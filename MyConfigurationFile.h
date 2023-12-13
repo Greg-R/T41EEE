@@ -1,8 +1,4 @@
 
-
-
-
-
 //====================== User Specific Preferences =============
 
 //#define DEBUG 		                                                        // Uncommented for debugging, comment out for normal use

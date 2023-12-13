@@ -749,8 +749,6 @@ int VFOSelect() {
   BandInformation();
   ShowBandwidth();
   FilterBandwidth();
-  //EEPROMData.EEPROMData.activeVFO = EEPROMData.activeVFO;
-
   tft.fillRect(FREQUENCY_X_SPLIT, FREQUENCY_Y - 12, VFOB_PIXEL_LENGTH, FREQUENCY_PIXEL_HI, RA8875_BLACK);  // delete old digit
   tft.fillRect(FREQUENCY_X, FREQUENCY_Y - 12, VFOA_PIXEL_LENGTH, FREQUENCY_PIXEL_HI, RA8875_BLACK);        // delete old digit  tft.setFontScale( (enum RA8875tsize) 0);
   ShowFrequency();
@@ -760,6 +758,7 @@ int VFOSelect() {
   if (EEPROMData.xmtMode == CW_MODE) BandInformation();
   DrawBandWidthIndicatorBar();
   DrawFrequencyBarValue();
+  UpdateDecoderField();
   return EEPROMData.activeVFO;
 }
 
