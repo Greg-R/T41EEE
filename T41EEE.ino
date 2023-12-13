@@ -1917,7 +1917,7 @@ void Splash() {
   tft.setCursor(140, 20);  // XPIXELS is 800 for 5 inch display.  YPIXELS is 480.
   tft.print("T41-EP SDR Radio");
   tft.setTextColor(RA8875_RED);
-  tft.setCursor(45, 85);
+  tft.setCursor(35, 85);
   tft.setFontScale(2);
   tft.print("EXTREME EXPERIMENTER'S EDITION");
   tft.setCursor(310, 125);

@@ -69,19 +69,9 @@ extern struct maps myMapFiles[];
 // ==== Pick one of the following encoder configurations
 #define                             NORM_ENCODER
 //#define                             FOURSQRP
-//
-//#define DEBUG_JACK
-//#define DEBUG1
-//#define DEBUG2
-//#define DEBUG3
-//#define DEBUG4
-//#define DEBUG6
-//#define DEBUG7
-//#define DEBUG8
-//#define DEBUG9
+
 #define NUMBER_OF_ELEMENTS(x) (sizeof(x)/sizeof(x[0]))  // Typeless way to find number of elements in the x[] array
 #define NEW_SI5351_FREQ_MULT    1UL
-
 
 //======================================== Symbolic constants ==========================================================
 

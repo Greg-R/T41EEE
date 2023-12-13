@@ -805,6 +805,8 @@ int EEPROMOptions() {  // 0               1                2               3    
       tft.writeTo(L2);  // This is specifically to clear the bandwidth indicator bar.  KF5N August 7, 2023
       tft.clearMemory();
       tft.writeTo(L1);
+      //  Read the revised struct into active memory.
+      EEPROMRead();
       RedrawDisplayScreen();  // Assume there are lots of changes and do a heavy-duty refresh.  KF5N August 7, 2023
       break;
 
@@ -815,26 +817,26 @@ int EEPROMOptions() {  // 0               1                2               3    
         config_t EEPROMData_temp;
         EEPROM.get(EEPROM_BASE_ADDRESS, EEPROMData_temp);
         saveConfiguration(filename, EEPROMData_temp, false);  // Write the temporary struct to the serial monitor.
-        Serial.println(F("\nEnd EEPROMData from EEPROM"));
+        Serial.println(F("End EEPROMData from EEPROM\n"));
       }
       break;
 
     case 7:  // Defaults->Serial
       Serial.println(F("\nBegin EEPROMData defaults"));
       saveConfiguration(filename, defaultConfig, false);  // Write default EEPROMData struct to the Serial monitor.
-      Serial.println(F("\nEnd EEPROMData defaults"));
+      Serial.println(F("End EEPROMData defaults\n"));
       break;
 
     case 8:  // Current->Serial
       Serial.println(F("Begin EEPROMData on the stack"));
       saveConfiguration(filename, EEPROMData, false);  // Write current EEPROMData struct to the Serial monitor.
-      Serial.println(F("\nEnd EEPROMData on the stack"));
+      Serial.println(F("End EEPROMData on the stack\n"));
       break;
 
     case 9:  // SDEEPROMData->Serial
       Serial.println(F("Begin EEPROMData on the SD card"));
       printFile(filename);  // Write SD card EEPROMData struct to the Serial monitor.
-      Serial.println(F("\nEnd EEPROMData on the SD card"));
+      Serial.println(F("End EEPROMData on the SD card\n"));
       break;
 
     default:
