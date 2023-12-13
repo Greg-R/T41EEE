@@ -41,10 +41,10 @@ void CalibratePreamble(int setZoom) {
   userZoomIndex = EEPROMData.spectrum_zoom;                                 // Save the zoom index so it can be reset at the conclusion.  KF5N August 12, 2023
   zoomIndex = setZoom - 1;
   ButtonZoom();
+  RedrawDisplayScreen();  // Erase any existing spectrum trace data.
   tft.writeTo(L2);  // Erase the bandwidth bar.  KF5N August 16, 2023
   tft.clearMemory();
   tft.writeTo(L1);
-  RedrawDisplayScreen();  // Erase any existing spectrum trace data.
   tft.setFontScale((enum RA8875tsize)0);
   tft.setTextColor(RA8875_GREEN);
   tft.setCursor(350, 160);
@@ -207,11 +207,11 @@ void DoXmitCalibrate(int toneFreq) {
   int task = -1;
   int lastUsedTask = -2;
 
-  if (toneFreq == 0) {
+  if (toneFreq == 0) {     // 750 Hz
     CalibratePreamble(4);  // Set zoom to 16X.
     calFreqShift = -375;
   }
-  if (toneFreq == 1) {
+  if (toneFreq == 1) {     // 3 kHz
     CalibratePreamble(2);  // Set zoom to 4X.
     calFreqShift = 750;
   }
