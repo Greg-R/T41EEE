@@ -13,14 +13,12 @@ FLASHMEM void loadConfiguration(const char *filename, config_t &EEPROMData) {
   // Don't forget to change the capacity to match your requirements.
   // Use https://arduinojson.org/v6/assistant to compute the capacity.
   // StaticJsonDocument<512> doc;
-  DynamicJsonDocument doc(4096);  // This uses the heap.
-  //  Need to also create JSON arrays.
+  DynamicJsonDocument doc(7000);  // This uses the heap.
 
   // Deserialize the JSON document
   DeserializationError error = deserializeJson(doc, file);
   if (error) {
-    Serial.println(F("Failed to read file, using default EEPROMDatauration"));
-    EEPROMRead();
+    Serial.println(F("Failed to read configuration file."));
     return;
   }
 
@@ -82,7 +80,7 @@ FLASHMEM void loadConfiguration(const char *filename, config_t &EEPROMData) {
   for (int i = 0; i < 7; i++) EEPROMData.IQXPhaseCorrectionFactor[i] = doc["IQXPhaseCorrectionFactor"][i];
   for (int i = 0; i < 13; i++) EEPROMData.favoriteFreqs[i] = doc["favoriteFreqs"][i];
   for (int i = 0; i < 7; i++) {
-    for (int j = 0; j < 2; j++) EEPROMData.lastFrequencies[0][0] = doc["lastFrequencies"][0][0];
+    for (int j = 0; j < 2; j++) EEPROMData.lastFrequencies[i][j] = doc["lastFrequencies"][i][j];
   }
   EEPROMData.centerFreq = doc["centerFreq"];
   //EEPROMData.mapFileName  = doc["mapFileName"] | "Boston";
@@ -111,6 +109,7 @@ FLASHMEM void loadConfiguration(const char *filename, config_t &EEPROMData) {
   file.close();
   //  At this point, the data exists only in the EEPROMData struct.
   //  Now copy the struct data into the Global variables which are used by the radio.
+  //    EEPROMRead();
   //EEPROMRead();
   //Serial.printf("myCall after EEPROMRead() = %s\n", myCall);
   //Serial.printf("EEPROMData.AGCMode after EEPROMRead() = %d\n", EEPROMData.AGCMode);
@@ -124,7 +123,7 @@ FLASHMEM void saveConfiguration(const char *filename, const config_t &EEPROMData
   // Don't forget to change the capacity to match your requirements.
   // Use https://arduinojson.org/assistant to compute the capacity.
   //StaticJsonDocument<256> doc;  // This uses the stack.
-  DynamicJsonDocument doc(4096);  // This uses the heap.
+  DynamicJsonDocument doc(7000);  // This uses the heap.
 
   // Set the values in the document
   doc["versionSettings"] = EEPROMData.versionSettings;

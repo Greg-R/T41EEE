@@ -800,13 +800,15 @@ int EEPROMOptions() {  // 0               1                2               3    
       break;
 
     case 5:                                     // Copy SD->EEPROM
-      loadConfiguration(filename, EEPROMData);  // Copy from SD to struct EEPROMData.
-      EEPROMWrite();
+      loadConfiguration(filename, EEPROMData);  // Copy from SD to struct in active memory (on the stack) EEPROMData.
+      EEPROMWrite();  // Write to EEPROM non-volatile memory.
       tft.writeTo(L2);  // This is specifically to clear the bandwidth indicator bar.  KF5N August 7, 2023
       tft.clearMemory();
       tft.writeTo(L1);
       //  Read the revised struct into active memory.
-      EEPROMRead();
+      //EEPROMRead();
+      // Initialize the frequency setting based on the last used frequency stored to EEPROM.
+      TxRxFreq = EEPROMData.centerFreq = EEPROMData.lastFrequencies[EEPROMData.currentBand][EEPROMData.activeVFO];
       RedrawDisplayScreen();  // Assume there are lots of changes and do a heavy-duty refresh.  KF5N August 7, 2023
       break;
 
@@ -817,20 +819,20 @@ int EEPROMOptions() {  // 0               1                2               3    
         config_t EEPROMData_temp;
         EEPROM.get(EEPROM_BASE_ADDRESS, EEPROMData_temp);
         saveConfiguration(filename, EEPROMData_temp, false);  // Write the temporary struct to the serial monitor.
-        Serial.println(F("End EEPROMData from EEPROM\n"));
+        Serial.println(F("\nEnd EEPROMData from EEPROM\n"));
       }
       break;
 
     case 7:  // Defaults->Serial
       Serial.println(F("\nBegin EEPROMData defaults"));
       saveConfiguration(filename, defaultConfig, false);  // Write default EEPROMData struct to the Serial monitor.
-      Serial.println(F("End EEPROMData defaults\n"));
+      Serial.println(F("\nEnd EEPROMData defaults\n"));
       break;
 
     case 8:  // Current->Serial
       Serial.println(F("Begin EEPROMData on the stack"));
       saveConfiguration(filename, EEPROMData, false);  // Write current EEPROMData struct to the Serial monitor.
-      Serial.println(F("End EEPROMData on the stack\n"));
+      Serial.println(F("\nEnd EEPROMData on the stack\n"));
       break;
 
     case 9:  // SDEEPROMData->Serial

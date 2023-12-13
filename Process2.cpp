@@ -141,9 +141,12 @@ void CalibratePrologue() {
 void DoReceiveCalibrate() {
   int task = -1;
   int lastUsedTask = -2;
+  int calFreqTemp;
   CalibratePreamble(0);                                                              // Set zoom to 1X.
   if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) calFreqShift = 24000 - 2000;  //  LSB offset.  KF5N
   if (bands[EEPROMData.currentBand].mode == DEMOD_USB) calFreqShift = 24000 + 2250;  //  USB offset.  KF5N
+  calFreqTemp = EEPROMData.calFreq;
+  EEPROMData.calFreq = 1;  // Receive calibration currently must use 3 kHz.
   SetFreqCal();
   calTypeFlag = 0;  // RX cal
   // Receive calibration loop
@@ -192,6 +195,7 @@ void DoReceiveCalibrate() {
     if (IQChoice == 6) break;  // Exit the while loop.
   }                            // End while loop
   CalibratePrologue();
+  EEPROMData.calFreq = calFreqTemp;  // Set back to the user selected calibration tone frequency.
 }
 
 /*****
