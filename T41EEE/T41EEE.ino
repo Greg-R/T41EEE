@@ -2128,8 +2128,8 @@ void setup() {
   SetTransmitDitLength(EEPROMData.currentWPM);
   CWFreqShift = 750;
   calFreqShift = 0;
-  //AFP 10-25-22
-  sineTone(BUFFER_SINE_COUNT);  // Set to 8
+  // Initialize buffer used by CW transmitter.
+  sineTone(EEPROMData.CWOffset + 6);  // This function takes "number of cycles" which is the offset + 6.
   // Initialize buffer used by CW decoder.
     float freq[4] = {562.5, 656.5, 750.0, 843.75};
     float theta;
@@ -2311,7 +2311,6 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       break;
     case CW_TRANSMIT_STRAIGHT_STATE:
       EEPROMData.powerOutCW[EEPROMData.currentBand] = (-.0133 * EEPROMData.transmitPowerLevel * EEPROMData.transmitPowerLevel + .7884 * EEPROMData.transmitPowerLevel + 4.5146) * EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];
-      Serial.printf("cwtransmit EEPROMData.powerOutCW = %f\n", EEPROMData.powerOutCW[EEPROMData.currentBand]);
       CW_ExciterIQData();
       xrState = TRANSMIT_STATE;
       ShowTransmitReceiveStatus();
