@@ -569,10 +569,7 @@ extern int radioState, lastState;  // Used by the loop to monitor current state.
 
 #define FIRST_BAND                BAND_80M
 #define LAST_BAND                 BAND_10M    //AFP 1-28-21
-#define NUMBER_OF_BANDS           7           //AFP 1-28-21
-//#define STARTUP_BAND              BAND_40M    //AFP 1-28-21
-
-//#endif
+#define NUMBER_OF_BANDS           8           // Added 6 meters.  KF5N, December 14, 2023
 
 //=== CW Filter ===
 
@@ -796,21 +793,21 @@ struct config_t {
   float NR_beta              = 0.85;                   // 4 bytes
   float omegaN               = 200.0;                   // 4 bytes
   float pll_fmax             = 4000.0;                // 4 bytes
-  float powerOutCW[NUMBER_OF_BANDS] = { 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02 };
-  float powerOutSSB[NUMBER_OF_BANDS] = { 0.03, 0.03, 0.03, 0.03, 0.03, 0.03, 0.03 };
-  float CWPowerCalibrationFactor[NUMBER_OF_BANDS] = { 0.019, 0.019, .0190, .019, .019, .019, .019 };    // 0.019;
-  float SSBPowerCalibrationFactor[NUMBER_OF_BANDS]= { 0.008, 0.008, 0.008, 0.008, 0.008, 0.008, 0.008 };   // 0.008
-  float IQAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1, 1, 1, 1, 1, 1, 1 };
-  float IQPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-  float IQXAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1, 1, 1, 1, 1, 1, 1 };
-  float IQXPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+  float powerOutCW[NUMBER_OF_BANDS] = { 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02 };
+  float powerOutSSB[NUMBER_OF_BANDS] = { 0.03, 0.03, 0.03, 0.03, 0.03, 0.03, 0.03, 0.03 };
+  float CWPowerCalibrationFactor[NUMBER_OF_BANDS] = { 0.019, 0.019, .0190, .019, .019, .019, .019, .019 };    // 0.019;
+  float SSBPowerCalibrationFactor[NUMBER_OF_BANDS]= { 0.008, 0.008, 0.008, 0.008, 0.008, 0.008, 0.008, 0.008 };   // 0.008
+  float IQAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1, 1, 1, 1, 1, 1, 1, 1 };
+  float IQPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+  float IQXAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1, 1, 1, 1, 1, 1, 1, 1 };
+  float IQXPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0, 0 };
   long favoriteFreqs[13] = {3560000, 3690000, 7030000, 7200000, 14060000, 14200000, 21060000, 21285000, 28060000, 28365000, 5000000, 10000000, 15000000};
 
     //DB2OO, 23-AUG-23: Region 1 freqs (from https://qrper.com/qrp-calling-frequencies/)
 #if defined(ITU_REGION) && ITU_REGION==1  
-int lastFrequencies[NUMBER_OF_BANDS][2] = {{3690000, 3560000}, {7090000, 7030000}, {14285000, 14060000}, {18130000, 18096000}, {21285000, 21060000}, {24950000, 24906000},  {28365000, 28060000}};
+int lastFrequencies[NUMBER_OF_BANDS][2] = {{3690000, 3560000}, {7090000, 7030000}, {14285000, 14060000}, {18130000, 18096000}, {21285000, 21060000}, {24950000, 24906000},  {28365000, 28060000},  {50365000, 50060000}};
 #else
-int lastFrequencies[NUMBER_OF_BANDS][2] = {{3985000, 3560000}, {7200000, 7030000}, {14285000, 14060000}, {18130000, 18096000}, {21385000, 21060000}, {24950000, 24906000}, {28385800, 28060000}};
+int lastFrequencies[NUMBER_OF_BANDS][2] = {{3985000, 3560000}, {7200000, 7030000}, {14285000, 14060000}, {18130000, 18096000}, {21385000, 21060000}, {24950000, 24906000}, {28385800, 28060000}, {50385800, 50060000}};
 #endif
 
   long centerFreq               = 7030000L;              // 4 bytes
@@ -823,7 +820,7 @@ int lastFrequencies[NUMBER_OF_BANDS][2] = {{3985000, 3560000}, {7200000, 7030000
   int sdCardPresent             = 0;                           //   JJP  7/18/23
   float myLong                  = MY_LON;
   float myLat                   = MY_LAT;
-  int currentNoiseFloor[NUMBER_OF_BANDS] = {0, 0, 0, 0, 0, 0, 0};             // JJP 7/17/23
+  int currentNoiseFloor[NUMBER_OF_BANDS] = {0, 0, 0, 0, 0, 0, 0, 0};             // JJP 7/17/23
   int compressorFlag = 0;                                 // JJP 8/28/23
   bool xmitEQFlag = false;
   bool receiveEQFlag = false;
