@@ -1,6 +1,4 @@
-# T41 EXTREME EXPERIMENTER'S EDITION
-
-Version T41EEE.0 T41 Software Defined Transceiver Arduino Sketch
+### Version T41EEE.0 T41 Software Defined Transceiver Arduino Sketch
 
 This is the first of the "T41 Extreme Experimenter's Edition" software for the 
 T41 Software Defined Transceiver.  The T41EEE was "forked" from the V049.2 version
@@ -8,11 +6,21 @@ of the T41-EP software.  T41EEE is fundamentally different from the mainstream T
 code in that it adopts C++ rather than C.  C++ language features will be gradually
 introduced in the next releases.
 
-This software is licensed according to:
-GNU GENERAL PUBLIC LICENSE
-Version 3, 29 June 2007
-Please refer to the included LICENSE file.
-Greg Raven, December 13 2023
+Purchase the book "Digital Signal Processing and Software Defined Radio" by
+Albert Peter and Jack Purdum here:
+
+<https://www.amazon.com/Software-Defined-Radio-Transceiver-Construction/dp/B09WYP1ST8>
+
+Please bring your questions, bug reports, and complaints about this software to this
+group:
+
+<https://groups.io/g/SoftwareControlledHamRadio>
+
+This software is licensed according to:  
+GNU GENERAL PUBLIC LICENSE  
+Version 3, 29 June 2007  
+Please refer to the included LICENSE file.  
+Greg Raven, December 13 2023  
 
 T41EEE will be hosted at this public Github repository:
 
@@ -27,7 +35,7 @@ It is recommended to perform a full FLASH erase before loading T41EEE.0.
 
 ## Highlight of Features included in T41EEE.0
 
-1.  External configuration file stored on the SD card is changed to JSON format.
+1.  The configuration file stored on the SD card is changed to JSON format.
 2.  New selections in the EEPROM menu allow serial readout of configuration data
     from the stack, the EEPROM, the SD card, and the hard-coded defaults.
 3.  The Morse decoder is coded in a state-machine design pattern.
@@ -41,7 +49,10 @@ It is recommended to perform a full FLASH erase before loading T41EEE.0.
 8.  The configuration file includes variables for frequency divider (quadrature
     generator) hardware.  The values of 4 work with the original T41 QSD and QSE
     boards.
+9.  Volume control is changed to one-hundred 1 dB steps.
 
+
+*********************************************************************************************
 
   This comment block must appear in the load page (e.g., main() or setup()) in any source code
   that uses code presented as whole or part of the T41-EP source code.

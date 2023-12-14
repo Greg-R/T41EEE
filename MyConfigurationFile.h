@@ -44,8 +44,12 @@
 #define IMAGE_CORNER_Y            40                                        // ImageHeight = 302 Therefore 480 - 302 = 178 / 2 = 89
 #define RAY_LENGTH                190
 
+// ==== Pick one of the following encoder configurations
+#define                           NORM_ENCODER
+//#define                           FOURSQRP
+
 // Set multiplication factors for your QSD and QSE boards.
 #define MASTER_CLK_MULT_RX 4
-#define MASTER_CLK_MULT_TX 2
+#define MASTER_CLK_MULT_TX 4
 
 

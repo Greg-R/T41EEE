@@ -65,11 +65,6 @@ extern struct maps myMapFiles[];
 #define VALID_EEPROM_DATA           1
 #define INVALID_EEPROM_DATA         0
 
-
-// ==== Pick one of the following encoder configurations
-#define                             NORM_ENCODER
-//#define                             FOURSQRP
-
 #define NUMBER_OF_ELEMENTS(x) (sizeof(x)/sizeof(x[0]))  // Typeless way to find number of elements in the x[] array
 #define NEW_SI5351_FREQ_MULT    1UL
 
