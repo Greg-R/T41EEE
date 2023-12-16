@@ -841,7 +841,7 @@ extern float32_t HP_DC_Butter_state[6];                     //AFP 09-23-22
 extern float32_t coeffs192K_10K_LPF_FIR[];
 extern float32_t coeffs48K_8K_LPF_FIR[];
 extern const uint32_t N_B_EX;
-extern float32_t recEQ_LevelScale[];
+//extern float32_t recEQ_LevelScale[];
 extern float32_t EQ_Band1Coeffs[];
 extern float32_t EQ_Band2Coeffs[];
 extern float32_t EQ_Band3Coeffs[];

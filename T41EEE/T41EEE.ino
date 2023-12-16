@@ -275,7 +275,7 @@ SPISettings settingsA(70000000UL, MSBFIRST, SPI_MODE1);
 const uint32_t N_B_EX = 16;
 //================== Receive EQ Variables================= AFP 08-08-22
 //float32_t recEQ_Level[14];
-float32_t recEQ_LevelScale[14];
+//float32_t recEQ_LevelScale[14];
 //Setup for EQ filters
 float32_t rec_EQ1_float_buffer_L[256];
 float32_t rec_EQ2_float_buffer_L[256];
