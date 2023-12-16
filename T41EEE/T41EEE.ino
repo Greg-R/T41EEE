@@ -1605,29 +1605,6 @@ float TGetTemp() {
   return tmeas;
 }
 
-/*****
-  Purpose: scale volume from 0 to 100
-
-  Parameter list:
-    int volume        the current reading
-
-  Return value;
-    void
-*****/
-float VolumeToAmplification(int volume) {
-  float x = volume / 100.0f;  //"volume" Range 0..100
-                              //#if 0
-                              //  float a = 3.1623e-4;
-                              //  float b = 8.059f;
-                              //  float ampl = a * expf( b * x );
-                              //  if (x < 0.1f) ampl *= x * 10.0f;
-                              //#else
-  //Approximation:
-  float ampl = 5 * x * x * x * x * x;  //70dB
-                                       //#endif
-  return ampl;
-}
-
 
 // Teensy 4.0, 4.1
 /*****
