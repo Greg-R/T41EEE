@@ -44,11 +44,12 @@ void KeyRingOn() //AFP 09-25-22
   Purpose: Create I and Q signals for CW transmission.
 
   Parameter list:
+    int shaping   one of CW_SHAPING_RISE, CW_SHAPING_FALL, or CW_SHAPING_NONE
 
   Return value;
     void
 *****/
-void CW_ExciterIQData() //AFP 08-20-22
+void CW_ExciterIQData(int shaping) //AFP 08-20-22
 {
   uint32_t N_BLOCKS_EX = N_B_EX;
  
@@ -70,6 +71,14 @@ void CW_ExciterIQData() //AFP 08-20-22
       arm_scale_f32 (float_buffer_L_EX, + EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L_EX, 256);   // KF5N flipped sign, original was minus
       IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand], 256);
     }
+  }
+
+  if (shaping == CW_SHAPING_RISE) {
+    arm_mult_f32(float_buffer_L_EX, cwRiseBuffer, float_buffer_L_EX, 256);
+    arm_mult_f32(float_buffer_R_EX, cwRiseBuffer, float_buffer_R_EX, 256);
+  } else if (shaping == CW_SHAPING_FALL) {
+    arm_mult_f32(float_buffer_L_EX, cwFallBuffer, float_buffer_L_EX, 256);
+    arm_mult_f32(float_buffer_R_EX, cwFallBuffer, float_buffer_R_EX, 256);
   }
     /**********************************************************************************
               Interpolate (upsample the data streams by 8X to create the 192KHx sample rate for output
