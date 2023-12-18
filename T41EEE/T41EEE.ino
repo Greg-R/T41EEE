@@ -2207,19 +2207,58 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       case SSB_RECEIVE_STATE:
       case CW_RECEIVE_STATE:
         // QSD connected and enabled
+        Q_in_L.begin();
+        Q_in_R.begin();
+        patchCord9.connect();
+        patchCord10.connect();
+
         // Microphone input disabled and disconnected
+        patchCord1.disconnect();
+        patchCord2.disconnect();
+        Q_in_L_Ex.end();
+        Q_in_R_Ex.end();
+
         // CW sidetone output disconnected
+        patchCord23.disconnect();
+        patchCord24.disconnect();
+
         break;
       case SSB_TRANSMIT_STATE:
         // QSD disabled and disconnected
+        patchCord9.disconnect();
+        patchCord10.disconnect();
+        Q_in_L.end();
+        Q_in_R.end();
+
         // Microphone input enabled and connected
+        Q_in_L_Ex.begin();
+        Q_in_R_Ex.begin();
+        patchCord1.connect();
+        patchCord2.connect();
+
         // CW sidetone output disconnected
+        patchCord23.disconnect();
+        patchCord24.disconnect();
+
         break;
       case CW_TRANSMIT_STRAIGHT_STATE:
       case CW_TRANSMIT_KEYER_STATE:
         // QSD disabled and disconnected
+        patchCord9.disconnect();
+        patchCord10.disconnect();
+        Q_in_L.end();
+        Q_in_R.end();
+
         // Microphone input disabled and disconnected
+        patchCord1.disconnect();
+        patchCord2.disconnect();
+        Q_in_L_Ex.end();
+        Q_in_R_Ex.end();
+
         // CW sidetone output connected
+        patchCord23.connect();
+        patchCord24.connect();
+
         break;
     }
   }
@@ -2257,10 +2296,6 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       ShowSpectrum();
       break;
     case SSB_TRANSMIT_STATE:
-      Q_in_L.end();  //Set up input Queues for transmit
-      Q_in_R.end();
-      Q_in_L_Ex.begin();
-      Q_in_R_Ex.begin();
       comp1.setPreGain_dB(EEPROMData.currentMicGain);
       comp2.setPreGain_dB(EEPROMData.currentMicGain);
       if (EEPROMData.compressorFlag == 1) {
@@ -2281,8 +2316,6 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       modeSelectInExL.gain(0, 1);
       modeSelectOutL.gain(0, 0);
       modeSelectOutR.gain(0, 0);
-      patchCord1.connect();
-      patchCord2.connect();
       modeSelectOutExL.gain(0, EEPROMData.powerOutSSB[EEPROMData.currentBand]);  //AFP 10-21-22
       modeSelectOutExR.gain(0, EEPROMData.powerOutSSB[EEPROMData.currentBand]);  //AFP 10-21-22
       ShowTransmitReceiveStatus();
@@ -2290,10 +2323,6 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       while (digitalRead(PTT) == LOW) {
         ExciterIQData();
       }
-      Q_in_L_Ex.end();  // End Transmit Queue
-      Q_in_R_Ex.end();
-      Q_in_L.begin();  // Start Receive Queue
-      Q_in_R.begin();
       xrState = RECEIVE_STATE;
       break;
     default:
@@ -2340,8 +2369,6 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       modeSelectOutR.gain(0, 0);
       modeSelectOutExL.gain(0, 0);
       modeSelectOutExR.gain(0, 0);
-      patchCord1.disconnect();
-      patchCord2.disconnect();
       cwTimer = millis();
       while (millis() - cwTimer <= EEPROMData.cwTransmitDelay) {  //Start CW transmit timer on
         digitalWrite(RXTX, HIGH);
@@ -2381,8 +2408,6 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       modeSelectOutR.gain(0, 0);
       modeSelectOutExL.gain(0, 0);
       modeSelectOutExR.gain(0, 0);
-      patchCord1.disconnect();
-      patchCord2.disconnect();
       cwTimer = millis();
       while (millis() - cwTimer <= EEPROMData.cwTransmitDelay) {
         digitalWrite(RXTX, HIGH);  //Turns on relay
