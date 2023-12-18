@@ -360,8 +360,8 @@ void SetKeyPowerUp() {
 *****/
 void SetSideToneVolume() {
   int val, sidetoneDisplay;
-  Q_in_L.clear();  // Clear other buffers too?
-  Q_in_R.clear();
+
+  SetAudioOperatingState(CW_TRANSMIT_STRAIGHT_STATE);
   tft.setFontScale((enum RA8875tsize)1);
   tft.fillRect(SECONDARY_MENU_X - 50, MENUS_Y, EACH_MENU_WIDTH + 60, CHAR_HEIGHT, RA8875_MAGENTA);
   tft.setTextColor(RA8875_WHITE);
