@@ -49,8 +49,8 @@ void EEPROMRead() {
 #ifdef DEBUG 
     //display version in EEPROM in last line of display
     MORSE_STRING_DISPLAY("EEPROMVersion ");
-    if (strlen(versionSettings) <10) {
-      MORSE_STRING_DISPLAY(versionSettings);
+    if (strlen(EEPROMData.versionSettings) <10) {
+      MORSE_STRING_DISPLAY(EEPROMData.versionSettings);
     }else {
       MORSE_STRING_DISPLAY("<<INVALID>>");
     }
