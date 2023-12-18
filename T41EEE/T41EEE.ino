@@ -2271,11 +2271,6 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   if (EEPROMData.xmtMode == CW_MODE && (keyPressedOn == 1 && EEPROMData.xmtMode == CW_MODE && EEPROMData.keyType == 1)) radioState = CW_TRANSMIT_KEYER_STATE;
   if (lastState != radioState) {
     SetFreq();  // Update frequencies if the radio state has changed.
-  }
-  //lastState = radioState;  // G0ORX 01092023
-
-  //  Manage audio chain memory usage: KN6LFB
-  if (lastState != radioState) {
     SetAudioOperatingState(radioState);
   }
 
