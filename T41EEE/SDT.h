@@ -671,7 +671,7 @@ extern float ticMarkTimer;
 extern float ticMarkTimerOld;
 extern int CWOnState;  //AFP 05-17-22
 extern long CWFreqShift; //AFP 05-17-22
-extern long calFreqShift; //AFP 11-06-22
+//extern long calFreqShift; //AFP 11-06-22
 extern long cwTime0;
 extern long cwTime1;
 extern long cwTime2;
@@ -2202,7 +2202,7 @@ void TurnOffInitializingMessage();
 
 void UpdateInfoWindow();
 
-void SetFreqCal(void) ;
+void SetFreqCal(int calFreqShift) ;
 extern "C"
 {
   void sincosf(float err, float *s, float *c);

@@ -864,7 +864,7 @@ float aveAtomGapLength = 40;
 float thresholdGapGeometricMean;
 float thresholdGapArithmeticMean;
 long CWFreqShift;
-long calFreqShift;
+//long calFreqShift;
 long filter_pos = 0;
 long last_filter_pos = 0;
 // ============ end new stuff =======
@@ -2111,7 +2111,7 @@ void setup() {
   SetDitLength(EEPROMData.currentWPM);
   SetTransmitDitLength(EEPROMData.currentWPM);
   CWFreqShift = 750;
-  calFreqShift = 0;
+  //calFreqShift = 0;
   // Initialize buffer used by CW transmitter.
   sineTone(EEPROMData.CWOffset + 6);  // This function takes "number of cycles" which is the offset + 6.
   // Initialize buffer used by CW decoder.
