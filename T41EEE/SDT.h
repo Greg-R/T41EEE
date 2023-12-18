@@ -1139,6 +1139,8 @@ extern AudioEffectCompressor_F32 comp1, comp2;
 extern AudioConvert_F32toI16     float2Int1, float2Int2;    //Converts Float to Int16.  See class in AudioStream_F32.h
 //===============  AFP 11-01-22
 
+extern void SetAudioOperatingState(int operatingState);
+
 extern Bounce decreaseBand;
 extern Bounce increaseBand;
 extern Bounce modeSwitch;

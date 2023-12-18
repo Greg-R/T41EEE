@@ -1894,6 +1894,90 @@ void InitializeDataArrays() {
   TEMPMON_TEMPSENSE0 |= 0x2U;
 }
 
+/*****
+  Purpose: Manage AudioRecordQueue objects and patchCord connections based on
+           the radio's operating mode in a way that minimizes unnecessary
+           AudioMemory usage.
+
+  Parameter list:
+    int operatingState    radioState/lastState constant indicating desired state
+
+  Return value:
+    void
+
+*****/
+
+void SetAudioOperatingState(int operatingState) {
+#ifdef DEBUG
+    Serial.printf("lastState=%d radioState=%d memory_used=%d memory_used_max=%d f32_memory_used=%d f32_memory_used_max=%d\n",
+                  lastState,
+                  radioState,
+                  (int) AudioStream::memory_used,
+                  (int) AudioStream::memory_used_max,
+                  (int) AudioStream_F32::f32_memory_used,
+                  (int) AudioStream_F32::f32_memory_used_max);
+    AudioStream::memory_used_max = 0;
+    AudioStream_F32::f32_memory_used_max = 0;
+#endif
+    switch (operatingState) {
+      case SSB_RECEIVE_STATE:
+      case CW_RECEIVE_STATE:
+        // QSD connected and enabled
+        Q_in_L.begin();
+        Q_in_R.begin();
+        patchCord9.connect();
+        patchCord10.connect();
+
+        // Microphone input disabled and disconnected
+        patchCord1.disconnect();
+        patchCord2.disconnect();
+        Q_in_L_Ex.end();
+        Q_in_R_Ex.end();
+
+        // CW sidetone output disconnected
+        patchCord23.disconnect();
+        patchCord24.disconnect();
+
+        break;
+      case SSB_TRANSMIT_STATE:
+        // QSD disabled and disconnected
+        patchCord9.disconnect();
+        patchCord10.disconnect();
+        Q_in_L.end();
+        Q_in_R.end();
+
+        // Microphone input enabled and connected
+        Q_in_L_Ex.begin();
+        Q_in_R_Ex.begin();
+        patchCord1.connect();
+        patchCord2.connect();
+
+        // CW sidetone output disconnected
+        patchCord23.disconnect();
+        patchCord24.disconnect();
+
+        break;
+      case CW_TRANSMIT_STRAIGHT_STATE:
+      case CW_TRANSMIT_KEYER_STATE:
+        // QSD disabled and disconnected
+        patchCord9.disconnect();
+        patchCord10.disconnect();
+        Q_in_L.end();
+        Q_in_R.end();
+
+        // Microphone input disabled and disconnected
+        patchCord1.disconnect();
+        patchCord2.disconnect();
+        Q_in_L_Ex.end();
+        Q_in_R_Ex.end();
+
+        // CW sidetone output connected
+        patchCord23.connect();
+        patchCord24.connect();
+
+        break;
+    }
+}
 
 /*****
   Purpose: The initial screen display on startup. Expect this to be customized.
@@ -2192,75 +2276,7 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
 
   //  Manage audio chain memory usage: KN6LFB
   if (lastState != radioState) {
-#ifdef DEBUG
-    Serial.printf("lastState=%d radioState=%d memory_used=%d memory_used_max=%d f32_memory_used=%d f32_memory_used_max=%d\n",
-                  lastState,
-                  radioState,
-                  (int) AudioStream::memory_used,
-                  (int) AudioStream::memory_used_max,
-                  (int) AudioStream_F32::f32_memory_used,
-                  (int) AudioStream_F32::f32_memory_used_max);
-    AudioStream::memory_used_max = 0;
-    AudioStream_F32::f32_memory_used_max = 0;
-#endif
-    switch (radioState) {
-      case SSB_RECEIVE_STATE:
-      case CW_RECEIVE_STATE:
-        // QSD connected and enabled
-        Q_in_L.begin();
-        Q_in_R.begin();
-        patchCord9.connect();
-        patchCord10.connect();
-
-        // Microphone input disabled and disconnected
-        patchCord1.disconnect();
-        patchCord2.disconnect();
-        Q_in_L_Ex.end();
-        Q_in_R_Ex.end();
-
-        // CW sidetone output disconnected
-        patchCord23.disconnect();
-        patchCord24.disconnect();
-
-        break;
-      case SSB_TRANSMIT_STATE:
-        // QSD disabled and disconnected
-        patchCord9.disconnect();
-        patchCord10.disconnect();
-        Q_in_L.end();
-        Q_in_R.end();
-
-        // Microphone input enabled and connected
-        Q_in_L_Ex.begin();
-        Q_in_R_Ex.begin();
-        patchCord1.connect();
-        patchCord2.connect();
-
-        // CW sidetone output disconnected
-        patchCord23.disconnect();
-        patchCord24.disconnect();
-
-        break;
-      case CW_TRANSMIT_STRAIGHT_STATE:
-      case CW_TRANSMIT_KEYER_STATE:
-        // QSD disabled and disconnected
-        patchCord9.disconnect();
-        patchCord10.disconnect();
-        Q_in_L.end();
-        Q_in_R.end();
-
-        // Microphone input disabled and disconnected
-        patchCord1.disconnect();
-        patchCord2.disconnect();
-        Q_in_L_Ex.end();
-        Q_in_R_Ex.end();
-
-        // CW sidetone output connected
-        patchCord23.connect();
-        patchCord24.connect();
-
-        break;
-    }
+    SetAudioOperatingState(radioState);
   }
 
   //  Begin radio state machines
