@@ -2190,6 +2190,40 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   }
   //lastState = radioState;  // G0ORX 01092023
 
+  //  Manage audio chain memory usage: KN6LFB
+  if (lastState != radioState) {
+#ifdef DEBUG
+    Serial.printf("lastState=%d radioState=%d memory_used=%d memory_used_max=%d f32_memory_used=%d f32_memory_used_max=%d\n",
+                  lastState,
+                  radioState,
+                  (int) AudioStream::memory_used,
+                  (int) AudioStream::memory_used_max,
+                  (int) AudioStream_F32::f32_memory_used,
+                  (int) AudioStream_F32::f32_memory_used_max);
+    AudioStream::memory_used_max = 0;
+    AudioStream_F32::f32_memory_used_max = 0;
+#endif
+    switch (radioState) {
+      case SSB_RECEIVE_STATE:
+      case CW_RECEIVE_STATE:
+        // QSD connected and enabled
+        // Microphone input disabled and disconnected
+        // CW sidetone output disconnected
+        break;
+      case SSB_TRANSMIT_STATE:
+        // QSD disabled and disconnected
+        // Microphone input enabled and connected
+        // CW sidetone output disconnected
+        break;
+      case CW_TRANSMIT_STRAIGHT_STATE:
+      case CW_TRANSMIT_KEYER_STATE:
+        // QSD disabled and disconnected
+        // Microphone input disabled and disconnected
+        // CW sidetone output connected
+        break;
+    }
+  }
+
   //  Begin radio state machines
 
   //  Begin SSB Mode state machine
