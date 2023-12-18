@@ -1931,8 +1931,8 @@ void SetAudioOperatingState(int operatingState) {
         // Microphone input disabled and disconnected
         patchCord1.disconnect();
         patchCord2.disconnect();
-        Q_in_L_Ex.end();
-        Q_in_R_Ex.end();
+        Q_in_L_Ex.end(); Q_in_L_Ex.clear();
+        Q_in_R_Ex.end(); Q_in_R_Ex.clear();
 
         // CW sidetone output disconnected
         patchCord23.disconnect();
@@ -1943,8 +1943,8 @@ void SetAudioOperatingState(int operatingState) {
         // QSD disabled and disconnected
         patchCord9.disconnect();
         patchCord10.disconnect();
-        Q_in_L.end();
-        Q_in_R.end();
+        Q_in_L.end(); Q_in_L.clear();
+        Q_in_R.end(); Q_in_R.clear();
 
         // Microphone input enabled and connected
         Q_in_L_Ex.begin();
@@ -1962,14 +1962,14 @@ void SetAudioOperatingState(int operatingState) {
         // QSD disabled and disconnected
         patchCord9.disconnect();
         patchCord10.disconnect();
-        Q_in_L.end();
-        Q_in_R.end();
+        Q_in_L.end(); Q_in_L.clear();
+        Q_in_R.end(); Q_in_R.clear();
 
         // Microphone input disabled and disconnected
         patchCord1.disconnect();
         patchCord2.disconnect();
-        Q_in_L_Ex.end();
-        Q_in_R_Ex.end();
+        Q_in_L_Ex.end(); Q_in_L_Ex.clear();
+        Q_in_R_Ex.end(); Q_in_R_Ex.clear();
 
         // CW sidetone output connected
         patchCord23.connect();
