@@ -382,7 +382,7 @@ void SetSideToneVolume() {
   modeSelectOutR.gain(1, 0.0);  // Sidetone  AFP 10-01-22
 
   while (true) {
-    if (digitalRead(EEPROMData.paddleDit) == LOW || digitalRead(EEPROMData.paddleDah) == LOW) CW_ExciterIQData();
+    if (digitalRead(EEPROMData.paddleDit) == LOW || digitalRead(EEPROMData.paddleDah) == LOW) CW_ExciterIQData(CW_SHAPING_NONE);
 
     if (filterEncoderMove != 0) {
       //      EEPROMData.sidetoneVolume = EEPROMData.sidetoneVolume + (float)filterEncoderMove * 0.001;  // EEPROMData.sidetoneVolume range is 0.0 to 1.0 in 0.001 steps.  KF5N August 29, 2023
