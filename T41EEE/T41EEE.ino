@@ -53,11 +53,14 @@ successful.
     The new selections are in the CW Options menu.
 6.  Spectrum zooms of 8X and 16X bugs are resolved and these zooms are functioning.
 7.  Transmit calibration can be done with either a 750 Hz or 3 kHz tone.  This new
-    selection is in the Calibration Options menu.
+    selection is in the Calibration Options menu.  Calibration code is simplified
+    and this should result in better quality calibration.
 8.  The configuration file includes variables for frequency divider (quadrature
     generator) hardware.  The values of 4 work with the original T41 QSD and QSE
     boards.
 9.  Volume control is changed to one-hundred 1 dB steps.
+10. Audio chain management is significantly enhanced, and less audio memory is required.
+    Thank you to Jonathan KN6LFB for this major improvement!
 
 
 *********************************************************************************************

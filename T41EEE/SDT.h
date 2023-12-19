@@ -14,7 +14,6 @@ extern struct maps myMapFiles[];
 
 //======================================== Library include files ========================================================
 #include <Adafruit_GFX.h>
-//#include "JSON.cpp"
 #include <ArduinoJson.h>
 #include "Fonts/FreeMonoBold24pt7b.h"
 #include "Fonts/FreeMonoBold18pt7b.h"
