@@ -1127,6 +1127,8 @@ unsigned long long Clk2SetFreq;                  // AFP 09-27-22
 unsigned long long Clk1SetFreq = 1000000000ULL;  // AFP 09-27-22
 unsigned long ditLength;
 unsigned long transmitDitLength;  // JJP 8/19/23
+int transmitDitUnshapedBlocks;
+int transmitDahUnshapedBlocks;
 float dcfRefLevel;
 float CPU_temperature = 0.0;
 
@@ -2261,6 +2263,7 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   int valPin;
   long ditTimerOff;  //AFP 09-22-22
   long dahTimerOn;
+  int cwBlock;
 
   valPin = ReadSelectedPushButton();                     // Poll UI push buttons
   if (valPin != BOGUS_PIN_READ) {                        // If a button was pushed...
@@ -2440,11 +2443,16 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
           modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);       //AFP 10-21-22
           modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);       //AFP 10-21-22
           modeSelectOutL.gain(1, volumeLog[(int)EEPROMData.sidetoneVolume]);  // Sidetone
+          
           CW_ExciterIQData(CW_SHAPING_RISE);
-          while (millis() - ditTimerOn <= transmitDitLength) {
+          for (cwBlock = 0; cwBlock < transmitDitUnshapedBlocks; cwBlock++) {
             CW_ExciterIQData(CW_SHAPING_NONE);
           }
           CW_ExciterIQData(CW_SHAPING_FALL);
+
+          while (millis() - ditTimerOn <= transmitDitLength) {
+            ;
+          }
          
           ditTimerOff = millis();
           while (millis() - ditTimerOff <= transmitDitLength) {
@@ -2462,11 +2470,16 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
             modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);
             modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);
             modeSelectOutL.gain(1, volumeLog[(int)EEPROMData.sidetoneVolume]);
+
             CW_ExciterIQData(CW_SHAPING_RISE);
-            while (millis() - dahTimerOn <= 3UL * transmitDitLength) {
+            for (cwBlock = 0; cwBlock < transmitDahUnshapedBlocks; cwBlock++) {
               CW_ExciterIQData(CW_SHAPING_NONE);
             }
             CW_ExciterIQData(CW_SHAPING_FALL);
+
+            while (millis() - dahTimerOn <= 3UL * transmitDitLength) {
+              ;
+            }
 
             ditTimerOff = millis();
             while (millis() - ditTimerOff <= transmitDitLength) {
