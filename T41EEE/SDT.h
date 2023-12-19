@@ -778,7 +778,7 @@ struct config_t {
 #endif
 
   int equalizerRec[EQUALIZER_CELL_COUNT] = {100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100};
-  int equalizerXmt[EQUALIZER_CELL_COUNT] = {0, 0, 100, 100, 100, 100, 100, 100, 100, 100, 100, 0, 0, 0};   // Provide equalizer optimized for SSB voice based on Neville's tests.  KF5N November 2, 2023
+  int equalizerXmt[EQUALIZER_CELL_COUNT] = {0, 0, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 0, 0};  // Provide equalizer optimized for SSB voice based on Neville's tests.  KF5N November 2, 2023
   int currentMicThreshold   = -10;                    // 4 bytes       AFP 09-22-22
   float currentMicCompRatio = 8.0;
   float currentMicAttack    = 0.1;
@@ -810,7 +810,7 @@ struct config_t {
 #if defined(ITU_REGION) && ITU_REGION==1  
 int lastFrequencies[NUMBER_OF_BANDS][2] = {{3690000, 3560000}, {7090000, 7030000}, {14285000, 14060000}, {18130000, 18096000}, {21285000, 21060000}, {24950000, 24906000},  {28365000, 28060000}};
 #else
-int lastFrequencies[NUMBER_OF_BANDS][2] = {{3985000, 3560000}, {7200000, 7030000}, {14285000, 14060000}, {18130000, 18096000}, {21385000, 21060000}, {24950000, 24906000}, {28385800, 28060000}};
+int lastFrequencies[NUMBER_OF_BANDS][2] = {{3985000, 3560000}, {7200000, 7030000}, {14285000, 14060000}, {18130000, 18096000}, {21385000, 21060000}, {24950000, 24906000}, {28385000, 28060000}};
 #endif
 
   long centerFreq               = 7030000L;              // 4 bytes
