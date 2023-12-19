@@ -1962,7 +1962,7 @@ extern float x;
 
 extern const float displayscale;
 extern const float32_t nuttallWindow256[];
-extern const float32_t sqrtHann[];
+
 
 extern float32_t FFT_buffer [] __attribute__ ((aligned (4)));
 
@@ -2101,7 +2101,6 @@ int  GetEncoderValue(int minValue, int maxValue, int startValue, int increment, 
 float GetEncoderValueLive(float minValue, float maxValue, float startValue, float increment, char prompt[]);//AFP 10-22-22
 void GetFavoriteFrequency();
 
-//double HaversineDistance(double hLat, double hLon, double dxLat, double dxLon);
 float HaversineDistance(float dxLat, float dxLon);
 
 int  InitializeSDCard();
@@ -2109,7 +2108,6 @@ void InitializeDataArrays();
 void InitFilterMask();
 void InitLMSNoiseReduction();
 void initTempMon(uint16_t freq, uint32_t lowAlarmTemp, uint32_t highAlarmTemp, uint32_t panicAlarmTemp);
-//int  IQOptions();
 void IQPhaseCorrection(float32_t *I_buffer, float32_t *Q_buffer, float32_t factor, uint32_t blocksize);
 float32_t Izero(float32_t x);
 
@@ -2221,7 +2219,6 @@ void ShowTempAndLoad();
 void ShowTransmitReceiveStatus();
 void BandInformation();
 float32_t sign(float32_t x);
-//void sineTone(long freqSideTone);
 void SpectralNoiseReduction(void);
 void SpectralNoiseReductionInit();
 void Splash();

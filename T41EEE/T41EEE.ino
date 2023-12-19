@@ -1132,8 +1132,6 @@ float help;
 float s_hotT_ROOM; /*!< The value of s_hotTemp minus room temperature(25¡æ).*/
 float lastII = 0;
 float lastQQ = 0;
-//float EEPROMData.myLat = MY_LAT;
-//float EEPROMData.myLong = MY_LON;
 
 float RXbit = 0;
 float bitSampleTimer = 0;
@@ -1168,12 +1166,6 @@ float32_t audiou;
 float32_t audioSpectBuffer[1024];  // This can't be DMAMEM.  It will break the S-Meter.  KF5N October 10, 2023
 float32_t bass = 0.0;
 float32_t farnsworthValue;
-//int EEPROMData.currentMicThreshold;  // Don't need to define here, will happen with EEPROMRead().  KF5N August 27, 2023
-//float EEPROMData.currentMicCompRatio = 5.0;
-//float EEPROMData.currentMicAttack = 0.1;
-//float EEPROMData.currentMicRelease = 2.0;
-//int EEPROMData.currentMicGain = -10;
-//int EEPROMData.compressorFlag = 0;
 float32_t midbass = 0.0;
 float32_t mid = 0.0;
 float32_t midtreble = 0.0;
@@ -1187,13 +1179,9 @@ float32_t coefficient_set[5] = { 0, 0, 0, 0, 0 };
 float32_t corr[2];
 float32_t Cos = 0.0;
 float32_t cursorIncrementFraction;
-//float32_t CPU_temperature               = 0.0;
-
 float32_t dbm = -145.0;
-;
 float32_t dbm_calibration = 22.0;
 float32_t dbm_old = -145.0;
-;
 float32_t dbmhz = -145.0;
 float32_t decay_mult;
 float32_t display_offset;
@@ -1265,17 +1253,6 @@ float32_t IIR_biquad_Zoom_FFT_I_state[IIR_biquad_Zoom_FFT_N_stages * 4];
 float32_t IIR_biquad_Zoom_FFT_Q_state[IIR_biquad_Zoom_FFT_N_stages * 4];
 float32_t inv_max_input;
 float32_t inv_out_target;
-
-//float32_t EEPROMData.IQAmpCorrectionFactor[7] = { 1, 1.024, 1, 1, 1, 1, 1 };
-//float32_t EEPROMData.IQPhaseCorrectionFactor[7] = { 0, 0.007, 0, 0, 0, 0, 0 };
-//float32_t EEPROMData.IQXAmpCorrectionFactor[7] = { 1, 1.097, 1, 1, 1, 1, 1 };
-//float32_t EEPROMData.IQXPhaseCorrectionFactor[7] = { 0, 0.193, 0, 0, 0, 0, 0 };
-
-/*float32_t EEPROMData.IQAmpCorrectionFactorUSB[7]        = {1,1.057,1,1,1,1,1};
-  float32_t EEPROMData.IQPhaseCorrectionFactorUSB[7]      = {0,-0.02,0,0,0,0,0};
-  float32_t EEPROMData.IQXAmpCorrectionFactorUSB[7]       = {1,1.097,1,1,1,1,1};
-  float32_t EEPROMData.IQXPhaseCorrectionFactor[7]     = {0,0.193,0,0,0,0,0};*/
-
 float32_t IQ_sum = 0.0;
 float32_t K_dirty = 0.868;
 float32_t K_est = 1.0;
@@ -1289,7 +1266,6 @@ float32_t LMS_errsig1[256 + 10];
 float32_t LMS_NormCoeff_f32[MAX_LMS_TAPS + MAX_LMS_DELAY];
 float32_t LMS_nr_delay[512 + MAX_LMS_DELAY];
 float32_t LMS_StateF32[MAX_LMS_TAPS + MAX_LMS_DELAY];
-//float32_t EEPROMData.LPFcoeff;
 float32_t LP_Astop = 90.0;
 float32_t LP_Fpass = 3500.0;
 float32_t LP_Fstop = 3600.0;
@@ -1299,26 +1275,20 @@ float32_t M_c2 = 0.0;
 float32_t m_AttackAlpha = 0.03;
 float32_t m_AttackAvedbm = -73.0;
 float32_t m_DecayAvedbm = -73.0;
-;
 float32_t m_DecayAlpha = 0.01;
 float32_t m_AverageMagdbm = -73.0;
-;
 float32_t m_AttackAvedbmhz = -103.0;
 float32_t m_DecayAvedbmhz = -103.0;
 float32_t m_AverageMagdbmhz = -103.0;
 float32_t max_gain;
 float32_t max_input = -0.1;
 float32_t min_volts;
-
 float32_t noiseThreshhold;
 float32_t notches[10] = { 500.0, 1000.0, 1500.0, 2000.0, 2500.0, 3000.0, 3500.0, 4000.0, 4500.0, 5000.0 };
 float32_t DMAMEM NR_FFT_buffer[512] __attribute__((aligned(4)));
 float32_t NR_sum = 0;
-//float32_t NR_PSI = 3.0;
 float32_t NR_KIM_K = 1.0;
-//float32_t EEPROMData.NR_alpha = 0.95;
 float32_t NR_onemalpha = (1.0 - EEPROMData.NR_alpha);
-//float32_t EEPROMData.NR_beta = 0.85;
 float32_t NR_onemtwobeta = (1.0 - (2.0 * EEPROMData.NR_beta));
 float32_t NR_onembeta = 1.0 - EEPROMData.NR_beta;
 float32_t NR_G_bin_m_1;
@@ -1372,8 +1342,6 @@ float32_t sample_meanLNew = 0.0;  //AFP 10-11-22
 float32_t sample_meanRNew = 0.0;
 float32_t save_volts = 0.0;
 float32_t slope_constant;
-
-//float32_t EEPROMData.spectrum_display_scale = 20.0;     // 30.0
 float32_t stereo_factor = 100.0;
 float32_t tau_attack;
 float32_t tau_decay;
@@ -1381,7 +1349,6 @@ float32_t tau_fast_backaverage = 0.0;
 float32_t tau_fast_decay;
 float32_t tau_hang_backmult;
 float32_t tau_hang_decay;
-
 float32_t teta1 = 0.0;
 float32_t teta2 = 0.0;
 float32_t teta3 = 0.0;
@@ -1393,7 +1360,6 @@ float32_t var_gain;
 float32_t volts = 0.0;
 float32_t w;
 float32_t wold = 0.0f;
-
 
 float angl;
 float bitSamplePeriod = 1.0 / 500.0;
@@ -1408,42 +1374,6 @@ float tau;
 float temp;
 float xExpand = 1.5;  //
 float x;
-
-const float32_t sqrtHann[256] = {
-  0, 0.01231966, 0.024637449, 0.036951499, 0.049259941, 0.061560906,
-  0.073852527, 0.086132939, 0.098400278, 0.110652682, 0.122888291, 0.135105247, 0.147301698,
-  0.159475791, 0.171625679, 0.183749518, 0.195845467, 0.207911691, 0.219946358, 0.231947641, 0.24391372,
-  0.255842778, 0.267733003, 0.279582593, 0.291389747, 0.303152674, 0.314869589, 0.326538713, 0.338158275,
-  0.349726511, 0.361241666, 0.372701992, 0.384105749, 0.395451207, 0.406736643, 0.417960345, 0.429120609,
-  0.440215741, 0.451244057, 0.462203884, 0.473093557, 0.483911424, 0.494655843, 0.505325184, 0.515917826,
-  0.526432163, 0.536866598, 0.547219547, 0.557489439, 0.567674716, 0.577773831, 0.587785252, 0.597707459,
-  0.607538946, 0.617278221, 0.626923806, 0.636474236, 0.645928062, 0.65528385, 0.664540179, 0.673695644,
-  0.682748855, 0.691698439, 0.700543038, 0.709281308, 0.717911923, 0.726433574, 0.734844967, 0.743144825,
-  0.75133189, 0.759404917, 0.767362681, 0.775203976, 0.78292761, 0.790532412, 0.798017227, 0.805380919,
-  0.812622371, 0.819740483, 0.826734175, 0.833602385, 0.840344072, 0.846958211, 0.853443799, 0.859799851,
-  0.866025404, 0.872119511, 0.878081248, 0.88390971, 0.889604013, 0.895163291, 0.900586702, 0.905873422,
-  0.911022649, 0.916033601, 0.920905518, 0.92563766, 0.930229309, 0.934679767, 0.938988361, 0.943154434,
-  0.947177357, 0.951056516, 0.954791325, 0.958381215, 0.961825643, 0.965124085, 0.968276041, 0.971281032,
-  0.974138602, 0.976848318, 0.979409768, 0.981822563, 0.984086337, 0.986200747, 0.988165472, 0.989980213,
-  0.991644696, 0.993158666, 0.994521895, 0.995734176, 0.996795325, 0.99770518, 0.998463604, 0.999070481,
-  0.99952572, 0.99982925, 0.999981027, 0.999981027, 0.99982925, 0.99952572, 0.999070481, 0.998463604,
-  0.99770518, 0.996795325, 0.995734176, 0.994521895, 0.993158666, 0.991644696, 0.989980213, 0.988165472,
-  0.986200747, 0.984086337, 0.981822563, 0.979409768, 0.976848318, 0.974138602, 0.971281032, 0.968276041,
-  0.965124085, 0.961825643, 0.958381215, 0.954791325, 0.951056516, 0.947177357, 0.943154434, 0.938988361,
-  0.934679767, 0.930229309, 0.92563766, 0.920905518, 0.916033601, 0.911022649, 0.905873422, 0.900586702,
-  0.895163291, 0.889604013, 0.88390971, 0.878081248, 0.872119511, 0.866025404, 0.859799851, 0.853443799,
-  0.846958211, 0.840344072, 0.833602385, 0.826734175, 0.819740483, 0.812622371, 0.805380919, 0.798017227,
-  0.790532412, 0.78292761, 0.775203976, 0.767362681, 0.759404917, 0.75133189, 0.743144825, 0.734844967,
-  0.726433574, 0.717911923, 0.709281308, 0.700543038, 0.691698439, 0.682748855, 0.673695644, 0.664540179,
-  0.65528385, 0.645928062, 0.636474236, 0.626923806, 0.617278221, 0.607538946, 0.597707459, 0.587785252,
-  0.577773831, 0.567674716, 0.557489439, 0.547219547, 0.536866598, 0.526432163, 0.515917826, 0.505325184,
-  0.494655843, 0.483911424, 0.473093557, 0.462203884, 0.451244057, 0.440215741, 0.429120609, 0.417960345,
-  0.406736643, 0.395451207, 0.384105749, 0.372701992, 0.361241666, 0.349726511, 0.338158275, 0.326538713,
-  0.314869589, 0.303152674, 0.291389747, 0.279582593, 0.267733003, 0.255842778, 0.24391372, 0.231947641,
-  0.219946358, 0.207911691, 0.195845467, 0.183749518, 0.171625679, 0.159475791, 0.147301698, 0.135105247,
-  0.122888291, 0.110652682, 0.098400278, 0.086132939, 0.073852527, 0.061560906, 0.049259941, 0.036951499,
-  0.024637449, 0.01231966, 0
-};
 
 // Voltage in one-hundred 1 dB steps for volume control.
 const float32_t volumeLog[] = { 0.000010, 0.000011, 0.000013, 0.000014, 0.000016, 0.000018, 0.000020, 0.000022, 0.000025, 0.000028,
@@ -1671,6 +1601,8 @@ void MyDelay(unsigned long millisWait) {
   while (millis() - now < millisWait)
     ;  // Twiddle thumbs until delay ends...
 }
+
+
 /*****
   Purpose: to collect array inits in one place
 
@@ -1894,6 +1826,7 @@ void InitializeDataArrays() {
   TEMPMON_TEMPSENSE0 |= 0x2U;
 }
 
+
 /*****
   Purpose: Manage AudioRecordQueue objects and patchCord connections based on
            the radio's operating mode in a way that minimizes unnecessary
@@ -1906,7 +1839,6 @@ void InitializeDataArrays() {
     void
 
 *****/
-
 void SetAudioOperatingState(int operatingState) {
 #ifdef DEBUG
     Serial.printf("lastState=%d radioState=%d memory_used=%d memory_used_max=%d f32_memory_used=%d f32_memory_used_max=%d\n",
@@ -1978,6 +1910,7 @@ void SetAudioOperatingState(int operatingState) {
         break;
     }
 }
+
 
 /*****
   Purpose: The initial screen display on startup. Expect this to be customized.
