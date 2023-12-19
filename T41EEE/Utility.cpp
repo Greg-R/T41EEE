@@ -43,12 +43,8 @@ void initCWShaping(){
   float deg;
 
   // Rising waveform
-  //  First 64 samples are muted
-  for ( pos = 0; pos < 64; pos++) {
-    cwRiseBuffer[pos] = 0.0;
-  }
-  //  Raised cosine scaling from sample 64 to 192 (128 samples, roughly 5ms)
-  for ( deg = -180; pos < 192; deg += 1.40625 /* 180 / 128 */, pos++ ) {
+  //  Raised cosine increasing amplitude for 128 samples (roughly 5ms)
+  for ( pos = 0, deg = -180; pos < 128; deg += 1.40625 /* 180 / 128 */, pos++ ) {
     cwRiseBuffer[pos] = (1.0 + cos(deg / 57.3 /* fixed conversion to radians */)) / 2.0;
   }
   //  Full amplitude for the remainder
@@ -57,17 +53,13 @@ void initCWShaping(){
   }
 
   // Falling waveform
-  //  Full amplitude for first 64 samples
-  for ( pos = 0; pos < 64; pos++) {
+  //  Full amplitude for the first 128 samples
+  for (pos = 0; pos < 128; pos++) {
     cwFallBuffer[pos] = 1.0;
   }
-  //  Raised cosine scaling from sample 64 to 192 (128 samples, roughly 5ms)
-  for ( deg = 0; pos < 192; deg += 1.40625 /* 180 / 128 */, pos++ ) {
+  //  Raised cosine decreasing amplitude for the final 128 samples (roughly 5ms)
+  for ( deg = 0; pos < 256; deg += 1.40625 /* 180 / 128 */, pos++ ) {
     cwFallBuffer[pos] = (1.0 + cos(deg / 57.3 /* fixed conversion to radians */)) / 2.0;
-  }
-  //  Muted for final 64 samples, one I2S DMA block; this final block will repeat until we write more audio
-  for (; pos < 256; pos++) {
-    cwFallBuffer[pos] = 0.0;
   }
 }
 
