@@ -301,6 +301,17 @@ void SetDitLength(int wpm) {
 *****/
 void SetTransmitDitLength(int wpm) {
   transmitDitLength = 1200 / wpm;  // JJP 8/19/23
+
+  // Total audio blocks that will be output = 1 (rise) + transmit(Dit|Dah)UnshapedBlocks + 1 (fall)
+  // Blocks are assumed to be 10ms long, and the number of unshaped blocks is rounded to acheive
+  // the best approximation of the actual desired dit and dah times.
+  if (transmitDitLength < 20) {
+    transmitDitUnshapedBlocks = 0;
+    transmitDahUnshapedBlocks = 0;
+  } else {
+    transmitDitUnshapedBlocks = (unsigned long) rint(((double) transmitDitLength - 20.0) / 10.0);
+    transmitDahUnshapedBlocks = (unsigned long) rint((((double) transmitDitLength * 3.0) - 20.0) / 10.0);
+  }
 }
 
 /*****
@@ -361,6 +372,7 @@ void SetKeyPowerUp() {
 *****/
 void SetSideToneVolume() {
   int val, sidetoneDisplay;
+  bool keyDown;
 
   SetAudioOperatingState(CW_TRANSMIT_STRAIGHT_STATE);
   tft.setFontScale((enum RA8875tsize)1);
@@ -370,6 +382,7 @@ void SetSideToneVolume() {
   tft.print("Sidetone Volume:");
   tft.setCursor(SECONDARY_MENU_X + 220, MENUS_Y + 1);
   sidetoneDisplay = (int)(EEPROMData.sidetoneVolume);
+  keyDown = false;
   tft.print(sidetoneDisplay);  // Display in range of 0 to 100.
   modeSelectInR.gain(0, 0);
   modeSelectInL.gain(0, 0);
@@ -383,7 +396,19 @@ void SetSideToneVolume() {
   modeSelectOutR.gain(1, 0.0);  // Sidetone  AFP 10-01-22
 
   while (true) {
-    if (digitalRead(EEPROMData.paddleDit) == LOW || digitalRead(EEPROMData.paddleDah) == LOW) CW_ExciterIQData();
+    if (digitalRead(EEPROMData.paddleDit) == LOW || digitalRead(EEPROMData.paddleDah) == LOW) {
+      if (keyDown) {
+        CW_ExciterIQData(CW_SHAPING_NONE);
+      } else {
+        CW_ExciterIQData(CW_SHAPING_RISE);
+        keyDown = true;
+      }
+    } else {
+      if (keyDown) {
+        CW_ExciterIQData(CW_SHAPING_FALL);
+        keyDown = false;
+      }
+    }
 
     if (filterEncoderMove != 0) {
       //      EEPROMData.sidetoneVolume = EEPROMData.sidetoneVolume + (float)filterEncoderMove * 0.001;  // EEPROMData.sidetoneVolume range is 0.0 to 1.0 in 0.001 steps.  KF5N August 29, 2023

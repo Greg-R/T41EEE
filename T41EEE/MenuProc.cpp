@@ -49,25 +49,6 @@ int CalibrateOptions() {
       break;
 
     case 1:  // CW PA Cal
-    //  Duplication of loop() state machine.  Removed December 19, 2023  KN6LFB
-//      if (keyPressedOn == 1 && EEPROMData.xmtMode == CW_MODE) {
-        //================  CW Transmit Mode Straight Key ===========
-//        if (digitalRead(KEYER_DIT_INPUT_TIP) == LOW && EEPROMData.xmtMode == CW_MODE && EEPROMData.keyType == 0) {  //Straight Key
-//          EEPROMData.powerOutCW[EEPROMData.currentBand] = (-.0133 * EEPROMData.transmitPowerLevel * EEPROMData.transmitPowerLevel + .7884 * EEPROMData.transmitPowerLevel + 4.5146) * EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];
-//          CW_ExciterIQData();
-//          xrState = TRANSMIT_STATE;
-//          ShowTransmitReceiveStatus();
-//          SetFreq();                 //  AFP 10-02-22
-//          digitalWrite(MUTE, HIGH);  //   Mute Audio  (HIGH=Mute)
-//          modeSelectInR.gain(0, 0);
-//          modeSelectInL.gain(0, 0);
-//          modeSelectInExR.gain(0, 0);
-//          modeSelectOutL.gain(0, 0);
-//          modeSelectOutR.gain(0, 0);
-//          modeSelectOutExL.gain(0, 0);
-//          modeSelectOutExR.gain(0, 0);
-//        }
-//      }
       EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand] = GetEncoderValueLive(-2.0, 2.0, EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand], 0.001, (char *)"CW PA Cal: ");
       EEPROMData.powerOutCW[EEPROMData.currentBand] = (-.0133 * EEPROMData.transmitPowerLevel * EEPROMData.transmitPowerLevel + .7884 * EEPROMData.transmitPowerLevel + 4.5146) * EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];  // AFP 10-21-22
       val = ReadSelectedPushButton();

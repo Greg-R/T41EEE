@@ -30,6 +30,38 @@ void sineTone(int numCycles)
   }
 }
 
+/*****
+  Purpose: Generate ~5ms raised cosine wave-shaping arrays
+  Parameter list:
+    void
+  Return value;
+    void
+*****/
+
+void initCWShaping(){
+  int pos;
+  float deg;
+
+  // Rising waveform
+  //  Raised cosine increasing amplitude for 128 samples (roughly 5ms)
+  for ( pos = 0, deg = -180; pos < 128; deg += 1.40625 /* 180 / 128 */, pos++ ) {
+    cwRiseBuffer[pos] = (1.0 + cos(deg / 57.3 /* fixed conversion to radians */)) / 2.0;
+  }
+  //  Full amplitude for the remainder
+  for (; pos < 256; pos++) {
+    cwRiseBuffer[pos] = 1.0;
+  }
+
+  // Falling waveform
+  //  Full amplitude for the first 128 samples
+  for (pos = 0; pos < 128; pos++) {
+    cwFallBuffer[pos] = 1.0;
+  }
+  //  Raised cosine decreasing amplitude for the final 128 samples (roughly 5ms)
+  for ( deg = 0; pos < 256; deg += 1.40625 /* 180 / 128 */, pos++ ) {
+    cwFallBuffer[pos] = (1.0 + cos(deg / 57.3 /* fixed conversion to radians */)) / 2.0;
+  }
+}
 
 const float32_t atanTable[68] = {
   -0.015623728620477f,

@@ -550,6 +550,8 @@ float32_t cosBuffer2[256];
 //float32_t cosBuffer4[256];
 float32_t sinBuffer[256];
 float32_t sinBuffer2[256];
+float32_t cwRiseBuffer[256];
+float32_t cwFallBuffer[256];
 //float32_t sinBuffer3[256];
 //float32_t sinBuffer4[256];
 float32_t aveCorrResult;
@@ -1127,6 +1129,8 @@ unsigned long long Clk2SetFreq;                  // AFP 09-27-22
 unsigned long long Clk1SetFreq = 1000000000ULL;  // AFP 09-27-22
 unsigned long ditLength;
 unsigned long transmitDitLength;  // JJP 8/19/23
+unsigned long transmitDitUnshapedBlocks;
+unsigned long transmitDahUnshapedBlocks;
 float dcfRefLevel;
 float CPU_temperature = 0.0;
 
@@ -2134,6 +2138,7 @@ void setup() {
   //calFreqShift = 0;
   // Initialize buffer used by CW transmitter.
   sineTone(EEPROMData.CWOffset + 6);  // This function takes "number of cycles" which is the offset + 6.
+  initCWShaping();
   // Initialize buffer used by CW decoder.
     float freq[4] = {562.5, 656.5, 750.0, 843.75};
     float theta;
@@ -2193,6 +2198,8 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   int valPin;
   long ditTimerOff;  //AFP 09-22-22
   long dahTimerOn;
+  bool cwKeyDown;
+  unsigned long cwBlockIndex;
 
   valPin = ReadSelectedPushButton();                     // Poll UI push buttons
   if (valPin != BOGUS_PIN_READ) {                        // If a button was pushed...
@@ -2305,10 +2312,8 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       break;
     case CW_TRANSMIT_STRAIGHT_STATE:
       EEPROMData.powerOutCW[EEPROMData.currentBand] = (-.0133 * EEPROMData.transmitPowerLevel * EEPROMData.transmitPowerLevel + .7884 * EEPROMData.transmitPowerLevel + 4.5146) * EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];
-      CW_ExciterIQData();
       xrState = TRANSMIT_STATE;
       ShowTransmitReceiveStatus();
-      digitalWrite(MUTE, HIGH);  //   Mute Audio  (HIGH=Mute)
       modeSelectInR.gain(0, 0);
       modeSelectInL.gain(0, 0);
       modeSelectInExR.gain(0, 0);
@@ -2316,114 +2321,132 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       modeSelectOutR.gain(0, 0);
       modeSelectOutExL.gain(0, 0);
       modeSelectOutExR.gain(0, 0);
+      digitalWrite(MUTE, LOW);                                    // unmutes audio
+      cwKeyDown = false;
       cwTimer = millis();
       while (millis() - cwTimer <= EEPROMData.cwTransmitDelay) {  //Start CW transmit timer on
         digitalWrite(RXTX, HIGH);
         if (digitalRead(EEPROMData.paddleDit) == LOW && EEPROMData.keyType == 0) {       // AFP 09-25-22  Turn on CW signal
           cwTimer = millis();                                      //Reset timer
-          modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);       //AFP 10-21-22
-          modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);       //AFP 10-21-22
-          digitalWrite(MUTE, LOW);                                 // unmutes audio
-          modeSelectOutL.gain(1, volumeLog[(int)EEPROMData.sidetoneVolume]);  // Sidetone  AFP 10-01-22
-    //        modeSelectOutR.gain(1, volumeLog[(int)EEPROMData.sidetoneVolume]);           // Right side not used.  KF5N September 1, 2023
+
+          if (!cwKeyDown) {
+            modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);       //AFP 10-21-22
+            modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);       //AFP 10-21-22
+            modeSelectOutL.gain(1, volumeLog[(int)EEPROMData.sidetoneVolume]);  // Sidetone  AFP 10-01-22
+
+            CW_ExciterIQData(CW_SHAPING_RISE);
+            cwKeyDown = true;
+          } else {
+            CW_ExciterIQData(CW_SHAPING_NONE);
+          }
         } else {
           if (digitalRead(EEPROMData.paddleDit) == HIGH && EEPROMData.keyType == 0) {  //Turn off CW signal
             keyPressedOn = 0;
-            digitalWrite(MUTE, HIGH);     // mutes audio
-            modeSelectOutExL.gain(0, 0);  //Power = 0
-            modeSelectOutExR.gain(0, 0);
-            modeSelectOutL.gain(1, 0);  // Sidetone off
-            modeSelectOutR.gain(1, 0);
+
+            if (cwKeyDown) {
+              CW_ExciterIQData(CW_SHAPING_FALL);
+              cwKeyDown = false;
+            }
           }
         }
-        CW_ExciterIQData();
       }
+      digitalWrite(MUTE, HIGH);     // mutes audio
+      modeSelectOutL.gain(1, 0);  // Sidetone off
+      modeSelectOutR.gain(1, 0);
       modeSelectOutExL.gain(0, 0);  //Power = 0 //AFP 10-11-22
       modeSelectOutExR.gain(0, 0);  //AFP 10-11-22
       digitalWrite(RXTX, LOW);      // End Straight Key Mode
       break;
     case CW_TRANSMIT_KEYER_STATE:
-      CW_ExciterIQData();
+      EEPROMData.powerOutCW[EEPROMData.currentBand] = (-.0133 * EEPROMData.transmitPowerLevel * EEPROMData.transmitPowerLevel + .7884 * EEPROMData.transmitPowerLevel + 4.5146) * EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];
       xrState = TRANSMIT_STATE;
       ShowTransmitReceiveStatus();
-      digitalWrite(MUTE, HIGH);  //   Mute Audio  (HIGH=Mute)
       modeSelectInR.gain(0, 0);
       modeSelectInL.gain(0, 0);
       modeSelectInExR.gain(0, 0);
-      modeSelectInExL.gain(0, 0);
       modeSelectOutL.gain(0, 0);
       modeSelectOutR.gain(0, 0);
       modeSelectOutExL.gain(0, 0);
       modeSelectOutExR.gain(0, 0);
+      digitalWrite(MUTE, LOW);                                    // unmutes audio
       cwTimer = millis();
       while (millis() - cwTimer <= EEPROMData.cwTransmitDelay) {
-        digitalWrite(RXTX, HIGH);  //Turns on relay
-        CW_ExciterIQData();
-        modeSelectInR.gain(0, 0);
-        modeSelectInL.gain(0, 0);
-        modeSelectInExR.gain(0, 0);
-        modeSelectInExL.gain(0, 0);
-        modeSelectOutL.gain(0, 0);
-        modeSelectOutR.gain(0, 0);
+        digitalWrite(RXTX, HIGH);
 
         if (digitalRead(EEPROMData.paddleDit) == LOW) {  // Keyer Dit
-          cwTimer = millis();
           ditTimerOn = millis();
-          //          while (millis() - ditTimerOn <= ditLength) {
-          while (millis() - ditTimerOn <= transmitDitLength) {       // JJP 8/19/23
-            modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);       //AFP 10-21-22
-            modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);       //AFP 10-21-22
-            digitalWrite(MUTE, LOW);                                 // unmutes audio
-            modeSelectOutL.gain(1, volumeLog[(int)EEPROMData.sidetoneVolume]);  // Sidetone
-                                                                     //  modeSelectOutR.gain(1, volumeLog[(int)EEPROMData.sidetoneVolume]);           // Right side not used.  KF5N September 1, 2023
-            CW_ExciterIQData();                                      // Creates CW output signal
-            keyPressedOn = 0;
+          modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);       //AFP 10-21-22
+          modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);       //AFP 10-21-22
+          modeSelectOutL.gain(1, volumeLog[(int)EEPROMData.sidetoneVolume]);  // Sidetone
+
+          // Queue audio blocks--execution time of this loop will be between 0-20ms shorter
+          // than the desired dit time, due to audio buffering
+          CW_ExciterIQData(CW_SHAPING_RISE);
+          for (cwBlockIndex = 0; cwBlockIndex < transmitDitUnshapedBlocks; cwBlockIndex++) {
+            CW_ExciterIQData(CW_SHAPING_NONE);
           }
+          CW_ExciterIQData(CW_SHAPING_FALL);
+
+          // Wait for calculated dit time, allowing audio blocks to be played
+          while (millis() - ditTimerOn <= transmitDitLength) {
+            ;
+          }
+
+          // Pause for one dit length of silence 
           ditTimerOff = millis();
-          //          while (millis() - ditTimerOff <= ditLength - 10) {  //Time between
-          while (millis() - ditTimerOff <= transmitDitLength - 10L) {  // JJP 8/19/23
-            modeSelectOutExL.gain(0, 0);                               //Power =0
+          while (millis() - ditTimerOff <= transmitDitLength) {
+            ;
+          }
+
+          modeSelectOutExL.gain(0, 0);                               //Power =0
+          modeSelectOutExR.gain(0, 0);
+          modeSelectOutL.gain(1, 0);  // Sidetone off
+          modeSelectOutR.gain(1, 0);
+
+          cwTimer = millis();
+        } else {
+          if (digitalRead(EEPROMData.paddleDah) == LOW) {  //Keyer DAH
+            dahTimerOn = millis();
+            modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);
+            modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);
+            modeSelectOutL.gain(1, volumeLog[(int)EEPROMData.sidetoneVolume]);
+
+            // Queue audio blocks--execution time of this loop will be between 0-20ms shorter
+            // than the desired dah time, due to audio buffering
+            CW_ExciterIQData(CW_SHAPING_RISE);
+            for (cwBlockIndex = 0; cwBlockIndex < transmitDahUnshapedBlocks; cwBlockIndex++) {
+              CW_ExciterIQData(CW_SHAPING_NONE);
+            }
+            CW_ExciterIQData(CW_SHAPING_FALL);
+
+            // Wait for calculated dah time, allowing audio blocks to be played
+            while (millis() - dahTimerOn <= 3UL * transmitDitLength) {
+              ;
+            }
+
+            // Pause for one dit length of silence 
+            ditTimerOff = millis();
+            while (millis() - ditTimerOff <= transmitDitLength) {
+              ;
+            }
+
+            modeSelectOutExL.gain(0, 0);                                //Power =0
             modeSelectOutExR.gain(0, 0);
             modeSelectOutL.gain(1, 0);  // Sidetone off
             modeSelectOutR.gain(1, 0);
-            CW_ExciterIQData();
-            keyPressedOn = 0;
-          }
-        } else {
-          if (digitalRead(EEPROMData.paddleDah) == LOW) {  //Keyer DAH
+
             cwTimer = millis();
-            dahTimerOn = millis();
-            //            while (millis() - dahTimerOn <= 3UL * ditLength) {
-            while (millis() - dahTimerOn <= 3UL * transmitDitLength) {  // JJP 8/19/23
-              modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);        //AFP 10-21-22
-              modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);        //AFP 10-21-22
-              digitalWrite(MUTE, LOW);                                  // unmutes audio
-              modeSelectOutL.gain(1, volumeLog[(int)EEPROMData.sidetoneVolume]);   // Dah sidetone was using constants.  KD0RC
-                                                                        //   modeSelectOutR.gain(1, volumeLog[(int)EEPROMData.sidetoneVolume]);           // Right side not used.  KF5N September 1, 2023
-              CW_ExciterIQData();                                       // Creates CW output signal
-              keyPressedOn = 0;
-            }
-            ditTimerOff = millis();
-            //            while (millis() - ditTimerOff <= ditLength - 10UL) {  //Time between characters                         // mutes audio
-            while (millis() - ditTimerOff <= transmitDitLength - 10UL) {  // JJP 8/19/23
-              modeSelectOutExL.gain(0, 0);                                //Power =0
-              modeSelectOutExR.gain(0, 0);
-              modeSelectOutL.gain(1, 0);  // Sidetone off
-              modeSelectOutR.gain(1, 0);
-              CW_ExciterIQData();
-            }
           }
         }
-        CW_ExciterIQData();
         keyPressedOn = 0;  // Fix for keyer click-clack.  KF5N August 16, 2023
       }                    //End Relay timer
 
+      digitalWrite(MUTE, HIGH);     // mutes audio
+      modeSelectOutL.gain(1, 0);    // Sidetone off
+      modeSelectOutR.gain(1, 0);
       modeSelectOutExL.gain(0, 0);  //Power = 0 //AFP 10-11-22
       modeSelectOutExR.gain(0, 0);  //AFP 10-11-22
-      digitalWrite(RXTX, LOW);
-      EEPROMData.xmtMode = CW_MODE;
-      //   RedrawDisplayScreen();
-      //   DrawFrequencyBarValue();
+      digitalWrite(RXTX, LOW);      // End Straight Key Mode
       break;
     default:
       break;

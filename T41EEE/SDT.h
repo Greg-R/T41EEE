@@ -628,6 +628,8 @@ extern float32_t corrResult;  //AFP 02-02-22
 extern uint32_t corrResultIndex;  //AFP 02-02-22
 extern float32_t sinBuffer[];    //AFP 02-02-22
 extern float32_t sinBuffer2[];
+extern float32_t cwRiseBuffer[];
+extern float32_t cwFallBuffer[];
 //extern float32_t sinBuffer3[];
 //extern float32_t sinBuffer4[];
 extern float32_t float_Corr_Buffer[];   //AFP 02-02-22
@@ -1604,6 +1606,8 @@ extern long currentFreq;
 //extern long centerFreq;
 extern unsigned long ditLength;
 extern unsigned long transmitDitLength;   // JJP 8/19/23
+extern unsigned long transmitDitUnshapedBlocks;
+extern unsigned long transmitDahUnshapedBlocks;
 extern long TxRxFreq;             // = centerFreq+NCOFreq  NCOFreq from FreqShift2()
 extern long TxRxFreqOld;
 extern long TxRxFreqDE;
@@ -2034,7 +2038,12 @@ void CopyEEPROM();
 int  CreateMapList(char ptrMaps[10][50], int *count);
 int  CWOptions();
 void CW_DecodeLevelDisplay();
-void CW_ExciterIQData();  // AFP 08-18-22
+
+#define CW_SHAPING_NONE 0
+#define CW_SHAPING_RISE 1
+#define CW_SHAPING_FALL 2
+
+void CW_ExciterIQData(int shaping);  // AFP 08-18-22
 
 void Dah();
 void DecodeIQ();
@@ -2195,6 +2204,7 @@ void ShowBandwidth();
 void ShowCurrentPowerSetting();
 void ShowDecoderMessage();
 void sineTone(int numCycles);
+void initCWShaping();
 int  SpectrumOptions();
 
 void TurnOffInitializingMessage();
