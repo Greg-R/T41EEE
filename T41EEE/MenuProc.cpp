@@ -791,6 +791,8 @@ int EEPROMOptions() {  // 0               1                2               3    
       //EEPROMRead();
       // Initialize the frequency setting based on the last used frequency stored to EEPROM.
       TxRxFreq = EEPROMData.centerFreq = EEPROMData.lastFrequencies[EEPROMData.currentBand][EEPROMData.activeVFO];
+      // Set the frequency correction of the Si5351:
+      si5351.set_correction(EEPROMData.freqCorrectionFactor, SI5351_PLL_INPUT_XO);
       RedrawDisplayScreen();  // Assume there are lots of changes and do a heavy-duty refresh.  KF5N August 7, 2023
       break;
 
