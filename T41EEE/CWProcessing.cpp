@@ -303,8 +303,8 @@ void SetTransmitDitLength(int wpm) {
   transmitDitLength = 1200 / wpm;  // JJP 8/19/23
 
   // Total audio blocks that will be output = 1 (rise) + transmit(Dit|Dah)UnshapedBlocks + 1 (fall)
-  transmitDitUnshapedBlocks = max((transmitDitLength / 10) - 2, 0);
-  transmitDahUnshapedBlocks = max(((transmitDitLength * 3) / 10) - 2, 0);
+  transmitDitUnshapedBlocks = max((transmitDitLength / 10) - 2, 0UL);
+  transmitDahUnshapedBlocks = max(((transmitDitLength * 3) / 10) - 2, 0UL);
 }
 
 /*****

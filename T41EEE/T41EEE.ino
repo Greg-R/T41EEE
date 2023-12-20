@@ -2199,7 +2199,7 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   int valPin;
   long ditTimerOff;  //AFP 09-22-22
   long dahTimerOn;
-  long cwBlockIndex;
+  unsigned long cwBlockIndex;
 
   valPin = ReadSelectedPushButton();                     // Poll UI push buttons
   if (valPin != BOGUS_PIN_READ) {                        // If a button was pushed...
