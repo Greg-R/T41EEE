@@ -826,7 +826,7 @@ int lastFrequencies[NUMBER_OF_BANDS][2] = {{3985000, 3560000}, {7200000, 7030000
   int compressorFlag = 0;                                 // JJP 8/28/23
   bool xmitEQFlag = false;
   bool receiveEQFlag = false;
-  int calFreq = 0;  // This is an index into an array of tone frequencies, for example:  {750, 3000}
+  int calFreq = 1;  // This is an index into an array of tone frequencies, for example:  {750, 3000}
 };                                 //  Total:       438 bytes
 
 extern struct config_t EEPROMData;
