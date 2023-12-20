@@ -107,7 +107,7 @@ void CalibratePrologue() {
   NCOFreq = 0L;
   xrState = RECEIVE_STATE;
   calibrateFlag = 0;  // KF5N
-  calFreqShift = 0;
+  //calFreqShift = 0;
   EEPROMData.currentScale = userScale;  //  Restore vertical scale to user preference.  KF5N
   ShowSpectrumdBScale();
   EEPROMData.xmtMode = userxmtMode;                        // Restore the user's floor setting.  KF5N July 27, 2023
@@ -141,13 +141,15 @@ void CalibratePrologue() {
 void DoReceiveCalibrate() {
   int task = -1;
   int lastUsedTask = -2;
-  int calFreqTemp;
+  int calFreqTemp, calFreqShift;
   CalibratePreamble(0);                                                              // Set zoom to 1X.
-  if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) calFreqShift = 24000 - 2000;  //  LSB offset.  KF5N
-  if (bands[EEPROMData.currentBand].mode == DEMOD_USB) calFreqShift = 24000 + 2250;  //  USB offset.  KF5N
+//  if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) calFreqShift = 24000 - 2000;  //  LSB offset.  KF5N
+//  if (bands[EEPROMData.currentBand].mode == DEMOD_USB) calFreqShift = 24000 + 2250;  //  USB offset.  KF5N
+  if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) calFreqShift = 24000;  //  LSB offset.  KF5N
+  if (bands[EEPROMData.currentBand].mode == DEMOD_USB) calFreqShift = 24000;  //  USB offset.  KF5N
   calFreqTemp = EEPROMData.calFreq;
   EEPROMData.calFreq = 1;  // Receive calibration currently must use 3 kHz.
-  SetFreqCal();
+  SetFreqCal(calFreqShift);
   calTypeFlag = 0;  // RX cal
   // Receive calibration loop
   while (true) {
@@ -210,18 +212,19 @@ void DoReceiveCalibrate() {
 void DoXmitCalibrate(int toneFreq) {
   int task = -1;
   int lastUsedTask = -2;
+  int freqOffset;
 
   if (toneFreq == 0) {     // 750 Hz
     CalibratePreamble(4);  // Set zoom to 16X.
-    calFreqShift = -375;
+    freqOffset = 0;        // Calibration tone same as regular modulation tone.
   }
   if (toneFreq == 1) {     // 3 kHz
     CalibratePreamble(2);  // Set zoom to 4X.
-    calFreqShift = 750;
+    freqOffset = 2250;      // Need 750 + 2250 = 3 kHz
   }
   calTypeFlag = 1;  // TX cal
 
-  SetFreqCal();
+  SetFreqCal(freqOffset);
   tft.writeTo(L1);
   // Transmit Calibration Loop
   while (true) {
@@ -433,25 +436,27 @@ void ShowSpectrum2(int toneFreq)  //AFP 2-10-23
   //  The target bin locations are used by the for-loop to sweep a small range in the FFT.  A maximum finding function finds the peak signal strength.
   int cal_bins[2] = { 0, 0 };
   if (calTypeFlag == 0 && bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
-    cal_bins[0] = 310;
-    cal_bins[1] = 460;
+    cal_bins[0] = 315;
+    cal_bins[1] = 455;
   }  // Receive calibration, LSB.  KF5N
   if (calTypeFlag == 0 && bands[EEPROMData.currentBand].mode == DEMOD_USB) {
-    cal_bins[0] = 65;
-    cal_bins[1] = 192;
+    cal_bins[0] = 59;
+    cal_bins[1] = 199;
   }  // Receive calibration, USB.  KF5N
   if (calTypeFlag == 1 && bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
-    cal_bins[0] = 240;
-    cal_bins[1] = 305;
+    cal_bins[0] = 257;
+    cal_bins[1] = 322;
   }  // Transmit calibration, LSB.  KF5N
   if (calTypeFlag == 1 && bands[EEPROMData.currentBand].mode == DEMOD_USB) {
-    cal_bins[0] = 209;
-    cal_bins[1] = 273;
+    cal_bins[0] = 193;
+    cal_bins[1] = 257;
   }  // Transmit calibration, USB.  KF5N
 
-  // Draw vertical markers for the reference and undesired sideband locations.  For debugging only!
+  // Draw vertical markers for the reference, undesired sideband locations, and centerline.  For debugging only!
   //    tft.drawFastVLine(cal_bins[0], SPECTRUM_TOP_Y, h, RA8875_GREEN);
   //    tft.drawFastVLine(cal_bins[1], SPECTRUM_TOP_Y, h, RA8875_GREEN);
+  //    int centerLine = (MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2;
+  //    tft.drawFastVLine(centerLine, SPECTRUM_TOP_Y, h, RA8875_GREEN);  // Draws centerline on spectrum display
 
   //  There are 2 for-loops, one for the reference signal and another for the undesired sideband.
   for (x1 = cal_bins[0] - capture_bins; x1 < cal_bins[0] + capture_bins; x1++) adjdB = PlotCalSpectrum(x1, cal_bins, capture_bins);
@@ -533,22 +538,22 @@ float PlotCalSpectrum(int x1, int cal_bins[2], int capture_bins) {
     adjdB = ((float)adjAmplitude - (float)refAmplitude) / 1.95;
     tft.writeTo(L2);
     if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
-      tft.fillRect(450, SPECTRUM_TOP_Y + 20, 20, h - 6, DARK_RED);     // SPECTRUM_TOP_Y = 100
-      tft.fillRect(300, SPECTRUM_TOP_Y + 20, 20, h - 6, RA8875_BLUE);  // h = SPECTRUM_HEIGHT + 3
+      tft.fillRect(445, SPECTRUM_TOP_Y + 20, 20, h - 6, DARK_RED);     // SPECTRUM_TOP_Y = 100
+      tft.fillRect(304, SPECTRUM_TOP_Y + 20, 20, h - 6, RA8875_BLUE);  // h = SPECTRUM_HEIGHT + 3
     } else {                                                           // SPECTRUM_HEIGHT = 150 so h = 153
-      tft.fillRect(55, SPECTRUM_TOP_Y + 20, 20, h - 6, DARK_RED);
-      tft.fillRect(182, SPECTRUM_TOP_Y + 20, 20, h - 6, RA8875_BLUE);
+      tft.fillRect(50, SPECTRUM_TOP_Y + 20, 20, h - 6, DARK_RED);
+      tft.fillRect(188, SPECTRUM_TOP_Y + 20, 20, h - 6, RA8875_BLUE);
     }
   } else {                                                       //Transmit Cal
     adjdB = ((float)adjAmplitude - (float)refAmplitude) / 1.95;  // Cast to float and calculate the dB level.  KF5N
     tft.writeTo(L2);
     if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
-      tft.fillRect(295, SPECTRUM_TOP_Y + 20, 20, h - 6, DARK_RED);  // Adjusted height due to other graphics changes.  KF5N August 3, 2023
-      tft.fillRect(230, SPECTRUM_TOP_Y + 20, 20, h - 6, RA8875_BLUE);
+      tft.fillRect(312, SPECTRUM_TOP_Y + 20, 20, h - 6, DARK_RED);  // Adjusted height due to other graphics changes.  KF5N August 3, 2023
+      tft.fillRect(247, SPECTRUM_TOP_Y + 20, 20, h - 6, RA8875_BLUE);
     } else {
       if (bands[EEPROMData.currentBand].mode == DEMOD_USB) {  //mode == DEMOD_LSB
-        tft.fillRect(199, SPECTRUM_TOP_Y + 20, 20, h - 6, DARK_RED);
-        tft.fillRect(263, SPECTRUM_TOP_Y + 20, 20, h - 6, RA8875_BLUE);
+        tft.fillRect(183, SPECTRUM_TOP_Y + 20, 20, h - 6, DARK_RED);
+        tft.fillRect(247, SPECTRUM_TOP_Y + 20, 20, h - 6, RA8875_BLUE);
       }
     }
   }
@@ -576,6 +581,7 @@ void SelectCalFreq() {
   // Clear the current CW filter graphics and then restore the bandwidth indicator bar.  KF5N July 30, 2023
   tft.writeTo(L2);
   tft.clearMemory();
-  BandInformation();
-  DrawBandWidthIndicatorBar();
+  RedrawDisplayScreen();
+//  BandInformation();
+//  DrawBandWidthIndicatorBar();
 }

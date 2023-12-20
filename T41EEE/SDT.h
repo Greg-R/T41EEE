@@ -14,7 +14,6 @@ extern struct maps myMapFiles[];
 
 //======================================== Library include files ========================================================
 #include <Adafruit_GFX.h>
-//#include "JSON.cpp"
 #include <ArduinoJson.h>
 #include "Fonts/FreeMonoBold24pt7b.h"
 #include "Fonts/FreeMonoBold18pt7b.h"
@@ -673,7 +672,7 @@ extern float ticMarkTimer;
 extern float ticMarkTimerOld;
 extern int CWOnState;  //AFP 05-17-22
 extern long CWFreqShift; //AFP 05-17-22
-extern long calFreqShift; //AFP 11-06-22
+//extern long calFreqShift; //AFP 11-06-22
 extern long cwTime0;
 extern long cwTime1;
 extern long cwTime2;
@@ -780,7 +779,7 @@ struct config_t {
 #endif
 
   int equalizerRec[EQUALIZER_CELL_COUNT] = {100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100};
-  int equalizerXmt[EQUALIZER_CELL_COUNT] = {0, 0, 100, 100, 100, 100, 100, 100, 100, 100, 100, 0, 0, 0};   // Provide equalizer optimized for SSB voice based on Neville's tests.  KF5N November 2, 2023
+  int equalizerXmt[EQUALIZER_CELL_COUNT] = {0, 0, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 0, 0};  // Provide equalizer optimized for SSB voice based on Neville's tests.  KF5N November 2, 2023
   int currentMicThreshold   = -10;                    // 4 bytes       AFP 09-22-22
   float currentMicCompRatio = 8.0;
   float currentMicAttack    = 0.1;
@@ -812,7 +811,7 @@ struct config_t {
 #if defined(ITU_REGION) && ITU_REGION==1  
 int lastFrequencies[NUMBER_OF_BANDS][2] = {{3690000, 3560000}, {7090000, 7030000}, {14285000, 14060000}, {18130000, 18096000}, {21285000, 21060000}, {24950000, 24906000},  {28365000, 28060000}};
 #else
-int lastFrequencies[NUMBER_OF_BANDS][2] = {{3985000, 3560000}, {7200000, 7030000}, {14285000, 14060000}, {18130000, 18096000}, {21385000, 21060000}, {24950000, 24906000}, {28385800, 28060000}};
+int lastFrequencies[NUMBER_OF_BANDS][2] = {{3985000, 3560000}, {7200000, 7030000}, {14285000, 14060000}, {18130000, 18096000}, {21385000, 21060000}, {24950000, 24906000}, {28385000, 28060000}};
 #endif
 
   long centerFreq               = 7030000L;              // 4 bytes
@@ -1966,7 +1965,7 @@ extern float x;
 
 extern const float displayscale;
 extern const float32_t nuttallWindow256[];
-extern const float32_t sqrtHann[];
+
 
 extern float32_t FFT_buffer [] __attribute__ ((aligned (4)));
 
@@ -2110,7 +2109,6 @@ int  GetEncoderValue(int minValue, int maxValue, int startValue, int increment, 
 float GetEncoderValueLive(float minValue, float maxValue, float startValue, float increment, char prompt[]);//AFP 10-22-22
 void GetFavoriteFrequency();
 
-//double HaversineDistance(double hLat, double hLon, double dxLat, double dxLon);
 float HaversineDistance(float dxLat, float dxLon);
 
 int  InitializeSDCard();
@@ -2118,7 +2116,6 @@ void InitializeDataArrays();
 void InitFilterMask();
 void InitLMSNoiseReduction();
 void initTempMon(uint16_t freq, uint32_t lowAlarmTemp, uint32_t highAlarmTemp, uint32_t panicAlarmTemp);
-//int  IQOptions();
 void IQPhaseCorrection(float32_t *I_buffer, float32_t *Q_buffer, float32_t factor, uint32_t blocksize);
 float32_t Izero(float32_t x);
 
@@ -2214,7 +2211,7 @@ void TurnOffInitializingMessage();
 
 void UpdateInfoWindow();
 
-void SetFreqCal(void) ;
+void SetFreqCal(int calFreqShift) ;
 extern "C"
 {
   void sincosf(float err, float *s, float *c);
@@ -2231,7 +2228,6 @@ void ShowTempAndLoad();
 void ShowTransmitReceiveStatus();
 void BandInformation();
 float32_t sign(float32_t x);
-//void sineTone(long freqSideTone);
 void SpectralNoiseReduction(void);
 void SpectralNoiseReductionInit();
 void Splash();

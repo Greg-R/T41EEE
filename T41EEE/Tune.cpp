@@ -13,7 +13,7 @@
 
   CAUTION: SI5351_FREQ_MULT is set in the si5253.h header file and is 100UL
 *****/
-void SetFreqCal(void) 
+void SetFreqCal(int calFreqShift) 
 {  // July 7 2023 KF5N
   // NEVER USE AUDIONOINTERRUPTS HERE: that introduces annoying clicking noise with every frequency change
   // SI5351_FREQ_MULT is 100ULL, MASTER_CLK_MULT is 4;
@@ -82,10 +82,10 @@ void SetFreq() {  //AFP 09-22-22   Revised July 7 KF5N
     Clk1SetFreq = (TxRxFreq * SI5351_FREQ_MULT) * MASTER_CLK_MULT_TX;  // AFP 09-27-22
   } else if (radioState == CW_TRANSMIT_STRAIGHT_STATE || radioState == CW_TRANSMIT_KEYER_STATE) {
     if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
-      Clk1SetFreq = (((TxRxFreq + cwFreqOffset + calFreqShift) * SI5351_FREQ_MULT)) * MASTER_CLK_MULT_TX;  // AFP 09-27-22;  KF5N flip CWFreqShift, sign originally minus
+      Clk1SetFreq = (((TxRxFreq + cwFreqOffset) * SI5351_FREQ_MULT)) * MASTER_CLK_MULT_TX;  // AFP 09-27-22;  KF5N flip CWFreqShift, sign originally minus
     } else {
       if (bands[EEPROMData.currentBand].mode == DEMOD_USB) {
-        Clk1SetFreq = (((TxRxFreq - cwFreqOffset - calFreqShift) * SI5351_FREQ_MULT)) * MASTER_CLK_MULT_TX;  // AFP 10-01-22; KF5N flip CWFreqShift, sign originally plus
+        Clk1SetFreq = (((TxRxFreq - cwFreqOffset) * SI5351_FREQ_MULT)) * MASTER_CLK_MULT_TX;  // AFP 10-01-22; KF5N flip CWFreqShift, sign originally plus
       }
     }
   }
