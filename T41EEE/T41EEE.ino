@@ -849,7 +849,6 @@ int charGapLength2;
 int centerTuneFlag = 0;
 int x1AdjMax = 0;  //AFP 2-6-23
 unsigned long cwTimer;
-bool cwFirstAudioBlock;
 long signalTime;
 unsigned long ditTimerOn;
 long DahTimer;
@@ -2199,6 +2198,7 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   int valPin;
   long ditTimerOff;  //AFP 09-22-22
   long dahTimerOn;
+  bool cwKeyDown;
   unsigned long cwBlockIndex;
 
   valPin = ReadSelectedPushButton();                     // Poll UI push buttons
@@ -2322,20 +2322,19 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       modeSelectOutExL.gain(0, 0);
       modeSelectOutExR.gain(0, 0);
       digitalWrite(MUTE, LOW);                                    // unmutes audio
-      cwTimer = millis();
-      cwFirstAudioBlock = true;
+      cwKeyDown = false;
       while (millis() - cwTimer <= EEPROMData.cwTransmitDelay) {  //Start CW transmit timer on
         digitalWrite(RXTX, HIGH);
         if (digitalRead(EEPROMData.paddleDit) == LOW && EEPROMData.keyType == 0) {       // AFP 09-25-22  Turn on CW signal
           cwTimer = millis();                                      //Reset timer
 
-          if (cwFirstAudioBlock) {
+          if (!cwKeyDown) {
             modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);       //AFP 10-21-22
             modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);       //AFP 10-21-22
             modeSelectOutL.gain(1, volumeLog[(int)EEPROMData.sidetoneVolume]);  // Sidetone  AFP 10-01-22
 
             CW_ExciterIQData(CW_SHAPING_RISE);
-            cwFirstAudioBlock = false;
+            cwKeyDown = true;
           } else {
             CW_ExciterIQData(CW_SHAPING_NONE);
           }
@@ -2343,9 +2342,9 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
           if (digitalRead(EEPROMData.paddleDit) == HIGH && EEPROMData.keyType == 0) {  //Turn off CW signal
             keyPressedOn = 0;
 
-            if (!cwFirstAudioBlock) {
+            if (cwKeyDown) {
               CW_ExciterIQData(CW_SHAPING_FALL);
-              cwFirstAudioBlock = true;
+              cwKeyDown = false;
             }
           }
         }
