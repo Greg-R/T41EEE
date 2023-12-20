@@ -2374,7 +2374,6 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
         digitalWrite(RXTX, HIGH);
 
         if (digitalRead(EEPROMData.paddleDit) == LOW) {  // Keyer Dit
-          cwTimer = millis();
           ditTimerOn = millis();
           modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);       //AFP 10-21-22
           modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);       //AFP 10-21-22
@@ -2399,9 +2398,10 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
           modeSelectOutExR.gain(0, 0);
           modeSelectOutL.gain(1, 0);  // Sidetone off
           modeSelectOutR.gain(1, 0);
+
+          cwTimer = millis();
         } else {
           if (digitalRead(EEPROMData.paddleDah) == LOW) {  //Keyer DAH
-            cwTimer = millis();
             dahTimerOn = millis();
             modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);
             modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);
@@ -2426,6 +2426,8 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
             modeSelectOutExR.gain(0, 0);
             modeSelectOutL.gain(1, 0);  // Sidetone off
             modeSelectOutR.gain(1, 0);
+
+            cwTimer = millis();
           }
         }
         keyPressedOn = 0;  // Fix for keyer click-clack.  KF5N August 16, 2023
