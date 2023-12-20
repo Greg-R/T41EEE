@@ -313,14 +313,14 @@ extern struct maps myMapFiles[];
 #define TFT_RST                     255
 //========================================= Encoder pins  Jack Purdum W8TEE September 25, 2023
 #ifdef FOURSQRP
-    #define VOLUME_ENCODER_A          3
-    #define VOLUME_ENCODER_B          2
-    #define FILTER_ENCODER_A         14
+    #define VOLUME_ENCODER_A          2
+    #define VOLUME_ENCODER_B          3
+    #define FILTER_ENCODER_A         16
     #define FILTER_ENCODER_B         15
-    #define FINETUNE_ENCODER_A        5
-    #define FINETUNE_ENCODER_B        4
-    #define TUNE_ENCODER_A           17
-    #define TUNE_ENCODER_B           16
+    #define FINETUNE_ENCODER_A        4
+    #define FINETUNE_ENCODER_B        5
+    #define TUNE_ENCODER_A           14
+    #define TUNE_ENCODER_B           17
 #else
     #define VOLUME_ENCODER_A          2
     #define VOLUME_ENCODER_B          3
