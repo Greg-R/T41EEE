@@ -61,6 +61,8 @@ successful.
 9.  Volume control is changed to one-hundred 1 dB steps.
 10. Audio chain management is significantly enhanced, and less audio memory is required.
     Thank you to Jonathan KN6LFB for this major improvement!
+11. CW keyer timing optimizations including CW envelope shaping.  Another great one from
+    Jonathan KN6LFB!
 
 
 *********************************************************************************************
