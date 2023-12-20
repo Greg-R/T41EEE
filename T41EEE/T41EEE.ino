@@ -2377,17 +2377,21 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
           modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);       //AFP 10-21-22
           modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);       //AFP 10-21-22
           modeSelectOutL.gain(1, volumeLog[(int)EEPROMData.sidetoneVolume]);  // Sidetone
-          
+
+          // Queue audio blocks--execution time of this loop will be between 0-20ms shorter
+          // than the desired dit time, due to audio buffering
           CW_ExciterIQData(CW_SHAPING_RISE);
           for (cwBlockIndex = 0; cwBlockIndex < transmitDitUnshapedBlocks; cwBlockIndex++) {
             CW_ExciterIQData(CW_SHAPING_NONE);
           }
           CW_ExciterIQData(CW_SHAPING_FALL);
 
+          // Wait for calculated dit time, allowing audio blocks to be played
           while (millis() - ditTimerOn <= transmitDitLength) {
             ;
           }
-         
+
+          // Pause for one dit length of silence 
           ditTimerOff = millis();
           while (millis() - ditTimerOff <= transmitDitLength) {
             ;
@@ -2406,16 +2410,20 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
             modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);
             modeSelectOutL.gain(1, volumeLog[(int)EEPROMData.sidetoneVolume]);
 
+            // Queue audio blocks--execution time of this loop will be between 0-20ms shorter
+            // than the desired dah time, due to audio buffering
             CW_ExciterIQData(CW_SHAPING_RISE);
             for (cwBlockIndex = 0; cwBlockIndex < transmitDahUnshapedBlocks; cwBlockIndex++) {
               CW_ExciterIQData(CW_SHAPING_NONE);
             }
             CW_ExciterIQData(CW_SHAPING_FALL);
 
+            // Wait for calculated dah time, allowing audio blocks to be played
             while (millis() - dahTimerOn <= 3UL * transmitDitLength) {
               ;
             }
 
+            // Pause for one dit length of silence 
             ditTimerOff = millis();
             while (millis() - ditTimerOff <= transmitDitLength) {
               ;
