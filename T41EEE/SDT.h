@@ -1606,8 +1606,8 @@ extern long currentFreq;
 //extern long centerFreq;
 extern unsigned long ditLength;
 extern unsigned long transmitDitLength;   // JJP 8/19/23
-extern int transmitDitUnshapedBlocks;
-extern int transmitDahUnshapedBlocks;
+extern unsigned long transmitDitUnshapedBlocks;
+extern unsigned long transmitDahUnshapedBlocks;
 extern long TxRxFreq;             // = centerFreq+NCOFreq  NCOFreq from FreqShift2()
 extern long TxRxFreqOld;
 extern long TxRxFreqDE;

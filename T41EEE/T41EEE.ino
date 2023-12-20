@@ -1130,8 +1130,8 @@ unsigned long long Clk2SetFreq;                  // AFP 09-27-22
 unsigned long long Clk1SetFreq = 1000000000ULL;  // AFP 09-27-22
 unsigned long ditLength;
 unsigned long transmitDitLength;  // JJP 8/19/23
-int transmitDitUnshapedBlocks;
-int transmitDahUnshapedBlocks;
+unsigned long transmitDitUnshapedBlocks;
+unsigned long transmitDahUnshapedBlocks;
 float dcfRefLevel;
 float CPU_temperature = 0.0;
 
@@ -2199,7 +2199,7 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   int valPin;
   long ditTimerOff;  //AFP 09-22-22
   long dahTimerOn;
-  int cwBlock;
+  long cwBlockIndex;
 
   valPin = ReadSelectedPushButton();                     // Poll UI push buttons
   if (valPin != BOGUS_PIN_READ) {                        // If a button was pushed...
@@ -2381,7 +2381,7 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
           modeSelectOutL.gain(1, volumeLog[(int)EEPROMData.sidetoneVolume]);  // Sidetone
           
           CW_ExciterIQData(CW_SHAPING_RISE);
-          for (cwBlock = 0; cwBlock < transmitDitUnshapedBlocks; cwBlock++) {
+          for (cwBlockIndex = 0; cwBlockIndex < transmitDitUnshapedBlocks; cwBlockIndex++) {
             CW_ExciterIQData(CW_SHAPING_NONE);
           }
           CW_ExciterIQData(CW_SHAPING_FALL);
@@ -2408,7 +2408,7 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
             modeSelectOutL.gain(1, volumeLog[(int)EEPROMData.sidetoneVolume]);
 
             CW_ExciterIQData(CW_SHAPING_RISE);
-            for (cwBlock = 0; cwBlock < transmitDahUnshapedBlocks; cwBlock++) {
+            for (cwBlockIndex = 0; cwBlockIndex < transmitDahUnshapedBlocks; cwBlockIndex++) {
               CW_ExciterIQData(CW_SHAPING_NONE);
             }
             CW_ExciterIQData(CW_SHAPING_FALL);
