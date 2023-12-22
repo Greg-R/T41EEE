@@ -2133,6 +2133,7 @@ int  NROptions();
 
 float PlotCalSpectrum(int x1, int cal_bins[2], int capture_bins);
 void printFile(const char *filename);
+void EnableButtonInterrupts();
 int  ProcessButtonPress(int valPin);
 void ProcessEqualizerChoices(int EQType, char *title);
 void ProcessIQData();

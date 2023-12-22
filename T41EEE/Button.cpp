@@ -3,17 +3,90 @@
 #include "SDT.h"
 #endif
 
+IntervalTimer buttonInterrupts;
+
+bool buttonInterruptsEnabled = false;
+volatile int buttonPressed = -1;
+int lastButtonIndex = -1;
+
+/*****
+  Purpose: ISR to read button ADC and detect button presses
+
+  Parameter list:
+    none
+  Return value;
+    void
+*****/
+
+void ButtonISR() {
+  int adcValue, buttonIndex;
+  int minADCValue, maxADCValue, prevButtonADCValue, nextButtonADCValue;
+
+  adcValue = analogRead(BUSY_ANALOG_PIN);
+  for (prevButtonADCValue = 1023, buttonIndex = 0; buttonIndex < NUMBER_OF_SWITCHES; buttonIndex++) {
+    if (buttonIndex == NUMBER_OF_SWITCHES - 1) {
+      nextButtonADCValue = 0;
+    } else {
+      nextButtonADCValue = EEPROMData.switchValues[buttonIndex + 1];
+    }
+
+    maxADCValue = prevButtonADCValue - ((prevButtonADCValue - EEPROMData.switchValues[buttonIndex]) / 2);
+    minADCValue = nextButtonADCValue + ((EEPROMData.switchValues[buttonIndex] - nextButtonADCValue) / 2);
+
+    if (adcValue >= minADCValue && adcValue <= maxADCValue) {
+      break;
+    }
+  }
+
+  if (buttonIndex == NUMBER_OF_SWITCHES) {
+    buttonIndex = -1;
+  }
+
+  // A button is considered pressed if we remain in its ADC range
+  // for 2 consecutive interrupts
+  if (buttonIndex == lastButtonIndex) {
+    buttonPressed = buttonIndex;
+  } else {
+    lastButtonIndex = buttonIndex;
+    buttonPressed = -1;
+  }
+}
+
+/*****
+  Purpose: Starts button IntervalTimer and toggles subsequent button
+           functions into interrupt mode.
+
+  Parameter list:
+    none
+  Return value;
+    void
+*****/
+
+void EnableButtonInterrupts() {
+  buttonInterrupts.begin(ButtonISR, 5000);
+  buttonInterruptsEnabled = true;
+}
+
 /*****
   Purpose: Determine which UI button was pressed
 
   Parameter list:
-    int valPin            the ADC value from analogRead()
+    int valPin            Return value from ReadSelectedPushButton, which is either:
+                          When interrupt-driven buttons disabled: 
+                            the ADC value from analogRead()
+                          When interrupt-driven-buttons enabled:
+                            the index of the selected push button, in which case this
+                            function is essentially a noop.
 
   Return value;
     int                   -1 if not valid push button, index of push button if valid
 *****/
 int ProcessButtonPress(int valPin) {
   int switchIndex;
+
+  if (buttonInterruptsEnabled) {
+    return valPin;
+  }
 
   if (valPin == BOGUS_PIN_READ) {  // Not valid press
     return -1;
@@ -38,11 +111,22 @@ int ProcessButtonPress(int valPin) {
     int vsl               the value from analogRead in loop()\
 
   Return value;
-    int                   -1 if not valid push button, ADC value if valid
+    int                   When button interrupts not in use:
+                            -1 if not valid push button, ADC value if valid
+                          When button interrupts in use:
+                            -1 if no button pressed, otherwise the index of the pressed button
 *****/
 int ReadSelectedPushButton() {
   minPinRead = 0;
   int buttonReadOld = 1023;
+
+  if (buttonInterruptsEnabled) {
+    noInterrupts();
+    buttonReadOld = buttonPressed;
+    interrupts();
+
+    return buttonReadOld; 
+  }
 
   while (abs(minPinRead - buttonReadOld) > 3) {  // do averaging to smooth out the button response
     minPinRead = analogRead(BUSY_ANALOG_PIN);
