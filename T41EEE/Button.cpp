@@ -50,9 +50,9 @@ void ButtonISR() {
   buttonFilterRegister = buttonFilterRegister - (buttonFilterRegister >> BUTTON_FILTER_SHIFT) + analogRead(BUSY_ANALOG_PIN);
 
   /*
-  Button ADC output is pinned at 1023 (no button pressed) until the slew rate drops below
-  BUTTON_PRESS_SLEWRATE.  This prevents us from returning ADC values while the voltage is dropping,
-  which can be interpreted as false presses of higher-voltage buttons.
+  Button ADC values are only output when the slew rate is at or below BUTTON_PRESS_SLEWRATE.  This
+  prevents us from returning ADC values while the voltage is dropping, which can be interpreted as
+  false presses of higher-voltage buttons.
 
   The default BUTTON_PRESS_SLEWRATE and BUTTON_FILTER_SAMPLERATE correlate to a roughly 3 ADC count
   per interrupt, which is similar to the 3 ADC count averaging threshold implemented in the
