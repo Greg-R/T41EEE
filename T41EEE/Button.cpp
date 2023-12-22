@@ -67,8 +67,6 @@ void ButtonISR() {
 
   if (abs(lastFilteredButtonAdc - filteredButtonAdc) * BUTTON_FILTER_SAMPLERATE < BUTTON_PRESS_SLEWRATE) {
     buttonADCOut = filteredButtonAdc;
-  } else {
-    buttonADCOut = 1023;
   }
 
   lastFilteredButtonAdc = filteredButtonAdc;
@@ -146,6 +144,14 @@ int ReadSelectedPushButton() {
   if (buttonInterruptsEnabled) {
     noInterrupts();
     buttonRead = buttonADCOut;
+
+    /*
+    Clear the button read.  If the button remains pressed, the ISR will reset the value nearly
+    instantly.  Clearing the value here rather than in the ISR provides more consistent button
+    press "feel" when calls to ReadSelectedPushButton have variable timing.
+    */
+
+    buttonADCOut = 1023;
     interrupts();
   } else {
     while (abs(minPinRead - buttonReadOld) > 3) {  // do averaging to smooth out the button response
