@@ -5,10 +5,13 @@
 
 IntervalTimer buttonInterrupts;
 
+#define BUTTON_FILTER_SAMPLERATE  100  // in microseconds
+#define BUTTON_FILTER_SHIFT       2     // Parameter K
+
 bool buttonInterruptsEnabled = false;
-volatile int buttonPressed = -1;
-volatile int buttonRepeatDelay = 0;
-volatile int lastButtonIndex = -1;
+volatile int filteredButtonAdc;
+unsigned long buttonFilterRegister;
+elapsedMillis buttonRepeatDelay;
 
 /*****
   Purpose: ISR to read button ADC and detect button presses
@@ -20,41 +23,8 @@ volatile int lastButtonIndex = -1;
 *****/
 
 void ButtonISR() {
-  int adcValue, buttonIndex;
-  int minADCValue, maxADCValue, prevButtonADCValue, nextButtonADCValue;
-
-  if (buttonRepeatDelay) {
-    buttonRepeatDelay--;
-  }
-
-  adcValue = analogRead(BUSY_ANALOG_PIN);
-  for (prevButtonADCValue = 1023, buttonIndex = 0; buttonIndex < NUMBER_OF_SWITCHES; buttonIndex++) {
-    if (buttonIndex == NUMBER_OF_SWITCHES - 1) {
-      nextButtonADCValue = 0;
-    } else {
-      nextButtonADCValue = EEPROMData.switchValues[buttonIndex + 1];
-    }
-
-    maxADCValue = prevButtonADCValue - ((prevButtonADCValue - EEPROMData.switchValues[buttonIndex]) / 2);
-    minADCValue = nextButtonADCValue + ((EEPROMData.switchValues[buttonIndex] - nextButtonADCValue) / 2);
-
-    if (adcValue > minADCValue && adcValue < maxADCValue) {
-      break;
-    }
-  }
-
-  if (buttonIndex == NUMBER_OF_SWITCHES) {
-    buttonIndex = -1;
-  }
-
-  // A button is considered pressed if we remain in its ADC range
-  // for 2 consecutive interrupts
-  if (buttonIndex == lastButtonIndex) {
-    buttonPressed = buttonIndex;
-  } else {
-    lastButtonIndex = buttonIndex;
-    buttonPressed = -1;
-  }
+  buttonFilterRegister = buttonFilterRegister - (buttonFilterRegister >> BUTTON_FILTER_SHIFT) + analogRead(BUSY_ANALOG_PIN);
+  filteredButtonAdc = (int) (buttonFilterRegister >> BUTTON_FILTER_SHIFT);
 }
 
 /*****
@@ -68,7 +38,9 @@ void ButtonISR() {
 *****/
 
 void EnableButtonInterrupts() {
-  buttonInterrupts.begin(ButtonISR, 5000);
+  filteredButtonAdc = 1023;
+  buttonFilterRegister = 1023;
+  buttonInterrupts.begin(ButtonISR, BUTTON_FILTER_SAMPLERATE);
   buttonInterruptsEnabled = true;
 }
 
@@ -76,12 +48,7 @@ void EnableButtonInterrupts() {
   Purpose: Determine which UI button was pressed
 
   Parameter list:
-    int valPin            Return value from ReadSelectedPushButton, which is either:
-                          When interrupt-driven buttons disabled: 
-                            the ADC value from analogRead()
-                          When interrupt-driven-buttons enabled:
-                            the index of the selected push button, in which case this
-                            function is essentially a noop.
+    int valPin            the ADC value from analogRead()
 
   Return value;
     int                   -1 if not valid push button, index of push button if valid
@@ -89,23 +56,29 @@ void EnableButtonInterrupts() {
 int ProcessButtonPress(int valPin) {
   int switchIndex;
 
-  if (buttonInterruptsEnabled) {
-    return valPin;
-  }
+  // buttonRepeatDelay allows us to apply a delay between button presses
+  // without blocking
+  if (buttonRepeatDelay < 100) {
+    return -1;
+  } else 
 
   if (valPin == BOGUS_PIN_READ) {  // Not valid press
     return -1;
   }
+
   if (valPin == MENU_OPTION_SELECT && menuStatus == NO_MENUS_ACTIVE) {
     NoActiveMenu();
     return -1;
   }
+
   for (switchIndex = 0; switchIndex < NUMBER_OF_SWITCHES; switchIndex++) {
     if (abs(valPin - EEPROMData.switchValues[switchIndex]) < WIGGLE_ROOM)  // ...because ADC does return exact values every time
     {
+      buttonRepeatDelay = 0;
       return switchIndex;
     }
   }
+
   return -1;  // Really should never do this
 }
 
@@ -113,13 +86,10 @@ int ProcessButtonPress(int valPin) {
   Purpose: Check for UI button press. If pressed, return the ADC value
 
   Parameter list:
-    int vsl               the value from analogRead in loop()\
+    none
 
   Return value;
-    int                   When button interrupts not in use:
-                            -1 if not valid push button, ADC value if valid
-                          When button interrupts in use:
-                            -1 if no button pressed, otherwise the index of the pressed button
+    int                   -1 if not valid push button, ADC value if valid
 *****/
 int ReadSelectedPushButton() {
   minPinRead = 0;
@@ -127,32 +97,21 @@ int ReadSelectedPushButton() {
 
   if (buttonInterruptsEnabled) {
     noInterrupts();
-    if (buttonRepeatDelay) {
-      buttonReadOld = -1;
-    } else {
-      buttonReadOld = buttonPressed;
-      if (buttonReadOld != -1) {
-        // Apply 100ms repeat delay, same as the delay for the non-interrupt code path,
-        // but non-blocking as it is handled in the ISR.
-        buttonRepeatDelay = 20;
-      }
-    }
+    buttonRead = filteredButtonAdc;
     interrupts();
+  } else {
+    while (abs(minPinRead - buttonReadOld) > 3) {  // do averaging to smooth out the button response
+      minPinRead = analogRead(BUSY_ANALOG_PIN);
 
-    return buttonReadOld; 
+      buttonRead    = .1 * minPinRead + (1 - .1) * buttonReadOld;  // See expected values in next function.
+      buttonReadOld = buttonRead;
+    }
   }
 
-  while (abs(minPinRead - buttonReadOld) > 3) {  // do averaging to smooth out the button response
-    minPinRead = analogRead(BUSY_ANALOG_PIN);
-
-    buttonRead    = .1 * minPinRead + (1 - .1) * buttonReadOld;  // See expected values in next function.
-    buttonReadOld = buttonRead;
-  }
   if (buttonRead > EEPROMData.switchValues[0] + WIGGLE_ROOM) {  //AFP 10-29-22 per Jack Wilson
     return -1;
   }
   minPinRead = buttonRead;
-  MyDelay(100L);
   return minPinRead;
 }
 
