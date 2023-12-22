@@ -57,10 +57,10 @@ int ProcessButtonPress(int valPin) {
   int switchIndex;
 
   // buttonRepeatDelay allows us to apply a delay between button presses
-  // without blocking
+  // without blocking.
   if (buttonRepeatDelay < 100) {
     return -1;
-  } else 
+  }
 
   if (valPin == BOGUS_PIN_READ) {  // Not valid press
     return -1;
