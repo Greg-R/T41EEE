@@ -28,7 +28,7 @@ Thus, the values below create a filter with 5000 * 0.0217 = 108.5 Hz bandwidth
 #define BUTTON_FILTER_SAMPLERATE  5000  // Hz
 #define BUTTON_FILTER_SHIFT       3     // Filter parameter k
 #define BUTTON_PRESS_SLEWRATE     15000 // ADC counts per second
-#define BUTTON_REPEAT_DELAY       100   // ms
+#define BUTTON_REPEAT_DELAY       150   // ms
 
 IntervalTimer buttonInterrupts;
 bool buttonInterruptsEnabled = false;
