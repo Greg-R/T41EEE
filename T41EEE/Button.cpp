@@ -104,7 +104,7 @@ void EnableButtonInterrupts() {
 int ProcessButtonPress(int valPin) {
   int switchIndex;
 
-  // Don't return more than one button press per 100MS (repeat delay)
+  // Don't return more than one button press per 100ms (repeat delay)
   if (buttonRepeatDelay < 100) {
     return -1;
   }
