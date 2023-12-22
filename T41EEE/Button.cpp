@@ -3,12 +3,33 @@
 #include "SDT.h"
 #endif
 
-IntervalTimer buttonInterrupts;
+/*
+The button interrupt routine implements a first-order recursive filter, or "leaky integrator,"
+as described at:
+
+  https://www.edn.com/a-simple-software-lowpass-filter-suits-embedded-system-applications/
+
+Filter bandwidth is dependent on the sample rate and the "k" parameter, as follows:
+
+                                1 Hz
+                          k   Bandwidth   Rise time (samples)
+                          1   0.1197      3
+                          2   0.0466      8
+                          3   0.0217      16
+                          4   0.0104      34
+                          5   0.0051      69
+                          6   0.0026      140
+                          7   0.0012      280
+                          8   0.0007      561
+
+Thus, the values below create a filter with 5000 * 0.0217 = 108.5 Hz bandwidth
+*/
 
 #define BUTTON_FILTER_SAMPLERATE  5000  // Hz
 #define BUTTON_FILTER_SHIFT       3     // Filter parameter k
 #define BUTTON_PRESS_SLEWRATE     15000 // ADC counts per second
 
+IntervalTimer buttonInterrupts;
 bool buttonInterruptsEnabled = false;
 int filteredButtonAdc, lastFilteredButtonAdc;
 unsigned long buttonFilterRegister;
@@ -30,6 +51,18 @@ void ButtonISR() {
   currentADC = analogRead(BUSY_ANALOG_PIN);
   buttonFilterRegister = buttonFilterRegister - (buttonFilterRegister >> BUTTON_FILTER_SHIFT) + currentADC;
   filteredButtonAdc = (int) (buttonFilterRegister >> BUTTON_FILTER_SHIFT);
+
+  /*
+  Button ADC output is pinned at 1023 (no button pressed) until the slew rate drops below
+  BUTTON_PRESS_SLEWRATE.  This prevents us from returning ADC values while the voltage is dropping,
+  which can be interpreted as false presses of higher-voltage buttons.
+
+  The default BUTTON_PRESS_SLEWRATE and BUTTON_FILTER_SAMPLERATE correlate to a roughly 3 ADC count
+  per interrupt, which is similar to the 3 ADC count averaging threshold implemented in the
+  non-interrupt button polling routine.
+
+  Note: Slew rate is calculated from the average ADC values.
+  */
 
   if (abs(lastFilteredButtonAdc - filteredButtonAdc) * BUTTON_FILTER_SAMPLERATE < BUTTON_PRESS_SLEWRATE) {
     buttonADCOut = filteredButtonAdc;
@@ -71,8 +104,7 @@ void EnableButtonInterrupts() {
 int ProcessButtonPress(int valPin) {
   int switchIndex;
 
-  // buttonRepeatDelay allows us to apply a delay between button presses
-  // without blocking.
+  // Don't return more than one button press per 100MS (repeat delay)
   if (buttonRepeatDelay < 100) {
     return -1;
   }
