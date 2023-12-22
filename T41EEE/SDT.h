@@ -1142,19 +1142,6 @@ extern AudioConvert_F32toI16     float2Int1, float2Int2;    //Converts Float to 
 
 extern void SetAudioOperatingState(int operatingState);
 
-extern Bounce decreaseBand;
-extern Bounce increaseBand;
-extern Bounce modeSwitch;
-extern Bounce decreaseMenu;
-extern Bounce frequencyIncrement;
-extern Bounce filterSwitch;
-extern Bounce increaseMenu;
-extern Bounce selectExitMenues;
-extern Bounce changeNR;
-extern Bounce demodSwitch;
-extern Bounce zoomSwitch;
-extern Bounce cursorSwitch;
-
 extern Rotary volumeEncoder;        // (2,  3)
 extern Rotary tuneEncoder;          // (16, 17)
 extern Rotary filterEncoder;        // (14, 15)
@@ -2146,6 +2133,7 @@ int  NROptions();
 
 float PlotCalSpectrum(int x1, int cal_bins[2], int capture_bins);
 void printFile(const char *filename);
+void EnableButtonInterrupts();
 int  ProcessButtonPress(int valPin);
 void ProcessEqualizerChoices(int EQType, char *title);
 void ProcessIQData();

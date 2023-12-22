@@ -3,6 +3,91 @@
 #include "SDT.h"
 #endif
 
+/*
+The button interrupt routine implements a first-order recursive filter, or "leaky integrator,"
+as described at:
+
+  https://www.edn.com/a-simple-software-lowpass-filter-suits-embedded-system-applications/
+
+Filter bandwidth is dependent on the sample rate and the "k" parameter, as follows:
+
+                                1 Hz
+                          k   Bandwidth   Rise time (samples)
+                          1   0.1197      3
+                          2   0.0466      8
+                          3   0.0217      16
+                          4   0.0104      34
+                          5   0.0051      69
+                          6   0.0026      140
+                          7   0.0012      280
+                          8   0.0007      561
+
+Thus, the values below create a filter with 5000 * 0.0217 = 108.5 Hz bandwidth
+*/
+
+#define BUTTON_FILTER_SAMPLERATE  5000  // Hz
+#define BUTTON_FILTER_SHIFT       3     // Filter parameter k
+#define BUTTON_PRESS_SLEWRATE     15000 // ADC counts per second
+#define BUTTON_REPEAT_DELAY       150   // ms
+
+IntervalTimer buttonInterrupts;
+bool buttonInterruptsEnabled = false;
+int filteredButtonAdc, lastFilteredButtonAdc;
+unsigned long buttonFilterRegister, lastButtonFilterRegister;
+volatile int buttonADCOut;
+elapsedMillis buttonRepeatDelay;
+
+/*****
+  Purpose: ISR to read button ADC and detect button presses
+
+  Parameter list:
+    none
+  Return value;
+    void
+*****/
+
+void ButtonISR() {
+  buttonFilterRegister = buttonFilterRegister - (buttonFilterRegister >> BUTTON_FILTER_SHIFT) + analogRead(BUSY_ANALOG_PIN);
+
+  /*
+  Button ADC values are only output when the slew rate is at or below BUTTON_PRESS_SLEWRATE.  This
+  prevents us from returning ADC values while the voltage is dropping, which can be interpreted as
+  false presses of higher-voltage buttons.
+
+  The default BUTTON_PRESS_SLEWRATE and BUTTON_FILTER_SAMPLERATE correlate to a roughly 3 ADC count
+  per interrupt, which is similar to the 3 ADC count averaging threshold implemented in the
+  non-interrupt button polling routine.
+
+  Note: Slew rate is calculated from the average ADC values.
+  */
+
+  if (((unsigned long) abs(lastButtonFilterRegister - buttonFilterRegister) * BUTTON_FILTER_SAMPLERATE) >> BUTTON_FILTER_SHIFT <= BUTTON_PRESS_SLEWRATE) {
+    buttonADCOut = (int) buttonFilterRegister >> BUTTON_FILTER_SHIFT;
+  }
+
+  lastButtonFilterRegister = buttonFilterRegister;
+}
+
+/*****
+  Purpose: Starts button IntervalTimer and toggles subsequent button
+           functions into interrupt mode.
+
+  Parameter list:
+    none
+  Return value;
+    void
+*****/
+
+void EnableButtonInterrupts() {
+  filteredButtonAdc = 1023;
+  lastFilteredButtonAdc = 1023;
+  buttonFilterRegister = 1023;
+  lastButtonFilterRegister = 1023;
+  buttonADCOut = 1023;
+  buttonInterrupts.begin(ButtonISR, 1000000 / BUTTON_FILTER_SAMPLERATE);
+  buttonInterruptsEnabled = true;
+}
+
 /*****
   Purpose: Determine which UI button was pressed
 
@@ -15,19 +100,28 @@
 int ProcessButtonPress(int valPin) {
   int switchIndex;
 
+  // Don't return more than one button press per 100ms (repeat delay)
+  if (buttonRepeatDelay < BUTTON_REPEAT_DELAY) {
+    return -1;
+  }
+
   if (valPin == BOGUS_PIN_READ) {  // Not valid press
     return -1;
   }
+
   if (valPin == MENU_OPTION_SELECT && menuStatus == NO_MENUS_ACTIVE) {
     NoActiveMenu();
     return -1;
   }
+
   for (switchIndex = 0; switchIndex < NUMBER_OF_SWITCHES; switchIndex++) {
     if (abs(valPin - EEPROMData.switchValues[switchIndex]) < WIGGLE_ROOM)  // ...because ADC does return exact values every time
     {
+      buttonRepeatDelay = 0;
       return switchIndex;
     }
   }
+
   return -1;  // Really should never do this
 }
 
@@ -35,7 +129,7 @@ int ProcessButtonPress(int valPin) {
   Purpose: Check for UI button press. If pressed, return the ADC value
 
   Parameter list:
-    int vsl               the value from analogRead in loop()\
+    none
 
   Return value;
     int                   -1 if not valid push button, ADC value if valid
@@ -44,17 +138,31 @@ int ReadSelectedPushButton() {
   minPinRead = 0;
   int buttonReadOld = 1023;
 
-  while (abs(minPinRead - buttonReadOld) > 3) {  // do averaging to smooth out the button response
-    minPinRead = analogRead(BUSY_ANALOG_PIN);
+  if (buttonInterruptsEnabled) {
+    noInterrupts();
+    buttonRead = buttonADCOut;
 
-    buttonRead    = .1 * minPinRead + (1 - .1) * buttonReadOld;  // See expected values in next function.
-    buttonReadOld = buttonRead;
+    /*
+    Clear the button read.  If the button remains pressed, the ISR will reset the value nearly
+    instantly.  Clearing the value here rather than in the ISR provides more consistent button
+    press "feel" when calls to ReadSelectedPushButton have variable timing.
+    */
+
+    buttonADCOut = 1023;
+    interrupts();
+  } else {
+    while (abs(minPinRead - buttonReadOld) > 3) {  // do averaging to smooth out the button response
+      minPinRead = analogRead(BUSY_ANALOG_PIN);
+
+      buttonRead    = .1 * minPinRead + (1 - .1) * buttonReadOld;  // See expected values in next function.
+      buttonReadOld = buttonRead;
+    }
   }
+
   if (buttonRead > EEPROMData.switchValues[0] + WIGGLE_ROOM) {  //AFP 10-29-22 per Jack Wilson
     return -1;
   }
   minPinRead = buttonRead;
-  MyDelay(100L);
   return minPinRead;
 }
 

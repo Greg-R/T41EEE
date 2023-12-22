@@ -707,9 +707,9 @@ void ButtonFrequencyEntry() {
   }
 
   while (doneFE == false) {
-    valPin = ReadSelectedPushButton();                     // Poll UI push buttons
-    if (valPin != BOGUS_PIN_READ) {                        // If a button was pushed...
-      pushButtonSwitchIndex = ProcessButtonPress(valPin);  // Winner, winner...chicken dinner!
+    valPin = ReadSelectedPushButton();
+    pushButtonSwitchIndex = ProcessButtonPress(valPin);
+    if (pushButtonSwitchIndex != -1) {
       key = numKeys[pushButtonSwitchIndex];
       switch (key) {
         case 0x7F:  // erase last digit =127
