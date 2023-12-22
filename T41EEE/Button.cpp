@@ -5,12 +5,14 @@
 
 IntervalTimer buttonInterrupts;
 
-#define BUTTON_FILTER_SAMPLERATE  10000  // in Hz
-#define BUTTON_FILTER_SHIFT       2      // Parameter K
+#define BUTTON_FILTER_SAMPLERATE  5000  // Hz
+#define BUTTON_FILTER_SHIFT       3     // Filter parameter k
+#define BUTTON_PRESS_SLEWRATE     15000 // ADC counts per second
 
 bool buttonInterruptsEnabled = false;
-volatile int filteredButtonAdc;
+int filteredButtonAdc, lastFilteredButtonAdc;
 unsigned long buttonFilterRegister;
+volatile int buttonADCOut;
 elapsedMillis buttonRepeatDelay;
 
 /*****
@@ -23,8 +25,19 @@ elapsedMillis buttonRepeatDelay;
 *****/
 
 void ButtonISR() {
-  buttonFilterRegister = buttonFilterRegister - (buttonFilterRegister >> BUTTON_FILTER_SHIFT) + analogRead(BUSY_ANALOG_PIN);
+  int currentADC;
+
+  currentADC = analogRead(BUSY_ANALOG_PIN);
+  buttonFilterRegister = buttonFilterRegister - (buttonFilterRegister >> BUTTON_FILTER_SHIFT) + currentADC;
   filteredButtonAdc = (int) (buttonFilterRegister >> BUTTON_FILTER_SHIFT);
+
+  if (abs(lastFilteredButtonAdc - filteredButtonAdc) * BUTTON_FILTER_SAMPLERATE < BUTTON_PRESS_SLEWRATE) {
+    buttonADCOut = filteredButtonAdc;
+  } else {
+    buttonADCOut = 1023;
+  }
+
+  lastFilteredButtonAdc = filteredButtonAdc;
 }
 
 /*****
@@ -39,7 +52,9 @@ void ButtonISR() {
 
 void EnableButtonInterrupts() {
   filteredButtonAdc = 1023;
+  lastFilteredButtonAdc = 1023;
   buttonFilterRegister = 1023;
+  buttonADCOut = 1023;
   buttonInterrupts.begin(ButtonISR, 1000000 / BUTTON_FILTER_SAMPLERATE);
   buttonInterruptsEnabled = true;
 }
@@ -97,7 +112,7 @@ int ReadSelectedPushButton() {
 
   if (buttonInterruptsEnabled) {
     noInterrupts();
-    buttonRead = filteredButtonAdc;
+    buttonRead = buttonADCOut;
     interrupts();
   } else {
     while (abs(minPinRead - buttonReadOld) > 3) {  // do averaging to smooth out the button response
