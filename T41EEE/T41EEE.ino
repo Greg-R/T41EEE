@@ -2056,6 +2056,24 @@ void setup() {
 
   // =============== EEPROM section =================
   EEPROMStartup();
+
+
+  // Push and hold a button at power up to activate switch matrix calibration.
+  // Uncomment this code block to enable this feature.  Len KD0RC
+  /* Remove this line and the matching block comment line below to activate.
+  minPinRead = analogRead(BUSY_ANALOG_PIN);
+  if (minPinRead < NOTHING_TO_SEE_HERE) {
+    tft.fillWindow(RA8875_BLACK);
+    tft.setFontScale(1);
+    tft.setTextColor(RA8875_GREEN);
+    tft.setCursor(10, 10);
+    tft.print("Release button to start calibration.");
+    MyDelay(2000);
+    SaveAnalogSwitchValues();
+    EEPROMRead();  // Call to reset switch matrix values
+  }                // KD0RC end
+  Remove this line and the matching block comment line above to activate. */
+
   EnableButtonInterrupts();
 
   spectrum_x = 10;
