@@ -239,21 +239,6 @@ AudioConnection patchCord24(Q_out_R_Ex, 0, modeSelectOutR, 1);
 AudioControlSGTL5000 sgtl5000_2;
 // ===========================  AFP 08-22-22 end
 
-Bounce decreaseBand = Bounce(BAND_MENUS, 50);
-Bounce increaseBand = Bounce(BAND_PLUS, 50);
-Bounce modeSwitch = Bounce(CHANGE_MODE, 50);
-Bounce decreaseMenu = Bounce(MENU_MINUS, 50);
-Bounce frequencyIncrement = Bounce(CHANGE_INCREMENT, 50);
-Bounce filterSwitch = Bounce(CHANGE_FILTER, 50);
-Bounce increaseMenu = Bounce(MENU_PLUS, 50);
-Bounce selectExitMenues = Bounce(CHANGE_MENU2, 50);
-Bounce changeNR = Bounce(CHANGE_NOISE, 50);
-Bounce demodSwitch = Bounce(CHANGE_DEMOD, 50);
-Bounce zoomSwitch = Bounce(CHANGE_ZOOM, 50);
-Bounce cursorSwitch = Bounce(SET_FREQ_CURSOR, 50);
-Bounce KeyPin2 = Bounce(KEYER_DAH_INPUT_RING, 5);
-Bounce KeyPin1 = Bounce(KEYER_DIT_INPUT_TIP, 5);
-
 Rotary volumeEncoder = Rotary(VOLUME_ENCODER_A, VOLUME_ENCODER_B);        //( 2,  3)
 Rotary tuneEncoder = Rotary(TUNE_ENCODER_A, TUNE_ENCODER_B);              //(16, 17)
 Rotary filterEncoder = Rotary(FILTER_ENCODER_A, FILTER_ENCODER_B);        //(15, 14)
