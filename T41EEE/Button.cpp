@@ -28,6 +28,7 @@ Thus, the values below create a filter with 5000 * 0.0217 = 108.5 Hz bandwidth
 #define BUTTON_FILTER_SAMPLERATE  5000  // Hz
 #define BUTTON_FILTER_SHIFT       3     // Filter parameter k
 #define BUTTON_PRESS_SLEWRATE     15000 // ADC counts per second
+#define BUTTON_REPEAT_DELAY       100   // ms
 
 IntervalTimer buttonInterrupts;
 bool buttonInterruptsEnabled = false;
@@ -105,7 +106,7 @@ int ProcessButtonPress(int valPin) {
   int switchIndex;
 
   // Don't return more than one button press per 100ms (repeat delay)
-  if (buttonRepeatDelay < 100) {
+  if (buttonRepeatDelay < BUTTON_REPEAT_DELAY) {
     return -1;
   }
 
