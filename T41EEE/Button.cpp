@@ -7,7 +7,8 @@ IntervalTimer buttonInterrupts;
 
 bool buttonInterruptsEnabled = false;
 volatile int buttonPressed = -1;
-int lastButtonIndex = -1;
+volatile int buttonRepeatDelay = 0;
+volatile int lastButtonIndex = -1;
 
 /*****
   Purpose: ISR to read button ADC and detect button presses
@@ -22,6 +23,10 @@ void ButtonISR() {
   int adcValue, buttonIndex;
   int minADCValue, maxADCValue, prevButtonADCValue, nextButtonADCValue;
 
+  if (buttonRepeatDelay) {
+    buttonRepeatDelay--;
+  }
+
   adcValue = analogRead(BUSY_ANALOG_PIN);
   for (prevButtonADCValue = 1023, buttonIndex = 0; buttonIndex < NUMBER_OF_SWITCHES; buttonIndex++) {
     if (buttonIndex == NUMBER_OF_SWITCHES - 1) {
@@ -33,7 +38,7 @@ void ButtonISR() {
     maxADCValue = prevButtonADCValue - ((prevButtonADCValue - EEPROMData.switchValues[buttonIndex]) / 2);
     minADCValue = nextButtonADCValue + ((EEPROMData.switchValues[buttonIndex] - nextButtonADCValue) / 2);
 
-    if (adcValue >= minADCValue && adcValue <= maxADCValue) {
+    if (adcValue > minADCValue && adcValue < maxADCValue) {
       break;
     }
   }
@@ -122,7 +127,16 @@ int ReadSelectedPushButton() {
 
   if (buttonInterruptsEnabled) {
     noInterrupts();
-    buttonReadOld = buttonPressed;
+    if (buttonRepeatDelay) {
+      buttonReadOld = -1;
+    } else {
+      buttonReadOld = buttonPressed;
+      if (buttonReadOld != -1) {
+        // Apply 100ms repeat delay, same as the delay for the non-interrupt code path,
+        // but non-blocking as it is handled in the ISR.
+        buttonRepeatDelay = 20;
+      }
+    }
     interrupts();
 
     return buttonReadOld; 
