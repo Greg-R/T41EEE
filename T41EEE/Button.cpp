@@ -33,7 +33,7 @@ Thus, the values below create a filter with 5000 * 0.0217 = 108.5 Hz bandwidth
 IntervalTimer buttonInterrupts;
 bool buttonInterruptsEnabled = false;
 int filteredButtonAdc, lastFilteredButtonAdc;
-unsigned long buttonFilterRegister;
+unsigned long buttonFilterRegister, lastButtonFilterRegister;
 volatile int buttonADCOut;
 elapsedMillis buttonRepeatDelay;
 
@@ -47,11 +47,7 @@ elapsedMillis buttonRepeatDelay;
 *****/
 
 void ButtonISR() {
-  int currentADC;
-
-  currentADC = analogRead(BUSY_ANALOG_PIN);
-  buttonFilterRegister = buttonFilterRegister - (buttonFilterRegister >> BUTTON_FILTER_SHIFT) + currentADC;
-  filteredButtonAdc = (int) (buttonFilterRegister >> BUTTON_FILTER_SHIFT);
+  buttonFilterRegister = buttonFilterRegister - (buttonFilterRegister >> BUTTON_FILTER_SHIFT) + analogRead(BUSY_ANALOG_PIN);
 
   /*
   Button ADC output is pinned at 1023 (no button pressed) until the slew rate drops below
@@ -65,11 +61,11 @@ void ButtonISR() {
   Note: Slew rate is calculated from the average ADC values.
   */
 
-  if (abs(lastFilteredButtonAdc - filteredButtonAdc) * BUTTON_FILTER_SAMPLERATE < BUTTON_PRESS_SLEWRATE) {
-    buttonADCOut = filteredButtonAdc;
+  if (((unsigned long) abs(lastButtonFilterRegister - buttonFilterRegister) * BUTTON_FILTER_SAMPLERATE) >> BUTTON_FILTER_SHIFT <= BUTTON_PRESS_SLEWRATE) {
+    buttonADCOut = (int) buttonFilterRegister >> BUTTON_FILTER_SHIFT;
   }
 
-  lastFilteredButtonAdc = filteredButtonAdc;
+  lastButtonFilterRegister = buttonFilterRegister;
 }
 
 /*****
@@ -86,6 +82,7 @@ void EnableButtonInterrupts() {
   filteredButtonAdc = 1023;
   lastFilteredButtonAdc = 1023;
   buttonFilterRegister = 1023;
+  lastButtonFilterRegister = 1023;
   buttonADCOut = 1023;
   buttonInterrupts.begin(ButtonISR, 1000000 / BUTTON_FILTER_SAMPLERATE);
   buttonInterruptsEnabled = true;
