@@ -5,8 +5,8 @@
 
 IntervalTimer buttonInterrupts;
 
-#define BUTTON_FILTER_SAMPLERATE  100  // in microseconds
-#define BUTTON_FILTER_SHIFT       2     // Parameter K
+#define BUTTON_FILTER_SAMPLERATE  10000  // in Hz
+#define BUTTON_FILTER_SHIFT       2      // Parameter K
 
 bool buttonInterruptsEnabled = false;
 volatile int filteredButtonAdc;
@@ -40,7 +40,7 @@ void ButtonISR() {
 void EnableButtonInterrupts() {
   filteredButtonAdc = 1023;
   buttonFilterRegister = 1023;
-  buttonInterrupts.begin(ButtonISR, BUTTON_FILTER_SAMPLERATE);
+  buttonInterrupts.begin(ButtonISR, 1000000 / BUTTON_FILTER_SAMPLERATE);
   buttonInterruptsEnabled = true;
 }
 
