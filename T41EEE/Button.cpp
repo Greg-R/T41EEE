@@ -82,7 +82,6 @@ void ButtonISR() {
       break;
     case BUTTON_STATE_PRESSED:
       if (filteredADCValue >= BUTTON_THRESHOLD_RELEASED) {
-        buttonADCOut = BUTTON_OUTPUT_UP;
         buttonState = BUTTON_STATE_UP;
       } else {
         buttonADCOut = buttonADCPressed;
@@ -172,7 +171,7 @@ int ReadSelectedPushButton() {
     press "feel" when calls to ReadSelectedPushButton have variable timing.
     */
 
-    buttonADCOut = 1023;
+    buttonADCOut = BUTTON_OUTPUT_UP;
     interrupts();
   } else {
     while (abs(minPinRead - buttonReadOld) > 3) {  // do averaging to smooth out the button response
