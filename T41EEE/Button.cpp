@@ -22,18 +22,29 @@ Filter bandwidth is dependent on the sample rate and the "k" parameter, as follo
                           7   0.0012      280
                           8   0.0007      561
 
-Thus, the values below create a filter with 5000 * 0.0217 = 108.5 Hz bandwidth
+Thus, the default values below create a filter with 10000 * 0.0217 = 217 Hz bandwidth
 */
 
-#define BUTTON_FILTER_SAMPLERATE  5000  // Hz
+#define BUTTON_FILTER_SAMPLERATE  10000 // Hz
 #define BUTTON_FILTER_SHIFT       3     // Filter parameter k
-#define BUTTON_PRESS_SLEWRATE     15000 // ADC counts per second
 #define BUTTON_REPEAT_DELAY       150   // ms
+
+#define BUTTON_STATE_UP           0
+#define BUTTON_STATE_DEBOUNCE     1
+#define BUTTON_STATE_PRESSED      2
+
+#define BUTTON_THRESHOLD_PRESSED  980   // Absolute ADC value
+#define BUTTON_THRESHOLD_RELEASED 1010  // Absolute ADC value
+#define BUTTON_DEBOUNCE_DELAY     5000  // In uSec
+
+#define BUTTON_ELAPSED_PER_ISR    (1000000 / BUTTON_FILTER_SAMPLERATE)
+
+#define BUTTON_OUTPUT_UP          1023  // Value to be output when in the UP state
 
 IntervalTimer buttonInterrupts;
 bool buttonInterruptsEnabled = false;
-int filteredButtonAdc, lastFilteredButtonAdc;
-unsigned long buttonFilterRegister, lastButtonFilterRegister;
+unsigned long buttonFilterRegister;
+int buttonState, buttonADCPressed, buttonDebounceElapsed;
 volatile int buttonADCOut;
 elapsedMillis buttonRepeatDelay;
 
@@ -47,25 +58,38 @@ elapsedMillis buttonRepeatDelay;
 *****/
 
 void ButtonISR() {
+  int filteredADCValue;
+
   buttonFilterRegister = buttonFilterRegister - (buttonFilterRegister >> BUTTON_FILTER_SHIFT) + analogRead(BUSY_ANALOG_PIN);
+  filteredADCValue = (int) buttonFilterRegister >> BUTTON_FILTER_SHIFT;
 
-  /*
-  Button ADC values are only output when the slew rate is at or below BUTTON_PRESS_SLEWRATE.  This
-  prevents us from returning ADC values while the voltage is dropping, which can be interpreted as
-  false presses of higher-voltage buttons.
+  switch (buttonState) {
+    case BUTTON_STATE_UP:
+      if (filteredADCValue <= BUTTON_THRESHOLD_PRESSED) {
+        buttonDebounceElapsed = 0;
+        buttonState = BUTTON_STATE_DEBOUNCE;
+      }
 
-  The default BUTTON_PRESS_SLEWRATE and BUTTON_FILTER_SAMPLERATE correlate to a roughly 3 ADC count
-  per interrupt, which is similar to the 3 ADC count averaging threshold implemented in the
-  non-interrupt button polling routine.
+      break;
+    case BUTTON_STATE_DEBOUNCE:
+      if (buttonDebounceElapsed < BUTTON_DEBOUNCE_DELAY) {
+        buttonDebounceElapsed += BUTTON_ELAPSED_PER_ISR;
+      } else {
+        buttonADCPressed = filteredADCValue;
+        buttonState = BUTTON_STATE_PRESSED;
+      }
 
-  Note: Slew rate is calculated from the average ADC values.
-  */
+      break;
+    case BUTTON_STATE_PRESSED:
+      if (filteredADCValue >= BUTTON_THRESHOLD_RELEASED) {
+        buttonADCOut = BUTTON_OUTPUT_UP;
+        buttonState = BUTTON_STATE_UP;
+      } else {
+        buttonADCOut = buttonADCPressed;
+      }
 
-  if (((unsigned long) abs(lastButtonFilterRegister - buttonFilterRegister) * BUTTON_FILTER_SAMPLERATE) >> BUTTON_FILTER_SHIFT <= BUTTON_PRESS_SLEWRATE) {
-    buttonADCOut = (int) buttonFilterRegister >> BUTTON_FILTER_SHIFT;
+      break;
   }
-
-  lastButtonFilterRegister = buttonFilterRegister;
 }
 
 /*****
@@ -79,11 +103,11 @@ void ButtonISR() {
 *****/
 
 void EnableButtonInterrupts() {
-  filteredButtonAdc = 1023;
-  lastFilteredButtonAdc = 1023;
-  buttonFilterRegister = 1023;
-  lastButtonFilterRegister = 1023;
-  buttonADCOut = 1023;
+  buttonADCOut = BUTTON_OUTPUT_UP;
+  buttonFilterRegister = buttonADCOut << BUTTON_FILTER_SHIFT;
+  buttonState = BUTTON_STATE_UP;
+  buttonADCPressed = BUTTON_STATE_UP;
+  buttonDebounceElapsed = 0;
   buttonInterrupts.begin(ButtonISR, 1000000 / BUTTON_FILTER_SAMPLERATE);
   buttonInterruptsEnabled = true;
 }
