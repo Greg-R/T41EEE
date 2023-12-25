@@ -27,15 +27,11 @@ Thus, the default values below create a filter with 10000 * 0.0217 = 217 Hz band
 
 #define BUTTON_FILTER_SAMPLERATE  10000 // Hz
 #define BUTTON_FILTER_SHIFT       3     // Filter parameter k
+#define BUTTON_DEBOUNCE_DELAY     5000  // uSec
 
 #define BUTTON_STATE_UP           0
 #define BUTTON_STATE_DEBOUNCE     1
 #define BUTTON_STATE_PRESSED      2
-
-#define BUTTON_THRESHOLD_PRESSED  970     // Absolute ADC value
-#define BUTTON_THRESHOLD_RELEASED 990     // Absolute ADC value
-#define BUTTON_DEBOUNCE_DELAY     5000    // uSec
-#define BUTTON_REPEAT_DELAY       200000  // uSec
 
 #define BUTTON_USEC_PER_ISR       (1000000 / BUTTON_FILTER_SAMPLERATE)
 
@@ -64,7 +60,7 @@ void ButtonISR() {
 
   switch (buttonState) {
     case BUTTON_STATE_UP:
-      if (filteredADCValue <= BUTTON_THRESHOLD_PRESSED) {
+      if (filteredADCValue <= EEPROMData.buttonThresholdPressed) {
         buttonElapsed = 0;
         buttonState = BUTTON_STATE_DEBOUNCE;
       }
@@ -81,13 +77,15 @@ void ButtonISR() {
 
       break;
     case BUTTON_STATE_PRESSED:
-      if (filteredADCValue >= BUTTON_THRESHOLD_RELEASED) {
+      if (filteredADCValue >= EEPROMData.buttonThresholdReleased) {
         buttonState = BUTTON_STATE_UP;
-      } else if (buttonElapsed < BUTTON_REPEAT_DELAY) {
-        buttonElapsed += BUTTON_USEC_PER_ISR;
-      } else {
-        buttonADCOut = buttonADCPressed;
-        buttonElapsed = 0;
+      } else if (EEPROMData.buttonRepeatDelay != 0) { // buttonRepeatDelay of 0 disables repeat
+        if (buttonElapsed < EEPROMData.buttonRepeatDelay) {
+          buttonElapsed += BUTTON_USEC_PER_ISR;
+        } else {
+          buttonADCOut = buttonADCPressed;
+          buttonElapsed = 0;
+        }
       }
 
       break;

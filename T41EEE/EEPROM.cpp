@@ -5,7 +5,7 @@
 //DB2OO, 29-AUG-23: Don't use the overall VERSION for the EEPROM structure version information, but use a combination of an EEPROM_VERSION with the size of the EEPROMData variable.
 // The "EEPROM_VERSION" should only be changed, if the structure config_t EEPROMData has changed!
 // For V049.1 the new version in EEPROM will be "V049_808", for V049.2 it will be "V049_812"
-#define EEPROM_VERSION  "T41EEE.0"
+#define EEPROM_VERSION  "T41EEE.1"
 static char version_size[10];
 
 /*****
@@ -373,6 +373,7 @@ void EEPROMStartup() {
   if (strcmp(EEPROMData.versionSettings, EEPROMSetVersion()) == 0) {  // Are the versions the same?
     return;                                                // Yep. Go home and don't mess with the EEPROM
   }
+
   strcpy(EEPROMData.versionSettings, EEPROMSetVersion());  // Nope, this is a new the version, so copy new version title to EEPROM
                                                 //                                                                     Check if calibration has not been done and/or switch values are wonky, okay to use defaults
                                                 //                                                                     If the Teensy is unused, these EEPROM values are 0xFF or perhaps cleared to 0.
