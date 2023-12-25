@@ -32,14 +32,14 @@ Thus, the default values below create a filter with 10000 * 0.0217 = 217 Hz band
 #define BUTTON_STATE_DEBOUNCE     1
 #define BUTTON_STATE_PRESSED      2
 
-#define BUTTON_THRESHOLD_PRESSED  980     // Absolute ADC value
-#define BUTTON_THRESHOLD_RELEASED 1010    // Absolute ADC value
+#define BUTTON_THRESHOLD_PRESSED  970     // Absolute ADC value
+#define BUTTON_THRESHOLD_RELEASED 990     // Absolute ADC value
 #define BUTTON_DEBOUNCE_DELAY     5000    // uSec
-#define BUTTON_REPEAT_DELAY       150000  // uSec
+#define BUTTON_REPEAT_DELAY       200000  // uSec
 
-#define BUTTON_USEC_PER_ISR    (1000000 / BUTTON_FILTER_SAMPLERATE)
+#define BUTTON_USEC_PER_ISR       (1000000 / BUTTON_FILTER_SAMPLERATE)
 
-#define BUTTON_OUTPUT_UP          1023  // Value to be output when in the UP state
+#define BUTTON_OUTPUT_UP          1023    // Value to be output when in the UP state
 
 IntervalTimer buttonInterrupts;
 bool buttonInterruptsEnabled = false;
@@ -60,7 +60,7 @@ void ButtonISR() {
   int filteredADCValue;
 
   buttonFilterRegister = buttonFilterRegister - (buttonFilterRegister >> BUTTON_FILTER_SHIFT) + analogRead(BUSY_ANALOG_PIN);
-  filteredADCValue = (int) buttonFilterRegister >> BUTTON_FILTER_SHIFT;
+  filteredADCValue = (int) (buttonFilterRegister >> BUTTON_FILTER_SHIFT);
 
   switch (buttonState) {
     case BUTTON_STATE_UP:
