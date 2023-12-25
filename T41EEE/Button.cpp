@@ -87,6 +87,7 @@ void ButtonISR() {
         buttonElapsed += BUTTON_USEC_PER_ISR;
       } else {
         buttonADCOut = buttonADCPressed;
+        buttonElapsed = 0;
       }
 
       break;
