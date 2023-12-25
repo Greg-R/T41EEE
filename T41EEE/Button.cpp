@@ -27,26 +27,25 @@ Thus, the default values below create a filter with 10000 * 0.0217 = 217 Hz band
 
 #define BUTTON_FILTER_SAMPLERATE  10000 // Hz
 #define BUTTON_FILTER_SHIFT       3     // Filter parameter k
-#define BUTTON_REPEAT_DELAY       150   // ms
 
 #define BUTTON_STATE_UP           0
 #define BUTTON_STATE_DEBOUNCE     1
 #define BUTTON_STATE_PRESSED      2
 
-#define BUTTON_THRESHOLD_PRESSED  980   // Absolute ADC value
-#define BUTTON_THRESHOLD_RELEASED 1010  // Absolute ADC value
-#define BUTTON_DEBOUNCE_DELAY     5000  // In uSec
+#define BUTTON_THRESHOLD_PRESSED  980     // Absolute ADC value
+#define BUTTON_THRESHOLD_RELEASED 1010    // Absolute ADC value
+#define BUTTON_DEBOUNCE_DELAY     5000    // uSec
+#define BUTTON_REPEAT_DELAY       150000  // uSec
 
-#define BUTTON_ELAPSED_PER_ISR    (1000000 / BUTTON_FILTER_SAMPLERATE)
+#define BUTTON_USEC_PER_ISR    (1000000 / BUTTON_FILTER_SAMPLERATE)
 
 #define BUTTON_OUTPUT_UP          1023  // Value to be output when in the UP state
 
 IntervalTimer buttonInterrupts;
 bool buttonInterruptsEnabled = false;
 unsigned long buttonFilterRegister;
-int buttonState, buttonADCPressed, buttonDebounceElapsed;
+int buttonState, buttonADCPressed, buttonElapsed;
 volatile int buttonADCOut;
-elapsedMillis buttonRepeatDelay;
 
 /*****
   Purpose: ISR to read button ADC and detect button presses
@@ -66,16 +65,17 @@ void ButtonISR() {
   switch (buttonState) {
     case BUTTON_STATE_UP:
       if (filteredADCValue <= BUTTON_THRESHOLD_PRESSED) {
-        buttonDebounceElapsed = 0;
+        buttonElapsed = 0;
         buttonState = BUTTON_STATE_DEBOUNCE;
       }
 
       break;
     case BUTTON_STATE_DEBOUNCE:
-      if (buttonDebounceElapsed < BUTTON_DEBOUNCE_DELAY) {
-        buttonDebounceElapsed += BUTTON_ELAPSED_PER_ISR;
+      if (buttonElapsed < BUTTON_DEBOUNCE_DELAY) {
+        buttonElapsed += BUTTON_USEC_PER_ISR;
       } else {
-        buttonADCPressed = filteredADCValue;
+        buttonADCOut = buttonADCPressed = filteredADCValue;
+        buttonElapsed = 0;
         buttonState = BUTTON_STATE_PRESSED;
       }
 
@@ -83,6 +83,8 @@ void ButtonISR() {
     case BUTTON_STATE_PRESSED:
       if (filteredADCValue >= BUTTON_THRESHOLD_RELEASED) {
         buttonState = BUTTON_STATE_UP;
+      } else if (buttonElapsed < BUTTON_REPEAT_DELAY) {
+        buttonElapsed += BUTTON_USEC_PER_ISR;
       } else {
         buttonADCOut = buttonADCPressed;
       }
@@ -106,7 +108,7 @@ void EnableButtonInterrupts() {
   buttonFilterRegister = buttonADCOut << BUTTON_FILTER_SHIFT;
   buttonState = BUTTON_STATE_UP;
   buttonADCPressed = BUTTON_STATE_UP;
-  buttonDebounceElapsed = 0;
+  buttonElapsed = 0;
   buttonInterrupts.begin(ButtonISR, 1000000 / BUTTON_FILTER_SAMPLERATE);
   buttonInterruptsEnabled = true;
 }
@@ -123,11 +125,6 @@ void EnableButtonInterrupts() {
 int ProcessButtonPress(int valPin) {
   int switchIndex;
 
-  // Don't return more than one button press per 100ms (repeat delay)
-  if (buttonRepeatDelay < BUTTON_REPEAT_DELAY) {
-    return -1;
-  }
-
   if (valPin == BOGUS_PIN_READ) {  // Not valid press
     return -1;
   }
@@ -140,7 +137,6 @@ int ProcessButtonPress(int valPin) {
   for (switchIndex = 0; switchIndex < NUMBER_OF_SWITCHES; switchIndex++) {
     if (abs(valPin - EEPROMData.switchValues[switchIndex]) < WIGGLE_ROOM)  // ...because ADC does return exact values every time
     {
-      buttonRepeatDelay = 0;
       return switchIndex;
     }
   }
