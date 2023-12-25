@@ -495,6 +495,7 @@ void SaveAnalogSwitchValues()
                                 };
   */
   int index;
+  int minVal;
   int value;
   int origRepeatDelay;
 
@@ -522,8 +523,25 @@ void SaveAnalogSwitchValues()
     tft.print(". ");
     tft.print(labels[index]);
 
-    while ((value = ReadSelectedPushButton()) == -1) {
-      // Wait until a button is pressed
+    if (buttonInterruptsEnabled) {
+      while ((value = ReadSelectedPushButton()) == -1) {
+        // Wait until a button is pressed
+      }
+    } else {
+      value = -1;
+      minVal = NOTHING_TO_SEE_HERE;
+      while (true) {
+        value = ReadSelectedPushButton();
+        if (value < NOTHING_TO_SEE_HERE && value > 0) {
+          MyDelay(100L);
+          if (value < minVal) {
+            minVal = value;
+          } else {
+            value = minVal;
+            break;
+          }
+        }
+      }
     }
 
     tft.fillRect(20, 100, 300, 40, RA8875_BLACK);
@@ -542,7 +560,7 @@ void SaveAnalogSwitchValues()
     }
 
     index++;
-    while ((value = ReadSelectedPushButton()) != -1) {
+    while ((value = ReadSelectedPushButton()) != -1 && value < NOTHING_TO_SEE_HERE) {
       // Wait until the button is released
     }
   }

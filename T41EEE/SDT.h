@@ -1491,6 +1491,7 @@ extern int mainTuneEncoder;
 extern int micChoice;
 extern int micGainChoice;
 extern int minPinRead;
+extern bool buttonInterruptsEnabled;
 extern int NR_Filter_Value;
 extern int operatingMode;
 extern int n_L;

@@ -39,9 +39,9 @@ Thus, the default values below create a filter with 10000 * 0.0217 = 217 Hz band
 
 IntervalTimer buttonInterrupts;
 bool buttonInterruptsEnabled = false;
-unsigned long buttonFilterRegister;
-int buttonState, buttonADCPressed, buttonElapsed;
-volatile int buttonADCOut;
+static unsigned long buttonFilterRegister;
+static int buttonState, buttonADCPressed, buttonElapsed;
+static volatile int buttonADCOut;
 
 /*****
   Purpose: ISR to read button ADC and detect button presses
@@ -181,6 +181,9 @@ int ReadSelectedPushButton() {
     return -1;
   }
   minPinRead = buttonRead;
+  if (!buttonInterruptsEnabled) {
+    MyDelay(100L);
+  }
   return minPinRead;
 }
 
