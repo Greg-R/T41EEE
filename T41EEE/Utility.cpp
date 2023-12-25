@@ -257,7 +257,7 @@ void Calculatedbm()
   // calculation of the signal level inside the filter bandwidth
   // taken from the spectrum display FFT
   // taking into account the analog gain before the ADC
-  // analog gain is adgusted in steps of 1.5dB
+  // analog gain is adjusted in steps of 1.5dB
   // bands[EEPROMData.currentBand].RFgain = 0 --> 0dB gain
   // bands[EEPROMData.currentBand].RFgain = 15 --> 22.5dB gain
 
