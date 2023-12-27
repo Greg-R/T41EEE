@@ -22,20 +22,26 @@ Filter bandwidth is dependent on the sample rate and the "k" parameter, as follo
                           7   0.0012      280
                           8   0.0007      561
 
-Thus, the values below create a filter with 5000 * 0.0217 = 108.5 Hz bandwidth
+Thus, the default values below create a filter with 10000 * 0.0217 = 217 Hz bandwidth
 */
 
-#define BUTTON_FILTER_SAMPLERATE  5000  // Hz
+#define BUTTON_FILTER_SAMPLERATE  10000 // Hz
 #define BUTTON_FILTER_SHIFT       3     // Filter parameter k
-#define BUTTON_PRESS_SLEWRATE     15000 // ADC counts per second
-#define BUTTON_REPEAT_DELAY       150   // ms
+#define BUTTON_DEBOUNCE_DELAY     5000  // uSec
+
+#define BUTTON_STATE_UP           0
+#define BUTTON_STATE_DEBOUNCE     1
+#define BUTTON_STATE_PRESSED      2
+
+#define BUTTON_USEC_PER_ISR       (1000000 / BUTTON_FILTER_SAMPLERATE)
+
+#define BUTTON_OUTPUT_UP          1023    // Value to be output when in the UP state
 
 IntervalTimer buttonInterrupts;
 bool buttonInterruptsEnabled = false;
-int filteredButtonAdc, lastFilteredButtonAdc;
-unsigned long buttonFilterRegister, lastButtonFilterRegister;
-volatile int buttonADCOut;
-elapsedMillis buttonRepeatDelay;
+static unsigned long buttonFilterRegister;
+static int buttonState, buttonADCPressed, buttonElapsed;
+static volatile int buttonADCOut;
 
 /*****
   Purpose: ISR to read button ADC and detect button presses
@@ -47,25 +53,43 @@ elapsedMillis buttonRepeatDelay;
 *****/
 
 void ButtonISR() {
+  int filteredADCValue;
+
   buttonFilterRegister = buttonFilterRegister - (buttonFilterRegister >> BUTTON_FILTER_SHIFT) + analogRead(BUSY_ANALOG_PIN);
+  filteredADCValue = (int) (buttonFilterRegister >> BUTTON_FILTER_SHIFT);
 
-  /*
-  Button ADC values are only output when the slew rate is at or below BUTTON_PRESS_SLEWRATE.  This
-  prevents us from returning ADC values while the voltage is dropping, which can be interpreted as
-  false presses of higher-voltage buttons.
+  switch (buttonState) {
+    case BUTTON_STATE_UP:
+      if (filteredADCValue <= EEPROMData.buttonThresholdPressed) {
+        buttonElapsed = 0;
+        buttonState = BUTTON_STATE_DEBOUNCE;
+      }
 
-  The default BUTTON_PRESS_SLEWRATE and BUTTON_FILTER_SAMPLERATE correlate to a roughly 3 ADC count
-  per interrupt, which is similar to the 3 ADC count averaging threshold implemented in the
-  non-interrupt button polling routine.
+      break;
+    case BUTTON_STATE_DEBOUNCE:
+      if (buttonElapsed < BUTTON_DEBOUNCE_DELAY) {
+        buttonElapsed += BUTTON_USEC_PER_ISR;
+      } else {
+        buttonADCOut = buttonADCPressed = filteredADCValue;
+        buttonElapsed = 0;
+        buttonState = BUTTON_STATE_PRESSED;
+      }
 
-  Note: Slew rate is calculated from the average ADC values.
-  */
+      break;
+    case BUTTON_STATE_PRESSED:
+      if (filteredADCValue >= EEPROMData.buttonThresholdReleased) {
+        buttonState = BUTTON_STATE_UP;
+      } else if (EEPROMData.buttonRepeatDelay != 0) { // buttonRepeatDelay of 0 disables repeat
+        if (buttonElapsed < EEPROMData.buttonRepeatDelay) {
+          buttonElapsed += BUTTON_USEC_PER_ISR;
+        } else {
+          buttonADCOut = buttonADCPressed;
+          buttonElapsed = 0;
+        }
+      }
 
-  if (((unsigned long) abs(lastButtonFilterRegister - buttonFilterRegister) * BUTTON_FILTER_SAMPLERATE) >> BUTTON_FILTER_SHIFT <= BUTTON_PRESS_SLEWRATE) {
-    buttonADCOut = (int) buttonFilterRegister >> BUTTON_FILTER_SHIFT;
+      break;
   }
-
-  lastButtonFilterRegister = buttonFilterRegister;
 }
 
 /*****
@@ -79,11 +103,11 @@ void ButtonISR() {
 *****/
 
 void EnableButtonInterrupts() {
-  filteredButtonAdc = 1023;
-  lastFilteredButtonAdc = 1023;
-  buttonFilterRegister = 1023;
-  lastButtonFilterRegister = 1023;
-  buttonADCOut = 1023;
+  buttonADCOut = BUTTON_OUTPUT_UP;
+  buttonFilterRegister = buttonADCOut << BUTTON_FILTER_SHIFT;
+  buttonState = BUTTON_STATE_UP;
+  buttonADCPressed = BUTTON_STATE_UP;
+  buttonElapsed = 0;
   buttonInterrupts.begin(ButtonISR, 1000000 / BUTTON_FILTER_SAMPLERATE);
   buttonInterruptsEnabled = true;
 }
@@ -100,11 +124,6 @@ void EnableButtonInterrupts() {
 int ProcessButtonPress(int valPin) {
   int switchIndex;
 
-  // Don't return more than one button press per 100ms (repeat delay)
-  if (buttonRepeatDelay < BUTTON_REPEAT_DELAY) {
-    return -1;
-  }
-
   if (valPin == BOGUS_PIN_READ) {  // Not valid press
     return -1;
   }
@@ -117,7 +136,6 @@ int ProcessButtonPress(int valPin) {
   for (switchIndex = 0; switchIndex < NUMBER_OF_SWITCHES; switchIndex++) {
     if (abs(valPin - EEPROMData.switchValues[switchIndex]) < WIGGLE_ROOM)  // ...because ADC does return exact values every time
     {
-      buttonRepeatDelay = 0;
       return switchIndex;
     }
   }
@@ -148,7 +166,7 @@ int ReadSelectedPushButton() {
     press "feel" when calls to ReadSelectedPushButton have variable timing.
     */
 
-    buttonADCOut = 1023;
+    buttonADCOut = BUTTON_OUTPUT_UP;
     interrupts();
   } else {
     while (abs(minPinRead - buttonReadOld) > 3) {  // do averaging to smooth out the button response
@@ -163,6 +181,9 @@ int ReadSelectedPushButton() {
     return -1;
   }
   minPinRead = buttonRead;
+  if (!buttonInterruptsEnabled) {
+    MyDelay(100L);
+  }
   return minPinRead;
 }
 

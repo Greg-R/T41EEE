@@ -23,8 +23,8 @@ int CalibrateOptions() {
 
   // Select the type of calibration, and then skip this during the loop() function.
   if (calibrateFlag == 0) {
-    const char *IQOptions[7]{ "Freq Cal", "CW PA Cal", "Rec Cal", "Xmit Cal", "SSB PA Cal", "Set Tone", "Cancel" };  //AFP 10-21-22
-    IQChoice = SubmenuSelect(IQOptions, 7, 0);                                                                       //AFP 10-21-22
+    const char *IQOptions[9]{ "Freq Cal", "CW PA Cal", "Rec Cal", "Xmit Cal", "SSB PA Cal", "Set Tone", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
+    IQChoice = SubmenuSelect(IQOptions, 9, 0);                                                                       //AFP 10-21-22
   }
   calibrateFlag = 1;
   switch (IQChoice) {
@@ -95,7 +95,31 @@ int CalibrateOptions() {
       return 0;
       break;
 
-    case 6:  // Cancelled choice
+    case 6:  // Calibrate buttons
+      SaveAnalogSwitchValues();
+      calibrateFlag = 0;
+      RedrawDisplayScreen();
+      ShowFrequency();
+      DrawFrequencyBarValue();
+      IQChoice = 6;
+      return 6;
+
+    case 7:  // Set button repeat rate
+      EEPROMData.buttonRepeatDelay = 1000 * GetEncoderValueLive(0, 5000, EEPROMData.buttonRepeatDelay / 1000, 1, (char *)"Btn Repeat:  ");
+      val = ReadSelectedPushButton();
+      if (val != BOGUS_PIN_READ) {
+        val = ProcessButtonPress(val);
+        if (val == MENU_OPTION_SELECT) {
+          tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
+          EEPROMWrite();
+          calibrateFlag = 0;
+          IQChoice = 7;
+          return IQChoice;
+        }
+      }
+      break;
+
+    case 8:  // Cancelled choice
       //EraseMenus();
       RedrawDisplayScreen();
       currentFreq = TxRxFreq = EEPROMData.centerFreq + NCOFreq;

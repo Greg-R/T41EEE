@@ -3,7 +3,7 @@
 
 //======================================== User section that might need to be changed ===================================
 #include "MyConfigurationFile.h"                                          // This file name should remain unchanged
-#define VERSION                     "T41EEE.0"                               // Change this for updates. If you make this longer than 9 characters, brace yourself for surprises
+#define VERSION                     "T41EEE.1"                            // Change this for updates. If you make this longer than 9 characters, brace yourself for surprises
 #define UPDATE_SWITCH_MATRIX        0                                     // 1 = Yes, redo the switch matrix values, 0 = leave switch matrix values as is from the last change
 struct maps {
   char mapNames[50];
@@ -829,6 +829,9 @@ int lastFrequencies[NUMBER_OF_BANDS][2] = {{3985000, 3560000}, {7200000, 7030000
   bool xmitEQFlag = false;
   bool receiveEQFlag = false;
   int calFreq = 1;  // This is an index into an array of tone frequencies, for example:  {750, 3000}
+  int buttonThresholdPressed = 944; // switchValues[0] + WIGGLE_ROOM
+  int buttonThresholdReleased = 964; // buttonThresholdPressed + WIGGLE_ROOM
+  int buttonRepeatDelay = 200000;
 };                                 //  Total:       438 bytes
 
 extern struct config_t EEPROMData;
@@ -1488,6 +1491,7 @@ extern int mainTuneEncoder;
 extern int micChoice;
 extern int micGainChoice;
 extern int minPinRead;
+extern bool buttonInterruptsEnabled;
 extern int NR_Filter_Value;
 extern int operatingMode;
 extern int n_L;
