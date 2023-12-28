@@ -831,8 +831,8 @@ int lastFrequencies[NUMBER_OF_BANDS][2] = {{3985000, 3560000}, {7200000, 7030000
   int calFreq = 1;  // This is an index into an array of tone frequencies, for example:  {750, 3000}
   int buttonThresholdPressed = 944; // switchValues[0] + WIGGLE_ROOM
   int buttonThresholdReleased = 964; // buttonThresholdPressed + WIGGLE_ROOM
-  int buttonRepeatDelay = 200000;
-};                                 //  Total:       438 bytes
+  int buttonRepeatDelay = 300000;  // Increased to 300000 from 200000 to better handle cheap, wornout buttons.
+};
 
 extern struct config_t EEPROMData;
 extern config_t defaultConfig;
