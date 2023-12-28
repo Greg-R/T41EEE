@@ -2164,8 +2164,8 @@ void EEPROMDataDefaultsToSerial(const char *filename);
 void EEPROMDataToSerial(const char *filename);
 void SDEEPROMDataToSerial(const char *filename);
 int  SDEEPROMWriteDefaults();
-void Send(char myChar);
-void SendCode(char code);
+//void Send(char myChar);
+//void SendCode(char code);
 void SelectCalFreq();  // AFP 10-18-22
 void SelectCWFilter();  // AFP 10-18-22
 void SelectCWOffset();  // KF5N December 13, 2023
