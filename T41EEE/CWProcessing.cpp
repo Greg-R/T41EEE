@@ -487,29 +487,6 @@ void MorseCharacterDisplay(char currentLetter) {
 
 
 /*****
-  Purpose: When the CW decoder is active, this function allows the user to set the ditLenght, which updates
-           the display for the new WPM.
-
-  Parameter list:
-    void
-
-  Return value;
-    void
-*****/
-void DisplayDitLength() {
-  tft.setFontScale((enum RA8875tsize)0);  // Erase old WPM value
-  tft.fillRect(FIELD_OFFSET_X + 6 * tft.getFontWidth(), DECODER_Y, tft.getFontWidth() * 15, tft.getFontHeight(), RA8875_BLACK);
-  tft.setCursor(FIELD_OFFSET_X + 6 * tft.getFontWidth(), DECODER_Y);  // Show estimated WPM
-  tft.setTextColor(RA8875_WHITE);
-  tft.print("[ ");
-  tft.setTextColor(RA8875_GREEN);
-  tft.print(1200 / ditLength);
-  tft.setTextColor(RA8875_WHITE);
-  tft.print(" ]");
-}
-
-
-/*****
   Purpose: This function uses the current WPM to set an estimate ditLength any time the tune
            endcoder is changed
 
@@ -536,66 +513,6 @@ void ResetHistograms() {
   UpdateWPMField();
 }
 
-/*****
-  Purpose: This function draws the plot axes in the display's waterfall space
-
-  Parameter list:
-    void
-
-  Return value;
-    void
-*****/
-void DrawSignalPlotFrame() {
-  int offset;
-  float val = 0.0;
-  tft.fillRect(WATERFALL_LEFT_X, FIRST_WATERFALL_LINE - 5, MAX_WATERFALL_WIDTH + 10, MAX_WATERFALL_ROWS + 30, RA8875_BLACK);
-
-  tft.setFontScale(0);
-  tft.setTextColor(RA8875_GREEN);
-  tft.drawFastVLine(WATERFALL_LEFT_X + 60, FIRST_WATERFALL_LINE + 5, MAX_WATERFALL_ROWS - 25, RA8875_GREEN);
-  tft.drawFastHLine(WATERFALL_LEFT_X + 60, WATERFALL_BOTTOM - 20, MAX_WATERFALL_WIDTH - 80, RA8875_GREEN);
-  offset = WATERFALL_BOTTOM - 30;
-  for (int i = 0; i < 5; i++) {
-    tft.setCursor(WATERFALL_LEFT_X + 15, offset - (i * 30));
-    tft.print(val);
-    tft.print(" -");
-    val += 2.0;
-  }
-  tft.setTextColor(RA8875_WHITE);
-  tft.setCursor(WATERFALL_LEFT_X, FIRST_WATERFALL_LINE);
-  tft.print("Signal");
-  tft.setCursor(MAX_WATERFALL_WIDTH >> 1, WATERFALL_BOTTOM - 20);
-  tft.print("Time");
-}
-
-/*****
-  Purpose: This function plots the CW signal in the display's waterfall space
-
-  Parameter list:
-    float val         the current signal value
-
-  Return value;
-    void
-*****/
-void DoSignalPlot(float val) {
-  int i, j;
-  int location;
-  static short int signalArray[MAX_WATERFALL_ROWS + 1][MAX_WATERFALL_WIDTH + 1];
-
-  location = map(val, 0, 8.0, WATERFALL_TOP_Y, WATERFALL_BOTTOM);  // What row to activate?
-  signalArray[location][MAX_WATERFALL_WIDTH] = RA8875_WHITE;       // Turn pixel on.
-  for (i = 0; i < MAX_WATERFALL_ROWS; i++) {
-    memmove(&signalArray[i], &signalArray[i + 1], MAX_WATERFALL_WIDTH);
-  }
-  for (i = 0; i < MAX_WATERFALL_ROWS; i++) {
-    for (j = 0; j < MAX_WATERFALL_WIDTH; j++) {
-      if (signalArray[i][j] != 0) {
-        tft.setCursor(WATERFALL_LEFT_X + 61 + i, FIRST_WATERFALL_LINE + 6 + j);
-        tft.print('.');
-      }
-    }
-  }
-}
 
 // This function was re-factored into a state machine by KF5N October 29, 2023.
 /*****
@@ -715,69 +632,6 @@ FASTRUN void DoCWDecoding(int audioValue) {
   }
 }
 
-
-/*
-void DoCWDecoding(int audioValue) {
-
-  if (audioValue == 1 && signalStart == 0L) {  // This is the start of the signal
-    signalStart = millis();
-    gapEnd = signalStart;           // Must be at noise end
-    gapLength = gapEnd - gapStart;  // How long was the gap between signals?
-
-    if (gapLength > LOWEST_ATOM_TIME && (uint32_t)gapLength < (uint32_t)(thresholdGeometricMean * 3)) {  // range
-      DoGapHistogram(gapLength);                                                                         // Map the gap in the signal
-    }
-    signalEnd = 0L;          // Allows us to know timing started, but not ended
-    signalElapsedTime = 0L;  // Signal is just starting
-    gapStart = 0L;           // Reset noise measures
-  }
-
-  if (audioValue == 0 && signalStart != 0L) {     // Has signal has just ended?
-    signalEnd = millis();                         // Yep, mark end of signal, but also...
-    gapStart = signalEnd;                         // ...mark the start of the gap
-    signalElapsedTime = signalEnd - signalStart;  // How long was signal on?
-
-    if (signalElapsedTime < LOWEST_ATOM_TIME) {  // A hiccup or a real signal?
-      signalElapsedTime = 0L;
-    }
-    signalStart = 0L;
-    if (signalElapsedTime > LOWEST_ATOM_TIME && signalElapsedTime < HISTOGRAM_ELEMENTS) {  // Valid elapsed time?
-      DoSignalHistogram(signalElapsedTime);                                                //Yep
-    }
-
-    if (gapLength > ditLength * 1.95) {  // Is a char done??
-      MorseCharacterDisplay(bigMorseCodeTree[currentDecoderIndex]);
-      if (gapLength > ditLength * 4.5) {  // good over 15WPM on W1AW; no Fransworth
-        MorseCharacterDisplay(' ');
-        tft.setFontScale((enum RA8875tsize)0);  // Show estimated WPM
-        tft.setTextColor(RA8875_GREEN);
-        tft.fillRect(DECODER_X + 104, DECODER_Y, tft.getFontWidth() * 10, tft.getFontHeight(), RA8875_BLACK);
-        tft.setCursor(DECODER_X + 105, DECODER_Y);
-        tft.print("(");
-        tft.print(1200L / (dahLength / 3));
-        tft.print(" WPM)");
-        tft.setTextColor(RA8875_WHITE);
-        tft.setFontScale((enum RA8875tsize)3);
-      }
-      currentDecoderIndex = 0;  //Reset everything if char or word
-      currentDashJump = DECODER_BUFFER_SIZE;
-      gapLength = 0L;
-    }
-
-    //================
-    if (signalElapsedTime > (0.5 * ditLength) && signalElapsedTime < (1.5 * dahLength)) {  // If not a char delimiter
-      currentDashJump = currentDashJump >> 1;                                              // Fast divide by 2
-      if (signalElapsedTime < thresholdGeometricMean) {                                    // It was a dit
-        currentDecoderIndex++;
-      } else {
-        if (signalElapsedTime > thresholdGeometricMean && signalStart == 0L) {  // It was a dah
-          currentDecoderIndex += currentDashJump;
-        }
-      }
-    }
-  }
-}
-*/
 
 /*****
   Purpose: This function creates a distribution of the gaps between signals, expressed
@@ -997,23 +851,3 @@ float goertzel_mag(int numSamples, int TARGET_FREQUENCY, int SAMPLING_RATE, floa
   return magnitude;
 }
 
-/*****
-  Purpose:Display horizontal CW Decode level
-
-  Parameter list:
-    void
-
-  Return value;
-    void
-
-*****/
-void CW_DecodeLevelDisplay() {
-  int levelMtrOffset = 120;
-
-  // draw S-Meter layout
-  tft.drawFastHLine(SMETER_X - levelMtrOffset, SMETER_Y - 1, 100, RA8875_WHITE);
-  tft.drawFastHLine(SMETER_X - levelMtrOffset, SMETER_Y + 20, 100, RA8875_WHITE);  // changed 6 to 20
-
-  tft.drawFastVLine(SMETER_X - levelMtrOffset, SMETER_Y - 1, 20, RA8875_WHITE);  // charge 8 to 18
-  tft.drawFastVLine(SMETER_X + 100 - levelMtrOffset, SMETER_Y - 1, 20, RA8875_WHITE);
-}

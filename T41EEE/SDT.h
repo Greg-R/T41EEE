@@ -2028,7 +2028,6 @@ void ControlFilterF();
 void CopyEEPROM();
 int  CreateMapList(char ptrMaps[10][50], int *count);
 int  CWOptions();
-void CW_DecodeLevelDisplay();
 
 #define CW_SHAPING_NONE 0
 #define CW_SHAPING_RISE 1
@@ -2040,17 +2039,14 @@ void Dah();
 void DecodeIQ();
 void DisplayClock();
 void DisplaydbM();
-void DisplayDitLength();
 void DisplayIncrementField();
 void Dit();
 void DoCWDecoding(int audioValue);
 void DoCWReceiveProcessing(); //AFP 09-19-22
 void DoExciterEQ();
 void DoReceiveEQ();
-void DrawSignalPlotFrame();
 void DoSignalHistogram(long val);
 void DoGapHistogram(long val);
-void DoSignalPlot(float val);
 int  DoSplitVFO();
 void DoPaddleFlip();
 void DoXmitCalibrate(int toneFreq);
