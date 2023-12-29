@@ -136,7 +136,7 @@ void ButtonBandIncrease() {
   tft.writeTo(L2);
   tft.clearMemory();
   tft.writeTo(L1);
-  if(EEPROMData.xmtMode == CW_MODE) BandInformation(); 
+  if (EEPROMData.xmtMode == CW_MODE) BandInformation();
   DrawBandWidthIndicatorBar();
   DrawFrequencyBarValue();
   UpdateDecoderField();
@@ -235,7 +235,7 @@ void ButtonBandDecrease() {
   tft.writeTo(L2);
   tft.clearMemory();
   tft.writeTo(L1);
-  if(EEPROMData.xmtMode == CW_MODE) BandInformation(); 
+  if (EEPROMData.xmtMode == CW_MODE) BandInformation();
   DrawBandWidthIndicatorBar();
   DrawFrequencyBarValue();
   UpdateDecoderField();
@@ -313,14 +313,14 @@ void ButtonDemodMode() {
   ControlFilterF();
   tft.writeTo(L2);  // Destroy the bandwidth indicator bar.  KF5N July 30, 2023
   tft.clearMemory();
-  if(EEPROMData.xmtMode == CW_MODE) BandInformation(); 
+  if (EEPROMData.xmtMode == CW_MODE) BandInformation();
   DrawBandWidthIndicatorBar();  // Restory the bandwidth indicator bar.  KF5N July 30, 2023
   FilterBandwidth();
   DrawSMeterContainer();
   ShowAnalogGain();
   AudioInterrupts();
-  SetFreq();  // Must update frequency, for example moving from SSB to CW, the RX LO is shifted.  KF5N
-  if((EEPROMData.xmtMode == CW_MODE) && (EEPROMData.decoderFlag == 1)) UpdateDecoderField();  // KF5N December 28 2023.
+  SetFreq();                                                                                   // Must update frequency, for example moving from SSB to CW, the RX LO is shifted.  KF5N
+  if ((EEPROMData.xmtMode == CW_MODE) && (EEPROMData.decoderFlag == 1)) UpdateDecoderField();  // KF5N December 28 2023.
 }
 
 
@@ -364,9 +364,9 @@ void ButtonMode()  //====== Changed AFP 10-05-22  =================
   ShowTransmitReceiveStatus();
   ShowFrequency();
   // Draw or not draw CW filter graphics to audio spectrum area.  KF5N July 30, 2023
-  if(EEPROMData.xmtMode == SSB_MODE) {
-  tft.writeTo(L2);
-  tft.clearMemory();
+  if (EEPROMData.xmtMode == SSB_MODE) {
+    tft.writeTo(L2);
+    tft.clearMemory();
   } else BandInformation();
   DrawBandWidthIndicatorBar();
 }
@@ -415,14 +415,14 @@ void ButtonNotchFilter() {
     int           the current noise floor value
 *****/
 int ButtonSetNoiseFloor() {
-  int floor = EEPROMData.currentNoiseFloor[EEPROMData.currentBand];   // KF5N
+  int floor = EEPROMData.currentNoiseFloor[EEPROMData.currentBand];  // KF5N
   int val;
 
   tft.setFontScale((enum RA8875tsize)1);
   ErasePrimaryMenu();
   tft.fillRect(SECONDARY_MENU_X - 100, MENUS_Y, EACH_MENU_WIDTH + 120, CHAR_HEIGHT, RA8875_MAGENTA);
   //tft.setTextColor(RA8875_WHITE);
-  tft.setTextColor(RA8875_BLACK);     // JJP 7/17/23
+  tft.setTextColor(RA8875_BLACK);  // JJP 7/17/23
   tft.setCursor(SECONDARY_MENU_X - 98, MENUS_Y + 1);
   tft.print("Pixels above axis:");
   tft.setCursor(SECONDARY_MENU_X + 200, MENUS_Y + 1);
@@ -462,9 +462,9 @@ int ButtonSetNoiseFloor() {
           floor = SPECTRUM_BOTTOM - 50;
       }
       */
-    //  EEPROMData.currentNoiseFloor[EEPROMData.currentBand]             = floor;
-//      EEPROMData.spectrumNoiseFloor              = floor;
-      EEPROMData.currentNoiseFloor[EEPROMData.currentBand]  = floor;
+      //  EEPROMData.currentNoiseFloor[EEPROMData.currentBand]             = floor;
+      //      EEPROMData.spectrumNoiseFloor              = floor;
+      EEPROMData.currentNoiseFloor[EEPROMData.currentBand] = floor;
       EEPROMWrite();
       break;
     }
@@ -491,8 +491,7 @@ int ButtonSetNoiseFloor() {
   Return value;
     int           the current noise floor value
 *****/
-int DrawNewFloor(int floor)
-{
+int DrawNewFloor(int floor) {
   static int oldY = SPECTRUM_BOTTOM;
 
   if (floor < 0) {
@@ -584,8 +583,8 @@ void ButtonFrequencyEntry() {
   //save_last_frequency = false;                    // prevents crazy frequencies when you change bands/save_last_frequency = true;
   // Arrays for allocating values associated with keys and switches - choose whether USB keypad or analogue switch matrix
   // USB keypad and analogue switch matrix
-  const char *DE_Band[] = {"80m","40m","20m","17m","15m","12m","10m"};
-  const char *DE_Flimit[] = {"4.5","9","16","26","26","30","30"};
+  const char *DE_Band[] = { "80m", "40m", "20m", "17m", "15m", "12m", "10m" };
+  const char *DE_Flimit[] = { "4.5", "9", "16", "26", "26", "30", "30" };
   int numKeys[] = { 0x0D, 0x7F, 0x58,  // values to be allocated to each key push
                     0x37, 0x38, 0x39,
                     0x34, 0x35, 0x36,
@@ -658,17 +657,17 @@ void ButtonFrequencyEntry() {
   tft.setCursor(WATERFALL_LEFT_X + 20, SPECTRUM_TOP_Y + 190);
   tft.print("S   Save Direct to Last Freq. ");
   tft.setCursor(WATERFALL_LEFT_X + 20, SPECTRUM_TOP_Y + 240);
-  tft.print("Direct Entry was called from "); 
+  tft.print("Direct Entry was called from ");
   tft.print(DE_Band[EEPROMData.currentBand]);
   tft.print(" band");
   tft.setCursor(WATERFALL_LEFT_X + 20, SPECTRUM_TOP_Y + 270);
-  tft.print("Frequency response limited above "); 
+  tft.print("Frequency response limited above ");
   tft.print(DE_Flimit[EEPROMData.currentBand]);
   tft.print("MHz");
   tft.setCursor(WATERFALL_LEFT_X + 20, SPECTRUM_TOP_Y + 300);
-  tft.print("For widest direct entry frequency range"); 
+  tft.print("For widest direct entry frequency range");
   tft.setCursor(WATERFALL_LEFT_X + 20, SPECTRUM_TOP_Y + 330);
-  tft.print("call from 12m or 10m band"); 
+  tft.print("call from 12m or 10m band");
 
 #endif
 
@@ -681,7 +680,7 @@ void ButtonFrequencyEntry() {
 
   tft.fillRect(SECONDARY_MENU_X + 20, MENUS_Y, EACH_MENU_WIDTH + 10, CHAR_HEIGHT, RA8875_MAGENTA);
   //tft.setTextColor(RA8875_WHITE);
-  tft.setTextColor(RA8875_BLACK);       // JJP 7/17/23
+  tft.setTextColor(RA8875_BLACK);  // JJP 7/17/23
   tft.setCursor(SECONDARY_MENU_X + 21, MENUS_Y + 1);
   tft.print("kHz or MHz:");
   tft.setFontScale((enum RA8875tsize)0);
@@ -772,7 +771,7 @@ void ButtonFrequencyEntry() {
   directFreqFlag = 1;
   EEPROMData.centerFreq = TxRxFreq;
   centerTuneFlag = 1;  // Put back in so tuning bar is refreshed.  KF5N July 31, 2023
-  SetFreq();  // Used here instead of centerTuneFlag.  KF5N July 22, 2023
+  SetFreq();           // Used here instead of centerTuneFlag.  KF5N July 22, 2023
   //}
   if (save_last_frequency == 1) {
     EEPROMData.lastFrequencies[EEPROMData.currentBand][EEPROMData.activeVFO] = enteredF;
@@ -781,7 +780,7 @@ void ButtonFrequencyEntry() {
       EEPROMData.lastFrequencies[EEPROMData.currentBand][EEPROMData.activeVFO] = TxRxFreqOld;
     }
   }
-  tft.fillRect(0, 0, 799, 479, RA8875_BLACK);   // Clear layer 2  JJP 7/23/23
+  tft.fillRect(0, 0, 799, 479, RA8875_BLACK);  // Clear layer 2  JJP 7/23/23
   tft.writeTo(L1);
   EraseSpectrumDisplayContainer();
   DrawSpectrumDisplayContainer();
@@ -796,7 +795,7 @@ void ButtonFrequencyEntry() {
   // Draw or not draw CW filter graphics to audio spectrum area.  KF5N July 30, 2023
   tft.writeTo(L2);
   tft.clearMemory();
-  if(EEPROMData.xmtMode == CW_MODE) BandInformation(); 
+  if (EEPROMData.xmtMode == CW_MODE) BandInformation();
   DrawBandWidthIndicatorBar();
-  RedrawDisplayScreen(); // KD0RC
+  RedrawDisplayScreen();  // KD0RC
 }

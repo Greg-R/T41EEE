@@ -48,24 +48,24 @@ FLASHMEM void SelectCWFilter() {
 *****/
 FLASHMEM void SelectCWOffset() {
   const char *CWOffsets[] = { "562.5 Hz", "656.5 Hz", "750 Hz", "843.75 Hz", " Cancel " };
-  const int numCycles[4] = {6, 7, 8, 9};
+  const int numCycles[4] = { 6, 7, 8, 9 };
   EEPROMData.CWOffset = SubmenuSelect(CWOffsets, 5, 2);  // CWFilter is an array of strings.
   // Now generate the values for the buffer which is used to create the CW tone.  The values are discrete because there must be whole cycles.
-  if(EEPROMData.CWOffset < 4) sineTone(numCycles[EEPROMData.CWOffset]);
+  if (EEPROMData.CWOffset < 4) sineTone(numCycles[EEPROMData.CWOffset]);
   // sinBuffer is used by the CW decoder.  Load the buffer per chosen frequency.
-  float32_t theta = 0.0;              //AFP 10-25-22
-  float freq[4] = {562.5, 656.5, 750.0, 843.75};
-  for (int kf = 0; kf < 255; kf++) {  //Calc sine wave
-    theta = (float)kf * TWO_PI * freq[EEPROMData.CWOffset] / 24000.0;    // theta = kf * 2 * PI * freqSideTone / 24000
+  float32_t theta = 0.0;  //AFP 10-25-22
+  float freq[4] = { 562.5, 656.5, 750.0, 843.75 };
+  for (int kf = 0; kf < 255; kf++) {                                   //Calc sine wave
+    theta = (float)kf * TWO_PI * freq[EEPROMData.CWOffset] / 24000.0;  // theta = kf * 2 * PI * freqSideTone / 24000
     sinBuffer[kf] = sin(theta);
   }
   // Clear the current CW filter graphics and then restore the bandwidth indicator bar.  KF5N July 30, 2023
   tft.writeTo(L2);
   tft.clearMemory();
   RedrawDisplayScreen();
-//  BandInformation();
-//  DrawBandWidthIndicatorBar();
- // UpdateDecoderField();
+  //  BandInformation();
+  //  DrawBandWidthIndicatorBar();
+  // UpdateDecoderField();
 }
 
 
@@ -83,8 +83,8 @@ FLASHMEM void SelectCWOffset() {
 void DoCWReceiveProcessing() {  // All New AFP 09-19-22
   float goertzelMagnitude1;
   float goertzelMagnitude2;
-  int audioTemp;  // KF5N
-  float freq[4] = {562.5, 656.5, 750.0, 843.75};  // User selectable CW offset frequencies.
+  int audioTemp;                                    // KF5N
+  float freq[4] = { 562.5, 656.5, 750.0, 843.75 };  // User selectable CW offset frequencies.
   //arm_copy_f32(float_buffer_R, float_buffer_R_CW, 256);
   //arm_biquad_cascade_df2T_f32(&S1_CW_Filter, float_buffer_R, float_buffer_R_CW, 256);//AFP 09-01-22
   //arm_biquad_cascade_df2T_f32(&S1_CW_Filter, float_buffer_L, float_buffer_L_CW, 256);//AFP 09-01-22
@@ -201,8 +201,8 @@ void SetTransmitDitLength(int wpm) {
     transmitDitUnshapedBlocks = 0;
     transmitDahUnshapedBlocks = 0;
   } else {
-    transmitDitUnshapedBlocks = (unsigned long) rint(((double) transmitDitLength - 20.0) / 10.0);
-    transmitDahUnshapedBlocks = (unsigned long) rint((((double) transmitDitLength * 3.0) - 20.0) / 10.0);
+    transmitDitUnshapedBlocks = (unsigned long)rint(((double)transmitDitLength - 20.0) / 10.0);
+    transmitDahUnshapedBlocks = (unsigned long)rint((((double)transmitDitLength * 3.0) - 20.0) / 10.0);
   }
 }
 
@@ -317,11 +317,11 @@ void SetSideToneVolume() {
       filterEncoderMove = 0;
     }
     modeSelectOutL.gain(1, volumeLog[(int)EEPROMData.sidetoneVolume]);  // Sidetone  AFP 10-01-22
-                                                             //    modeSelectOutR.gain(1, volumeLog[(int)EEPROMData.sidetoneVolume]);  // Right side not used.  KF5N September 1, 2023
-    val = ReadSelectedPushButton();                          // Read pin that controls all switches
+                                                                        //    modeSelectOutR.gain(1, volumeLog[(int)EEPROMData.sidetoneVolume]);  // Right side not used.  KF5N September 1, 2023
+    val = ReadSelectedPushButton();                                     // Read pin that controls all switches
     val = ProcessButtonPress(val);
     if (val == MENU_OPTION_SELECT) {  // Make a choice??
-     // EEPROMData.EEPROMData.sidetoneVolume = EEPROMData.sidetoneVolume;
+                                      // EEPROMData.EEPROMData.sidetoneVolume = EEPROMData.sidetoneVolume;
       EEPROMWrite();
       break;
     }
@@ -436,15 +436,15 @@ FASTRUN void DoCWDecoding(int audioValue) {
       case state0:
         // Detect signal and redirect to appropriate state.
         if (audioValue == 1) {
-          signalStart = millis();                                                                              // Time stamp beginning of signal.
-          gapLength = signalStart - signalEnd;                                                                 // Calculate the time gap between the start of this new signal and the end of the last one.
-                                                                                                               //        Serial.printf("gapLength state0 = %d\n", gapLength);
+          signalStart = millis();                                                                    // Time stamp beginning of signal.
+          gapLength = signalStart - signalEnd;                                                       // Calculate the time gap between the start of this new signal and the end of the last one.
+                                                                                                     //        Serial.printf("gapLength state0 = %d\n", gapLength);
           if (gapLength > LOWEST_ATOM_TIME && gapLength < (uint32_t)(thresholdGeometricMean * 3)) {  // range  LOWEST_ATOM_TIME = 20
-            DoGapHistogram(gapLength);                                                                         // Map the gap in the signal
+            DoGapHistogram(gapLength);                                                               // Map the gap in the signal
           }
           //        Serial.printf("gapLength = %d gapChar = %d gapAtom = %d\n", gapLength, gapChar, gapAtom);
-          decodeStates = state1;                                                                               // Go to "signalStart" state.
-          break;  // Go to state1;
+          decodeStates = state1;  // Go to "signalStart" state.
+          break;                  // Go to state1;
         }
         // audioValue = 0, no signal:
         noSignalTimeStamp = millis();
@@ -742,4 +742,3 @@ float goertzel_mag(int numSamples, int TARGET_FREQUENCY, int SAMPLING_RATE, floa
   magnitude = sqrtf(real * real + imag * imag);
   return magnitude;
 }
-

@@ -215,7 +215,7 @@ FLASHMEM void GetFavoriteFrequency() {
         case VFO_B:
           if (EEPROMData.currentBandB == NUMBER_OF_BANDS) {  // Incremented too far?
             EEPROMData.currentBandB = 0;                     // Yep. Roll to list front.
-          }                                       // Same for VFO B
+          }                                                  // Same for VFO B
           EEPROMData.currentBandB = currentBand2;
           TxRxFreq = EEPROMData.centerFreq + NCOFreq;
           EEPROMData.lastFrequencies[EEPROMData.currentBand][VFO_B] = TxRxFreq;
@@ -259,11 +259,11 @@ FLASHMEM void GetFavoriteFrequency() {
 *****/
 
 void EEPROMDataDefaults() {
-struct config_t* defaultConfig = new config_t;  // Create a copy of the default configuration.
-EEPROMData = *defaultConfig;             // Copy the defaults to EEPROMData struct.
-// Initialize the frequency setting based on the last used frequency stored to EEPROM.
-TxRxFreq = EEPROMData.centerFreq = EEPROMData.lastFrequencies[EEPROMData.currentBand][EEPROMData.activeVFO];
-RedrawDisplayScreen();  //  Need to refresh display here.
+  struct config_t* defaultConfig = new config_t;  // Create a copy of the default configuration.
+  EEPROMData = *defaultConfig;                    // Copy the defaults to EEPROMData struct.
+  // Initialize the frequency setting based on the last used frequency stored to EEPROM.
+  TxRxFreq = EEPROMData.centerFreq = EEPROMData.lastFrequencies[EEPROMData.currentBand][EEPROMData.activeVFO];
+  RedrawDisplayScreen();  //  Need to refresh display here.
 }
 
 
@@ -277,38 +277,37 @@ RedrawDisplayScreen();  //  Need to refresh display here.
     void
 *****/
 FLASHMEM void EEPROMStartup() {
-int eepromStructSize;
-int stackStructSize;
-//  Determine if the struct EEPROMData is compatible (same size) with the one stored in EEPROM.
+  int eepromStructSize;
+  int stackStructSize;
+  //  Determine if the struct EEPROMData is compatible (same size) with the one stored in EEPROM.
 
-eepromStructSize = EEPROMReadSize();
-stackStructSize  = sizeof(EEPROMData);
+  eepromStructSize = EEPROMReadSize();
+  stackStructSize = sizeof(EEPROMData);
 
-//Serial.printf("eempromStructSize = %d\n", eepromStructSize);
-//Serial.printf("stackStructSize = %d\n", stackStructSize);
+  //Serial.printf("eempromStructSize = %d\n", eepromStructSize);
+  //Serial.printf("stackStructSize = %d\n", stackStructSize);
 
-// For minor revisions to the code, we don't want to overwrite the EEPROM.
-// We will assume the switch matrix and other items are calibrated by the user, and not to be lost.
-// However, if the EEPROMData struct changes, it is necessary to overwrite the EEPROM with the new struct.
-// This decision is made by using a simple size comparison.  This is not fool-proof, but it will probably
-// work most of the time.  The users should be instructed to always save the EEPROM to SD for later recovery
-// of their calibration and custom settings.
-// If all else fails, then the user should execute a FLASH erase.
+  // For minor revisions to the code, we don't want to overwrite the EEPROM.
+  // We will assume the switch matrix and other items are calibrated by the user, and not to be lost.
+  // However, if the EEPROMData struct changes, it is necessary to overwrite the EEPROM with the new struct.
+  // This decision is made by using a simple size comparison.  This is not fool-proof, but it will probably
+  // work most of the time.  The users should be instructed to always save the EEPROM to SD for later recovery
+  // of their calibration and custom settings.
+  // If all else fails, then the user should execute a FLASH erase.
 
-// The case where struct sizes are the same, indicating no changes to the struct.  Nothing more to do, return.
-if(eepromStructSize == stackStructSize) {
-EEPROMRead();   // Read the EEPROM data into active memory.
-return;         // Done, begin radio operation.
-}
+  // The case where struct sizes are the same, indicating no changes to the struct.  Nothing more to do, return.
+  if (eepromStructSize == stackStructSize) {
+    EEPROMRead();  // Read the EEPROM data into active memory.
+    return;        // Done, begin radio operation.
+  }
 
-// If the flow proceeds here, it is time to initialize some things.
-// The rest of the code will require a switch matrix calibration, and will write the EEPROMData struct to EEPROM.
+  // If the flow proceeds here, it is time to initialize some things.
+  // The rest of the code will require a switch matrix calibration, and will write the EEPROMData struct to EEPROM.
 
-SaveAnalogSwitchValues();   // Calibrate the switch matrix.
-EEPROMWriteSize(stackStructSize);  // Write the size of the struct to EEPROM.
+  SaveAnalogSwitchValues();          // Calibrate the switch matrix.
+  EEPROMWriteSize(stackStructSize);  // Write the size of the struct to EEPROM.
 
-//Serial.printf("eempromStructSize = %d\n", EEPROMReadSize());
-EEPROMWrite();              // Write the EEPROMData struct to non-volatile memory.
-//Serial.printf("eempromStructSize = %d\n", EEPROMReadSize());
-
+  //Serial.printf("eempromStructSize = %d\n", EEPROMReadSize());
+  EEPROMWrite();  // Write the EEPROMData struct to non-volatile memory.
+  //Serial.printf("eempromStructSize = %d\n", EEPROMReadSize());
 }

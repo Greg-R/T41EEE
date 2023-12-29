@@ -25,17 +25,17 @@ Filter bandwidth is dependent on the sample rate and the "k" parameter, as follo
 Thus, the default values below create a filter with 10000 * 0.0217 = 217 Hz bandwidth
 */
 
-#define BUTTON_FILTER_SAMPLERATE  10000 // Hz
-#define BUTTON_FILTER_SHIFT       3     // Filter parameter k
-#define BUTTON_DEBOUNCE_DELAY     5000  // uSec
+#define BUTTON_FILTER_SAMPLERATE 10000  // Hz
+#define BUTTON_FILTER_SHIFT 3           // Filter parameter k
+#define BUTTON_DEBOUNCE_DELAY 5000      // uSec
 
-#define BUTTON_STATE_UP           0
-#define BUTTON_STATE_DEBOUNCE     1
-#define BUTTON_STATE_PRESSED      2
+#define BUTTON_STATE_UP 0
+#define BUTTON_STATE_DEBOUNCE 1
+#define BUTTON_STATE_PRESSED 2
 
-#define BUTTON_USEC_PER_ISR       (1000000 / BUTTON_FILTER_SAMPLERATE)
+#define BUTTON_USEC_PER_ISR (1000000 / BUTTON_FILTER_SAMPLERATE)
 
-#define BUTTON_OUTPUT_UP          1023    // Value to be output when in the UP state
+#define BUTTON_OUTPUT_UP 1023  // Value to be output when in the UP state
 
 IntervalTimer buttonInterrupts;
 bool buttonInterruptsEnabled = false;
@@ -56,7 +56,7 @@ void ButtonISR() {
   int filteredADCValue;
 
   buttonFilterRegister = buttonFilterRegister - (buttonFilterRegister >> BUTTON_FILTER_SHIFT) + analogRead(BUSY_ANALOG_PIN);
-  filteredADCValue = (int) (buttonFilterRegister >> BUTTON_FILTER_SHIFT);
+  filteredADCValue = (int)(buttonFilterRegister >> BUTTON_FILTER_SHIFT);
 
   switch (buttonState) {
     case BUTTON_STATE_UP:
@@ -79,7 +79,7 @@ void ButtonISR() {
     case BUTTON_STATE_PRESSED:
       if (filteredADCValue >= EEPROMData.buttonThresholdReleased) {
         buttonState = BUTTON_STATE_UP;
-      } else if (EEPROMData.buttonRepeatDelay != 0) { // buttonRepeatDelay of 0 disables repeat
+      } else if (EEPROMData.buttonRepeatDelay != 0) {  // buttonRepeatDelay of 0 disables repeat
         if (buttonElapsed < EEPROMData.buttonRepeatDelay) {
           buttonElapsed += BUTTON_USEC_PER_ISR;
         } else {
@@ -172,7 +172,7 @@ int ReadSelectedPushButton() {
     while (abs(minPinRead - buttonReadOld) > 3) {  // do averaging to smooth out the button response
       minPinRead = analogRead(BUSY_ANALOG_PIN);
 
-      buttonRead    = .1 * minPinRead + (1 - .1) * buttonReadOld;  // See expected values in next function.
+      buttonRead = .1 * minPinRead + (1 - .1) * buttonReadOld;  // See expected values in next function.
       buttonReadOld = buttonRead;
     }
   }
@@ -204,8 +204,8 @@ void ExecuteButtonPress(int val) {
   } else {
     menuStatus = PRIMARY_MENU_ACTIVE;
   }
-//Serial.print("val = ");
-//Serial.println(val);  
+  //Serial.print("val = ");
+  //Serial.println(val);
   switch (val) {
     case MENU_OPTION_SELECT:  // 0
 
@@ -232,9 +232,9 @@ void ExecuteButtonPress(int val) {
 
     case BAND_UP:  // 2 Now calls ProcessIQData and Encoders calls
       EraseMenus();
-      if(EEPROMData.currentBand < 5) digitalWrite(bandswitchPins[EEPROMData.currentBand], LOW);  // Added if so unused GPOs will not be touched.  KF5N October 16, 2023.
+      if (EEPROMData.currentBand < 5) digitalWrite(bandswitchPins[EEPROMData.currentBand], LOW);  // Added if so unused GPOs will not be touched.  KF5N October 16, 2023.
       ButtonBandIncrease();
-      if(EEPROMData.currentBand < 5) digitalWrite(bandswitchPins[EEPROMData.currentBand], HIGH);
+      if (EEPROMData.currentBand < 5) digitalWrite(bandswitchPins[EEPROMData.currentBand], HIGH);
       BandInformation();
       NCOFreq = 0L;
       DrawBandWidthIndicatorBar();  // AFP 10-20-22
@@ -259,9 +259,9 @@ void ExecuteButtonPress(int val) {
     case BAND_DN:  // 5
       EraseMenus();
       ShowSpectrum();  //Now calls ProcessIQData and Encoders calls
-      if(EEPROMData.currentBand < 5) digitalWrite(bandswitchPins[EEPROMData.currentBand], LOW);
+      if (EEPROMData.currentBand < 5) digitalWrite(bandswitchPins[EEPROMData.currentBand], LOW);
       ButtonBandDecrease();
-      if(EEPROMData.currentBand < 5) digitalWrite(bandswitchPins[EEPROMData.currentBand], HIGH);
+      if (EEPROMData.currentBand < 5) digitalWrite(bandswitchPins[EEPROMData.currentBand], HIGH);
       BandInformation();
       NCOFreq = 0L;
       DrawBandWidthIndicatorBar();  //AFP 10-20-22
@@ -322,30 +322,30 @@ void ExecuteButtonPress(int val) {
     case BEARING:  // 17  // AFP 10-11-22
       int buttonIndex, doneViewing, valPin;
       float retVal;
-      
+
       tft.clearScreen(RA8875_BLACK);
 
       DrawKeyboard();
       CaptureKeystrokes();
       retVal = BearingHeading(keyboardBuffer);
 
-     
-      if (retVal != -1.0) {                           // We have valid country
+
+      if (retVal != -1.0) {  // We have valid country
         bmpDraw((char *)myMapFiles[selectedMapIndex].mapNames, IMAGE_CORNER_X, IMAGE_CORNER_Y);
         doneViewing = false;
       } else {
         tft.setTextColor(RA8875_RED);
-        tft.setCursor(380 - (17 * tft.getFontWidth(0)) / 2, 240);   // Center message
-        tft.print("Country not found");  
-        tft.setTextColor(RA8875_WHITE);        
+        tft.setCursor(380 - (17 * tft.getFontWidth(0)) / 2, 240);  // Center message
+        tft.print("Country not found");
+        tft.setTextColor(RA8875_WHITE);
       }
       while (true) {
-        valPin = ReadSelectedPushButton();            // Poll UI push buttons
+        valPin = ReadSelectedPushButton();  // Poll UI push buttons
         MyDelay(100L);
-        if (valPin != BOGUS_PIN_READ) {               // If a button was pushed...
-          buttonIndex = ProcessButtonPress(valPin);   // Winner, winner...chicken dinner!
+        if (valPin != BOGUS_PIN_READ) {              // If a button was pushed...
+          buttonIndex = ProcessButtonPress(valPin);  // Winner, winner...chicken dinner!
           switch (buttonIndex) {
-            case BEARING:                             // Pressed puchbutton 18
+            case BEARING:  // Pressed puchbutton 18
               doneViewing = true;
               break;
             default:
@@ -354,16 +354,16 @@ void ExecuteButtonPress(int val) {
         }
 
         if (doneViewing == true) {
-            //tft.clearMemory();          // Need to clear overlay too
-            //tft.writeTo(L2);
-            //tft.fillWindow();
+          //tft.clearMemory();          // Need to clear overlay too
+          //tft.writeTo(L2);
+          //tft.fillWindow();
           break;
         }
       }
       RedrawDisplayScreen();
       ShowFrequency();
       DrawFrequencyBarValue();
-      
+
       break;
   }
 }

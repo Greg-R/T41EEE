@@ -9,24 +9,23 @@
   Return value;
     void
 *****/
-void sineTone(int numCycles)
-{
+void sineTone(int numCycles) {
   float theta;
   float freqSideTone2;
   // freqSideTone3, 3000 Hz, is used during TX calibration.
-//  float freqSideTone3 = 3000;         // Refactored 32 * 24000 / 256; //AFP 2-7-23
-//  float freqSideTone4 = 375;  Not used.
+  //  float freqSideTone3 = 3000;         // Refactored 32 * 24000 / 256; //AFP 2-7-23
+  //  float freqSideTone4 = 375;  Not used.
   freqSideTone2 = numCycles * 24000 / 256;  // 750.0
-  for (int kf = 0; kf < 256; kf++) { //Calc: numCycles=8, 750 hz sine wave.
+  for (int kf = 0; kf < 256; kf++) {        //Calc: numCycles=8, 750 hz sine wave.
     theta = kf * 2 * PI * freqSideTone2 / 24000;
     sinBuffer2[kf] = sin(theta);  // Used in CW_Excite.cpp
     cosBuffer2[kf] = cos(theta);  // Used in CW_Excite.cpp
-//    theta = kf * 2.0 * PI * freqSideTone3 / 24000;
-//    sinBuffer3[kf] = sin(theta);  // Used in Process2.cpp.  This is only periodically used for calibration.
-//    cosBuffer3[kf] = cos(theta);  // Used in Process2.cpp.  This could be added to one of the calibration functions so it is not always sitting on the stack.
-//    theta = kf * 2.0 * PI * freqSideTone4 / 24000;
-//    sinBuffer4[kf] = sin(theta);
-//    cosBuffer4[kf] = cos(theta);
+                                  //    theta = kf * 2.0 * PI * freqSideTone3 / 24000;
+                                  //    sinBuffer3[kf] = sin(theta);  // Used in Process2.cpp.  This is only periodically used for calibration.
+                                  //    cosBuffer3[kf] = cos(theta);  // Used in Process2.cpp.  This could be added to one of the calibration functions so it is not always sitting on the stack.
+                                  //    theta = kf * 2.0 * PI * freqSideTone4 / 24000;
+                                  //    sinBuffer4[kf] = sin(theta);
+                                  //    cosBuffer4[kf] = cos(theta);
   }
 }
 
@@ -38,13 +37,13 @@ void sineTone(int numCycles)
     void
 *****/
 
-void initCWShaping(){
+void initCWShaping() {
   int pos;
   float deg;
 
   // Rising waveform
   //  Raised cosine increasing amplitude for 128 samples (roughly 5ms)
-  for ( pos = 0, deg = -180; pos < 128; deg += 1.40625 /* 180 / 128 */, pos++ ) {
+  for (pos = 0, deg = -180; pos < 128; deg += 1.40625 /* 180 / 128 */, pos++) {
     cwRiseBuffer[pos] = (1.0 + cos(deg / 57.3 /* fixed conversion to radians */)) / 2.0;
   }
   //  Full amplitude for the remainder
@@ -58,7 +57,7 @@ void initCWShaping(){
     cwFallBuffer[pos] = 1.0;
   }
   //  Raised cosine decreasing amplitude for the final 128 samples (roughly 5ms)
-  for ( deg = 0; pos < 256; deg += 1.40625 /* 180 / 128 */, pos++ ) {
+  for (deg = 0; pos < 256; deg += 1.40625 /* 180 / 128 */, pos++) {
     cwFallBuffer[pos] = (1.0 + cos(deg / 57.3 /* fixed conversion to radians */)) / 2.0;
   }
 }
@@ -156,17 +155,16 @@ const float32_t atanTable[68] = {
   Return value;
     void
 *****/
-void IQPhaseCorrection(float32_t *I_buffer, float32_t *Q_buffer, float32_t factor, uint32_t blocksize)
-{
+void IQPhaseCorrection(float32_t *I_buffer, float32_t *Q_buffer, float32_t factor, uint32_t blocksize) {
   float32_t temp_buffer[blocksize];
-  if (factor < 0.0) {                                                             // mix a bit of I into Q
-    arm_scale_f32 (I_buffer, factor, temp_buffer, blocksize);
-    arm_add_f32 (Q_buffer, temp_buffer, Q_buffer, blocksize);
-  } else {                                                      // mix a bit of Q into I
-    arm_scale_f32 (Q_buffer, factor, temp_buffer, blocksize);
-    arm_add_f32 (I_buffer, temp_buffer, I_buffer, blocksize);
+  if (factor < 0.0) {  // mix a bit of I into Q
+    arm_scale_f32(I_buffer, factor, temp_buffer, blocksize);
+    arm_add_f32(Q_buffer, temp_buffer, Q_buffer, blocksize);
+  } else {  // mix a bit of Q into I
+    arm_scale_f32(Q_buffer, factor, temp_buffer, blocksize);
+    arm_add_f32(I_buffer, temp_buffer, I_buffer, blocksize);
   }
-} // end IQphase_correction
+}  // end IQphase_correction
 
 /*****
   Purpose: Calculate sinc function
@@ -176,8 +174,7 @@ void IQPhaseCorrection(float32_t *I_buffer, float32_t *Q_buffer, float32_t facto
   Return value;
     void
 *****/
-float MSinc(int m, float fc)
-{
+float MSinc(int m, float fc) {
   float x = m * PIH;
   if (m == 0)
     return 1.0f;
@@ -193,17 +190,15 @@ float MSinc(int m, float fc)
   Return value;
     void
 *****/
-float32_t Izero(float32_t x)
-{
-  float32_t x2          = x / 2.0;
-  float32_t summe       = 1.0;
-  float32_t ds          = 1.0;
-  float32_t di          = 1.0;
-  float32_t errorlimit  = 1e-9;
+float32_t Izero(float32_t x) {
+  float32_t x2 = x / 2.0;
+  float32_t summe = 1.0;
+  float32_t ds = 1.0;
+  float32_t di = 1.0;
+  float32_t errorlimit = 1e-9;
   float32_t tmp;
 
-  do
-  {
+  do {
     tmp = x2 / di;
     tmp *= tmp;
     ds *= tmp;
@@ -251,8 +246,7 @@ float32_t log10f_fast(float32_t X) {
   Return value;
     void
 *****/
-void Calculatedbm()
-{
+void Calculatedbm() {
 
   // calculation of the signal level inside the filter bandwidth
   // taken from the spectrum display FFT
@@ -263,24 +257,24 @@ void Calculatedbm()
 
   // spectrum display is generated from 256 samples based on 1024 samples of the FIR FFT . . .
   // could this cause errors in the calculation of the signal strength ?
-  int posbin              = 0;
+  int posbin = 0;
 
   float32_t Lbin, Ubin;
-  float32_t slope         = 10.0;
-  float32_t cons          = -92;
-  float32_t bw_LSB        = 0.0;
-  float32_t bw_USB        = 0.0;
-  float32_t sum_db        = 0.0; // FIXME: mabye this slows down the FPU, because the FPU does only process 32bit floats ???
-  float32_t bin_bandwidth = (float32_t) (SR[SampleRate].rate / (256.0));
+  float32_t slope = 10.0;
+  float32_t cons = -92;
+  float32_t bw_LSB = 0.0;
+  float32_t bw_USB = 0.0;
+  float32_t sum_db = 0.0;  // FIXME: mabye this slows down the FPU, because the FPU does only process 32bit floats ???
+  float32_t bin_bandwidth = (float32_t)(SR[SampleRate].rate / (256.0));
 
   // width of a 256 tap FFT bin @ 96ksps = 375Hz
   // we have to take into account the magnify mode
   // --> recalculation of bin_BW
-  bin_bandwidth = bin_bandwidth / (1 << EEPROMData.spectrum_zoom); // correct bin bandwidth is determined by the Zoom FFT display setting
+  bin_bandwidth = bin_bandwidth / (1 << EEPROMData.spectrum_zoom);  // correct bin bandwidth is determined by the Zoom FFT display setting
 
   // in all magnify cases (2x up to 16x) the posbin is in the centre of the spectrum display
   if (EEPROMData.spectrum_zoom != 0) {
-    posbin = 128; // right in the middle!
+    posbin = 128;  // right in the middle!
   } else {
     posbin = 64;
   }
@@ -293,8 +287,8 @@ void Calculatedbm()
   bw_USB = bands[EEPROMData.currentBand].FHiCut;
   // calculate upper and lower limit for determination of signal strength
   // = filter passband is between the lower bin Lbin and the upper bin Ubin
-  Lbin  = (float32_t)posbin + roundf(bw_LSB / bin_bandwidth); // bin on the lower/left side
-  Ubin  = (float32_t)posbin + roundf(bw_USB / bin_bandwidth); // bin on the upper/right side
+  Lbin = (float32_t)posbin + roundf(bw_LSB / bin_bandwidth);  // bin on the lower/left side
+  Ubin = (float32_t)posbin + roundf(bw_USB / bin_bandwidth);  // bin on the upper/right side
 
   // take care of filter bandwidths that are larger than the displayed FFT bins
   if (Lbin < 0) {
@@ -316,8 +310,7 @@ void Calculatedbm()
     //#ifdef USE_LOG10FAST
     switch (display_dbm) {
       case DISPLAY_S_METER_DBM:
-        dbm = dbm_calibration + bands[EEPROMData.currentBand].gainCorrection + (float32_t)attenuator +
-              slope * log10f_fast(sum_db) + cons - (float32_t)bands[EEPROMData.currentBand].RFgain * 1.5;
+        dbm = dbm_calibration + bands[EEPROMData.currentBand].gainCorrection + (float32_t)attenuator + slope * log10f_fast(sum_db) + cons - (float32_t)bands[EEPROMData.currentBand].RFgain * 1.5;
         dbmhz = 0;
         break;
       case DISPLAY_S_METER_DBMHZ:
@@ -337,7 +330,6 @@ void Calculatedbm()
   // Tau = 10ms = 0.01s attack time
   // m_DecayAlpha = 0.0392; // 500ms decay time
   //
-
 }
 
 
@@ -351,15 +343,14 @@ void Calculatedbm()
   Return value;
     atan2(y, x) = atan(y/x) as radians.
 *****/
-float32_t arm_atan2_f32(float32_t y, float32_t x)
-{
-  float32_t atan2Val, fract, in;                 /* Temporary variables for input, output */
-  uint32_t index;                                /* Index variable */
-  uint32_t tableSize = (uint32_t) TABLE_SIZE_64; /* Initialise tablesize */
-  float32_t wa, wb, wc, wd;                      /* Cubic interpolation coefficients */
-  float32_t a, b, c, d;                          /* Four nearest output values */
-  float32_t *tablePtr;                           /* Pointer to table */
-  uint8_t flags = 0;                             /* flags providing information about input values:
+float32_t arm_atan2_f32(float32_t y, float32_t x) {
+  float32_t atan2Val, fract, in;                /* Temporary variables for input, output */
+  uint32_t index;                               /* Index variable */
+  uint32_t tableSize = (uint32_t)TABLE_SIZE_64; /* Initialise tablesize */
+  float32_t wa, wb, wc, wd;                     /* Cubic interpolation coefficients */
+  float32_t a, b, c, d;                         /* Four nearest output values */
+  float32_t *tablePtr;                          /* Pointer to table */
+  uint8_t flags = 0;                            /* flags providing information about input values:
                                                     Bit0 = 1 if |x| < |y|
                                                     Bit1 = 1 if x < 0
                                                     Bit2 = 1 if y < 0 */
@@ -379,21 +370,21 @@ float32_t arm_atan2_f32(float32_t y, float32_t x)
   if (x < y) {
     in = x / y;
     flags |= 0x01;
-  } else {                /* x >= y */
+  } else { /* x >= y */
     if (x > 0.0f)
       in = y / x;
-    else                  /* both are 0.0 */
-      in = 0.0;           /* prevent division by 0 */
+    else        /* both are 0.0 */
+      in = 0.0; /* prevent division by 0 */
   }
 
   /* Calculation of index of the table */
-  index = (uint32_t) (tableSize * in);
+  index = (uint32_t)(tableSize * in);
 
   /* fractional value calculation */
-  fract = ((float32_t) tableSize * in) - (float32_t) index;
+  fract = ((float32_t)tableSize * in) - (float32_t)index;
 
   /* Initialise table pointer */
-  tablePtr = (float32_t *) & atanTable[index];
+  tablePtr = (float32_t *)&atanTable[index];
 
   /* Read four nearest values of output value from the sin table */
   a = *tablePtr++;
@@ -402,28 +393,24 @@ float32_t arm_atan2_f32(float32_t y, float32_t x)
   d = *tablePtr++;
 
   /* Cubic interpolation process */
-  wa = -(((0.166666667f) * (fract * (fract * fract))) +
-         ((0.3333333333333f) * fract)) + ((0.5f) * (fract * fract));
-  wb = (((0.5f) * (fract * (fract * fract))) -
-        ((fract * fract) + ((0.5f) * fract))) + 1.0f;
-  wc = (-((0.5f) * (fract * (fract * fract))) +
-        ((0.5f) * (fract * fract))) + fract;
-  wd = ((0.166666667f) * (fract * (fract * fract))) -
-       ((0.166666667f) * fract);
+  wa = -(((0.166666667f) * (fract * (fract * fract))) + ((0.3333333333333f) * fract)) + ((0.5f) * (fract * fract));
+  wb = (((0.5f) * (fract * (fract * fract))) - ((fract * fract) + ((0.5f) * fract))) + 1.0f;
+  wc = (-((0.5f) * (fract * (fract * fract))) + ((0.5f) * (fract * fract))) + fract;
+  wd = ((0.166666667f) * (fract * (fract * fract))) - ((0.166666667f) * fract);
 
-  atan2Val = ((a * wa) + (b * wb)) + ((c * wc) + (d * wd));     /* Calculate atan2 value */
+  atan2Val = ((a * wa) + (b * wb)) + ((c * wc) + (d * wd)); /* Calculate atan2 value */
 
-  if (flags & 0x01)                                             /* exchanged input values? */
+  if (flags & 0x01) /* exchanged input values? */
 
-    atan2Val = 1.5707963267949f - atan2Val;                     /* output = pi/2 - output */
+    atan2Val = 1.5707963267949f - atan2Val; /* output = pi/2 - output */
 
   if (flags & 0x02)
-    atan2Val = 3.14159265358979f - atan2Val;                    /* negative x input? Quadrant 2 or 3 */
+    atan2Val = 3.14159265358979f - atan2Val; /* negative x input? Quadrant 2 or 3 */
 
   if (flags & 0x04)
-    atan2Val = - atan2Val;                                      /* negative y input? Quadrant 3 or 4 */
+    atan2Val = -atan2Val; /* negative y input? Quadrant 3 or 4 */
 
-  return (atan2Val);                                            /* Return the output value */
+  return (atan2Val); /* Return the output value */
 }
 
 /*****
@@ -435,13 +422,13 @@ float32_t arm_atan2_f32(float32_t y, float32_t x)
   Return value;
     float32_t
 *****/
-float32_t AlphaBetaMag(float32_t  inphase, float32_t  quadrature)   // (c) András Retzler
-{ // taken from libcsdr: https://github.com/simonyiszk/csdr
+float32_t AlphaBetaMag(float32_t inphase, float32_t quadrature)  // (c) András Retzler
+{                                                                // taken from libcsdr: https://github.com/simonyiszk/csdr
   // Min RMS Err      0.947543636291 0.392485425092
   // Min Peak Err     0.960433870103 0.397824734759
   // Min RMS w/ Avg=0 0.948059448969 0.392699081699
-  const float32_t alpha = 0.960433870103; // 1.0; //0.947543636291;
-  const float32_t beta =  0.397824734759;
+  const float32_t alpha = 0.960433870103;  // 1.0; //0.947543636291;
+  const float32_t beta = 0.397824734759;
 
   float32_t abs_inphase = fabs(inphase);
   float32_t abs_quadrature = fabs(quadrature);
@@ -464,8 +451,7 @@ float32_t AlphaBetaMag(float32_t  inphase, float32_t  quadrature)   // (c) Andr�
   Return value;
     float           atan vakye
 *****/
-float ApproxAtan(float z)
-{
+float ApproxAtan(float z) {
   const float n1 = 0.97239411f;
   const float n2 = -0.19194795f;
   return (n1 + n2 * z * z) * z;
@@ -483,8 +469,7 @@ float ApproxAtan(float z)
   Return value;
     void
 *****/
-void SaveAnalogSwitchValues()
-{
+void SaveAnalogSwitchValues() {
   /*                                                                        This list is new with V017
     const char *labels[]        = {"Select",       "Menu Up",  "Band Up",
                                  "Zoom",         "Menu Dn",  "Band Dn",
@@ -517,7 +502,7 @@ void SaveAnalogSwitchValues()
   origRepeatDelay = EEPROMData.buttonRepeatDelay;
   EEPROMData.buttonRepeatDelay = 0;
 
-  for (index = 0; index < NUMBER_OF_SWITCHES; ) {
+  for (index = 0; index < NUMBER_OF_SWITCHES;) {
     tft.setCursor(20, 100);
     tft.print(index + 1);
     tft.print(". ");
@@ -565,8 +550,8 @@ void SaveAnalogSwitchValues()
     }
   }
 
-  EEPROMData.buttonRepeatDelay = origRepeatDelay;   // Restore original repeat delay
-//  EEPROM.put(0, EEPROMData);                        // Done by EEPROMStartup().
+  EEPROMData.buttonRepeatDelay = origRepeatDelay;  // Restore original repeat delay
+  //  EEPROM.put(0, EEPROMData);                        // Done by EEPROMStartup().
 }
 
 // ================== Clock stuff
@@ -577,14 +562,13 @@ void SaveAnalogSwitchValues()
   Return value;
     void
 *****/
-void DisplayClock()
-{
+void DisplayClock() {
   char timeBuffer[15];
   char temp[5];
 
-  temp[0]       = '\0';
+  temp[0] = '\0';
   timeBuffer[0] = '\0';
-  strcpy(timeBuffer, MY_TIMEZONE);         // e.g., EST
+  strcpy(timeBuffer, MY_TIMEZONE);  // e.g., EST
 #ifdef TIME_24H
   //DB2OO, 29-AUG-23: use 24h format
   itoa(hour(), temp, DEC);
@@ -610,13 +594,13 @@ void DisplayClock()
   }
   strcat(timeBuffer, temp);
 
-  tft.setFontScale( (enum RA8875tsize) 1);
+  tft.setFontScale((enum RA8875tsize)1);
 
   tft.fillRect(TIME_X - 20, TIME_Y, XPIXELS - TIME_X - 1, CHAR_HEIGHT, RA8875_BLACK);
   tft.setCursor(TIME_X - 20, TIME_Y);
   tft.setTextColor(RA8875_WHITE);
   tft.print(timeBuffer);
-}                                                   // end function displayTime
+}  // end function displayTime
 
 
 // ============== Mode stuff
@@ -629,37 +613,36 @@ void DisplayClock()
   Return value;
     void
 *****/
-void SetupMode(int sideBand)
-{
+void SetupMode(int sideBand) {
   int temp;
-                                    // AFP 10-27-22
-  if (old_demod_mode != -99)                                    // first time radio is switched on and when changing bands
+  // AFP 10-27-22
+  if (old_demod_mode != -99)  // first time radio is switched on and when changing bands
   {
     switch (sideBand) {
-      case DEMOD_LSB :
+      case DEMOD_LSB:
         temp = bands[EEPROMData.currentBand].FHiCut;
-        bands[EEPROMData.currentBand].FHiCut = - bands[EEPROMData.currentBand].FLoCut;
-        bands[EEPROMData.currentBand].FLoCut = - temp;
+        bands[EEPROMData.currentBand].FHiCut = -bands[EEPROMData.currentBand].FLoCut;
+        bands[EEPROMData.currentBand].FLoCut = -temp;
         break;
 
-      case DEMOD_USB :
+      case DEMOD_USB:
         temp = bands[EEPROMData.currentBand].FHiCut;
-        bands[EEPROMData.currentBand].FHiCut = - bands[EEPROMData.currentBand].FLoCut;
-        bands[EEPROMData.currentBand].FLoCut = - temp;
+        bands[EEPROMData.currentBand].FHiCut = -bands[EEPROMData.currentBand].FLoCut;
+        bands[EEPROMData.currentBand].FLoCut = -temp;
         break;
-      case DEMOD_AM :
-        bands[EEPROMData.currentBand].FHiCut =  -bands[EEPROMData.currentBand].FLoCut;
+      case DEMOD_AM:
+        bands[EEPROMData.currentBand].FHiCut = -bands[EEPROMData.currentBand].FLoCut;
         break;
     }
   }
   ShowBandwidth();
   // tft.fillRect(pos_x_frequency + 10, pos_y_frequency + 24, 210, 16, RA8875_BLACK);
   //tft.fillRect(OPERATION_STATS_X + 170, FREQUENCY_Y + 30, tft.getFontWidth() * 5, tft.getFontHeight(), RA8875_BLACK);        // Clear top-left menu area
-  old_demod_mode = bands[EEPROMData.currentBand].mode; // set old_mode flag for next time, at the moment only used for first time radio is switched on . . .
-} // end void setup_mode
+  old_demod_mode = bands[EEPROMData.currentBand].mode;  // set old_mode flag for next time, at the moment only used for first time radio is switched on . . .
+}  // end void setup_mode
 
 
-int Xmit_IQ_Cal() //AFP 09-21-22
+int Xmit_IQ_Cal()  //AFP 09-21-22
 {
   return -1;
 }
@@ -672,9 +655,8 @@ int Xmit_IQ_Cal() //AFP 09-21-22
   Return value;
     void
 *****/
-void SetBand()
-{
-  old_demod_mode = -99; // used in setup_mode and when changing bands, so that LoCut and HiCut are not changed!
+void SetBand() {
+  old_demod_mode = -99;  // used in setup_mode and when changing bands, so that LoCut and HiCut are not changed!
   SetupMode(bands[EEPROMData.currentBand].mode);
   SetFreq();
   ShowFrequency();
@@ -691,12 +673,10 @@ void SetBand()
   Return value;
     int               0 = SD not initialized, 1 = has data
 *****/
-int SDPresentCheck()
-{
-  if (!SD.begin(chipSelect))
-  {
+int SDPresentCheck() {
+  if (!SD.begin(chipSelect)) {
     Serial.print("No SD card or cannot be initialized.");
-    tft.setFontScale((enum RA8875tsize) 1);
+    tft.setFontScale((enum RA8875tsize)1);
     tft.setForegroundColor(RA8875_RED);
     tft.setCursor(20, 300);
     tft.print("No SD card or not initialized.");
@@ -705,12 +685,10 @@ int SDPresentCheck()
   }
   // open the file.
   File dataFile = SD.open("SDEEPROMData.txt");
-  
+
   if (dataFile) {
     return 1;
   } else {
     return 0;
   }
-
 }
-
