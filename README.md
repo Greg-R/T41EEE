@@ -45,9 +45,9 @@ successful.
 Thank you to Jonathan KN6LFB for the major improvement in button functionality!
 
 1.  Switch matrix buttons are changed from polling to interrupts for improved performance.
-2.  The new button code includes a tunable variable for "button delay".  This variable
+2.  The new button code includes a tunable variable for button response time.  This variable
     is added to the calibration menu as BTN REPEAT.  The default value should be a good
-    starting point.
+    starting point.  If button response is too fast, increase the BTN REPEAT value.
 3.  The switch matrix calibration routine is added to the calibration menu.
 4.  Switch matrix calibration is easier and precise.  It is possible to push a button
     and hold it.  It will not skip to the next button.  In practice, a short, firm push
