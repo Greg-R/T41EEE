@@ -791,7 +791,6 @@ struct config_t {
                             459, 407, 356,
                             298, 242, 183,
                             131, 67, 10 };
-  bool switchMatrixCalibrated = false;
   float LPFcoeff             = 0.0;                   // 4 bytes
   float NR_PSI               = 0.0;                   // 4 bytes
   float NR_alpha             = 0.95;                   // 4 bytes
@@ -2162,7 +2161,6 @@ int  MicGainSet();
 void SaveAnalogSwitchValues();
 int  SDDataCheck();
 void EEPROMDataDefaultsToSerial(const char *filename);
-void EEPROMDataToSerial(const char *filename);
 void SDEEPROMDataToSerial(const char *filename);
 int  SDEEPROMWriteDefaults();
 //void Send(char myChar);

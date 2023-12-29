@@ -566,8 +566,7 @@ void SaveAnalogSwitchValues()
   }
 
   EEPROMData.buttonRepeatDelay = origRepeatDelay;   // Restore original repeat delay
-  EEPROMData.switchMatrixCalibrated = true;         // Used in EEPROMStartup().
-  EEPROM.put(0, EEPROMData);                        // Save values to EEPROM
+//  EEPROM.put(0, EEPROMData);                        // Done by EEPROMStartup().
 }
 
 // ================== Clock stuff
