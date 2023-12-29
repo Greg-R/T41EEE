@@ -237,7 +237,7 @@ void SetKeyType() {
   Return value:
     void
 *****/
-void SetKeyPowerUp() {
+FLASHMEM void SetKeyPowerUp() {
   if (EEPROMData.keyType == 0) {
     EEPROMData.paddleDit = KEYER_DIT_INPUT_TIP;
     EEPROMData.paddleDah = KEYER_DAH_INPUT_RING;

@@ -735,7 +735,7 @@ extern long last_filter_pos;
 
 struct config_t {
   
-  char versionSettings[10] = VERSION;
+  char versionSettings[10] = VERSION;   // This is required to be the first!  See EEPROMRead() function.
   int AGCMode             = 1;     
   int audioVolume         = 30;                       // 4 bytes
   int rfGainAllBands      = 0;
@@ -791,6 +791,7 @@ struct config_t {
                             459, 407, 356,
                             298, 242, 183,
                             131, 67, 10 };
+  bool switchMatrixCalibrated = false;
   float LPFcoeff             = 0.0;                   // 4 bytes
   float NR_PSI               = 0.0;                   // 4 bytes
   float NR_alpha             = 0.95;                   // 4 bytes

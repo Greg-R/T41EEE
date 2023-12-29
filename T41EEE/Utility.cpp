@@ -566,6 +566,7 @@ void SaveAnalogSwitchValues()
   }
 
   EEPROMData.buttonRepeatDelay = origRepeatDelay;   // Restore original repeat delay
+  EEPROMData.switchMatrixCalibrated = true;         // Used in EEPROMStartup().
   EEPROM.put(0, EEPROMData);                        // Save values to EEPROM
 }
 
@@ -620,8 +621,6 @@ void DisplayClock()
 
 
 // ============== Mode stuff
-
-
 /*****
   Purpose: SetupMode sets default mode for the selected band
 

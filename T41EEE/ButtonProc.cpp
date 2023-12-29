@@ -320,6 +320,7 @@ void ButtonDemodMode() {
   ShowAnalogGain();
   AudioInterrupts();
   SetFreq();  // Must update frequency, for example moving from SSB to CW, the RX LO is shifted.  KF5N
+  if((EEPROMData.xmtMode == CW_MODE) && (EEPROMData.decoderFlag == 1)) UpdateDecoderField();  // KF5N December 28 2023.
 }
 
 
@@ -556,16 +557,7 @@ void ResetZoom(int zoomIndex1) {
   RedrawDisplayScreen();
 }
 
-/*****
-  Purpose: Direct Frequrncy Entry
 
-  Parameter list:
-    void
-
-  Return value;
-    void
-    Base Code courtesy of Harry  GM3RVL
-*****/
 /*****
   Purpose: Direct Frequency Entry
 
