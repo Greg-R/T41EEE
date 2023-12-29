@@ -99,9 +99,9 @@ FLASHMEM void loadConfiguration(const char *filename, config_t &EEPROMData) {
   EEPROMData.xmitEQFlag = doc["xmitEQFlag"];
   EEPROMData.receiveEQFlag = doc["receiveEQFlag"];
   EEPROMData.calFreq = doc["calFreq"];
-  EEPROMData.buttonThresholdPressed = doc["buttonThresholdPressed"];
-  EEPROMData.buttonThresholdReleased = doc["buttonThresholdReleased"];
-  EEPROMData.buttonRepeatDelay = doc["buttonRepeatDelay"];
+  EEPROMData.buttonThresholdPressed = doc["buttonThresholdPressed"] | 944;
+  EEPROMData.buttonThresholdReleased = doc["buttonThresholdReleased"] | 964;
+  EEPROMData.buttonRepeatDelay = doc["buttonRepeatDelay"] | 300000;
 
   // How to copy strings:
   //  strlcpy(EEPROMData.myCall,                  // <- destination

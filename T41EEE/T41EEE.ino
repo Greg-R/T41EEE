@@ -1,7 +1,7 @@
 /*
-### Version T41EEE.0 T41 Software Defined Transceiver Arduino Sketch
+### Version T41EEE.1 T41 Software Defined Transceiver Arduino Sketch
 
-This is the first of the "T41 Extreme Experimenter's Edition" software for the 
+This is the "T41 Extreme Experimenter's Edition" software for the 
 T41 Software Defined Transceiver.  The T41EEE was "forked" from the V049.2 version
 of the T41-EP software.  T41EEE is fundamentally different from the mainstream T41-EP
 code in that it adopts C++ rather than C.  C++ language features will be gradually
@@ -32,7 +32,7 @@ and feature enhancements become available.  You will be able to update and FLASH
 with the revised software quickly.
 
 Please note that the configuration structure is different than the predecessor V049.2
-It is recommended to perform a full FLASH erase before loading T41EEE.0.
+It is recommended to perform a full FLASH erase before loading T41EEE.1.
 
 You will need to install the ArduinoJSON library by Benoit Blanchon.  Using the IDE:
 Tools -> Manage Libraries ...
@@ -41,28 +41,19 @@ with the name Arduino_JSON, which is not the correct library.  Install the libra
 and if you have the other dependencies for the V049.2 version, compilation will be
 successful.
 
-## Highlight of Features included in T41EEE.0
+## Highlight of Features included in T41EEE.1
 
-1.  The configuration file stored on the SD card is changed to JSON format.
-2.  New selections in the EEPROM menu allow serial readout of configuration data
-    from the stack, the EEPROM, the SD card, and the hard-coded defaults.
-3.  The Morse decoder is coded in a state-machine design pattern.
-4.  The sidetone quality is improved.  Thank you to Jonathan KN6LFB for this very
-    excellent improvement!
-5.  The user can now select from 4 different discrete CW offset tone frequencies.
-    The new selections are in the CW Options menu.
-6.  Spectrum zooms of 8X and 16X bugs are resolved and these zooms are functioning.
-7.  Transmit calibration can be done with either a 750 Hz or 3 kHz tone.  This new
-    selection is in the Calibration Options menu.  Calibration code is simplified
-    and this should result in better quality calibration.
-8.  The configuration file includes variables for frequency divider (quadrature
-    generator) hardware.  The values of 4 work with the original T41 QSD and QSE
-    boards.
-9.  Volume control is changed to one-hundred 1 dB steps.
-10. Audio chain management is significantly enhanced, and less audio memory is required.
-    Thank you to Jonathan KN6LFB for this major improvement!
-11. CW keyer timing optimizations including CW envelope shaping.  Another great one from
-    Jonathan KN6LFB!
+Thank you to Jonathan KN6LFB for the major improvement in button functionality!
+
+1.  Switch matrix buttons are changed from polling to interrupts for improved performance.
+2.  The new button code includes a tunable variable for "button delay".  This variable
+    is added to the calibration menu as BTN REPEAT.  The default value should be a good
+    starting point.
+3.  The switch matrix calibration routine is added to the calibration menu.
+4.  Switch matrix calibration is easier and precise.  It is possible to push a button
+    and hold it.  It will not skip to the next button.  In practice, a short, firm push
+    on each button in the proper series will rapidly complete the process.
+5.  EEPROM start-up code is significantly revised.
 
 
 *********************************************************************************************

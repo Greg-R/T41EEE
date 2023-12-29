@@ -249,7 +249,7 @@ int AGCOptions() {
   AGCLoadValues();  // G0ORX September 5, 2023
 
   EEPROMData.AGCMode = EEPROMData.AGCMode;      // Store in EEPROM and...
-  EEPROM.put(EEPROM_BASE_ADDRESS, EEPROMData);  // ...save it
+  EEPROM.put(EEPROM_BASE_ADDRESS + 4, EEPROMData);  // ...save it
   UpdateAGCField();
   return EEPROMData.AGCMode;
 }
@@ -801,7 +801,7 @@ int EEPROMOptions() {  // 0               1                2               3    
       break;
 
     case 4:                                           // Copy EEPROM->SD.
-      EEPROM.get(EEPROM_BASE_ADDRESS, tempConfig);    // Read as one large chunk
+      EEPROM.get(EEPROM_BASE_ADDRESS + 4, tempConfig);    // Read as one large chunk
       saveConfiguration(filename, tempConfig, true);  // Save EEPROM struct to SD
       break;
 
@@ -825,7 +825,7 @@ int EEPROMOptions() {  // 0               1                2               3    
         Serial.println(F("\nBegin EEPROMData from EEPROM"));
         // Don't want to overwrite the stack.  Need a temporary struct, read the EEPROM data into that.
         config_t EEPROMData_temp;
-        EEPROM.get(EEPROM_BASE_ADDRESS, EEPROMData_temp);
+        EEPROM.get(EEPROM_BASE_ADDRESS + 4, EEPROMData_temp);
         saveConfiguration(filename, EEPROMData_temp, false);  // Write the temporary struct to the serial monitor.
         Serial.println(F("\nEnd EEPROMData from EEPROM\n"));
       }

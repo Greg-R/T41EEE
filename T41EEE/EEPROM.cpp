@@ -19,7 +19,7 @@ void EEPROMWrite() {
 
 
 /*****
-  Purpose: This is nothing more than an alias for EEPROM.get(EEPROM_BASE_ADDRESS, EEPROMData).
+  Purpose: This is nothing more than an alias for EEPROM.get(EEPROM_BASE_ADDRESS + 4, EEPROMData).
 
   Parameter list:
   None
