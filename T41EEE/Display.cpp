@@ -83,6 +83,15 @@ void ShowName() {
 *****/
 FASTRUN void ShowSpectrum()  //AFP Extensively Modified 3-15-21 Adjusted 12-13-21 to align all elements.  Place in tightly-coupled memory.
 {
+  
+  int frequ_hist[32] = {0,0,0,0,0,0,0,0,              //  HB start
+                        0,0,0,0,0,0,0,0,
+                        0,0,0,0,0,0,0,0,
+                        0,0,0,0,0,0,0,0};                      
+  int j, k;
+  int FH_max = 0, FH_max_box = 0;                     //  HB finish
+
+  
   int centerLine = (MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2;
   int middleSlice = centerLine / 2;  // Approximate center element
   //int j2;  KF5N
@@ -139,6 +148,20 @@ FASTRUN void ShowSpectrum()  //AFP Extensively Modified 3-15-21 Adjusted 12-13-2
     y1_new_plot = EEPROMData.spectrumNoiseFloor - y1_new - EEPROMData.currentNoiseFloor[EEPROMData.currentBand];
     y_old_plot = EEPROMData.spectrumNoiseFloor - y_old - EEPROMData.currentNoiseFloor[EEPROMData.currentBand];
     y_old2_plot = EEPROMData.spectrumNoiseFloor - y_old2 - EEPROMData.currentNoiseFloor[EEPROMData.currentBand];
+
+
+    if ((x1 > 51) && (x1 < 461))                                                                //  HB start  for auto RFgain collect frequency distribution
+    {
+      j = 247 - y_new_plot + 40; // +40 to get 10 bins below zero - want to straddle zero
+      k = j >> 2;
+      if ((k > -1) && (k < 32)) {
+        frequ_hist[k] += 1;} ;
+        if (frequ_hist[k] > FH_max){
+          FH_max = frequ_hist[k];
+          FH_max_box = k;
+        }
+    }                                                                                         //  HB finish
+
 
     // Prevent spectrum from going below the bottom of the spectrum area.  KF5N
     if (y_new_plot > 247) y_new_plot = 247;
@@ -199,7 +222,7 @@ FASTRUN void ShowSpectrum()  //AFP Extensively Modified 3-15-21 Adjusted 12-13-2
     }
 
     int test1;
-    test1 = -y_new_plot + 230;  // Nudged waterfall towards blue.  KF5N July 23, 2023
+    test1 = -y_new_plot + 230;  // Nudged waterfall towards blue.  KF5N July 23, 2023   
     if (test1 < 0) test1 = 0;
     if (test1 > 117) test1 = 117;
     waterfall[x1] = gradient[test1];  // Try to put pixel values in middle of gradient array.  KF5N
@@ -221,7 +244,15 @@ FASTRUN void ShowSpectrum()  //AFP Extensively Modified 3-15-21 Adjusted 12-13-2
   }
   // Then write new row data into the missing top row to get a scroll effect using display hardware, not the CPU.
   tft.writeRect(WATERFALL_LEFT_X, FIRST_WATERFALL_LINE, MAX_WATERFALL_WIDTH, 1, waterfall);
+
+  if (FH_max_box > 15) {                                                      //  HB Start adjust rfGainAllBands  15 and 13 to alter to move target base up and down
+    EEPROMData.rfGainAllBands = EEPROMData.rfGainAllBands - 1;  
+  }
+  if (FH_max_box < 13) {
+    EEPROMData.rfGainAllBands = EEPROMData.rfGainAllBands + 1;  
+  }                                                                           // HB Finish
 }
+
 
 /*****
   Purpose: show filter bandwidth near center of spectrum and and show sample rate in corner
