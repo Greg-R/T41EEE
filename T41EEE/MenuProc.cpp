@@ -601,11 +601,11 @@ int MicOptions()  // AFP 09-22-22 All new
     int           an index into the band array
 *****/
 int RFOptions() {
-  const char *rfOptions[] = { "Power level", "Gain", "Cancel" };
+  const char *rfOptions[] = { "Power level", "Gain", "Auto-Gain On", "Auto-Gain Off", "Cancel" };
   int rfSet = 0;
   int returnValue = 0;
 
-  rfSet = SubmenuSelect(rfOptions, 3, rfSet);
+  rfSet = SubmenuSelect(rfOptions, 5, rfSet);
 
   switch (rfSet) {
     case 0:  // AFP 10-21-22
@@ -632,6 +632,18 @@ int RFOptions() {
       //EEPROMData.rfGainAllBands = EEPROMData.rfGainAllBands;
       EEPROMWrite();
       returnValue = EEPROMData.rfGainAllBands;
+      break;
+
+      case 2:      // Auto-Gain On                                                                                                  // Gain
+      EEPROMData.autoGain = true;  // Argument: min, max, start, increment
+      EEPROMWrite();
+      returnValue = true;
+      break;
+
+      case 3:      // Auto-Gain Off
+      EEPROMData.autoGain = false;
+      EEPROMWrite();
+      returnValue = false;
       break;
 
       // Where is the 3rd option and default???

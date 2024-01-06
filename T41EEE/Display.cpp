@@ -245,12 +245,14 @@ FASTRUN void ShowSpectrum()  //AFP Extensively Modified 3-15-21 Adjusted 12-13-2
   // Then write new row data into the missing top row to get a scroll effect using display hardware, not the CPU.
   tft.writeRect(WATERFALL_LEFT_X, FIRST_WATERFALL_LINE, MAX_WATERFALL_WIDTH, 1, waterfall);
 
+if(EEPROMData.autoGain) { // Adjust gain of AutoGain is ON.
   if (FH_max_box > 15) {                                                      //  HB Start adjust rfGainAllBands  15 and 13 to alter to move target base up and down
     EEPROMData.rfGainAllBands = EEPROMData.rfGainAllBands - 1;  
   }
   if (FH_max_box < 13) {
     EEPROMData.rfGainAllBands = EEPROMData.rfGainAllBands + 1;  
   }                                                                           // HB Finish
+}
 }
 
 

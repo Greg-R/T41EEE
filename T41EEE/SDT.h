@@ -739,6 +739,7 @@ struct config_t {
   int AGCMode = 1;
   int audioVolume = 30;  // 4 bytes
   int rfGainAllBands = 0;
+  bool autoGain = true;
   int spectrumNoiseFloor = SPECTRUM_NOISE_FLOOR;  // AFP 09-26-22
   int tuneIndex = DEFAULTFREQINCREMENT;           // JJP 7-3-23
   long stepFineTune = FINE_TUNE_STEP;             // JJP 7-3-23
