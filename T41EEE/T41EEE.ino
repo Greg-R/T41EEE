@@ -258,20 +258,20 @@ const uint32_t N_B_EX = 16;
 //float32_t recEQ_Level[14];
 //float32_t recEQ_LevelScale[14];
 //Setup for EQ filters
-float32_t rec_EQ1_float_buffer_L[256];
-float32_t rec_EQ2_float_buffer_L[256];
-float32_t rec_EQ3_float_buffer_L[256];
-float32_t rec_EQ4_float_buffer_L[256];
-float32_t rec_EQ5_float_buffer_L[256];
-float32_t rec_EQ6_float_buffer_L[256];
-float32_t rec_EQ7_float_buffer_L[256];
-float32_t rec_EQ8_float_buffer_L[256];
-float32_t rec_EQ9_float_buffer_L[256];
-float32_t rec_EQ10_float_buffer_L[256];
-float32_t rec_EQ11_float_buffer_L[256];
-float32_t rec_EQ12_float_buffer_L[256];
-float32_t rec_EQ13_float_buffer_L[256];
-float32_t rec_EQ14_float_buffer_L[256];
+float32_t DMAMEM rec_EQ1_float_buffer_L[256];
+float32_t DMAMEM rec_EQ2_float_buffer_L[256];
+float32_t DMAMEM rec_EQ3_float_buffer_L[256];
+float32_t DMAMEM rec_EQ4_float_buffer_L[256];
+float32_t DMAMEM rec_EQ5_float_buffer_L[256];
+float32_t DMAMEM rec_EQ6_float_buffer_L[256];
+float32_t DMAMEM rec_EQ7_float_buffer_L[256];
+float32_t DMAMEM rec_EQ8_float_buffer_L[256];
+float32_t DMAMEM rec_EQ9_float_buffer_L[256];
+float32_t DMAMEM rec_EQ10_float_buffer_L[256];
+float32_t DMAMEM rec_EQ11_float_buffer_L[256];
+float32_t DMAMEM rec_EQ12_float_buffer_L[256];
+float32_t DMAMEM rec_EQ13_float_buffer_L[256];
+float32_t DMAMEM rec_EQ14_float_buffer_L[256];
 
 float32_t rec_EQ_Band1_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };  //declare and zero biquad state variables
 float32_t rec_EQ_Band2_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -470,8 +470,6 @@ arm_fir_interpolate_instance_f32 FIR_int2_Q;
 arm_lms_norm_instance_f32 LMS_Norm_instance;
 arm_lms_instance_f32 LMS_instance;
 
-
-
 const DEMOD_Descriptor DEMOD[3] = {
   //   DEMOD_n, name
   { DEMOD_USB, "(USB)" },
@@ -479,16 +477,7 @@ const DEMOD_Descriptor DEMOD[3] = {
   { DEMOD_AM, "(AM)" },  //AFP09-22-22
 
 };
-/*
-struct dispSc
-{
-  const char *dbText;
-  float32_t   dBScale;
-  uint16_t    pixelsPerDB;
-  uint16_t    baseOffset;
-  float32_t   offsetIncrement;
-};
-*/
+
 dispSc displayScale[] =  //r *dbText,dBScale, pixelsPerDB, baseOffset, offsetIncrement
   {
     { "20 dB/", 10.0, 2, 24, 1.00 },
@@ -500,10 +489,6 @@ dispSc displayScale[] =  //r *dbText,dBScale, pixelsPerDB, baseOffset, offsetInc
 
 //======================================== Global variables declarations for Quad Oscillator 2 ===============================================
 long NCOFreq;
-
-//int EEPROMData.stepFineTuneOld = 0;
-//long EEPROMData.stepFineTune = 50UL;
-//long EEPROMData.stepFineTune2 = 50UL;
 
 float32_t NCO_INC;
 
@@ -524,14 +509,10 @@ float32_t q_temp = 0.0;
 float32_t corrResult;
 uint32_t corrResultIndex;
 float32_t cosBuffer2[256];
-//float32_t cosBuffer3[256];
-//float32_t cosBuffer4[256];
 float32_t sinBuffer[256];
 float32_t sinBuffer2[256];
 float32_t cwRiseBuffer[256];
 float32_t cwFallBuffer[256];
-//float32_t sinBuffer3[256];
-//float32_t sinBuffer4[256];
 float32_t aveCorrResult;
 float32_t aveCorrResultR;
 float32_t aveCorrResultL;
@@ -559,7 +540,6 @@ float32_t float_Corr_BufferR[511];
 float32_t float_Corr_BufferL[511];
 long tempSigTime = 0;
 
-//int audioTemp           = 0;  KF5N
 int audioTempPrevious = 0;
 float sigStart = 0.0;
 float sigDuration = 0.0;
@@ -648,21 +628,12 @@ char decodeBuffer[33];    // The buffer for holding the decoded characters.  Inc
 char keyboardBuffer[10];  // Set for call prefixes. May be increased later
 const char DEGREE_SYMBOL[] = { 0xB0, '\0' };
 
-//char *bigMorseCodeTree = (char *)"-EISH5--4--V---3--UF--------?-2--ARL---------.--.WP------J---1--TNDB6--.--X/-----KC------Y------MGZ7----,Q------O-8------9--0----";
-//012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678
-//         10        20        30        40        50        60        70        80        90       100       110       120
-
-//char EEPROMData.mapFileName[50];
-//char EEPROMData.myCall[10];
-//char EEPROMData.EEPROMData.equalizerRec[10];
 const char *tune_text = "Fast Tune";
 const char *zoomOptions[] = { "1x ", "2x ", "4x ", "8x ", "16x" };
-//char versionSettings[10];
 
 byte currentDashJump = DECODER_BUFFER_SIZE;
 byte currentDecoderIndex = 0;
 
-//int8_t EEPROMData.AGCMode = 2;
 int8_t auto_IQ_correction;
 int filterWidthX;  // The current filter X.
 int filterWidthY;  // The current filter Y.
@@ -684,7 +655,6 @@ int8_t NB_impulse_samples = 7;
 int8_t NR_first_block = 1;
 int8_t pos_x_date = 14;
 int8_t pos_y_date = 68;
-//int8_t EEPROMData.xmtMode = SSB_MODE;  // 0 = SSB, 1 = CW
 
 uint8_t agc_action = 0;
 uint8_t agc_switch_mode = 0;
@@ -755,13 +725,12 @@ const uint8_t NR_N_frames = 15;
 
 uint16_t base_y = SPECTRUM_BOTTOM;
 
-//int16_t EEPROMData.activeVFO;
 int16_t currentMode;
 int16_t pixelCurrent[SPECTRUM_RES];
 int16_t pixelnew[SPECTRUM_RES];
 int16_t pixelold[SPECTRUM_RES];
-int16_t pixelnew2[MAX_WATERFALL_WIDTH + 1];  //AFP
-int16_t pixelold2[MAX_WATERFALL_WIDTH];
+//int16_t pixelnew2[MAX_WATERFALL_WIDTH + 1];  //AFP
+//int16_t pixelold2[MAX_WATERFALL_WIDTH];
 int16_t notch_L[2] = { 156, 180 };
 int16_t fineEncoderRead;
 int16_t notch_R[2] = { 166, 190 };

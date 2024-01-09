@@ -13,7 +13,7 @@ FLASHMEM void loadConfiguration(const char *filename, config_t &EEPROMData) {
   // Don't forget to change the capacity to match your requirements.
   // Use https://arduinojson.org/v6/assistant to compute the capacity.
   // StaticJsonDocument<512> doc;
-  DynamicJsonDocument doc(7000);  // This uses the heap.
+  JsonDocument doc;  // This uses the heap.
 
   // Deserialize the JSON document
   DeserializationError error = deserializeJson(doc, file);
@@ -119,7 +119,7 @@ FLASHMEM void saveConfiguration(const char *filename, const config_t &EEPROMData
   // Don't forget to change the capacity to match your requirements.
   // Use https://arduinojson.org/assistant to compute the capacity.
   //StaticJsonDocument<256> doc;  // This uses the stack.
-  DynamicJsonDocument doc(7000);  // This uses the heap.
+  JsonDocument doc;  // This uses the heap.
 
   // Set the values in the document
   doc["versionSettings"] = EEPROMData.versionSettings;
