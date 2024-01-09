@@ -9,7 +9,7 @@
   Return value;
     void
 *****/
-void sineTone(int numCycles) {
+FLASHMEM void sineTone(int numCycles) {
   float theta;
   float freqSideTone2;
   // freqSideTone3, 3000 Hz, is used during TX calibration.
@@ -37,7 +37,7 @@ void sineTone(int numCycles) {
     void
 *****/
 
-void initCWShaping() {
+FLASHMEM void initCWShaping() {
   int pos;
   float deg;
 

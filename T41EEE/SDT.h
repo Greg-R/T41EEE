@@ -1366,8 +1366,8 @@ extern int16_t fineEncoderRead;
 
 extern int16_t pixelnew[];
 extern int16_t pixelold[];
-extern int16_t pixelnew2[];  //AFP
-extern int16_t pixelold2[];
+//extern int16_t pixelnew2[];  //AFP
+//extern int16_t pixelold2[];
 
 extern int16_t notch_L[];
 extern int16_t notch_R[];
