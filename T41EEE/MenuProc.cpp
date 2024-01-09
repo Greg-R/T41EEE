@@ -23,8 +23,8 @@ int CalibrateOptions() {
 
   // Select the type of calibration, and then skip this during the loop() function.
   if (calibrateFlag == 0) {
-    const char *IQOptions[9]{ "Freq Cal", "CW PA Cal", "Rec Cal", "Xmit Cal", "SSB PA Cal", "Set Tone", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
-    IQChoice = SubmenuSelect(IQOptions, 9, 0);                                                                                                //AFP 10-21-22
+    const char *IQOptions[10]{ "Freq Cal", "CW PA Cal", "Rec Cal", "Carrier Cal", "Xmit Cal", "SSB PA Cal", "Set Tone", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
+    IQChoice = SubmenuSelect(IQOptions, 10, 0);                                                                                                //AFP 10-21-22
   }
   calibrateFlag = 1;
   switch (IQChoice) {
@@ -68,11 +68,17 @@ int CalibrateOptions() {
       DoReceiveCalibrate();  // This function was significantly revised.  KF5N August 16, 2023
       IQChoice = 5;
       break;
-    case 3:                                 // IQ Transmit Cal - Gain and Phase  //AFP 2-21-23
+
+    case 3:                  // Xmit Carrier calibration.
+      DoXmitCarrierCalibrate(EEPROMData.calFreq);
+      IQChoice = 5;
+      break;
+
+    case 4:                                 // IQ Transmit Cal - Gain and Phase  //AFP 2-21-23
       DoXmitCalibrate(EEPROMData.calFreq);  // This function was significantly revised.  KF5N August 16, 2023
       IQChoice = 5;
       break;
-    case 4:  // SSB PA Cal
+    case 5:  // SSB PA Cal
       EEPROMData.SSBPowerCalibrationFactor[EEPROMData.currentBand] = GetEncoderValueLive(-2.0, 2.0, EEPROMData.SSBPowerCalibrationFactor[EEPROMData.currentBand], 0.001, (char *)"SSB PA Cal: ");
       EEPROMData.powerOutSSB[EEPROMData.currentBand] = (-.0133 * EEPROMData.transmitPowerLevel * EEPROMData.transmitPowerLevel + .7884 * EEPROMData.transmitPowerLevel + 4.5146) * EEPROMData.SSBPowerCalibrationFactor[EEPROMData.currentBand];  // AFP 10-21-22
       val = ReadSelectedPushButton();
@@ -88,14 +94,14 @@ int CalibrateOptions() {
       }
       break;  // Missing break.  KF5N August 12, 2023
 
-    case 5:  // Choose CW calibration tone frequency.
+    case 6:  // Choose CW calibration tone frequency.
       SelectCalFreq();
       Serial.printf("End of case 5 in IQOptions\n");
       calibrateFlag = 0;
       return 0;
       break;
 
-    case 6:  // Calibrate buttons
+    case 7:  // Calibrate buttons
       SaveAnalogSwitchValues();
       calibrateFlag = 0;
       RedrawDisplayScreen();
@@ -104,7 +110,7 @@ int CalibrateOptions() {
       IQChoice = 6;
       return 6;
 
-    case 7:  // Set button repeat rate
+    case 8:  // Set button repeat rate
       EEPROMData.buttonRepeatDelay = 1000 * GetEncoderValueLive(0, 5000, EEPROMData.buttonRepeatDelay / 1000, 1, (char *)"Btn Repeat:  ");
       val = ReadSelectedPushButton();
       if (val != BOGUS_PIN_READ) {
@@ -119,7 +125,7 @@ int CalibrateOptions() {
       }
       break;
 
-    case 8:  // Cancelled choice
+    case 9:  // Cancelled choice
       //EraseMenus();
       RedrawDisplayScreen();
       currentFreq = TxRxFreq = EEPROMData.centerFreq + NCOFreq;

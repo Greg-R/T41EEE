@@ -35,8 +35,10 @@ void CalibratePreamble(int setZoom) {
   EEPROMData.transmitPowerLevel = 5;  //AFP 02-09-23  Set to 5 watts as a precaution to protect the power amplifier in case it is connected.
   EEPROMData.powerOutCW[EEPROMData.currentBand] = (-.0133 * EEPROMData.transmitPowerLevel * EEPROMData.transmitPowerLevel + .7884 * EEPROMData.transmitPowerLevel + 4.5146) * EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];
   //  Serial.printf("preamble EEPROMData.powerOutCW = %f\n", EEPROMData.powerOutCW[EEPROMData.currentBand]);
-  modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
-  modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
+//  modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
+//  modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
+  modeSelectOutExL.gain(0, 1);  //AFP 10-21-22
+  modeSelectOutExR.gain(0, 1);  //AFP 10-21-22
   userxmtMode = EEPROMData.xmtMode;                                         // Store the user's mode setting.  KF5N July 22, 2023
   userZoomIndex = EEPROMData.spectrum_zoom;                                 // Save the zoom index so it can be reset at the conclusion.  KF5N August 12, 2023
   zoomIndex = setZoom - 1;
@@ -277,6 +279,85 @@ void DoXmitCalibrate(int toneFreq) {
 
 
 /*****
+  Purpose: Combined input/ output for the purpose of calibrating the transmit IQ
+
+   Parameter List:
+      void
+
+   Return value:
+      void
+ *****/
+
+ int16_t iDCoffset = 0;
+ int16_t qDCoffset = 0;
+void DoXmitCarrierCalibrate(int toneFreq) {
+  int task = -1;
+  int lastUsedTask = -2;
+  int freqOffset;
+
+  if (toneFreq == 0) {     // 750 Hz
+    CalibratePreamble(4);  // Set zoom to 16X.
+    freqOffset = 0;        // Calibration tone same as regular modulation tone.
+  }
+  if (toneFreq == 1) {     // 3 kHz
+    CalibratePreamble(2);  // Set zoom to 4X.
+    freqOffset = 2250;      // Need 750 + 2250 = 3 kHz
+  }
+  calTypeFlag = 1;  // TX cal
+
+  SetFreqCal(freqOffset);
+  tft.writeTo(L1);
+  // Transmit Calibration Loop
+  while (true) {
+    ShowSpectrum2(toneFreq);
+    val = ReadSelectedPushButton();
+    if (val != BOGUS_PIN_READ) {
+      val = ProcessButtonPress(val);
+      if (val != lastUsedTask && task == -100) task = val;
+      else task = BOGUS_PIN_READ;
+    }
+    switch (task) {
+      // Toggle gain and phase
+      case UNUSED_1:
+        IQCalType = !IQCalType;
+        break;
+      // Toggle increment value
+      case BEARING:  // UNUSED_2 is now called BEARING
+        corrChange = !corrChange;
+        if (corrChange == 1) {          // Toggle increment value
+          correctionIncrement = 10;  // AFP 2-11-23
+        } else {
+          correctionIncrement = 1;  // AFP 2-11-23
+        }
+        tft.setFontScale((enum RA8875tsize)0);
+        tft.fillRect(400, 110, 50, tft.getFontHeight(), RA8875_BLACK);
+        tft.setCursor(400, 110);
+        tft.print(correctionIncrement, 3);
+        break;
+      case (MENU_OPTION_SELECT):  // Save values and exit calibration.
+        tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
+        //        EEPROMData.EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] = EEPROMData.IQAmpCorrectionFactor[EEPROMData.currentBand];
+        //        EEPROMData.EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand] = EEPROMData.IQPhaseCorrectionFactor[EEPROMData.currentBand];
+        IQChoice = 6;  // AFP 2-11-23
+        break;
+      default:
+        break;
+    }                                     // end switch
+    if (task != -1) lastUsedTask = task;  //  Save the last used task.
+    task = -100;                          // Reset task after it is used.
+    //  Read encoder and update values.
+    if (IQCalType == 0) {
+      iDCoffset = GetEncoderValueLive(-1000, 1000, iDCoffset, correctionIncrement, (char *)"I Offset");
+    } else {
+      qDCoffset = GetEncoderValueLive(-1000, 1000, qDCoffset, correctionIncrement, (char *)"Q Offset");
+    }
+    if (IQChoice == 6) break;  //  Exit the while loop.
+  }                            // end while
+  CalibratePrologue();
+}
+
+
+/*****
   Purpose: Signal processing for th purpose of calibrating the transmit IQ
 
    Parameter List:
@@ -333,8 +414,8 @@ void ProcessIQData2(int toneFreq) {
   arm_fir_interpolate_f32(&FIR_int2_EX_Q, float_buffer_RTemp, float_buffer_R_EX, 512);
 
   //  192KHz effective sample rate here
-  arm_scale_f32(float_buffer_L_EX, 20, float_buffer_L_EX, 2048);  //Scale to compensate for losses in Interpolation
-  arm_scale_f32(float_buffer_R_EX, 20, float_buffer_R_EX, 2048);
+  arm_scale_f32(float_buffer_L_EX, 7, float_buffer_L_EX, 2048);  //Scale to compensate for losses in Interpolation
+  arm_scale_f32(float_buffer_R_EX, 7, float_buffer_R_EX, 2048);
 
   // are there at least N_BLOCKS buffers in each channel available ?
   if ((uint32_t)Q_in_L.available() > N_BLOCKS + 0 && (uint32_t)Q_in_R.available() > N_BLOCKS + 0) {
@@ -346,6 +427,8 @@ void ProcessIQData2(int toneFreq) {
     Q_out_R_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
     arm_float_to_q15(float_buffer_L_EX, q15_buffer_LTemp, 2048);
     arm_float_to_q15(float_buffer_R_EX, q15_buffer_RTemp, 2048);
+    for(int i = 0; i < 2048; i = i + 1) q15_buffer_LTemp[i] = q15_buffer_LTemp[i] - 27000 + iDCoffset;
+    for(int i = 0; i < 2048; i = i + 1) q15_buffer_RTemp[i] = q15_buffer_RTemp[i] - 27000 + qDCoffset;
     Q_out_L_Ex.play(q15_buffer_LTemp, 2048);
     Q_out_R_Ex.play(q15_buffer_RTemp, 2048);
     Q_out_L_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);

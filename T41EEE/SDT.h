@@ -2054,6 +2054,7 @@ void DoGapHistogram(long val);
 int DoSplitVFO();
 void DoPaddleFlip();
 void DoXmitCalibrate(int toneFreq);
+void DoXmitCarrierCalibrate(int toneFreq);
 void DoReceiveCalibrate();
 void DrawActiveLetter(int row, int horizontalSpacer, int whichLetterIndex, int keyWidth, int keyHeight);
 void DrawBandWidthIndicatorBar();  // AFP 03-27-22 Layers

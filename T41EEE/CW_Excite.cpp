@@ -93,18 +93,22 @@ void CW_ExciterIQData(int shaping) //AFP 08-20-22
     arm_fir_interpolate_f32(&FIR_int2_EX_Q, float_buffer_RTemp, float_buffer_R_EX, 512);
 
     //  192KHz effective sample rate here
-    arm_scale_f32(float_buffer_L_EX, 20, float_buffer_L_EX, 2048); //Scale to compensate for losses in Interpolation
-    arm_scale_f32(float_buffer_R_EX, 20, float_buffer_R_EX, 2048);
+    arm_scale_f32(float_buffer_L_EX, 10, float_buffer_L_EX, 2048); //Scale to compensate for losses in Interpolation
+    arm_scale_f32(float_buffer_R_EX, 10, float_buffer_R_EX, 2048);
 
     /**********************************************************************************  AFP 12-31-20
       CONVERT TO INTEGER AND PLAY AUDIO
     **********************************************************************************/
 
     for (unsigned  i = 0; i < N_BLOCKS_EX; i++) {  //N_BLOCKS_EX=16  BUFFER_SIZE=128 16x128=2048
-      sp_L2 = Q_out_L_Ex.getBuffer();
-      sp_R2 = Q_out_R_Ex.getBuffer();
-      arm_float_to_q15 (&float_buffer_L_EX[BUFFER_SIZE * i], sp_L2, BUFFER_SIZE);
+      sp_L2 = Q_out_L_Ex.getBuffer();       // Q_out_L_Ex and Q_out_R_Ex are AudioPlayQueue objects.  sp_L2 and sp_R2 are pointers to int16_t.
+      sp_R2 = Q_out_R_Ex.getBuffer();       // getBuffer() returns a pointer to an array of AUDIO_BLOCK_SAMPLES (usually 128) int16.
+      arm_float_to_q15 (&float_buffer_L_EX[BUFFER_SIZE * i], sp_L2, BUFFER_SIZE);  // source, destination, number of samples
       arm_float_to_q15 (&float_buffer_R_EX[BUFFER_SIZE * i], sp_R2, BUFFER_SIZE);
+      //  Now it is desired to inject a DC offset into the data.
+      for(int i = 0; i < 128; i = i + 1) *(sp_L2 + i) = *(sp_L2 + i) - 27200;
+      for(int i = 0; i < 128; i = i + 1) *(sp_R2 + i) = *(sp_R2 + i) - 26600;
+    //  Serial.printf("%d\n", *(sp_L2 +64));
       Q_out_L_Ex.playBuffer(); // play it !
       Q_out_R_Ex.playBuffer(); // play it !
     }
