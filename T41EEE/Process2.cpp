@@ -287,13 +287,15 @@ void DoXmitCalibrate(int toneFreq) {
    Return value:
       void
  *****/
+  q15_t iDCoffset;
+  q15_t qDCoffset;
 
- int16_t iDCoffset = 0;
- int16_t qDCoffset = 0;
 void DoXmitCarrierCalibrate(int toneFreq) {
   int task = -1;
   int lastUsedTask = -2;
   int freqOffset;
+
+  int increment = 10;
 
   if (toneFreq == 0) {     // 750 Hz
     CalibratePreamble(4);  // Set zoom to 16X.
@@ -325,14 +327,14 @@ void DoXmitCarrierCalibrate(int toneFreq) {
       case BEARING:  // UNUSED_2 is now called BEARING
         corrChange = !corrChange;
         if (corrChange == 1) {          // Toggle increment value
-          correctionIncrement = 10;  // AFP 2-11-23
+          increment = 10;  // AFP 2-11-23
         } else {
-          correctionIncrement = 1;  // AFP 2-11-23
+          increment = 1;  // AFP 2-11-23
         }
         tft.setFontScale((enum RA8875tsize)0);
         tft.fillRect(400, 110, 50, tft.getFontHeight(), RA8875_BLACK);
         tft.setCursor(400, 110);
-        tft.print(correctionIncrement, 3);
+        tft.print(increment);
         break;
       case (MENU_OPTION_SELECT):  // Save values and exit calibration.
         tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
@@ -347,9 +349,9 @@ void DoXmitCarrierCalibrate(int toneFreq) {
     task = -100;                          // Reset task after it is used.
     //  Read encoder and update values.
     if (IQCalType == 0) {
-      iDCoffset = GetEncoderValueLive(-1000, 1000, iDCoffset, correctionIncrement, (char *)"I Offset");
+      EEPROMData.iDCoffset[EEPROMData.currentBand] = (q15_t)GetEncoderValueLiveQ15t(-1000, 1000, EEPROMData.iDCoffset[EEPROMData.currentBand], increment, (char *)"I Offset:");
     } else {
-      qDCoffset = GetEncoderValueLive(-1000, 1000, qDCoffset, correctionIncrement, (char *)"Q Offset");
+      EEPROMData.qDCoffset[EEPROMData.currentBand] = (q15_t)GetEncoderValueLiveQ15t(-1000, 1000, EEPROMData.qDCoffset[EEPROMData.currentBand], increment, (char *)"Q Offset:");
     }
     if (IQChoice == 6) break;  //  Exit the while loop.
   }                            // end while
@@ -414,8 +416,8 @@ void ProcessIQData2(int toneFreq) {
   arm_fir_interpolate_f32(&FIR_int2_EX_Q, float_buffer_RTemp, float_buffer_R_EX, 512);
 
   //  192KHz effective sample rate here
-  arm_scale_f32(float_buffer_L_EX, 7, float_buffer_L_EX, 2048);  //Scale to compensate for losses in Interpolation
-  arm_scale_f32(float_buffer_R_EX, 7, float_buffer_R_EX, 2048);
+  arm_scale_f32(float_buffer_L_EX, 20, float_buffer_L_EX, 2048);  //Scale to compensate for losses in Interpolation
+  arm_scale_f32(float_buffer_R_EX, 20, float_buffer_R_EX, 2048);
 
   // are there at least N_BLOCKS buffers in each channel available ?
   if ((uint32_t)Q_in_L.available() > N_BLOCKS + 0 && (uint32_t)Q_in_R.available() > N_BLOCKS + 0) {
@@ -427,8 +429,8 @@ void ProcessIQData2(int toneFreq) {
     Q_out_R_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
     arm_float_to_q15(float_buffer_L_EX, q15_buffer_LTemp, 2048);
     arm_float_to_q15(float_buffer_R_EX, q15_buffer_RTemp, 2048);
-    for(int i = 0; i < 2048; i = i + 1) q15_buffer_LTemp[i] = q15_buffer_LTemp[i] - 27000 + iDCoffset;
-    for(int i = 0; i < 2048; i = i + 1) q15_buffer_RTemp[i] = q15_buffer_RTemp[i] - 27000 + qDCoffset;
+    for(int i = 0; i < 2048; i = i + 1) q15_buffer_LTemp[i] = q15_buffer_LTemp[i] + EEPROMData.iDCoffset[EEPROMData.currentBand] + 1300;
+    for(int i = 0; i < 2048; i = i + 1) q15_buffer_RTemp[i] = q15_buffer_RTemp[i] + EEPROMData.qDCoffset[EEPROMData.currentBand] + 1300;
     Q_out_L_Ex.play(q15_buffer_LTemp, 2048);
     Q_out_R_Ex.play(q15_buffer_RTemp, 2048);
     Q_out_L_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);

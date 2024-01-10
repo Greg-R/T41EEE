@@ -832,6 +832,8 @@ struct config_t {
   int buttonThresholdPressed = 944;   // switchValues[0] + WIGGLE_ROOM
   int buttonThresholdReleased = 964;  // buttonThresholdPressed + WIGGLE_ROOM
   int buttonRepeatDelay = 300000;     // Increased to 300000 from 200000 to better handle cheap, wornout buttons.
+  q15_t iDCoffset[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+  q15_t qDCoffset[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
 };
 
 extern struct config_t EEPROMData;
@@ -2099,6 +2101,7 @@ void FreqShift2();
 float goertzel_mag(int numSamples, int TARGET_FREQUENCY, int SAMPLING_RATE, float *data);
 int GetEncoderValue(int minValue, int maxValue, int startValue, int increment, char prompt[]);
 float GetEncoderValueLive(float minValue, float maxValue, float startValue, float increment, char prompt[]);  //AFP 10-22-22
+int GetEncoderValueLiveQ15t(int minValue, int maxValue, int startValue, int increment, char prompt[]);
 void GetFavoriteFrequency();
 
 float HaversineDistance(float dxLat, float dxLon);

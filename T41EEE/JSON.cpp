@@ -102,6 +102,8 @@ FLASHMEM void loadConfiguration(const char *filename, config_t &EEPROMData) {
   EEPROMData.buttonThresholdPressed = doc["buttonThresholdPressed"] | 944;
   EEPROMData.buttonThresholdReleased = doc["buttonThresholdReleased"] | 964;
   EEPROMData.buttonRepeatDelay = doc["buttonRepeatDelay"] | 300000;
+  for (int i = 0; i < 7; i++) EEPROMData.iDCoffset[i] = doc["iDCoffset"][i];
+  for (int i = 0; i < 7; i++) EEPROMData.qDCoffset[i] = doc["qDCoffset"][i];  
 
   // How to copy strings:
   //  strlcpy(EEPROMData.myCall,                  // <- destination
@@ -198,6 +200,8 @@ FLASHMEM void saveConfiguration(const char *filename, const config_t &EEPROMData
   doc["buttonThresholdPressed"] = EEPROMData.buttonThresholdPressed;
   doc["buttonThresholdReleased"] = EEPROMData.buttonThresholdReleased;
   doc["buttonRepeatDelay"] = EEPROMData.buttonRepeatDelay;
+  for (int i = 0; i < 7; i++) doc["iDCoffset"][i] = EEPROMData.iDCoffset[i];
+  for (int i = 0; i < 7; i++) doc["qDCoffset"][i] = EEPROMData.qDCoffset[i];
 
   if (toFile) {
     // Delete existing file, otherwise EEPROMData is appended to the file
