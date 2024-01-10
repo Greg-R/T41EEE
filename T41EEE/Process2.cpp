@@ -7,7 +7,7 @@
 // Major clean-up of calibration.  KF5N August 16, 2023
 
 int val;
-int corrChange;
+//bool corrChange;
 float correctionIncrement;  //AFP 2-7-23
 int userScale, userZoomIndex, userxmtMode;
 int transmitPowerLevelTemp, cwFreqOffsetTemp;
@@ -25,8 +25,8 @@ int transmitPowerLevelTemp, cwFreqOffsetTemp;
  *****/
 void CalibratePreamble(int setZoom) {
   calOnFlag = 1;
-  corrChange = 0;
-  correctionIncrement = 0.01;  //AFP 2-7-23
+  //corrChange = false;
+  //correctionIncrement = 0.01;  //AFP 2-7-23
   IQCalType = 0;
   radioState = CW_TRANSMIT_STRAIGHT_STATE;                 // KF5N
   transmitPowerLevelTemp = EEPROMData.transmitPowerLevel;  //AFP 05-11-23
@@ -35,16 +35,16 @@ void CalibratePreamble(int setZoom) {
   EEPROMData.transmitPowerLevel = 5;  //AFP 02-09-23  Set to 5 watts as a precaution to protect the power amplifier in case it is connected.
   EEPROMData.powerOutCW[EEPROMData.currentBand] = (-.0133 * EEPROMData.transmitPowerLevel * EEPROMData.transmitPowerLevel + .7884 * EEPROMData.transmitPowerLevel + 4.5146) * EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];
   //  Serial.printf("preamble EEPROMData.powerOutCW = %f\n", EEPROMData.powerOutCW[EEPROMData.currentBand]);
-//  modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
-//  modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
-  modeSelectOutExL.gain(0, 1);  //AFP 10-21-22
-  modeSelectOutExR.gain(0, 1);  //AFP 10-21-22
-  userxmtMode = EEPROMData.xmtMode;                                         // Store the user's mode setting.  KF5N July 22, 2023
-  userZoomIndex = EEPROMData.spectrum_zoom;                                 // Save the zoom index so it can be reset at the conclusion.  KF5N August 12, 2023
+  //  modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
+  //  modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
+  modeSelectOutExL.gain(0, 1);               //AFP 10-21-22
+  modeSelectOutExR.gain(0, 1);               //AFP 10-21-22
+  userxmtMode = EEPROMData.xmtMode;          // Store the user's mode setting.  KF5N July 22, 2023
+  userZoomIndex = EEPROMData.spectrum_zoom;  // Save the zoom index so it can be reset at the conclusion.  KF5N August 12, 2023
   zoomIndex = setZoom - 1;
   ButtonZoom();
   RedrawDisplayScreen();  // Erase any existing spectrum trace data.
-  tft.writeTo(L2);  // Erase the bandwidth bar.  KF5N August 16, 2023
+  tft.writeTo(L2);        // Erase the bandwidth bar.  KF5N August 16, 2023
   tft.clearMemory();
   tft.writeTo(L1);
   tft.setFontScale((enum RA8875tsize)0);
@@ -60,8 +60,8 @@ void CalibratePreamble(int setZoom) {
   tft.print("dB");
   tft.setCursor(350, 110);
   tft.print("Incr= ");
-  tft.setCursor(400, 110);
-  tft.print(correctionIncrement, 3);
+  //  tft.setCursor(400, 110);
+  //  tft.print(correctionIncrement, 3);
   userScale = EEPROMData.currentScale;  //  Remember user preference so it can be reset when done.  KF5N
   EEPROMData.currentScale = 1;          //  Set vertical scale to 10 dB during calibration.  KF5N
   updateDisplayFlag = 0;
@@ -76,8 +76,8 @@ void CalibratePreamble(int setZoom) {
   modeSelectOutR.gain(0, 1);
   modeSelectOutL.gain(1, 0);
   modeSelectOutR.gain(1, 0);
-  //  modeSelectOutExL.gain(0, 1);
-  //  modeSelectOutExR.gain(0, 1);
+  modeSelectOutExL.gain(0, 1);
+  modeSelectOutExR.gain(0, 1);
   EEPROMData.centerFreq = TxRxFreq;
   NCOFreq = 0L;
   xrState = TRANSMIT_STATE;
@@ -122,8 +122,8 @@ void CalibratePrologue() {
   tft.writeTo(L2);  // Clear layer 2.  KF5N July 31, 2023
   tft.clearMemory();
   tft.writeTo(L1);  // Exit function in layer 1.  KF5N August 3, 2023
-  RedrawDisplayScreen();
-  IQChoice = 5;
+  //RedrawDisplayScreen();
+  IQChoice = 9;
   calOnFlag = 0;
   radioState = CW_RECEIVE_STATE;  // KF5N
   SetFreq();                      // Return Si5351 to normal operation mode.  KF5N
@@ -144,15 +144,23 @@ void DoReceiveCalibrate() {
   int task = -1;
   int lastUsedTask = -2;
   int calFreqTemp, calFreqShift;
-  CalibratePreamble(0);                                                              // Set zoom to 1X.
-//  if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) calFreqShift = 24000 - 2000;  //  LSB offset.  KF5N
-//  if (bands[EEPROMData.currentBand].mode == DEMOD_USB) calFreqShift = 24000 + 2250;  //  USB offset.  KF5N
+  bool corrChange = false;
+  float correctionIncrement = 0.01;
+  CalibratePreamble(0);                                                       // Set zoom to 1X.
+                                                                              //  if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) calFreqShift = 24000 - 2000;  //  LSB offset.  KF5N
+                                                                              //  if (bands[EEPROMData.currentBand].mode == DEMOD_USB) calFreqShift = 24000 + 2250;  //  USB offset.  KF5N
   if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) calFreqShift = 24000;  //  LSB offset.  KF5N
   if (bands[EEPROMData.currentBand].mode == DEMOD_USB) calFreqShift = 24000;  //  USB offset.  KF5N
   calFreqTemp = EEPROMData.calFreq;
   EEPROMData.calFreq = 1;  // Receive calibration currently must use 3 kHz.
   SetFreqCal(calFreqShift);
   calTypeFlag = 0;  // RX cal
+
+  tft.setFontScale((enum RA8875tsize)0);
+  tft.fillRect(400, 110, 50, tft.getFontHeight(), RA8875_BLACK);
+  tft.setCursor(400, 110);
+  tft.print(correctionIncrement);
+
   // Receive calibration loop
   while (true) {
     ShowSpectrum2(750.0);
@@ -215,6 +223,8 @@ void DoXmitCalibrate(int toneFreq) {
   int task = -1;
   int lastUsedTask = -2;
   int freqOffset;
+  bool corrChange = true;
+  float correctionIncrement = 0.01;
 
   if (toneFreq == 0) {     // 750 Hz
     CalibratePreamble(4);  // Set zoom to 16X.
@@ -222,9 +232,14 @@ void DoXmitCalibrate(int toneFreq) {
   }
   if (toneFreq == 1) {     // 3 kHz
     CalibratePreamble(2);  // Set zoom to 4X.
-    freqOffset = 2250;      // Need 750 + 2250 = 3 kHz
+    freqOffset = 2250;     // Need 750 + 2250 = 3 kHz
   }
   calTypeFlag = 1;  // TX cal
+
+  tft.setFontScale((enum RA8875tsize)0);
+  tft.fillRect(400, 110, 50, tft.getFontHeight(), RA8875_BLACK);
+  tft.setCursor(400, 110);
+  tft.print(correctionIncrement);
 
   SetFreqCal(freqOffset);
   tft.writeTo(L1);
@@ -255,7 +270,7 @@ void DoXmitCalibrate(int toneFreq) {
         tft.setCursor(400, 110);
         tft.print(correctionIncrement, 3);
         break;
-      case (MENU_OPTION_SELECT):  // Save values and exit calibration.
+      case MENU_OPTION_SELECT:  // Save values and exit calibration.
         tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
         //        EEPROMData.EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] = EEPROMData.IQAmpCorrectionFactor[EEPROMData.currentBand];
         //        EEPROMData.EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand] = EEPROMData.IQPhaseCorrectionFactor[EEPROMData.currentBand];
@@ -287,14 +302,14 @@ void DoXmitCalibrate(int toneFreq) {
    Return value:
       void
  *****/
-  q15_t iDCoffset;
-  q15_t qDCoffset;
+//  q15_t iDCoffset;
+//  q15_t qDCoffset;
 
 void DoXmitCarrierCalibrate(int toneFreq) {
   int task = -1;
   int lastUsedTask = -2;
   int freqOffset;
-
+  bool corrChange = true;
   int increment = 10;
 
   if (toneFreq == 0) {     // 750 Hz
@@ -303,9 +318,14 @@ void DoXmitCarrierCalibrate(int toneFreq) {
   }
   if (toneFreq == 1) {     // 3 kHz
     CalibratePreamble(2);  // Set zoom to 4X.
-    freqOffset = 2250;      // Need 750 + 2250 = 3 kHz
+    freqOffset = 2250;     // Need 750 + 2250 = 3 kHz
   }
   calTypeFlag = 1;  // TX cal
+
+  tft.setFontScale((enum RA8875tsize)0);
+  tft.fillRect(400, 110, 50, tft.getFontHeight(), RA8875_BLACK);
+  tft.setCursor(400, 110);
+  tft.print(increment);
 
   SetFreqCal(freqOffset);
   tft.writeTo(L1);
@@ -323,11 +343,12 @@ void DoXmitCarrierCalibrate(int toneFreq) {
       case UNUSED_1:
         IQCalType = !IQCalType;
         break;
+
       // Toggle increment value
       case BEARING:  // UNUSED_2 is now called BEARING
-        corrChange = !corrChange;
-        if (corrChange == 1) {          // Toggle increment value
-          increment = 10;  // AFP 2-11-23
+        corrChange = not corrChange;
+        if (corrChange == true) {  // Toggle increment value
+          increment = 10;          // AFP 2-11-23
         } else {
           increment = 1;  // AFP 2-11-23
         }
@@ -336,12 +357,14 @@ void DoXmitCarrierCalibrate(int toneFreq) {
         tft.setCursor(400, 110);
         tft.print(increment);
         break;
-      case (MENU_OPTION_SELECT):  // Save values and exit calibration.
+
+      case MENU_OPTION_SELECT:  // Save values and exit calibration.
         tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
         //        EEPROMData.EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] = EEPROMData.IQAmpCorrectionFactor[EEPROMData.currentBand];
         //        EEPROMData.EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand] = EEPROMData.IQPhaseCorrectionFactor[EEPROMData.currentBand];
         IQChoice = 6;  // AFP 2-11-23
         break;
+
       default:
         break;
     }                                     // end switch
@@ -393,7 +416,7 @@ void ProcessIQData2(int toneFreq) {
 
   bandOutputFactor = 0.127;  // This is a remnant of the calibration process which included the power amplifier.
   // Generate I and Q for the transmit or receive calibration.  KF5N
-  if (IQChoice == 2 || IQChoice == 3) {                                   // KF5N
+  if (IQChoice == 2 || IQChoice == 3 || IQChoice == 4) {                                   // KF5N
     arm_scale_f32(cosBuffer3, bandOutputFactor, float_buffer_L_EX, 256);  // AFP 2-11-23 Use pre-calculated sin & cos instead of Hilbert
     arm_scale_f32(sinBuffer3, bandOutputFactor, float_buffer_R_EX, 256);  // AFP 2-11-23 Sidetone = 3000
   }
@@ -429,8 +452,8 @@ void ProcessIQData2(int toneFreq) {
     Q_out_R_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
     arm_float_to_q15(float_buffer_L_EX, q15_buffer_LTemp, 2048);
     arm_float_to_q15(float_buffer_R_EX, q15_buffer_RTemp, 2048);
-    for(int i = 0; i < 2048; i = i + 1) q15_buffer_LTemp[i] = q15_buffer_LTemp[i] + EEPROMData.iDCoffset[EEPROMData.currentBand] + 1300;
-    for(int i = 0; i < 2048; i = i + 1) q15_buffer_RTemp[i] = q15_buffer_RTemp[i] + EEPROMData.qDCoffset[EEPROMData.currentBand] + 1300;
+        for(int i = 0; i < 2048; i = i + 1) q15_buffer_LTemp[i] = q15_buffer_LTemp[i] + EEPROMData.iDCoffset[EEPROMData.currentBand] + 1300;
+        for(int i = 0; i < 2048; i = i + 1) q15_buffer_RTemp[i] = q15_buffer_RTemp[i] + EEPROMData.qDCoffset[EEPROMData.currentBand] + 1300;
     Q_out_L_Ex.play(q15_buffer_LTemp, 2048);
     Q_out_R_Ex.play(q15_buffer_RTemp, 2048);
     Q_out_L_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
@@ -648,7 +671,7 @@ float PlotCalSpectrum(int x1, int cal_bins[2], int capture_bins) {
 
 
 /*****
-  Purpose: Select the transmit calibration tone frequency.  Possible values:
+  Purpose: Function pointer to select the transmit calibration tone frequency.  Possible values:
            0 = 750 Hz
            1 = 3 kHz
 
@@ -667,6 +690,6 @@ void SelectCalFreq() {
   tft.writeTo(L2);
   tft.clearMemory();
   RedrawDisplayScreen();
-//  BandInformation();
-//  DrawBandWidthIndicatorBar();
+  //  BandInformation();
+  //  DrawBandWidthIndicatorBar();
 }

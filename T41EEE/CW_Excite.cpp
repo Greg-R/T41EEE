@@ -106,9 +106,11 @@ void CW_ExciterIQData(int shaping) //AFP 08-20-22
       arm_float_to_q15 (&float_buffer_L_EX[BUFFER_SIZE * i], sp_L2, BUFFER_SIZE);  // source, destination, number of samples
       arm_float_to_q15 (&float_buffer_R_EX[BUFFER_SIZE * i], sp_R2, BUFFER_SIZE);
       //  Now it is desired to inject a DC offset into the data.
-    //  for(int i = 0; i < 128; i = i + 1) *(sp_L2 + i) = *(sp_L2 + i) - 27200;
-    //  for(int i = 0; i < 128; i = i + 1) *(sp_R2 + i) = *(sp_R2 + i) - 26600;
-    //  Serial.printf("%d\n", *(sp_L2 +64));
+      for(int i = 0; i < 128; i = i + 1) *(sp_L2 + i) = *(sp_L2 + i) + EEPROMData.iDCoffset[EEPROMData.currentBand] + 1300;
+      for(int i = 0; i < 128; i = i + 1) *(sp_R2 + i) = *(sp_R2 + i) + EEPROMData.qDCoffset[EEPROMData.currentBand] + 1300;
+//    for(int i = 0; i < 2048; i = i + 1) q15_buffer_LTemp[i] = q15_buffer_LTemp[i] + EEPROMData.iDCoffset[EEPROMData.currentBand] + 1300;
+//    for(int i = 0; i < 2048; i = i + 1) q15_buffer_RTemp[i] = q15_buffer_RTemp[i] + EEPROMData.qDCoffset[EEPROMData.currentBand] + 1300;
+
       Q_out_L_Ex.playBuffer(); // play it !
       Q_out_R_Ex.playBuffer(); // play it !
     }
