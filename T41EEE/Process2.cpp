@@ -122,7 +122,7 @@ void CalibratePrologue() {
   tft.writeTo(L2);  // Clear layer 2.  KF5N July 31, 2023
   tft.clearMemory();
   tft.writeTo(L1);  // Exit function in layer 1.  KF5N August 3, 2023
-  //RedrawDisplayScreen();
+  RedrawDisplayScreen();
   IQChoice = 9;
   calOnFlag = 0;
   radioState = CW_RECEIVE_STATE;  // KF5N
@@ -320,7 +320,7 @@ void DoXmitCarrierCalibrate(int toneFreq) {
     CalibratePreamble(2);  // Set zoom to 4X.
     freqOffset = 2250;     // Need 750 + 2250 = 3 kHz
   }
-  calTypeFlag = 1;  // TX cal
+  calTypeFlag = 2;  // TX carrier calibration.
 
   tft.setFontScale((enum RA8875tsize)0);
   tft.fillRect(400, 110, 50, tft.getFontHeight(), RA8875_BLACK);
@@ -452,6 +452,7 @@ void ProcessIQData2(int toneFreq) {
     Q_out_R_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
     arm_float_to_q15(float_buffer_L_EX, q15_buffer_LTemp, 2048);
     arm_float_to_q15(float_buffer_R_EX, q15_buffer_RTemp, 2048);
+    // Inject the DC offset from carrier calibration.
         for(int i = 0; i < 2048; i = i + 1) q15_buffer_LTemp[i] = q15_buffer_LTemp[i] + EEPROMData.iDCoffset[EEPROMData.currentBand] + 1300;
         for(int i = 0; i < 2048; i = i + 1) q15_buffer_RTemp[i] = q15_buffer_RTemp[i] + EEPROMData.qDCoffset[EEPROMData.currentBand] + 1300;
     Q_out_L_Ex.play(q15_buffer_LTemp, 2048);
@@ -542,7 +543,7 @@ void ShowSpectrum2(int toneFreq)  //AFP 2-10-23
   //  All calibrations use a 0 dB reference signal and an "undesired sideband" signal which is to be minimized relative to the reference.
   //  Thus there is a target "bin" for the reference signal and another "bin" for the undesired sideband.
   //  The target bin locations are used by the for-loop to sweep a small range in the FFT.  A maximum finding function finds the peak signal strength.
-  int cal_bins[2] = { 0, 0 };
+  int cal_bins[3] = { 0, 0, 0 };
   if (calTypeFlag == 0 && bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
     cal_bins[0] = 315;
     cal_bins[1] = 455;
@@ -554,24 +555,42 @@ void ShowSpectrum2(int toneFreq)  //AFP 2-10-23
   if (calTypeFlag == 1 && bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
     cal_bins[0] = 257;
     cal_bins[1] = 322;
+    cal_bins[2] = 289;  // Carrier
   }  // Transmit calibration, LSB.  KF5N
   if (calTypeFlag == 1 && bands[EEPROMData.currentBand].mode == DEMOD_USB) {
     cal_bins[0] = 193;
     cal_bins[1] = 257;
+    cal_bins[2] = 289;  // Carrier
+  }
+  if (calTypeFlag == 2 && bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
+    cal_bins[0] = 257;  // Carrier
+    cal_bins[1] = 289;
+    cal_bins[2] 
+  }  // Transmit calibration, LSB.  KF5N
+  if (calTypeFlag == 2 && bands[EEPROMData.currentBand].mode == DEMOD_USB) {
+    cal_bins[0] = 193;
+    cal_bins[1] = 257;  // Carrier
   }  // Transmit calibration, USB.  KF5N
 
   // Draw vertical markers for the reference, undesired sideband locations, and centerline.  For debugging only!
-  //    tft.drawFastVLine(cal_bins[0], SPECTRUM_TOP_Y, h, RA8875_GREEN);
-  //    tft.drawFastVLine(cal_bins[1], SPECTRUM_TOP_Y, h, RA8875_GREEN);
-  //    int centerLine = (MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2;
-  //    tft.drawFastVLine(centerLine, SPECTRUM_TOP_Y, h, RA8875_GREEN);  // Draws centerline on spectrum display
+      tft.drawFastVLine(cal_bins[0], SPECTRUM_TOP_Y, h, RA8875_GREEN);
+      tft.drawFastVLine(cal_bins[1], SPECTRUM_TOP_Y, h, RA8875_GREEN);
+      tft.drawFastVLine(cal_bins[2], SPECTRUM_TOP_Y, h, RA8875_GREEN);
+      int centerLine = (MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2;    //  (512 + 3)/2 = 257.5
+      tft.drawFastVLine(centerLine, SPECTRUM_TOP_Y, h, RA8875_GREEN);  // Draws centerline on spectrum display
 
   //  There are 2 for-loops, one for the reference signal and another for the undesired sideband.
   for (x1 = cal_bins[0] - capture_bins; x1 < cal_bins[0] + capture_bins; x1++) adjdB = PlotCalSpectrum(x1, cal_bins, capture_bins);
   for (x1 = cal_bins[1] - capture_bins; x1 < cal_bins[1] + capture_bins; x1++) adjdB = PlotCalSpectrum(x1, cal_bins, capture_bins);
   // Plot carrier during transmit cal, do not return a dB value:
-  if (calTypeFlag == 1)
-    for (x1 = cal_bins[0] + 20; x1 < cal_bins[1] - 20; x1++) PlotCalSpectrum(x1, cal_bins, capture_bins);
+//  if (calTypeFlag == 1)
+//  for (x1 = cal_bins[0] + 20; x1 < cal_bins[1] - 20; x1++) PlotCalSpectrum(x1, cal_bins, capture_bins);
+if (calTypeFlag == 2) {
+  if(bands[EEPROMData.currentBand].mode == DEMOD_LSB);
+
+  if(bands[EEPROMData.currentBand].mode == DEMOD_USB);
+
+}
 
   // Finish up:
   //= AFP 2-11-23
@@ -642,8 +661,9 @@ float PlotCalSpectrum(int x1, int cal_bins[2], int capture_bins) {
   tft.drawLine(x1, EEPROMData.spectrumNoiseFloor - y1_new, x1, EEPROMData.spectrumNoiseFloor - y_new, RA8875_YELLOW);  // Draw new
   pixelCurrent[x1] = pixelnew[x1];                                                                                     //  This is the actual "old" spectrum!  This is required due to CW interrupts.  Copied to pixelold by the FFT function.
 
+    adjdB = ((float)adjAmplitude - (float)refAmplitude) / 1.95;  // Cast to float and calculate the dB level.  KF5N
   if (calTypeFlag == 0) {  // Receive Cal
-    adjdB = ((float)adjAmplitude - (float)refAmplitude) / 1.95;
+//    adjdB = ((float)adjAmplitude - (float)refAmplitude) / 1.95;
     tft.writeTo(L2);
     if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
       tft.fillRect(445, SPECTRUM_TOP_Y + 20, 20, h - 6, DARK_RED);     // SPECTRUM_TOP_Y = 100
@@ -653,7 +673,7 @@ float PlotCalSpectrum(int x1, int cal_bins[2], int capture_bins) {
       tft.fillRect(188, SPECTRUM_TOP_Y + 20, 20, h - 6, RA8875_BLUE);
     }
   } else {                                                       //Transmit Cal
-    adjdB = ((float)adjAmplitude - (float)refAmplitude) / 1.95;  // Cast to float and calculate the dB level.  KF5N
+//    adjdB = ((float)adjAmplitude - (float)refAmplitude) / 1.95;  // Cast to float and calculate the dB level.  KF5N
     tft.writeTo(L2);
     if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
       tft.fillRect(312, SPECTRUM_TOP_Y + 20, 20, h - 6, DARK_RED);  // Adjusted height due to other graphics changes.  KF5N August 3, 2023
