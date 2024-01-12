@@ -2139,7 +2139,7 @@ void NoActiveMenu();
 void NoiseBlanker(float32_t *inputsamples, float32_t *outputsamples);
 int NROptions();
 
-float PlotCalSpectrum(int x1, int cal_bins[2], int capture_bins);
+float PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins);
 void printFile(const char *filename);
 void EnableButtonInterrupts();
 int ProcessButtonPress(int valPin);

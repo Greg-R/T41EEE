@@ -552,25 +552,25 @@ void ShowSpectrum2(int toneFreq)  //AFP 2-10-23
     cal_bins[0] = 59;
     cal_bins[1] = 199;
   }  // Receive calibration, USB.  KF5N
-  if (calTypeFlag == 1 && bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
-    cal_bins[0] = 257;
-    cal_bins[1] = 322;
-    cal_bins[2] = 289;  // Carrier
+  if ((calTypeFlag == 1 || calTypeFlag == 2) && bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
+    cal_bins[0] = 257;  // LSB
+    cal_bins[1] = 289;  // Carrier
+    cal_bins[2] = 322;  // Undesired sideband
   }  // Transmit calibration, LSB.  KF5N
-  if (calTypeFlag == 1 && bands[EEPROMData.currentBand].mode == DEMOD_USB) {
-    cal_bins[0] = 193;
-    cal_bins[1] = 257;
-    cal_bins[2] = 289;  // Carrier
+  if ((calTypeFlag == 1 || calTypeFlag == 2) && bands[EEPROMData.currentBand].mode == DEMOD_USB) {
+    cal_bins[0] = 257;  // USB
+    cal_bins[1] = 225;  // Carrier
+    cal_bins[2] = 193;  // Undesired sideband
   }
-  if (calTypeFlag == 2 && bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
-    cal_bins[0] = 257;  // Carrier
-    cal_bins[1] = 289;
-    cal_bins[2] 
-  }  // Transmit calibration, LSB.  KF5N
-  if (calTypeFlag == 2 && bands[EEPROMData.currentBand].mode == DEMOD_USB) {
-    cal_bins[0] = 193;
-    cal_bins[1] = 257;  // Carrier
-  }  // Transmit calibration, USB.  KF5N
+//  if (calTypeFlag == 2 && bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
+//    cal_bins[0] = 257;  // Carrier
+//    cal_bins[1] = 289;
+//    cal_bins[2] 
+//  }  // Transmit calibration, LSB.  KF5N
+//  if (calTypeFlag == 2 && bands[EEPROMData.currentBand].mode == DEMOD_USB) {
+//    cal_bins[0] = 193;
+//    cal_bins[1] = 257;  // Carrier
+//  }  // Transmit calibration, USB.  KF5N
 
   // Draw vertical markers for the reference, undesired sideband locations, and centerline.  For debugging only!
       tft.drawFastVLine(cal_bins[0], SPECTRUM_TOP_Y, h, RA8875_GREEN);
@@ -580,16 +580,18 @@ void ShowSpectrum2(int toneFreq)  //AFP 2-10-23
       tft.drawFastVLine(centerLine, SPECTRUM_TOP_Y, h, RA8875_GREEN);  // Draws centerline on spectrum display
 
   //  There are 2 for-loops, one for the reference signal and another for the undesired sideband.
+  if((calTypeFlag == 0 || calTypeFlag == 1)) {
   for (x1 = cal_bins[0] - capture_bins; x1 < cal_bins[0] + capture_bins; x1++) adjdB = PlotCalSpectrum(x1, cal_bins, capture_bins);
-  for (x1 = cal_bins[1] - capture_bins; x1 < cal_bins[1] + capture_bins; x1++) adjdB = PlotCalSpectrum(x1, cal_bins, capture_bins);
+  for (x1 = cal_bins[2] - capture_bins; x1 < cal_bins[2] + capture_bins; x1++) adjdB = PlotCalSpectrum(x1, cal_bins, capture_bins);
+  }
+
   // Plot carrier during transmit cal, do not return a dB value:
 //  if (calTypeFlag == 1)
 //  for (x1 = cal_bins[0] + 20; x1 < cal_bins[1] - 20; x1++) PlotCalSpectrum(x1, cal_bins, capture_bins);
 if (calTypeFlag == 2) {
-  if(bands[EEPROMData.currentBand].mode == DEMOD_LSB);
-
-  if(bands[EEPROMData.currentBand].mode == DEMOD_USB);
-
+  for (x1 = cal_bins[0] - capture_bins; x1 < cal_bins[0] + capture_bins; x1++) adjdB = PlotCalSpectrum(x1, cal_bins, capture_bins);
+  for (x1 = cal_bins[1] - capture_bins; x1 < cal_bins[1] + capture_bins; x1++) adjdB = PlotCalSpectrum(x1, cal_bins, capture_bins);
+  for (x1 = cal_bins[2] - capture_bins; x1 < cal_bins[2] + capture_bins; x1++) PlotCalSpectrum(x1, cal_bins, capture_bins);  // Undesired sideband
 }
 
   // Finish up:
@@ -617,7 +619,7 @@ if (calTypeFlag == 2) {
   Return value;
     float returns the adjusted value in dB
 *****/
-float PlotCalSpectrum(int x1, int cal_bins[2], int capture_bins) {
+float PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
   float adjdB = 0.0;
   int16_t adjAmplitude = 0;  // Was float; cast to float in dB calculation.  KF5N
   int16_t refAmplitude = 0;  // Was float; cast to float in dB calculation.  KF5N
@@ -672,7 +674,8 @@ float PlotCalSpectrum(int x1, int cal_bins[2], int capture_bins) {
       tft.fillRect(50, SPECTRUM_TOP_Y + 20, 20, h - 6, DARK_RED);
       tft.fillRect(188, SPECTRUM_TOP_Y + 20, 20, h - 6, RA8875_BLUE);
     }
-  } else {                                                       //Transmit Cal
+  }  
+   if (calTypeFlag == 1) {                                                       //Transmit Cal
 //    adjdB = ((float)adjAmplitude - (float)refAmplitude) / 1.95;  // Cast to float and calculate the dB level.  KF5N
     tft.writeTo(L2);
     if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
@@ -681,6 +684,18 @@ float PlotCalSpectrum(int x1, int cal_bins[2], int capture_bins) {
     } else {
       if (bands[EEPROMData.currentBand].mode == DEMOD_USB) {  //mode == DEMOD_LSB
         tft.fillRect(183, SPECTRUM_TOP_Y + 20, 20, h - 6, DARK_RED);
+        tft.fillRect(247, SPECTRUM_TOP_Y + 20, 20, h - 6, RA8875_BLUE);
+      }
+    }
+  }
+     if (calTypeFlag == 2) {                                                       //Transmit Cal
+    tft.writeTo(L2);
+    if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
+      tft.fillRect(279, SPECTRUM_TOP_Y + 20, 20, h - 6, DARK_RED);  // Adjusted height due to other graphics changes.  KF5N August 3, 2023
+      tft.fillRect(247, SPECTRUM_TOP_Y + 20, 20, h - 6, RA8875_BLUE);
+    } else {
+      if (bands[EEPROMData.currentBand].mode == DEMOD_USB) {  //mode == DEMOD_LSB
+        tft.fillRect(215, SPECTRUM_TOP_Y + 20, 20, h - 6, DARK_RED);
         tft.fillRect(247, SPECTRUM_TOP_Y + 20, 20, h - 6, RA8875_BLUE);
       }
     }
