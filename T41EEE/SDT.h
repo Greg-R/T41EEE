@@ -2055,8 +2055,8 @@ void DoSignalHistogram(long val);
 void DoGapHistogram(long val);
 int DoSplitVFO();
 void DoPaddleFlip();
-void DoXmitCalibrate(int toneFreq);
-void DoXmitCarrierCalibrate(int toneFreq);
+void DoXmitCalibrate(int toneFreqIndex);
+void DoXmitCarrierCalibrate(int toneFreqIndex);
 void DoReceiveCalibrate();
 void DrawActiveLetter(int row, int horizontalSpacer, int whichLetterIndex, int keyWidth, int keyHeight);
 void DrawBandWidthIndicatorBar();  // AFP 03-27-22 Layers
@@ -2145,7 +2145,7 @@ void EnableButtonInterrupts();
 int ProcessButtonPress(int valPin);
 void ProcessEqualizerChoices(int EQType, char *title);
 void ProcessIQData();
-void ProcessIQData2(float toneFreq);
+void ProcessIQData2(int toneFreqIndex);
 
 uint16_t read16(File &f);
 uint32_t read32(File &f);
@@ -2216,7 +2216,7 @@ void ShowMenu(const char *menu[], int where);
 void ShowName();
 void ShowNotch();
 void ShowSpectrum();
-void ShowSpectrum2(int toneFreq);
+void ShowSpectrum2();
 void ShowSpectrumdBScale();
 void ShowTempAndLoad();
 void ShowTransmitReceiveStatus();
