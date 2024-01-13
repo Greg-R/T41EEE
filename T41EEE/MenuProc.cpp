@@ -693,6 +693,7 @@ void DoPaddleFlip() {
       }
     }
   }
+  EEPROMWrite();
 }
 
 
