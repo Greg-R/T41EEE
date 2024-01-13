@@ -49,9 +49,12 @@ void KeyRingOn() //AFP 09-25-22
   Return value;
     void
 *****/
+int16_t* leftSidetone;
+int16_t* rightSidetone;
 void CW_ExciterIQData(int shaping) //AFP 08-20-22
 {
   uint32_t N_BLOCKS_EX = N_B_EX;
+  float32_t powerScaling;
  
   arm_scale_f32 (cosBuffer2, 0.127, float_buffer_L_EX, 256);  // AFP 10-13-22 Use pre-calculated sin & cos instead of Hilbert
   arm_scale_f32 (sinBuffer2, 0.127, float_buffer_R_EX, 256);  // AFP 10-13-22
@@ -92,19 +95,32 @@ void CW_ExciterIQData(int shaping) //AFP 08-20-22
     arm_fir_interpolate_f32(&FIR_int2_EX_I, float_buffer_LTemp, float_buffer_L_EX, 512);
     arm_fir_interpolate_f32(&FIR_int2_EX_Q, float_buffer_RTemp, float_buffer_R_EX, 512);
 
+    //  Need to have a sidetone which is independent of any scaling.  Re-use float_bufferL/RTemp and Q_out_L/Q_out_R buffers.
+    arm_scale_f32(float_buffer_L_EX, 20, float_buffer_LTemp, 2048); //Scale to compensate for losses in Interpolation
+    arm_scale_f32(float_buffer_R_EX, 20, float_buffer_RTemp, 2048);
+
+powerScaling = EEPROMData.powerOutCW[EEPROMData.currentBand] * 40.0;
+
     //  192KHz effective sample rate here
-    arm_scale_f32(float_buffer_L_EX, 20, float_buffer_L_EX, 2048); //Scale to compensate for losses in Interpolation
-    arm_scale_f32(float_buffer_R_EX, 20, float_buffer_R_EX, 2048);
+    arm_scale_f32(float_buffer_L_EX, powerScaling, float_buffer_L_EX, 2048); //Scale to compensate for losses in Interpolation
+    arm_scale_f32(float_buffer_R_EX, powerScaling, float_buffer_R_EX, 2048);
 
     /**********************************************************************************  AFP 12-31-20
-      CONVERT TO INTEGER AND PLAY AUDIO
+      CONVERT TO INTEGER AND PLAY AUDIO, I and Q of CW transmitter and also sidetone.
     **********************************************************************************/
 
     for (unsigned  i = 0; i < N_BLOCKS_EX; i++) {  //N_BLOCKS_EX=16  BUFFER_SIZE=128 16x128=2048
       sp_L2 = Q_out_L_Ex.getBuffer();       // Q_out_L_Ex and Q_out_R_Ex are AudioPlayQueue objects.  sp_L2 and sp_R2 are pointers to int16_t.
       sp_R2 = Q_out_R_Ex.getBuffer();       // getBuffer() returns a pointer to an array of AUDIO_BLOCK_SAMPLES (usually 128) int16.
+      leftSidetone = Q_out_L.getBuffer();       // Q_out_L_Ex and Q_out_R_Ex are AudioPlayQueue objects.  sp_L2 and sp_R2 are pointers to int16_t.
+      rightSidetone = Q_out_R.getBuffer();       // getBuffer() returns a pointer to an array of AUDIO_BLOCK_SAMPLES (usually 128) int16.
+
       arm_float_to_q15 (&float_buffer_L_EX[BUFFER_SIZE * i], sp_L2, BUFFER_SIZE);  // source, destination, number of samples
       arm_float_to_q15 (&float_buffer_R_EX[BUFFER_SIZE * i], sp_R2, BUFFER_SIZE);
+
+      arm_float_to_q15 (&float_buffer_LTemp[BUFFER_SIZE * i], leftSidetone, BUFFER_SIZE);  // source, destination, number of samples
+      arm_float_to_q15 (&float_buffer_RTemp[BUFFER_SIZE * i], rightSidetone, BUFFER_SIZE);
+
     // Inject the DC offset from carrier calibration.
       for(int i = 0; i < 128; i = i + 1) *(sp_L2 + i) = *(sp_L2 + i) + EEPROMData.iDCoffset[EEPROMData.currentBand] + 1300;
       for(int i = 0; i < 128; i = i + 1) *(sp_R2 + i) = *(sp_R2 + i) + EEPROMData.qDCoffset[EEPROMData.currentBand] + 1300;
@@ -113,6 +129,8 @@ void CW_ExciterIQData(int shaping) //AFP 08-20-22
 
       Q_out_L_Ex.playBuffer(); // play it !
       Q_out_R_Ex.playBuffer(); // play it !
+      Q_out_L.playBuffer(); // play it !
+      Q_out_R.playBuffer(); // play it !
     }
     
 

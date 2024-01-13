@@ -439,8 +439,8 @@ void ProcessIQData2(int toneFreqIndex) {
   arm_fir_interpolate_f32(&FIR_int2_EX_Q, float_buffer_RTemp, float_buffer_R_EX, 512);
 
   //  192KHz effective sample rate here
-  arm_scale_f32(float_buffer_L_EX, 20, float_buffer_L_EX, 2048);  //Scale to compensate for losses in Interpolation
-  arm_scale_f32(float_buffer_R_EX, 20, float_buffer_R_EX, 2048);
+  arm_scale_f32(float_buffer_L_EX, 40, float_buffer_L_EX, 2048);  //Scale to compensate for losses in Interpolation
+  arm_scale_f32(float_buffer_R_EX, 40, float_buffer_R_EX, 2048);
 
   // are there at least N_BLOCKS buffers in each channel available ?
   if ((uint32_t)Q_in_L.available() > N_BLOCKS + 0 && (uint32_t)Q_in_R.available() > N_BLOCKS + 0) {
