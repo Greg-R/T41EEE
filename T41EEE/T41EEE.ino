@@ -2175,7 +2175,9 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   valPin = ReadSelectedPushButton();                     // Poll UI push buttons
   if (valPin != BOGUS_PIN_READ) {                        // If a button was pushed...
     pushButtonSwitchIndex = ProcessButtonPress(valPin);  // Winner, winner...chicken dinner!
-    ExecuteButtonPress(pushButtonSwitchIndex);
+    if (xrState == RECEIVE_STATE) {
+      ExecuteButtonPress(pushButtonSwitchIndex);
+    }
   }
   //  State detection
   if (EEPROMData.xmtMode == SSB_MODE && digitalRead(PTT) == HIGH) radioState = SSB_RECEIVE_STATE;
