@@ -1,5 +1,28 @@
 The following change log documents changes to versions prior to the current.
 
+## Highlight of Features included in T41EEE.0.  December 2023
+
+1.  The configuration file stored on the SD card is changed to JSON format.
+2.  New selections in the EEPROM menu allow serial readout of configuration data
+    from the stack, the EEPROM, the SD card, and the hard-coded defaults.
+3.  The Morse decoder is coded in a state-machine design pattern.
+4.  The sidetone quality is improved.  Thank you to Jonathan KN6LFB for this very
+    excellent improvement!
+5.  The user can now select from 4 different discrete CW offset tone frequencies.
+    The new selections are in the CW Options menu.
+6.  Spectrum zooms of 8X and 16X bugs are resolved and these zooms are functioning.
+7.  Transmit calibration can be done with either a 750 Hz or 3 kHz tone.  This new
+    selection is in the Calibration Options menu.  Calibration code is simplified
+    and this should result in better quality calibration.
+8.  The configuration file includes variables for frequency divider (quadrature
+    generator) hardware.  The values of 4 work with the original T41 QSD and QSE
+    boards.
+9.  Volume control is changed to one-hundred 1 dB steps.
+10. Audio chain management is significantly enhanced, and less audio memory is required.
+    Thank you to Jonathan KN6LFB for this major improvement!
+11. CW keyer timing optimizations including CW envelope shaping.  Another great one from
+    Jonathan KN6LFB!
+
 
 V049.3 October XX, 20XX Greg Raven (KF5N)
   1. Fixed muting after calibration.

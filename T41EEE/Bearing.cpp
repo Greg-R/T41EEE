@@ -1050,7 +1050,7 @@ void bmpDraw(const char *filename, int x, int y) {
   // Open requested file on SD card
   if ((bmpFile = SD.open(filename)) == false) {
     tft.setCursor(100, 300);
-    tft.print("File not found");
+    tft.print("File not found, press again to return");
     return;
   }
 
