@@ -390,11 +390,9 @@ void MorseCharacterDisplay(char currentLetter) {
     void
 *****/
 void ResetHistograms() {
-  gapAtom = 80;
-  ditLength = 80;  // Start with 15wpm ditLength
-  gapChar = 240;
-  dahLength = 240;
-  thresholdGeometricMean = 160;  // Use simple mean for starters so we don't have 0
+  gapAtom = ditLength = transmitDitLength;
+  gapChar = dahLength = transmitDitLength * 3;
+  thresholdGeometricMean = (ditLength + dahLength) / 2;  // Use simple mean for starters so we don't have 0
   aveDitLength = ditLength;
   aveDahLength = dahLength;
   valRef1 = 0;
@@ -402,8 +400,6 @@ void ResetHistograms() {
   // Clear graph arrays
   memset(signalHistogram, 0, HISTOGRAM_ELEMENTS * sizeof(uint32_t));
   memset(gapHistogram, 0, HISTOGRAM_ELEMENTS * sizeof(uint32_t));
-  EEPROMData.currentWPM = 1200 / ditLength;
-  UpdateWPMField();
 }
 
 
