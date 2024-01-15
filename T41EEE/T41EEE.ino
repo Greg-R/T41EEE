@@ -2172,12 +2172,10 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   bool cwKeyDown;
   unsigned long cwBlockIndex;
 
-  valPin = ReadSelectedPushButton();                     // Poll UI push buttons
-  if (valPin != BOGUS_PIN_READ) {                        // If a button was pushed...
-    pushButtonSwitchIndex = ProcessButtonPress(valPin);  // Winner, winner...chicken dinner!
-    if (xrState == RECEIVE_STATE) {
-      ExecuteButtonPress(pushButtonSwitchIndex);
-    }
+  valPin = ReadSelectedPushButton();
+  if (valPin != BOGUS_PIN_READ && xrState != TRANSMIT_STATE) {
+    pushButtonSwitchIndex = ProcessButtonPress(valPin);
+    ExecuteButtonPress(pushButtonSwitchIndex);
   }
   //  State detection
   if (EEPROMData.xmtMode == SSB_MODE && digitalRead(PTT) == HIGH) radioState = SSB_RECEIVE_STATE;
