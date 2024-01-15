@@ -13,7 +13,7 @@ FLASHMEM void loadConfiguration(const char *filename, config_t &EEPROMData) {
   // Don't forget to change the capacity to match your requirements.
   // Use https://arduinojson.org/v6/assistant to compute the capacity.
   // StaticJsonDocument<512> doc;
-  DynamicJsonDocument doc(7000);  // This uses the heap.
+  JsonDocument doc;  // This uses the heap.
 
   // Deserialize the JSON document
   DeserializationError error = deserializeJson(doc, file);
@@ -99,6 +99,9 @@ FLASHMEM void loadConfiguration(const char *filename, config_t &EEPROMData) {
   EEPROMData.xmitEQFlag = doc["xmitEQFlag"];
   EEPROMData.receiveEQFlag = doc["receiveEQFlag"];
   EEPROMData.calFreq = doc["calFreq"];
+  EEPROMData.buttonThresholdPressed = doc["buttonThresholdPressed"] | 944;
+  EEPROMData.buttonThresholdReleased = doc["buttonThresholdReleased"] | 964;
+  EEPROMData.buttonRepeatDelay = doc["buttonRepeatDelay"] | 300000;
 
   // How to copy strings:
   //  strlcpy(EEPROMData.myCall,                  // <- destination
@@ -107,13 +110,6 @@ FLASHMEM void loadConfiguration(const char *filename, config_t &EEPROMData) {
 
   // Close the file (Curiously, File's destructor doesn't close the file)
   file.close();
-  //  At this point, the data exists only in the EEPROMData struct.
-  //  Now copy the struct data into the Global variables which are used by the radio.
-  //    EEPROMRead();
-  //EEPROMRead();
-  //Serial.printf("myCall after EEPROMRead() = %s\n", myCall);
-  //Serial.printf("EEPROMData.AGCMode after EEPROMRead() = %d\n", EEPROMData.AGCMode);
-  //Serial.printf("EEPROMData.AGCMode after EEPROMRead() = %d\n", EEPROMData.AGCMode);
 }
 
 // Saves the configuration EEPROMData to a file or writes to serial.  toFile == true for file, false for serial.
@@ -123,7 +119,7 @@ FLASHMEM void saveConfiguration(const char *filename, const config_t &EEPROMData
   // Don't forget to change the capacity to match your requirements.
   // Use https://arduinojson.org/assistant to compute the capacity.
   //StaticJsonDocument<256> doc;  // This uses the stack.
-  DynamicJsonDocument doc(7000);  // This uses the heap.
+  JsonDocument doc;  // This uses the heap.
 
   // Set the values in the document
   doc["versionSettings"] = EEPROMData.versionSettings;
@@ -199,6 +195,9 @@ FLASHMEM void saveConfiguration(const char *filename, const config_t &EEPROMData
   doc["xmitEQFlag"] = EEPROMData.xmitEQFlag;
   doc["receiveEQFlag"] = EEPROMData.receiveEQFlag;
   doc["calFreq"] = EEPROMData.calFreq;
+  doc["buttonThresholdPressed"] = EEPROMData.buttonThresholdPressed;
+  doc["buttonThresholdReleased"] = EEPROMData.buttonThresholdReleased;
+  doc["buttonRepeatDelay"] = EEPROMData.buttonRepeatDelay;
 
   if (toFile) {
     // Delete existing file, otherwise EEPROMData is appended to the file

@@ -24,7 +24,7 @@ int CalibrateOptions() {
   // Select the type of calibration, and then skip this during the loop() function.
   if (calibrateFlag == 0) {
     const char *IQOptions[9]{ "Freq Cal", "CW PA Cal", "Rec Cal", "Xmit Cal", "SSB PA Cal", "Set Tone", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
-    IQChoice = SubmenuSelect(IQOptions, 9, 0);                                                                       //AFP 10-21-22
+    IQChoice = SubmenuSelect(IQOptions, 9, 0);                                                                                                //AFP 10-21-22
   }
   calibrateFlag = 1;
   switch (IQChoice) {
@@ -50,7 +50,7 @@ int CalibrateOptions() {
 
     case 1:  // CW PA Cal
       EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand] = GetEncoderValueLive(-2.0, 2.0, EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand], 0.001, (char *)"CW PA Cal: ");
-//      EEPROMData.powerOutCW[EEPROMData.currentBand] = (-.0133 * EEPROMData.transmitPowerLevel * EEPROMData.transmitPowerLevel + .7884 * EEPROMData.transmitPowerLevel + 4.5146) * EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];  // AFP 10-21-22
+      //      EEPROMData.powerOutCW[EEPROMData.currentBand] = (-.0133 * EEPROMData.transmitPowerLevel * EEPROMData.transmitPowerLevel + .7884 * EEPROMData.transmitPowerLevel + 4.5146) * EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];  // AFP 10-21-22
       val = ReadSelectedPushButton();
       if (val != BOGUS_PIN_READ) {        // Any button press??
         val = ProcessButtonPress(val);    // Use ladder value to get menu choice
@@ -176,7 +176,7 @@ int CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
       DoPaddleFlip();  // Stored in EEPROM; variables EEPROMData.paddleDit and EEPROMData.paddleDah
       break;
 
-    case 4:            // Select a preferred CW offset frequency.
+    case 4:              // Select a preferred CW offset frequency.
       SelectCWOffset();  //  Located in CWProcessing.cpp
       break;
 
@@ -248,8 +248,8 @@ int AGCOptions() {
 
   AGCLoadValues();  // G0ORX September 5, 2023
 
-  EEPROMData.AGCMode = EEPROMData.AGCMode;      // Store in EEPROM and...
-  EEPROM.put(EEPROM_BASE_ADDRESS, EEPROMData);  // ...save it
+  EEPROMData.AGCMode = EEPROMData.AGCMode;          // Store in EEPROM and...
+  EEPROM.put(EEPROM_BASE_ADDRESS + 4, EEPROMData);  // ...save it
   UpdateAGCField();
   return EEPROMData.AGCMode;
 }
@@ -693,6 +693,7 @@ void DoPaddleFlip() {
       }
     }
   }
+  EEPROMWrite();
 }
 
 
@@ -800,15 +801,15 @@ int EEPROMOptions() {  // 0               1                2               3    
       SetFavoriteFrequency();  // Set favorites
       break;
 
-    case 4:                                           // Copy EEPROM->SD.
-      EEPROM.get(EEPROM_BASE_ADDRESS, tempConfig);    // Read as one large chunk
-      saveConfiguration(filename, tempConfig, true);  // Save EEPROM struct to SD
+    case 4:                                             // Copy EEPROM->SD.
+      EEPROM.get(EEPROM_BASE_ADDRESS + 4, tempConfig);  // Read as one large chunk
+      saveConfiguration(filename, tempConfig, true);    // Save EEPROM struct to SD
       break;
 
     case 5:                                     // Copy SD->EEPROM
       loadConfiguration(filename, EEPROMData);  // Copy from SD to struct in active memory (on the stack) EEPROMData.
-      EEPROMWrite();  // Write to EEPROM non-volatile memory.
-      tft.writeTo(L2);  // This is specifically to clear the bandwidth indicator bar.  KF5N August 7, 2023
+      EEPROMWrite();                            // Write to EEPROM non-volatile memory.
+      tft.writeTo(L2);                          // This is specifically to clear the bandwidth indicator bar.  KF5N August 7, 2023
       tft.clearMemory();
       tft.writeTo(L1);
       //  Read the revised struct into active memory.
@@ -825,7 +826,7 @@ int EEPROMOptions() {  // 0               1                2               3    
         Serial.println(F("\nBegin EEPROMData from EEPROM"));
         // Don't want to overwrite the stack.  Need a temporary struct, read the EEPROM data into that.
         config_t EEPROMData_temp;
-        EEPROM.get(EEPROM_BASE_ADDRESS, EEPROMData_temp);
+        EEPROM.get(EEPROM_BASE_ADDRESS + 4, EEPROMData_temp);
         saveConfiguration(filename, EEPROMData_temp, false);  // Write the temporary struct to the serial monitor.
         Serial.println(F("\nEnd EEPROMData from EEPROM\n"));
       }

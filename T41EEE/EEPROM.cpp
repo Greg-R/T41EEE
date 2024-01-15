@@ -2,97 +2,10 @@
 #include "SDT.h"
 #endif
 
-//DB2OO, 29-AUG-23: Don't use the overall VERSION for the EEPROM structure version information, but use a combination of an EEPROM_VERSION with the size of the EEPROMData variable.
-// The "EEPROM_VERSION" should only be changed, if the structure config_t EEPROMData has changed!
-// For V049.1 the new version in EEPROM will be "V049_808", for V049.2 it will be "V049_812"
-#define EEPROM_VERSION  "T41EEE.1"
-static char version_size[10];
 
 /*****
-  Purpose: void EEPROMSetVersion()
-
-  Parameter list:
-
-  Return value;
-    char* pointer to EEPROM version string of the form "V049_808"
-*****/
-static char* EEPROMSetVersion(void)
-{
-    size_t  l;
-  strncpy(version_size, EEPROM_VERSION, sizeof(version_size));
-  l = strlen(version_size);
-  //enough space to append '_' and 4 characters for size
-  if ((sizeof(version_size)-l) > 5) {
-    version_size[l] = '_';
-    itoa(sizeof(EEPROMData), version_size+l+1, 10);
-  }
-  return version_size;
-}
-
-/*****
-  Purpose: void EEPROMRead()
-
-  Parameter list:
-    struct config_t e[]       pointer to the EEPROM structure
-
-  Return value;
-    void
-*****/
-void EEPROMRead() {
-  int i;
-  int v049_version=0; //DB2OO, 10-SEP-23
-#define MORSE_STRING_DISPLAY(s)  {size_t j; for (j=0;j<strlen(s);j++) MorseCharacterDisplay(s[j]);}  
-
-  //DB2OO, 25-AUG-23: don't read the EEPROM before you are sure, that it is in T41-SDT format!!
-  //DB2OO, 25-AUG-23: first read only the version string and compare it with the current version. The version string must also be at the beginning of the EEPROMData structure!
-  for (i=0; i<10; i++) { EEPROMData.versionSettings[i]= EEPROM.read(EEPROM_BASE_ADDRESS+i); }
-#ifdef DEBUG 
-    //display version in EEPROM in last line of display
-    MORSE_STRING_DISPLAY("EEPROMVersion ");
-    if (strlen(EEPROMData.versionSettings) <10) {
-      MORSE_STRING_DISPLAY(EEPROMData.versionSettings);
-    }else {
-      MORSE_STRING_DISPLAY("<<INVALID>>");
-    }
-    MyDelay(1000);
-#endif
-  //Do we have V049.1 or V049.2 structure in EEPROM?
-  if (strcmp("V049.1", EEPROMData.versionSettings) == 0) v049_version=1;
-  if (strcmp("V049.2", EEPROMData.versionSettings) == 0) v049_version=2;
-
-  if (v049_version > 0) {
-     //DB2OO, 29-AUG-23: allow "V049.1" or "V049.2" instead of the Version with size for a migration to the new format
-     strcpy(EEPROMData.versionSettings, EEPROMSetVersion());  // set new version format
-    for (i=0; i<10; i++) { EEPROM.write(EEPROM_BASE_ADDRESS+i, EEPROMData.versionSettings[i]); }
-  }
-  if (strncmp(EEPROMSetVersion(), EEPROMData.versionSettings, 10) != 0) {
-    //Different version in EEPROM: set the EEPROM values for THIS version
-#ifdef DEBUG  
-    const char *wrong_ver = "EEPROMRead(): different version, calling EEPROMSaveDefaults2()";
-    MORSE_STRING_DISPLAY(wrong_ver);
-    Serial.println(wrong_ver);
-    MyDelay(1000);
-#endif    
-  //  EEPROMSaveDefaults2();
-    // and write it into the EEPROM
-    EEPROM.put(EEPROM_BASE_ADDRESS, EEPROMData);
-    // after this we will read the default values for this version
-  } else {
-#ifdef DEBUG  
-    MORSE_STRING_DISPLAY("-->Reading EEPROM content...");
-    MyDelay(1000);
-#endif
-  }
-#ifdef DEBUG
-  //clear the Morse character buffer
-  MorseCharacterClear();
-#endif  
-  EEPROM.get(EEPROM_BASE_ADDRESS, EEPROMData);  // Read as one large chunk
-}
-
-
-/*****
-  Purpose: To save the configuration data (working variables) to EEPROM
+  Purpose: To save the configuration data (working variables) to EEPROM.
+           Skip 4 bytes to allow for the struct size variable.
 
   Parameter list:
     struct EEPROMData       pointer to the EEPROM structure
@@ -101,8 +14,53 @@ void EEPROMRead() {
     void
 *****/
 void EEPROMWrite() {
-  EEPROM.put(EEPROM_BASE_ADDRESS, EEPROMData);
+  EEPROM.put(EEPROM_BASE_ADDRESS + 4, EEPROMData);
 }
+
+
+/*****
+  Purpose: This is nothing more than an alias for EEPROM.get(EEPROM_BASE_ADDRESS + 4, EEPROMData).
+
+  Parameter list:
+  None
+
+  Return value;
+    void
+*****/
+void EEPROMRead() {
+  EEPROM.get(EEPROM_BASE_ADDRESS + 4, EEPROMData);  // Read as one large chunk
+}
+
+
+/*****
+  Purpose: Write the struct size stored to the EEPROM.
+
+  Parameter list:
+  None
+
+  Return value;
+    void
+*****/
+void EEPROMWriteSize(int structSize) {
+  EEPROM.put(EEPROM_BASE_ADDRESS, structSize);  // Read as one large chunk
+}
+
+
+/*****
+  Purpose: Read the struct size stored in the EEPROM.
+
+  Parameter list:
+  None
+
+  Return value;
+    void
+*****/
+int EEPROMReadSize() {
+  int structSize;
+  EEPROM.get(EEPROM_BASE_ADDRESS, structSize);  // Read as one large chunk
+  return structSize;
+}
+
 
 
 /*****
@@ -257,7 +215,7 @@ FLASHMEM void GetFavoriteFrequency() {
         case VFO_B:
           if (EEPROMData.currentBandB == NUMBER_OF_BANDS) {  // Incremented too far?
             EEPROMData.currentBandB = 0;                     // Yep. Roll to list front.
-          }                                       // Same for VFO B
+          }                                                  // Same for VFO B
           EEPROMData.currentBandB = currentBand2;
           TxRxFreq = EEPROMData.centerFreq + NCOFreq;
           EEPROMData.lastFrequencies[EEPROMData.currentBand][VFO_B] = TxRxFreq;
@@ -301,16 +259,16 @@ FLASHMEM void GetFavoriteFrequency() {
 *****/
 
 void EEPROMDataDefaults() {
-struct config_t* defaultConfig = new config_t;  // Create a copy of the default configuration.
-EEPROMData = *defaultConfig;             // Copy the defaults to EEPROMData struct.
-// Initialize the frequency setting based on the last used frequency stored to EEPROM.
-TxRxFreq = EEPROMData.centerFreq = EEPROMData.lastFrequencies[EEPROMData.currentBand][EEPROMData.activeVFO];
-RedrawDisplayScreen();  //  Need to refresh display here.
+  struct config_t* defaultConfig = new config_t;  // Create a copy of the default configuration.
+  EEPROMData = *defaultConfig;                    // Copy the defaults to EEPROMData struct.
+  // Initialize the frequency setting based on the last used frequency stored to EEPROM.
+  TxRxFreq = EEPROMData.centerFreq = EEPROMData.lastFrequencies[EEPROMData.currentBand][EEPROMData.activeVFO];
+  RedrawDisplayScreen();  //  Need to refresh display here.
 }
 
 
 /*****
-  Purpose: Update the version number only in EEPROM
+  Purpose: Manage EEPROM memory at radio start-up.
 
   Parameter list:
     void
@@ -318,79 +276,38 @@ RedrawDisplayScreen();  //  Need to refresh display here.
   Return value;
     void
 *****/
-void UpdateEEPROMVersionNumber() {
-  strcpy(EEPROMData.versionSettings, EEPROMSetVersion());  // Copy the latest version to EEPROM
-}
+FLASHMEM void EEPROMStartup() {
+  int eepromStructSize;
+  int stackStructSize;
+  //  Determine if the struct EEPROMData is compatible (same size) with the one stored in EEPROM.
 
+  eepromStructSize = EEPROMReadSize();
+  stackStructSize = sizeof(EEPROMData);
 
-/*****
-  Purpose: Writes EEPROMData defaults to the Serial monitor.
+  //Serial.printf("eempromStructSize = %d\n", eepromStructSize);
+  //Serial.printf("stackStructSize = %d\n", stackStructSize);
 
-  Parameter list:
-   const char *filename
+  // For minor revisions to the code, we don't want to overwrite the EEPROM.
+  // We will assume the switch matrix and other items are calibrated by the user, and not to be lost.
+  // However, if the EEPROMData struct changes, it is necessary to overwrite the EEPROM with the new struct.
+  // This decision is made by using a simple size comparison.  This is not fool-proof, but it will probably
+  // work most of the time.  The users should be instructed to always save the EEPROM to SD for later recovery
+  // of their calibration and custom settings.
+  // If all else fails, then the user should execute a FLASH erase.
 
-  Return value;
-    int               0 = SD is untouched, 1 = has data
-*****/
-void EEPROMDataToSerial(const char *filename) {
-
-  Serial.println("Current EEPROMData follows:");
-
-  Serial.println("End of current EEPROMData");
-}
-
-
-/*****
-  Purpose: Clears the first 1K of emulated EEPROM to 0xff
-
-  Parameter list:
-    void
-
-  Return value;
-    void
-*****/
-void ClearEEPROM() {
-  int i;
-  for (i = 0; i < 1000; i++) {
-    EEPROM.write(i, 0xFF);
-  }
-}
-
-
-
-/*****
-  Purpose: Read the EEPROM from: a) EEPROM memory, b) SD card memory, or c) defaults
-
-  Parameter list:
-    void
-
-  Return value;
-    void
-*****/
-void EEPROMStartup() {
-  EEPROMRead();  // Read current stored data
-
-  if (strcmp(EEPROMData.versionSettings, EEPROMSetVersion()) == 0) {  // Are the versions the same?
-    return;                                                // Yep. Go home and don't mess with the EEPROM
+  // The case where struct sizes are the same, indicating no changes to the struct.  Nothing more to do, return.
+  if (eepromStructSize == stackStructSize) {
+    EEPROMRead();  // Read the EEPROM data into active memory.
+    return;        // Done, begin radio operation.
   }
 
-  strcpy(EEPROMData.versionSettings, EEPROMSetVersion());  // Nope, this is a new the version, so copy new version title to EEPROM
-                                                //                                                                     Check if calibration has not been done and/or switch values are wonky, okay to use defaults
-                                                //                                                                     If the Teensy is unused, these EEPROM values are 0xFF or perhaps cleared to 0.
+  // If the flow proceeds here, it is time to initialize some things.
+  // The rest of the code will require a switch matrix calibration, and will write the EEPROMData struct to EEPROM.
 
-//  if (EEPROMData.switchValues[9] < 440 || EEPROMData.switchValues[9] > 480) {
-//    EEPROMSaveDefaults2();     // At least give them some starting values
-//    EEPROMData.switchValues[9] = 0;  // This will force the next code block to set the switch values.
-//  }
-//  if (EEPROMData.switchValues[9] < 440 || EEPROMData.switchValues[9] > 480) {  // If the Teensy is unused, these EEPROM values are 0xFF or perhaps cleared to 0.
-    SaveAnalogSwitchValues();                                      // In that case, we need to set the switch values.
-//  }
-  //                                                                     If we get here, the switch values have been set, either previously or by the call to
-  //                                                                     SaveAnalogSwitchValues() as has the rest of the EEPROM data. This avoids recalibration.
-//  EEPROM.put(0, EEPROMData);  // This rewrites the entire EEPROM struct as defined in SDT.h
-//  EEPROMRead();               // Read the EEPROM data, including new switch values. This also resets working variables
+  SaveAnalogSwitchValues();          // Calibrate the switch matrix.
+  EEPROMWriteSize(stackStructSize);  // Write the size of the struct to EEPROM.
 
-#ifdef DEBUG1
-  SDEEPROMDump();  // Call this to observe EEPROM struct data
-#endif
+  //Serial.printf("eempromStructSize = %d\n", EEPROMReadSize());
+  EEPROMWrite();  // Write the EEPROMData struct to non-volatile memory.
+  //Serial.printf("eempromStructSize = %d\n", EEPROMReadSize());
 }

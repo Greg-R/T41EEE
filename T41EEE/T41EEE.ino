@@ -1,7 +1,7 @@
 /*
-### Version T41EEE.0 T41 Software Defined Transceiver Arduino Sketch
+### Version T41EEE.1 T41 Software Defined Transceiver Arduino Sketch
 
-This is the first of the "T41 Extreme Experimenter's Edition" software for the 
+This is the "T41 Extreme Experimenter's Edition" software for the 
 T41 Software Defined Transceiver.  The T41EEE was "forked" from the V049.2 version
 of the T41-EP software.  T41EEE is fundamentally different from the mainstream T41-EP
 code in that it adopts C++ rather than C.  C++ language features will be gradually
@@ -32,7 +32,7 @@ and feature enhancements become available.  You will be able to update and FLASH
 with the revised software quickly.
 
 Please note that the configuration structure is different than the predecessor V049.2
-It is recommended to perform a full FLASH erase before loading T41EEE.0.
+It is recommended to perform a full FLASH erase before loading T41EEE.1.
 
 You will need to install the ArduinoJSON library by Benoit Blanchon.  Using the IDE:
 Tools -> Manage Libraries ...
@@ -41,28 +41,19 @@ with the name Arduino_JSON, which is not the correct library.  Install the libra
 and if you have the other dependencies for the V049.2 version, compilation will be
 successful.
 
-## Highlight of Features included in T41EEE.0
+## Highlight of Features included in T41EEE.1
 
-1.  The configuration file stored on the SD card is changed to JSON format.
-2.  New selections in the EEPROM menu allow serial readout of configuration data
-    from the stack, the EEPROM, the SD card, and the hard-coded defaults.
-3.  The Morse decoder is coded in a state-machine design pattern.
-4.  The sidetone quality is improved.  Thank you to Jonathan KN6LFB for this very
-    excellent improvement!
-5.  The user can now select from 4 different discrete CW offset tone frequencies.
-    The new selections are in the CW Options menu.
-6.  Spectrum zooms of 8X and 16X bugs are resolved and these zooms are functioning.
-7.  Transmit calibration can be done with either a 750 Hz or 3 kHz tone.  This new
-    selection is in the Calibration Options menu.  Calibration code is simplified
-    and this should result in better quality calibration.
-8.  The configuration file includes variables for frequency divider (quadrature
-    generator) hardware.  The values of 4 work with the original T41 QSD and QSE
-    boards.
-9.  Volume control is changed to one-hundred 1 dB steps.
-10. Audio chain management is significantly enhanced, and less audio memory is required.
-    Thank you to Jonathan KN6LFB for this major improvement!
-11. CW keyer timing optimizations including CW envelope shaping.  Another great one from
-    Jonathan KN6LFB!
+Thank you to Jonathan KN6LFB for the major improvement in button functionality!
+
+1.  Switch matrix buttons are changed from polling to interrupts for improved performance.
+2.  The new button code includes a tunable variable for button response time.  This variable
+    is added to the calibration menu as BTN REPEAT.  The default value should be a good
+    starting point.  If button response is too fast, increase the BTN REPEAT value.
+3.  The switch matrix calibration routine is added to the calibration menu.
+4.  Switch matrix calibration is easier and precise.  It is possible to push a button
+    and hold it.  It will not skip to the next button.  In practice, a short, firm push
+    on each button in the proper series will rapidly complete the process.
+5.  EEPROM start-up code is significantly revised.
 
 
 *********************************************************************************************
@@ -267,20 +258,20 @@ const uint32_t N_B_EX = 16;
 //float32_t recEQ_Level[14];
 //float32_t recEQ_LevelScale[14];
 //Setup for EQ filters
-float32_t rec_EQ1_float_buffer_L[256];
-float32_t rec_EQ2_float_buffer_L[256];
-float32_t rec_EQ3_float_buffer_L[256];
-float32_t rec_EQ4_float_buffer_L[256];
-float32_t rec_EQ5_float_buffer_L[256];
-float32_t rec_EQ6_float_buffer_L[256];
-float32_t rec_EQ7_float_buffer_L[256];
-float32_t rec_EQ8_float_buffer_L[256];
-float32_t rec_EQ9_float_buffer_L[256];
-float32_t rec_EQ10_float_buffer_L[256];
-float32_t rec_EQ11_float_buffer_L[256];
-float32_t rec_EQ12_float_buffer_L[256];
-float32_t rec_EQ13_float_buffer_L[256];
-float32_t rec_EQ14_float_buffer_L[256];
+float32_t DMAMEM rec_EQ1_float_buffer_L[256];
+float32_t DMAMEM rec_EQ2_float_buffer_L[256];
+float32_t DMAMEM rec_EQ3_float_buffer_L[256];
+float32_t DMAMEM rec_EQ4_float_buffer_L[256];
+float32_t DMAMEM rec_EQ5_float_buffer_L[256];
+float32_t DMAMEM rec_EQ6_float_buffer_L[256];
+float32_t DMAMEM rec_EQ7_float_buffer_L[256];
+float32_t DMAMEM rec_EQ8_float_buffer_L[256];
+float32_t DMAMEM rec_EQ9_float_buffer_L[256];
+float32_t DMAMEM rec_EQ10_float_buffer_L[256];
+float32_t DMAMEM rec_EQ11_float_buffer_L[256];
+float32_t DMAMEM rec_EQ12_float_buffer_L[256];
+float32_t DMAMEM rec_EQ13_float_buffer_L[256];
+float32_t DMAMEM rec_EQ14_float_buffer_L[256];
 
 float32_t rec_EQ_Band1_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };  //declare and zero biquad state variables
 float32_t rec_EQ_Band2_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -479,8 +470,6 @@ arm_fir_interpolate_instance_f32 FIR_int2_Q;
 arm_lms_norm_instance_f32 LMS_Norm_instance;
 arm_lms_instance_f32 LMS_instance;
 
-
-
 const DEMOD_Descriptor DEMOD[3] = {
   //   DEMOD_n, name
   { DEMOD_USB, "(USB)" },
@@ -488,16 +477,7 @@ const DEMOD_Descriptor DEMOD[3] = {
   { DEMOD_AM, "(AM)" },  //AFP09-22-22
 
 };
-/*
-struct dispSc
-{
-  const char *dbText;
-  float32_t   dBScale;
-  uint16_t    pixelsPerDB;
-  uint16_t    baseOffset;
-  float32_t   offsetIncrement;
-};
-*/
+
 dispSc displayScale[] =  //r *dbText,dBScale, pixelsPerDB, baseOffset, offsetIncrement
   {
     { "20 dB/", 10.0, 2, 24, 1.00 },
@@ -509,10 +489,6 @@ dispSc displayScale[] =  //r *dbText,dBScale, pixelsPerDB, baseOffset, offsetInc
 
 //======================================== Global variables declarations for Quad Oscillator 2 ===============================================
 long NCOFreq;
-
-//int EEPROMData.stepFineTuneOld = 0;
-//long EEPROMData.stepFineTune = 50UL;
-//long EEPROMData.stepFineTune2 = 50UL;
 
 float32_t NCO_INC;
 
@@ -533,14 +509,10 @@ float32_t q_temp = 0.0;
 float32_t corrResult;
 uint32_t corrResultIndex;
 float32_t cosBuffer2[256];
-//float32_t cosBuffer3[256];
-//float32_t cosBuffer4[256];
 float32_t sinBuffer[256];
 float32_t sinBuffer2[256];
 float32_t cwRiseBuffer[256];
 float32_t cwFallBuffer[256];
-//float32_t sinBuffer3[256];
-//float32_t sinBuffer4[256];
 float32_t aveCorrResult;
 float32_t aveCorrResultR;
 float32_t aveCorrResultL;
@@ -568,7 +540,6 @@ float32_t float_Corr_BufferR[511];
 float32_t float_Corr_BufferL[511];
 long tempSigTime = 0;
 
-//int audioTemp           = 0;  KF5N
 int audioTempPrevious = 0;
 float sigStart = 0.0;
 float sigDuration = 0.0;
@@ -657,21 +628,12 @@ char decodeBuffer[33];    // The buffer for holding the decoded characters.  Inc
 char keyboardBuffer[10];  // Set for call prefixes. May be increased later
 const char DEGREE_SYMBOL[] = { 0xB0, '\0' };
 
-//char *bigMorseCodeTree = (char *)"-EISH5--4--V---3--UF--------?-2--ARL---------.--.WP------J---1--TNDB6--.--X/-----KC------Y------MGZ7----,Q------O-8------9--0----";
-//012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678
-//         10        20        30        40        50        60        70        80        90       100       110       120
-
-//char EEPROMData.mapFileName[50];
-//char EEPROMData.myCall[10];
-//char EEPROMData.EEPROMData.equalizerRec[10];
 const char *tune_text = "Fast Tune";
 const char *zoomOptions[] = { "1x ", "2x ", "4x ", "8x ", "16x" };
-//char versionSettings[10];
 
 byte currentDashJump = DECODER_BUFFER_SIZE;
 byte currentDecoderIndex = 0;
 
-//int8_t EEPROMData.AGCMode = 2;
 int8_t auto_IQ_correction;
 int filterWidthX;  // The current filter X.
 int filterWidthY;  // The current filter Y.
@@ -693,7 +655,6 @@ int8_t NB_impulse_samples = 7;
 int8_t NR_first_block = 1;
 int8_t pos_x_date = 14;
 int8_t pos_y_date = 68;
-//int8_t EEPROMData.xmtMode = SSB_MODE;  // 0 = SSB, 1 = CW
 
 uint8_t agc_action = 0;
 uint8_t agc_switch_mode = 0;
@@ -764,13 +725,12 @@ const uint8_t NR_N_frames = 15;
 
 uint16_t base_y = SPECTRUM_BOTTOM;
 
-//int16_t EEPROMData.activeVFO;
 int16_t currentMode;
 int16_t pixelCurrent[SPECTRUM_RES];
 int16_t pixelnew[SPECTRUM_RES];
 int16_t pixelold[SPECTRUM_RES];
-int16_t pixelnew2[MAX_WATERFALL_WIDTH + 1];  //AFP
-int16_t pixelold2[MAX_WATERFALL_WIDTH];
+//int16_t pixelnew2[MAX_WATERFALL_WIDTH + 1];  //AFP
+//int16_t pixelold2[MAX_WATERFALL_WIDTH];
 int16_t notch_L[2] = { 156, 180 };
 int16_t fineEncoderRead;
 int16_t notch_R[2] = { 166, 190 };
@@ -944,7 +904,7 @@ int dcfSilenceTimer;
 int dcfTheSecond;
 int dcfPulseTime;
 //int EEPROMData.decoderFlag = DECODER_STATE;  // Startup state for decoder
-int demodIndex = 0;               //AFP 2-10-21
+int demodIndex = 0;  //AFP 2-10-21
 int directFreqFlag = 0;
 int EEPROMChoice;
 int encoderStepOld;
@@ -1019,7 +979,7 @@ int termCursorXpos = 0;
 int x2 = 0;  //AFP
 
 int zoom_sample_ptr = 0;
-int zoomIndex = 1;                 //AFP 9-26-22
+int zoomIndex = 1;  //AFP 9-26-22
 //int EEPROMData.tuneIndex = DEFAULTFREQINDEX;  //AFP 2-10-21
 int wtf;
 int updateDisplayFlag = 0;
@@ -1078,7 +1038,7 @@ long averageDah;
 
 long currentFreq;
 //long EEPROMData.centerFreq = 0L;
-long CWRecFreq;                //  = TxRxFreq +/- 750Hz
+long CWRecFreq;  //  = TxRxFreq +/- 750Hz
 //long currentFreqA = 7150000L;  //Initial VFOA center freq
 //long currentFreqAOld2 = 0;
 //long currentFreqB = 7030000;  //Initial VFOB center freq
@@ -1105,7 +1065,7 @@ long TxRxFreq;  // = EEPROMData.centerFreq+NCOFreq  NCOFreq from FreqShift2()
 long TxRxFreqOld;
 long TxRxFreqDE;
 uint32_t gapLength;
-long gapEnd, gapStart;    // Time for noise measures
+long gapEnd, gapStart;               // Time for noise measures
 long ditTime = 80L, dahTime = 240L;  // Assume 15wpm to start
 
 ulong samp_ptr;
@@ -1191,15 +1151,15 @@ float32_t fast_decay_mult;
 // decimation with FIR lowpass for Zoom FFT
 arm_fir_decimate_instance_f32 Fir_Zoom_FFT_Decimate_I1;
 arm_fir_decimate_instance_f32 Fir_Zoom_FFT_Decimate_Q1;
-float32_t DMAMEM Fir_Zoom_FFT_Decimate_I1_state [12 + BUFFER_SIZE * N_B - 1];
-float32_t DMAMEM Fir_Zoom_FFT_Decimate_Q1_state [12 + BUFFER_SIZE * N_B - 1];
+float32_t DMAMEM Fir_Zoom_FFT_Decimate_I1_state[12 + BUFFER_SIZE * N_B - 1];
+float32_t DMAMEM Fir_Zoom_FFT_Decimate_Q1_state[12 + BUFFER_SIZE * N_B - 1];
 float32_t DMAMEM Fir_Zoom_FFT_Decimate1_coeffs[12];
 
 // decimation with FIR lowpass for Zoom FFT
 arm_fir_decimate_instance_f32 Fir_Zoom_FFT_Decimate_I2;
 arm_fir_decimate_instance_f32 Fir_Zoom_FFT_Decimate_Q2;
-float32_t DMAMEM Fir_Zoom_FFT_Decimate_I2_state [12 + BUFFER_SIZE * N_B - 1];
-float32_t DMAMEM Fir_Zoom_FFT_Decimate_Q2_state [12 + BUFFER_SIZE * N_B - 1];
+float32_t DMAMEM Fir_Zoom_FFT_Decimate_I2_state[12 + BUFFER_SIZE * N_B - 1];
+float32_t DMAMEM Fir_Zoom_FFT_Decimate_Q2_state[12 + BUFFER_SIZE * N_B - 1];
 float32_t DMAMEM Fir_Zoom_FFT_Decimate2_coeffs[12];
 
 float32_t DMAMEM FIR_Coef_I[(FFT_LENGTH / 2) + 1];
@@ -1440,7 +1400,7 @@ void Codec_gain() {
     if (timer >= 50)  // 500   // has it been long enough since the last increase?
     {
       bands[EEPROMData.currentBand].RFgain += 1;  // increase gain by one step, 1.5dB
-      timer = 0;                       // reset the timer to prevent this from executing too often
+      timer = 0;                                  // reset the timer to prevent this from executing too often
       if (bands[EEPROMData.currentBand].RFgain > 15) {
         bands[EEPROMData.currentBand].RFgain = 15;
       }
@@ -1835,74 +1795,82 @@ void InitializeDataArrays() {
 *****/
 void SetAudioOperatingState(int operatingState) {
 #ifdef DEBUG
-    Serial.printf("lastState=%d radioState=%d memory_used=%d memory_used_max=%d f32_memory_used=%d f32_memory_used_max=%d\n",
-                  lastState,
-                  radioState,
-                  (int) AudioStream::memory_used,
-                  (int) AudioStream::memory_used_max,
-                  (int) AudioStream_F32::f32_memory_used,
-                  (int) AudioStream_F32::f32_memory_used_max);
-    AudioStream::memory_used_max = 0;
-    AudioStream_F32::f32_memory_used_max = 0;
+  Serial.printf("lastState=%d radioState=%d memory_used=%d memory_used_max=%d f32_memory_used=%d f32_memory_used_max=%d\n",
+                lastState,
+                radioState,
+                (int)AudioStream::memory_used,
+                (int)AudioStream::memory_used_max,
+                (int)AudioStream_F32::f32_memory_used,
+                (int)AudioStream_F32::f32_memory_used_max);
+  AudioStream::memory_used_max = 0;
+  AudioStream_F32::f32_memory_used_max = 0;
 #endif
-    switch (operatingState) {
-      case SSB_RECEIVE_STATE:
-      case CW_RECEIVE_STATE:
-        // QSD connected and enabled
-        Q_in_L.begin();
-        Q_in_R.begin();
-        patchCord9.connect();
-        patchCord10.connect();
+  switch (operatingState) {
+    case SSB_RECEIVE_STATE:
+    case CW_RECEIVE_STATE:
+      // QSD connected and enabled
+      Q_in_L.begin();
+      Q_in_R.begin();
+      patchCord9.connect();
+      patchCord10.connect();
 
-        // Microphone input disabled and disconnected
-        patchCord1.disconnect();
-        patchCord2.disconnect();
-        Q_in_L_Ex.end(); Q_in_L_Ex.clear();
-        Q_in_R_Ex.end(); Q_in_R_Ex.clear();
+      // Microphone input disabled and disconnected
+      patchCord1.disconnect();
+      patchCord2.disconnect();
+      Q_in_L_Ex.end();
+      Q_in_L_Ex.clear();
+      Q_in_R_Ex.end();
+      Q_in_R_Ex.clear();
 
-        // CW sidetone output disconnected
-        patchCord23.disconnect();
-        patchCord24.disconnect();
+      // CW sidetone output disconnected
+      patchCord23.disconnect();
+      patchCord24.disconnect();
 
-        break;
-      case SSB_TRANSMIT_STATE:
-        // QSD disabled and disconnected
-        patchCord9.disconnect();
-        patchCord10.disconnect();
-        Q_in_L.end(); Q_in_L.clear();
-        Q_in_R.end(); Q_in_R.clear();
+      break;
+    case SSB_TRANSMIT_STATE:
+      // QSD disabled and disconnected
+      patchCord9.disconnect();
+      patchCord10.disconnect();
+      Q_in_L.end();
+      Q_in_L.clear();
+      Q_in_R.end();
+      Q_in_R.clear();
 
-        // Microphone input enabled and connected
-        Q_in_L_Ex.begin();
-        Q_in_R_Ex.begin();
-        patchCord1.connect();
-        patchCord2.connect();
+      // Microphone input enabled and connected
+      Q_in_L_Ex.begin();
+      Q_in_R_Ex.begin();
+      patchCord1.connect();
+      patchCord2.connect();
 
-        // CW sidetone output disconnected
-        patchCord23.disconnect();
-        patchCord24.disconnect();
+      // CW sidetone output disconnected
+      patchCord23.disconnect();
+      patchCord24.disconnect();
 
-        break;
-      case CW_TRANSMIT_STRAIGHT_STATE:
-      case CW_TRANSMIT_KEYER_STATE:
-        // QSD disabled and disconnected
-        patchCord9.disconnect();
-        patchCord10.disconnect();
-        Q_in_L.end(); Q_in_L.clear();
-        Q_in_R.end(); Q_in_R.clear();
+      break;
+    case CW_TRANSMIT_STRAIGHT_STATE:
+    case CW_TRANSMIT_KEYER_STATE:
+      // QSD disabled and disconnected
+      patchCord9.disconnect();
+      patchCord10.disconnect();
+      Q_in_L.end();
+      Q_in_L.clear();
+      Q_in_R.end();
+      Q_in_R.clear();
 
-        // Microphone input disabled and disconnected
-        patchCord1.disconnect();
-        patchCord2.disconnect();
-        Q_in_L_Ex.end(); Q_in_L_Ex.clear();
-        Q_in_R_Ex.end(); Q_in_R_Ex.clear();
+      // Microphone input disabled and disconnected
+      patchCord1.disconnect();
+      patchCord2.disconnect();
+      Q_in_L_Ex.end();
+      Q_in_L_Ex.clear();
+      Q_in_R_Ex.end();
+      Q_in_R_Ex.clear();
 
-        // CW sidetone output connected
-        patchCord23.connect();
-        patchCord24.connect();
+      // CW sidetone output connected
+      patchCord23.connect();
+      patchCord24.connect();
 
-        break;
-    }
+      break;
+  }
 }
 
 
@@ -2062,13 +2030,13 @@ void setup() {
   spectrum_y = 150;
   xExpand = 1.4;
   h = 135;
-//  EEPROMData.nrOptionSelect = 0;
+  //  EEPROMData.nrOptionSelect = 0;
 
   Q_in_L.begin();  //Initialize receive input buffers
   Q_in_R.begin();
   MyDelay(100L);
 
-//  EEPROMData.freqIncrement = incrementValues[EEPROMData.tuneIndex];
+  //  EEPROMData.freqIncrement = incrementValues[EEPROMData.tuneIndex];
   NR_Index = EEPROMData.nrOptionSelect;
   NCOFreq = 0L;
 
@@ -2079,11 +2047,11 @@ void setup() {
   /****************************************************************************************
      start local oscillator Si5351
   ****************************************************************************************/
-  si5351.reset();                                                                // KF5N.  Moved Si5351 start-up to setup. JJP  7/14/23
+  si5351.reset();                                                                           // KF5N.  Moved Si5351 start-up to setup. JJP  7/14/23
   si5351.init(SI5351_CRYSTAL_LOAD_10PF, Si_5351_crystal, EEPROMData.freqCorrectionFactor);  //JJP  7/14/23
-  si5351.set_ms_source(SI5351_CLK2, SI5351_PLLB);                                //  Allows CLK1 and CLK2 to exceed 100 MHz simultaneously.
-  si5351.drive_strength(SI5351_CLK1, SI5351_DRIVE_8MA);                          //AFP 10-13-22
-  si5351.drive_strength(SI5351_CLK2, SI5351_DRIVE_8MA);                          //CWP AFP 10-13-22
+  si5351.set_ms_source(SI5351_CLK2, SI5351_PLLB);                                           //  Allows CLK1 and CLK2 to exceed 100 MHz simultaneously.
+  si5351.drive_strength(SI5351_CLK1, SI5351_DRIVE_8MA);                                     //AFP 10-13-22
+  si5351.drive_strength(SI5351_CLK2, SI5351_DRIVE_8MA);                                     //CWP AFP 10-13-22
   // Turn off LOs.
   si5351.output_enable(SI5351_CLK2, 0);
   si5351.output_enable(SI5351_CLK1, 0);
@@ -2111,10 +2079,10 @@ void setup() {
   sineTone(EEPROMData.CWOffset + 6);  // This function takes "number of cycles" which is the offset + 6.
   initCWShaping();
   // Initialize buffer used by CW decoder.
-    float freq[4] = {562.5, 656.5, 750.0, 843.75};
-    float theta;
-  for (int kf = 0; kf < 255; kf++) {  //Calc sine wave
-    theta = (float)kf * TWO_PI * freq[EEPROMData.CWOffset] / 24000.0;    // theta = kf * 2 * PI * freqSideTone / 24000
+  float freq[4] = { 562.5, 656.5, 750.0, 843.75 };
+  float theta;
+  for (int kf = 0; kf < 255; kf++) {                                   //Calc sine wave
+    theta = (float)kf * TWO_PI * freq[EEPROMData.CWOffset] / 24000.0;  // theta = kf * 2 * PI * freqSideTone / 24000
     sinBuffer[kf] = sin(theta);
   }
   filterEncoderMove = 0;
@@ -2133,8 +2101,8 @@ void setup() {
   ShowFrequency();
   SetFreq();
   zoomIndex = EEPROMData.spectrum_zoom - 1;  // ButtonZoom() increments zoomIndex, so this cancels it so the read from EEPROM is accurately restored.  KF5N August 3, 2023
-  ButtonZoom();                   // Restore zoom settings.  KF5N August 3, 2023
-  knee_dBFS = -15.0;   // Is this variable actually used???
+  ButtonZoom();                              // Restore zoom settings.  KF5N August 3, 2023
+  knee_dBFS = -15.0;                         // Is this variable actually used???
   comp_ratio = 5.0;
   attack_sec = .1;
   release_sec = 2.0;
@@ -2142,11 +2110,11 @@ void setup() {
   comp2.setPreGain_dB(-10);  //set the gain of the Right-channel gain processor
 
   EEPROMData.sdCardPresent = SDPresentCheck();  // JJP 7/18/23
-  lastState = 1111;                  // To make sure the receiver will be configured on the first pass through.  KF5N September 3, 2023
-  decodeStates = state0;             // Initialize the Morse decoder.
-  UpdateDecoderField();              // Adjust graphics for Morse decoder.
+  lastState = 1111;                             // To make sure the receiver will be configured on the first pass through.  KF5N September 3, 2023
+  decodeStates = state0;                        // Initialize the Morse decoder.
+  UpdateDecoderField();                         // Adjust graphics for Morse decoder.
 
-if((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops(); // Required only for QSD2/QSE2.
+  if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();  // Required only for QSD2/QSE2.
 }
 //============================================================== END setup() =================================================================
 //===============================================================================================================================
@@ -2292,18 +2260,18 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       modeSelectOutR.gain(0, 0);
       modeSelectOutExL.gain(0, 0);
       modeSelectOutExR.gain(0, 0);
-      digitalWrite(MUTE, LOW);                                    // unmutes audio
+      digitalWrite(MUTE, LOW);  // unmutes audio
       cwKeyDown = false;
       cwTimer = millis();
       while (millis() - cwTimer <= EEPROMData.cwTransmitDelay) {  //Start CW transmit timer on
         digitalWrite(RXTX, HIGH);
-        if (digitalRead(EEPROMData.paddleDit) == LOW && EEPROMData.keyType == 0) {       // AFP 09-25-22  Turn on CW signal
-          cwTimer = millis();                                      //Reset timer
+        if (digitalRead(EEPROMData.paddleDit) == LOW && EEPROMData.keyType == 0) {  // AFP 09-25-22  Turn on CW signal
+          cwTimer = millis();                                                       //Reset timer
 
           if (!cwKeyDown) {
-            modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);       //AFP 10-21-22
-            modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);       //AFP 10-21-22
-            modeSelectOutL.gain(1, volumeLog[(int)EEPROMData.sidetoneVolume]);  // Sidetone  AFP 10-01-22
+            modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
+            modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
+            modeSelectOutL.gain(1, volumeLog[(int)EEPROMData.sidetoneVolume]);        // Sidetone  AFP 10-01-22
 
             CW_ExciterIQData(CW_SHAPING_RISE);
             cwKeyDown = true;
@@ -2321,7 +2289,7 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
           }
         }
       }
-      digitalWrite(MUTE, HIGH);     // mutes audio
+      digitalWrite(MUTE, HIGH);   // mutes audio
       modeSelectOutL.gain(1, 0);  // Sidetone off
       modeSelectOutR.gain(1, 0);
       modeSelectOutExL.gain(0, 0);  //Power = 0 //AFP 10-11-22
@@ -2339,16 +2307,16 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       modeSelectOutR.gain(0, 0);
       modeSelectOutExL.gain(0, 0);
       modeSelectOutExR.gain(0, 0);
-      digitalWrite(MUTE, LOW);                                    // unmutes audio
+      digitalWrite(MUTE, LOW);  // unmutes audio
       cwTimer = millis();
       while (millis() - cwTimer <= EEPROMData.cwTransmitDelay) {
         digitalWrite(RXTX, HIGH);
 
         if (digitalRead(EEPROMData.paddleDit) == LOW) {  // Keyer Dit
           ditTimerOn = millis();
-          modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);       //AFP 10-21-22
-          modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);       //AFP 10-21-22
-          modeSelectOutL.gain(1, volumeLog[(int)EEPROMData.sidetoneVolume]);  // Sidetone
+          modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
+          modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
+          modeSelectOutL.gain(1, volumeLog[(int)EEPROMData.sidetoneVolume]);        // Sidetone
 
           // Queue audio blocks--execution time of this loop will be between 0-20ms shorter
           // than the desired dit time, due to audio buffering
@@ -2363,13 +2331,13 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
             ;
           }
 
-          // Pause for one dit length of silence 
+          // Pause for one dit length of silence
           ditTimerOff = millis();
           while (millis() - ditTimerOff <= transmitDitLength) {
             ;
           }
 
-          modeSelectOutExL.gain(0, 0);                               //Power =0
+          modeSelectOutExL.gain(0, 0);  //Power =0
           modeSelectOutExR.gain(0, 0);
           modeSelectOutL.gain(1, 0);  // Sidetone off
           modeSelectOutR.gain(1, 0);
@@ -2395,13 +2363,13 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
               ;
             }
 
-            // Pause for one dit length of silence 
+            // Pause for one dit length of silence
             ditTimerOff = millis();
             while (millis() - ditTimerOff <= transmitDitLength) {
               ;
             }
 
-            modeSelectOutExL.gain(0, 0);                                //Power =0
+            modeSelectOutExL.gain(0, 0);  //Power =0
             modeSelectOutExR.gain(0, 0);
             modeSelectOutL.gain(1, 0);  // Sidetone off
             modeSelectOutR.gain(1, 0);
@@ -2412,8 +2380,8 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
         keyPressedOn = 0;  // Fix for keyer click-clack.  KF5N August 16, 2023
       }                    //End Relay timer
 
-      digitalWrite(MUTE, HIGH);     // mutes audio
-      modeSelectOutL.gain(1, 0);    // Sidetone off
+      digitalWrite(MUTE, HIGH);   // mutes audio
+      modeSelectOutL.gain(1, 0);  // Sidetone off
       modeSelectOutR.gain(1, 0);
       modeSelectOutExL.gain(0, 0);  //Power = 0 //AFP 10-11-22
       modeSelectOutExR.gain(0, 0);  //AFP 10-11-22
