@@ -225,6 +225,7 @@ void SetKeyType() {
     EEPROMData.paddleDit = KEYER_DIT_INPUT_TIP;
     EEPROMData.paddleDah = KEYER_DAH_INPUT_RING;
   }
+  EEPROMWrite();
 }
 
 
