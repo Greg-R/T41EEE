@@ -28,7 +28,9 @@ FLASHMEM void loadConfiguration(const char *filename, config_t &EEPROMData) {
   strlcpy(EEPROMData.versionSettings, doc["versionSettings"] | "t41pp.0", 10);
   EEPROMData.AGCMode = doc["AGCMode"];
   EEPROMData.audioVolume = doc["audioVolume"];
-  EEPROMData.rfGainAllBands = doc["rfGainAllBands"];
+  EEPROMData.rfGainCurrent = doc["rfGainCurrent"];
+  for (int i = 0; i < NUMBER_OF_BANDS; i++) EEPROMData.rfGain[i] = doc["rfGain"][i];
+  EEPROMData.autoGain = doc["autoGain"];
   EEPROMData.spectrumNoiseFloor = doc["spectrumNoiseFloor"];
   EEPROMData.tuneIndex = doc["tuneIndex"];
   EEPROMData.stepFineTune = doc["stepFineTune"];
@@ -126,7 +128,9 @@ FLASHMEM void saveConfiguration(const char *filename, const config_t &EEPROMData
   doc["myCall"] = EEPROMData.myCall;
   doc["AGCMode"] = EEPROMData.AGCMode;
   doc["audioVolume"] = EEPROMData.audioVolume;
-  doc["rfGainAllBands"] = EEPROMData.rfGainAllBands;
+  doc["rfGainCurrent"] = EEPROMData.rfGainCurrent;
+  for (int i = 0; i < NUMBER_OF_BANDS; i++) doc["rfGain"][i] = EEPROMData.rfGain[i];
+  doc["autoGain"] = EEPROMData.autoGain;
   doc["spectrumNoiseFloor"] = EEPROMData.spectrumNoiseFloor;
   doc["tuneIndex"] = EEPROMData.tuneIndex;
   doc["stepFineTune"] = EEPROMData.stepFineTune;

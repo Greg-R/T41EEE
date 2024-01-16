@@ -34,6 +34,7 @@ void ProcessIQData()
   float32_t audioMaxSquared;
   uint32_t AudioMaxIndex;
   float rfGainValue;
+  int rfGain;
 
   // Are there at least N_BLOCKS buffers in each channel available ?  N_BLOCKS should be 16.
   if ( (uint32_t) Q_in_L.available() > N_BLOCKS && (uint32_t) Q_in_R.available() > N_BLOCKS ) {     // Removed addition of 0 to N_BLOCKS.
@@ -69,7 +70,9 @@ void ProcessIQData()
     resetTuningFlag = 0;
 
     //  Set RFGain for all bands.
-    rfGainValue = pow(10, (float)EEPROMData.rfGainAllBands / 20);
+    if(EEPROMData.autoGain) rfGain = EEPROMData.rfGainCurrent;
+       else rfGain = EEPROMData.rfGain[EEPROMData.currentBand];
+    rfGainValue = pow(10, (float)rfGain / 20);  // KF5N January 16 2024
     arm_scale_f32 (float_buffer_L, rfGainValue, float_buffer_L, BUFFER_SIZE * N_BLOCKS); //AFP 09-27-22
     arm_scale_f32 (float_buffer_R, rfGainValue, float_buffer_R, BUFFER_SIZE * N_BLOCKS); //AFP 09-27-22
     /**********************************************************************************  AFP 12-31-20

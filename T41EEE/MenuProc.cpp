@@ -628,10 +628,10 @@ int RFOptions() {
       break;
 
     case 1:                                                                                                        // Gain
-      EEPROMData.rfGainAllBands = GetEncoderValue(-60, 10, EEPROMData.rfGainAllBands, 5, (char *)"RF Gain dB: ");  // Argument: min, max, start, increment
+      EEPROMData.rfGain[EEPROMData.currentBand] = GetEncoderValue(-60, 10, EEPROMData.rfGain[EEPROMData.currentBand], 5, (char *)"RF Gain dB: ");  // Argument: min, max, start, increment
       //EEPROMData.rfGainAllBands = EEPROMData.rfGainAllBands;
       EEPROMWrite();
-      returnValue = EEPROMData.rfGainAllBands;
+      returnValue = EEPROMData.rfGain[EEPROMData.currentBand];
       break;
 
       // Where is the 3rd option and default???

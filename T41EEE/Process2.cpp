@@ -368,7 +368,7 @@ void ProcessIQData2(int toneFreq) {
       Q_in_R.freeBuffer();
     }
 
-    rfGainValue = pow(10, (float)EEPROMData.rfGainAllBands / 20);                        //AFP 2-11-23
+    rfGainValue = pow(10, (float)EEPROMData.rfGain[EEPROMData.currentBand] / 20);                        //AFP 2-11-23
     arm_scale_f32(float_buffer_L, rfGainValue, float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 2-11-23
     arm_scale_f32(float_buffer_R, rfGainValue, float_buffer_R, BUFFER_SIZE * N_BLOCKS);  //AFP 2-11-23
 
