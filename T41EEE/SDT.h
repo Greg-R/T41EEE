@@ -738,7 +738,7 @@ struct config_t {
   char versionSettings[10] = VERSION;  // This is required to be the first!  See EEPROMRead() function.
   int AGCMode = 1;
   int audioVolume = 30;  // 4 bytes
-  int rfGainAllBands = 0;
+  int rfGainCurrent = 0;
   int spectrumNoiseFloor = SPECTRUM_NOISE_FLOOR;  // AFP 09-26-22
   int tuneIndex = DEFAULTFREQINCREMENT;           // JJP 7-3-23
   long stepFineTune = FINE_TUNE_STEP;             // JJP 7-3-23
@@ -832,6 +832,7 @@ struct config_t {
   int buttonThresholdPressed = 944;   // switchValues[0] + WIGGLE_ROOM
   int buttonThresholdReleased = 964;  // buttonThresholdPressed + WIGGLE_ROOM
   int buttonRepeatDelay = 300000;     // Increased to 300000 from 200000 to better handle cheap, wornout buttons.
+  int rfGain[NUMBER_OF_BANDS] = {0};
 };
 
 extern struct config_t EEPROMData;
