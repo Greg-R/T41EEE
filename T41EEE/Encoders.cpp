@@ -322,6 +322,7 @@ int SetWPM() {
       break;
     }
   }
+  EEPROMWrite();
   tft.setTextColor(RA8875_WHITE);
   EraseMenus();
   return EEPROMData.currentWPM;
