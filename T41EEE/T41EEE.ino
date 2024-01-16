@@ -2140,9 +2140,9 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   bool cwKeyDown;
   unsigned long cwBlockIndex;
 
-  valPin = ReadSelectedPushButton();                     // Poll UI push buttons
-  if (valPin != BOGUS_PIN_READ) {                        // If a button was pushed...
-    pushButtonSwitchIndex = ProcessButtonPress(valPin);  // Winner, winner...chicken dinner!
+  valPin = ReadSelectedPushButton();
+  if (valPin != BOGUS_PIN_READ && xrState != TRANSMIT_STATE) {
+    pushButtonSwitchIndex = ProcessButtonPress(valPin);
     ExecuteButtonPress(pushButtonSwitchIndex);
   }
   //  State detection
