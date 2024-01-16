@@ -740,7 +740,7 @@ struct config_t {
   int audioVolume = 30;  // 4 bytes
   int rfGainCurrent = 0;
   int rfGain[NUMBER_OF_BANDS] = {0};
-  bool autoGain = true;
+  bool autoGain = false;
   int spectrumNoiseFloor = SPECTRUM_NOISE_FLOOR;  // AFP 09-26-22
   int tuneIndex = DEFAULTFREQINCREMENT;           // JJP 7-3-23
   long stepFineTune = FINE_TUNE_STEP;             // JJP 7-3-23
