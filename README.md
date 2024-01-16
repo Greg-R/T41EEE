@@ -1,4 +1,4 @@
-### Version T41EEE.1 T41 Software Defined Transceiver Arduino Sketch
+### Version T41EEE.2 T41 Software Defined Transceiver Arduino Sketch
 
 This is the "T41 Extreme Experimenter's Edition" software for the 
 T41 Software Defined Transceiver.  The T41EEE was "forked" from the V049.2 version
@@ -40,19 +40,22 @@ with the name Arduino_JSON, which is not the correct library.  Install the libra
 and if you have the other dependencies for the V049.2 version, compilation will be
 successful.
 
-## Highlight of Features included in T41EEE.1
+## Highlight of Features included in T41EEE.2
 
-Thank you to Jonathan KN6LFB for the major improvement in button functionality!
+Thank you to Jonathan KN6LFB and Harry GM3RVL for their contributions to the T41EEE code!
 
-1.  Switch matrix buttons are changed from polling to interrupts for improved performance.
-2.  The new button code includes a tunable variable for button response time.  This variable
-    is added to the calibration menu as BTN REPEAT.  The default value should be a good
-    starting point.  If button response is too fast, increase the BTN REPEAT value.
-3.  The switch matrix calibration routine is added to the calibration menu.
-4.  Switch matrix calibration is easier and precise.  It is possible to push a button
-    and hold it.  It will not skip to the next button.  In practice, a short, firm push
-    on each button in the proper series will rapidly complete the process.
-5.  EEPROM start-up code is significantly revised.
+1.  Harry GM3RVL version of ShowSpectrum() inserted which includes automatic RF gain control
+2.  Added On/Off for AutoGain.
+3.  Converted to ArduinoJson 7 and some house cleaning.
+4.  Added EEPROMWrite to key selections and paddle flip.
+5.  Disable button presses during transmit. Buttons are still read and "processed", so that interrupt-driven button repeats are cleared,
+    but they are not "executed".  By Jonathan KN6LFB.
+6.  Modified ResetHistograms to use the already-calculated transmitDitLength, and not to reset the current keyer speed to 15wpm. Since
+    the keyer speed is not being modified, there is also no reason to call UpdateWPMField.  By Jonathan KN6LFB.
+7.  Added new array for RF gain value per band.
+8.  Auto-gain works independently of manual RF gain per band.
+9.  Added EEPROMWrite() to SetWPM().
+10. Set autogain to false by default.
 
 
 *********************************************************************************************

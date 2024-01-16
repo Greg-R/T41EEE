@@ -1,5 +1,19 @@
 The following change log documents changes to versions prior to the current.
 
+## Highlight of Features included in T41EEE.1
+
+Thank you to Jonathan KN6LFB for the major improvement in button functionality!
+
+1.  Switch matrix buttons are changed from polling to interrupts for improved performance.
+2.  The new button code includes a tunable variable for button response time.  This variable
+    is added to the calibration menu as BTN REPEAT.  The default value should be a good
+    starting point.  If button response is too fast, increase the BTN REPEAT value.
+3.  The switch matrix calibration routine is added to the calibration menu.
+4.  Switch matrix calibration is easier and precise.  It is possible to push a button
+    and hold it.  It will not skip to the next button.  In practice, a short, firm push
+    on each button in the proper series will rapidly complete the process.
+5.  EEPROM start-up code is significantly revised.
+
 ## Highlight of Features included in T41EEE.0.  December 2023
 
 1.  The configuration file stored on the SD card is changed to JSON format.
