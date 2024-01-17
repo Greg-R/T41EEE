@@ -172,10 +172,6 @@ AudioMixer4 modeSelectOutR;    // AFP 09-01-22
 AudioMixer4 modeSelectOutExL;  // AFP 09-01-22
 AudioMixer4 modeSelectOutExR;  // AFP 09-01-22
 
-//=============== // AFP 09-01-22
-//AudioMixer4           CW_AudioOutR; //AFP 09-01-22
-//AudioMixer4           CW_AudioOutL; //AFP 09-01-22
-
 AudioMixer4 CW_AudioOut;
 
 AudioRecordQueue Q_in_L;
@@ -196,10 +192,6 @@ AudioConnection_F32 patchCord3(int2Float1, 0, comp1, 0);  //Left.  makes Float c
 AudioConnection_F32 patchCord4(int2Float2, 0, comp2, 0);  //Right.  makes Float connections between objects
 AudioConnection_F32 patchCord5(comp1, 0, float2Int1, 0);  //Left.  makes Float connections between objects
 AudioConnection_F32 patchCord6(comp2, 0, float2Int2, 0);  //Right.  makes Float connections between objects
-//AudioConnection_F32     patchCord3(int2Float1, 0, float2Int1, 0); //Left.  makes Float connections between objects
-//AudioConnection_F32     patchCord4(int2Float2, 0, float2Int2, 0); //Right.  makes Float connections between objects
-
-// ===============
 
 AudioConnection patchCord7(float2Int1, 0, modeSelectInExL, 0);  //Input Ex
 AudioConnection patchCord8(float2Int2, 0, modeSelectInExR, 0);
@@ -229,7 +221,6 @@ AudioConnection patchCord24(Q_out_R_Ex, 0, modeSelectOutR, 1);
 
 // ================================== AFP 11-01-22
 
-//AudioControlSGTL5000  sgtl5000_1;
 AudioControlSGTL5000 sgtl5000_2;
 // ===========================  AFP 08-22-22 end
 
@@ -258,8 +249,6 @@ SPISettings settingsA(70000000UL, MSBFIRST, SPI_MODE1);
 
 const uint32_t N_B_EX = 16;
 //================== Receive EQ Variables================= AFP 08-08-22
-//float32_t recEQ_Level[14];
-//float32_t recEQ_LevelScale[14];
 //Setup for EQ filters
 float32_t DMAMEM rec_EQ1_float_buffer_L[256];
 float32_t DMAMEM rec_EQ2_float_buffer_L[256];
@@ -478,7 +467,6 @@ const DEMOD_Descriptor DEMOD[3] = {
   { DEMOD_USB, "(USB)" },
   { DEMOD_LSB, "(LSB)" },
   { DEMOD_AM, "(AM)" },  //AFP09-22-22
-
 };
 
 dispSc displayScale[] =  //r *dbText,dBScale, pixelsPerDB, baseOffset, offsetIncrement
@@ -557,72 +545,8 @@ bool gEEPROM_current = false;  //mdrhere does the data in EEPROM match the curre
 bool NR_gain_smooth_enable = false;
 bool NR_long_tone_reset = true;
 bool NR_long_tone_enable = false;
-//bool omitOutputFlag                       = false;
 bool timeflag = 0;
 bool volumeChangeFlag = false;
-
-char letterTable[] = {
-  // Morse coding: dit = 0, dah = 1
-  0b101,    // A                first 1 is the sentinel marker
-  0b11000,  // B
-  0b11010,  // C
-  0b1100,   // D
-  0b10,     // E
-  0b10010,  // F
-  0b1110,   // G
-  0b10000,  // H
-  0b100,    // I
-  0b10111,  // J
-  0b1101,   // K
-  0b10100,  // L
-  0b111,    // M
-  0b110,    // N
-  0b1111,   // O
-  0b10110,  // P
-  0b11101,  // Q
-  0b1010,   // R
-  0b1000,   // S
-  0b11,     // T
-  0b1001,   // U
-  0b10001,  // V
-  0b1011,   // W
-  0b11001,  // X
-  0b11011,  // Y
-  0b11100   // Z
-};
-
-char numberTable[] = {
-  0b111111,  // 0
-  0b101111,  // 1
-  0b100111,  // 2
-  0b100011,  // 3
-  0b100001,  // 4
-  0b100000,  // 5
-  0b110000,  // 6
-  0b111000,  // 7
-  0b111100,  // 8
-  0b111110   // 9
-};
-
-char punctuationTable[] = {
-  0b01101011,  // exclamation mark 33
-  0b01010010,  // double quote 34
-  0b10001001,  // dollar sign 36
-  0b00101000,  // ampersand 38
-  0b01011110,  // apostrophe 39
-  0b01011110,  // parentheses (L) 40, 41
-  0b01110011,  // comma 44
-  0b00100001,  // hyphen 45
-  0b01010101,  // period  46
-  0b00110010,  // slash 47
-  0b01111000,  // colon 58
-  0b01101010,  // semi-colon 59
-  0b01001100,  // question mark 63
-  0b01001101,  // underline 95
-  0b01101000,  // paragraph
-  0b00010001   // break
-};
-int ASCIIForPunctuation[] = { 33, 34, 36, 39, 41, 44, 45, 46, 47, 58, 59, 63, 95 };  // Indexes into code
 
 long startTime = 0;
 
@@ -732,8 +656,6 @@ int16_t currentMode;
 int16_t pixelCurrent[SPECTRUM_RES];
 int16_t pixelnew[SPECTRUM_RES];
 int16_t pixelold[SPECTRUM_RES];
-//int16_t pixelnew2[MAX_WATERFALL_WIDTH + 1];  //AFP
-//int16_t pixelold2[MAX_WATERFALL_WIDTH];
 int16_t notch_L[2] = { 156, 180 };
 int16_t fineEncoderRead;
 int16_t notch_R[2] = { 166, 190 };
@@ -760,16 +682,13 @@ int16_t spectrum_y = SPECTRUM_TOP_Y;
 
 uint16_t adcMaxLevel, dacMaxLevel;
 uint16_t barGraphUpdate = 0;
-//uint16_t EEPROMData.currentScale = 1;  // 20 dB/division
 
 //===== New histogram stuff ===
 int endDitFlag = 0;
 volatile int filterEncoderMove = 0;
 volatile long fineTuneEncoderMove = 0L;
 
-//int EEPROMData.currentNoiseFloor[NUMBER_OF_BANDS];
 int endGapFlag = 0;
-//int EEPROMData.freqSeparationChar;
 int selectedMapIndex;
 int topDitIndex;
 int topDitIndexOld;
@@ -794,8 +713,6 @@ int atomGapLength;
 int atomGapLength2;
 int charGapLength;
 int charGapLength2;
-//int receiveEQFlag;
-//int xmitEQFlag;
 int centerTuneFlag = 0;
 int x1AdjMax = 0;  //AFP 2-6-23
 unsigned long cwTimer;
@@ -819,11 +736,9 @@ float aveAtomGapLength = 40;
 float thresholdGapGeometricMean;
 float thresholdGapArithmeticMean;
 long CWFreqShift;
-//long calFreqShift;
 long filter_pos = 0;
 long last_filter_pos = 0;
 // ============ end new stuff =======
-
 
 uint16_t notches_BW[2] = { 4, 4 };  // no. of bins --> notch BW = no. of bins * bin_BW
 uint16_t temp_check_frequency;
@@ -875,8 +790,6 @@ int ANR_position = 0;
 int ANR_taps = 64;
 int attenuator = 0;
 int attack_buffsize;
-//int EEPROMData.AGCMode = 30;  // KF5N JJP 7/14/23
-//int EEPROMData.AGCModeOld2 = 30;
 int audioYPixel[1024];
 int audioPostProcessorCells[AUDIO_POST_PROCESSOR_BANDS];
 
@@ -896,17 +809,12 @@ int calTypeFlag = 0;
 int calOnFlag = 0;
 int chipSelect = BUILTIN_SDCARD;
 int countryIndex = -1;
-//int EEPROMData.currentBand = BAND_40M;
-//int currentBandA = BAND_40M;
-//int currentBandB = BAND_40M;
-//int EEPROMData.CWFilterIndex = 5;  //AFP10-18-22
 int dahLength;
 int dcfCount;
 int dcfLevel;
 int dcfSilenceTimer;
 int dcfTheSecond;
 int dcfPulseTime;
-//int EEPROMData.decoderFlag = DECODER_STATE;  // Startup state for decoder
 int demodIndex = 0;  //AFP 2-10-21
 int directFreqFlag = 0;
 int EEPROMChoice;
@@ -919,7 +827,6 @@ int filterHiPositionMarkerOld;
 int FLoCutOld;
 int FHiCutOld;
 int freqCalibration = -1000;
-//int EEPROMData.freqIncrement = DEFAULTEEPROMData.freqIncrement;
 int gapAtom;  // Space between atoms
 int gapChar;  // Space between characters
 int hang_counter = 0;
@@ -935,7 +842,6 @@ int IQChoice;
 int IQCalType;
 int IQEXChoice;
 int kDisplay = 0;  //AFP
-//int EEPROMData.keyType;
 int LMS_nr_strength;
 int LP_F_help = 3500;
 int mainTuneEncoder;
@@ -947,7 +853,6 @@ int n_L;
 int n_R;
 int n_tau;
 int NBChoice;
-//int EEPROMData.nrOptionSelect;
 int newCursorPosition = 0;
 int NR_Choice = 0;
 int NR_Filter_Value = -1;
@@ -959,31 +864,22 @@ int operatingMode;
 int old_demod_mode = -99;
 int oldnotchF = 10000;
 int out_index = -1;
-//int EEPROMData.paddleDah = KEYER_DAH_INPUT_RING;
-//int EEPROMData.paddleDit = KEYER_DIT_INPUT_TIP;
-//int EEPROMData.paddleFlip = PADDLE_FLIP;
 int pmode = 1;
 int pos_centre_f = 64;
 int pos_x_frequency = 12;
 int pos_y_smeter = (spectrum_y - 12);
-//int EEPROMData.rfGainAllBands = 1;
-
-//int EEPROMData.sdCardPresent = 0;  // Do they have an micro SD card installed?
 int secondaryMenuChoiceMade;
 int smeterLength;
-//int EEPROMData.spectrumNoiseFloor = SPECTRUM_NOISE_FLOOR;
 int splitOn;
 int switchFilterSideband = 0;
 
 int syncEEPROM;
 
 int termCursorXpos = 0;
-//float EEPROMData.transmitPowerLevel;
 int x2 = 0;  //AFP
 
 int zoom_sample_ptr = 0;
 int zoomIndex = 1;  //AFP 9-26-22
-//int EEPROMData.tuneIndex = DEFAULTFREQINDEX;  //AFP 2-10-21
 int wtf;
 int updateDisplayFlag = 0;
 int updateDisplayCounter = 0;
@@ -1005,8 +901,6 @@ unsigned tcr5;
 unsigned tcr2div;
 
 int32_t FFT_shift = 2048;
-//long long EEPROMData.freqCorrectionFactor = 68000LL;
-//long long EEPROMData.freqCorrectionFactorOld = 68000LL;
 int32_t IFFreq = SR[SampleRate].rate / 4;  // IF (intermediate) frequency
 int32_t IF_FREQ1 = 0;
 int32_t mainMenuIndex = START_MENU;  // Done so we show menu[0] at startup
@@ -1015,7 +909,6 @@ int32_t subMenuMaxOptions;           // holds the number of submenu options
 int32_t subMenuIndex = EEPROMData.currentBand;
 int32_t O_iiSum19;
 int32_t O_integrateCount19;
-//int32_t EEPROMData.spectrum_zoom = SPECTRUM_ZOOM_2;
 
 uint32_t N_BLOCKS = N_B;
 uint32_t BUF_N_DF = BUFFER_SIZE * N_BLOCKS / (uint32_t)DF;
@@ -1035,24 +928,14 @@ uint32_t s_hotTemp;      /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] at roo
 uint32_t s_hotCount;     /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] at the hot temperature.*/
 uint32_t twinpeaks_counter = 0;
 
-//unsigned long EEPROMData.cwTransmitDelay = 2000L;
 long averageDit;
 long averageDah;
 
 long currentFreq;
-//long EEPROMData.centerFreq = 0L;
 long CWRecFreq;  //  = TxRxFreq +/- 750Hz
-//long currentFreqA = 7150000L;  //Initial VFOA center freq
-//long currentFreqAOld2 = 0;
-//long currentFreqB = 7030000;  //Initial VFOB center freq
-//long currentFreqBOld2 = 0;
-//long EEPROMData.currentWPM = 15L;
-//long EEPROMData.favoriteFreqs[13];
 
-//long frequencyCorrection;
 long incrementValues[] = { 10, 50, 100, 250, 1000, 10000, 100000, 1000000 };
 long int n_clear;
-//long EEPROMData.lastFrequencies[NUMBER_OF_BANDS][2];
 long notchPosOld;
 long notchFreq = 1000;
 long notchCenterBin;
@@ -1361,10 +1244,6 @@ time_t getTeensy3Time() {
   return Teensy3Clock.get();
 }
 
-//#pragma GCC diagnostic ignored "-Wunused-variable"
-
-PROGMEM
-//==================================================================================
 
 /*****
   Purpose: To set the codec gain
@@ -1426,7 +1305,7 @@ void Codec_gain() {
   Return value:
     void
 *****/
-void T4_rtc_set(unsigned long t) {
+void FLASHMEM T4_rtc_set(unsigned long t) {
   //#if defined (T4)
 #if 0
   // stop the RTC
@@ -1455,7 +1334,7 @@ void T4_rtc_set(unsigned long t) {
   Return value;
     void
 *****/
-void initTempMon(uint16_t freq, uint32_t lowAlarmTemp, uint32_t highAlarmTemp, uint32_t panicAlarmTemp) {
+void FLASHMEM initTempMon(uint16_t freq, uint32_t lowAlarmTemp, uint32_t highAlarmTemp, uint32_t panicAlarmTemp) {
 
   uint32_t calibrationData;
   uint32_t roomCount;
@@ -1733,7 +1612,7 @@ void InitializeDataArrays() {
   SetDecIntFilters();  // here, the correct bandwidths are calculated and set accordingly
 
   /****************************************************************************************
-     Zoom FFT: Initiate decimation and interpolation FIR filters AND IIR filters
+     Zoom FFT: Initiate decimation and interpolation FIR filters AND IIR filters  Not done by ZoomFFTPrep???
   ****************************************************************************************/
   float32_t Fstop_Zoom = 0.5 * (float32_t)SR[SampleRate].rate / (1 << EEPROMData.spectrum_zoom);
 
@@ -2033,16 +1912,13 @@ void setup() {
   spectrum_y = 150;
   xExpand = 1.4;
   h = 135;
-  //  EEPROMData.nrOptionSelect = 0;
 
   Q_in_L.begin();  //Initialize receive input buffers
   Q_in_R.begin();
   MyDelay(100L);
 
-  //  EEPROMData.freqIncrement = incrementValues[EEPROMData.tuneIndex];
   NR_Index = EEPROMData.nrOptionSelect;
   NCOFreq = 0L;
-
 
   // ========================  End set up of Parameters from EEPROM data ===============
   NCOFreq = 0;
@@ -2064,7 +1940,6 @@ void setup() {
     EEPROMData.decoderFlag = DECODE_ON;  // Turns decoder on JJP 7/1/23
   }
 
-  //TxRxFreq = EEPROMData.centerFreq + NCOFreq;
   // Initialize the frequency setting based on the last used frequency stored to EEPROM.
   TxRxFreq = EEPROMData.centerFreq = EEPROMData.lastFrequencies[EEPROMData.currentBand][EEPROMData.activeVFO];
 
@@ -2072,12 +1947,10 @@ void setup() {
   splitOn = 0;  // Split VFO not active
   SetupMode(bands[EEPROMData.currentBand].mode);
 
-  //EEPROMData.currentWPM = EEPROMData.EEPROMData.currentWPM;  // Not required.  Retrieved by EEPROMRead().  KF5N August 27, 2023
   SetKeyPowerUp();  // Use EEPROMData.keyType and EEPROMData.paddleFlip to configure key GPIs.  KF5N August 27, 2023
   SetDitLength(EEPROMData.currentWPM);
   SetTransmitDitLength(EEPROMData.currentWPM);
   CWFreqShift = 750;
-  //calFreqShift = 0;
   // Initialize buffer used by CW transmitter.
   sineTone(EEPROMData.CWOffset + 6);  // This function takes "number of cycles" which is the offset + 6.
   initCWShaping();
@@ -2120,7 +1993,6 @@ void setup() {
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();  // Required only for QSD2/QSE2.
 }
 //============================================================== END setup() =================================================================
-//===============================================================================================================================
 
 elapsedMicros usec = 0;  // Automatically increases as time passes; no ++ necessary.
 
@@ -2202,7 +2074,6 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
         }
       }
       xrState = TRANSMIT_STATE;
-      // centerTuneFlag = 1;  Not required with revised tuning scheme.  KF5N July 22, 2023
       digitalWrite(MUTE, HIGH);  //  Mute Audio  (HIGH=Mute)
       digitalWrite(RXTX, HIGH);  //xmit on
       xrState = TRANSMIT_STATE;
@@ -2235,7 +2106,6 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
         T41State = CW_RECEIVE;
         ShowTransmitReceiveStatus();
         xrState = RECEIVE_STATE;
-        //SetFreq();   // KF5N
         modeSelectInR.gain(0, 1);
         modeSelectInL.gain(0, 1);
         modeSelectInExR.gain(0, 0);
@@ -2412,9 +2282,5 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
     volumeChangeFlag = false;
     UpdateVolumeField();
   }
-  /* if (ms_500.check() == 1)                                  // For clock updates AFP 10-26-22
-    {
-     //wait_flag = 0;
-     DisplayClock();
-    }*/
-}
+ 
+}  // end loop()
