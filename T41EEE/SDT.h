@@ -915,7 +915,6 @@ extern int16_t currentMode;
 
 extern int16_t pixelnew[];
 extern int16_t pixelold[];
-
 extern int16_t pixelCurrent[];
 extern int16_t pixelold[];
 
@@ -926,7 +925,6 @@ extern int16_t *sp_L1;
 extern int16_t *sp_R1;
 extern int16_t *sp_L2;
 extern int16_t *sp_R2;
-extern int16_t spectrum_height;
 extern int16_t spectrum_pos_centre_f;
 extern int16_t spectrum_x;
 extern int16_t spectrum_y;
@@ -939,98 +937,59 @@ extern const uint32_t N_stages_biquad_lowpass1;
 extern const uint16_t n_dec1_taps;
 extern const uint16_t n_dec2_taps;
 extern float adjustVolEncoder;  //AFP 09-21-22
-extern int adjustIQ;            //AFP 09-21-22
 extern int encoderStepOld;
-extern int resultOldFactor;
-extern float incrFactor;
 extern int mute;
-extern int exciteOn;
-extern int agc_decay;
-extern int agc_slope;
-extern int agc_thresh;
 extern int ANR_buff_size;
 extern int ANR_delay;
 extern int ANR_dline_size;
 extern int ANR_in_idx;
 extern int ANR_mask;
-extern int ANR_position;
 extern int ANR_taps;
 extern int attenuator;
 extern int attack_buffsize;
 extern int audioYPixel[];
 extern int bandswitchPins[];
-extern int button9State;
 extern int buttonRead;
 extern int calibrateFlag;
 extern int chipSelect;
 extern int countryIndex;
 extern int dahLength;
-extern int dcfCount;
-extern int dcfLevel;
-extern int dcfSilenceTimer;
-extern int dcfTheSecond;
-extern int dcfPulseTime;
 extern int decoderFlag;
-extern int demodIndex;
 extern int directFreqFlag;
-extern int EEPROMChoice;
-extern int equalizerRecChoice;
-extern int equalizerXmtChoice;
 extern int fLoCutOld;
 extern int fHiCutOld;
-extern int fastTuneActive;
 extern volatile int filterEncoderMove;
 extern volatile long fineTuneEncoderMove;
 extern int filterLoPositionMarkerOld;  // AFP 03-27-22 Layers
 extern int filterHiPositionMarkerOld;  // AFP 03-27-22 Layers
-
 extern int freqIncrement;
-extern int FLoCutOld;
-extern int FHiCutOld;
 extern int (*functionPtr[])();
 extern int gapAtom;  //Space between atoms
 extern int gapChar;  // Space between characters
 extern int hang_counter;
-extern int helpmin;
-extern int helphour;
-extern int helpday;
-extern int helpmonth;
-extern int helpyear;
-extern int helpsec;
-extern int idx, idpk;
+extern int idx;
 extern int IQChoice;
 extern int IQCalType;
-extern int IQEXChoice;
-extern int lidx, hidx;
+extern int lidx;
 extern int keyType;
 extern int LMS_nr_strength;
 extern int LP_F_help;
-extern int mainTuneEncoder;
 extern int micChoice;
 extern int micGainChoice;
 extern int minPinRead;
 extern bool buttonInterruptsEnabled;
-extern int NR_Filter_Value;
-extern int operatingMode;
 extern int n_L;
 extern int n_R;
 extern int n_tau;
-extern int NBChoice;
 extern int newCursorPosition;
-extern int NR_Choice;
-extern int NR_KIM_K_int;
-extern int NR_VAD_delay;
-extern int NR_VAD_duration;
 extern int NR_Index;
 extern int old_demod_mode;
-extern int oldnotchF;
 extern int oldCursorPosition;
 extern int out_index;
 extern int paddleFlip;
 extern int pmode;
 extern int pos_centre_f;
 extern int pos_x_frequency;
-extern int pos_y_smeter;
 extern int resetTuningFlag;  // Experimental flag for ResetTuning() due to possible timing issues.  KF5N July 31, 2023
 extern int secondaryMenuChoiceMade;
 extern int selectedMapIndex;
@@ -1038,54 +997,31 @@ extern int smeterLength;
 extern int splitOn;
 extern int switchFilterSideband;  //AFP 1-28-21
 extern int syncEEPROM;
-extern int termCursorXpos;
 extern int x2;  //AFP
 extern int xrState;
 extern int zeta_help;
 extern int zoom_sample_ptr;
 extern int zoomIndex;
-
 extern int updateDisplayFlag;
 extern int updateDisplayCounter;
 
 extern const int DEC2STATESIZE;
 extern const int INT1_STATE_SIZE;
 extern const int INT2_STATE_SIZE;
-extern const int myInput;
-extern const int pos_x_smeter;
-extern const int waterfallBottom;
-extern const int waterfallTop;
-extern int wtf;
-
-extern unsigned framesize;
-extern unsigned nbits;
 extern unsigned ring_buffsize;
-extern unsigned tcr5;
-extern unsigned tcr2div;
-
-extern int32_t FFT_shift;
 extern long long freqCorrectionFactor;
 extern long long freqCorrectionFactorOld;  //AFP 09-21-22
 
 extern int32_t IFFreq;  // IF (intermediate) frequency
-extern int32_t IF_FREQ1;
-extern int32_t O_iiSum19;
-extern int32_t O_integrateCount19;
 extern int32_t mainMenuIndex;
 extern int32_t subMenuMaxOptions;
 extern int32_t secondaryMenuIndex;  // -1 means haven't determined secondary menu
 extern const uint32_t N_B;
 extern const uint32_t N_DEC_B;
-extern const uint32_t NR_add_counter;
-
-extern uint32_t BUF_N_DF;
 extern uint32_t FFT_length;
 extern int32_t gapHistogram[];
 extern uint32_t in_index;
-extern uint32_t IQ_counter;
-extern uint32_t MDR;
 extern uint32_t N_BLOCKS;
-extern uint32_t n_para;
 extern uint32_t NR_X_pointer;
 extern uint32_t NR_E_pointer;
 extern uint32_t m_NumTaps;
@@ -1093,11 +1029,6 @@ extern uint32_t roomCount;    /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] a
 extern uint32_t s_hotTemp;    /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] at room temperature .*/
 extern uint32_t s_hotCount;   /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] at the hot temperature.*/
 extern uint32_t s_roomC_hotC; /*!< The value of s_roomCount minus s_hotCount.*/
-extern uint32_t T4_CPU_FREQUENCY;
-extern uint32_t twinpeaks_counter;
-
-extern long averageDit;
-extern long averageDah;
 extern long currentFreq;
 extern unsigned long ditLength;
 extern unsigned long transmitDitLength;  // JJP 8/19/23
@@ -1105,29 +1036,17 @@ extern unsigned long transmitDitUnshapedBlocks;
 extern unsigned long transmitDahUnshapedBlocks;
 extern long TxRxFreq;  // = centerFreq+NCOFreq  NCOFreq from FreqShift2()
 extern long TxRxFreqOld;
-extern long TxRxFreqDE;
-extern long recClockFreq;  //  = TxRxFreq+IFFreq  IFFreq from FreqShift1()=48KHz
-extern long CWRecFreq;     //  = TxRxFreq +/- 700Hz
 extern uint32_t cwTimer;
-extern long signalTime;
 extern unsigned long ditTimerOn;
-extern long DahTimer;
 extern unsigned long cwTransmitDelay;  // ms to keep relay on after last atom read
 extern long incrementValues[];
 extern long lastFrequencies[][2];
 extern long notchCenterBin;
 extern long int n_clear;
-extern long startTime;
 extern long signalElapsedTime;
-extern long spaceSpan;
 extern long signalStart;
 extern long signalEnd;  // Start-end of dit or dah
-extern long spaceStart;
-extern long spaceEnd;
-extern long spaceElapsedTime;
-
 extern uint32_t gapLength;
-extern long gapEnd, gapStart;  // Time for noise measures
 
 // This enum is used by an experimental Morse decoder.
 enum states { state0,
@@ -1139,11 +1058,6 @@ enum states { state0,
               state6 };
 extern states decodeStates;
 
-extern ulong samp_ptr;
-extern unsigned long currentFreqs[];
-
-extern uint64_t output12khz;
-
 extern unsigned long long Clk2SetFreq;  // AFP 09-27-22
 extern unsigned long long Clk1SetFreq;  // AFP 09-27-22
 
@@ -1151,8 +1065,6 @@ float32_t arm_atan2_f32(float32_t y, float32_t x);
 float ApproxAtan(float z);
 float ApproxAtan2(float y, float x);
 
-extern float dcfRefLevel;
-extern float DD4WH_RF_gain;
 extern float s_hotT_ROOM; /*!< The value of s_hotTemp minus room temperature(25¡æ).*/
 
 //====== SAM stuff AFP 11-02-22
@@ -1166,8 +1078,6 @@ extern float32_t d[3 * SAM_PLL_HILBERT_STAGES + 3];
 extern float32_t a[];
 extern float32_t abs_ring[];
 extern float32_t abs_out_sample;
-extern float32_t ai, bi, aq, bq;
-extern float32_t ai_ps, bi_ps, aq_ps, bq_ps;
 extern float32_t pll_fmax;
 
 extern float32_t ANR_d[];
@@ -1201,24 +1111,17 @@ extern float32_t corr[];
 extern float32_t Cos;
 extern float32_t cosBuffer2[];  //AFP 08-18-22
 extern float32_t CPU_temperature;
-extern float32_t cursorIncrementFraction;
 extern float32_t d[];
-
 extern float32_t dbm;
 extern float32_t dbm_calibration;
-extern float32_t dbm_old;
 extern float32_t dbmhz;
 extern float32_t decay_mult;
-extern float32_t display_offset;
 extern float32_t /*DMAMEM*/ FFT_buffer[];
 extern float32_t /*DMAMEM*/ FFT_spec[];
 extern float32_t /*DMAMEM*/ FFT_spec_old[];
-extern float32_t dsI;
-extern float32_t dsQ;
 extern float32_t fast_backaverage;
 extern float32_t fast_backmult;
 extern float32_t fast_decay_mult;
-extern float32_t farnsworthValue;
 extern float32_t FFT_spec[];
 extern float32_t FFT_spec_old[];
 extern float32_t fil_out;
@@ -1279,8 +1182,6 @@ extern float32_t hangtime;
 extern float32_t hh1;
 extern float32_t hh2;
 extern float32_t /*DMAMEM*/ iFFT_buffer[];
-extern float32_t I_old;
-extern float32_t I_sum;
 extern float32_t IIR_biquad_Zoom_FFT_I_state[];
 extern float32_t IIR_biquad_Zoom_FFT_Q_state[];
 extern float32_t inv_max_input;
@@ -1291,12 +1192,6 @@ extern float32_t IQPhaseCorrectionFactor[];
 extern float32_t IQXAmpCorrectionFactor[];
 extern float32_t IQXPhaseCorrectionFactor[];
 
-extern float32_t IQ_sum;
-extern float32_t K_dirty;
-extern float32_t K_est;
-extern float32_t K_est_old;
-extern float32_t K_est_mult;
-extern float32_t last_dc_level;
 extern float32_t /*DMAMEM*/ last_sample_buffer_L[];
 extern float32_t /*DMAMEM*/ last_sample_buffer_R[];
 extern float32_t L_BufferOffset[];
@@ -1304,42 +1199,21 @@ extern float32_t LMS_errsig1[];
 extern float32_t LMS_NormCoeff_f32[];
 extern float32_t LMS_nr_delay[];
 extern float32_t LMS_StateF32[];
-extern float32_t LP_Astop;
-extern float32_t LP_Fpass;
-extern float32_t LP_Fstop;
 extern float32_t LPF_spectrum;
-extern float32_t M_c1;
-extern float32_t M_c2;
 extern float32_t m_AttackAlpha;
-extern float32_t m_AttackAvedbm;
-extern float32_t m_DecayAvedbm;
 extern float32_t m_DecayAlpha;
-;
-extern float32_t m_AverageMagdbm;
-extern float32_t m_AttackAvedbmhz;
-extern float32_t m_DecayAvedbmhz;
-extern float32_t m_AverageMagdbmhz;
 extern float32_t *mag_coeffs[];
 extern float32_t max_gain;
 extern float32_t max_input;
 extern int calTypeFlag;
 extern int calOnFlag;
-
-extern float32_t midbass;
 extern float32_t mid;
-extern float32_t midtreble;
 extern float32_t min_volts;
-
-extern float32_t noiseThreshhold;
-extern float32_t notches[];
 extern float32_t /*DMAMEM*/ NR_FFT_buffer[];
 extern float32_t NR_sum;
 extern float32_t NR_KIM_K;
 extern float32_t NR_onemalpha;
 extern float32_t NR_onemtwobeta;
-extern float32_t NR_onembeta;
-extern float32_t NR_G_bin_m_1;
-extern float32_t NR_G_bin_p_1;
 extern float32_t NR_T;
 extern float32_t NR_output_audio_buffer[];
 extern float32_t NR_last_iFFT_result[];
@@ -1349,94 +1223,55 @@ extern float32_t NR_X[][3];
 extern float32_t NR_E[][15];
 extern float32_t NR_M[];
 extern float32_t NR_Nest[][2];  //
-extern float32_t NR_vk;
 extern float32_t NR_lambda[];
 extern float32_t NR_Gts[][2];
 extern float32_t NR_G[];
 extern float32_t NR_SNR_prio[];
 extern float32_t NR_SNR_post[];
-extern float32_t NR_SNR_post_pos;
 extern float32_t NR_Hk_old[];
-extern float32_t NR_VAD;
-extern float32_t NR_VAD_thresh;
 extern float32_t NR_long_tone[][2];
 extern float32_t NR_long_tone_gain[];
-extern float32_t NR_long_tone_alpha;
-extern float32_t NR_long_tone_thresh;
-extern float32_t NR_gain_smooth_alpha;
-extern float32_t NR_temp_sum;
 extern float32_t NB_thresh;
-extern float32_t offsetDisplayDB;
-
 extern float32_t onemfast_backmult;
 extern float32_t onemhang_backmult;
 extern float32_t out_sample[];
 extern float32_t out_targ;
 extern float32_t out_target;
-
-extern float32_t P_dirty;
-extern float32_t P_est;
-extern float32_t P_est_old;
-extern float32_t P_est_mult;
 extern float32_t phaseLO;
-
 extern float32_t pop_ratio;
-extern float32_t Q_old;
-extern float32_t Q_sum;
 extern float32_t R_BufferOffset[];
 extern float32_t ring[];
 extern float32_t ring_max;
 extern float32_t sample_meanL;
 extern float32_t sample_meanR;
-extern float32_t sample_meanLNew;
-extern float32_t sample_meanRNew;
 extern float32_t save_volts;
 extern const float32_t volumeLog[101];
 extern float32_t slope_constant;
 extern float32_t spectrum_display_scale;  // 30.0
-extern float32_t stereo_factor;
 extern float32_t tau_attack;
 extern float32_t tau_decay;
 extern float32_t tau_fast_backaverage;
 extern float32_t tau_fast_decay;
 extern float32_t tau_hang_backmult;
 extern float32_t tau_hang_decay;
-extern float32_t teta1;
-extern float32_t teta2;
-extern float32_t teta3;
-extern float32_t teta1_old;
-extern float32_t teta2_old;
-extern float32_t teta3_old;
 extern float32_t tmp;
-extern float32_t treble;
 extern float32_t var_gain;
 extern float32_t volts;
 extern float32_t w;
 extern float32_t wold;
 
 extern float angl;
-extern float bitSamplePeriod;
-extern float bitSampleTimer;
-extern float bsq, usq;
-extern float cf1, cf2;
-extern float dcfMean;
-extern float dcfSum;
-extern float lolim, hilim;
-extern float partr, parti;
+extern float parti;
 extern float pi;
 extern float tau;
 extern float temp;
-extern float Tsample;
 extern float xExpand;  //AFP
 extern float x;
 
 extern const float32_t nuttallWindow256[];
-
 extern float32_t FFT_buffer[] __attribute__((aligned(4)));
-
 extern float32_t float_buffer_L_3[];
 extern float32_t float_buffer_R_3[];
-
 extern const float32_t atanTable[];
 extern const float32_t DF1;           // decimation factor
 extern const float32_t DF2;           // decimation factor

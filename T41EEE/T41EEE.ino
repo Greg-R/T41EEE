@@ -143,9 +143,6 @@ uint32_t FFT_length = FFT_LENGTH;
 
 extern "C" uint32_t set_arm_clock(uint32_t frequency);
 
-// lowering this from 600MHz to 200MHz makes power consumption less
-uint32_t T4_CPU_FREQUENCY = 500000000UL;  //AFP 2-10-21
-
 //======================================== Global object definitions ==================================================
 // ===========================  AFP 08-22-22
 
@@ -517,8 +514,6 @@ float32_t float_Corr_BufferL[511];
 float goertzelMagnitude;
 bool volumeChangeFlag = false;
 
-long startTime = 0;
-
 char decodeBuffer[33];    // The buffer for holding the decoded characters.  Increased to 33.  KF5N October 29, 2023
 char keyboardBuffer[10];  // Set for call prefixes. May be increased later
 const char DEGREE_SYMBOL[] = { 0xB0, '\0' };
@@ -589,7 +584,6 @@ int16_t *sp_L1;
 int16_t *sp_R1;
 int16_t *sp_L2;
 int16_t *sp_R2;
-int16_t spectrum_height = 96;
 int16_t spectrum_pos_centre_f = 64 * xExpand;
 int16_t spectrum_x = SPECTRUM_LEFT_X;
 int16_t spectrum_y = SPECTRUM_TOP_Y;
@@ -608,9 +602,7 @@ int32_t signalHistogram[HISTOGRAM_ELEMENTS];
 enum states decodeStates;
 int centerTuneFlag = 0;
 unsigned long cwTimer;
-long signalTime;
 unsigned long ditTimerOn;
-long DahTimer;
 long valRef1;
 long valRef2;
 long gapRef1;
@@ -649,22 +641,13 @@ const uint32_t N_stages_biquad_lowpass1 = 1;
 const uint16_t n_dec1_taps = (1 + (uint16_t)(n_att / (22.0 * (n_fstop1 - n_fpass1))));
 const uint16_t n_dec2_taps = (1 + (uint16_t)(n_att / (22.0 * (n_fstop2 - n_fpass2))));
 
-int resultOldFactor;
-float incrFactor;
 int mute = 0;
-
 float adjustVolEncoder;
-int adjustIQ;
-int exciteOn = 0;
-int agc_decay = 100;
-int agc_slope = 100;
-int agc_thresh = 30;
 int ANR_buff_size = FFT_length / 2.0;
 int ANR_delay = 16;
 int ANR_dline_size = ANR_DLINE_SIZE;
 int ANR_in_idx = 0;
 int ANR_mask = ANR_dline_size - 1;
-int ANR_position = 0;
 int ANR_taps = 64;
 int attenuator = 0;
 int attack_buffsize;
@@ -680,7 +663,7 @@ int bandswitchPins[] = {
   0,   // 12M  Note that 12M and 10M both use the 10M filter, which is always in (no relay).  KF5N September 27, 2023.
   0    // 10M
 };
-int button9State;
+
 int buttonRead = 0;
 int calibrateFlag = 0;
 int calTypeFlag = 0;
@@ -688,41 +671,21 @@ int calOnFlag = 0;
 int chipSelect = BUILTIN_SDCARD;
 int countryIndex = -1;
 int dahLength;
-int dcfCount;
-int dcfLevel;
-int dcfSilenceTimer;
-int dcfTheSecond;
-int dcfPulseTime;
-int demodIndex = 0;  //AFP 2-10-21
 int directFreqFlag = 0;
-int EEPROMChoice;
 int encoderStepOld;
-int equalizerRecChoice;
-int equalizerXmtChoice;
-int fastTuneActive;
 int filterLoPositionMarkerOld;
 int filterHiPositionMarkerOld;
-int FLoCutOld;
-int FHiCutOld;
 int freqCalibration = -1000;
 int gapAtom;  // Space between atoms
 int gapChar;  // Space between characters
 int hang_counter = 0;
-int helpmin;
-int helphour;
-int helpday;
-int helpmonth;
-int helpyear;
-int helpsec;
-int idx, idpk;
-int lidx, hidx;
+int idx;
+int lidx;
 int IQChoice;
 int IQCalType;
-int IQEXChoice;
 int kDisplay = 0;  //AFP
 int LMS_nr_strength;
 int LP_F_help = 3500;
-int mainTuneEncoder;
 int micChoice;
 int micGainChoice;
 int minPinRead = 1024;
@@ -730,32 +693,19 @@ int NR_Index = 0;
 int n_L;
 int n_R;
 int n_tau;
-int NBChoice;
 int newCursorPosition = 0;
-int NR_Choice = 0;
-int NR_Filter_Value = -1;
-int NR_KIM_K_int = 1000;
-int NR_VAD_delay = 0;
-int NR_VAD_duration = 0;
 int oldCursorPosition = 256;
-int operatingMode;
 int old_demod_mode = -99;
-int oldnotchF = 10000;
 int out_index = -1;
 int pmode = 1;
 int pos_centre_f = 64;
 int pos_x_frequency = 12;
-int pos_y_smeter = (spectrum_y - 12);
 int secondaryMenuChoiceMade;
 int smeterLength;
 int splitOn;
 int switchFilterSideband = 0;
-
 int syncEEPROM;
-
-int termCursorXpos = 0;
 int x2 = 0;  //AFP
-
 int zoom_sample_ptr = 0;
 int zoomIndex = 1;  //AFP 9-26-22
 int wtf;
@@ -767,74 +717,37 @@ const int BW_indicator_y = SPECTRUM_TOP_Y + SPECTRUM_HEIGHT + 2;
 const int DEC2STATESIZE = n_dec2_taps + (BUFFER_SIZE * N_B / (uint32_t)DF1) - 1;
 const int INT1_STATE_SIZE = 24 + BUFFER_SIZE * N_B / (uint32_t)DF - 1;
 const int INT2_STATE_SIZE = 8 + BUFFER_SIZE * N_B / (uint32_t)DF1 - 1;
-const int myInput = AUDIO_INPUT_LINEIN;
-const int pos_x_smeter = 11;
-const int waterfallBottom = spectrum_y + spectrum_height + 4;
-const int waterfallTop = spectrum_y + spectrum_height + 4;
-
-unsigned framesize;
-unsigned nbits;
 unsigned ring_buffsize = RB_SIZE;
-unsigned tcr5;
-unsigned tcr2div;
-
-int32_t FFT_shift = 2048;
 int32_t IFFreq = SR[SampleRate].rate / 4;  // IF (intermediate) frequency
-int32_t IF_FREQ1 = 0;
 int32_t mainMenuIndex = START_MENU;  // Done so we show menu[0] at startup
 int32_t secondaryMenuIndex = -1;     // -1 means haven't determined secondary menu
 int32_t subMenuMaxOptions;           // holds the number of submenu options
 int32_t subMenuIndex = EEPROMData.currentBand;
-int32_t O_iiSum19;
-int32_t O_integrateCount19;
-
 uint32_t N_BLOCKS = N_B;
-uint32_t BUF_N_DF = BUFFER_SIZE * N_BLOCKS / (uint32_t)DF;
 uint32_t highAlarmTemp;
 uint32_t in_index;
 uint32_t lowAlarmTemp;
-uint32_t MDR;
-uint32_t n_para = 512;
 uint32_t NR_X_pointer = 0;
 uint32_t NR_E_pointer = 0;
-uint32_t IQ_counter = 0;
 uint32_t m_NumTaps = (FFT_LENGTH / 2) + 1;
 uint32_t panicAlarmTemp; /*!< The panic alarm temperature.*/
 uint32_t roomCount;      /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] at the hot temperature.*/
 uint32_t s_roomC_hotC;   /*!< The value of s_roomCount minus s_hotCount.*/
 uint32_t s_hotTemp;      /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] at room temperature .*/
 uint32_t s_hotCount;     /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] at the hot temperature.*/
-uint32_t twinpeaks_counter = 0;
-
-long averageDit;
-long averageDah;
-
 long currentFreq;
-long CWRecFreq;  //  = TxRxFreq +/- 750Hz
-
 long incrementValues[] = { 10, 50, 100, 250, 1000, 10000, 100000, 1000000 };
 long int n_clear;
 long notchPosOld;
 long notchFreq = 1000;
 long notchCenterBin;
-long recClockFreq;  //  = TxRxFreq+IFFreq  IFFreq from FreqShift1()=48KHz
 long signalElapsedTime;
-long spaceSpan;
 long signalStart;
 long signalEnd;  // Start-end of dit or dah
-long spaceStart;
-long spaceEnd;
-long spaceElapsedTime;
 long TxRxFreq;  // = EEPROMData.centerFreq+NCOFreq  NCOFreq from FreqShift2()
 long TxRxFreqOld;
-long TxRxFreqDE;
 uint32_t gapLength;
-long gapEnd, gapStart;               // Time for noise measures
 long ditTime = 80L, dahTime = 240L;  // Assume 15wpm to start
-
-ulong samp_ptr;
-
-uint64_t output12khz;
 
 unsigned long long Clk2SetFreq;                  // AFP 09-27-22
 unsigned long long Clk1SetFreq = 1000000000ULL;  // AFP 09-27-22
@@ -842,18 +755,14 @@ unsigned long ditLength;
 unsigned long transmitDitLength;  // JJP 8/19/23
 unsigned long transmitDitUnshapedBlocks;
 unsigned long transmitDahUnshapedBlocks;
-float dcfRefLevel;
 float CPU_temperature = 0.0;
 
-float DD4WH_RF_gain = 6.0;
 float help;
 float s_hotT_ROOM; /*!< The value of s_hotTemp minus room temperature(25¡æ).*/
 float lastII = 0;
 float lastQQ = 0;
 
 float RXbit = 0;
-float bitSampleTimer = 0;
-float Tsample = 1.0 / 12000.0;
 //====== SAM stuff AFP 11-02-22
 float32_t a[3 * SAM_PLL_HILBERT_STAGES + 3];
 float32_t b[3 * SAM_PLL_HILBERT_STAGES + 3];
@@ -864,8 +773,6 @@ float32_t d[3 * SAM_PLL_HILBERT_STAGES + 3];
 
 float32_t abs_ring[RB_SIZE];
 float32_t abs_out_sample;
-float32_t ai, bi, aq, bq;
-float32_t ai_ps, bi_ps, aq_ps, bq_ps;
 float32_t ANR_d[ANR_DLINE_SIZE];
 float32_t ANR_den_mult = 6.25e-10;
 float32_t ANR_gamma = 0.1;
@@ -883,11 +790,7 @@ float32_t audiotmp = 0.0f;
 float32_t audiou;
 float32_t audioSpectBuffer[1024];  // This can't be DMAMEM.  It will break the S-Meter.  KF5N October 10, 2023
 float32_t bass = 0.0;
-float32_t farnsworthValue;
-float32_t midbass = 0.0;
 float32_t mid = 0.0;
-float32_t midtreble = 0.0;
-float32_t treble = 0.0;
 float32_t bin_BW = 1.0 / (DF * FFT_length) * SR[SampleRate].rate;
 float32_t bin = 2000.0 / bin_BW;
 float32_t biquad_lowpass1_state[N_stages_biquad_lowpass1 * 4];
@@ -896,18 +799,13 @@ float32_t DMAMEM buffer_spec_FFT[1024] __attribute__((aligned(4)));
 float32_t coefficient_set[5] = { 0, 0, 0, 0, 0 };
 float32_t corr[2];
 float32_t Cos = 0.0;
-float32_t cursorIncrementFraction;
 float32_t dbm = -145.0;
 float32_t dbm_calibration = 22.0;
-float32_t dbm_old = -145.0;
 float32_t dbmhz = -145.0;
 float32_t decay_mult;
-float32_t display_offset;
 float32_t DMAMEM FFT_buffer[FFT_LENGTH * 2] __attribute__((aligned(4)));
 float32_t DMAMEM FFT_spec[1024];
 float32_t DMAMEM FFT_spec_old[1024];
-float32_t dsI;
-float32_t dsQ;
 float32_t fast_backaverage;
 float32_t fast_backmult;
 float32_t fast_decay_mult;
@@ -965,18 +863,10 @@ float32_t hangtime;
 float32_t hh1 = 0.0;
 float32_t hh2 = 0.0;
 float32_t DMAMEM iFFT_buffer[FFT_LENGTH * 2 + 1];
-float32_t I_old = 0.2;
-float32_t I_sum;
 float32_t IIR_biquad_Zoom_FFT_I_state[IIR_biquad_Zoom_FFT_N_stages * 4];
 float32_t IIR_biquad_Zoom_FFT_Q_state[IIR_biquad_Zoom_FFT_N_stages * 4];
 float32_t inv_max_input;
 float32_t inv_out_target;
-float32_t IQ_sum = 0.0;
-float32_t K_dirty = 0.868;
-float32_t K_est = 1.0;
-float32_t K_est_old = 0.0;
-float32_t K_est_mult = 1.0 / K_est;
-float32_t last_dc_level = 0.0f;
 float32_t DMAMEM last_sample_buffer_L[BUFFER_SIZE * N_DEC_B];
 float32_t DMAMEM last_sample_buffer_R[BUFFER_SIZE * N_DEC_B];
 float32_t DMAMEM L_BufferOffset[BUFFER_SIZE * N_B];
@@ -984,33 +874,17 @@ float32_t LMS_errsig1[256 + 10];
 float32_t LMS_NormCoeff_f32[MAX_LMS_TAPS + MAX_LMS_DELAY];
 float32_t LMS_nr_delay[512 + MAX_LMS_DELAY];
 float32_t LMS_StateF32[MAX_LMS_TAPS + MAX_LMS_DELAY];
-float32_t LP_Astop = 90.0;
-float32_t LP_Fpass = 3500.0;
-float32_t LP_Fstop = 3600.0;
 float32_t LPF_spectrum = 0.82;
-float32_t M_c1 = 0.0;
-float32_t M_c2 = 0.0;
 float32_t m_AttackAlpha = 0.03;
-float32_t m_AttackAvedbm = -73.0;
-float32_t m_DecayAvedbm = -73.0;
 float32_t m_DecayAlpha = 0.01;
-float32_t m_AverageMagdbm = -73.0;
-float32_t m_AttackAvedbmhz = -103.0;
-float32_t m_DecayAvedbmhz = -103.0;
-float32_t m_AverageMagdbmhz = -103.0;
 float32_t max_gain;
 float32_t max_input = -0.1;
 float32_t min_volts;
-float32_t noiseThreshhold;
-float32_t notches[10] = { 500.0, 1000.0, 1500.0, 2000.0, 2500.0, 3000.0, 3500.0, 4000.0, 4500.0, 5000.0 };
 float32_t DMAMEM NR_FFT_buffer[512] __attribute__((aligned(4)));
 float32_t NR_sum = 0;
 float32_t NR_KIM_K = 1.0;
 float32_t NR_onemalpha = (1.0 - EEPROMData.NR_alpha);
 float32_t NR_onemtwobeta = (1.0 - (2.0 * EEPROMData.NR_beta));
-float32_t NR_onembeta = 1.0 - EEPROMData.NR_beta;
-float32_t NR_G_bin_m_1;
-float32_t NR_G_bin_p_1;
 float32_t NR_T;
 float32_t DMAMEM NR_output_audio_buffer[NR_FFT_L];
 float32_t DMAMEM NR_last_iFFT_result[NR_FFT_L / 2];
@@ -1020,22 +894,14 @@ float32_t DMAMEM NR_X[NR_FFT_L / 2][3];
 float32_t DMAMEM NR_E[NR_FFT_L / 2][15];
 float32_t DMAMEM NR_M[NR_FFT_L / 2];
 float32_t DMAMEM NR_Nest[NR_FFT_L / 2][2];  //
-float32_t NR_vk;
 float32_t DMAMEM NR_lambda[NR_FFT_L / 2];
 float32_t DMAMEM NR_Gts[NR_FFT_L / 2][2];
 float32_t DMAMEM NR_G[NR_FFT_L / 2];
 float32_t DMAMEM NR_SNR_prio[NR_FFT_L / 2];
 float32_t DMAMEM NR_SNR_post[NR_FFT_L / 2];
-float32_t NR_SNR_post_pos;
 float32_t DMAMEM NR_Hk_old[NR_FFT_L / 2];
-float32_t NR_VAD = 0.0;
-float32_t NR_VAD_thresh = 6.0;
 float32_t DMAMEM NR_long_tone[NR_FFT_L / 2][2];
 float32_t DMAMEM NR_long_tone_gain[NR_FFT_L / 2];
-float32_t NR_long_tone_alpha = 0.9999;
-float32_t NR_long_tone_thresh = 12000;
-float32_t NR_gain_smooth_alpha = 0.25;
-float32_t NR_temp_sum = 0.0;
 float32_t NB_thresh = 2.5;
 float32_t offsetDisplayDB = 10.0;
 float32_t onemfast_backmult;
@@ -1043,50 +909,29 @@ float32_t onemhang_backmult;
 float32_t out_sample[2];
 float32_t out_targ;
 float32_t out_target;
-float32_t P_dirty = 1.0;
-float32_t P_est;
-float32_t P_est_old;
-float32_t P_est_mult = 1.0 / (sqrtf(1.0 - P_est * P_est));
 float32_t phaseLO = 0.0;
 float32_t pop_ratio;
-float32_t Q_old = 0.2;
-float32_t Q_sum;
 float32_t DMAMEM R_BufferOffset[BUFFER_SIZE * N_B];
 float32_t ring[RB_SIZE * 2];
 float32_t ring_max = 0.0;
 float32_t sample_meanL = 0.0;
 float32_t sample_meanR = 0.0;
-float32_t sample_meanLNew = 0.0;  //AFP 10-11-22
-float32_t sample_meanRNew = 0.0;
 float32_t save_volts = 0.0;
 float32_t slope_constant;
-float32_t stereo_factor = 100.0;
 float32_t tau_attack;
 float32_t tau_decay;
 float32_t tau_fast_backaverage = 0.0;
 float32_t tau_fast_decay;
 float32_t tau_hang_backmult;
 float32_t tau_hang_decay;
-float32_t teta1 = 0.0;
-float32_t teta2 = 0.0;
-float32_t teta3 = 0.0;
-float32_t teta1_old = 0.0;
-float32_t teta2_old = 0.0;
-float32_t teta3_old = 0.0;
 float32_t tmp;
 float32_t var_gain;
 float32_t volts = 0.0;
 float32_t w;
 float32_t wold = 0.0f;
-
 float angl;
-float bitSamplePeriod = 1.0 / 500.0;
-float bsq, usq;
-float cf1, cf2;
 float dcfMean;
 float dcfSum;
-float lolim, hilim;
-float partr, parti;
 float pi = 3.14159265358979;
 float tau;
 float temp;
