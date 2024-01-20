@@ -1,7 +1,5 @@
-#ifndef BEENHERE
-#include "SDT.h"
-#endif
 
+#include "SDT.h"
 
 // 12 pole Chebyshev 24KSPS 840HZ Fc CW LPF  // AFP 10-18-22
 //   b0                     b1                   b2   

@@ -1,6 +1,5 @@
-#ifndef BEENHERE
+
 #include "SDT.h"
-#endif
 
 /*****
   Purpose: Generate Array with variable sinewave frequency tone AFP 05-17-22
@@ -20,12 +19,6 @@ FLASHMEM void sineTone(int numCycles) {
     theta = kf * 2 * PI * freqSideTone2 / 24000;
     sinBuffer2[kf] = sin(theta);  // Used in CW_Excite.cpp
     cosBuffer2[kf] = cos(theta);  // Used in CW_Excite.cpp
-                                  //    theta = kf * 2.0 * PI * freqSideTone3 / 24000;
-                                  //    sinBuffer3[kf] = sin(theta);  // Used in Process2.cpp.  This is only periodically used for calibration.
-                                  //    cosBuffer3[kf] = cos(theta);  // Used in Process2.cpp.  This could be added to one of the calibration functions so it is not always sitting on the stack.
-                                  //    theta = kf * 2.0 * PI * freqSideTone4 / 24000;
-                                  //    sinBuffer4[kf] = sin(theta);
-                                  //    cosBuffer4[kf] = cos(theta);
   }
 }
 

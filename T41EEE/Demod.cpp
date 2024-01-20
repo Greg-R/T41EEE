@@ -1,6 +1,5 @@
-#ifndef BEENHERE
+
 #include "SDT.h"
-#endif
 
 float32_t dc = 0.0;
 float32_t dc_insert = 0.0;

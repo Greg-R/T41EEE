@@ -1,7 +1,5 @@
-#ifndef BEENHERE
-#include "SDT.h"
-#endif
 
+#include "SDT.h"
 
 const float32_t sqrtHann[256] = {
   0, 0.01231966, 0.024637449, 0.036951499, 0.049259941, 0.061560906,

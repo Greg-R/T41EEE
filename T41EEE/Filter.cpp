@@ -1,7 +1,5 @@
-#ifndef BEENHERE
-#include "SDT.h"
-#endif
 
+#include "SDT.h"
 
 /*****
   Purpose: void DoReceiveEQ  Parameter list:

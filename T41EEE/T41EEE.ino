@@ -81,9 +81,7 @@ to prior versions.
 
 // setup() and loop() at the bottom of this file
 
-#ifndef BEENHERE
 #include "SDT.h"
-#endif
 
 const char *filename = "/config.txt";  // <- SD library uses 8.3 filenames
 
@@ -160,8 +158,6 @@ AudioConvert_F32toI16 float2Int1, float2Int2;  //Converts Float to Int16.  See c
 AudioInputI2SQuad i2s_quadIn;
 AudioOutputI2SQuad i2s_quadOut;
 
-AudioMixer4 recMix_3;  // JJP
-
 AudioMixer4 modeSelectInR;    // AFP 09-01-22
 AudioMixer4 modeSelectInL;    // AFP 09-01-22
 AudioMixer4 modeSelectInExR;  // AFP 09-01-22
@@ -171,8 +167,6 @@ AudioMixer4 modeSelectOutL;    // AFP 09-01-22
 AudioMixer4 modeSelectOutR;    // AFP 09-01-22
 AudioMixer4 modeSelectOutExL;  // AFP 09-01-22
 AudioMixer4 modeSelectOutExR;  // AFP 09-01-22
-
-AudioMixer4 CW_AudioOut;
 
 AudioRecordQueue Q_in_L;
 AudioRecordQueue Q_in_R;
@@ -230,8 +224,6 @@ Rotary filterEncoder = Rotary(FILTER_ENCODER_A, FILTER_ENCODER_B);        //(15,
 Rotary fineTuneEncoder = Rotary(FINETUNE_ENCODER_A, FINETUNE_ENCODER_B);  //( 4,  5)
 
 Metro ms_500 = Metro(500);  // Set up a Metro
-Metro ms_300000 = Metro(300000);
-Metro encoder_check = Metro(100);  // Set up a Metro
 
 Si5351 si5351;
 
@@ -384,8 +376,6 @@ float32_t DMAMEM FIR_dec2_EX_Q_state[535];
 
 float32_t DMAMEM FIR_int2_EX_I_state[519];
 float32_t DMAMEM FIR_int2_EX_Q_state[519];
-float32_t DMAMEM FIR_int1_EX_coeffs[48];
-float32_t DMAMEM FIR_int2_EX_coeffs[48];
 
 float32_t DMAMEM FIR_int1_EX_I_state[279];
 float32_t DMAMEM FIR_int1_EX_Q_state[279];
@@ -460,7 +450,6 @@ arm_fir_interpolate_instance_f32 FIR_int1_Q;
 arm_fir_interpolate_instance_f32 FIR_int2_I;
 arm_fir_interpolate_instance_f32 FIR_int2_Q;
 arm_lms_norm_instance_f32 LMS_Norm_instance;
-arm_lms_instance_f32 LMS_instance;
 
 const DEMOD_Descriptor DEMOD[3] = {
   //   DEMOD_n, name
@@ -490,8 +479,6 @@ double Osc_Vect_I = 0.0;
 double Osc_Gain = 0.0;
 double Osc_Q = 0.0;
 double Osc_I = 0.0;
-float32_t i_temp = 0.0;
-float32_t q_temp = 0.0;
 
 //======================================== Global variables declarations ===============================================
 //=============================== Any variable initialized to zero is done for documentation ===========================
@@ -507,7 +494,6 @@ float32_t cwFallBuffer[256];
 float32_t aveCorrResult;
 float32_t aveCorrResultR;
 float32_t aveCorrResultL;
-float32_t magFFTResults[256];
 float32_t float_Corr_Buffer[511];
 float32_t corrResultR;
 uint32_t corrResultIndexR;
@@ -516,41 +502,23 @@ uint32_t corrResultIndexL;
 float32_t combinedCoeff;
 float32_t combinedCoeff2;
 float32_t combinedCoeff2Old;
-int CWCoeffLevelOld = 0.0;
 float CWLevelTimer = 0.0;
 float CWLevelTimerOld = 0.0;
-float ticMarkTimer = 0.0;
-float ticMarkTimerOld = 0.0;
 // === Compressor patameters AFP 11-01-22
-float min_gain_dB = -20.0, max_gain_dB = 40.0;  //set desired gain range
-float gain_dB = 0.0;                            //computed desired gain value in dB
+
 boolean use_HP_filter = true;                   //enable the software HP filter to get rid of DC?
-float knee_dBFS, comp_ratio, attack_sec, release_sec;
+float knee_dBFS;
+float comp_ratio;
+float attack_sec;
+float release_sec;
 // ===========
 float32_t float_Corr_BufferR[511];
 float32_t float_Corr_BufferL[511];
-long tempSigTime = 0;
-
-int audioTempPrevious = 0;
-float sigStart = 0.0;
-float sigDuration = 0.0;
-float gapStartData = 0.0;
-float gapDurationData = 0.0;
 float goertzelMagnitude;
-
-int audioValuePrevious = 0;
-int CWOnState;
-
-bool gEEPROM_current = false;  //mdrhere does the data in EEPROM match the current structure contents
-bool NR_gain_smooth_enable = false;
-bool NR_long_tone_reset = true;
-bool NR_long_tone_enable = false;
-bool timeflag = 0;
 bool volumeChangeFlag = false;
 
 long startTime = 0;
 
-char theversion[10];
 char decodeBuffer[33];    // The buffer for holding the decoded characters.  Increased to 33.  KF5N October 29, 2023
 char keyboardBuffer[10];  // Set for call prefixes. May be increased later
 const char DEGREE_SYMBOL[] = { 0xB0, '\0' };
@@ -561,9 +529,7 @@ const char *zoomOptions[] = { "1x ", "2x ", "4x ", "8x ", "16x" };
 byte currentDashJump = DECODER_BUFFER_SIZE;
 byte currentDecoderIndex = 0;
 
-int8_t auto_IQ_correction;
 int filterWidthX;  // The current filter X.
-int filterWidthY;  // The current filter Y.
 float32_t pixel_per_khz = ((1 << EEPROMData.spectrum_zoom) * SPECTRUM_RES * 1000.0 / SR[SampleRate].rate);
 int pos_left = centerLine - (int)(bands[EEPROMData.currentBand].FLoCut / 1000.0 * pixel_per_khz);
 int centerLine = (MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2;
@@ -572,78 +538,38 @@ int fHiCutOld;
 int filterWidth = (int)((bands[EEPROMData.currentBand].FHiCut - bands[EEPROMData.currentBand].FLoCut) / 1000.0 * pixel_per_khz);
 int h = SPECTRUM_HEIGHT + 3;
 int8_t first_block = 1;
-
 int8_t Menu2 = MENU_F_LO_CUT;
-int8_t mesz = -1;
 int8_t menuStatus = NO_MENUS_ACTIVE;
-int8_t mesz_old = 0;
 int8_t NB_taps = 10;
 int8_t NB_impulse_samples = 7;
-int8_t NR_first_block = 1;
 int8_t pos_x_date = 14;
 int8_t pos_y_date = 68;
-
 uint8_t agc_action = 0;
-uint8_t agc_switch_mode = 0;
-uint8_t ANR_on = 0;
 uint8_t ANR_notch = 0;
 uint8_t ANR_notchOn = 0;
-uint8_t atan2_approx = 1;
 uint8_t auto_codec_gain = 1;
-uint8_t audio_flag = 1;
-uint8_t bitnumber = 16;  // test, how restriction to twelve bit alters sound quality
-uint8_t codec_restarts = 0;
-uint8_t dbm_state = 0;
 uint8_t dcfParityBit;
 uint8_t decay_type = 0;
 uint8_t digimode = 0;
-uint8_t digits_old[2][10] = { { 9, 9, 9, 9, 9, 9, 9, 9, 9, 9 },
-                              { 9, 9, 9, 9, 9, 9, 9, 9, 9, 9 } };
 uint8_t display_dbm = DISPLAY_S_METER_DBM;
 uint8_t display_S_meter_or_spectrum_state = 0;
-uint8_t eeprom_saved = 0;
-uint8_t eeprom_loaded = 0;
-uint8_t erase_flag = 0;
 uint8_t FIR_filter_window = 1;
-uint8_t flagg = 0;
 uint8_t half_clip = 0;
 uint8_t hang_enable;
-uint8_t hour10_old;
-uint8_t hour1_old;
-uint8_t IQCalFlag = 0;
-uint8_t iFFT_flip = 0;
-uint8_t IQ_state = 1;
-uint8_t IQ_RecCalFlag = 0;
 uint8_t keyPressedOn = 0;
-uint8_t relayLatch = 0;
-uint8_t LastSampleRate = SAMPLE_RATE_192K;
-uint8_t minute10_old;
-uint8_t minute1_old;
 uint8_t NB_on = 0;
 uint8_t NB_test = 0;
 uint8_t notchButtonState = 0;
-uint8_t notchIndex = 0;
-uint8_t notches_on[2] = { 0, 0 };
 uint8_t NR_first_time = 1;
 uint8_t NR_Kim;
-uint8_t NR_LMS = 0;
-uint8_t NR_Spect;
 uint8_t NR_use_X = 0;
-uint8_t NR_VAD_enable = 1;
-uint8_t precision_flag = 0;
 uint8_t quarter_clip = 0;
 uint8_t SampleRate = SAMPLE_RATE_192K;
-uint8_t save_energy;
 uint8_t sch = 0;
-uint8_t second10_old;
-uint8_t second1_old;
-uint8_t show_spectrum_flag = 1;
-uint8_t spectrum_mov_average = 0;
 uint8_t state = 0;
 uint8_t twinpeaks_tested = 2;  // initial value --> 2 !!
 uint8_t T41State = 1;
 uint8_t wait_flag;
-uint8_t which_menu = 1;
 uint8_t write_analog_gain = 0;
 uint8_t zoom_display = 1;
 
@@ -656,99 +582,51 @@ int16_t currentMode;
 int16_t pixelCurrent[SPECTRUM_RES];
 int16_t pixelnew[SPECTRUM_RES];
 int16_t pixelold[SPECTRUM_RES];
-int16_t notch_L[2] = { 156, 180 };
-int16_t fineEncoderRead;
-int16_t notch_R[2] = { 166, 190 };
-int16_t notch_pixel_L[2] = { 1, 2 };
-int16_t notch_pixel_R[2] = { 2, 3 };
-int16_t offsetPixels;
-int16_t pos_x_dbm = pos_x_smeter + 170;
-int16_t pos_y_dbm = pos_y_smeter - 10;
-int16_t pos_y_db;
 int16_t pos_y_frequency = 48;
 int16_t pos_x_time = 390;  // 14;
 int16_t pos_y_time = 5;    //114;
-int16_t s_w = 10;
 int16_t *sp_L1;
 int16_t *sp_R1;
 int16_t *sp_L2;
 int16_t *sp_R2;
-int16_t spectrum_brightness = 255;
 int16_t spectrum_height = 96;
 int16_t spectrum_pos_centre_f = 64 * xExpand;
-int16_t spectrum_WF_height = 96;
 int16_t spectrum_x = SPECTRUM_LEFT_X;
 int16_t spectrum_y = SPECTRUM_TOP_Y;
-
-uint16_t adcMaxLevel, dacMaxLevel;
 uint16_t barGraphUpdate = 0;
 
 //===== New histogram stuff ===
-int endDitFlag = 0;
 volatile int filterEncoderMove = 0;
 volatile long fineTuneEncoderMove = 0L;
-
 int endGapFlag = 0;
 int selectedMapIndex;
-int topDitIndex;
-int topDitIndexOld;
 int topGapIndex;
 int topGapIndexOld;
-
 int32_t gapHistogram[HISTOGRAM_ELEMENTS];  // Not used.  KF5N November 12, 2023
 int32_t signalHistogram[HISTOGRAM_ELEMENTS];
-
 // This enum is for an experimental Morse decoder change.
 enum states decodeStates;
-
-uint32_t histMaxIndexDitOld = 80;  // Defaults for 15wpm
-uint32_t histMaxIndexDahOld = 200;
-
-uint32_t histMaxDit;
-uint32_t histMaxDah;
-uint32_t histMaxIndexDit;
-uint32_t histMaxIndexDah;
-
-int atomGapLength;
-int atomGapLength2;
-int charGapLength;
-int charGapLength2;
 int centerTuneFlag = 0;
-int x1AdjMax = 0;  //AFP 2-6-23
 unsigned long cwTimer;
 long signalTime;
 unsigned long ditTimerOn;
 long DahTimer;
-long cwTime0;
-long cwTime5;
-long cwTime6;
 long valRef1;
 long valRef2;
 long gapRef1;
 int valFlag = 0;
 long signalStartOld = 0;
-int valCounter;
 long aveDitLength = 80;
 long aveDahLength = 200;
 float thresholdGeometricMean = 140.0;  // This changes as decoder runs
 float thresholdArithmeticMean;
-float aveAtomGapLength = 40;
-float thresholdGapGeometricMean;
-float thresholdGapArithmeticMean;
 long CWFreqShift;
 long filter_pos = 0;
 long last_filter_pos = 0;
 // ============ end new stuff =======
 
-uint16_t notches_BW[2] = { 4, 4 };  // no. of bins --> notch BW = no. of bins * bin_BW
 uint16_t temp_check_frequency;
-uint16_t uAfter;
-uint16_t uB4;
-uint16_t xx;
-
 int16_t y_old, y_new, y1_new, y1_old, y_old2;  //A
-int16_t y1_old_minus = 0;
-int16_t y1_new_minus = 0;
 
 const float32_t DF1 = 4.0;             // decimation factor
 const float32_t DF2 = 2.0;             // decimation factor
@@ -2123,6 +2001,7 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       ShowSpectrum();  // if removed CW signal on is 2 mS
       break;
     case CW_TRANSMIT_STRAIGHT_STATE:
+    // powerOutCw could be calculated whenever transmitPowerLevel or CWPowerCalibrationFactor is changed.  It should not be calculated in this loop.
       EEPROMData.powerOutCW[EEPROMData.currentBand] = (-.0133 * EEPROMData.transmitPowerLevel * EEPROMData.transmitPowerLevel + .7884 * EEPROMData.transmitPowerLevel + 4.5146) * EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];
       xrState = TRANSMIT_STATE;
       ShowTransmitReceiveStatus();

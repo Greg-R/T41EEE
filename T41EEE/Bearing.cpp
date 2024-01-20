@@ -1,22 +1,6 @@
-#ifndef BEENHERE
+
 #include "SDT.h"
-#endif
-/*
-  #define SD_CS                       BUILTIN_SDCARD        // Works on T_3.6 and T_4.1 ...
 
-  #define MY_LON                      -84.42676671875002
-  #define MY_LAT                      39.074660204008886
-  #define CENTER_SCREEN_X             387
-  #define CENTER_SCREEN_Y             240
-  #define IMAGE_CORNER_X              211 // ImageWidth = 378 Therefore 800 - 378 = 422 / 2 = 211
-  #define IMAGE_CORNER_Y              89  // ImageHeight = 302 Therefore 480 - 302 = 178 / 2 = 89
-  #define RAY_LENGTH                  190
-  #define BUFFPIXEL                   20  // Use buffer to read image rather than 1 pixel at a time
-
-  #define DEGREES2RADIANS             0.01745329
-  #define RADIANS2DEGREES             57.29578
-  #define PI_BY_180                   0.01745329
-*/
 enum { SCL_HALF = 0,
        SCL_QUARTER,
        SCL_EIGHTH,
@@ -28,9 +12,7 @@ typedef struct {
   int *key_value_addr;
 } key_name_value_t;
 
-
 uint8_t sdbuffer[3 * BUFFPIXEL];  // pixel buffer (R+G+B per pixel)
-
 
 int g_background_color = RA8875_BLACK;
 int g_debug_output = 0;

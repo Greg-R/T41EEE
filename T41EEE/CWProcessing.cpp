@@ -1,6 +1,5 @@
-#ifndef BEENHERE
+
 #include "SDT.h"
-#endif
 
 //=================  AFP10-18-22 ================
 /*****

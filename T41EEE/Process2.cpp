@@ -1,6 +1,5 @@
-#ifndef BEENHERE
+
 #include "SDT.h"
-#endif
 
 // Updates to DoReceiveCalibration() and DoXmitCalibrate() functions by KF5N.  July 20, 2023
 // Updated PlotCalSpectrum() function to clean up graphics.  KF5N August 3, 2023

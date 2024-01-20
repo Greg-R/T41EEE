@@ -1,6 +1,5 @@
-#ifndef BEENHERE
+
 #include "SDT.h"
-#endif
 
 int Zoom_FFT_M1;
 int Zoom_FFT_M2;
@@ -191,7 +190,6 @@ void ZoomFFTExe (uint32_t blockSize)
     }
 }
 }
-
 
 
 /*****

@@ -1,0 +1,1 @@
+TMS1_MEASURE_FREQ(x) Total = 1  <-----------------<<

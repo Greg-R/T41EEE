@@ -1,6 +1,5 @@
-#ifndef BEENHERE
+
 #include "SDT.h"
-#endif
 
 // Updates by KF5N to CalibrateOptions() function. July 20, 2023
 // Updated receive calibration code to clean up graphics.  KF5N August 3, 2023

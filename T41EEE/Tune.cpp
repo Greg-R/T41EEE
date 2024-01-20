@@ -1,6 +1,5 @@
-#ifndef BEENHERE
+
 #include "SDT.h"
-#endif
 
 /*****
   Purpose: A special variant of SetFreq() used only for calibration.

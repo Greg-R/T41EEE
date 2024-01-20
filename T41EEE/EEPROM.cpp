@@ -1,7 +1,5 @@
-#ifndef BEENHERE
-#include "SDT.h"
-#endif
 
+#include "SDT.h"
 
 /*****
   Purpose: To save the configuration data (working variables) to EEPROM.

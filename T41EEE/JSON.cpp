@@ -1,6 +1,5 @@
-#ifndef BEENHERE
+
 #include "SDT.h"
-#endif
 
 // JSON experiment.  This was derived from a JSON example from the ArduinoJSON library.
 
@@ -88,7 +87,7 @@ FLASHMEM void loadConfiguration(const char *filename, config_t &EEPROMData) {
   //EEPROMData.mapFileName  = doc["mapFileName"] | "Boston";
   strlcpy(EEPROMData.mapFileName, doc["mapFileName"] | "Boston", 50);
   //EEPROMData.myCall  = doc["myCall"];
-  strlcpy(EEPROMData.myCall, doc["myCall"] | "Your Call", 10);
+//  strlcpy(EEPROMData.myCall, doc["myCall"] | "Your Call", 10);
   //EEPROMData.myTimeZone  = doc["myTimeZone"];
   strlcpy(EEPROMData.myTimeZone, doc["myTimeZone"] | "EST", 10);
   EEPROMData.separationCharacter = doc["separationCharacter"];
@@ -126,7 +125,7 @@ FLASHMEM void saveConfiguration(const char *filename, const config_t &EEPROMData
 
   // Set the values in the document
   doc["versionSettings"] = EEPROMData.versionSettings;
-  doc["myCall"] = EEPROMData.myCall;
+//  doc["myCall"] = EEPROMData.myCall;
   doc["AGCMode"] = EEPROMData.AGCMode;
   doc["audioVolume"] = EEPROMData.audioVolume;
   doc["rfGainCurrent"] = EEPROMData.rfGainCurrent;
@@ -188,7 +187,7 @@ FLASHMEM void saveConfiguration(const char *filename, const config_t &EEPROMData
   }
   doc["centerFreq"] = EEPROMData.centerFreq;
   doc["mapFileName"] = EEPROMData.mapFileName;
-  doc["myCall"] = EEPROMData.myCall;
+//  doc["myCall"] = EEPROMData.myCall;
   doc["myTimeZone"] = EEPROMData.myTimeZone;
   doc["separationCharacter"] = EEPROMData.separationCharacter;
   doc["paddleFlip"] = EEPROMData.paddleFlip;
