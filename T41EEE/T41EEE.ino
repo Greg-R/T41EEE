@@ -237,7 +237,7 @@ SPISettings settingsA(70000000UL, MSBFIRST, SPI_MODE1);
 const uint32_t N_B_EX = 16;
 //================== Receive EQ Variables================= AFP 08-08-22
 //Setup for EQ filters
-float32_t DMAMEM rec_EQ1_float_buffer_L[256];
+float32_t DMAMEM EQ1_float_buffer_L[256];
 float32_t DMAMEM rec_EQ2_float_buffer_L[256];
 float32_t DMAMEM rec_EQ3_float_buffer_L[256];
 float32_t DMAMEM rec_EQ4_float_buffer_L[256];
@@ -286,7 +286,7 @@ arm_biquad_cascade_df2T_instance_f32 S14_Rec = { IIR_NUMSTAGES, rec_EQ_Band14_st
 // ===============================  AFP 10-02-22 ================
 
 //EQBuffers
-float32_t DMAMEM xmt_EQ1_float_buffer_L[256];
+//float32_t DMAMEM EQ1_float_buffer_L[256];
 float32_t DMAMEM xmt_EQ2_float_buffer_L[256];
 float32_t DMAMEM xmt_EQ3_float_buffer_L[256];
 float32_t DMAMEM xmt_EQ4_float_buffer_L[256];

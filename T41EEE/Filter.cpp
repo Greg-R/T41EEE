@@ -12,7 +12,7 @@ void DoReceiveEQ() //AFP 08-09-22
 //  for (int i = 0; i < 14; i++) {
 //    recEQ_LevelScale[i] = (float)EEPROMData.equalizerRec[i] / 100.0;
 //  }
-  arm_biquad_cascade_df2T_f32(&S1_Rec, float_buffer_L, rec_EQ1_float_buffer_L, 256);
+  arm_biquad_cascade_df2T_f32(&S1_Rec, float_buffer_L, EQ1_float_buffer_L, 256);
   arm_biquad_cascade_df2T_f32(&S2_Rec, float_buffer_L, rec_EQ2_float_buffer_L, 256);
   arm_biquad_cascade_df2T_f32(&S3_Rec, float_buffer_L, rec_EQ3_float_buffer_L, 256);
   arm_biquad_cascade_df2T_f32(&S4_Rec, float_buffer_L, rec_EQ4_float_buffer_L, 256);
@@ -27,7 +27,7 @@ void DoReceiveEQ() //AFP 08-09-22
   arm_biquad_cascade_df2T_f32(&S13_Rec, float_buffer_L, rec_EQ13_float_buffer_L, 256);
   arm_biquad_cascade_df2T_f32(&S14_Rec, float_buffer_L, rec_EQ14_float_buffer_L, 256);
 
-  arm_scale_f32(rec_EQ1_float_buffer_L, -(float)EEPROMData.equalizerRec[0] / 100.0, rec_EQ1_float_buffer_L, 256);
+  arm_scale_f32(EQ1_float_buffer_L, -(float)EEPROMData.equalizerRec[0] / 100.0, EQ1_float_buffer_L, 256);
   arm_scale_f32(rec_EQ2_float_buffer_L, (float)EEPROMData.equalizerRec[1] / 100.0, rec_EQ2_float_buffer_L, 256);
   arm_scale_f32(rec_EQ3_float_buffer_L, -(float)EEPROMData.equalizerRec[2] / 100.0, rec_EQ3_float_buffer_L, 256);
   arm_scale_f32(rec_EQ4_float_buffer_L, (float)EEPROMData.equalizerRec[3] / 100.0, rec_EQ4_float_buffer_L, 256);
@@ -42,7 +42,7 @@ void DoReceiveEQ() //AFP 08-09-22
   arm_scale_f32(rec_EQ13_float_buffer_L, -(float)EEPROMData.equalizerRec[12] / 100.0, rec_EQ13_float_buffer_L, 256);
   arm_scale_f32(rec_EQ14_float_buffer_L, (float)EEPROMData.equalizerRec[13] / 100.0, rec_EQ14_float_buffer_L, 256);
 
-  arm_add_f32(rec_EQ1_float_buffer_L , rec_EQ2_float_buffer_L, float_buffer_L , 256 ) ;
+  arm_add_f32(EQ1_float_buffer_L , rec_EQ2_float_buffer_L, float_buffer_L , 256 ) ;
 
   arm_add_f32(float_buffer_L , rec_EQ3_float_buffer_L, float_buffer_L , 256 ) ;
   arm_add_f32(float_buffer_L , rec_EQ4_float_buffer_L, float_buffer_L , 256 ) ;
@@ -68,7 +68,7 @@ void DoReceiveEQ() //AFP 08-09-22
 *****/
 void DoExciterEQ() //AFP 10-02-22
 {
-  arm_biquad_cascade_df2T_f32(&S1_Xmt,  float_buffer_L_EX, xmt_EQ1_float_buffer_L, 256);
+  arm_biquad_cascade_df2T_f32(&S1_Xmt,  float_buffer_L_EX, EQ1_float_buffer_L, 256);
   arm_biquad_cascade_df2T_f32(&S2_Xmt,  float_buffer_L_EX, xmt_EQ2_float_buffer_L, 256);
   arm_biquad_cascade_df2T_f32(&S3_Xmt,  float_buffer_L_EX, xmt_EQ3_float_buffer_L, 256);
   arm_biquad_cascade_df2T_f32(&S4_Xmt,  float_buffer_L_EX, xmt_EQ4_float_buffer_L, 256);
@@ -83,7 +83,7 @@ void DoExciterEQ() //AFP 10-02-22
   arm_biquad_cascade_df2T_f32(&S13_Xmt, float_buffer_L_EX, xmt_EQ13_float_buffer_L, 256);
   arm_biquad_cascade_df2T_f32(&S14_Xmt, float_buffer_L_EX, xmt_EQ14_float_buffer_L, 256);
 
-  arm_scale_f32(xmt_EQ1_float_buffer_L,  -(float)EEPROMData.equalizerXmt[0] / 100.0,  xmt_EQ1_float_buffer_L, 256);
+  arm_scale_f32(EQ1_float_buffer_L,  -(float)EEPROMData.equalizerXmt[0] / 100.0,  EQ1_float_buffer_L, 256);
   arm_scale_f32(xmt_EQ2_float_buffer_L,   (float)EEPROMData.equalizerXmt[1] / 100.0,  xmt_EQ2_float_buffer_L, 256);
   arm_scale_f32(xmt_EQ3_float_buffer_L,  -(float)EEPROMData.equalizerXmt[2] / 100.0,  xmt_EQ3_float_buffer_L, 256);
   arm_scale_f32(xmt_EQ4_float_buffer_L,   (float)EEPROMData.equalizerXmt[3] / 100.0,  xmt_EQ4_float_buffer_L, 256);
@@ -98,7 +98,7 @@ void DoExciterEQ() //AFP 10-02-22
   arm_scale_f32(xmt_EQ13_float_buffer_L, -(float)EEPROMData.equalizerXmt[12] / 100.0, xmt_EQ13_float_buffer_L, 256);
   arm_scale_f32(xmt_EQ14_float_buffer_L,  (float)EEPROMData.equalizerXmt[13] / 100.0, xmt_EQ14_float_buffer_L, 256);
 
-  arm_add_f32(xmt_EQ1_float_buffer_L , xmt_EQ2_float_buffer_L, float_buffer_L_EX , 256 ) ;
+  arm_add_f32(EQ1_float_buffer_L , xmt_EQ2_float_buffer_L, float_buffer_L_EX , 256 ) ;
 
   arm_add_f32(float_buffer_L_EX , xmt_EQ3_float_buffer_L,  float_buffer_L_EX , 256 ) ;
   arm_add_f32(float_buffer_L_EX , xmt_EQ4_float_buffer_L,  float_buffer_L_EX , 256 ) ;

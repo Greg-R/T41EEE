@@ -589,7 +589,7 @@ extern float32_t rec_EQ_Band12_state[];
 extern float32_t rec_EQ_Band13_state[];
 extern float32_t rec_EQ_Band14_state[];
 
-extern float32_t rec_EQ1_float_buffer_L[];
+extern float32_t EQ1_float_buffer_L[];
 extern float32_t rec_EQ2_float_buffer_L[];
 extern float32_t rec_EQ3_float_buffer_L[];
 extern float32_t rec_EQ4_float_buffer_L[];
@@ -654,7 +654,7 @@ extern arm_biquad_cascade_df2T_instance_f32 S12_Xmt;
 extern arm_biquad_cascade_df2T_instance_f32 S13_Xmt;
 extern arm_biquad_cascade_df2T_instance_f32 S14_Xmt;
 
-extern float32_t xmt_EQ1_float_buffer_L[];
+//extern float32_t xmt_EQ1_float_buffer_L[];
 extern float32_t xmt_EQ2_float_buffer_L[];
 extern float32_t xmt_EQ3_float_buffer_L[];
 extern float32_t xmt_EQ4_float_buffer_L[];
