@@ -238,19 +238,19 @@ const uint32_t N_B_EX = 16;
 //================== Receive EQ Variables================= AFP 08-08-22
 //Setup for EQ filters
 float32_t DMAMEM EQ1_float_buffer_L[256];
-float32_t DMAMEM rec_EQ2_float_buffer_L[256];
-float32_t DMAMEM rec_EQ3_float_buffer_L[256];
-float32_t DMAMEM rec_EQ4_float_buffer_L[256];
-float32_t DMAMEM rec_EQ5_float_buffer_L[256];
-float32_t DMAMEM rec_EQ6_float_buffer_L[256];
-float32_t DMAMEM rec_EQ7_float_buffer_L[256];
-float32_t DMAMEM rec_EQ8_float_buffer_L[256];
-float32_t DMAMEM rec_EQ9_float_buffer_L[256];
-float32_t DMAMEM rec_EQ10_float_buffer_L[256];
-float32_t DMAMEM rec_EQ11_float_buffer_L[256];
-float32_t DMAMEM rec_EQ12_float_buffer_L[256];
-float32_t DMAMEM rec_EQ13_float_buffer_L[256];
-float32_t DMAMEM rec_EQ14_float_buffer_L[256];
+float32_t DMAMEM EQ2_float_buffer_L[256];
+float32_t DMAMEM EQ3_float_buffer_L[256];
+float32_t DMAMEM EQ4_float_buffer_L[256];
+float32_t DMAMEM EQ5_float_buffer_L[256];
+float32_t DMAMEM EQ6_float_buffer_L[256];
+float32_t DMAMEM EQ7_float_buffer_L[256];
+float32_t DMAMEM EQ8_float_buffer_L[256];
+float32_t DMAMEM EQ9_float_buffer_L[256];
+float32_t DMAMEM EQ10_float_buffer_L[256];
+float32_t DMAMEM EQ11_float_buffer_L[256];
+float32_t DMAMEM EQ12_float_buffer_L[256];
+float32_t DMAMEM EQ13_float_buffer_L[256];
+float32_t DMAMEM EQ14_float_buffer_L[256];
 
 float32_t rec_EQ_Band1_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };  //declare and zero biquad state variables
 float32_t rec_EQ_Band2_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -284,22 +284,6 @@ arm_biquad_cascade_df2T_instance_f32 S13_Rec = { IIR_NUMSTAGES, rec_EQ_Band13_st
 arm_biquad_cascade_df2T_instance_f32 S14_Rec = { IIR_NUMSTAGES, rec_EQ_Band14_state, EQ_Band14Coeffs };
 
 // ===============================  AFP 10-02-22 ================
-
-//EQBuffers
-//float32_t DMAMEM EQ1_float_buffer_L[256];
-float32_t DMAMEM xmt_EQ2_float_buffer_L[256];
-float32_t DMAMEM xmt_EQ3_float_buffer_L[256];
-float32_t DMAMEM xmt_EQ4_float_buffer_L[256];
-float32_t DMAMEM xmt_EQ5_float_buffer_L[256];
-float32_t DMAMEM xmt_EQ6_float_buffer_L[256];
-float32_t DMAMEM xmt_EQ7_float_buffer_L[256];
-float32_t DMAMEM xmt_EQ8_float_buffer_L[256];
-float32_t DMAMEM xmt_EQ9_float_buffer_L[256];
-float32_t DMAMEM xmt_EQ10_float_buffer_L[256];
-float32_t DMAMEM xmt_EQ11_float_buffer_L[256];
-float32_t DMAMEM xmt_EQ12_float_buffer_L[256];
-float32_t DMAMEM xmt_EQ13_float_buffer_L[256];
-float32_t DMAMEM xmt_EQ14_float_buffer_L[256];
 
 float32_t xmt_EQ_Band1_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };  //declare and zero biquad state variables
 float32_t xmt_EQ_Band2_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -339,16 +323,16 @@ float32_t HP_DC_Butter_state2[2] = { 0, 0 };                                    
 arm_biquad_cascade_df2T_instance_f32 s1_Receive = { 3, HP_DC_Butter_state, HP_DC_Filter_Coeffs };     //AFP 09-23-22
 arm_biquad_cascade_df2T_instance_f32 s1_Receive2 = { 1, HP_DC_Butter_state2, HP_DC_Filter_Coeffs2 };  //AFP 11-04-22
 //Hilbert FIR Filters
-float32_t FIR_Hilbert_state_L[100 + 256 - 1];
-float32_t FIR_Hilbert_state_R[100 + 256 - 1];
+float32_t DMAMEM FIR_Hilbert_state_L[100 + 256 - 1];
+float32_t DMAMEM FIR_Hilbert_state_R[100 + 256 - 1];
 arm_fir_instance_f32 FIR_Hilbert_L;
 arm_fir_instance_f32 FIR_Hilbert_R;
 
 // CW decode Filters
 arm_fir_instance_f32 FIR_CW_DecodeL;  //AFP 10-25-22
 arm_fir_instance_f32 FIR_CW_DecodeR;  //AFP 10-25-22
-float32_t FIR_CW_DecodeL_state[64 + 256 - 1];
-float32_t FIR_CW_DecodeR_state[64 + 256 - 1];
+float32_t DMAMEM FIR_CW_DecodeL_state[64 + 256 - 1];
+float32_t DMAMEM FIR_CW_DecodeR_state[64 + 256 - 1];
 
 //Decimation and Interpolation Filters
 arm_fir_decimate_instance_f32 FIR_dec1_EX_I;
@@ -481,15 +465,15 @@ double Osc_I = 0.0;
 //================== Global CW Correlation and FFT Variables =================
 float32_t corrResult;
 uint32_t corrResultIndex;
-float32_t cosBuffer2[256];
-float32_t sinBuffer[256];
-float32_t sinBuffer2[256];
-float32_t cwRiseBuffer[256];
-float32_t cwFallBuffer[256];
+float32_t DMAMEM cosBuffer2[256];
+float32_t DMAMEM sinBuffer[256];
+float32_t DMAMEM sinBuffer2[256];
+float32_t DMAMEM cwRiseBuffer[256];
+float32_t DMAMEM cwFallBuffer[256];
 float32_t aveCorrResult;
 float32_t aveCorrResultR;
 float32_t aveCorrResultL;
-float32_t float_Corr_Buffer[511];
+float32_t DMAMEM float_Corr_Buffer[511];
 float32_t corrResultR;
 uint32_t corrResultIndexR;
 float32_t corrResultL;
@@ -845,8 +829,8 @@ float32_t DMAMEM float_buffer_L[BUFFER_SIZE * N_B];
 float32_t DMAMEM float_buffer_R[BUFFER_SIZE * N_B];
 float32_t DMAMEM float_buffer_L2[BUFFER_SIZE * N_B];
 float32_t DMAMEM float_buffer_R2[BUFFER_SIZE * N_B];
-float32_t float_buffer_L_3[BUFFER_SIZE * N_B];
-float32_t float_buffer_R_3[BUFFER_SIZE * N_B];
+float32_t DMAMEM float_buffer_L_3[BUFFER_SIZE * N_B];
+float32_t DMAMEM float_buffer_R_3[BUFFER_SIZE * N_B];
 
 float32_t DMAMEM float_buffer_L_CW[256];       //AFP 09-01-22
 float32_t DMAMEM float_buffer_R_CW[256];       //AFP 09-01-22
@@ -1169,7 +1153,7 @@ void MyDelay(unsigned long millisWait) {
   Return value:
     void
 *****/
-void InitializeDataArrays() {
+FLASHMEM void InitializeDataArrays() {
   //DB2OO, 11-SEP-23: don't use the fixed sizes, but use the caculated ones, otherwise a code change will create very difficult to find problems
 #define CLEAR_VAR(x) memset(x, 0, sizeof(x))
   memset(FFT_spec_old, 0, sizeof(FFT_spec_old));
@@ -1486,7 +1470,7 @@ void SetAudioOperatingState(int operatingState) {
   Return value:
     void
 *****/
-void Splash() {
+FLASHMEM void Splash() {
   int centerCall;
   tft.fillWindow(RA8875_BLACK);
   tft.setFontScale(3);
@@ -1534,7 +1518,7 @@ void Splash() {
   Return value:
     void
 *****/
-void setup() {
+FLASHMEM void setup() {
 
   Serial.begin(9600);
 

@@ -590,19 +590,19 @@ extern float32_t rec_EQ_Band13_state[];
 extern float32_t rec_EQ_Band14_state[];
 
 extern float32_t EQ1_float_buffer_L[];
-extern float32_t rec_EQ2_float_buffer_L[];
-extern float32_t rec_EQ3_float_buffer_L[];
-extern float32_t rec_EQ4_float_buffer_L[];
-extern float32_t rec_EQ5_float_buffer_L[];
-extern float32_t rec_EQ6_float_buffer_L[];
-extern float32_t rec_EQ7_float_buffer_L[];
-extern float32_t rec_EQ8_float_buffer_L[];
-extern float32_t rec_EQ9_float_buffer_L[];
-extern float32_t rec_EQ10_float_buffer_L[];
-extern float32_t rec_EQ11_float_buffer_L[];
-extern float32_t rec_EQ12_float_buffer_L[];
-extern float32_t rec_EQ13_float_buffer_L[];
-extern float32_t rec_EQ14_float_buffer_L[];
+extern float32_t EQ2_float_buffer_L[];
+extern float32_t EQ3_float_buffer_L[];
+extern float32_t EQ4_float_buffer_L[];
+extern float32_t EQ5_float_buffer_L[];
+extern float32_t EQ6_float_buffer_L[];
+extern float32_t EQ7_float_buffer_L[];
+extern float32_t EQ8_float_buffer_L[];
+extern float32_t EQ9_float_buffer_L[];
+extern float32_t EQ10_float_buffer_L[];
+extern float32_t EQ11_float_buffer_L[];
+extern float32_t EQ12_float_buffer_L[];
+extern float32_t EQ13_float_buffer_L[];
+extern float32_t EQ14_float_buffer_L[];
 
 extern float32_t FIR_Hilbert_coeffs90[];
 extern float32_t FIR_Hilbert_coeffs0[];
@@ -653,21 +653,6 @@ extern arm_biquad_cascade_df2T_instance_f32 S11_Xmt;
 extern arm_biquad_cascade_df2T_instance_f32 S12_Xmt;
 extern arm_biquad_cascade_df2T_instance_f32 S13_Xmt;
 extern arm_biquad_cascade_df2T_instance_f32 S14_Xmt;
-
-//extern float32_t xmt_EQ1_float_buffer_L[];
-extern float32_t xmt_EQ2_float_buffer_L[];
-extern float32_t xmt_EQ3_float_buffer_L[];
-extern float32_t xmt_EQ4_float_buffer_L[];
-extern float32_t xmt_EQ5_float_buffer_L[];
-extern float32_t xmt_EQ6_float_buffer_L[];
-extern float32_t xmt_EQ7_float_buffer_L[];
-extern float32_t xmt_EQ8_float_buffer_L[];
-extern float32_t xmt_EQ9_float_buffer_L[];
-extern float32_t xmt_EQ10_float_buffer_L[];
-extern float32_t xmt_EQ11_float_buffer_L[];
-extern float32_t xmt_EQ12_float_buffer_L[];
-extern float32_t xmt_EQ13_float_buffer_L[];
-extern float32_t xmt_EQ14_float_buffer_L[];
 
 // ================= end  AFP 10-02-22 ===========
 //Hilbert FIR Filter
