@@ -146,6 +146,7 @@ extern "C" uint32_t set_arm_clock(uint32_t frequency);
 //======================================== Global object definitions ==================================================
 // ===========================  AFP 08-22-22
 
+// Teensy and OpenAudio dataflow code.
 AudioControlSGTL5000_Extended sgtl5000_1;      //controller for the Teensy Audio Board
 AudioConvert_I16toF32 int2Float1, int2Float2;  //Converts Int16 to Float.  See class in AudioStream_F32.h
 AudioEffectGain_F32 gain1, gain2;              //Applies digital gain to audio data.  Expected Float data.
@@ -175,7 +176,6 @@ AudioPlayQueue Q_out_R;
 AudioPlayQueue Q_out_L_Ex;
 AudioPlayQueue Q_out_R_Ex;
 
-// ===============
 AudioConnection patchCord1(i2s_quadIn, 0, int2Float1, 0);  //connect the Left input to the Left Int->Float converter
 AudioConnection patchCord2(i2s_quadIn, 1, int2Float2, 0);  //connect the Right input to the Right Int->Float converter
 
@@ -210,10 +210,8 @@ AudioConnection patchCord22(modeSelectOutR, 0, i2s_quadOut, 3);
 AudioConnection patchCord23(Q_out_L_Ex, 0, modeSelectOutL, 1);  //Rec out Queue for sidetone
 AudioConnection patchCord24(Q_out_R_Ex, 0, modeSelectOutR, 1);
 
-// ================================== AFP 11-01-22
-
 AudioControlSGTL5000 sgtl5000_2;
-// ===========================  AFP 08-22-22 end
+// End dataflow code
 
 Rotary volumeEncoder = Rotary(VOLUME_ENCODER_A, VOLUME_ENCODER_B);        //( 2,  3)
 Rotary tuneEncoder = Rotary(TUNE_ENCODER_A, TUNE_ENCODER_B);              //(16, 17)
@@ -222,12 +220,12 @@ Rotary fineTuneEncoder = Rotary(FINETUNE_ENCODER_A, FINETUNE_ENCODER_B);  //( 4,
 
 Metro ms_500 = Metro(500);  // Set up a Metro
 
-Si5351 si5351;
+Si5351 si5351;  // Instantiate the PLL device.
 
 int radioState, lastState;  // KF5N
 int resetTuningFlag = 0;
 #ifndef RA8875_DISPLAY
-ILI9488_t3 tft = ILI9488_t3(&SPI, TFT_CS, TFT_DC, TFT_RST);
+ILI9488_t3 tft = ILI9488_t3(&SPI, TFT_CS, TFT_DC, TFT_RST);  // Instantiate the display.
 #else
 #define RA8875_CS TFT_CS
 #define RA8875_RESET TFT_DC  // any pin or nothing!
