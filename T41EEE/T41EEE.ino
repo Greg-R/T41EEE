@@ -235,87 +235,6 @@ RA8875 tft = RA8875(RA8875_CS, RA8875_RESET);
 SPISettings settingsA(70000000UL, MSBFIRST, SPI_MODE1);
 
 const uint32_t N_B_EX = 16;
-//================== Receive EQ Variables================= AFP 08-08-22
-//Setup for EQ filters
-float32_t DMAMEM EQ1_float_buffer_L[256];
-float32_t DMAMEM EQ2_float_buffer_L[256];
-float32_t DMAMEM EQ3_float_buffer_L[256];
-float32_t DMAMEM EQ4_float_buffer_L[256];
-float32_t DMAMEM EQ5_float_buffer_L[256];
-float32_t DMAMEM EQ6_float_buffer_L[256];
-float32_t DMAMEM EQ7_float_buffer_L[256];
-float32_t DMAMEM EQ8_float_buffer_L[256];
-float32_t DMAMEM EQ9_float_buffer_L[256];
-float32_t DMAMEM EQ10_float_buffer_L[256];
-float32_t DMAMEM EQ11_float_buffer_L[256];
-float32_t DMAMEM EQ12_float_buffer_L[256];
-float32_t DMAMEM EQ13_float_buffer_L[256];
-float32_t DMAMEM EQ14_float_buffer_L[256];
-
-float32_t rec_EQ_Band1_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };  //declare and zero biquad state variables
-float32_t rec_EQ_Band2_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-float32_t rec_EQ_Band3_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-float32_t rec_EQ_Band4_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-float32_t rec_EQ_Band5_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-float32_t rec_EQ_Band6_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-float32_t rec_EQ_Band7_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-float32_t rec_EQ_Band8_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };  //declare and zero biquad state variables
-float32_t rec_EQ_Band9_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-float32_t rec_EQ_Band10_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-float32_t rec_EQ_Band11_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-float32_t rec_EQ_Band12_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-float32_t rec_EQ_Band13_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-float32_t rec_EQ_Band14_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-
-//EQ filter instances
-arm_biquad_cascade_df2T_instance_f32 S1_Rec = { IIR_NUMSTAGES, rec_EQ_Band1_state, EQ_Band1Coeffs };
-arm_biquad_cascade_df2T_instance_f32 S2_Rec = { IIR_NUMSTAGES, rec_EQ_Band2_state, EQ_Band2Coeffs };
-arm_biquad_cascade_df2T_instance_f32 S3_Rec = { IIR_NUMSTAGES, rec_EQ_Band3_state, EQ_Band3Coeffs };
-arm_biquad_cascade_df2T_instance_f32 S4_Rec = { IIR_NUMSTAGES, rec_EQ_Band4_state, EQ_Band4Coeffs };
-arm_biquad_cascade_df2T_instance_f32 S5_Rec = { IIR_NUMSTAGES, rec_EQ_Band5_state, EQ_Band5Coeffs };
-arm_biquad_cascade_df2T_instance_f32 S6_Rec = { IIR_NUMSTAGES, rec_EQ_Band6_state, EQ_Band6Coeffs };
-arm_biquad_cascade_df2T_instance_f32 S7_Rec = { IIR_NUMSTAGES, rec_EQ_Band7_state, EQ_Band7Coeffs };
-arm_biquad_cascade_df2T_instance_f32 S8_Rec = { IIR_NUMSTAGES, rec_EQ_Band8_state, EQ_Band8Coeffs };
-arm_biquad_cascade_df2T_instance_f32 S9_Rec = { IIR_NUMSTAGES, rec_EQ_Band9_state, EQ_Band9Coeffs };
-arm_biquad_cascade_df2T_instance_f32 S10_Rec = { IIR_NUMSTAGES, rec_EQ_Band10_state, EQ_Band10Coeffs };
-arm_biquad_cascade_df2T_instance_f32 S11_Rec = { IIR_NUMSTAGES, rec_EQ_Band11_state, EQ_Band11Coeffs };
-arm_biquad_cascade_df2T_instance_f32 S12_Rec = { IIR_NUMSTAGES, rec_EQ_Band12_state, EQ_Band12Coeffs };
-arm_biquad_cascade_df2T_instance_f32 S13_Rec = { IIR_NUMSTAGES, rec_EQ_Band13_state, EQ_Band13Coeffs };
-arm_biquad_cascade_df2T_instance_f32 S14_Rec = { IIR_NUMSTAGES, rec_EQ_Band14_state, EQ_Band14Coeffs };
-
-// ===============================  AFP 10-02-22 ================
-
-float32_t xmt_EQ_Band1_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };  //declare and zero biquad state variables
-float32_t xmt_EQ_Band2_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-float32_t xmt_EQ_Band3_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-float32_t xmt_EQ_Band4_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-float32_t xmt_EQ_Band5_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-float32_t xmt_EQ_Band6_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-float32_t xmt_EQ_Band7_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-float32_t xmt_EQ_Band8_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-float32_t xmt_EQ_Band9_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-float32_t xmt_EQ_Band10_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-float32_t xmt_EQ_Band11_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-float32_t xmt_EQ_Band12_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-float32_t xmt_EQ_Band13_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-float32_t xmt_EQ_Band14_state[IIR_NUMSTAGES * 2] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-
-//EQ filter instances
-arm_biquad_cascade_df2T_instance_f32 S1_Xmt = { IIR_NUMSTAGES, xmt_EQ_Band1_state, EQ_Band1Coeffs };
-arm_biquad_cascade_df2T_instance_f32 S2_Xmt = { IIR_NUMSTAGES, xmt_EQ_Band2_state, EQ_Band2Coeffs };
-arm_biquad_cascade_df2T_instance_f32 S3_Xmt = { IIR_NUMSTAGES, xmt_EQ_Band3_state, EQ_Band3Coeffs };
-arm_biquad_cascade_df2T_instance_f32 S4_Xmt = { IIR_NUMSTAGES, xmt_EQ_Band4_state, EQ_Band4Coeffs };
-arm_biquad_cascade_df2T_instance_f32 S5_Xmt = { IIR_NUMSTAGES, xmt_EQ_Band5_state, EQ_Band5Coeffs };
-arm_biquad_cascade_df2T_instance_f32 S6_Xmt = { IIR_NUMSTAGES, xmt_EQ_Band6_state, EQ_Band6Coeffs };
-arm_biquad_cascade_df2T_instance_f32 S7_Xmt = { IIR_NUMSTAGES, xmt_EQ_Band7_state, EQ_Band7Coeffs };
-arm_biquad_cascade_df2T_instance_f32 S8_Xmt = { IIR_NUMSTAGES, xmt_EQ_Band8_state, EQ_Band8Coeffs };
-arm_biquad_cascade_df2T_instance_f32 S9_Xmt = { IIR_NUMSTAGES, xmt_EQ_Band9_state, EQ_Band9Coeffs };
-arm_biquad_cascade_df2T_instance_f32 S10_Xmt = { IIR_NUMSTAGES, xmt_EQ_Band10_state, EQ_Band10Coeffs };
-arm_biquad_cascade_df2T_instance_f32 S11_Xmt = { IIR_NUMSTAGES, xmt_EQ_Band11_state, EQ_Band11Coeffs };
-arm_biquad_cascade_df2T_instance_f32 S12_Xmt = { IIR_NUMSTAGES, xmt_EQ_Band12_state, EQ_Band12Coeffs };
-arm_biquad_cascade_df2T_instance_f32 S13_Xmt = { IIR_NUMSTAGES, xmt_EQ_Band13_state, EQ_Band13Coeffs };
-arm_biquad_cascade_df2T_instance_f32 S14_Xmt = { IIR_NUMSTAGES, xmt_EQ_Band14_state, EQ_Band14Coeffs };
-// ===============================End xmit EQ filter setup  AFP 10-02-22 ================
 
 // HP BiQuad IIR DC filter
 float32_t HP_DC_Butter_state[6] = { 0, 0, 0, 0, 0, 0 };
@@ -366,21 +285,6 @@ float32_t DMAMEM float_buffer_RTemp[2048];
 //==================== End Excite Variables================================
 
 //======================================== Global structure declarations ===============================================
-//=== CW Filter ===
-float32_t CW_Filter_state[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-float32_t CW_AudioFilter1_state[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };  // AFP 10-18-22
-float32_t CW_AudioFilter2_state[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };  // AFP 10-18-22
-float32_t CW_AudioFilter3_state[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };  // AFP 10-18-22
-float32_t CW_AudioFilter4_state[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };  // AFP 10-18-22
-float32_t CW_AudioFilter5_state[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };  // AFP 10-18-22
-//---------  Code Filter instance -----
-arm_biquad_cascade_df2T_instance_f32 S1_CW_Filter = { IIR_CW_NUMSTAGES, CW_Filter_state, CW_Filter_Coeffs };
-arm_biquad_cascade_df2T_instance_f32 S1_CW_AudioFilter1 = { 6, CW_AudioFilter1_state, CW_AudioFilterCoeffs1 };  // AFP 10-18-22
-arm_biquad_cascade_df2T_instance_f32 S1_CW_AudioFilter2 = { 6, CW_AudioFilter2_state, CW_AudioFilterCoeffs2 };  // AFP 10-18-22
-arm_biquad_cascade_df2T_instance_f32 S1_CW_AudioFilter3 = { 6, CW_AudioFilter3_state, CW_AudioFilterCoeffs3 };  // AFP 10-18-22
-arm_biquad_cascade_df2T_instance_f32 S1_CW_AudioFilter4 = { 6, CW_AudioFilter4_state, CW_AudioFilterCoeffs4 };  // AFP 10-18-22
-arm_biquad_cascade_df2T_instance_f32 S1_CW_AudioFilter5 = { 6, CW_AudioFilter5_state, CW_AudioFilterCoeffs5 };  // AFP 10-18-22
-//=== end CW Filter ===
 
 struct config_t EEPROMData;
 
@@ -463,21 +367,12 @@ double Osc_I = 0.0;
 //=============================== Any variable initialized to zero is done for documentation ===========================
 //=============================== purposes since the compiler does that for globals by default =========================
 //================== Global CW Correlation and FFT Variables =================
-float32_t corrResult;
-uint32_t corrResultIndex;
 float32_t DMAMEM cosBuffer2[256];
 float32_t DMAMEM sinBuffer[256];
 float32_t DMAMEM sinBuffer2[256];
 float32_t DMAMEM cwRiseBuffer[256];
 float32_t DMAMEM cwFallBuffer[256];
-float32_t aveCorrResult;
-float32_t aveCorrResultR;
-float32_t aveCorrResultL;
-float32_t DMAMEM float_Corr_Buffer[511];
-float32_t corrResultR;
-uint32_t corrResultIndexR;
-float32_t corrResultL;
-uint32_t corrResultIndexL;
+
 float32_t combinedCoeff;
 float32_t combinedCoeff2;
 float32_t combinedCoeff2Old;
@@ -485,14 +380,12 @@ float CWLevelTimer = 0.0;
 float CWLevelTimerOld = 0.0;
 // === Compressor patameters AFP 11-01-22
 
-boolean use_HP_filter = true;                   //enable the software HP filter to get rid of DC?
+bool use_HP_filter = true;                   //enable the software HP filter to get rid of DC?
 float knee_dBFS;
 float comp_ratio;
 float attack_sec;
 float release_sec;
 // ===========
-float32_t float_Corr_BufferR[511];
-float32_t float_Corr_BufferL[511];
 float goertzelMagnitude;
 bool volumeChangeFlag = false;
 
@@ -506,7 +399,6 @@ const char *zoomOptions[] = { "1x ", "2x ", "4x ", "8x ", "16x" };
 byte currentDashJump = DECODER_BUFFER_SIZE;
 byte currentDecoderIndex = 0;
 
-int filterWidthX;  // The current filter X.
 float32_t pixel_per_khz = ((1 << EEPROMData.spectrum_zoom) * SPECTRUM_RES * 1000.0 / SR[SampleRate].rate);
 int pos_left = centerLine - (int)(bands[EEPROMData.currentBand].FLoCut / 1000.0 * pixel_per_khz);
 int centerLine = (MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2;
@@ -519,28 +411,23 @@ int8_t Menu2 = MENU_F_LO_CUT;
 int8_t menuStatus = NO_MENUS_ACTIVE;
 int8_t NB_taps = 10;
 int8_t NB_impulse_samples = 7;
-int8_t pos_x_date = 14;
-int8_t pos_y_date = 68;
 uint8_t agc_action = 0;
 uint8_t ANR_notch = 0;
 uint8_t ANR_notchOn = 0;
 uint8_t auto_codec_gain = 1;
-uint8_t dcfParityBit;
 uint8_t decay_type = 0;
-uint8_t digimode = 0;
 uint8_t display_dbm = DISPLAY_S_METER_DBM;
 uint8_t display_S_meter_or_spectrum_state = 0;
 uint8_t FIR_filter_window = 1;
-uint8_t half_clip = 0;
+
 uint8_t hang_enable;
 uint8_t keyPressedOn = 0;
 uint8_t NB_on = 0;
 uint8_t NB_test = 0;
-uint8_t notchButtonState = 0;
 uint8_t NR_first_time = 1;
 uint8_t NR_Kim;
 uint8_t NR_use_X = 0;
-uint8_t quarter_clip = 0;
+
 uint8_t SampleRate = SAMPLE_RATE_192K;
 uint8_t sch = 0;
 uint8_t state = 0;
@@ -567,9 +454,6 @@ int16_t *sp_R1;
 int16_t *sp_L2;
 int16_t *sp_R2;
 int16_t spectrum_pos_centre_f = 64 * xExpand;
-int16_t spectrum_x = SPECTRUM_LEFT_X;
-int16_t spectrum_y = SPECTRUM_TOP_Y;
-uint16_t barGraphUpdate = 0;
 
 //===== New histogram stuff ===
 volatile int filterEncoderMove = 0;
@@ -599,13 +483,12 @@ long filter_pos = 0;
 long last_filter_pos = 0;
 // ============ end new stuff =======
 
-uint16_t temp_check_frequency;
 int16_t y_old, y_new, y1_new, y1_old, y_old2;  //A
 
 const float32_t DF1 = 4.0;             // decimation factor
 const float32_t DF2 = 2.0;             // decimation factor
 const float32_t DF = DF1 * DF2;        // decimation factor
-const float32_t n_samplerate = 176.0;  // samplerate before decimation
+const float32_t n_samplerate = 176.0;  // sample rate before decimation
 
 const uint32_t N_B = FFT_LENGTH / 2 / BUFFER_SIZE * (uint32_t)DF;
 const uint32_t N_DEC_B = N_B / (uint32_t)DF;
@@ -633,8 +516,7 @@ int ANR_mask = ANR_dline_size - 1;
 int ANR_taps = 64;
 int attenuator = 0;
 int attack_buffsize;
-int audioYPixel[1024];
-int audioPostProcessorCells[AUDIO_POST_PROCESSOR_BANDS];
+int DMAMEM audioYPixel[1024];  // Will int16_t save memory here???
 
 int bandswitchPins[] = {
   30,  // 80M
@@ -657,7 +539,6 @@ int directFreqFlag = 0;
 int encoderStepOld;
 int filterLoPositionMarkerOld;
 int filterHiPositionMarkerOld;
-int freqCalibration = -1000;
 int gapAtom;  // Space between atoms
 int gapChar;  // Space between characters
 int hang_counter = 0;
@@ -665,7 +546,6 @@ int idx;
 int lidx;
 int IQChoice;
 int IQCalType;
-int kDisplay = 0;  //AFP
 int LMS_nr_strength;
 int LP_F_help = 3500;
 int micChoice;
@@ -690,7 +570,6 @@ int syncEEPROM;
 int x2 = 0;  //AFP
 int zoom_sample_ptr = 0;
 int zoomIndex = 1;  //AFP 9-26-22
-int wtf;
 int updateDisplayFlag = 0;
 int updateDisplayCounter = 0;
 int xrState;  // Is the T41 in xmit or rec state? 1 = rec, 0 = xmt
@@ -704,23 +583,17 @@ int32_t IFFreq = SR[SampleRate].rate / 4;  // IF (intermediate) frequency
 int32_t mainMenuIndex = START_MENU;  // Done so we show menu[0] at startup
 int32_t secondaryMenuIndex = -1;     // -1 means haven't determined secondary menu
 int32_t subMenuMaxOptions;           // holds the number of submenu options
-int32_t subMenuIndex = EEPROMData.currentBand;
 uint32_t N_BLOCKS = N_B;
-uint32_t highAlarmTemp;
 uint32_t in_index;
-uint32_t lowAlarmTemp;
 uint32_t NR_X_pointer = 0;
 uint32_t NR_E_pointer = 0;
 uint32_t m_NumTaps = (FFT_LENGTH / 2) + 1;
-uint32_t panicAlarmTemp; /*!< The panic alarm temperature.*/
-uint32_t roomCount;      /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] at the hot temperature.*/
 uint32_t s_roomC_hotC;   /*!< The value of s_roomCount minus s_hotCount.*/
 uint32_t s_hotTemp;      /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] at room temperature .*/
 uint32_t s_hotCount;     /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] at the hot temperature.*/
 long currentFreq;
 long incrementValues[] = { 10, 50, 100, 250, 1000, 10000, 100000, 1000000 };
 long int n_clear;
-long notchPosOld;
 long notchFreq = 1000;
 long notchCenterBin;
 long signalElapsedTime;
@@ -729,8 +602,6 @@ long signalEnd;  // Start-end of dit or dah
 long TxRxFreq;  // = EEPROMData.centerFreq+NCOFreq  NCOFreq from FreqShift2()
 long TxRxFreqOld;
 uint32_t gapLength;
-long ditTime = 80L, dahTime = 240L;  // Assume 15wpm to start
-
 unsigned long long Clk2SetFreq;                  // AFP 09-27-22
 unsigned long long Clk1SetFreq = 1000000000ULL;  // AFP 09-27-22
 unsigned long ditLength;
@@ -741,10 +612,7 @@ float CPU_temperature = 0.0;
 
 float help;
 float s_hotT_ROOM; /*!< The value of s_hotTemp minus room temperature(25¡æ).*/
-float lastII = 0;
-float lastQQ = 0;
 
-float RXbit = 0;
 //====== SAM stuff AFP 11-02-22
 float32_t a[3 * SAM_PLL_HILBERT_STAGES + 3];
 float32_t b[3 * SAM_PLL_HILBERT_STAGES + 3];
@@ -771,7 +639,6 @@ float32_t audio;
 float32_t audiotmp = 0.0f;
 float32_t audiou;
 float32_t audioSpectBuffer[1024];  // This can't be DMAMEM.  It will break the S-Meter.  KF5N October 10, 2023
-float32_t bass = 0.0;
 float32_t mid = 0.0;
 float32_t bin_BW = 1.0 / (DF * FFT_length) * SR[SampleRate].rate;
 float32_t bin = 2000.0 / bin_BW;
@@ -885,13 +752,11 @@ float32_t DMAMEM NR_Hk_old[NR_FFT_L / 2];
 float32_t DMAMEM NR_long_tone[NR_FFT_L / 2][2];
 float32_t DMAMEM NR_long_tone_gain[NR_FFT_L / 2];
 float32_t NB_thresh = 2.5;
-float32_t offsetDisplayDB = 10.0;
 float32_t onemfast_backmult;
 float32_t onemhang_backmult;
 float32_t out_sample[2];
 float32_t out_targ;
 float32_t out_target;
-float32_t phaseLO = 0.0;
 float32_t pop_ratio;
 float32_t DMAMEM R_BufferOffset[BUFFER_SIZE * N_B];
 float32_t ring[RB_SIZE * 2];
@@ -912,13 +777,10 @@ float32_t volts = 0.0;
 float32_t w;
 float32_t wold = 0.0f;
 float angl;
-float dcfMean;
-float dcfSum;
 float pi = 3.14159265358979;
 float tau;
 float temp;
 float xExpand = 1.5;  //
-float x;
 
 // Voltage in one-hundred 1 dB steps for volume control.
 const float32_t volumeLog[] = { 0.000010, 0.000011, 0.000013, 0.000014, 0.000016, 0.000018, 0.000020, 0.000022, 0.000025, 0.000028,
@@ -961,6 +823,8 @@ time_t getTeensy3Time() {
 
 *****/
 void Codec_gain() {
+  uint8_t half_clip = 0;
+  uint8_t quarter_clip = 0;
   static uint32_t timer = 0;
   timer++;
   if (timer > 10000) timer = 10000;
@@ -1040,7 +904,6 @@ void FLASHMEM T4_rtc_set(unsigned long t) {
     void
 *****/
 void FLASHMEM initTempMon(uint16_t freq, uint32_t lowAlarmTemp, uint32_t highAlarmTemp, uint32_t panicAlarmTemp) {
-
   uint32_t calibrationData;
   uint32_t roomCount;
   //first power on the temperature sensor - no register change
@@ -1154,6 +1017,8 @@ void MyDelay(unsigned long millisWait) {
     void
 *****/
 FLASHMEM void InitializeDataArrays() {
+  uint16_t temp_check_frequency;
+  uint32_t highAlarmTemp, lowAlarmTemp, panicAlarmTemp;
   //DB2OO, 11-SEP-23: don't use the fixed sizes, but use the caculated ones, otherwise a code change will create very difficult to find problems
 #define CLEAR_VAR(x) memset(x, 0, sizeof(x))
   memset(FFT_spec_old, 0, sizeof(FFT_spec_old));
@@ -1613,8 +1478,6 @@ FLASHMEM void setup() {
   EnableButtonInterrupts();
   EEPROMStartup();
 
-  spectrum_x = 10;
-  spectrum_y = 150;
   xExpand = 1.4;
   h = 135;
 
@@ -1759,8 +1622,6 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
         modeSelectOutR.gain(1, 0);
         modeSelectOutExL.gain(0, 0);
         modeSelectOutExR.gain(0, 0);
-        phaseLO = 0.0;
-        barGraphUpdate = 0;
         if (keyPressedOn == 1) {
           return;
         }
@@ -1821,8 +1682,6 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
         modeSelectOutR.gain(1, 0);
         modeSelectOutExL.gain(0, 0);
         modeSelectOutExR.gain(0, 0);
-        phaseLO = 0.0;
-        barGraphUpdate = 0;
         keyPressedOn = 0;
       }
       ShowSpectrum();  // if removed CW signal on is 2 mS

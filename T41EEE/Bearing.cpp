@@ -1005,8 +1005,8 @@ void bmpDraw(const char *filename, int x, int y) {
   uint8_t sdbuffer[3 * BUFFPIXEL];     // pixel in buffer (R+G+B per pixel)
   uint16_t lcdbuffer[BUFFPIXEL];       // pixel out buffer (16-bit per pixel)
   uint8_t buffidx = sizeof(sdbuffer);  // Current position in sdbuffer
-  boolean goodBmp = false;             // Set to true on valid header parse
-  boolean flip = true;                 // BMP is stored bottom-to-top
+  bool goodBmp = false;             // Set to true on valid header parse
+  bool flip = true;                 // BMP is stored bottom-to-top
   int w, h, row, col, xpos, ypos;
 
   homeLat = myMapFiles[selectedMapIndex].lat;

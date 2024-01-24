@@ -1,6 +1,18 @@
 
 #include "SDT.h"
 
+float32_t aveCorrResult;
+float32_t aveCorrResultR;
+float32_t aveCorrResultL;
+
+float32_t DMAMEM float_Corr_Buffer[511];
+float32_t DMAMEM float_Corr_BufferR[511];
+float32_t DMAMEM float_Corr_BufferL[511];
+float32_t corrResultR;
+uint32_t corrResultIndexR;
+float32_t corrResultL;
+uint32_t corrResultIndexL;
+
 //=================  AFP10-18-22 ================
 /*****
   Purpose: Select CW Filter. EEPROMData.CWFilterIndex has these values:

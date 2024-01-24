@@ -12,7 +12,7 @@
   Return value;
     void
 *****/
-void SetupMyCompressors(boolean use_HP_filter1, float knee_dBFS1, float comp_ratio1, float attack_sec1, float release_sec1) {
+void SetupMyCompressors(bool use_HP_filter1, float knee_dBFS1, float comp_ratio1, float attack_sec1, float release_sec1) {
   comp1.enableHPFilter(use_HP_filter1);   comp2.enableHPFilter(use_HP_filter1);
   comp1.setThresh_dBFS(knee_dBFS1);       comp2.setThresh_dBFS(knee_dBFS1);
   comp1.setCompressionRatio(comp_ratio1); comp2.setCompressionRatio(comp_ratio1);

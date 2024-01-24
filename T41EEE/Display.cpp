@@ -16,8 +16,10 @@ const uint16_t gradient[] = {  // Color array for waterfall background
   0xF87E, 0xF87E, 0xF87E, 0xF87E, 0xF88F, 0xF88F, 0xF88F
 };
 
+int16_t spectrum_x = 10;
 uint16_t waterfall[MAX_WATERFALL_WIDTH];
 int maxYPlot;
+int filterWidthX;  // The current filter X.
 
 /*****
   Purpose: Draw audio spectrum box  AFP added 3-14-21

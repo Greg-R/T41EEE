@@ -342,20 +342,6 @@ extern int radioState, lastState;  // Used by the loop to monitor current state.
 
 //------------------------- Global CW Filter declarations ----------
 
-extern arm_biquad_cascade_df2T_instance_f32 S1_CW_Filter;
-extern arm_biquad_cascade_df2T_instance_f32 S1_CW_AudioFilter1;  //AFP 10-18-22
-extern arm_biquad_cascade_df2T_instance_f32 S1_CW_AudioFilter2;  //AFP 10-18-22
-extern arm_biquad_cascade_df2T_instance_f32 S1_CW_AudioFilter3;  //AFP 10-18-22
-extern arm_biquad_cascade_df2T_instance_f32 S1_CW_AudioFilter4;  //AFP 10-18-22
-extern arm_biquad_cascade_df2T_instance_f32 S1_CW_AudioFilter5;  //AFP 10-18-22
-extern float32_t CW_Filter_state[];
-extern float32_t CW_AudioFilter1_state[];  //AFP 10-18-22
-extern float32_t CW_AudioFilter2_state[];  //AFP 10-18-22
-extern float32_t CW_AudioFilter3_state[];  //AFP 10-18-22
-extern float32_t CW_AudioFilter4_state[];  //AFP 10-18-22
-extern float32_t CW_AudioFilter5_state[];  //AFP 10-18-22
-extern float32_t HP_DC_Filter_Coeffs[];
-
 extern float32_t CW_AudioFilterCoeffs1[];  //AFP 10-18-22
 extern float32_t CW_AudioFilterCoeffs2[];  //AFP 10-18-22
 extern float32_t CW_AudioFilterCoeffs3[];  //AFP 10-18-22
@@ -382,31 +368,17 @@ extern float32_t HP_DC_Filter_Coeffs2[];  // AFP 11-02-22
 
 //================== Global CW Correlation and FFT Variables =================
 extern float32_t audioMaxSquaredAve;
-extern float32_t corrResult;      //AFP 02-02-22
-extern uint32_t corrResultIndex;  //AFP 02-02-22
 extern float32_t sinBuffer[];     //AFP 02-02-22
 extern float32_t sinBuffer2[];
 extern float32_t cwRiseBuffer[];
 extern float32_t cwFallBuffer[];
-extern float32_t float_Corr_Buffer[];  //AFP 02-02-22
-extern float32_t aveCorrResult;        //AFP 02-02-22
 extern int filterWidth;
-extern int filterWidthX;  // The current filter X.
 extern float goertzelMagnitude;
 extern boolean use_HP_filter;           //enable the software HP filter to get rid of DC?
 extern float knee_dBFS;
 extern float comp_ratio;
 extern float attack_sec;
 extern float release_sec;
-extern float32_t corrResultR;           //AFP 02-02-22
-extern uint32_t corrResultIndexR;       //AFP 02-02-22
-extern float32_t corrResultL;           //AFP 02-02-22
-extern uint32_t corrResultIndexL;       //AFP 02-02-22
-extern float32_t aveCorrResult;         //AFP 02-02-22
-extern float32_t aveCorrResultR;        //AFP 02-06-22
-extern float32_t aveCorrResultL;        //AFP 02-06-22
-extern float32_t float_Corr_BufferR[];  //AFP 02-06-22
-extern float32_t float_Corr_BufferL[];  //AFP 02-06-22
 extern float32_t combinedCoeff;         //AFP 02-06-22
 extern float CWLevelTimer;
 extern float CWLevelTimerOld;
@@ -422,7 +394,6 @@ extern int32_t gapHistogram[];
 extern float32_t pixel_per_khz;  //AFP
 extern int pos_left;
 extern int centerLine;
-extern int filterWidth;
 extern int h;
 extern int centerTuneFlag;
 extern long valRef1;
@@ -558,6 +529,7 @@ extern arm_biquad_cascade_df2T_instance_f32 s1_Receive2;  //AFP 11-02-22
 extern float32_t coeffs192K_10K_LPF_FIR[];
 extern float32_t coeffs48K_8K_LPF_FIR[];
 extern const uint32_t N_B_EX;
+
 extern float32_t EQ_Band1Coeffs[];
 extern float32_t EQ_Band2Coeffs[];
 extern float32_t EQ_Band3Coeffs[];
@@ -572,88 +544,6 @@ extern float32_t EQ_Band11Coeffs[];
 extern float32_t EQ_Band12Coeffs[];
 extern float32_t EQ_Band13Coeffs[];
 extern float32_t EQ_Band14Coeffs[];
-
-//Setup for EQ filters
-extern float32_t rec_EQ_Band1_state[];
-extern float32_t rec_EQ_Band2_state[];
-extern float32_t rec_EQ_Band3_state[];
-extern float32_t rec_EQ_Band4_state[];
-extern float32_t rec_EQ_Band5_state[];
-extern float32_t rec_EQ_Band6_state[];
-extern float32_t rec_EQ_Band7_state[];
-extern float32_t rec_EQ_Band8_state[];
-extern float32_t rec_EQ_Band9_state[];
-extern float32_t rec_EQ_Band10_state[];
-extern float32_t rec_EQ_Band11_state[];
-extern float32_t rec_EQ_Band12_state[];
-extern float32_t rec_EQ_Band13_state[];
-extern float32_t rec_EQ_Band14_state[];
-
-extern float32_t EQ1_float_buffer_L[];
-extern float32_t EQ2_float_buffer_L[];
-extern float32_t EQ3_float_buffer_L[];
-extern float32_t EQ4_float_buffer_L[];
-extern float32_t EQ5_float_buffer_L[];
-extern float32_t EQ6_float_buffer_L[];
-extern float32_t EQ7_float_buffer_L[];
-extern float32_t EQ8_float_buffer_L[];
-extern float32_t EQ9_float_buffer_L[];
-extern float32_t EQ10_float_buffer_L[];
-extern float32_t EQ11_float_buffer_L[];
-extern float32_t EQ12_float_buffer_L[];
-extern float32_t EQ13_float_buffer_L[];
-extern float32_t EQ14_float_buffer_L[];
-
-extern float32_t FIR_Hilbert_coeffs90[];
-extern float32_t FIR_Hilbert_coeffs0[];
-
-extern float32_t EQ_Band1_state[];
-extern float32_t EQ_Band2_state[];
-extern float32_t EQ_Band3_state[];
-extern float32_t EQ_Band4_state[];
-extern float32_t EQ_Band5_state[];
-extern float32_t EQ_Band6_state[];
-extern float32_t EQ_Band7_state[];
-extern float32_t EQ_Band8_state[];
-extern float32_t EQ_Band9_state[];
-extern float32_t EQ_Band10_state[];
-extern float32_t EQ_Band11_state[];
-extern float32_t EQ_Band12_state[];
-extern float32_t EQ_Band13_state[];
-extern float32_t EQ_Band14_state[];
-
-//EQ filter instances
-extern arm_biquad_cascade_df2T_instance_f32 S1_Rec;
-extern arm_biquad_cascade_df2T_instance_f32 S2_Rec;
-extern arm_biquad_cascade_df2T_instance_f32 S3_Rec;
-extern arm_biquad_cascade_df2T_instance_f32 S4_Rec;
-extern arm_biquad_cascade_df2T_instance_f32 S5_Rec;
-extern arm_biquad_cascade_df2T_instance_f32 S6_Rec;
-extern arm_biquad_cascade_df2T_instance_f32 S7_Rec;
-extern arm_biquad_cascade_df2T_instance_f32 S8_Rec;
-extern arm_biquad_cascade_df2T_instance_f32 S9_Rec;
-extern arm_biquad_cascade_df2T_instance_f32 S10_Rec;
-extern arm_biquad_cascade_df2T_instance_f32 S11_Rec;
-extern arm_biquad_cascade_df2T_instance_f32 S12_Rec;
-extern arm_biquad_cascade_df2T_instance_f32 S13_Rec;
-extern arm_biquad_cascade_df2T_instance_f32 S14_Rec;
-
-// ================= start  AFP 10-02-22 ===========
-extern arm_biquad_cascade_df2T_instance_f32 S1_Xmt;
-extern arm_biquad_cascade_df2T_instance_f32 S2_Xmt;
-extern arm_biquad_cascade_df2T_instance_f32 S3_Xmt;
-extern arm_biquad_cascade_df2T_instance_f32 S4_Xmt;
-extern arm_biquad_cascade_df2T_instance_f32 S5_Xmt;
-extern arm_biquad_cascade_df2T_instance_f32 S6_Xmt;
-extern arm_biquad_cascade_df2T_instance_f32 S7_Xmt;
-extern arm_biquad_cascade_df2T_instance_f32 S8_Xmt;
-extern arm_biquad_cascade_df2T_instance_f32 S9_Xmt;
-extern arm_biquad_cascade_df2T_instance_f32 S10_Xmt;
-extern arm_biquad_cascade_df2T_instance_f32 S11_Xmt;
-extern arm_biquad_cascade_df2T_instance_f32 S12_Xmt;
-extern arm_biquad_cascade_df2T_instance_f32 S13_Xmt;
-extern arm_biquad_cascade_df2T_instance_f32 S14_Xmt;
-
 // ================= end  AFP 10-02-22 ===========
 //Hilbert FIR Filter
 
@@ -875,7 +765,6 @@ extern uint8_t decay_type;
 extern uint8_t display_dbm;
 extern uint8_t display_S_meter_or_spectrum_state;
 extern uint8_t FIR_filter_window;
-extern uint8_t half_clip;
 extern uint8_t hang_enable;
 extern uint8_t keyPressedOn;  //AFP 09-01-22
 extern uint8_t NB_on;
@@ -883,7 +772,6 @@ extern uint8_t NB_test;
 extern uint8_t NR_first_time;
 extern uint8_t NR_Kim;
 extern uint8_t NR_use_X;
-extern uint8_t quarter_clip;
 extern uint8_t SampleRate;
 extern uint8_t sch;
 extern uint8_t state;
@@ -911,11 +799,8 @@ extern int16_t *sp_R1;
 extern int16_t *sp_L2;
 extern int16_t *sp_R2;
 extern int16_t spectrum_pos_centre_f;
-extern int16_t spectrum_x;
-extern int16_t spectrum_y;
 extern int16_t y_old, y_new, y1_new, y1_old, y_old2;
 extern uint16_t base_y;
-extern uint16_t barGraphUpdate;
 extern const uint16_t gradient[];
 extern const uint32_t IIR_biquad_Zoom_FFT_N_stages;
 extern const uint32_t N_stages_biquad_lowpass1;
@@ -1021,8 +906,6 @@ extern unsigned long transmitDitUnshapedBlocks;
 extern unsigned long transmitDahUnshapedBlocks;
 extern long TxRxFreq;  // = centerFreq+NCOFreq  NCOFreq from FreqShift2()
 extern long TxRxFreqOld;
-extern uint32_t cwTimer;
-extern unsigned long ditTimerOn;
 extern unsigned long cwTransmitDelay;  // ms to keep relay on after last atom read
 extern long incrementValues[];
 extern long lastFrequencies[][2];
@@ -1221,7 +1104,6 @@ extern float32_t onemhang_backmult;
 extern float32_t out_sample[];
 extern float32_t out_targ;
 extern float32_t out_target;
-extern float32_t phaseLO;
 extern float32_t pop_ratio;
 extern float32_t R_BufferOffset[];
 extern float32_t ring[];
@@ -1258,7 +1140,6 @@ extern float32_t float_buffer_L_3[];
 extern float32_t float_buffer_R_3[];
 extern const float32_t atanTable[];
 extern const float32_t DF1;           // decimation factor
-extern const float32_t DF2;           // decimation factor
 extern const float32_t DF;            // decimation factor
 extern const float32_t n_att;         // desired stopband attenuation
 extern const float32_t n_desired_BW;  // desired max BW of the filters
@@ -1438,7 +1319,7 @@ void SetSideToneVolume();  // This function uses encoder to set sidetone volume.
 long SetTransmitDelay();
 void SetTransmitDitLength(int wpm);  // JJP 8/19/23
 void SetupMode(int sideBand);
-void SetupMyCompressors(boolean use_HP_filter, float knee_dBFS, float comp_ratio, float attack_sec, float release_sec);  //AFP 11-01-22 in DSP.cpp
+void SetupMyCompressors(bool use_HP_filter, float knee_dBFS, float comp_ratio, float attack_sec, float release_sec);  //AFP 11-01-22 in DSP.cpp
 int SetWPM();
 void ShowAnalogGain();
 void ShowBandwidth();

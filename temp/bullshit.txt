@@ -1,0 +1,4 @@
+int16_t spectrum_pos_centre_f = 64 * xExpand;
+int16_t spectrum_x = SPECTRUM_LEFT_X;
+int16_t spectrum_y = SPECTRUM_TOP_Y;
+uint16_t barGraphUpdate = 0;
