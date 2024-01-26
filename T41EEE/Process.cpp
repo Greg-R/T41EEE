@@ -2,6 +2,9 @@
 #include "SDT.h"
 
 char atom, currentAtom;
+int8_t first_block = 1;
+uint8_t NB_on = 0;
+uint8_t wait_flag;
 
 //=== CW Filter ===
 float32_t CW_AudioFilter1_state[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };  // AFP 10-18-22

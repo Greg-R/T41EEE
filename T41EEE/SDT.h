@@ -373,38 +373,15 @@ extern float32_t sinBuffer2[];
 extern float32_t cwRiseBuffer[];
 extern float32_t cwFallBuffer[];
 extern int filterWidth;
-extern float goertzelMagnitude;
 extern boolean use_HP_filter;           //enable the software HP filter to get rid of DC?
-extern float knee_dBFS;
-extern float comp_ratio;
-extern float attack_sec;
-extern float release_sec;
-extern float32_t combinedCoeff;         //AFP 02-06-22
-extern float CWLevelTimer;
-extern float CWLevelTimerOld;
-extern float32_t combinedCoeff2;
-extern float32_t combinedCoeff2Old;
-extern long CWFreqShift;  //AFP 05-17-22
+
 //===== New histogram stuff
-extern int endGapFlag;
-extern int topGapIndex;
-extern int topGapIndexOld;
-extern int32_t signalHistogram[];
-extern int32_t gapHistogram[];
 extern float32_t pixel_per_khz;  //AFP
 extern int pos_left;
 extern int centerLine;
 extern int h;
 extern int centerTuneFlag;
-extern long valRef1;
-extern long valRef2;
-extern long gapRef1;
-extern int valFlag;
-extern long signalStartOld;
-extern long aveDitLength;
-extern long aveDahLength;
-extern float thresholdGeometricMean;
-extern float thresholdArithmeticMean;
+
 extern long notchFreq;
 extern long filter_pos;
 extern long last_filter_pos;
@@ -593,14 +570,6 @@ void ExciterIQData();
 //======================================== Global object declarations ==================================================
 
 extern long NCOFreq;  // AFP 04-16-22
-extern float32_t NCO_INC;  // AFP 04-16-22
-extern double OSC_COS;
-extern double OSC_SIN;
-extern double Osc_Vect_Q;
-extern double Osc_Vect_I;
-extern double Osc_Gain;
-extern double Osc_Q;
-extern double Osc_I;
 
 //======================================== Global object declarations ==================================================
 
@@ -736,71 +705,37 @@ extern Menu_D Menus[];
 //======================================== Global variables declarations ===============================================
 //========================== Some are not in alpha order because of forward references =================================
 
-extern bool save_last_frequency;
 extern bool volumeChangeFlag;
-
-extern char decodeBuffer[];
-extern const char DEGREE_SYMBOL[];
 extern char keyboardBuffer[];
 extern const char *labels[];
-
 extern const char *topMenus[];
 extern const char *zoomOptions[];
-
 extern byte currentDashJump;
 extern byte currentDecoderIndex;
-
-extern int8_t first_block;
-extern int8_t Menu2;
 extern int8_t menuStatus;  // 0 = no primary or secondary menu, 1 = primary, 2 = secondary
-
-extern int8_t NB_taps;
-extern int8_t NB_impulse_samples;
-
-extern uint8_t agc_action;
 extern uint8_t ANR_notch;
 extern uint8_t ANR_notchOn;
 extern uint8_t auto_codec_gain;
-extern uint8_t decay_type;
-extern uint8_t display_dbm;
 extern uint8_t display_S_meter_or_spectrum_state;
-extern uint8_t FIR_filter_window;
-extern uint8_t hang_enable;
 extern uint8_t keyPressedOn;  //AFP 09-01-22
-extern uint8_t NB_on;
-extern uint8_t NB_test;
 extern uint8_t NR_first_time;
 extern uint8_t NR_Kim;
-extern uint8_t NR_use_X;
 extern uint8_t SampleRate;
 extern uint8_t sch;
 extern uint8_t state;
 extern uint8_t T41State;
-extern uint8_t twinpeaks_tested;  // initial value --> 2 !!
-extern uint8_t wait_flag;
-extern uint8_t write_analog_gain;
 extern uint8_t zoom_display;
-
 extern const uint8_t NR_L_frames;
 extern const uint8_t NR_N_frames;
-
-extern int16_t currentMode;
-
 extern int16_t pixelnew[];
 extern int16_t pixelold[];
 extern int16_t pixelCurrent[];
 extern int16_t pixelold[];
-
-extern int16_t pos_y_frequency;
-extern int16_t pos_x_time;  // 14;
-extern int16_t pos_y_time;
 extern int16_t *sp_L1;
 extern int16_t *sp_R1;
 extern int16_t *sp_L2;
 extern int16_t *sp_R2;
-extern int16_t spectrum_pos_centre_f;
 extern int16_t y_old, y_new, y1_new, y1_old, y_old2;
-extern uint16_t base_y;
 extern const uint16_t gradient[];
 extern const uint32_t IIR_biquad_Zoom_FFT_N_stages;
 extern const uint32_t N_stages_biquad_lowpass1;
@@ -1125,15 +1060,12 @@ extern float32_t var_gain;
 extern float32_t volts;
 extern float32_t w;
 extern float32_t wold;
-
 extern float angl;
 extern float parti;
 extern float pi;
 extern float tau;
 extern float temp;
-extern float xExpand;  //AFP
 extern float x;
-
 extern const float32_t nuttallWindow256[];
 extern float32_t FFT_buffer[] __attribute__((aligned(4)));
 extern float32_t float_buffer_L_3[];
@@ -1148,7 +1080,6 @@ extern const float32_t n_fpass2;
 extern const float32_t n_fstop1;
 extern const float32_t n_fstop2;
 extern const float32_t n_samplerate;  // samplerate before decimation
-
 extern double elapsed_micros_idx_t;
 extern double elapsed_micros_mean;
 extern double elapsed_micros_sum;

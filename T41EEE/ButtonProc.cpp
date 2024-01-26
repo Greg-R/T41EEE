@@ -1,6 +1,8 @@
 
 #include "SDT.h"
 
+bool save_last_frequency = false;
+
 /*****
   Purpose: To process a menu increase button push
 

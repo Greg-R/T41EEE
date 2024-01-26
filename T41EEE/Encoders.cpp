@@ -1,6 +1,8 @@
 
 #include "SDT.h"
 
+int8_t Menu2 = MENU_F_LO_CUT;
+
 /*****
   Purpose: EncoderFilter
 

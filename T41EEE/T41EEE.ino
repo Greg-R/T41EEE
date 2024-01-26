@@ -97,7 +97,6 @@ struct maps myMapFiles[10] = {
   { "", 0.0, 0.0 }
 };
 
-bool save_last_frequency = false;
 struct band bands[NUMBER_OF_BANDS] = {  //AFP Changed 1-30-21 // G0ORX Changed AGC to 20
 //freq    band low   band hi   name    mode      Low    Hi  Gain  type    gain  AGC   pixel
 //                                             filter filter             correct     offset
@@ -353,16 +352,6 @@ dispSc displayScale[] =  //r *dbText,dBScale, pixelsPerDB, baseOffset, offsetInc
 //======================================== Global variables declarations for Quad Oscillator 2 ===============================================
 long NCOFreq;
 
-float32_t NCO_INC;
-
-double OSC_COS;
-double OSC_SIN;
-double Osc_Vect_Q = 1.0;
-double Osc_Vect_I = 0.0;
-double Osc_Gain = 0.0;
-double Osc_Q = 0.0;
-double Osc_I = 0.0;
-
 //======================================== Global variables declarations ===============================================
 //=============================== Any variable initialized to zero is done for documentation ===========================
 //=============================== purposes since the compiler does that for globals by default =========================
@@ -373,112 +362,68 @@ float32_t DMAMEM sinBuffer2[256];
 float32_t DMAMEM cwRiseBuffer[256];
 float32_t DMAMEM cwFallBuffer[256];
 
-float32_t combinedCoeff;
-float32_t combinedCoeff2;
-float32_t combinedCoeff2Old;
-float CWLevelTimer = 0.0;
-float CWLevelTimerOld = 0.0;
 // === Compressor patameters AFP 11-01-22
 
 bool use_HP_filter = true;                   //enable the software HP filter to get rid of DC?
-float knee_dBFS;
 float comp_ratio;
 float attack_sec;
 float release_sec;
 // ===========
-float goertzelMagnitude;
-bool volumeChangeFlag = false;
 
-char decodeBuffer[33];    // The buffer for holding the decoded characters.  Increased to 33.  KF5N October 29, 2023
+
 char keyboardBuffer[10];  // Set for call prefixes. May be increased later
-const char DEGREE_SYMBOL[] = { 0xB0, '\0' };
-
 const char *tune_text = "Fast Tune";
 const char *zoomOptions[] = { "1x ", "2x ", "4x ", "8x ", "16x" };
 
 byte currentDashJump = DECODER_BUFFER_SIZE;
 byte currentDecoderIndex = 0;
-
 float32_t pixel_per_khz = ((1 << EEPROMData.spectrum_zoom) * SPECTRUM_RES * 1000.0 / SR[SampleRate].rate);
 int pos_left = centerLine - (int)(bands[EEPROMData.currentBand].FLoCut / 1000.0 * pixel_per_khz);
+
 int centerLine = (MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2;
 int fLoCutOld;
 int fHiCutOld;
 int filterWidth = (int)((bands[EEPROMData.currentBand].FHiCut - bands[EEPROMData.currentBand].FLoCut) / 1000.0 * pixel_per_khz);
 int h = SPECTRUM_HEIGHT + 3;
-int8_t first_block = 1;
-int8_t Menu2 = MENU_F_LO_CUT;
 int8_t menuStatus = NO_MENUS_ACTIVE;
-int8_t NB_taps = 10;
-int8_t NB_impulse_samples = 7;
-uint8_t agc_action = 0;
 uint8_t ANR_notch = 0;
 uint8_t ANR_notchOn = 0;
 uint8_t auto_codec_gain = 1;
-uint8_t decay_type = 0;
-uint8_t display_dbm = DISPLAY_S_METER_DBM;
 uint8_t display_S_meter_or_spectrum_state = 0;
-uint8_t FIR_filter_window = 1;
-
-uint8_t hang_enable;
 uint8_t keyPressedOn = 0;
-uint8_t NB_on = 0;
-uint8_t NB_test = 0;
 uint8_t NR_first_time = 1;
 uint8_t NR_Kim;
-uint8_t NR_use_X = 0;
-
 uint8_t SampleRate = SAMPLE_RATE_192K;
 uint8_t sch = 0;
 uint8_t state = 0;
-uint8_t twinpeaks_tested = 2;  // initial value --> 2 !!
 uint8_t T41State = 1;
-uint8_t wait_flag;
-uint8_t write_analog_gain = 0;
 uint8_t zoom_display = 1;
-
 const uint8_t NR_L_frames = 3;
 const uint8_t NR_N_frames = 15;
 
-uint16_t base_y = SPECTRUM_BOTTOM;
-
-int16_t currentMode;
 int16_t pixelCurrent[SPECTRUM_RES];
 int16_t pixelnew[SPECTRUM_RES];
 int16_t pixelold[SPECTRUM_RES];
-int16_t pos_y_frequency = 48;
-int16_t pos_x_time = 390;  // 14;
-int16_t pos_y_time = 5;    //114;
+
 int16_t *sp_L1;
 int16_t *sp_R1;
 int16_t *sp_L2;
 int16_t *sp_R2;
-int16_t spectrum_pos_centre_f = 64 * xExpand;
+
 
 //===== New histogram stuff ===
 volatile int filterEncoderMove = 0;
 volatile long fineTuneEncoderMove = 0L;
-int endGapFlag = 0;
+
 int selectedMapIndex;
-int topGapIndex;
-int topGapIndexOld;
-int32_t gapHistogram[HISTOGRAM_ELEMENTS];  // Not used.  KF5N November 12, 2023
-int32_t signalHistogram[HISTOGRAM_ELEMENTS];
+
 // This enum is for an experimental Morse decoder change.
 enum states decodeStates;
 int centerTuneFlag = 0;
 unsigned long cwTimer;
 unsigned long ditTimerOn;
-long valRef1;
-long valRef2;
-long gapRef1;
-int valFlag = 0;
-long signalStartOld = 0;
-long aveDitLength = 80;
-long aveDahLength = 200;
-float thresholdGeometricMean = 140.0;  // This changes as decoder runs
-float thresholdArithmeticMean;
-long CWFreqShift;
+
+
 long filter_pos = 0;
 long last_filter_pos = 0;
 // ============ end new stuff =======
@@ -780,7 +725,8 @@ float angl;
 float pi = 3.14159265358979;
 float tau;
 float temp;
-float xExpand = 1.5;  //
+bool volumeChangeFlag = false;
+
 
 // Voltage in one-hundred 1 dB steps for volume control.
 const float32_t volumeLog[] = { 0.000010, 0.000011, 0.000013, 0.000014, 0.000016, 0.000018, 0.000020, 0.000022, 0.000025, 0.000028,
@@ -841,9 +787,6 @@ void Codec_gain() {
         timer = 0;  // reset the adjustment timer
         AudioNoInterrupts();
         AudioInterrupts();
-        if (Menu2 == MENU_RF_GAIN) {
-          //         ShowMenu(1);
-        }
       }
     }
   } else if (quarter_clip == 0)  // no clipping occurred
@@ -1477,16 +1420,11 @@ FLASHMEM void setup() {
   // =============== EEPROM section =================
   EnableButtonInterrupts();
   EEPROMStartup();
-
-  xExpand = 1.4;
   h = 135;
-
   Q_in_L.begin();  //Initialize receive input buffers
   Q_in_R.begin();
   MyDelay(100L);
-
   NR_Index = EEPROMData.nrOptionSelect;
-  NCOFreq = 0L;
 
   // ========================  End set up of Parameters from EEPROM data ===============
   NCOFreq = 0;
@@ -1518,7 +1456,7 @@ FLASHMEM void setup() {
   SetKeyPowerUp();  // Use EEPROMData.keyType and EEPROMData.paddleFlip to configure key GPIs.  KF5N August 27, 2023
   SetDitLength(EEPROMData.currentWPM);
   SetTransmitDitLength(EEPROMData.currentWPM);
-  CWFreqShift = 750;
+  
   // Initialize buffer used by CW transmitter.
   sineTone(EEPROMData.CWOffset + 6);  // This function takes "number of cycles" which is the offset + 6.
   initCWShaping();
@@ -1546,7 +1484,6 @@ FLASHMEM void setup() {
   SetFreq();
   zoomIndex = EEPROMData.spectrum_zoom - 1;  // ButtonZoom() increments zoomIndex, so this cancels it so the read from EEPROM is accurately restored.  KF5N August 3, 2023
   ButtonZoom();                              // Restore zoom settings.  KF5N August 3, 2023
-  knee_dBFS = -15.0;                         // Is this variable actually used???
   comp_ratio = 5.0;
   attack_sec = .1;
   release_sec = 2.0;

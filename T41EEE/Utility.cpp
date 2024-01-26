@@ -1,6 +1,9 @@
 
 #include "SDT.h"
 
+uint8_t display_dbm = DISPLAY_S_METER_DBM;
+int16_t pos_y_frequency = 48;
+
 /*****
   Purpose: Generate Array with variable sinewave frequency tone AFP 05-17-22
   Parameter list:

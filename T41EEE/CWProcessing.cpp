@@ -4,7 +4,6 @@
 float32_t aveCorrResult;
 float32_t aveCorrResultR;
 float32_t aveCorrResultL;
-
 float32_t DMAMEM float_Corr_Buffer[511];
 float32_t DMAMEM float_Corr_BufferR[511];
 float32_t DMAMEM float_Corr_BufferL[511];
@@ -12,6 +11,27 @@ float32_t corrResultR;
 uint32_t corrResultIndexR;
 float32_t corrResultL;
 uint32_t corrResultIndexL;
+float32_t combinedCoeff;         //AFP 02-06-22
+float CWLevelTimer;
+float CWLevelTimerOld;
+float32_t combinedCoeff2;
+float32_t combinedCoeff2Old;
+float goertzelMagnitude;
+char decodeBuffer[33];    // The buffer for holding the decoded characters.  Increased to 33.  KF5N October 29, 2023
+int endGapFlag = 0;
+int topGapIndex;
+int topGapIndexOld;
+int32_t gapHistogram[HISTOGRAM_ELEMENTS];
+int32_t signalHistogram[HISTOGRAM_ELEMENTS];
+long valRef1;
+long valRef2;
+long gapRef1;
+int valFlag = 0;
+long signalStartOld = 0;
+long aveDitLength = 80;
+long aveDahLength = 200;
+float thresholdGeometricMean = 140.0;  // This changes as decoder runs
+float thresholdArithmeticMean;
 
 //=================  AFP10-18-22 ================
 /*****

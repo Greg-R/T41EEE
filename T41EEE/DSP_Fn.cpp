@@ -5,6 +5,14 @@
 #define impulse_length NB_impulse_samples           // 7 // has to be odd!!!! 7 / 3 should be enough
 #define PL             (impulse_length - 1) / 2     // 6 // 3 has to be (impulse_length-1)/2 !!!!
 
+float knee_dBFS = -15.0;
+int8_t NB_taps = 10;
+int8_t NB_impulse_samples = 7;
+uint8_t agc_action = 0;
+uint8_t decay_type = 0;
+uint8_t hang_enable;
+uint8_t NB_test = 0;
+
 /*****
   Purpose: Setup Teensy Mic Compressor
   Parameter list:

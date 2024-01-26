@@ -1,6 +1,8 @@
 
 #include "SDT.h"
 
+long CWFreqShift = 750;
+
 /*****
   Purpose: A special variant of SetFreq() used only for calibration.
 

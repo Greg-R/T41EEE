@@ -1,6 +1,8 @@
 
 #include "SDT.h"
 
+uint8_t FIR_filter_window = 1;
+
 // 12 pole Chebyshev 24KSPS 840HZ Fc CW LPF  // AFP 10-18-22
 //   b0                     b1                   b2   
 float32_t CW_AudioFilterCoeffs1[30] = {

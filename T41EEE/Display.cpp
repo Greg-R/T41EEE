@@ -20,6 +20,13 @@ int16_t spectrum_x = 10;
 uint16_t waterfall[MAX_WATERFALL_WIDTH];
 int maxYPlot;
 int filterWidthX;  // The current filter X.
+uint8_t twinpeaks_tested = 2;  // initial value --> 2 !!
+uint8_t write_analog_gain = 0;
+int16_t pos_x_time = 390;  // 14;
+int16_t pos_y_time = 5;    //114;
+float xExpand = 1.5;  //
+int16_t spectrum_pos_centre_f = 64 * xExpand;
+
 
 /*****
   Purpose: Draw audio spectrum box  AFP added 3-14-21

@@ -1,6 +1,8 @@
 
 #include "SDT.h"
 
+const char DEGREE_SYMBOL[] = { 0xB0, '\0' };
+
 enum { SCL_HALF = 0,
        SCL_QUARTER,
        SCL_EIGHTH,
