@@ -827,8 +827,6 @@ void MyDelay(unsigned long millisWait) {
   Return value:
     void
 *****/
-
-
 FLASHMEM void InitializeDataArrays() {
   uint16_t temp_check_frequency;
   uint32_t highAlarmTemp, lowAlarmTemp, panicAlarmTemp;
@@ -931,15 +929,12 @@ FLASHMEM void InitializeDataArrays() {
   CalcFIRCoeffs(FIR_dec1_coeffs, n_dec1_taps, (float32_t)(n_desired_BW * 1000.0), n_att, 0, 0.0, (float32_t)SR[SampleRate].rate);
 
   if (arm_fir_decimate_init_f32(&FIR_dec1_I, n_dec1_taps, (uint32_t)DF1, FIR_dec1_coeffs, FIR_dec1_I_state, BUFFER_SIZE * N_BLOCKS)) {
-    while (1)
-      ;
+    while (1);
   }
 
   if (arm_fir_decimate_init_f32(&FIR_dec1_Q, n_dec1_taps, (uint32_t)DF1, FIR_dec1_coeffs, FIR_dec1_Q_state, BUFFER_SIZE * N_BLOCKS)) {
-    while (1)
-      ;
+    while (1);
   }
-
   // Decimation filter 2, M2 = DF2
   CalcFIRCoeffs(FIR_dec2_coeffs, n_dec2_taps, (float32_t)(n_desired_BW * 1000.0), n_att, 0, 0.0, (float32_t)(SR[SampleRate].rate / DF1));
   if (arm_fir_decimate_init_f32(&FIR_dec2_I, n_dec2_taps, (uint32_t)DF2, FIR_dec2_coeffs, FIR_dec2_I_state, BUFFER_SIZE * N_BLOCKS / (uint32_t)DF1)) {
@@ -948,8 +943,7 @@ FLASHMEM void InitializeDataArrays() {
   }
 
   if (arm_fir_decimate_init_f32(&FIR_dec2_Q, n_dec2_taps, (uint32_t)DF2, FIR_dec2_coeffs, FIR_dec2_Q_state, BUFFER_SIZE * N_BLOCKS / (uint32_t)DF1)) {
-    while (1)
-      ;
+    while (1);
   }
 
   // Interpolation filter 1, L1 = 2
@@ -1144,7 +1138,6 @@ FLASHMEM void Splash() {
     void
 *****/
 FLASHMEM void setup() {
-
   Serial.begin(9600);
 
   setSyncProvider(getTeensy3Time);  // get TIME from real time clock with 3V backup battery
@@ -1441,8 +1434,6 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       ShowSpectrum();  // if removed CW signal on is 2 mS
       break;
     case CW_TRANSMIT_STRAIGHT_STATE:
-    // powerOutCw could be calculated whenever transmitPowerLevel or CWPowerCalibrationFactor is changed.  It should not be calculated in this loop.
-      EEPROMData.powerOutCW[EEPROMData.currentBand] = (-.0133 * EEPROMData.transmitPowerLevel * EEPROMData.transmitPowerLevel + .7884 * EEPROMData.transmitPowerLevel + 4.5146) * EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];
       xrState = TRANSMIT_STATE;
       ShowTransmitReceiveStatus();
       modeSelectInR.gain(0, 0);
@@ -1489,7 +1480,6 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       digitalWrite(RXTX, LOW);      // End Straight Key Mode
       break;
     case CW_TRANSMIT_KEYER_STATE:
-      EEPROMData.powerOutCW[EEPROMData.currentBand] = (-.0133 * EEPROMData.transmitPowerLevel * EEPROMData.transmitPowerLevel + .7884 * EEPROMData.transmitPowerLevel + 4.5146) * EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];
       xrState = TRANSMIT_STATE;
       ShowTransmitReceiveStatus();
       modeSelectInR.gain(0, 0);
