@@ -40,22 +40,16 @@ with the name Arduino_JSON, which is not the correct library.  Install the libra
 and if you have the other dependencies for the V049.2 version, compilation will be
 successful.
 
-## Highlight of Features included in T41EEE.2
+## Highlight of Features included in T41EEE.3
 
-Thank you to Jonathan KN6LFB and Harry GM3RVL for their contributions to the T41EEE code!
+No new features are introduced in T41EEE.3.  This is a "clean-up" version.
 
-1.  Harry GM3RVL version of ShowSpectrum() inserted which includes automatic RF gain control
-2.  Added On/Off for AutoGain.
-3.  Converted to ArduinoJson 7 and some house cleaning.
-4.  Added EEPROMWrite to key selections and paddle flip.
-5.  Disable button presses during transmit. Buttons are still read and "processed", so that interrupt-driven button repeats are cleared,
-    but they are not "executed".  By Jonathan KN6LFB.
-6.  Modified ResetHistograms to use the already-calculated transmitDitLength, and not to reset the current keyer speed to 15wpm. Since
-    the keyer speed is not being modified, there is also no reason to call UpdateWPMField.  By Jonathan KN6LFB.
-7.  Added new array for RF gain value per band.
-8.  Auto-gain works independently of manual RF gain per band.
-9.  Added EEPROMWrite() to SetWPM().
-10. Set autogain to false by default.
+1.  Removal of extraneous #define statements.
+2.  Removal of unused variables.
+3.  Global variables which do not require global access are moved to their individual
+    files and are no longer extern (removed from SDT.h).
+4.  Some larger arrays are now DMAMEM.  This moves them to RAM2, thereby increasing the
+    stack size.
 
 
 *********************************************************************************************

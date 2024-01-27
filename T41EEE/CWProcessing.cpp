@@ -4,9 +4,10 @@
 float32_t aveCorrResult;
 float32_t aveCorrResultR;
 float32_t aveCorrResultL;
-float32_t DMAMEM float_Corr_Buffer[511];
-float32_t DMAMEM float_Corr_BufferR[511];
+
+float32_t DMAMEM float_Corr_BufferR[511];  // DMAMEM may cause problems with these two buffers and CW decode.
 float32_t DMAMEM float_Corr_BufferL[511];
+
 float32_t corrResultR;
 uint32_t corrResultIndexR;
 float32_t corrResultL;
@@ -69,7 +70,6 @@ states decodeStates = state0;
 FLASHMEM void SelectCWFilter() {
   const char *CWFilter[] = { "0.8kHz", "1.0kHz", "1.3kHz", "1.8kHz", "2.0kHz", " Off " };
   EEPROMData.CWFilterIndex = SubmenuSelect(CWFilter, 6, 0);  // CWFilter is an array of strings.
-  //  RedrawDisplayScreen();  Kills the bandwidth graphics in the audio display window, remove. KF5N July 30, 2023
   // Clear the current CW filter graphics and then restore the bandwidth indicator bar.  KF5N July 30, 2023
   tft.writeTo(L2);
   tft.clearMemory();
@@ -111,9 +111,6 @@ FLASHMEM void SelectCWOffset() {
   tft.writeTo(L2);
   tft.clearMemory();
   RedrawDisplayScreen();
-  //  BandInformation();
-  //  DrawBandWidthIndicatorBar();
-  // UpdateDecoderField();
 }
 
 
@@ -173,8 +170,6 @@ void DoCWReceiveProcessing() {  // All New AFP 09-19-22
       }
     }
     combinedCoeff2Old = combinedCoeff2;
-    //    tft.drawFastVLine(BAND_INDICATOR_X - 8 + 25, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_GREEN);  //CW lower freq indicator
-    //    tft.drawFastVLine(BAND_INDICATOR_X - 8 + 35, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_GREEN);  //CW upper freq indicator
     if (combinedCoeff > 50) {  // if  have a reasonable corr coeff, >50, then we have a keeper. // AFP 10-26-22
       audioTemp = 1;
     } else {
