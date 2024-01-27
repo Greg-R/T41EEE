@@ -407,8 +407,6 @@ volatile long fineTuneEncoderMove = 0L;
 
 int selectedMapIndex;
 
-// This enum is for an experimental Morse decoder change.
-enum states decodeStates;
 int centerTuneFlag = 0;
 unsigned long cwTimer;
 unsigned long ditTimerOn;
@@ -1302,7 +1300,6 @@ FLASHMEM void setup() {
 
   EEPROMData.sdCardPresent = SDPresentCheck();  // JJP 7/18/23
   lastState = 1111;                             // To make sure the receiver will be configured on the first pass through.  KF5N September 3, 2023
-  decodeStates = state0;                        // Initialize the Morse decoder.
   UpdateDecoderField();                         // Adjust graphics for Morse decoder.
 
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();  // Required only for QSD2/QSE2.

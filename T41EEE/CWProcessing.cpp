@@ -40,8 +40,15 @@ long signalStart;
 long signalEnd;  // Start-end of dit or dah
 uint32_t gapLength;
 
-
-
+// This enum is used by an experimental Morse decoder.
+enum states { state0,
+              state1,
+              state2,
+              state3,
+              state4,
+              state5,
+              state6 };
+states decodeStates = state0;
 
 //=================  AFP10-18-22 ================
 /*****

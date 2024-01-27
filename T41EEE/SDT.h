@@ -797,15 +797,6 @@ extern unsigned long cwTransmitDelay;  // ms to keep relay on after last atom re
 extern long lastFrequencies[][2];
 extern long int n_clear;
 
-// This enum is used by an experimental Morse decoder.
-enum states { state0,
-              state1,
-              state2,
-              state3,
-              state4,
-              state5,
-              state6 };
-extern states decodeStates;
 
 extern unsigned long long Clk2SetFreq;  // AFP 09-27-22
 extern unsigned long long Clk1SetFreq;  // AFP 09-27-22
