@@ -9,6 +9,9 @@ double Osc_Vect_I = 0.0;
 double Osc_Gain = 0.0;
 double Osc_Q = 0.0;
 double Osc_I = 0.0;
+int encoderStepOld;
+float32_t hh1 = 0.0;
+float32_t hh2 = 0.0;
 
 /*****
   Purpose: void FreqShift1()

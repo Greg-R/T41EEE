@@ -11,6 +11,8 @@ float correctionIncrement;  //AFP 2-7-23
 int userScale, userZoomIndex, userxmtMode;
 int transmitPowerLevelTemp, cwFreqOffsetTemp;
 uint16_t base_y = SPECTRUM_BOTTOM;
+int calTypeFlag = 0;
+int IQCalType;
 
 /*****
   Purpose: Set up prior to IQ calibrations.  New function.  KF5N August 14, 2023

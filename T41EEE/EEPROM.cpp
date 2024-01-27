@@ -123,7 +123,6 @@ FLASHMEM void SetFavoriteFrequency() {
     if (val == MENU_OPTION_SELECT) {  // Make a choice??
       EraseMenus();
       EEPROMData.favoriteFreqs[index] = TxRxFreq;
-      syncEEPROM = 0;  // SD EEPROM different that memory EEPROM
       //UpdateEEPROMSyncIndicator(0);       //  JJP 7/25/23
       if (EEPROMData.activeVFO == VFO_A) {
         EEPROMData.currentFreqA = TxRxFreq;

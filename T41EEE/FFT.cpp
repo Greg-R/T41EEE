@@ -3,6 +3,9 @@
 
 int Zoom_FFT_M1;
 int Zoom_FFT_M2;
+int zoom_sample_ptr = 0;
+float32_t LPF_spectrum = 0.82;
+
 void ZoomFFTPrep()
 { // take value of spectrum_zoom and initialize FIR decimation filters for the right values
 

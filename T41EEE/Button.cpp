@@ -1,6 +1,11 @@
 
 #include "SDT.h"
 
+int buttonRead = 0;
+int minPinRead = 1024;
+int secondaryMenuChoiceMade;
+long incrementValues[] = { 10, 50, 100, 250, 1000, 10000, 100000, 1000000 };
+
 /*
 The button interrupt routine implements a first-order recursive filter, or "leaky integrator,"
 as described at:

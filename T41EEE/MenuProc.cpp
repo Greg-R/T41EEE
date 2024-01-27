@@ -1,6 +1,10 @@
 
 #include "SDT.h"
 
+int micChoice;
+int micGainChoice;
+int splitOn = 0;
+
 // Updates by KF5N to CalibrateOptions() function. July 20, 2023
 // Updated receive calibration code to clean up graphics.  KF5N August 3, 2023
 // ==============  AFP 10-22-22 ==================

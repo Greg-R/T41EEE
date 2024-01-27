@@ -3,6 +3,11 @@
 
 uint8_t display_dbm = DISPLAY_S_METER_DBM;
 int16_t pos_y_frequency = 48;
+int old_demod_mode = -99;
+int pos_x_frequency = 12;
+float32_t dbmhz = -145.0;
+float32_t m_AttackAlpha = 0.03;
+float32_t m_DecayAlpha = 0.01;
 
 /*****
   Purpose: Generate Array with variable sinewave frequency tone AFP 05-17-22

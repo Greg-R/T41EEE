@@ -32,6 +32,16 @@ long aveDitLength = 80;
 long aveDahLength = 200;
 float thresholdGeometricMean = 140.0;  // This changes as decoder runs
 float thresholdArithmeticMean;
+int dahLength;
+int gapAtom;  // Space between atoms
+int gapChar;  // Space between characters
+long signalElapsedTime;
+long signalStart;
+long signalEnd;  // Start-end of dit or dah
+uint32_t gapLength;
+
+
+
 
 //=================  AFP10-18-22 ================
 /*****

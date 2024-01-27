@@ -208,7 +208,6 @@ AudioConnection patchCord22(modeSelectOutR, 0, i2s_quadOut, 3);
 
 AudioConnection patchCord23(Q_out_L_Ex, 0, modeSelectOutL, 1);  //Rec out Queue for sidetone
 AudioConnection patchCord24(Q_out_R_Ex, 0, modeSelectOutR, 1);
-
 AudioControlSGTL5000 sgtl5000_2;
 // End dataflow code
 
@@ -270,13 +269,10 @@ float32_t audioMaxSquaredAve;
 
 float32_t DMAMEM FIR_dec2_EX_I_state[535];
 float32_t DMAMEM FIR_dec2_EX_Q_state[535];
-
 float32_t DMAMEM FIR_int2_EX_I_state[519];
 float32_t DMAMEM FIR_int2_EX_Q_state[519];
-
 float32_t DMAMEM FIR_int1_EX_I_state[279];
 float32_t DMAMEM FIR_int1_EX_Q_state[279];
-
 float32_t DMAMEM float_buffer_L_EX[2048];
 float32_t DMAMEM float_buffer_R_EX[2048];
 float32_t DMAMEM float_buffer_LTemp[2048];
@@ -318,15 +314,11 @@ const arm_cfft_instance_f32 *NR_iFFT;
 const arm_cfft_instance_f32 *spec_FFT;
 
 arm_biquad_casd_df1_inst_f32 biquad_lowpass1;
-arm_biquad_casd_df1_inst_f32 IIR_biquad_Zoom_FFT_I;
-arm_biquad_casd_df1_inst_f32 IIR_biquad_Zoom_FFT_Q;
 
 arm_fir_decimate_instance_f32 FIR_dec1_I;
 arm_fir_decimate_instance_f32 FIR_dec1_Q;
 arm_fir_decimate_instance_f32 FIR_dec2_I;
 arm_fir_decimate_instance_f32 FIR_dec2_Q;
-arm_fir_decimate_instance_f32 Fir_Zoom_FFT_Decimate_I;
-arm_fir_decimate_instance_f32 Fir_Zoom_FFT_Decimate_Q;
 arm_fir_interpolate_instance_f32 FIR_int1_I;
 arm_fir_interpolate_instance_f32 FIR_int1_Q;
 arm_fir_interpolate_instance_f32 FIR_int2_I;
@@ -370,7 +362,6 @@ float attack_sec;
 float release_sec;
 // ===========
 
-
 char keyboardBuffer[10];  // Set for call prefixes. May be increased later
 const char *tune_text = "Fast Tune";
 const char *zoomOptions[] = { "1x ", "2x ", "4x ", "8x ", "16x" };
@@ -410,7 +401,6 @@ int16_t *sp_R1;
 int16_t *sp_L2;
 int16_t *sp_R2;
 
-
 //===== New histogram stuff ===
 volatile int filterEncoderMove = 0;
 volatile long fineTuneEncoderMove = 0L;
@@ -422,10 +412,11 @@ enum states decodeStates;
 int centerTuneFlag = 0;
 unsigned long cwTimer;
 unsigned long ditTimerOn;
+unsigned long ditLength;
+unsigned long transmitDitLength;  // JJP 8/19/23
+unsigned long transmitDitUnshapedBlocks;
+unsigned long transmitDahUnshapedBlocks;
 
-
-long filter_pos = 0;
-long last_filter_pos = 0;
 // ============ end new stuff =======
 
 int16_t y_old, y_new, y1_new, y1_old, y_old2;  //A
@@ -434,33 +425,23 @@ const float32_t DF1 = 4.0;             // decimation factor
 const float32_t DF2 = 2.0;             // decimation factor
 const float32_t DF = DF1 * DF2;        // decimation factor
 const float32_t n_samplerate = 176.0;  // sample rate before decimation
-
 const uint32_t N_B = FFT_LENGTH / 2 / BUFFER_SIZE * (uint32_t)DF;
 const uint32_t N_DEC_B = N_B / (uint32_t)DF;
 const uint32_t NR_add_counter = 128;
-
-const float32_t n_att = 90.0;        // need here for later def's
 const float32_t n_desired_BW = 9.0;  // desired max BW of the filters
 const float32_t n_fpass1 = n_desired_BW / n_samplerate;
 const float32_t n_fpass2 = n_desired_BW / (n_samplerate / DF1);
 const float32_t n_fstop1 = ((n_samplerate / DF1) - n_desired_BW) / n_samplerate;
 const float32_t n_fstop2 = ((n_samplerate / (DF1 * DF2)) - n_desired_BW) / (n_samplerate / DF1);
-
 const uint32_t IIR_biquad_Zoom_FFT_N_stages = 4;
 const uint32_t N_stages_biquad_lowpass1 = 1;
+const float32_t n_att = 90.0;        // need here for later def's
 const uint16_t n_dec1_taps = (1 + (uint16_t)(n_att / (22.0 * (n_fstop1 - n_fpass1))));
 const uint16_t n_dec2_taps = (1 + (uint16_t)(n_att / (22.0 * (n_fstop2 - n_fpass2))));
 
 int mute = 0;
-float adjustVolEncoder;
-int ANR_buff_size = FFT_length / 2.0;
-int ANR_delay = 16;
-int ANR_dline_size = ANR_DLINE_SIZE;
-int ANR_in_idx = 0;
-int ANR_mask = ANR_dline_size - 1;
-int ANR_taps = 64;
 int attenuator = 0;
-int attack_buffsize;
+
 int DMAMEM audioYPixel[1024];  // Will int16_t save memory here???
 
 int bandswitchPins[] = {
@@ -473,47 +454,19 @@ int bandswitchPins[] = {
   0    // 10M
 };
 
-int buttonRead = 0;
 int calibrateFlag = 0;
-int calTypeFlag = 0;
 int calOnFlag = 0;
 int chipSelect = BUILTIN_SDCARD;
-int countryIndex = -1;
-int dahLength;
-int directFreqFlag = 0;
-int encoderStepOld;
-int filterLoPositionMarkerOld;
-int filterHiPositionMarkerOld;
-int gapAtom;  // Space between atoms
-int gapChar;  // Space between characters
-int hang_counter = 0;
 int idx;
-int lidx;
 int IQChoice;
-int IQCalType;
-int LMS_nr_strength;
-int LP_F_help = 3500;
-int micChoice;
-int micGainChoice;
-int minPinRead = 1024;
 int NR_Index = 0;
 int n_L;
 int n_R;
-int n_tau;
 int newCursorPosition = 0;
 int oldCursorPosition = 256;
-int old_demod_mode = -99;
-int out_index = -1;
-int pmode = 1;
-int pos_centre_f = 64;
-int pos_x_frequency = 12;
-int secondaryMenuChoiceMade;
-int smeterLength;
-int splitOn;
 int switchFilterSideband = 0;
-int syncEEPROM;
 int x2 = 0;  //AFP
-int zoom_sample_ptr = 0;
+
 int zoomIndex = 1;  //AFP 9-26-22
 int updateDisplayFlag = 0;
 int updateDisplayCounter = 0;
@@ -524,36 +477,21 @@ const int DEC2STATESIZE = n_dec2_taps + (BUFFER_SIZE * N_B / (uint32_t)DF1) - 1;
 const int INT1_STATE_SIZE = 24 + BUFFER_SIZE * N_B / (uint32_t)DF - 1;
 const int INT2_STATE_SIZE = 8 + BUFFER_SIZE * N_B / (uint32_t)DF1 - 1;
 unsigned ring_buffsize = RB_SIZE;
-int32_t IFFreq = SR[SampleRate].rate / 4;  // IF (intermediate) frequency
+
 int32_t mainMenuIndex = START_MENU;  // Done so we show menu[0] at startup
 int32_t secondaryMenuIndex = -1;     // -1 means haven't determined secondary menu
-int32_t subMenuMaxOptions;           // holds the number of submenu options
+
 uint32_t N_BLOCKS = N_B;
-uint32_t in_index;
-uint32_t NR_X_pointer = 0;
-uint32_t NR_E_pointer = 0;
-uint32_t m_NumTaps = (FFT_LENGTH / 2) + 1;
+
 uint32_t s_roomC_hotC;   /*!< The value of s_roomCount minus s_hotCount.*/
 uint32_t s_hotTemp;      /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] at room temperature .*/
 uint32_t s_hotCount;     /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] at the hot temperature.*/
 long currentFreq;
-long incrementValues[] = { 10, 50, 100, 250, 1000, 10000, 100000, 1000000 };
 long int n_clear;
-long notchFreq = 1000;
-long notchCenterBin;
-long signalElapsedTime;
-long signalStart;
-long signalEnd;  // Start-end of dit or dah
 long TxRxFreq;  // = EEPROMData.centerFreq+NCOFreq  NCOFreq from FreqShift2()
-long TxRxFreqOld;
-uint32_t gapLength;
+
 unsigned long long Clk2SetFreq;                  // AFP 09-27-22
 unsigned long long Clk1SetFreq = 1000000000ULL;  // AFP 09-27-22
-unsigned long ditLength;
-unsigned long transmitDitLength;  // JJP 8/19/23
-unsigned long transmitDitUnshapedBlocks;
-unsigned long transmitDahUnshapedBlocks;
-float CPU_temperature = 0.0;
 
 float help;
 float s_hotT_ROOM; /*!< The value of s_hotTemp minus room temperature(25¡æ).*/
@@ -562,28 +500,12 @@ float s_hotT_ROOM; /*!< The value of s_hotTemp minus room temperature(25¡æ).*/
 float32_t a[3 * SAM_PLL_HILBERT_STAGES + 3];
 float32_t b[3 * SAM_PLL_HILBERT_STAGES + 3];
 float32_t c[3 * SAM_PLL_HILBERT_STAGES + 3];  // Filter c variables
-float32_t c0[SAM_PLL_HILBERT_STAGES];
+
 float32_t c1[SAM_PLL_HILBERT_STAGES];
 float32_t d[3 * SAM_PLL_HILBERT_STAGES + 3];
 
-float32_t abs_ring[RB_SIZE];
-float32_t abs_out_sample;
-float32_t ANR_d[ANR_DLINE_SIZE];
-float32_t ANR_den_mult = 6.25e-10;
-float32_t ANR_gamma = 0.1;
-float32_t ANR_lidx = 120.0;
-float32_t ANR_lidx_min = 120.0;
-float32_t ANR_lidx_max = 200.0;
-float32_t ANR_lincr = 1.0;
-float32_t ANR_ldecr = 3.0;
-float32_t ANR_ngamma = 0.001;
-float32_t ANR_two_mu = 0.0001;
-float32_t ANR_w[ANR_DLINE_SIZE];
-float32_t attack_mult;
 float32_t audio;
-float32_t audiotmp = 0.0f;
-float32_t audiou;
-float32_t audioSpectBuffer[1024];  // This can't be DMAMEM.  It will break the S-Meter.  KF5N October 10, 2023
+
 float32_t mid = 0.0;
 float32_t bin_BW = 1.0 / (DF * FFT_length) * SR[SampleRate].rate;
 float32_t bin = 2000.0 / bin_BW;
@@ -592,17 +514,13 @@ float32_t biquad_lowpass1_coeffs[5 * N_stages_biquad_lowpass1] = { 0, 0, 0, 0, 0
 float32_t DMAMEM buffer_spec_FFT[1024] __attribute__((aligned(4)));
 float32_t coefficient_set[5] = { 0, 0, 0, 0, 0 };
 float32_t corr[2];
-float32_t Cos = 0.0;
+
 float32_t dbm = -145.0;
 float32_t dbm_calibration = 22.0;
-float32_t dbmhz = -145.0;
-float32_t decay_mult;
-float32_t DMAMEM FFT_buffer[FFT_LENGTH * 2] __attribute__((aligned(4)));
-float32_t DMAMEM FFT_spec[1024];
-float32_t DMAMEM FFT_spec_old[1024];
-float32_t fast_backaverage;
-float32_t fast_backmult;
-float32_t fast_decay_mult;
+
+float32_t DMAMEM FFT_buffer[FFT_LENGTH * 2] __attribute__((aligned(4))) = {0};
+float32_t DMAMEM FFT_spec[1024] = {0};
+float32_t DMAMEM FFT_spec_old[1024] = {0};
 
 // decimation with FIR lowpass for Zoom FFT
 arm_fir_decimate_instance_f32 Fir_Zoom_FFT_Decimate_I1;
@@ -617,7 +535,6 @@ arm_fir_decimate_instance_f32 Fir_Zoom_FFT_Decimate_Q2;
 float32_t DMAMEM Fir_Zoom_FFT_Decimate_I2_state[12 + BUFFER_SIZE * N_B - 1];
 float32_t DMAMEM Fir_Zoom_FFT_Decimate_Q2_state[12 + BUFFER_SIZE * N_B - 1];
 float32_t DMAMEM Fir_Zoom_FFT_Decimate2_coeffs[12];
-
 float32_t DMAMEM FIR_Coef_I[(FFT_LENGTH / 2) + 1];
 float32_t DMAMEM FIR_Coef_Q[(FFT_LENGTH / 2) + 1];
 float32_t DMAMEM FIR_dec1_I_state[n_dec1_taps + (uint16_t)BUFFER_SIZE * (uint32_t)N_B - 1];
@@ -636,50 +553,23 @@ float32_t DMAMEM FIR_int1_Q_state[INT1_STATE_SIZE];
 float32_t DMAMEM Fir_Zoom_FFT_Decimate_I_state[4 + BUFFER_SIZE * N_B - 1];
 float32_t DMAMEM Fir_Zoom_FFT_Decimate_Q_state[4 + BUFFER_SIZE * N_B - 1];
 float32_t DMAMEM Fir_Zoom_FFT_Decimate_coeffs[4];
-float32_t fixed_gain = 1.0;
 float32_t DMAMEM float_buffer_L[BUFFER_SIZE * N_B];
 float32_t DMAMEM float_buffer_R[BUFFER_SIZE * N_B];
 float32_t DMAMEM float_buffer_L2[BUFFER_SIZE * N_B];
 float32_t DMAMEM float_buffer_R2[BUFFER_SIZE * N_B];
 float32_t DMAMEM float_buffer_L_3[BUFFER_SIZE * N_B];
 float32_t DMAMEM float_buffer_R_3[BUFFER_SIZE * N_B];
-
 float32_t DMAMEM float_buffer_L_CW[256];       //AFP 09-01-22
 float32_t DMAMEM float_buffer_R_CW[256];       //AFP 09-01-22
 float32_t DMAMEM float_buffer_R_AudioCW[256];  //AFP 10-18-22
 float32_t DMAMEM float_buffer_L_AudioCW[256];  //AFP 10-18-22
-float32_t hang_backaverage;
-float32_t hang_backmult;
-float32_t hang_decay_mult;
-float32_t hang_thresh;
-float32_t hang_level;
-float32_t hangtime;
-float32_t hh1 = 0.0;
-float32_t hh2 = 0.0;
 float32_t DMAMEM iFFT_buffer[FFT_LENGTH * 2 + 1];
 float32_t IIR_biquad_Zoom_FFT_I_state[IIR_biquad_Zoom_FFT_N_stages * 4];
 float32_t IIR_biquad_Zoom_FFT_Q_state[IIR_biquad_Zoom_FFT_N_stages * 4];
-float32_t inv_max_input;
-float32_t inv_out_target;
 float32_t DMAMEM last_sample_buffer_L[BUFFER_SIZE * N_DEC_B];
 float32_t DMAMEM last_sample_buffer_R[BUFFER_SIZE * N_DEC_B];
 float32_t DMAMEM L_BufferOffset[BUFFER_SIZE * N_B];
-float32_t LMS_errsig1[256 + 10];
-float32_t LMS_NormCoeff_f32[MAX_LMS_TAPS + MAX_LMS_DELAY];
-float32_t LMS_nr_delay[512 + MAX_LMS_DELAY];
-float32_t LMS_StateF32[MAX_LMS_TAPS + MAX_LMS_DELAY];
-float32_t LPF_spectrum = 0.82;
-float32_t m_AttackAlpha = 0.03;
-float32_t m_DecayAlpha = 0.01;
-float32_t max_gain;
-float32_t max_input = -0.1;
-float32_t min_volts;
 float32_t DMAMEM NR_FFT_buffer[512] __attribute__((aligned(4)));
-float32_t NR_sum = 0;
-float32_t NR_KIM_K = 1.0;
-float32_t NR_onemalpha = (1.0 - EEPROMData.NR_alpha);
-float32_t NR_onemtwobeta = (1.0 - (2.0 * EEPROMData.NR_beta));
-float32_t NR_T;
 float32_t DMAMEM NR_output_audio_buffer[NR_FFT_L];
 float32_t DMAMEM NR_last_iFFT_result[NR_FFT_L / 2];
 float32_t DMAMEM NR_last_sample_buffer_L[NR_FFT_L / 2];
@@ -696,37 +586,15 @@ float32_t DMAMEM NR_SNR_post[NR_FFT_L / 2];
 float32_t DMAMEM NR_Hk_old[NR_FFT_L / 2];
 float32_t DMAMEM NR_long_tone[NR_FFT_L / 2][2];
 float32_t DMAMEM NR_long_tone_gain[NR_FFT_L / 2];
-float32_t NB_thresh = 2.5;
-float32_t onemfast_backmult;
-float32_t onemhang_backmult;
-float32_t out_sample[2];
-float32_t out_targ;
-float32_t out_target;
-float32_t pop_ratio;
 float32_t DMAMEM R_BufferOffset[BUFFER_SIZE * N_B];
 float32_t ring[RB_SIZE * 2];
-float32_t ring_max = 0.0;
-float32_t sample_meanL = 0.0;
-float32_t sample_meanR = 0.0;
-float32_t save_volts = 0.0;
-float32_t slope_constant;
-float32_t tau_attack;
-float32_t tau_decay;
-float32_t tau_fast_backaverage = 0.0;
-float32_t tau_fast_decay;
-float32_t tau_hang_backmult;
-float32_t tau_hang_decay;
 float32_t tmp;
-float32_t var_gain;
-float32_t volts = 0.0;
 float32_t w;
-float32_t wold = 0.0f;
 float angl;
 float pi = 3.14159265358979;
 float tau;
 float temp;
 bool volumeChangeFlag = false;
-
 
 // Voltage in one-hundred 1 dB steps for volume control.
 const float32_t volumeLog[] = { 0.000010, 0.000011, 0.000013, 0.000014, 0.000016, 0.000018, 0.000020, 0.000022, 0.000025, 0.000028,
@@ -741,7 +609,7 @@ const float32_t volumeLog[] = { 0.000010, 0.000011, 0.000013, 0.000014, 0.000016
                                 0.316228, 0.354813, 0.398107, 0.446684, 0.501187, 0.562341, 0.630957, 0.707946, 0.794328, 0.891251, 1.000000 };
 
 double elapsed_micros_idx_t = 0;
-double elapsed_micros_mean;
+
 double elapsed_micros_sum;
 
 /*****
@@ -959,24 +827,26 @@ void MyDelay(unsigned long millisWait) {
   Return value:
     void
 *****/
+
+
 FLASHMEM void InitializeDataArrays() {
   uint16_t temp_check_frequency;
   uint32_t highAlarmTemp, lowAlarmTemp, panicAlarmTemp;
+  int LP_F_help;
+  uint32_t m_NumTaps = (FFT_LENGTH / 2) + 1;
   //DB2OO, 11-SEP-23: don't use the fixed sizes, but use the caculated ones, otherwise a code change will create very difficult to find problems
 #define CLEAR_VAR(x) memset(x, 0, sizeof(x))
   memset(FFT_spec_old, 0, sizeof(FFT_spec_old));
 #ifdef DEBUG
   Serial.printf("InitializeDataArrays(): sizeof(FFT_spec_old) %d", sizeof(FFT_spec_old));
   Serial.printf("\tsizeof(NR_output_audio_buffer) %d", sizeof(NR_output_audio_buffer));
-  Serial.printf("\tsizeof(LMS_StateF32) %d", sizeof(LMS_StateF32));
   Serial.println();
 #endif
-  CLEAR_VAR(FFT_spec_old);             //memset(FFT_spec_old, 0, 4096);            // SPECTRUM_RES = 512 * 4 = 2048
+//  CLEAR_VAR(FFT_spec_old);             //memset(FFT_spec_old, 0, 4096);            // SPECTRUM_RES = 512 * 4 = 2048
   CLEAR_VAR(pixelnew);                 //memset(pixelnew, 0, 1024);                // 512 * 2
   CLEAR_VAR(pixelold);                 //memset(pixelold, 0, 1024);                // 512 * 2
   CLEAR_VAR(pixelCurrent);             //memset(pixelCurrent, 0, 1024);            // 512 * 2  KF5N JJP  7/14/23
   CLEAR_VAR(buffer_spec_FFT);          //memset(buffer_spec_FFT, 0, 4096);         // SPECTRUM_RES = 512 * 2 = 1024
-  CLEAR_VAR(FFT_spec);                 //memset(FFT_spec, 0, 4096);                // 512 * 2 * 4
   CLEAR_VAR(NR_FFT_buffer);            //memset(NR_FFT_buffer, 0, 2048);           // NR_FFT_L * sizeof(NR_FFT_buffer[0]));
   CLEAR_VAR(NR_output_audio_buffer);   //memset(NR_output_audio_buffer, 0, 1024);  // 256 * sizeof(NR_output_audio_buffer[0]));
   CLEAR_VAR(NR_last_iFFT_result);      //memset(NR_last_iFFT_result, 0, 512);
@@ -992,11 +862,6 @@ FLASHMEM void InitializeDataArrays() {
   CLEAR_VAR(NR_Nest);                  //memset(NR_Nest, 0, 1024);
   CLEAR_VAR(NR_Gts);                   //memset(NR_Gts, 0, 1024);
   CLEAR_VAR(NR_E);                     //memset(NR_E, 0, 7680);
-  CLEAR_VAR(ANR_d);                    //memset(ANR_d, 0, 2048);
-  CLEAR_VAR(ANR_w);                    //memset(ANR_w, 0, 2048);
-  CLEAR_VAR(LMS_StateF32);             //memset(LMS_StateF32, 0, 1408);  // 96 + 256 * 4
-  CLEAR_VAR(LMS_NormCoeff_f32);        //memset(LMS_NormCoeff_f32, 0, 1408);
-  CLEAR_VAR(LMS_nr_delay);             //memset(LMS_nr_delay, 0, 2312);
 
   CalcCplxFIRCoeffs(FIR_Coef_I, FIR_Coef_Q, m_NumTaps, (float32_t)bands[EEPROMData.currentBand].FLoCut, (float32_t)bands[EEPROMData.currentBand].FHiCut, (float)SR[SampleRate].rate / DF);
 
@@ -1034,8 +899,6 @@ FLASHMEM void InitializeDataArrays() {
      Set sample rate
   ****************************************************************************************/
   SetI2SFreq(SR[SampleRate].rate);
-  // essential ?
-  IFFreq = SR[SampleRate].rate / 4;
 
   biquad_lowpass1.numStages = N_stages_biquad_lowpass1;  // set number of stages
   biquad_lowpass1.pCoeffs = biquad_lowpass1_coeffs;      // set pointer to coefficients file
@@ -1092,72 +955,26 @@ FLASHMEM void InitializeDataArrays() {
   // Interpolation filter 1, L1 = 2
   // not sure whether I should design with the final sample rate ??
   // yes, because the interpolation filter is AFTER the upsampling, so it has to be in the target sample rate!
-  //    CalcFIRCoeffs(FIR_int1_coeffs, 8, (float32_t)5000.0, 80, 0, 0.0, 12000);
-  //    CalcFIRCoeffs(FIR_int1_coeffs, 16, (float32_t)(n_desired_BW * 1000.0), n_att, 0, 0.0, SR[SampleRate].rate / 4.0);
   CalcFIRCoeffs(FIR_int1_coeffs, 48, (float32_t)(n_desired_BW * 1000.0), n_att, 0, 0.0, SR[SampleRate].rate / 4.0);
-  //    if(arm_fir_interpolate_init_f32(&FIR_int1_I, (uint32_t)DF2, 16, FIR_int1_coeffs, FIR_int1_I_state, BUFFER_SIZE * N_BLOCKS / (uint32_t)DF)) {
   if (arm_fir_interpolate_init_f32(&FIR_int1_I, (uint8_t)DF2, 48, FIR_int1_coeffs, FIR_int1_I_state, BUFFER_SIZE * N_BLOCKS / (uint32_t)DF)) {
-    while (1)
-      ;
+    while (1);
   }
-  //    if(arm_fir_interpolate_init_f32(&FIR_int1_Q, (uint32_t)DF2, 16, FIR_int1_coeffs, FIR_int1_Q_state, BUFFER_SIZE * N_BLOCKS / (uint32_t)DF)) {
   if (arm_fir_interpolate_init_f32(&FIR_int1_Q, (uint8_t)DF2, 48, FIR_int1_coeffs, FIR_int1_Q_state, BUFFER_SIZE * N_BLOCKS / (uint32_t)DF)) {
-    while (1)
-      ;
+    while (1);
   }
   // Interpolation filter 2, L2 = 4
   // not sure whether I should design with the final sample rate ??
   // yes, because the interpolation filter is AFTER the upsampling, so it has to be in the target sample rate!
-  //    CalcFIRCoeffs(FIR_int2_coeffs, 4, (float32_t)5000.0, 80, 0, 0.0, 24000);
-  //    CalcFIRCoeffs(FIR_int2_coeffs, 16, (float32_t)(n_desired_BW * 1000.0), n_att, 0, 0.0, (float32_t)SR[SampleRate].rate);
   CalcFIRCoeffs(FIR_int2_coeffs, 32, (float32_t)(n_desired_BW * 1000.0), n_att, 0, 0.0, (float32_t)SR[SampleRate].rate);
 
   if (arm_fir_interpolate_init_f32(&FIR_int2_I, (uint8_t)DF1, 32, FIR_int2_coeffs, FIR_int2_I_state, BUFFER_SIZE * N_BLOCKS / (uint32_t)DF1)) {
-    while (1)
-      ;
+    while (1);
   }
-  //    if(arm_fir_interpolate_init_f32(&FIR_int2_Q, (uint32_t)DF1, 16, FIR_int2_coeffs, FIR_int2_Q_state, BUFFER_SIZE * N_BLOCKS / (uint32_t)DF1)) {
   if (arm_fir_interpolate_init_f32(&FIR_int2_Q, (uint8_t)DF1, 32, FIR_int2_coeffs, FIR_int2_Q_state, BUFFER_SIZE * N_BLOCKS / (uint32_t)DF1)) {
-    while (1)
-      ;
+    while (1);
   }
 
   SetDecIntFilters();  // here, the correct bandwidths are calculated and set accordingly
-
-  /****************************************************************************************
-     Zoom FFT: Initiate decimation and interpolation FIR filters AND IIR filters  Not done by ZoomFFTPrep???
-  ****************************************************************************************/
-  float32_t Fstop_Zoom = 0.5 * (float32_t)SR[SampleRate].rate / (1 << EEPROMData.spectrum_zoom);
-
-  CalcFIRCoeffs(Fir_Zoom_FFT_Decimate_coeffs, 4, Fstop_Zoom, 60, 0, 0.0, (float32_t)SR[SampleRate].rate);
-
-  // Attention: max decimation rate is 128 !
-  //  if (arm_fir_decimate_init_f32(&Fir_Zoom_FFT_Decimate_I, 4, 1 << EEPROMData.spectrum_zoom, Fir_Zoom_FFT_Decimate_coeffs, Fir_Zoom_FFT_Decimate_I_state, BUFFER_SIZE * N_BLOCKS)) {
-  if (arm_fir_decimate_init_f32(&Fir_Zoom_FFT_Decimate_I, 4, 128, Fir_Zoom_FFT_Decimate_coeffs, Fir_Zoom_FFT_Decimate_I_state, BUFFER_SIZE * N_BLOCKS)) {
-    while (1)
-      ;
-  }
-  // same coefficients, but specific state variables
-  //  if (arm_fir_decimate_init_f32(&Fir_Zoom_FFT_Decimate_Q, 4, 1 << EEPROMData.spectrum_zoom, Fir_Zoom_FFT_Decimate_coeffs, Fir_Zoom_FFT_Decimate_Q_state, BUFFER_SIZE * N_BLOCKS)) {
-  if (arm_fir_decimate_init_f32(&Fir_Zoom_FFT_Decimate_Q, 4, 128, Fir_Zoom_FFT_Decimate_coeffs, Fir_Zoom_FFT_Decimate_Q_state, BUFFER_SIZE * N_BLOCKS)) {
-    while (1)
-      ;
-  }
-
-  IIR_biquad_Zoom_FFT_I.numStages = IIR_biquad_Zoom_FFT_N_stages;  // set number of stages
-  IIR_biquad_Zoom_FFT_Q.numStages = IIR_biquad_Zoom_FFT_N_stages;  // set number of stages
-  for (unsigned i = 0; i < 4 * IIR_biquad_Zoom_FFT_N_stages; i++) {
-    IIR_biquad_Zoom_FFT_I_state[i] = 0.0;  // set state variables to zero
-    IIR_biquad_Zoom_FFT_Q_state[i] = 0.0;  // set state variables to zero
-  }
-  IIR_biquad_Zoom_FFT_I.pState = IIR_biquad_Zoom_FFT_I_state;  // set pointer to the state variables
-  IIR_biquad_Zoom_FFT_Q.pState = IIR_biquad_Zoom_FFT_Q_state;  // set pointer to the state variables
-
-  // this sets the coefficients for the ZoomFFT decimation filter
-  // according to the desired magnification mode
-  // for 0 the mag_coeffs will a NULL  ptr, since the filter is not going to be used in this  mode!
-  IIR_biquad_Zoom_FFT_I.pCoeffs = mag_coeffs[EEPROMData.spectrum_zoom];
-  IIR_biquad_Zoom_FFT_Q.pCoeffs = mag_coeffs[EEPROMData.spectrum_zoom];
 
   ZoomFFTPrep();
 
@@ -1450,7 +1267,7 @@ FLASHMEM void setup() {
   TxRxFreq = EEPROMData.centerFreq = EEPROMData.lastFrequencies[EEPROMData.currentBand][EEPROMData.activeVFO];
 
   InitializeDataArrays();
-  splitOn = 0;  // Split VFO not active
+  
   SetupMode(bands[EEPROMData.currentBand].mode);
 
   SetKeyPowerUp();  // Use EEPROMData.keyType and EEPROMData.paddleFlip to configure key GPIs.  KF5N August 27, 2023

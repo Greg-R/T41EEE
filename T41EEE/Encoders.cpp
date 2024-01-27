@@ -2,6 +2,9 @@
 #include "SDT.h"
 
 int8_t Menu2 = MENU_F_LO_CUT;
+long last_filter_pos = 0;
+long filter_pos = 0;
+float adjustVolEncoder;
 
 /*****
   Purpose: EncoderFilter

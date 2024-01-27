@@ -2,6 +2,9 @@
 #include "SDT.h"
 
 bool save_last_frequency = false;
+int directFreqFlag = 0;
+int32_t subMenuMaxOptions;    // Holds the number of submenu options.
+long TxRxFreqOld;
 
 /*****
   Purpose: To process a menu increase button push
@@ -154,8 +157,6 @@ void ButtonBandIncrease() {
 *****/
 void ButtonBandDecrease() {
   int tempIndex = EEPROMData.currentBand;
-  ;
-  //  NCOFreq = 0L;
 
   EEPROMData.currentBand--;  // decrement band index
 
@@ -307,7 +308,6 @@ void ButtonDemodMode() {
   if (bands[EEPROMData.currentBand].mode > DEMOD_MAX) {
     bands[EEPROMData.currentBand].mode = DEMOD_MIN;  // cycle thru demod modes
   }
-  //AudioNoInterrupts();
   BandInformation();
   SetupMode(bands[EEPROMData.currentBand].mode);
   ShowFrequency();
@@ -341,10 +341,7 @@ void ButtonMode()  //====== Changed AFP 10-05-22  =================
   } else {
     EEPROMData.xmtMode = CW_MODE;
   }
-  //fLoCutOld = bands[EEPROMData.currentBand].FLoCut;
-  //fHiCutOld = bands[EEPROMData.currentBand].FHiCut;
   SetFreq();  // Required due to RX LO shift from CW to SSB modes.  KF5N
-  //tft.fillWindow();  // This was erasing the waterfall when switching modes.  Removed by KF5N.
   DrawSpectrumDisplayContainer();
   DrawFrequencyBarValue();
   DrawInfoWindowFrame();
@@ -422,7 +419,6 @@ int ButtonSetNoiseFloor() {
   tft.setFontScale((enum RA8875tsize)1);
   ErasePrimaryMenu();
   tft.fillRect(SECONDARY_MENU_X - 100, MENUS_Y, EACH_MENU_WIDTH + 120, CHAR_HEIGHT, RA8875_MAGENTA);
-  //tft.setTextColor(RA8875_WHITE);
   tft.setTextColor(RA8875_BLACK);  // JJP 7/17/23
   tft.setCursor(SECONDARY_MENU_X - 98, MENUS_Y + 1);
   tft.print("Pixels above axis:");
@@ -433,15 +429,6 @@ int ButtonSetNoiseFloor() {
   while (true) {
     if (filterEncoderMove != 0) {
       floor += filterEncoderMove;  // It moves the display
-      /* JJP 7/17/23
-      if (floor < -15) {           //AFP 09-22-22                        // Don't exceed limits
-        floor = -15;               //AFP 09-22-22
-      } else {
-        if (floor > SPECTRUM_HEIGHT) {
-          floor = SPECTRUM_HEIGHT;
-        }
-      }
-      */
       EraseSpectrumWindow();
       floor = DrawNewFloor(floor);
       tft.fillRect(SECONDARY_MENU_X + 190, MENUS_Y, 80, CHAR_HEIGHT, RA8875_MAGENTA);
@@ -455,16 +442,6 @@ int ButtonSetNoiseFloor() {
     val = ProcessButtonPress(val);
     if (val == MENU_OPTION_SELECT)  // If they made a choice...
     {
-      /* JJP 7/17/23
-      if (floor > SPECTRUM_BOTTOM + 15) {  //AFP 09-22-22
-        floor = SPECTRUM_BOTTOM + 15;      //AFP 09-22-22
-      } else {
-        if (floor < SPECTRUM_BOTTOM - 50)
-          floor = SPECTRUM_BOTTOM - 50;
-      }
-      */
-      //  EEPROMData.currentNoiseFloor[EEPROMData.currentBand]             = floor;
-      //      EEPROMData.spectrumNoiseFloor              = floor;
       EEPROMData.currentNoiseFloor[EEPROMData.currentBand] = floor;
       EEPROMWrite();
       break;
@@ -549,11 +526,9 @@ void ResetZoom(int zoomIndex1) {
   ZoomFFTPrep();
   UpdateZoomField();
   DrawBandWidthIndicatorBar();
-  //ShowSpectrumdBScale();
   DrawFrequencyBarValue();
   ShowFrequency();
   ShowBandwidth();
-  //ResetTuning();
   RedrawDisplayScreen();
 }
 
@@ -581,7 +556,6 @@ void ButtonFrequencyEntry() {
   int numdigits = 0;  // number of digits entered
   int pushButtonSwitchIndex;
   EEPROMData.lastFrequencies[EEPROMData.currentBand][EEPROMData.activeVFO] = TxRxFreq;
-  //save_last_frequency = false;                    // prevents crazy frequencies when you change bands/save_last_frequency = true;
   // Arrays for allocating values associated with keys and switches - choose whether USB keypad or analogue switch matrix
   // USB keypad and analogue switch matrix
   const char *DE_Band[] = { "80m", "40m", "20m", "17m", "15m", "12m", "10m" };
@@ -680,7 +654,6 @@ void ButtonFrequencyEntry() {
   tft.print("Enter Frequency");
 
   tft.fillRect(SECONDARY_MENU_X + 20, MENUS_Y, EACH_MENU_WIDTH + 10, CHAR_HEIGHT, RA8875_MAGENTA);
-  //tft.setTextColor(RA8875_WHITE);
   tft.setTextColor(RA8875_BLACK);  // JJP 7/17/23
   tft.setCursor(SECONDARY_MENU_X + 21, MENUS_Y + 1);
   tft.print("kHz or MHz:");

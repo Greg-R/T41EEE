@@ -1,6 +1,7 @@
 
 #include "SDT.h"
 //#include "Filter.h"
+uint32_t m_NumTaps = (FFT_LENGTH / 2) + 1;
 
 
 //================== Receive EQ Variables================= AFP 08-08-22
@@ -311,6 +312,7 @@ void SetDecIntFilters()
   /****************************************************************************************
      Recalculate decimation and interpolation FIR filters
   ****************************************************************************************/
+  int LP_F_help;
   int filter_BW_highest = bands[EEPROMData.currentBand].FHiCut;
 
   if (filter_BW_highest < - bands[EEPROMData.currentBand].FLoCut) {

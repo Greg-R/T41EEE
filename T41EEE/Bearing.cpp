@@ -2,6 +2,7 @@
 #include "SDT.h"
 
 const char DEGREE_SYMBOL[] = { 0xB0, '\0' };
+int countryIndex = -1;
 
 enum { SCL_HALF = 0,
        SCL_QUARTER,

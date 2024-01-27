@@ -26,6 +26,12 @@ int16_t pos_x_time = 390;  // 14;
 int16_t pos_y_time = 5;    //114;
 float xExpand = 1.5;  //
 int16_t spectrum_pos_centre_f = 64 * xExpand;
+int filterLoPositionMarkerOld;
+int filterHiPositionMarkerOld;
+int pos_centre_f = 64;
+int smeterLength;
+float CPU_temperature = 0.0;
+double elapsed_micros_mean;
 
 
 /*****
