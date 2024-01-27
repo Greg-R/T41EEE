@@ -2,7 +2,7 @@
 
 //======================================== User section that might need to be changed ===================================
 #include "MyConfigurationFile.h"  // This file name should remain unchanged
-#define VERSION "T41EEE.2"        // Change this for updates. If you make this longer than 9 characters, brace yourself for surprises
+#define VERSION "T41EEE.3"        // Change this for updates. If you make this longer than 9 characters, brace yourself for surprises
 
 struct maps {
   char mapNames[50];
