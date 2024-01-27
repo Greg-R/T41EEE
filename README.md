@@ -1,4 +1,4 @@
-### Version T41EEE.2 T41 Software Defined Transceiver Arduino Sketch
+### Version T41EEE.3 T41 Software Defined Transceiver Arduino Sketch
 
 This is the "T41 Extreme Experimenter's Edition" software for the 
 T41 Software Defined Transceiver.  The T41EEE was "forked" from the V049.2 version
