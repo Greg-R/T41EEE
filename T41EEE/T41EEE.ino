@@ -342,7 +342,7 @@ long NCOFreq;
 //=============================== purposes since the compiler does that for globals by default =========================
 //================== Global CW Correlation and FFT Variables =================
 float32_t DMAMEM cosBuffer2[256];
-float32_t DMAMEM sinBuffer[256];
+float32_t sinBuffer[256];  // This can't be DMAMEM.  It will cause problems with the CW decoder.
 float32_t DMAMEM sinBuffer2[256];
 float32_t DMAMEM cwRiseBuffer[256];
 float32_t DMAMEM cwFallBuffer[256];

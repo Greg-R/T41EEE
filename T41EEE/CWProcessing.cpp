@@ -5,8 +5,8 @@ float32_t aveCorrResult;
 float32_t aveCorrResultR;
 float32_t aveCorrResultL;
 
-float32_t DMAMEM float_Corr_BufferR[511];  // DMAMEM may cause problems with these two buffers and CW decode.
-float32_t DMAMEM float_Corr_BufferL[511];
+float32_t float_Corr_BufferR[511];  // DMAMEM may cause problems with these two buffers and CW decode.
+float32_t float_Corr_BufferL[511];
 
 float32_t corrResultR;
 uint32_t corrResultIndexR;
