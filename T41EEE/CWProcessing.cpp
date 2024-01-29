@@ -1,29 +1,19 @@
 
 #include "SDT.h"
 
-float32_t aveCorrResult;
-float32_t aveCorrResultR;
+float32_t aveCorrResultR;  // Used in running averages; must not be inside function.
 float32_t aveCorrResultL;
-
-float32_t float_Corr_BufferR[511];  // DMAMEM may cause problems with these two buffers and CW decode.
-float32_t float_Corr_BufferL[511];
-
-float32_t corrResultR;
-uint32_t corrResultIndexR;
-float32_t corrResultL;
-uint32_t corrResultIndexL;
-float32_t combinedCoeff;         //AFP 02-06-22
+float32_t float_Corr_BufferR[511] = {0};  // DMAMEM may cause problems with these two buffers and CW decode.
+float32_t float_Corr_BufferL[511] = {0};
 float CWLevelTimer;
 float CWLevelTimerOld;
-float32_t combinedCoeff2;
-float32_t combinedCoeff2Old;
 float goertzelMagnitude;
-char decodeBuffer[33];    // The buffer for holding the decoded characters.  Increased to 33.  KF5N October 29, 2023
+char decodeBuffer[33] = {0};  // The buffer for holding the decoded characters.  Increased to 33.  KF5N October 29, 2023
 int endGapFlag = 0;
 int topGapIndex;
 int topGapIndexOld;
-int32_t gapHistogram[HISTOGRAM_ELEMENTS];
-int32_t signalHistogram[HISTOGRAM_ELEMENTS];
+int32_t gapHistogram[HISTOGRAM_ELEMENTS] = {0};  // DMAMEM???
+int32_t signalHistogram[HISTOGRAM_ELEMENTS] = {0};
 long valRef1;
 long valRef2;
 long gapRef1;
@@ -128,11 +118,14 @@ FLASHMEM void SelectCWOffset() {
 void DoCWReceiveProcessing() {  // All New AFP 09-19-22
   float goertzelMagnitude1;
   float goertzelMagnitude2;
+  float32_t aveCorrResult;
+  float32_t corrResultR;
+  uint32_t corrResultIndexR;
+  float32_t corrResultL;
+  uint32_t corrResultIndexL;
+  float32_t combinedCoeff;                          //AFP 02-06-22
   int audioTemp;                                    // KF5N
   float freq[4] = { 562.5, 656.5, 750.0, 843.75 };  // User selectable CW offset frequencies.
-  //arm_copy_f32(float_buffer_R, float_buffer_R_CW, 256);
-  //arm_biquad_cascade_df2T_f32(&S1_CW_Filter, float_buffer_R, float_buffer_R_CW, 256);//AFP 09-01-22
-  //arm_biquad_cascade_df2T_f32(&S1_CW_Filter, float_buffer_L, float_buffer_L_CW, 256);//AFP 09-01-22
 
   arm_fir_f32(&FIR_CW_DecodeL, float_buffer_L, float_buffer_L_CW, 256);  // AFP 10-25-22  Park McClellan FIR filter const Group delay
   arm_fir_f32(&FIR_CW_DecodeR, float_buffer_R, float_buffer_R_CW, 256);  // AFP 10-25-22
@@ -158,7 +151,6 @@ void DoCWReceiveProcessing() {  // All New AFP 09-19-22
     goertzelMagnitude = (goertzelMagnitude1 + goertzelMagnitude2) / 2;
     //Combine Correlation and Gowetzel Coefficients
     combinedCoeff = 10 * aveCorrResult * 100 * goertzelMagnitude;
-    combinedCoeff2 = combinedCoeff;
     // ==========  Changed CW decode "lock" indicator
     if (combinedCoeff > 50) {  // AFP 10-26-22
       tft.fillRect(745, 448, 15, 15, RA8875_GREEN);
@@ -169,7 +161,6 @@ void DoCWReceiveProcessing() {  // All New AFP 09-19-22
         tft.fillRect(744, 447, 17, 17, RA8875_BLACK);
       }
     }
-    combinedCoeff2Old = combinedCoeff2;
     if (combinedCoeff > 50) {  // if  have a reasonable corr coeff, >50, then we have a keeper. // AFP 10-26-22
       audioTemp = 1;
     } else {
