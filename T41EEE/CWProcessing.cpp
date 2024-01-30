@@ -1,10 +1,14 @@
 
 #include "SDT.h"
 
+#define HISTOGRAM_ELEMENTS 750
+
 float32_t aveCorrResultR;  // Used in running averages; must not be inside function.
 float32_t aveCorrResultL;
-float32_t float_Corr_BufferR[511] = {0};  // DMAMEM may cause problems with these two buffers and CW decode.
-float32_t float_Corr_BufferL[511] = {0};
+//float32_t float_Corr_BufferR[511] = {0};  // DMAMEM may cause problems with these two buffers and CW decode.
+//float32_t float_Corr_BufferL[511] = {0};
+float32_t* float_Corr_BufferR = new float32_t[511];
+float32_t* float_Corr_BufferL = new float32_t[511];
 float CWLevelTimer;
 float CWLevelTimerOld;
 float goertzelMagnitude;
@@ -12,8 +16,10 @@ char decodeBuffer[33] = {0};  // The buffer for holding the decoded characters. 
 int endGapFlag = 0;
 int topGapIndex;
 int topGapIndexOld;
-int32_t gapHistogram[HISTOGRAM_ELEMENTS] = {0};  // DMAMEM???
-int32_t signalHistogram[HISTOGRAM_ELEMENTS] = {0};
+//int32_t gapHistogram[HISTOGRAM_ELEMENTS];  // DMAMEM???
+//int32_t signalHistogram[HISTOGRAM_ELEMENTS];
+int32_t* gapHistogram = new int32_t[HISTOGRAM_ELEMENTS];
+int32_t* signalHistogram = new int32_t[HISTOGRAM_ELEMENTS];
 long valRef1;
 long valRef2;
 long gapRef1;

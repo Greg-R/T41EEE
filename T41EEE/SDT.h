@@ -165,7 +165,7 @@ extern struct maps myMapFiles[];
 #define SAM_PLL_HILBERT_STAGES 7              // AFP 11-02-22
 #define MAX_DECODE_CHARS 32                   // Max chars that can appear on decoder line.  Increased to 32.  KF5N October 29, 2023
 #define DECODER_BUFFER_SIZE 128               // Max chars in binary search string with , . ?
-#define HISTOGRAM_ELEMENTS 750
+
 #define LOWEST_ATOM_TIME 20                                   // 60WPM has an atom of 20ms
 #define ADAPTIVE_SCALE_FACTOR 0.8                             // The amount of old histogram values are presesrved
 #define SCALE_CONSTANT (1.0 / (1.0 - ADAPTIVE_SCALE_FACTOR))  // Insure array has enough observations to scale
@@ -781,7 +781,6 @@ extern int32_t secondaryMenuIndex;  // -1 means haven't determined secondary men
 extern const uint32_t N_B;
 extern const uint32_t N_DEC_B;
 extern uint32_t FFT_length;
-extern int32_t gapHistogram[];
 extern uint32_t N_BLOCKS;
 extern uint32_t roomCount;    /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] at the hot temperature.*/
 extern uint32_t s_hotTemp;    /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] at room temperature .*/
@@ -796,7 +795,6 @@ extern long TxRxFreq;  // = centerFreq+NCOFreq  NCOFreq from FreqShift2()
 extern unsigned long cwTransmitDelay;  // ms to keep relay on after last atom read
 extern long lastFrequencies[][2];
 extern long int n_clear;
-
 
 extern unsigned long long Clk2SetFreq;  // AFP 09-27-22
 extern unsigned long long Clk1SetFreq;  // AFP 09-27-22
