@@ -53,6 +53,8 @@ void DrawAudioSpectContainer() {
     tft.print("k");
   }
 }
+
+
 /*****
   Purpose: Show the program name and version number
 
@@ -64,9 +66,7 @@ void DrawAudioSpectContainer() {
 *****/
 void ShowName() {
   tft.fillRect(RIGNAME_X_OFFSET, 0, XPIXELS - RIGNAME_X_OFFSET, tft.getFontHeight(), RA8875_BLACK);
-
   tft.setFontScale((enum RA8875tsize)1);
-
   tft.setTextColor(RA8875_YELLOW);
   tft.setCursor(RIGNAME_X_OFFSET - 20, 1);
   tft.print(RIGNAME);
@@ -108,7 +108,6 @@ FASTRUN void ShowSpectrum()  //AFP Extensively Modified 3-15-21 Adjusted 12-13-2
   int j, k;
   int FH_max = 0, FH_max_box = 0;                     //  HB finish
 
-  
   int centerLine = (MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2;
   int middleSlice = centerLine / 2;  // Approximate center element
   //int j2;  KF5N
@@ -166,7 +165,6 @@ FASTRUN void ShowSpectrum()  //AFP Extensively Modified 3-15-21 Adjusted 12-13-2
     y_old_plot = EEPROMData.spectrumNoiseFloor - y_old - EEPROMData.currentNoiseFloor[EEPROMData.currentBand];
     y_old2_plot = EEPROMData.spectrumNoiseFloor - y_old2 - EEPROMData.currentNoiseFloor[EEPROMData.currentBand];
 
-
     if ((x1 > 51) && (x1 < 461))                                                                //  HB start  for auto RFgain collect frequency distribution
     {
       j = 247 - y_new_plot + 40; // +40 to get 10 bins below zero - want to straddle zero
@@ -178,7 +176,6 @@ FASTRUN void ShowSpectrum()  //AFP Extensively Modified 3-15-21 Adjusted 12-13-2
           FH_max_box = k;
         }
     }                                                                                         //  HB finish
-
 
     // Prevent spectrum from going below the bottom of the spectrum area.  KF5N
     if (y_new_plot > 247) y_new_plot = 247;
@@ -308,7 +305,6 @@ FASTRUN void ShowSpectrum()  //AFP Extensively Modified 3-15-21 Adjusted 12-13-2
   int j, k;
   int FH_max = 0, FH_max_box = 0;                     //  HB finish
 
-  
   int centerLine = (MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2;
   int middleSlice = centerLine / 2;  // Approximate center element
   //int j2;  KF5N
@@ -378,7 +374,6 @@ FASTRUN void ShowSpectrum()  //AFP Extensively Modified 3-15-21 Adjusted 12-13-2
           FH_max_box = k;
         }
     }                                                                                         //  HB finish
-
 
     // Prevent spectrum from going below the bottom of the spectrum area.  KF5N
     if (y_new_plot > 247) y_new_plot = 247;
@@ -472,6 +467,7 @@ if(EEPROMData.autoGain) { // Adjust gain of AutoGain is ON.
 }
 }
 */
+
 
 /*****
   Purpose: show filter bandwidth near center of spectrum and and show sample rate in corner
@@ -624,6 +620,7 @@ void ShowSpectrumdBScale() {
 void DrawSpectrumDisplayContainer() {
   tft.drawRect(SPECTRUM_LEFT_X - 1, SPECTRUM_TOP_Y, MAX_WATERFALL_WIDTH + 2, SPECTRUM_HEIGHT, RA8875_YELLOW);  // Spectrum box
 }
+
 
 /*****
   Purpose: This function draws the frequency bar at the bottom of the spectrum scope, putting markers at every
@@ -1070,6 +1067,8 @@ FASTRUN void ShowFrequency() {
   }                         // end Show VFO_B
   tft.setFontDefault();
 }
+
+
 /*****
   Purpose: Display dBm
   Parameter list:
@@ -1655,6 +1654,7 @@ void RedrawDisplayScreen() {
   UpdateDecoderField();
   UpdateInfoWindow();
 }
+
 
 /*****
   Purpose: Draw Tuned Bandwidth on Spectrum Plot // AFP 03-27-22 Layers
