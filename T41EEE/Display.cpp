@@ -24,7 +24,7 @@ uint8_t twinpeaks_tested = 2;  // initial value --> 2 !!
 uint8_t write_analog_gain = 0;
 int16_t pos_x_time = 390;  // 14;
 int16_t pos_y_time = 5;    //114;
-float xExpand = 1.5;  //
+float xExpand = 1.4;  //
 int16_t spectrum_pos_centre_f = 64 * xExpand;
 int filterLoPositionMarkerOld;
 int filterHiPositionMarkerOld;
@@ -634,12 +634,10 @@ void DrawSpectrumDisplayContainer() {
 *****/
 void DrawFrequencyBarValue() {
   char txt[16];
-
   int bignum;
   int centerIdx;
   int pos_help;
   float disp_freq;
-
   float freq_calc;
   float grat;
   int centerLine = MAX_WATERFALL_WIDTH / 2 + SPECTRUM_LEFT_X;
@@ -656,30 +654,23 @@ void DrawFrequencyBarValue() {
   tft.setFontScale((enum RA8875tsize)0);
   tft.fillRect(WATERFALL_LEFT_X, WATERFALL_TOP_Y, MAX_WATERFALL_WIDTH + 5, tft.getFontHeight(), RA8875_BLACK);  // 4-16-2022 JACK
 
-  freq_calc = (float)(EEPROMData.centerFreq / NEW_SI5351_FREQ_MULT);  // get current frequency in Hz
+  freq_calc = (float)(EEPROMData.centerFreq);  // get current frequency in Hz
 
-  if (EEPROMData.activeVFO == VFO_A) {
-    EEPROMData.currentFreqA = TxRxFreq;
-  } else {
-    EEPROMData.currentFreqB = TxRxFreq;
-  }
+//  if (EEPROMData.activeVFO == VFO_A) {  Code appears redundant; removed January 31, 2024.
+//    EEPROMData.currentFreqA = TxRxFreq;
+//  } else {
+//    EEPROMData.currentFreqB = TxRxFreq;
+//  }
 
   if (EEPROMData.spectrum_zoom == 0) {
     freq_calc += (float32_t)SR[SampleRate].rate / 4.0;
   }
 
-  if (EEPROMData.spectrum_zoom < 5) {
-    freq_calc = roundf(freq_calc / 1000);  // round graticule frequency to the nearest kHz
-  } else if (EEPROMData.spectrum_zoom < 5) {
+//  if (EEPROMData.spectrum_zoom < 5) {  Redundant if-else removed January 31, 2024.
+//    freq_calc = roundf(freq_calc / 1000);  // round graticule frequency to the nearest kHz
+//  } else if 
+  if(EEPROMData.spectrum_zoom < 5) {
     freq_calc = roundf(freq_calc / 100) / 10;  // round graticule frequency to the nearest 100Hz
-    // === AFP 10-30-22
-    // } else if (EEPROMData.spectrum_zoom == 5) {              // 32x
-    //  freq_calc = roundf(freq_calc / 50) / 20;    // round graticule frequency to the nearest 50Hz
-    //} else if (EEPROMData.spectrum_zoom < 8) {
-    //  freq_calc = roundf(freq_calc / 10) / 100 ;  // round graticule frequency to the nearest 10Hz
-    // } else {
-    //  freq_calc = roundf(freq_calc) / 1000;       // round graticule frequency to the nearest 1Hz
-    // ============
   }
 
   if (EEPROMData.spectrum_zoom != 0)
@@ -736,6 +727,8 @@ void DrawFrequencyBarValue() {
   tft.setFontScale((enum RA8875tsize)1);
   ShowBandwidth();
 }
+
+
 /*****
   Purpose: void ShowAnalogGain()
 
