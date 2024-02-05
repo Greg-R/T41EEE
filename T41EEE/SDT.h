@@ -274,9 +274,9 @@ extern struct maps myMapFiles[];
 #define CW_RECEIVE_STATE 2
 #define CW_TRANSMIT_STRAIGHT_STATE 3
 #define CW_TRANSMIT_KEYER_STATE 4
-#define DECODER_STATE 0  // 0 = off, 1 = on
-#define DECODE_OFF 0
-#define DECODE_ON 1
+//#define DECODER_STATE 0  // 0 = off, 1 = on
+//#define DECODE_OFF 0
+//#define DECODE_ON 1
 #define CW 1
 #define SPECTRUM_ZOOM_1 0
 #define SPECTRUM_ZOOM_2 1
@@ -408,7 +408,7 @@ struct config_t {
   int CWFilterIndex = 5;                // Off
   int paddleDit = KEYER_DIT_INPUT_TIP;
   int paddleDah = KEYER_DAH_INPUT_RING;
-  int decoderFlag = DECODER_STATE;        // JJP 7-3-23
+  int decoderFlag = false;        // JJP 7-3-23
   int keyType = STRAIGHT_KEY_OR_PADDLES;  // straight key = 0, keyer = 1  JJP 7-3-23
   int currentWPM = DEFAULT_KEYER_WPM;     // 4 bytes default = 15 JJP 7-3-23
   int CWOffset = 2;                       // Default is 750 Hz.
@@ -1142,6 +1142,7 @@ float TGetTemp();
 void UpdateAGCField();
 void UpdateCompressionField();
 void UpdateDecoderField();
+void UpdateEqualizerField(bool rxEqState, bool txEqState);
 void UpdateIncrementField();
 void UpdateNoiseField();
 void UpdateNotchField();

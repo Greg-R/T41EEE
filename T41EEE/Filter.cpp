@@ -2,7 +2,7 @@
 #include "SDT.h"
 //#include "Filter.h"
 uint32_t m_NumTaps = (FFT_LENGTH / 2) + 1;
-
+float32_t xmtEqScaleFactor = 150.0;
 
 //================== Receive EQ Variables================= AFP 08-08-22
 //Setup for EQ filters
@@ -169,20 +169,20 @@ void DoExciterEQ() //AFP 10-02-22
   arm_biquad_cascade_df2T_f32(&S13_Xmt, float_buffer_L_EX, EQ13_float_buffer_L, 256);
   arm_biquad_cascade_df2T_f32(&S14_Xmt, float_buffer_L_EX, EQ14_float_buffer_L, 256);
 
-  arm_scale_f32(EQ1_float_buffer_L,  -(float)EEPROMData.equalizerXmt[0] / 100.0,  EQ1_float_buffer_L, 256);
-  arm_scale_f32(EQ2_float_buffer_L,   (float)EEPROMData.equalizerXmt[1] / 100.0,  EQ2_float_buffer_L, 256);
-  arm_scale_f32(EQ3_float_buffer_L,  -(float)EEPROMData.equalizerXmt[2] / 100.0,  EQ3_float_buffer_L, 256);
-  arm_scale_f32(EQ4_float_buffer_L,   (float)EEPROMData.equalizerXmt[3] / 100.0,  EQ4_float_buffer_L, 256);
-  arm_scale_f32(EQ5_float_buffer_L,  -(float)EEPROMData.equalizerXmt[4] / 100.0,  EQ5_float_buffer_L, 256);
-  arm_scale_f32(EQ6_float_buffer_L,   (float)EEPROMData.equalizerXmt[5] / 100.0,  EQ6_float_buffer_L, 256);
-  arm_scale_f32(EQ7_float_buffer_L,  -(float)EEPROMData.equalizerXmt[6] / 100.0,  EQ7_float_buffer_L, 256);
-  arm_scale_f32(EQ8_float_buffer_L,   (float)EEPROMData.equalizerXmt[7] / 100.0,  EQ8_float_buffer_L, 256);
-  arm_scale_f32(EQ9_float_buffer_L,  -(float)EEPROMData.equalizerXmt[8] / 100.0,  EQ9_float_buffer_L, 256);
-  arm_scale_f32(EQ10_float_buffer_L,  (float)EEPROMData.equalizerXmt[9] / 100.0,  EQ10_float_buffer_L, 256);
-  arm_scale_f32(EQ11_float_buffer_L, -(float)EEPROMData.equalizerXmt[10] / 100.0, EQ11_float_buffer_L, 256);
-  arm_scale_f32(EQ12_float_buffer_L,  (float)EEPROMData.equalizerXmt[11] / 100.0, EQ12_float_buffer_L, 256);
-  arm_scale_f32(EQ13_float_buffer_L, -(float)EEPROMData.equalizerXmt[12] / 100.0, EQ13_float_buffer_L, 256);
-  arm_scale_f32(EQ14_float_buffer_L,  (float)EEPROMData.equalizerXmt[13] / 100.0, EQ14_float_buffer_L, 256);
+  arm_scale_f32(EQ1_float_buffer_L,  -(float)EEPROMData.equalizerXmt[0] / xmtEqScaleFactor,  EQ1_float_buffer_L, 256);
+  arm_scale_f32(EQ2_float_buffer_L,   (float)EEPROMData.equalizerXmt[1] / xmtEqScaleFactor,  EQ2_float_buffer_L, 256);
+  arm_scale_f32(EQ3_float_buffer_L,  -(float)EEPROMData.equalizerXmt[2] / xmtEqScaleFactor,  EQ3_float_buffer_L, 256);
+  arm_scale_f32(EQ4_float_buffer_L,   (float)EEPROMData.equalizerXmt[3] / xmtEqScaleFactor,  EQ4_float_buffer_L, 256);
+  arm_scale_f32(EQ5_float_buffer_L,  -(float)EEPROMData.equalizerXmt[4] / xmtEqScaleFactor,  EQ5_float_buffer_L, 256);
+  arm_scale_f32(EQ6_float_buffer_L,   (float)EEPROMData.equalizerXmt[5] / xmtEqScaleFactor,  EQ6_float_buffer_L, 256);
+  arm_scale_f32(EQ7_float_buffer_L,  -(float)EEPROMData.equalizerXmt[6] / xmtEqScaleFactor,  EQ7_float_buffer_L, 256);
+  arm_scale_f32(EQ8_float_buffer_L,   (float)EEPROMData.equalizerXmt[7] / xmtEqScaleFactor,  EQ8_float_buffer_L, 256);
+  arm_scale_f32(EQ9_float_buffer_L,  -(float)EEPROMData.equalizerXmt[8] / xmtEqScaleFactor,  EQ9_float_buffer_L, 256);
+  arm_scale_f32(EQ10_float_buffer_L,  (float)EEPROMData.equalizerXmt[9] / xmtEqScaleFactor,  EQ10_float_buffer_L, 256);
+  arm_scale_f32(EQ11_float_buffer_L, -(float)EEPROMData.equalizerXmt[10] / xmtEqScaleFactor, EQ11_float_buffer_L, 256);
+  arm_scale_f32(EQ12_float_buffer_L,  (float)EEPROMData.equalizerXmt[11] / xmtEqScaleFactor, EQ12_float_buffer_L, 256);
+  arm_scale_f32(EQ13_float_buffer_L, -(float)EEPROMData.equalizerXmt[12] / xmtEqScaleFactor, EQ13_float_buffer_L, 256);
+  arm_scale_f32(EQ14_float_buffer_L,  (float)EEPROMData.equalizerXmt[13] / xmtEqScaleFactor, EQ14_float_buffer_L, 256);
 
   arm_add_f32(EQ1_float_buffer_L , EQ2_float_buffer_L, float_buffer_L_EX , 256 ) ;
 

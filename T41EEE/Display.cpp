@@ -1353,18 +1353,18 @@ void UpdateIncrementField() {
 void DisplayIncrementField() {
   tft.setFontScale((enum RA8875tsize)0);
   tft.setTextColor(RA8875_WHITE);  // Frequency increment
-  tft.setCursor(INCREMENT_X, INCREMENT_Y);
+  tft.setCursor(INCREMENT_X + 6, INCREMENT_Y - 1);
   tft.print("Increment: ");
-  tft.setCursor(INCREMENT_X + 148, INCREMENT_Y);
+  tft.setCursor(INCREMENT_X + 148, INCREMENT_Y - 1);
   tft.print("FT Inc: ");
 
   tft.fillRect(INCREMENT_X + 90, INCREMENT_Y, tft.getFontWidth() * 7, tft.getFontHeight(), RA8875_BLACK);
-  tft.setCursor(FIELD_OFFSET_X - 3, INCREMENT_Y);
+  tft.setCursor(FIELD_OFFSET_X - 3, INCREMENT_Y - 1);
   tft.setTextColor(RA8875_GREEN);
   tft.print(EEPROMData.freqIncrement);
 
   tft.fillRect(INCREMENT_X + 210, INCREMENT_Y, tft.getFontWidth() * 4, tft.getFontHeight(), RA8875_BLACK);
-  tft.setCursor(FIELD_OFFSET_X + 120, INCREMENT_Y);
+  tft.setCursor(FIELD_OFFSET_X + 120, INCREMENT_Y - 1);
   tft.setTextColor(RA8875_GREEN);
   tft.print(EEPROMData.stepFineTune);
 }
@@ -1385,10 +1385,10 @@ void UpdateNotchField() {
   } else {
     tft.setTextColor(RA8875_WHITE);
   }
-  tft.fillRect(NOTCH_X + 60, NOTCH_Y, 150, tft.getFontHeight() + 5, RA8875_BLACK);
-  tft.setCursor(NOTCH_X - 32, NOTCH_Y);
+  tft.fillRect(NOTCH_X + 60, NOTCH_Y - 3, 150, tft.getFontHeight() + 5, RA8875_BLACK);
+  tft.setCursor(NOTCH_X - 27, NOTCH_Y - 2);
   tft.print("AutoNotch:");
-  tft.setCursor(FIELD_OFFSET_X, NOTCH_Y);
+  tft.setCursor(FIELD_OFFSET_X, NOTCH_Y - 2);
   tft.setTextColor(RA8875_GREEN);
   if (ANR_notchOn == 0) {
     tft.print("Off");
@@ -1412,9 +1412,9 @@ void UpdateZoomField() {
 
   tft.fillRect(ZOOM_X, ZOOM_Y, 100, tft.getFontHeight(), RA8875_BLACK);
   tft.setTextColor(RA8875_WHITE);  // Display zoom factor
-  tft.setCursor(ZOOM_X, ZOOM_Y);
+  tft.setCursor(ZOOM_X + 5, ZOOM_Y - 4);
   tft.print("Zoom:");
-  tft.setCursor(FIELD_OFFSET_X, ZOOM_Y);
+  tft.setCursor(FIELD_OFFSET_X, ZOOM_Y - 4);
   tft.setTextColor(RA8875_GREEN);
   tft.print(zoomOptions[zoomIndex]);
 }
@@ -1434,15 +1434,15 @@ void UpdateCompressionField()  // JJP 8/26/2023
   tft.fillRect(COMPRESSION_X, COMPRESSION_Y, 200, 15, RA8875_BLACK);
   tft.setFontScale((enum RA8875tsize)0);
   tft.setTextColor(RA8875_WHITE);  // Display zoom factor
-  tft.setCursor(COMPRESSION_X, COMPRESSION_Y);
+  tft.setCursor(COMPRESSION_X + 5, COMPRESSION_Y - 5);
   tft.print("Compress:");
-  tft.setCursor(FIELD_OFFSET_X, COMPRESSION_Y);
+  tft.setCursor(FIELD_OFFSET_X, COMPRESSION_Y - 5);
   tft.setTextColor(RA8875_GREEN);
   if (EEPROMData.compressorFlag == 1) {  // JJP 8/26/2023
     tft.print("On  ");
     tft.print(EEPROMData.currentMicThreshold);
   } else {
-    tft.setCursor(FIELD_OFFSET_X, COMPRESSION_Y);
+    tft.setCursor(FIELD_OFFSET_X, COMPRESSION_Y - 5);
     tft.print("Off");
   }
 }
@@ -1461,17 +1461,20 @@ FLASHMEM void UpdateDecoderField() {
   tft.setFontScale((enum RA8875tsize)0);
 
   tft.setTextColor(RA8875_WHITE);  // Display zoom factor
-  tft.setCursor(DECODER_X, DECODER_Y);
+  tft.setCursor(DECODER_X + 5, DECODER_Y - 5);
   tft.print("Decoder:");
   tft.setTextColor(RA8875_GREEN);
-  tft.fillRect(DECODER_X + 60, DECODER_Y, tft.getFontWidth() * 20, tft.getFontHeight() + 5, RA8875_BLACK);
-  tft.setCursor(FIELD_OFFSET_X, DECODER_Y);
-  if (EEPROMData.decoderFlag == DECODE_ON) {  // AFP 09-27-22
-    tft.print("On ");
+//  tft.fillRect(DECODER_X + 90, DECODER_Y, tft.getFontWidth() * 20, tft.getFontHeight() + 2, RA8875_BLACK);
+  tft.setCursor(FIELD_OFFSET_X, DECODER_Y - 5);
+  tft.fillRect(FIELD_OFFSET_X, DECODER_Y - 5, 140, 17, RA8875_BLACK);  // Erase
+  if (EEPROMData.decoderFlag) {  // AFP 09-27-22
+    tft.setCursor(FIELD_OFFSET_X, DECODER_Y - 5);
+    tft.print("    WPM");
   } else {
+//    tft.fillRect(FIELD_OFFSET_X, DECODER_Y - 5, 140, 17, RA8875_BLACK);  // Erase
     tft.print("Off");
   }
-  if (EEPROMData.xmtMode == CW_MODE && EEPROMData.decoderFlag == DECODE_ON) {  // In CW mode with decoder on? AFP 09-27-22
+  if (EEPROMData.xmtMode == CW_MODE && EEPROMData.decoderFlag) {  // In CW mode with decoder on? AFP 09-27-22
     tft.writeTo(L2);
     // Draw delimiter bars for CW offset frequency.  This depends on the user selected offset.
     if (EEPROMData.CWOffset == 0) {
@@ -1493,14 +1496,62 @@ FLASHMEM void UpdateDecoderField() {
     tft.writeTo(L1);
     tft.setFontScale((enum RA8875tsize)0);
     tft.setTextColor(RA8875_LIGHT_GREY);
-    tft.setCursor(FIELD_OFFSET_X, DECODER_Y + 15);
-    tft.print("CW Fine Adjust");
+//    tft.setCursor(FIELD_OFFSET_X, DECODER_Y + 15);
+//    tft.print("CW Fine Adjust");
   } else {
-    tft.fillRect(FIELD_OFFSET_X, DECODER_Y + 15, tft.getFontWidth() * 15, tft.getFontHeight(), RA8875_BLACK);
+//    tft.fillRect(FIELD_OFFSET_X, DECODER_Y + 15, tft.getFontWidth() * 15, tft.getFontHeight(), RA8875_BLUE);
     tft.writeTo(L2);
     tft.drawFastVLine(BAND_INDICATOR_X - 8 + 30, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_BLACK);  //CW lower freq indicator
     tft.drawFastVLine(BAND_INDICATOR_X - 8 + 38, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_BLACK);  //CW upper freq indicator
     tft.writeTo(L1);
+  }
+}
+
+
+/*****
+  Purpose: Updates the Rx and Tx equalizer states
+           shown on the display.
+
+  Parameter list:
+    bool rxEqState, txEqState
+
+  Return value;
+    void
+*****/
+FLASHMEM void UpdateEqualizerField(bool rxEqState, bool txEqState) {
+  tft.setFontScale((enum RA8875tsize)0);
+  tft.setTextColor(RA8875_WHITE);  // Display zoom factor
+  tft.setCursor(540, DECODER_Y + 15);
+  tft.print("Equalizers:");
+  tft.setTextColor(RA8875_GREEN);
+//  tft.fillRect(DECODER_X + 60, DECODER_Y, tft.getFontWidth() * 20, tft.getFontHeight() + 5, RA8875_BLUE);
+  tft.setCursor(FIELD_OFFSET_X, DECODER_Y + 15);
+  if (rxEqState) {  // AFP 09-27-22
+    tft.setTextColor(RA8875_RED);
+    tft.print("Rx");
+      tft.setTextColor(RA8875_WHITE);
+        tft.setCursor(FIELD_OFFSET_X + 25, DECODER_Y + 15);
+    tft.print("On");
+  } else {
+      tft.setTextColor(RA8875_RED);
+    tft.print("Rx");
+            tft.setCursor(FIELD_OFFSET_X + 25, DECODER_Y + 15);
+      tft.setTextColor(RA8875_WHITE);
+          tft.print("Off");
+  }
+      tft.setCursor(FIELD_OFFSET_X + 55, DECODER_Y +15);
+    if (txEqState) {  // AFP 09-27-22
+    tft.setTextColor(RA8875_RED);
+    tft.print("Tx");
+      tft.setTextColor(RA8875_WHITE);
+                  tft.setCursor(FIELD_OFFSET_X + 80, DECODER_Y +15);
+          tft.print("On");
+  } else {
+    tft.setTextColor(RA8875_RED);
+    tft.print("Tx");
+      tft.setTextColor(RA8875_WHITE);
+            tft.setCursor(FIELD_OFFSET_X + 80, DECODER_Y +15);
+          tft.print("Off");
   }
 }
 
@@ -1518,11 +1569,11 @@ void UpdateWPMField() {
   tft.setFontScale((enum RA8875tsize)0);
 
   tft.setTextColor(RA8875_WHITE);  // Display zoom factor
-  tft.setCursor(WPM_X, WPM_Y);
+  tft.setCursor(WPM_X + 5, WPM_Y - 5);
   tft.print("Keyer:");
   tft.setTextColor(RA8875_GREEN);
   tft.fillRect(WPM_X + 60, WPM_Y, tft.getFontWidth() * 15, tft.getFontHeight(), RA8875_BLACK);
-  tft.setCursor(FIELD_OFFSET_X, WPM_Y);
+  tft.setCursor(FIELD_OFFSET_X, WPM_Y - 5);
   //EEPROMData.EEPROMData.currentWPM = EEPROMData.currentWPM;
   if (EEPROMData.keyType == KEYER) {
     //tft.print("Paddles -- "); // KD0RC
@@ -1558,43 +1609,12 @@ void UpdateNoiseField() {
 
   tft.fillRect(FIELD_OFFSET_X, NOISE_REDUCE_Y, 70, tft.getFontHeight(), RA8875_BLACK);
   tft.setTextColor(RA8875_WHITE);  // Noise reduction
-  tft.setCursor(NOISE_REDUCE_X, NOISE_REDUCE_Y);
+  tft.setCursor(NOISE_REDUCE_X + 5, NOISE_REDUCE_Y - 3);
   tft.print("Noise:");
   tft.setTextColor(RA8875_GREEN);
-  tft.setCursor(FIELD_OFFSET_X, NOISE_REDUCE_Y);
+  tft.setCursor(FIELD_OFFSET_X, NOISE_REDUCE_Y - 3);
   tft.print(filter[EEPROMData.nrOptionSelect]);
 }
-
-
-/*****
-  Purpose: Implement the notch filter
-
-  Parameter list:
-    int notchF        the notch to use
-    int MODE          the current MODE
-
-  Return value;
-    void
-*****/
-void ShowNotch() {
-  tft.fillRect(NOTCH_X, NOTCH_Y + 30, 150, tft.getFontHeight() + 5, RA8875_BLACK);
-  if (NR_first_time == 0)
-    tft.setTextColor(RA8875_LIGHT_GREY);
-  else
-    tft.setTextColor(RA8875_WHITE);
-  tft.setCursor(NOTCH_X - 6, NOTCH_Y);
-  tft.print("Auto Notch:");
-  tft.setCursor(NOTCH_X + 90, NOTCH_Y);
-  tft.setTextColor(RA8875_GREEN);
-
-  if (ANR_notchOn) {
-    tft.print("On");
-  } else {
-    tft.print("Off");
-  }
-
-}  // end void show_notch
-
 
 
 /*****
@@ -1613,7 +1633,7 @@ void DrawInfoWindowFrame() {
 
 
 /*****
-  Purpose: This function redraws the entire display screen where the equalizers appeared
+  Purpose: This function redraws the entire display screen.
 
   Parameter list:
     void

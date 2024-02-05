@@ -137,7 +137,7 @@ void DoCWReceiveProcessing() {  // All New AFP 09-19-22
   arm_fir_f32(&FIR_CW_DecodeL, float_buffer_L, float_buffer_L_CW, 256);  // AFP 10-25-22  Park McClellan FIR filter const Group delay
   arm_fir_f32(&FIR_CW_DecodeR, float_buffer_R, float_buffer_R_CW, 256);  // AFP 10-25-22
 
-  if (EEPROMData.decoderFlag == DECODE_ON) {  // JJP 7/20/23
+  if (EEPROMData.decoderFlag) {  // JJP 7/20/23
 
     // ----------------------  Correlation calculation  AFP 02-04-22 -------------------------
     //Calculate correlation between calc sine and incoming signal
@@ -160,12 +160,12 @@ void DoCWReceiveProcessing() {  // All New AFP 09-19-22
     combinedCoeff = 10 * aveCorrResult * 100 * goertzelMagnitude;
     // ==========  Changed CW decode "lock" indicator
     if (combinedCoeff > 50) {  // AFP 10-26-22
-      tft.fillRect(745, 448, 15, 15, RA8875_GREEN);
+      tft.fillRect(700, 442, 15, 15, RA8875_GREEN);
     } else if (combinedCoeff < 50) {  // AFP 10-26-22
       CWLevelTimer = millis();
       if (CWLevelTimer - CWLevelTimerOld > 2000) {
         CWLevelTimerOld = millis();
-        tft.fillRect(744, 447, 17, 17, RA8875_BLACK);
+        tft.fillRect(700, 442, 15, 15, RA8875_BLACK);  // Erase
       }
     }
     if (combinedCoeff > 50) {  // if  have a reasonable corr coeff, >50, then we have a keeper. // AFP 10-26-22
@@ -545,11 +545,13 @@ FASTRUN void DoCWDecoding(int audioValue) {
 
         tft.setFontScale((enum RA8875tsize)0);  // Show estimated WPM
         tft.setTextColor(RA8875_GREEN);
-        tft.fillRect(DECODER_X + 104, DECODER_Y, tft.getFontWidth() * 10, tft.getFontHeight(), RA8875_BLACK);
-        tft.setCursor(DECODER_X + 105, DECODER_Y);
-        tft.print("(");
+        tft.fillRect(DECODER_X + 75, DECODER_Y - 5, tft.getFontWidth() * 3, tft.getFontHeight(), RA8875_BLACK);  // Erase old WPM.
+        tft.setCursor(DECODER_X + 75, DECODER_Y - 5);
+//        tft.print("(");
+        tft.writeTo(L1);
         tft.print(1200L / (dahLength / 3));
-        tft.print(" WPM)");
+        tft.writeTo(L1);
+//        tft.print(" WPM)");
         tft.setTextColor(RA8875_WHITE);
         tft.setFontScale((enum RA8875tsize)3);
         //Serial.printf("gapLength = %d thresholdGeometricMean = %f interElementGap = %d\n", gapLength, thresholdGeometricMean, interElementGap);

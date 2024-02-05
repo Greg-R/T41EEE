@@ -452,15 +452,15 @@ int EqualizerRecOptions() {
       EEPROMData.receiveEQFlag = false;
       break;
     case 2:
-      for (int iFreq = 0; iFreq < EQUALIZER_CELL_COUNT; iFreq++) {
-      }
       ProcessEqualizerChoices(0, (char *)"Receive Equalizer");
-      EEPROMWrite();
-      RedrawDisplayScreen();
       break;
     case 3:
+      return 0;  // Do nothing and return.
       break;
   }
+      EEPROMWrite();
+      RedrawDisplayScreen();
+      UpdateEqualizerField(EEPROMData.receiveEQFlag, EEPROMData.xmitEQFlag);
   return 0;
 }
 
@@ -488,12 +488,14 @@ int EqualizerXmtOptions() {
       break;
     case 2:
       ProcessEqualizerChoices(1, (char *)"Transmit Equalizer");
-      EEPROMWrite();
-      RedrawDisplayScreen();
       break;
-    case 3:
+    case 3:  // Do nothing and exit.
+      return 0;
       break;
   }
+      EEPROMWrite();
+      RedrawDisplayScreen();
+      UpdateEqualizerField(EEPROMData.receiveEQFlag, EEPROMData.xmitEQFlag);
   return 0;
 }
 

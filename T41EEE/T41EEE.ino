@@ -1241,11 +1241,11 @@ FLASHMEM void setup() {
   // Turn off LOs.
   si5351.output_enable(SI5351_CLK2, 0);
   si5351.output_enable(SI5351_CLK1, 0);
-  if (EEPROMData.xmtMode == CW_MODE && EEPROMData.decoderFlag == DECODE_OFF) {
-    EEPROMData.decoderFlag = DECODE_OFF;  // JJP 7/1/23
-  } else {
-    EEPROMData.decoderFlag = DECODE_ON;  // Turns decoder on JJP 7/1/23
-  }
+  //if (EEPROMData.xmtMode == CW_MODE && EEPROMData.decoderFlag == DECODE_OFF) {
+  //  EEPROMData.decoderFlag = DECODE_OFF;  // JJP 7/1/23
+  //} else {
+  //  EEPROMData.decoderFlag = DECODE_ON;  // Turns decoder on JJP 7/1/23
+  //}
 
   // Initialize the frequency setting based on the last used frequency stored to EEPROM.
   TxRxFreq = EEPROMData.centerFreq = EEPROMData.lastFrequencies[EEPROMData.currentBand][EEPROMData.activeVFO];
@@ -1294,7 +1294,7 @@ FLASHMEM void setup() {
   EEPROMData.sdCardPresent = SDPresentCheck();  // JJP 7/18/23
   lastState = 1111;                             // To make sure the receiver will be configured on the first pass through.  KF5N September 3, 2023
   UpdateDecoderField();                         // Adjust graphics for Morse decoder.
-
+  UpdateEqualizerField(EEPROMData.receiveEQFlag, EEPROMData.xmitEQFlag);
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();  // Required only for QSD2/QSE2.
 }
 //============================================================== END setup() =================================================================
