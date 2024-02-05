@@ -2,7 +2,6 @@
 //====================== User Specific Preferences =============
 
 //#define DEBUG 		                                                        // Uncommented for debugging, comment out for normal use
-#define DECODER_STATE							0						                              // 0 = off, 1 = on
 #define DEFAULT_KEYER_WPM   			15                                        // Startup value for keyer wpm
 #define FREQ_SEP_CHARACTER  			'.'					                              // Some may prefer period, space, or combo
 #define MAP_FILE_NAME   					"Cincinnati.bmp"                          // Name you gave to BMP map file. Max is 50 chars
@@ -27,7 +26,6 @@
 #define PADDLE_FLIP								0						                              // 0 = right paddle = DAH, 1 = DIT
 #define STRAIGHT_KEY_OR_PADDLES		0						                              // 0 = straight, 1 = paddles
 #define SDCARD_MESSAGE_LENGTH     3000L                                     // The number of milliseconds to leave error message on screen
-//#define SD_CARD_PRESENT         0                                         //   JJP  7/18/23
 
 //====================== System specific ===============
 #define CURRENT_FREQ_A            7200000                                   // VFO_A
@@ -49,7 +47,7 @@
 //#define                           FOURSQRP
 
 // Set multiplication factors for your QSD and QSE boards.
-#define MASTER_CLK_MULT_RX 2
-#define MASTER_CLK_MULT_TX 2
+#define MASTER_CLK_MULT_RX 4
+#define MASTER_CLK_MULT_TX 4
 
 

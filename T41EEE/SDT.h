@@ -274,10 +274,6 @@ extern struct maps myMapFiles[];
 #define CW_RECEIVE_STATE 2
 #define CW_TRANSMIT_STRAIGHT_STATE 3
 #define CW_TRANSMIT_KEYER_STATE 4
-//#define DECODER_STATE 0  // 0 = off, 1 = on
-//#define DECODE_OFF 0
-//#define DECODE_ON 1
-#define CW 1
 #define SPECTRUM_ZOOM_1 0
 #define SPECTRUM_ZOOM_2 1
 #define SPECTRUM_ZOOM_4 2
