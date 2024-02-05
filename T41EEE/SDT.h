@@ -411,7 +411,7 @@ struct config_t {
   int decoderFlag = DECODER_STATE;        // JJP 7-3-23
   int keyType = STRAIGHT_KEY_OR_PADDLES;  // straight key = 0, keyer = 1  JJP 7-3-23
   int currentWPM = DEFAULT_KEYER_WPM;     // 4 bytes default = 15 JJP 7-3-23
-  int CWOffset = 2;                       //
+  int CWOffset = 2;                       // Default is 750 Hz.
   float32_t sidetoneVolume = 30.0;        // 4 bytes
   uint32_t cwTransmitDelay = 1000;
   int activeVFO = 0;                // 2 bytes

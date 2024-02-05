@@ -93,7 +93,7 @@ FLASHMEM void SelectCWFilter() {
 FLASHMEM void SelectCWOffset() {
   const char *CWOffsets[] = { "562.5 Hz", "656.5 Hz", "750 Hz", "843.75 Hz", " Cancel " };
   const int numCycles[4] = { 6, 7, 8, 9 };
-  EEPROMData.CWOffset = SubmenuSelect(CWOffsets, 5, 2);  // CWFilter is an array of strings.
+  EEPROMData.CWOffset = SubmenuSelect(CWOffsets, 5, EEPROMData.CWOffset);  // CWFilter is an array of strings.
   // Now generate the values for the buffer which is used to create the CW tone.  The values are discrete because there must be whole cycles.
   if (EEPROMData.CWOffset < 4) sineTone(numCycles[EEPROMData.CWOffset]);
   // sinBuffer is used by the CW decoder.  Load the buffer per chosen frequency.
@@ -103,6 +103,7 @@ FLASHMEM void SelectCWOffset() {
     theta = (float)kf * TWO_PI * freq[EEPROMData.CWOffset] / 24000.0;  // theta = kf * 2 * PI * freqSideTone / 24000
     sinBuffer[kf] = sin(theta);
   }
+  EEPROMWrite();  // Save to EEPROM.
   // Clear the current CW filter graphics and then restore the bandwidth indicator bar.  KF5N July 30, 2023
   tft.writeTo(L2);
   tft.clearMemory();
