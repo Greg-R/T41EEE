@@ -441,7 +441,7 @@ struct config_t {
   float currentMicCompRatio = 8.0;
   float currentMicAttack = 0.1;
   float currentMicRelease = 0.1;
-  int currentMicGain = 20;
+  int currentMicGain = 15;   // Was 20; revised downward as a more conservative default.  KF5N February 5, 2024.
   int switchValues[18] = { 924, 870, 817,
                            769, 713, 669,
                            616, 565, 513,
