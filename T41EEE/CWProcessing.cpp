@@ -71,6 +71,7 @@ FLASHMEM void SelectCWFilter() {
   tft.clearMemory();
   BandInformation();
   DrawBandWidthIndicatorBar();
+  UpdateDecoderField();
 }
 
 
