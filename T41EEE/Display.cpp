@@ -1243,6 +1243,7 @@ void UpdateInfoWindow() {
   UpdateSDIndicator(EEPROMData.sdCardPresent);
   UpdateWPMField();
   UpdateZoomField();
+  UpdateEqualizerField(EEPROMData.receiveEQFlag, EEPROMData.xmitEQFlag);
 }
 
 /*****
