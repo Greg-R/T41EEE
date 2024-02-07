@@ -349,7 +349,7 @@ float32_t DMAMEM cwFallBuffer[256];
 
 // === Compressor patameters AFP 11-01-22
 
-bool use_HP_filter = true;                   //enable the software HP filter to get rid of DC?
+bool use_HP_filter = true;  //enable the software HP filter to get rid of DC?
 float comp_ratio;
 float attack_sec;
 float release_sec;
@@ -426,7 +426,7 @@ const float32_t n_fstop1 = ((n_samplerate / DF1) - n_desired_BW) / n_samplerate;
 const float32_t n_fstop2 = ((n_samplerate / (DF1 * DF2)) - n_desired_BW) / (n_samplerate / DF1);
 const uint32_t IIR_biquad_Zoom_FFT_N_stages = 4;
 const uint32_t N_stages_biquad_lowpass1 = 1;
-const float32_t n_att = 90.0;        // need here for later def's
+const float32_t n_att = 90.0;  // need here for later def's
 const uint16_t n_dec1_taps = (1 + (uint16_t)(n_att / (22.0 * (n_fstop1 - n_fpass1))));
 const uint16_t n_dec2_taps = (1 + (uint16_t)(n_att / (22.0 * (n_fstop2 - n_fpass2))));
 
@@ -474,9 +474,9 @@ int32_t secondaryMenuIndex = -1;     // -1 means haven't determined secondary me
 
 uint32_t N_BLOCKS = N_B;
 
-uint32_t s_roomC_hotC;   /*!< The value of s_roomCount minus s_hotCount.*/
-uint32_t s_hotTemp;      /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] at room temperature .*/
-uint32_t s_hotCount;     /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] at the hot temperature.*/
+uint32_t s_roomC_hotC; /*!< The value of s_roomCount minus s_hotCount.*/
+uint32_t s_hotTemp;    /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] at room temperature .*/
+uint32_t s_hotCount;   /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] at the hot temperature.*/
 long currentFreq;
 long int n_clear;
 long TxRxFreq;  // = EEPROMData.centerFreq+NCOFreq  NCOFreq from FreqShift2()
@@ -509,9 +509,9 @@ float32_t corr[2];
 float32_t dbm = -145.0;
 float32_t dbm_calibration = 22.0;
 
-float32_t DMAMEM FFT_buffer[FFT_LENGTH * 2] __attribute__((aligned(4))) = {0};
-float32_t DMAMEM FFT_spec[1024] = {0};
-float32_t DMAMEM FFT_spec_old[1024] = {0};
+float32_t DMAMEM FFT_buffer[FFT_LENGTH * 2] __attribute__((aligned(4))) = { 0 };
+float32_t DMAMEM FFT_spec[1024] = { 0 };
+float32_t DMAMEM FFT_spec_old[1024] = { 0 };
 
 // decimation with FIR lowpass for Zoom FFT
 arm_fir_decimate_instance_f32 Fir_Zoom_FFT_Decimate_I1;
@@ -831,7 +831,7 @@ FLASHMEM void InitializeDataArrays() {
   Serial.printf("\tsizeof(NR_output_audio_buffer) %d", sizeof(NR_output_audio_buffer));
   Serial.println();
 #endif
-//  CLEAR_VAR(FFT_spec_old);             //memset(FFT_spec_old, 0, 4096);            // SPECTRUM_RES = 512 * 4 = 2048
+  //  CLEAR_VAR(FFT_spec_old);             //memset(FFT_spec_old, 0, 4096);            // SPECTRUM_RES = 512 * 4 = 2048
   CLEAR_VAR(pixelnew);                 //memset(pixelnew, 0, 1024);                // 512 * 2
   CLEAR_VAR(pixelold);                 //memset(pixelold, 0, 1024);                // 512 * 2
   CLEAR_VAR(pixelCurrent);             //memset(pixelCurrent, 0, 1024);            // 512 * 2  KF5N JJP  7/14/23
@@ -920,11 +920,13 @@ FLASHMEM void InitializeDataArrays() {
   CalcFIRCoeffs(FIR_dec1_coeffs, n_dec1_taps, (float32_t)(n_desired_BW * 1000.0), n_att, 0, 0.0, (float32_t)SR[SampleRate].rate);
 
   if (arm_fir_decimate_init_f32(&FIR_dec1_I, n_dec1_taps, (uint32_t)DF1, FIR_dec1_coeffs, FIR_dec1_I_state, BUFFER_SIZE * N_BLOCKS)) {
-    while (1);
+    while (1)
+      ;
   }
 
   if (arm_fir_decimate_init_f32(&FIR_dec1_Q, n_dec1_taps, (uint32_t)DF1, FIR_dec1_coeffs, FIR_dec1_Q_state, BUFFER_SIZE * N_BLOCKS)) {
-    while (1);
+    while (1)
+      ;
   }
   // Decimation filter 2, M2 = DF2
   CalcFIRCoeffs(FIR_dec2_coeffs, n_dec2_taps, (float32_t)(n_desired_BW * 1000.0), n_att, 0, 0.0, (float32_t)(SR[SampleRate].rate / DF1));
@@ -934,7 +936,8 @@ FLASHMEM void InitializeDataArrays() {
   }
 
   if (arm_fir_decimate_init_f32(&FIR_dec2_Q, n_dec2_taps, (uint32_t)DF2, FIR_dec2_coeffs, FIR_dec2_Q_state, BUFFER_SIZE * N_BLOCKS / (uint32_t)DF1)) {
-    while (1);
+    while (1)
+      ;
   }
 
   // Interpolation filter 1, L1 = 2
@@ -942,10 +945,12 @@ FLASHMEM void InitializeDataArrays() {
   // yes, because the interpolation filter is AFTER the upsampling, so it has to be in the target sample rate!
   CalcFIRCoeffs(FIR_int1_coeffs, 48, (float32_t)(n_desired_BW * 1000.0), n_att, 0, 0.0, SR[SampleRate].rate / 4.0);
   if (arm_fir_interpolate_init_f32(&FIR_int1_I, (uint8_t)DF2, 48, FIR_int1_coeffs, FIR_int1_I_state, BUFFER_SIZE * N_BLOCKS / (uint32_t)DF)) {
-    while (1);
+    while (1)
+      ;
   }
   if (arm_fir_interpolate_init_f32(&FIR_int1_Q, (uint8_t)DF2, 48, FIR_int1_coeffs, FIR_int1_Q_state, BUFFER_SIZE * N_BLOCKS / (uint32_t)DF)) {
-    while (1);
+    while (1)
+      ;
   }
   // Interpolation filter 2, L2 = 4
   // not sure whether I should design with the final sample rate ??
@@ -953,10 +958,12 @@ FLASHMEM void InitializeDataArrays() {
   CalcFIRCoeffs(FIR_int2_coeffs, 32, (float32_t)(n_desired_BW * 1000.0), n_att, 0, 0.0, (float32_t)SR[SampleRate].rate);
 
   if (arm_fir_interpolate_init_f32(&FIR_int2_I, (uint8_t)DF1, 32, FIR_int2_coeffs, FIR_int2_I_state, BUFFER_SIZE * N_BLOCKS / (uint32_t)DF1)) {
-    while (1);
+    while (1)
+      ;
   }
   if (arm_fir_interpolate_init_f32(&FIR_int2_Q, (uint8_t)DF1, 32, FIR_int2_coeffs, FIR_int2_Q_state, BUFFER_SIZE * N_BLOCKS / (uint32_t)DF1)) {
-    while (1);
+    while (1)
+      ;
   }
 
   SetDecIntFilters();  // here, the correct bandwidths are calculated and set accordingly
@@ -1219,8 +1226,25 @@ FLASHMEM void setup() {
   EEPROMData.sdCardPresent = InitializeSDCard();  // Is there an SD card that can be initialized?
 
   // =============== EEPROM section =================
-  EnableButtonInterrupts();
+
   EEPROMStartup();
+
+  // Push and hold a button at power up to activate switch matrix calibration.
+  // Uncomment this code block to enable this feature.  Len KD0RC
+  /* Remove this line and the matching block comment line below to activate.
+  if (analogRead(BUSY_ANALOG_PIN) < NOTHING_TO_SEE_HERE) {
+    tft.fillWindow(RA8875_BLACK);
+    tft.setFontScale(1);
+    tft.setTextColor(RA8875_GREEN);
+    tft.setCursor(10, 10);
+    tft.print("Release button to start calibration.");
+    MyDelay(2000);
+    EnableButtonInterrupts();
+    SaveAnalogSwitchValues();
+    EEPROMRead();  // Call to reset switch matrix values
+  }                // KD0RC end
+  Remove this line and the matching block comment line above to activate. */
+  EnableButtonInterrupts();
   h = 135;
   Q_in_L.begin();  //Initialize receive input buffers
   Q_in_R.begin();
@@ -1251,13 +1275,13 @@ FLASHMEM void setup() {
   TxRxFreq = EEPROMData.centerFreq = EEPROMData.lastFrequencies[EEPROMData.currentBand][EEPROMData.activeVFO];
 
   InitializeDataArrays();
-  
+
   SetupMode(bands[EEPROMData.currentBand].mode);
 
   SetKeyPowerUp();  // Use EEPROMData.keyType and EEPROMData.paddleFlip to configure key GPIs.  KF5N August 27, 2023
   SetDitLength(EEPROMData.currentWPM);
   SetTransmitDitLength(EEPROMData.currentWPM);
-  
+
   // Initialize buffer used by CW transmitter.
   sineTone(EEPROMData.CWOffset + 6);  // This function takes "number of cycles" which is the offset + 6.
   initCWShaping();
@@ -1581,5 +1605,5 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
     volumeChangeFlag = false;
     UpdateVolumeField();
   }
- 
+
 }  // end loop()
