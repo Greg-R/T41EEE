@@ -341,9 +341,9 @@ long NCOFreq;
 //=============================== Any variable initialized to zero is done for documentation ===========================
 //=============================== purposes since the compiler does that for globals by default =========================
 //================== Global CW Correlation and FFT Variables =================
-float32_t DMAMEM cosBuffer2[256];
-float32_t sinBuffer[256];  // This can't be DMAMEM.  It will cause problems with the CW decoder.
-float32_t DMAMEM sinBuffer2[256];
+float32_t* cosBuffer = new float32_t[256];  // Was cosBuffer2; Greg KF5N February 7, 2024
+float32_t* sinBuffer = new float32_t[256];  // This can't be DMAMEM.  It will cause problems with the CW decoder.
+//float32_t DMAMEM sinBuffer2[256];
 float32_t DMAMEM cwRiseBuffer[256];
 float32_t DMAMEM cwFallBuffer[256];
 
@@ -626,7 +626,7 @@ time_t getTeensy3Time() {
   Return value:
     void
 
-*****/
+*****
 void Codec_gain() {
   uint8_t half_clip = 0;
   uint8_t quarter_clip = 0;
@@ -664,6 +664,7 @@ void Codec_gain() {
   half_clip = 0;     // clear "half clip" indicator that tells us that we should decrease gain
   quarter_clip = 0;  // clear indicator that, if not triggered, indicates that we can increase gain
 }
+*/
 
 // is added in Teensyduino 1.52 beta-4, so this can be deleted !?
 
@@ -1282,16 +1283,16 @@ FLASHMEM void setup() {
   SetDitLength(EEPROMData.currentWPM);
   SetTransmitDitLength(EEPROMData.currentWPM);
 
-  // Initialize buffer used by CW transmitter.
+  // Initialize buffers used by the CW transmitter and CW decoder.
   sineTone(EEPROMData.CWOffset + 6);  // This function takes "number of cycles" which is the offset + 6.
   initCWShaping();
   // Initialize buffer used by CW decoder.
-  float freq[4] = { 562.5, 656.5, 750.0, 843.75 };
-  float theta;
-  for (int kf = 0; kf < 255; kf++) {                                   //Calc sine wave
-    theta = (float)kf * TWO_PI * freq[EEPROMData.CWOffset] / 24000.0;  // theta = kf * 2 * PI * freqSideTone / 24000
-    sinBuffer[kf] = sin(theta);
-  }
+//  float freq[4] = { 562.5, 656.5, 750.0, 843.75 };
+//  float theta;
+//  for (int kf = 0; kf < 255; kf++) {                                   //Calc sine wave
+//    theta = (float)kf * TWO_PI * freq[EEPROMData.CWOffset] / 24000.0;  // theta = kf * 2 * PI * freqSideTone / 24000
+ //   sinBuffer[kf] = sin(theta);
+//  }
   filterEncoderMove = 0;
   fineTuneEncoderMove = 0L;
   xrState = RECEIVE_STATE;  // Enter loop() in receive state.  KF5N July 22, 2023

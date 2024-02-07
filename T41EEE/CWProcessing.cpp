@@ -36,6 +36,7 @@ long signalElapsedTime;
 long signalStart;
 long signalEnd;  // Start-end of dit or dah
 uint32_t gapLength;
+float freq[4] = { 562.5, 656.5, 750.0, 843.75 };
 
 // This enum is used by an experimental Morse decoder.
 enum states { state0,
@@ -98,12 +99,12 @@ FLASHMEM void SelectCWOffset() {
   // Now generate the values for the buffer which is used to create the CW tone.  The values are discrete because there must be whole cycles.
   if (EEPROMData.CWOffset < 4) sineTone(numCycles[EEPROMData.CWOffset]);
   // sinBuffer is used by the CW decoder.  Load the buffer per chosen frequency.
-  float32_t theta = 0.0;  //AFP 10-25-22
-  float freq[4] = { 562.5, 656.5, 750.0, 843.75 };
-  for (int kf = 0; kf < 255; kf++) {                                   //Calc sine wave
-    theta = (float)kf * TWO_PI * freq[EEPROMData.CWOffset] / 24000.0;  // theta = kf * 2 * PI * freqSideTone / 24000
-    sinBuffer[kf] = sin(theta);
-  }
+//  float32_t theta = 0.0;  //AFP 10-25-22
+//  float freq[4] = { 562.5, 656.5, 750.0, 843.75 };
+//  for (int kf = 0; kf < 255; kf++) {                                   //Calc sine wave
+//    theta = (float)kf * TWO_PI * freq[EEPROMData.CWOffset] / 24000.0;  // theta = kf * 2 * PI * freqSideTone / 24000
+//    sinBuffer[kf] = sin(theta);
+//  }
   EEPROMWrite();  // Save to EEPROM.
   // Clear the current CW filter graphics and then restore the bandwidth indicator bar.  KF5N July 30, 2023
   tft.writeTo(L2);
@@ -133,7 +134,7 @@ void DoCWReceiveProcessing() {  // All New AFP 09-19-22
   uint32_t corrResultIndexL;
   float32_t combinedCoeff;                          //AFP 02-06-22
   int audioTemp;                                    // KF5N
-  float freq[4] = { 562.5, 656.5, 750.0, 843.75 };  // User selectable CW offset frequencies.
+//  float freq[4] = { 562.5, 656.5, 750.0, 843.75 };  // User selectable CW offset frequencies.
 
   arm_fir_f32(&FIR_CW_DecodeL, float_buffer_L, float_buffer_L_CW, 256);  // AFP 10-25-22  Park McClellan FIR filter const Group delay
   arm_fir_f32(&FIR_CW_DecodeR, float_buffer_R, float_buffer_R_CW, 256);  // AFP 10-25-22

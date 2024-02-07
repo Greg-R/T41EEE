@@ -1,7 +1,7 @@
 
 #include "SDT.h"
 
-int16_t currentMode;
+PROGMEM int16_t currentMode;
 
 /*****
   Purpose: To save the configuration data (working variables) to EEPROM.

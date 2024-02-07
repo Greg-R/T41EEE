@@ -363,8 +363,8 @@ extern float32_t HP_DC_Filter_Coeffs2[];  // AFP 11-02-22
 
 //================== Global CW Correlation and FFT Variables =================
 extern float32_t audioMaxSquaredAve;
-extern float32_t sinBuffer[];     //AFP 02-02-22
-extern float32_t sinBuffer2[];
+extern float32_t* sinBuffer;     // Buffers commonized.  Greg KF5N, February 7, 2024.
+//extern float32_t sinBuffer2[];
 extern float32_t cwRiseBuffer[];
 extern float32_t cwFallBuffer[];
 extern int filterWidth;
@@ -706,7 +706,7 @@ extern byte currentDecoderIndex;
 extern int8_t menuStatus;  // 0 = no primary or secondary menu, 1 = primary, 2 = secondary
 extern uint8_t ANR_notch;
 extern uint8_t ANR_notchOn;
-extern uint8_t auto_codec_gain;
+//extern uint8_t auto_codec_gain;
 extern uint8_t display_S_meter_or_spectrum_state;
 extern uint8_t keyPressedOn;  //AFP 09-01-22
 extern uint8_t NR_first_time;
@@ -821,7 +821,7 @@ extern float32_t c[];
 extern float32_t c1[];
 extern float32_t coefficient_set[];
 extern float32_t corr[];
-extern float32_t cosBuffer2[];  //AFP 08-18-22
+extern float32_t* cosBuffer;  // Was cosBuffer2[]; this is a pointer to an array. Greg KF5N February 7, 2024
 extern float32_t d[];
 extern float32_t dbm;
 extern float32_t dbm_calibration;
@@ -1050,6 +1050,7 @@ void KeyOn();
 void KeyRingOn();
 void KeyTipOn();
 void LMSNoiseReduction(int16_t blockSize, float32_t *nrbuffer);
+void loadCalToneBuffers();
 float32_t log10f_fast(float32_t X);
 int MicOptions();
 int ModeOptions();

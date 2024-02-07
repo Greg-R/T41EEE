@@ -12,7 +12,7 @@ float32_t m_DecayAlpha = 0.01;
 /*****
   Purpose: Generate Array with variable sinewave frequency tone AFP 05-17-22
   Parameter list:
-    void
+    int numCycles  (This must be an integer value)
   Return value;
     void
 *****/
@@ -25,8 +25,9 @@ FLASHMEM void sineTone(int numCycles) {
   freqSideTone2 = numCycles * 24000 / 256;  // 750.0
   for (int kf = 0; kf < 256; kf++) {        //Calc: numCycles=8, 750 hz sine wave.
     theta = kf * 2 * PI * freqSideTone2 / 24000;
-    sinBuffer2[kf] = sin(theta);  // Used in CW_Excite.cpp
-    cosBuffer2[kf] = cos(theta);  // Used in CW_Excite.cpp
+    sinBuffer[kf] = sin(theta);  // Used in CW decoder. 
+//    sinBuffer[kf] = sin(theta);  // Used in CW_Excite.cpp
+    cosBuffer[kf] = cos(theta);  // Used in CW_Excite.cpp
   }
 }
 
@@ -134,20 +135,6 @@ const float32_t atanTable[68] = {
   0.800781565178043f
 };
 
-/*****
-  Purpose: Generate Array with variable sinewave frequency tone
-  Parameter list:
-    void
-  Return value;
-    void
-*****/
-/*void SinTone(long freqSideTone) { // AFP 10-25-22
-  float theta;
-  for (int kf = 0; kf < 255; kf++) { //Calc 750 hz sine wave.  use 750 because it is 8 whole cycles in 256 buffer.
-    theta = kf * 2 * PI * freqSideTone / 24000;
-    sinBuffer2[kf] = sin(theta);
-  }
-  }*/
 
 /*****
   Purpose: Correct Phase angle between I andQ channels
