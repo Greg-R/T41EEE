@@ -76,15 +76,8 @@ FLASHMEM void SelectCWFilter() {
 }
 
 
-//=================  AFP10-18-22 ================
 /*****
-  Purpose: Select CW Filter. EEPROMData.CWFilterIndex has these values:
-           0 = 840Hz
-           1 = 1kHz
-           2 = 1.3kHz
-           3 = 1.8kHz
-           4 = 2kHz
-           5 = Off
+  Purpose: Select CW tone frequency.
 
   Parameter list:
     void
@@ -98,13 +91,6 @@ FLASHMEM void SelectCWOffset() {
   EEPROMData.CWOffset = SubmenuSelect(CWOffsets, 5, EEPROMData.CWOffset);  // CWFilter is an array of strings.
   // Now generate the values for the buffer which is used to create the CW tone.  The values are discrete because there must be whole cycles.
   if (EEPROMData.CWOffset < 4) sineTone(numCycles[EEPROMData.CWOffset]);
-  // sinBuffer is used by the CW decoder.  Load the buffer per chosen frequency.
-//  float32_t theta = 0.0;  //AFP 10-25-22
-//  float freq[4] = { 562.5, 656.5, 750.0, 843.75 };
-//  for (int kf = 0; kf < 255; kf++) {                                   //Calc sine wave
-//    theta = (float)kf * TWO_PI * freq[EEPROMData.CWOffset] / 24000.0;  // theta = kf * 2 * PI * freqSideTone / 24000
-//    sinBuffer[kf] = sin(theta);
-//  }
   EEPROMWrite();  // Save to EEPROM.
   // Clear the current CW filter graphics and then restore the bandwidth indicator bar.  KF5N July 30, 2023
   tft.writeTo(L2);
@@ -159,7 +145,8 @@ void DoCWReceiveProcessing() {  // All New AFP 09-19-22
     goertzelMagnitude2 = goertzel_mag(256, freq[EEPROMData.CWOffset], 24000, float_buffer_R_CW);  //AFP 10-25-22
     goertzelMagnitude = (goertzelMagnitude1 + goertzelMagnitude2) / 2;
     //Combine Correlation and Gowetzel Coefficients
-    combinedCoeff = 10 * aveCorrResult * 100 * goertzelMagnitude;
+    combinedCoeff = 25 * aveCorrResult * goertzelMagnitude;
+//    Serial.printf("combinedCoeff = %f\n", combinedCoeff);
     // ==========  Changed CW decode "lock" indicator
     if (combinedCoeff > 50) {  // AFP 10-26-22
       tft.fillRect(700, 442, 15, 15, RA8875_GREEN);
@@ -744,7 +731,7 @@ FASTRUN void DoSignalHistogram(long val) {
 }
 
 /*****
-  Purpose: Calculate Goertzal Algorithn to enable decoding CW
+  Purpose: Calculate Goertzel Algorithn to enable decoding CW
 
   Parameter list:
     int numSamples,         // number of sample in data array

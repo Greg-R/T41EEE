@@ -98,20 +98,20 @@ struct band bands[NUMBER_OF_BANDS] = {  //AFP Changed 1-30-21 // G0ORX Changed A
 // Calibration done with TinySA as signal generator with -73dBm levels (S9) at the FT8 frequencies
 // with V010 QSD with the 12V mod of the pre-amp
 #if defined(ITU_REGION) && ITU_REGION == 1
-  3700000, 3500000, 3800000, "80M", DEMOD_LSB, -200, -3000, 1, HAM_BAND, -2.0, 20, 20,
-  7150000, 7000000, 7200000, "40M", DEMOD_LSB, -200, -3000, 1, HAM_BAND, -2.0, 20, 20,
+  3700000, 3500000, 3800000, "80M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20, 20,
+  7150000, 7000000, 7200000, "40M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20, 20,
 #elif defined(ITU_REGION) && ITU_REGION == 2
-  3700000, 3500000, 4000000, "80M", DEMOD_LSB, -200, -3000, 1, HAM_BAND, -2.0, 20, 20,
-  7150000, 7000000, 7300000, "40M", DEMOD_LSB, -200, -3000, 1, HAM_BAND, -2.0, 20, 20,
+  3700000, 3500000, 4000000, "80M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20, 20,
+  7150000, 7000000, 7300000, "40M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20, 20,
 #elif defined(ITU_REGION) && ITU_REGION == 3
-  3700000, 3500000, 3900000, "80M", DEMOD_LSB, -200, -3000, 1, HAM_BAND, -2.0, 20, 20,
-  7150000, 7000000, 7200000, "40M", DEMOD_LSB, -200, -3000, 1, HAM_BAND, -2.0, 20, 20,
+  3700000, 3500000, 3900000, "80M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20, 20,
+  7150000, 7000000, 7200000, "40M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20, 20,
 #endif
-  14200000, 14000000, 14350000, "20M", DEMOD_USB, 3000, 200, 1, HAM_BAND, 2.0, 20, 20,
-  18100000, 18068000, 18168000, "17M", DEMOD_USB, 3000, 200, 1, HAM_BAND, 2.0, 20, 20,
-  21200000, 21000000, 21450000, "15M", DEMOD_USB, 3000, 200, 1, HAM_BAND, 5.0, 20, 20,
-  24920000, 24890000, 24990000, "12M", DEMOD_USB, 3000, 200, 1, HAM_BAND, 6.0, 20, 20,
-  28350000, 28000000, 29700000, "10M", DEMOD_USB, 3000, 200, 1, HAM_BAND, 8.5, 20, 20
+  14200000, 14000000, 14350000, "20M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20, 20,
+  18100000, 18068000, 18168000, "17M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20, 20,
+  21200000, 21000000, 21450000, "15M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20, 20,
+  24920000, 24890000, 24990000, "12M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20, 20,
+  28350000, 28000000, 29700000, "10M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20, 20
 };
 
 const char *topMenus[] = { "CW Options", "RF Set", "VFO Select",
@@ -277,26 +277,25 @@ float32_t DMAMEM float_buffer_RTemp[2048];
 struct config_t EEPROMData;
 
 const struct SR_Descriptor SR[18] = {
-  // x_factor, x_offset and f1 to f4 are NOT USED ANYMORE !!!
-  //   SR_n ,            rate,  text,   f1,   f2,   f3,   f4, x_factor = pixels per f1 kHz in spectrum display, x_offset
-  { SAMPLE_RATE_8K, 8000, "  8k", " 1", " 2", " 3", " 4", 64.00, 11 },       // not OK
-  { SAMPLE_RATE_11K, 11025, " 11k", " 1", " 2", " 3", " 4", 43.10, 17 },     // not OK
-  { SAMPLE_RATE_16K, 16000, " 16k", " 4", " 4", " 8", "12", 64.00, 1 },      // OK
-  { SAMPLE_RATE_22K, 22050, " 22k", " 5", " 5", "10", "15", 58.05, 6 },      // OK
-  { SAMPLE_RATE_32K, 32000, " 32k", " 5", " 5", "10", "15", 40.00, 24 },     // OK, one more indicator?
-  { SAMPLE_RATE_44K, 44100, " 44k", "10", "10", "20", "30", 58.05, 6 },      // OK
-  { SAMPLE_RATE_48K, 48000, " 48k", "10", "10", "20", "30", 53.33, 11 },     // OK
-  { SAMPLE_RATE_50K, 50223, " 50k", "10", "10", "20", "30", 53.33, 11 },     // NOT OK
-  { SAMPLE_RATE_88K, 88200, " 88k", "20", "20", "40", "60", 58.05, 6 },      // OK
-  { SAMPLE_RATE_96K, 96000, " 96k", "20", "20", "40", "60", 53.33, 12 },     // OK
-  { SAMPLE_RATE_100K, 100000, "100k", "20", "20", "40", "60", 53.33, 12 },   // NOT OK
-  { SAMPLE_RATE_101K, 100466, "101k", "20", "20", "40", "60", 53.33, 12 },   // NOT OK
-  { SAMPLE_RATE_176K, 176400, "176k", "40", "40", "80", "120", 58.05, 6 },   // OK
-  { SAMPLE_RATE_192K, 192000, "192k", "40", "40", "80", "120", 53.33, 12 },  // OK    THIS IS USED IN THE T41
-  { SAMPLE_RATE_234K, 234375, "234k", "40", "40", "80", "120", 53.33, 12 },  // NOT OK
-  { SAMPLE_RATE_256K, 256000, "256k", "40", "40", "80", "120", 53.33, 12 },  // NOT OK
-  { SAMPLE_RATE_281K, 281000, "281k", "40", "40", "80", "120", 53.33, 12 },  // NOT OK
-  { SAMPLE_RATE_353K, 352800, "353k", "40", "40", "80", "120", 53.33, 12 }   // NOT OK
+  //   SR_n,        rate,  text
+  { SAMPLE_RATE_8K, 8000, "  8k"},       // not OK
+  { SAMPLE_RATE_11K, 11025, " 11k"},     // not OK
+  { SAMPLE_RATE_16K, 16000, " 16k"},      // OK
+  { SAMPLE_RATE_22K, 22050, " 22k"},      // OK
+  { SAMPLE_RATE_32K, 32000, " 32k"},     // OK, one more indicator?
+  { SAMPLE_RATE_44K, 44100, " 44k"},      // OK
+  { SAMPLE_RATE_48K, 48000, " 48k"},     // OK
+  { SAMPLE_RATE_50K, 50223, " 50k"},     // NOT OK
+  { SAMPLE_RATE_88K, 88200, " 88k"},      // OK
+  { SAMPLE_RATE_96K, 96000, " 96k"},     // OK
+  { SAMPLE_RATE_100K, 100000, "100k"},   // NOT OK
+  { SAMPLE_RATE_101K, 100466, "101k"},   // NOT OK
+  { SAMPLE_RATE_176K, 176400, "176k"},   // OK
+  { SAMPLE_RATE_192K, 192000, "192k"},  // OK    THIS IS USED IN THE T41
+  { SAMPLE_RATE_234K, 234375, "234k"},  // NOT OK
+  { SAMPLE_RATE_256K, 256000, "256k"},  // NOT OK
+  { SAMPLE_RATE_281K, 281000, "281k"},  // NOT OK
+  { SAMPLE_RATE_353K, 352800, "353k"}   // NOT OK
 };
 
 const arm_cfft_instance_f32 *S;
@@ -338,8 +337,6 @@ dispSc displayScale[] =  //r *dbText,dBScale, pixelsPerDB, baseOffset, offsetInc
 long NCOFreq;
 
 //======================================== Global variables declarations ===============================================
-//=============================== Any variable initialized to zero is done for documentation ===========================
-//=============================== purposes since the compiler does that for globals by default =========================
 //================== Global CW Correlation and FFT Variables =================
 float32_t* cosBuffer = new float32_t[256];  // Was cosBuffer2; Greg KF5N February 7, 2024
 float32_t* sinBuffer = new float32_t[256];  // This can't be DMAMEM.  It will cause problems with the CW decoder.
@@ -659,12 +656,14 @@ void Codec_gain() {
       }
       AudioNoInterrupts();
       AudioInterrupts();
+      Serial.printf("bands[EEPROMData.currentBand].RFgain = %d\n", bands[EEPROMData.currentBand].RFgain);
     }
   }
   half_clip = 0;     // clear "half clip" indicator that tells us that we should decrease gain
   quarter_clip = 0;  // clear indicator that, if not triggered, indicates that we can increase gain
 }
 */
+
 
 // is added in Teensyduino 1.52 beta-4, so this can be deleted !?
 
@@ -1242,6 +1241,7 @@ FLASHMEM void setup() {
     MyDelay(2000);
     EnableButtonInterrupts();
     SaveAnalogSwitchValues();
+    delay(3000);
     EEPROMRead();  // Call to reset switch matrix values
   }                // KD0RC end
   Remove this line and the matching block comment line above to activate. */
@@ -1266,11 +1266,6 @@ FLASHMEM void setup() {
   // Turn off LOs.
   si5351.output_enable(SI5351_CLK2, 0);
   si5351.output_enable(SI5351_CLK1, 0);
-  //if (EEPROMData.xmtMode == CW_MODE && EEPROMData.decoderFlag == DECODE_OFF) {
-  //  EEPROMData.decoderFlag = DECODE_OFF;  // JJP 7/1/23
-  //} else {
-  //  EEPROMData.decoderFlag = DECODE_ON;  // Turns decoder on JJP 7/1/23
-  //}
 
   // Initialize the frequency setting based on the last used frequency stored to EEPROM.
   TxRxFreq = EEPROMData.centerFreq = EEPROMData.lastFrequencies[EEPROMData.currentBand][EEPROMData.activeVFO];
@@ -1286,13 +1281,6 @@ FLASHMEM void setup() {
   // Initialize buffers used by the CW transmitter and CW decoder.
   sineTone(EEPROMData.CWOffset + 6);  // This function takes "number of cycles" which is the offset + 6.
   initCWShaping();
-  // Initialize buffer used by CW decoder.
-//  float freq[4] = { 562.5, 656.5, 750.0, 843.75 };
-//  float theta;
-//  for (int kf = 0; kf < 255; kf++) {                                   //Calc sine wave
-//    theta = (float)kf * TWO_PI * freq[EEPROMData.CWOffset] / 24000.0;  // theta = kf * 2 * PI * freqSideTone / 24000
- //   sinBuffer[kf] = sin(theta);
-//  }
   filterEncoderMove = 0;
   fineTuneEncoderMove = 0L;
   xrState = RECEIVE_STATE;  // Enter loop() in receive state.  KF5N July 22, 2023

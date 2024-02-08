@@ -423,9 +423,6 @@ void ProcessIQData2(int toneFreq) {
       ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
     }
 
-//    if (auto_codec_gain == 1) {
-//      Codec_gain();
-//    }
   }
 }
 

@@ -534,9 +534,8 @@ void ProcessIQData()
       Q_out_R.playBuffer(); // play it !
     }
 
-//    if (auto_codec_gain == 1) {
 //      Codec_gain();
-//    }
+
     elapsed_micros_sum = elapsed_micros_sum + usec;
     elapsed_micros_idx_t++;
   } // end of if(audio blocks available)

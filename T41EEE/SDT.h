@@ -364,7 +364,6 @@ extern float32_t HP_DC_Filter_Coeffs2[];  // AFP 11-02-22
 //================== Global CW Correlation and FFT Variables =================
 extern float32_t audioMaxSquaredAve;
 extern float32_t* sinBuffer;     // Buffers commonized.  Greg KF5N, February 7, 2024.
-//extern float32_t sinBuffer2[];
 extern float32_t cwRiseBuffer[];
 extern float32_t cwFallBuffer[];
 extern int filterWidth;
@@ -470,7 +469,6 @@ struct config_t {
   long centerFreq = 7030000L;  // 4 bytes
   // New user config data                                JJP 7-3-23
   char mapFileName[50] = MAP_FILE_NAME;
-//  char myCall[10] = MY_CALL;
   char myTimeZone[10] = MY_TIMEZONE;
   int separationCharacter = (int)'.';  // JJP 7/25/23
   int paddleFlip = PADDLE_FLIP;        // 0 = right paddle = DAH, 1 = DIT
@@ -620,12 +618,6 @@ typedef struct SR_Descriptor {
   const uint8_t SR_n;
   const uint32_t rate;
   const char *const text;
-  const char *const f1;
-  const char *const f2;
-  const char *const f3;
-  const char *const f4;
-  const float32_t x_factor;
-  const uint8_t x_offset;
 } SR_Desc;
 extern const struct SR_Descriptor SR[];
 
@@ -706,7 +698,6 @@ extern byte currentDecoderIndex;
 extern int8_t menuStatus;  // 0 = no primary or secondary menu, 1 = primary, 2 = secondary
 extern uint8_t ANR_notch;
 extern uint8_t ANR_notchOn;
-//extern uint8_t auto_codec_gain;
 extern uint8_t display_S_meter_or_spectrum_state;
 extern uint8_t keyPressedOn;  //AFP 09-01-22
 extern uint8_t NR_first_time;
@@ -970,7 +961,7 @@ void CalcFIRCoeffs(float *coeffs_I, int numCoeffs, float32_t fc, float32_t Astop
 void CalcCplxFIRCoeffs(float *coeffs_I, float *coeffs_Q, int numCoeffs, float32_t FLoCut, float32_t FHiCut, float SampleRate);
 void CaptureKeystrokes();
 int CalibrateOptions();    // AFP 10-22-22, changed JJP 2/3/23
-void Codec_gain();
+//void Codec_gain();
 uint16_t Color565(uint8_t r, uint8_t g, uint8_t b);
 void ControlFilterF();
 int CreateMapList(char ptrMaps[10][50], int *count);
