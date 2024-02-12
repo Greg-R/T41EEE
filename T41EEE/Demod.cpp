@@ -1,6 +1,5 @@
-#ifndef BEENHERE
+
 #include "SDT.h"
-#endif
 
 float32_t dc = 0.0;
 float32_t dc_insert = 0.0;
@@ -15,6 +14,10 @@ float32_t SAM_carrier = 0.0;                 //AFP 11-02-22
 float32_t SAM_lowpass = 2700.0;              //AFP 11-02-22
 float32_t SAM_carrier_freq_offset = 0.0;     //AFP 11-02-22
 float32_t SAM_carrier_freq_offsetOld = 0.0;  //AFP 11-02-22
+float32_t ai, bi, aq, bq;
+float32_t ai_ps, bi_ps, aq_ps, bq_ps;
+float32_t audiou;
+float32_t Cos = 0.0;
 
 /*****  AFP 11-03-22
   Purpose: AMDecodeSAM()

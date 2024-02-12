@@ -1,6 +1,5 @@
-#ifndef BEENHERE
+
 #include "SDT.h"
-#endif
 
 // Updates to DoReceiveCalibration() and DoXmitCalibrate() functions by KF5N.  July 20, 2023
 // Updated PlotCalSpectrum() function to clean up graphics.  KF5N August 3, 2023
@@ -11,6 +10,33 @@ int val;
 float correctionIncrement;  //AFP 2-7-23
 int userScale, userZoomIndex, userxmtMode;
 int transmitPowerLevelTemp, cwFreqOffsetTemp;
+uint16_t base_y = SPECTRUM_BOTTOM;
+int calTypeFlag = 0;
+int IQCalType;
+
+
+/*****
+  Purpose: Load buffers used to modulate the transmitter during calibration.
+          The prologue must restore the buffers for normal operation!
+
+   Parameter List:
+      void
+
+   Return value:
+      void
+ *****/
+FLASHMEM void loadCalToneBuffers() {
+  float theta;
+  float32_t tones[2]{ 750.0, 3000.0 };
+  // This loop creates the sinusoidal waveform for the tone.
+  for (int kf = 0; kf < 256; kf++) {
+    theta = kf * 2.0 * PI * tones[EEPROMData.calFreq] / 24000;
+    sinBuffer[kf] = sin(theta);
+    cosBuffer[kf] = cos(theta);
+  }
+}
+
+
 /*****
   Purpose: Set up prior to IQ calibrations.  New function.  KF5N August 14, 2023
   These things need to be saved here and restored in the prologue function:
@@ -31,17 +57,18 @@ void CalibratePreamble(int setZoom) {
   radioState = CW_TRANSMIT_STRAIGHT_STATE;                 // KF5N
   transmitPowerLevelTemp = EEPROMData.transmitPowerLevel;  //AFP 05-11-23
   cwFreqOffsetTemp = EEPROMData.CWOffset;
-  EEPROMData.CWOffset = 2;            // 750 Hz
-  EEPROMData.transmitPowerLevel = 5;  //AFP 02-09-23  Set to 5 watts as a precaution to protect the power amplifier in case it is connected.
-  EEPROMData.powerOutCW[EEPROMData.currentBand] = (-.0133 * EEPROMData.transmitPowerLevel * EEPROMData.transmitPowerLevel + .7884 * EEPROMData.transmitPowerLevel + 4.5146) * EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];
+  //EEPROMData.CWOffset = 2;            // 750 Hz
+  //EEPROMData.transmitPowerLevel = 5;  //AFP 02-09-23  Set to 5 watts as a precaution to protect the power amplifier in case it is connected.
+  //EEPROMData.powerOutCW[EEPROMData.currentBand] = (-.0133 * EEPROMData.transmitPowerLevel * EEPROMData.transmitPowerLevel + .7884 * EEPROMData.transmitPowerLevel + 4.5146) * EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];
   //  Serial.printf("preamble EEPROMData.powerOutCW = %f\n", EEPROMData.powerOutCW[EEPROMData.currentBand]);
-  //  modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
-  //  modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
-  modeSelectOutExL.gain(0, 1);               //AFP 10-21-22
-  modeSelectOutExR.gain(0, 1);               //AFP 10-21-22
+  modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
+  modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
+  //modeSelectOutExL.gain(0, 1);               //AFP 10-21-22
+  //modeSelectOutExR.gain(0, 1);               //AFP 10-21-22
   userxmtMode = EEPROMData.xmtMode;          // Store the user's mode setting.  KF5N July 22, 2023
   userZoomIndex = EEPROMData.spectrum_zoom;  // Save the zoom index so it can be reset at the conclusion.  KF5N August 12, 2023
   zoomIndex = setZoom - 1;
+  loadCalToneBuffers();  // Restore in the prologue.
   ButtonZoom();
   RedrawDisplayScreen();  // Erase any existing spectrum trace data.
   tft.writeTo(L2);        // Erase the bandwidth bar.  KF5N August 16, 2023
@@ -87,6 +114,7 @@ void CalibratePreamble(int setZoom) {
   ShowSpectrumdBScale();
 }
 
+
 /*****
   Purpose: Shut down and clean up after IQ calibrations.  New function.  KF5N August 14, 2023
 
@@ -109,12 +137,13 @@ void CalibratePrologue() {
   NCOFreq = 0L;
   xrState = RECEIVE_STATE;
   calibrateFlag = 0;  // KF5N
+  EEPROMData.CWOffset = cwFreqOffsetTemp;                  // Return user selected CW offset frequency.
+  sineTone(EEPROMData.CWOffset + 6);  // This function takes "number of cycles" which is the offset + 6.
   //calFreqShift = 0;
   EEPROMData.currentScale = userScale;  //  Restore vertical scale to user preference.  KF5N
   ShowSpectrumdBScale();
   EEPROMData.xmtMode = userxmtMode;                        // Restore the user's floor setting.  KF5N July 27, 2023
   EEPROMData.transmitPowerLevel = transmitPowerLevelTemp;  // Restore the user's transmit power level setting.  KF5N August 15, 2023
-  EEPROMData.CWOffset = cwFreqOffsetTemp;                  // Return user selected CW offset frequency.
   EEPROMWrite();                                           // Save calibration numbers and configuration.  KF5N August 12, 2023
   zoomIndex = userZoomIndex - 1;
   ButtonZoom();     // Restore the user's zoom setting.  Note that this function also modifies EEPROMData.spectrum_zoom.
@@ -131,6 +160,9 @@ void CalibratePrologue() {
   return;
 }
 
+
+
+
 /*****
   Purpose: Combined input/ output for the purpose of calibrating the receive IQ
 
@@ -146,13 +178,13 @@ void DoReceiveCalibrate() {
   int calFreqTemp, calFreqShift;
   bool corrChange = false;
   float correctionIncrement = 0.01;
+  calFreqTemp = EEPROMData.calFreq;
+  EEPROMData.calFreq = 1;  // Receive calibration currently must use 3 kHz.
   CalibratePreamble(0);                                                       // Set zoom to 1X.
                                                                               //  if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) calFreqShift = 24000 - 2000;  //  LSB offset.  KF5N
                                                                               //  if (bands[EEPROMData.currentBand].mode == DEMOD_USB) calFreqShift = 24000 + 2250;  //  USB offset.  KF5N
   if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) calFreqShift = 24000;  //  LSB offset.  KF5N
   if (bands[EEPROMData.currentBand].mode == DEMOD_USB) calFreqShift = 24000;  //  USB offset.  KF5N
-  calFreqTemp = EEPROMData.calFreq;
-  EEPROMData.calFreq = 1;  // Receive calibration currently must use 3 kHz.
   SetFreqCal(calFreqShift);
   calTypeFlag = 0;  // RX cal
 
@@ -395,16 +427,7 @@ void ProcessIQData2(int toneFreqIndex) {
   float bandOutputFactor;                                          // AFP 2-11-23
   float rfGainValue;                                               // AFP 2-11-23
   float recBandFactor[7] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };  // AFP 2-11-23  KF5N uniform values
-  float theta;
-  float32_t tones[2]{ 750.0, 3000.0 };
-  float32_t cosBuffer3[256];
-  float32_t sinBuffer3[256];
-  // This loop creates the sinusoidal waveform for the tone.
-  for (int kf = 0; kf < 256; kf++) {
-    theta = kf * 2.0 * PI * tones[toneFreqIndex] / 24000;
-    sinBuffer3[kf] = sin(theta);
-    cosBuffer3[kf] = cos(theta);
-  }
+
   /**********************************************************************************  AFP 12-31-20
         Get samples from queue buffers
         Teensy Audio Library stores ADC data in two buffers size=128, Q_in_L and Q_in_R as initiated from the audio lib.
@@ -416,9 +439,9 @@ void ProcessIQData2(int toneFreqIndex) {
 
   bandOutputFactor = 0.127;  // This is a remnant of the calibration process which included the power amplifier.
   // Generate I and Q for the transmit or receive calibration.  KF5N
-  if (IQChoice == 2 || IQChoice == 3 || IQChoice == 4) {                                   // KF5N
-    arm_scale_f32(cosBuffer3, bandOutputFactor, float_buffer_L_EX, 256);  // AFP 2-11-23 Use pre-calculated sin & cos instead of Hilbert
-    arm_scale_f32(sinBuffer3, bandOutputFactor, float_buffer_R_EX, 256);  // AFP 2-11-23 Sidetone = 3000
+  if (IQChoice == 2 || IQChoice == 3) {                                   // KF5N
+    arm_scale_f32(cosBuffer, bandOutputFactor, float_buffer_L_EX, 256);  // AFP 2-11-23 Use pre-calculated sin & cos instead of Hilbert
+    arm_scale_f32(sinBuffer, bandOutputFactor, float_buffer_R_EX, 256);  // AFP 2-11-23 Sidetone = 3000
   }
 
   if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
@@ -479,7 +502,7 @@ void ProcessIQData2(int toneFreqIndex) {
       Q_in_R.freeBuffer();
     }
 
-    rfGainValue = pow(10, (float)EEPROMData.rfGainAllBands / 20);                        //AFP 2-11-23
+    rfGainValue = pow(10, (float)EEPROMData.rfGain[EEPROMData.currentBand] / 20);                        //AFP 2-11-23
     arm_scale_f32(float_buffer_L, rfGainValue, float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 2-11-23
     arm_scale_f32(float_buffer_R, rfGainValue, float_buffer_R, BUFFER_SIZE * N_BLOCKS);  //AFP 2-11-23
 
@@ -512,9 +535,6 @@ void ProcessIQData2(int toneFreqIndex) {
       ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
     }
 
-    if (auto_codec_gain == 1) {
-      Codec_gain();
-    }
   }
 }
 

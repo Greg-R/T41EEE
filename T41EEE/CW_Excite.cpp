@@ -56,8 +56,8 @@ void CW_ExciterIQData(int shaping) //AFP 08-20-22
   uint32_t N_BLOCKS_EX = N_B_EX;
   float32_t powerScaling;
  
-  arm_scale_f32 (cosBuffer2, 0.127, float_buffer_L_EX, 256);  // AFP 10-13-22 Use pre-calculated sin & cos instead of Hilbert
-  arm_scale_f32 (sinBuffer2, 0.127, float_buffer_R_EX, 256);  // AFP 10-13-22
+  arm_scale_f32 (cosBuffer, 0.127, float_buffer_L_EX, 256);  // AFP 10-13-22 Use pre-calculated sin & cos instead of Hilbert
+  arm_scale_f32 (sinBuffer, 0.127, float_buffer_R_EX, 256);  // AFP 10-13-22
   /**********************************************************************************
             Additional scaling, if nesessary to compensate for down-stream gain variations
    **********************************************************************************/

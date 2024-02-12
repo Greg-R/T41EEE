@@ -1,8 +1,30 @@
-#ifndef BEENHERE
+
 #include "SDT.h"
-#endif
 
 char atom, currentAtom;
+int8_t first_block = 1;
+uint8_t NB_on = 0;
+uint8_t wait_flag;
+float32_t audiotmp = 0.0f;
+//float32_t audioSpectBuffer[1024];  // This can't be DMAMEM.  It will break the S-Meter.  KF5N October 10, 2023
+float32_t* audioSpectBuffer = new float32_t[1024];  // Assign to the heap.
+float32_t sample_meanL = 0.0;
+float32_t sample_meanR = 0.0;
+float32_t wold = 0.0f;
+
+//=== CW Filter ===
+float32_t CW_AudioFilter1_state[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };  // AFP 10-18-22
+float32_t CW_AudioFilter2_state[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };  // AFP 10-18-22
+float32_t CW_AudioFilter3_state[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };  // AFP 10-18-22
+float32_t CW_AudioFilter4_state[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };  // AFP 10-18-22
+float32_t CW_AudioFilter5_state[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };  // AFP 10-18-22
+//---------  Code Filter instance -----
+arm_biquad_cascade_df2T_instance_f32 S1_CW_AudioFilter1 = { 6, CW_AudioFilter1_state, CW_AudioFilterCoeffs1 };  // AFP 10-18-22
+arm_biquad_cascade_df2T_instance_f32 S1_CW_AudioFilter2 = { 6, CW_AudioFilter2_state, CW_AudioFilterCoeffs2 };  // AFP 10-18-22
+arm_biquad_cascade_df2T_instance_f32 S1_CW_AudioFilter3 = { 6, CW_AudioFilter3_state, CW_AudioFilterCoeffs3 };  // AFP 10-18-22
+arm_biquad_cascade_df2T_instance_f32 S1_CW_AudioFilter4 = { 6, CW_AudioFilter4_state, CW_AudioFilterCoeffs4 };  // AFP 10-18-22
+arm_biquad_cascade_df2T_instance_f32 S1_CW_AudioFilter5 = { 6, CW_AudioFilter5_state, CW_AudioFilterCoeffs5 };  // AFP 10-18-22
+//=== end CW Filter ===
 
 /*****
   Purpose: Read audio from Teensy Audio Library
@@ -34,6 +56,7 @@ void ProcessIQData()
   float32_t audioMaxSquared;
   uint32_t AudioMaxIndex;
   float rfGainValue;
+  int rfGain;
 
   // Are there at least N_BLOCKS buffers in each channel available ?  N_BLOCKS should be 16.
   if ( (uint32_t) Q_in_L.available() > N_BLOCKS && (uint32_t) Q_in_R.available() > N_BLOCKS ) {     // Removed addition of 0 to N_BLOCKS.
@@ -69,7 +92,9 @@ void ProcessIQData()
     resetTuningFlag = 0;
 
     //  Set RFGain for all bands.
-    rfGainValue = pow(10, (float)EEPROMData.rfGainAllBands / 20);
+    if(EEPROMData.autoGain) rfGain = EEPROMData.rfGainCurrent;
+       else rfGain = EEPROMData.rfGain[EEPROMData.currentBand];
+    rfGainValue = pow(10, (float)rfGain / 20);  // KF5N January 16 2024
     arm_scale_f32 (float_buffer_L, rfGainValue, float_buffer_L, BUFFER_SIZE * N_BLOCKS); //AFP 09-27-22
     arm_scale_f32 (float_buffer_R, rfGainValue, float_buffer_R, BUFFER_SIZE * N_BLOCKS); //AFP 09-27-22
     /**********************************************************************************  AFP 12-31-20
@@ -509,9 +534,8 @@ void ProcessIQData()
       Q_out_R.playBuffer(); // play it !
     }
 
-    if (auto_codec_gain == 1) {
-      Codec_gain();
-    }
+//      Codec_gain();
+
     elapsed_micros_sum = elapsed_micros_sum + usec;
     elapsed_micros_idx_t++;
   } // end of if(audio blocks available)

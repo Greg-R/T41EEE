@@ -1,6 +1,9 @@
-#ifndef BEENHERE
+
 #include "SDT.h"
-#endif
+
+int micChoice;
+int micGainChoice;
+int splitOn = 0;
 
 // Updates by KF5N to CalibrateOptions() function. July 20, 2023
 // Updated receive calibration code to clean up graphics.  KF5N August 3, 2023
@@ -50,13 +53,12 @@ int CalibrateOptions() {
 
     case 1:  // CW PA Cal
       EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand] = GetEncoderValueLive(-2.0, 2.0, EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand], 0.001, (char *)"CW PA Cal: ");
-      //      EEPROMData.powerOutCW[EEPROMData.currentBand] = (-.0133 * EEPROMData.transmitPowerLevel * EEPROMData.transmitPowerLevel + .7884 * EEPROMData.transmitPowerLevel + 4.5146) * EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];  // AFP 10-21-22
+      EEPROMData.powerOutCW[EEPROMData.currentBand] = (-.0133 * EEPROMData.transmitPowerLevel * EEPROMData.transmitPowerLevel + .7884 * EEPROMData.transmitPowerLevel + 4.5146) * EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];
       val = ReadSelectedPushButton();
       if (val != BOGUS_PIN_READ) {        // Any button press??
         val = ProcessButtonPress(val);    // Use ladder value to get menu choice
         if (val == MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-          //         EEPROMData.EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand] = EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];
           EEPROMWrite();
           calibrateFlag = 0;
           IQChoice = 5;
@@ -87,6 +89,7 @@ int CalibrateOptions() {
         val = ProcessButtonPress(val);    // Use ladder value to get menu choice
         if (val == MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
+          val = ReadSelectedPushButton();
           EEPROMWrite();
           calibrateFlag = 0;
           IQChoice = 5;
@@ -133,6 +136,7 @@ int CalibrateOptions() {
       DrawBandWidthIndicatorBar();  // AFP 10-20-22
       ShowFrequency();
       BandInformation();
+
       calibrateFlag = 0;
       // centerTuneFlag = 1;  Not used in revised tuning scheme.  July 22, 2023
       modeSelectOutExL.gain(0, 0);
@@ -144,6 +148,7 @@ int CalibrateOptions() {
       micChoice = -1;
       break;
   }
+  UpdateEqualizerField(EEPROMData.receiveEQFlag, EEPROMData.xmitEQFlag);
   return 1;
 }
 // ==============  AFP 10-22-22 ==================
@@ -456,15 +461,15 @@ int EqualizerRecOptions() {
       EEPROMData.receiveEQFlag = false;
       break;
     case 2:
-      for (int iFreq = 0; iFreq < EQUALIZER_CELL_COUNT; iFreq++) {
-      }
       ProcessEqualizerChoices(0, (char *)"Receive Equalizer");
-      EEPROMWrite();
-      RedrawDisplayScreen();
       break;
     case 3:
+      return 0;  // Do nothing and return.
       break;
   }
+  EEPROMWrite();
+  RedrawDisplayScreen();
+  UpdateEqualizerField(EEPROMData.receiveEQFlag, EEPROMData.xmitEQFlag);
   return 0;
 }
 
@@ -492,12 +497,14 @@ int EqualizerXmtOptions() {
       break;
     case 2:
       ProcessEqualizerChoices(1, (char *)"Transmit Equalizer");
-      EEPROMWrite();
-      RedrawDisplayScreen();
       break;
-    case 3:
+    case 3:  // Do nothing and exit.
+      return 0;
       break;
   }
+  EEPROMWrite();
+  RedrawDisplayScreen();
+  UpdateEqualizerField(EEPROMData.receiveEQFlag, EEPROMData.xmitEQFlag);
   return 0;
 }
 
@@ -608,24 +615,20 @@ int MicOptions()  // AFP 09-22-22 All new
     int           an index into the band array
 *****/
 int RFOptions() {
-  const char *rfOptions[] = { "Power level", "Gain", "Cancel" };
+  const char *rfOptions[] = { "Power level", "Gain", "Auto-Gain On", "Auto-Gain Off", "Cancel" };
   int rfSet = 0;
   int returnValue = 0;
 
-  rfSet = SubmenuSelect(rfOptions, 3, rfSet);
+  rfSet = SubmenuSelect(rfOptions, 5, rfSet);
 
   switch (rfSet) {
     case 0:  // AFP 10-21-22
       EEPROMData.transmitPowerLevel = (float)GetEncoderValue(1, 20, EEPROMData.transmitPowerLevel, 1, (char *)"Power: ");
       if (EEPROMData.xmtMode == CW_MODE) {                                                                                                                                                                                                        //AFP 10-13-22
         EEPROMData.powerOutCW[EEPROMData.currentBand] = (-.0133 * EEPROMData.transmitPowerLevel * EEPROMData.transmitPowerLevel + .7884 * EEPROMData.transmitPowerLevel + 4.5146) * EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];  //  afp 10-21-22
-
-        //        EEPROMData.EEPROMData.powerOutCW[EEPROMData.currentBand] = EEPROMData.powerOutCW[EEPROMData.currentBand];  //AFP 10-21-22
-        //EEPROMWrite();//AFP 10-21-22
-      } else {  //AFP 10-13-22
+      } else {                                                                                                                                                                                                                                    //AFP 10-13-22
         if (EEPROMData.xmtMode == SSB_MODE) {
-          EEPROMData.powerOutSSB[EEPROMData.currentBand] = (-.0133 * EEPROMData.transmitPowerLevel * EEPROMData.transmitPowerLevel + .7884 * EEPROMData.transmitPowerLevel + 4.5146) * EEPROMData.SSBPowerCalibrationFactor[EEPROMData.currentBand];  // afp 10-21-22
-                                                                                                                                                                                                                                                      //         EEPROMData.EEPROMData.powerOutSSB[EEPROMData.currentBand] = EEPROMData.powerOutSSB[EEPROMData.currentBand];                                                                                                //AFP 10-21-22
+          EEPROMData.powerOutSSB[EEPROMData.currentBand] = (-.0133 * EEPROMData.transmitPowerLevel * EEPROMData.transmitPowerLevel + .7884 * EEPROMData.transmitPowerLevel + 4.5146) * EEPROMData.SSBPowerCalibrationFactor[EEPROMData.currentBand];  // afp 10-21-22                                                                                                                                                                                                                                                      //         EEPROMData.EEPROMData.powerOutSSB[EEPROMData.currentBand] = EEPROMData.powerOutSSB[EEPROMData.currentBand];                                                                                                //AFP 10-21-22
         }
       }
       EEPROMData.transmitPowerLevel = EEPROMData.transmitPowerLevel;  //AFP 10-21-22
@@ -634,11 +637,23 @@ int RFOptions() {
       BandInformation();
       break;
 
-    case 1:                                                                                                        // Gain
-      EEPROMData.rfGainAllBands = GetEncoderValue(-60, 10, EEPROMData.rfGainAllBands, 5, (char *)"RF Gain dB: ");  // Argument: min, max, start, increment
+    case 1:                                                                                                                                        // Gain
+      EEPROMData.rfGain[EEPROMData.currentBand] = GetEncoderValue(-60, 10, EEPROMData.rfGain[EEPROMData.currentBand], 5, (char *)"RF Gain dB: ");  // Argument: min, max, start, increment
       //EEPROMData.rfGainAllBands = EEPROMData.rfGainAllBands;
       EEPROMWrite();
-      returnValue = EEPROMData.rfGainAllBands;
+      returnValue = EEPROMData.rfGain[EEPROMData.currentBand];
+      break;
+
+    case 2:                        // Auto-Gain On                                                                                                  // Gain
+      EEPROMData.autoGain = true;  // Argument: min, max, start, increment
+      EEPROMWrite();
+      returnValue = true;
+      break;
+
+    case 3:  // Auto-Gain Off
+      EEPROMData.autoGain = false;
+      EEPROMWrite();
+      returnValue = false;
       break;
 
       // Where is the 3rd option and default???

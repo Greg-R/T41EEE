@@ -1,6 +1,5 @@
-#ifndef BEENHERE
+
 #include "SDT.h"
-#endif
 
 /*****
   Purpose: Create I and Q signals from Mic input

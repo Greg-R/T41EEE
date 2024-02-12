@@ -1,6 +1,52 @@
-#ifndef BEENHERE
+
 #include "SDT.h"
-#endif
+
+#define HISTOGRAM_ELEMENTS 750
+
+float32_t aveCorrResultR;  // Used in running averages; must not be inside function.
+float32_t aveCorrResultL;
+//float32_t float_Corr_BufferR[511] = {0};  // DMAMEM may cause problems with these two buffers and CW decode.
+//float32_t float_Corr_BufferL[511] = {0};
+float32_t* float_Corr_BufferR = new float32_t[511];
+float32_t* float_Corr_BufferL = new float32_t[511];
+float CWLevelTimer;
+float CWLevelTimerOld;
+float goertzelMagnitude;
+char decodeBuffer[33] = {0};  // The buffer for holding the decoded characters.  Increased to 33.  KF5N October 29, 2023
+int endGapFlag = 0;
+int topGapIndex;
+int topGapIndexOld;
+//int32_t gapHistogram[HISTOGRAM_ELEMENTS];  // DMAMEM???
+//int32_t signalHistogram[HISTOGRAM_ELEMENTS];
+int32_t* gapHistogram = new int32_t[HISTOGRAM_ELEMENTS];
+int32_t* signalHistogram = new int32_t[HISTOGRAM_ELEMENTS];
+long valRef1;
+long valRef2;
+long gapRef1;
+int valFlag = 0;
+long signalStartOld = 0;
+long aveDitLength = 80;
+long aveDahLength = 200;
+float thresholdGeometricMean = 140.0;  // This changes as decoder runs
+float thresholdArithmeticMean;
+int dahLength;
+int gapAtom;  // Space between atoms
+int gapChar;  // Space between characters
+long signalElapsedTime;
+long signalStart;
+long signalEnd;  // Start-end of dit or dah
+uint32_t gapLength;
+float freq[4] = { 562.5, 656.5, 750.0, 843.75 };
+
+// This enum is used by an experimental Morse decoder.
+enum states { state0,
+              state1,
+              state2,
+              state3,
+              state4,
+              state5,
+              state6 };
+states decodeStates = state0;
 
 //=================  AFP10-18-22 ================
 /*****
@@ -21,24 +67,17 @@
 FLASHMEM void SelectCWFilter() {
   const char *CWFilter[] = { "0.8kHz", "1.0kHz", "1.3kHz", "1.8kHz", "2.0kHz", " Off " };
   EEPROMData.CWFilterIndex = SubmenuSelect(CWFilter, 6, 0);  // CWFilter is an array of strings.
-  //  RedrawDisplayScreen();  Kills the bandwidth graphics in the audio display window, remove. KF5N July 30, 2023
   // Clear the current CW filter graphics and then restore the bandwidth indicator bar.  KF5N July 30, 2023
   tft.writeTo(L2);
   tft.clearMemory();
   BandInformation();
   DrawBandWidthIndicatorBar();
+  UpdateDecoderField();
 }
 
 
-//=================  AFP10-18-22 ================
 /*****
-  Purpose: Select CW Filter. EEPROMData.CWFilterIndex has these values:
-           0 = 840Hz
-           1 = 1kHz
-           2 = 1.3kHz
-           3 = 1.8kHz
-           4 = 2kHz
-           5 = Off
+  Purpose: Select CW tone frequency.
 
   Parameter list:
     void
@@ -49,23 +88,14 @@ FLASHMEM void SelectCWFilter() {
 FLASHMEM void SelectCWOffset() {
   const char *CWOffsets[] = { "562.5 Hz", "656.5 Hz", "750 Hz", "843.75 Hz", " Cancel " };
   const int numCycles[4] = { 6, 7, 8, 9 };
-  EEPROMData.CWOffset = SubmenuSelect(CWOffsets, 5, 2);  // CWFilter is an array of strings.
+  EEPROMData.CWOffset = SubmenuSelect(CWOffsets, 5, EEPROMData.CWOffset);  // CWFilter is an array of strings.
   // Now generate the values for the buffer which is used to create the CW tone.  The values are discrete because there must be whole cycles.
   if (EEPROMData.CWOffset < 4) sineTone(numCycles[EEPROMData.CWOffset]);
-  // sinBuffer is used by the CW decoder.  Load the buffer per chosen frequency.
-  float32_t theta = 0.0;  //AFP 10-25-22
-  float freq[4] = { 562.5, 656.5, 750.0, 843.75 };
-  for (int kf = 0; kf < 255; kf++) {                                   //Calc sine wave
-    theta = (float)kf * TWO_PI * freq[EEPROMData.CWOffset] / 24000.0;  // theta = kf * 2 * PI * freqSideTone / 24000
-    sinBuffer[kf] = sin(theta);
-  }
+  EEPROMWrite();  // Save to EEPROM.
   // Clear the current CW filter graphics and then restore the bandwidth indicator bar.  KF5N July 30, 2023
   tft.writeTo(L2);
   tft.clearMemory();
   RedrawDisplayScreen();
-  //  BandInformation();
-  //  DrawBandWidthIndicatorBar();
-  // UpdateDecoderField();
 }
 
 
@@ -83,16 +113,19 @@ FLASHMEM void SelectCWOffset() {
 void DoCWReceiveProcessing() {  // All New AFP 09-19-22
   float goertzelMagnitude1;
   float goertzelMagnitude2;
+  float32_t aveCorrResult;
+  float32_t corrResultR;
+  uint32_t corrResultIndexR;
+  float32_t corrResultL;
+  uint32_t corrResultIndexL;
+  float32_t combinedCoeff;                          //AFP 02-06-22
   int audioTemp;                                    // KF5N
-  float freq[4] = { 562.5, 656.5, 750.0, 843.75 };  // User selectable CW offset frequencies.
-  //arm_copy_f32(float_buffer_R, float_buffer_R_CW, 256);
-  //arm_biquad_cascade_df2T_f32(&S1_CW_Filter, float_buffer_R, float_buffer_R_CW, 256);//AFP 09-01-22
-  //arm_biquad_cascade_df2T_f32(&S1_CW_Filter, float_buffer_L, float_buffer_L_CW, 256);//AFP 09-01-22
+//  float freq[4] = { 562.5, 656.5, 750.0, 843.75 };  // User selectable CW offset frequencies.
 
   arm_fir_f32(&FIR_CW_DecodeL, float_buffer_L, float_buffer_L_CW, 256);  // AFP 10-25-22  Park McClellan FIR filter const Group delay
   arm_fir_f32(&FIR_CW_DecodeR, float_buffer_R, float_buffer_R_CW, 256);  // AFP 10-25-22
 
-  if (EEPROMData.decoderFlag == DECODE_ON) {  // JJP 7/20/23
+  if (EEPROMData.decoderFlag) {  // JJP 7/20/23
 
     // ----------------------  Correlation calculation  AFP 02-04-22 -------------------------
     //Calculate correlation between calc sine and incoming signal
@@ -112,21 +145,18 @@ void DoCWReceiveProcessing() {  // All New AFP 09-19-22
     goertzelMagnitude2 = goertzel_mag(256, freq[EEPROMData.CWOffset], 24000, float_buffer_R_CW);  //AFP 10-25-22
     goertzelMagnitude = (goertzelMagnitude1 + goertzelMagnitude2) / 2;
     //Combine Correlation and Gowetzel Coefficients
-    combinedCoeff = 10 * aveCorrResult * 100 * goertzelMagnitude;
-    combinedCoeff2 = combinedCoeff;
+    combinedCoeff = 25 * aveCorrResult * goertzelMagnitude;
+//    Serial.printf("combinedCoeff = %f\n", combinedCoeff);
     // ==========  Changed CW decode "lock" indicator
     if (combinedCoeff > 50) {  // AFP 10-26-22
-      tft.fillRect(745, 448, 15, 15, RA8875_GREEN);
+      tft.fillRect(700, 442, 15, 15, RA8875_GREEN);
     } else if (combinedCoeff < 50) {  // AFP 10-26-22
       CWLevelTimer = millis();
       if (CWLevelTimer - CWLevelTimerOld > 2000) {
         CWLevelTimerOld = millis();
-        tft.fillRect(744, 447, 17, 17, RA8875_BLACK);
+        tft.fillRect(700, 442, 15, 15, RA8875_BLACK);  // Erase
       }
     }
-    combinedCoeff2Old = combinedCoeff2;
-    //    tft.drawFastVLine(BAND_INDICATOR_X - 8 + 25, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_GREEN);  //CW lower freq indicator
-    //    tft.drawFastVLine(BAND_INDICATOR_X - 8 + 35, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_GREEN);  //CW upper freq indicator
     if (combinedCoeff > 50) {  // if  have a reasonable corr coeff, >50, then we have a keeper. // AFP 10-26-22
       audioTemp = 1;
     } else {
@@ -390,11 +420,9 @@ void MorseCharacterDisplay(char currentLetter) {
     void
 *****/
 void ResetHistograms() {
-  gapAtom = 80;
-  ditLength = 80;  // Start with 15wpm ditLength
-  gapChar = 240;
-  dahLength = 240;
-  thresholdGeometricMean = 160;  // Use simple mean for starters so we don't have 0
+  gapAtom = ditLength = transmitDitLength;
+  gapChar = dahLength = transmitDitLength * 3;
+  thresholdGeometricMean = (ditLength + dahLength) / 2;  // Use simple mean for starters so we don't have 0
   aveDitLength = ditLength;
   aveDahLength = dahLength;
   valRef1 = 0;
@@ -402,8 +430,6 @@ void ResetHistograms() {
   // Clear graph arrays
   memset(signalHistogram, 0, HISTOGRAM_ELEMENTS * sizeof(uint32_t));
   memset(gapHistogram, 0, HISTOGRAM_ELEMENTS * sizeof(uint32_t));
-  EEPROMData.currentWPM = 1200 / ditLength;
-  UpdateWPMField();
 }
 
 
@@ -508,11 +534,13 @@ FASTRUN void DoCWDecoding(int audioValue) {
 
         tft.setFontScale((enum RA8875tsize)0);  // Show estimated WPM
         tft.setTextColor(RA8875_GREEN);
-        tft.fillRect(DECODER_X + 104, DECODER_Y, tft.getFontWidth() * 10, tft.getFontHeight(), RA8875_BLACK);
-        tft.setCursor(DECODER_X + 105, DECODER_Y);
-        tft.print("(");
+        tft.fillRect(DECODER_X + 75, DECODER_Y - 5, tft.getFontWidth() * 3, tft.getFontHeight(), RA8875_BLACK);  // Erase old WPM.
+        tft.setCursor(DECODER_X + 75, DECODER_Y - 5);
+//        tft.print("(");
+        tft.writeTo(L1);
         tft.print(1200L / (dahLength / 3));
-        tft.print(" WPM)");
+        tft.writeTo(L1);
+//        tft.print(" WPM)");
         tft.setTextColor(RA8875_WHITE);
         tft.setFontScale((enum RA8875tsize)3);
         //Serial.printf("gapLength = %d thresholdGeometricMean = %f interElementGap = %d\n", gapLength, thresholdGeometricMean, interElementGap);
@@ -703,7 +731,7 @@ FASTRUN void DoSignalHistogram(long val) {
 }
 
 /*****
-  Purpose: Calculate Goertzal Algorithn to enable decoding CW
+  Purpose: Calculate Goertzel Algorithn to enable decoding CW
 
   Parameter list:
     int numSamples,         // number of sample in data array

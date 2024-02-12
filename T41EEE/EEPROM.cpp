@@ -1,7 +1,7 @@
-#ifndef BEENHERE
-#include "SDT.h"
-#endif
 
+#include "SDT.h"
+
+PROGMEM int16_t currentMode;
 
 /*****
   Purpose: To save the configuration data (working variables) to EEPROM.
@@ -13,7 +13,7 @@
   Return value;
     void
 *****/
-void EEPROMWrite() {
+FLASHMEM void EEPROMWrite() {
   EEPROM.put(EEPROM_BASE_ADDRESS + 4, EEPROMData);
 }
 
@@ -27,7 +27,7 @@ void EEPROMWrite() {
   Return value;
     void
 *****/
-void EEPROMRead() {
+FLASHMEM void EEPROMRead() {
   EEPROM.get(EEPROM_BASE_ADDRESS + 4, EEPROMData);  // Read as one large chunk
 }
 
@@ -41,7 +41,7 @@ void EEPROMRead() {
   Return value;
     void
 *****/
-void EEPROMWriteSize(int structSize) {
+FLASHMEM void EEPROMWriteSize(int structSize) {
   EEPROM.put(EEPROM_BASE_ADDRESS, structSize);  // Read as one large chunk
 }
 
@@ -55,7 +55,7 @@ void EEPROMWriteSize(int structSize) {
   Return value;
     void
 *****/
-int EEPROMReadSize() {
+FLASHMEM int EEPROMReadSize() {
   int structSize;
   EEPROM.get(EEPROM_BASE_ADDRESS, structSize);  // Read as one large chunk
   return structSize;
@@ -72,7 +72,7 @@ int EEPROMReadSize() {
   Return value;
     void
 *****/
-void EEPROMStuffFavorites(unsigned long current[]) {
+FLASHMEM void EEPROMStuffFavorites(unsigned long current[]) {
   int i;
   for (i = 0; i < MAX_FAVORITES; i++) {
     current[i] = EEPROMData.favoriteFreqs[i];
@@ -123,7 +123,6 @@ FLASHMEM void SetFavoriteFrequency() {
     if (val == MENU_OPTION_SELECT) {  // Make a choice??
       EraseMenus();
       EEPROMData.favoriteFreqs[index] = TxRxFreq;
-      syncEEPROM = 0;  // SD EEPROM different that memory EEPROM
       //UpdateEEPROMSyncIndicator(0);       //  JJP 7/25/23
       if (EEPROMData.activeVFO == VFO_A) {
         EEPROMData.currentFreqA = TxRxFreq;
@@ -258,7 +257,7 @@ FLASHMEM void GetFavoriteFrequency() {
     void
 *****/
 
-void EEPROMDataDefaults() {
+FLASHMEM void EEPROMDataDefaults() {
   struct config_t* defaultConfig = new config_t;  // Create a copy of the default configuration.
   EEPROMData = *defaultConfig;                    // Copy the defaults to EEPROMData struct.
   // Initialize the frequency setting based on the last used frequency stored to EEPROM.
@@ -284,9 +283,6 @@ FLASHMEM void EEPROMStartup() {
   eepromStructSize = EEPROMReadSize();
   stackStructSize = sizeof(EEPROMData);
 
-  //Serial.printf("eempromStructSize = %d\n", eepromStructSize);
-  //Serial.printf("stackStructSize = %d\n", stackStructSize);
-
   // For minor revisions to the code, we don't want to overwrite the EEPROM.
   // We will assume the switch matrix and other items are calibrated by the user, and not to be lost.
   // However, if the EEPROMData struct changes, it is necessary to overwrite the EEPROM with the new struct.
@@ -307,7 +303,5 @@ FLASHMEM void EEPROMStartup() {
   SaveAnalogSwitchValues();          // Calibrate the switch matrix.
   EEPROMWriteSize(stackStructSize);  // Write the size of the struct to EEPROM.
 
-  //Serial.printf("eempromStructSize = %d\n", EEPROMReadSize());
   EEPROMWrite();  // Write the EEPROMData struct to non-volatile memory.
-  //Serial.printf("eempromStructSize = %d\n", EEPROMReadSize());
 }

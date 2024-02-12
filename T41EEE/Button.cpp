@@ -1,7 +1,10 @@
 
-#ifndef BEENHERE
 #include "SDT.h"
-#endif
+
+int buttonRead = 0;
+int minPinRead = 1024;
+int secondaryMenuChoiceMade;
+long incrementValues[] = { 10, 50, 100, 250, 1000, 10000, 100000, 1000000 };
 
 /*
 The button interrupt routine implements a first-order recursive filter, or "leaky integrator,"
@@ -204,8 +207,6 @@ void ExecuteButtonPress(int val) {
   } else {
     menuStatus = PRIMARY_MENU_ACTIVE;
   }
-  //Serial.print("val = ");
-  //Serial.println(val);
   switch (val) {
     case MENU_OPTION_SELECT:  // 0
 
@@ -238,7 +239,6 @@ void ExecuteButtonPress(int val) {
       BandInformation();
       NCOFreq = 0L;
       DrawBandWidthIndicatorBar();  // AFP 10-20-22
-      //FilterOverlay();   // AFP 10-20-22
       SetFreq();
       ShowSpectrum();
       break;
@@ -265,7 +265,6 @@ void ExecuteButtonPress(int val) {
       BandInformation();
       NCOFreq = 0L;
       DrawBandWidthIndicatorBar();  //AFP 10-20-22
-      //FilterOverlay();            // AFP 10-20-22
       break;
 
     case FILTER:  // 6
@@ -354,9 +353,6 @@ void ExecuteButtonPress(int val) {
         }
 
         if (doneViewing == true) {
-          //tft.clearMemory();          // Need to clear overlay too
-          //tft.writeTo(L2);
-          //tft.fillWindow();
           break;
         }
       }

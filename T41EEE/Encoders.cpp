@@ -1,6 +1,10 @@
-#ifndef BEENHERE
+
 #include "SDT.h"
-#endif
+
+int8_t Menu2 = MENU_F_LO_CUT;
+long last_filter_pos = 0;
+long filter_pos = 0;
+float adjustVolEncoder;
 
 /*****
   Purpose: EncoderFilter
@@ -99,7 +103,7 @@ void EncoderCenterTune() {
   if (result == 0)  // Nothing read
     return;
 
-  if (EEPROMData.xmtMode == CW_MODE && EEPROMData.decoderFlag == DECODE_ON) {  // No reason to reset if we're not doing decoded CW AFP 09-27-22
+  if (EEPROMData.xmtMode == CW_MODE && EEPROMData.decoderFlag) {  // No reason to reset if we're not doing decoded CW AFP 09-27-22
     ResetHistograms();
   }
 
@@ -364,6 +368,7 @@ int SetWPM() {
       break;
     }
   }
+  EEPROMWrite();
   tft.setTextColor(RA8875_WHITE);
   EraseMenus();
   return EEPROMData.currentWPM;

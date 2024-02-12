@@ -1,6 +1,8 @@
-#ifndef BEENHERE
+
 #include "SDT.h"
-#endif
+
+long CWFreqShift = 750;
+int32_t IFFreq = SR[SampleRate].rate / 4;  // IF (intermediate) frequency
 
 /*****
   Purpose: A special variant of SetFreq() used only for calibration.

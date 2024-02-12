@@ -1,4 +1,4 @@
-### Version T41EEE.1 T41 Software Defined Transceiver Arduino Sketch
+### Version T41EEE.3 T41 Software Defined Transceiver Arduino Sketch
 
 This is the "T41 Extreme Experimenter's Edition" software for the 
 T41 Software Defined Transceiver.  The T41EEE was "forked" from the V049.2 version
@@ -40,19 +40,16 @@ with the name Arduino_JSON, which is not the correct library.  Install the libra
 and if you have the other dependencies for the V049.2 version, compilation will be
 successful.
 
-## Highlight of Features included in T41EEE.1
+## Highlight of Features included in T41EEE.3
 
-Thank you to Jonathan KN6LFB for the major improvement in button functionality!
+No new features are introduced in T41EEE.3.  This is a "clean-up" version.
 
-1.  Switch matrix buttons are changed from polling to interrupts for improved performance.
-2.  The new button code includes a tunable variable for button response time.  This variable
-    is added to the calibration menu as BTN REPEAT.  The default value should be a good
-    starting point.  If button response is too fast, increase the BTN REPEAT value.
-3.  The switch matrix calibration routine is added to the calibration menu.
-4.  Switch matrix calibration is easier and precise.  It is possible to push a button
-    and hold it.  It will not skip to the next button.  In practice, a short, firm push
-    on each button in the proper series will rapidly complete the process.
-5.  EEPROM start-up code is significantly revised.
+1.  Removal of extraneous #define statements.
+2.  Removal of unused variables.
+3.  Global variables which do not require global access are moved to their individual
+    files and are no longer extern (removed from SDT.h).
+4.  Some larger arrays are now DMAMEM.  This moves them to RAM2, thereby increasing the
+    stack size.
 
 
 *********************************************************************************************

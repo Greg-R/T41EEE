@@ -1,6 +1,39 @@
-#ifndef BEENHERE
+
 #include "SDT.h"
-#endif
+
+uint8_t NR_use_X = 0;
+int ANR_buff_size = FFT_length / 2.0;
+int ANR_delay = 16;
+int ANR_dline_size = ANR_DLINE_SIZE;
+int ANR_in_idx = 0;
+int ANR_mask = ANR_dline_size - 1;
+int ANR_taps = 64;
+int lidx;
+int LMS_nr_strength;
+uint32_t NR_X_pointer = 0;
+uint32_t NR_E_pointer = 0;
+float32_t c0[SAM_PLL_HILBERT_STAGES];
+float32_t ANR_den_mult = 6.25e-10;
+float32_t ANR_gamma = 0.1;
+float32_t ANR_lidx = 120.0;
+float32_t ANR_lidx_min = 120.0;
+float32_t ANR_lidx_max = 200.0;
+float32_t ANR_lincr = 1.0;
+float32_t ANR_ldecr = 3.0;
+float32_t ANR_ngamma = 0.001;
+float32_t ANR_two_mu = 0.0001;
+float32_t LMS_errsig1[256 + 10];
+float32_t NR_sum = 0;
+float32_t NR_KIM_K = 1.0;
+float32_t NR_onemalpha = (1.0 - EEPROMData.NR_alpha);
+float32_t NR_onemtwobeta = (1.0 - (2.0 * EEPROMData.NR_beta));
+float32_t NR_T;
+
+float32_t DMAMEM ANR_d[ANR_DLINE_SIZE] = {0};
+float32_t DMAMEM ANR_w[ANR_DLINE_SIZE] = {0};
+float32_t DMAMEM LMS_StateF32[MAX_LMS_TAPS + MAX_LMS_DELAY] = {0};
+float32_t DMAMEM LMS_NormCoeff_f32[MAX_LMS_TAPS + MAX_LMS_DELAY] = {0};
+float32_t DMAMEM LMS_nr_delay[512 + MAX_LMS_DELAY] = {0};
 
 
 const float32_t sqrtHann[256] = {

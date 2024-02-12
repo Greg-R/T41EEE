@@ -1,6 +1,5 @@
-#ifndef BEENHERE
+
 #include "SDT.h"
-#endif
 /*
 const char *topMenus[] = { "Bearing", "CW Options", "RF Set", "VFO Select",
                            "EEPROM", "AGC", "Spectrum Options",
