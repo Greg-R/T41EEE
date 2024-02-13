@@ -53,8 +53,8 @@ void CW_ExciterIQData(int shaping) //AFP 08-20-22
 {
   uint32_t N_BLOCKS_EX = N_B_EX;
  
-  arm_scale_f32 (cosBuffer, 0.127, float_buffer_L_EX, 256);  // AFP 10-13-22 Use pre-calculated sin & cos instead of Hilbert
-  arm_scale_f32 (sinBuffer, 0.127, float_buffer_R_EX, 256);  // AFP 10-13-22
+  arm_scale_f32 (cosBuffer, 0.3, float_buffer_L_EX, 256);  // AFP 10-13-22 Use pre-calculated sin & cos instead of Hilbert
+  arm_scale_f32 (sinBuffer, 0.3, float_buffer_R_EX, 256);  // AFP 10-13-22
   /**********************************************************************************
             Additional scaling, if nesessary to compensate for down-stream gain variations
    **********************************************************************************/
@@ -93,8 +93,8 @@ void CW_ExciterIQData(int shaping) //AFP 08-20-22
     arm_fir_interpolate_f32(&FIR_int2_EX_Q, float_buffer_RTemp, float_buffer_R_EX, 512);
 
     //  192KHz effective sample rate here
-    arm_scale_f32(float_buffer_L_EX, 20, float_buffer_L_EX, 2048); //Scale to compensate for losses in Interpolation
-    arm_scale_f32(float_buffer_R_EX, 20, float_buffer_R_EX, 2048);
+    arm_scale_f32(float_buffer_L_EX, 25, float_buffer_L_EX, 2048); //Scale to compensate for losses in Interpolation
+    arm_scale_f32(float_buffer_R_EX, 25, float_buffer_R_EX, 2048);
 
     /**********************************************************************************  AFP 12-31-20
       CONVERT TO INTEGER AND PLAY AUDIO

@@ -53,7 +53,8 @@ int CalibrateOptions() {
 
     case 1:  // CW PA Cal
       EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand] = GetEncoderValueLive(-2.0, 2.0, EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand], 0.001, (char *)"CW PA Cal: ");
-      EEPROMData.powerOutCW[EEPROMData.currentBand] = (-.0133 * EEPROMData.transmitPowerLevel * EEPROMData.transmitPowerLevel + .7884 * EEPROMData.transmitPowerLevel + 4.5146) * EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];
+//      EEPROMData.powerOutCW[EEPROMData.currentBand] = (-.0133 * EEPROMData.transmitPowerLevel * EEPROMData.transmitPowerLevel + .7884 * EEPROMData.transmitPowerLevel + 4.5146) * EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];
+      EEPROMData.powerOutCW[EEPROMData.currentBand] = sqrt(EEPROMData.transmitPowerLevel/20.0) * EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];
       val = ReadSelectedPushButton();
       if (val != BOGUS_PIN_READ) {        // Any button press??
         val = ProcessButtonPress(val);    // Use ladder value to get menu choice
@@ -618,7 +619,8 @@ int RFOptions() {
     case 0:  // AFP 10-21-22
       EEPROMData.transmitPowerLevel = (float)GetEncoderValue(1, 20, EEPROMData.transmitPowerLevel, 1, (char *)"Power: ");
       if (EEPROMData.xmtMode == CW_MODE) {                                                                                                                                                                                                        //AFP 10-13-22
-        EEPROMData.powerOutCW[EEPROMData.currentBand] = (-.0133 * EEPROMData.transmitPowerLevel * EEPROMData.transmitPowerLevel + .7884 * EEPROMData.transmitPowerLevel + 4.5146) * EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];  //  afp 10-21-22
+//        EEPROMData.powerOutCW[EEPROMData.currentBand] = (-.0133 * EEPROMData.transmitPowerLevel * EEPROMData.transmitPowerLevel + .7884 * EEPROMData.transmitPowerLevel + 4.5146) * EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];  //  afp 10-21-22
+          EEPROMData.powerOutCW[EEPROMData.currentBand] = sqrt(EEPROMData.transmitPowerLevel/20.0) * EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];  // Normalize to 20 watts.
       } else {                                                                                                                                                                                                                                    //AFP 10-13-22
         if (EEPROMData.xmtMode == SSB_MODE) {
           EEPROMData.powerOutSSB[EEPROMData.currentBand] = (-.0133 * EEPROMData.transmitPowerLevel * EEPROMData.transmitPowerLevel + .7884 * EEPROMData.transmitPowerLevel + 4.5146) * EEPROMData.SSBPowerCalibrationFactor[EEPROMData.currentBand];  // afp 10-21-22                                                                                                                                                                                                                                                      //         EEPROMData.EEPROMData.powerOutSSB[EEPROMData.currentBand] = EEPROMData.powerOutSSB[EEPROMData.currentBand];                                                                                                //AFP 10-21-22

@@ -394,7 +394,7 @@ struct config_t {
   int spectrumNoiseFloor = SPECTRUM_NOISE_FLOOR;  // AFP 09-26-22
   int tuneIndex = DEFAULTFREQINCREMENT;           // JJP 7-3-23
   long stepFineTune = FINE_TUNE_STEP;             // JJP 7-3-23
-  int transmitPowerLevel = DEFAULT_POWER_LEVEL;   // JJP 7-3-23
+  float32_t transmitPowerLevel = DEFAULT_POWER_LEVEL;   // Changed from int to float; Greg KF5N February 12, 2024
   int xmtMode = SSB_MODE;                         // AFP 09-26-22
   int nrOptionSelect = 0;                         // 1 byte
   int currentScale = 1;
