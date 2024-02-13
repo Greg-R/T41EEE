@@ -212,7 +212,8 @@ void ExecuteButtonPress(int val) {
 
       if (menuStatus == PRIMARY_MENU_ACTIVE) {  // Doing primary menu
         ErasePrimaryMenu();
-        secondaryMenuChoiceMade = functionPtr[mainMenuIndex]();  // These are processed in MenuProcessing.cpp
+//        secondaryMenuChoiceMade = functionPtr[mainMenuIndex]();  // These are processed in MenuProcessing.cpp
+          functionPtr[mainMenuIndex]();  // These are processed in MenuProcessing.cpp
         menuStatus = SECONDARY_MENU_ACTIVE;
         secondaryMenuIndex = -1;  // Reset secondary menu
       } else {

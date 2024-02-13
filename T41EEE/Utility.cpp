@@ -680,3 +680,19 @@ int SDPresentCheck() {
     return 0;
   }
 }
+
+/*****
+  Purpose: Initialize power coefficients based on transmit power level and calibration factor.
+
+  Parameter list:
+    void
+
+  Return value;
+    void
+*****/
+FLASHMEM void initPowerCoefficients() {
+      for(int i = 0; i < NUMBER_OF_BANDS; i = i + 1) {
+         EEPROMData.powerOutCW[i] = sqrt(EEPROMData.transmitPowerLevel/20.0) * EEPROMData.CWPowerCalibrationFactor[i];
+         EEPROMData.powerOutSSB[i] =  sqrt(EEPROMData.transmitPowerLevel/20.0) * EEPROMData.SSBPowerCalibrationFactor[i];
+      }
+}

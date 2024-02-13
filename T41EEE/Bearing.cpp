@@ -1421,7 +1421,7 @@ void WaitforWRComplete() {
   Return value;
     int                   0 if cannot initialize, 1 otherwise
 *****/
-FLASHMEM int BearingMaps() {
+FLASHMEM void BearingMaps() {
   char ptrMaps[10][50];
   int count;
 
@@ -1432,7 +1432,7 @@ FLASHMEM int BearingMaps() {
     MyDelay(SDCARD_MESSAGE_LENGTH);
     tft.fillRect(200, 300, tft.getFontWidth() * 12, tft.getFontHeight(), RA8875_BLACK);
     tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
-    return 0;
+//    return 0;
   }
   count = CreateMapList(ptrMaps, &count);  // Reads the SD card for BMP files and returns ptrMaps filled in with names and return the count
 
@@ -1440,7 +1440,7 @@ FLASHMEM int BearingMaps() {
     tft.setCursor(300, 300);
     tft.print("No Maps found");
     selectedMapIndex = -1;
-    return -1;  // Didn't find any
+//    return -1;  // Didn't find any
   }
   if (count == 1) {
     selectedMapIndex = 0;
@@ -1462,7 +1462,7 @@ FLASHMEM int BearingMaps() {
       tft.println("initialization failed!");
       MyDelay(5000L);
       tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
-      return -1;
+//      return -1;
     }
     selectedMapIndex = WhichOneToUse(ptrMaps, count);
   }
@@ -1475,7 +1475,7 @@ FLASHMEM int BearingMaps() {
   ShowFrequency();
   DrawFrequencyBarValue();
 
-  return selectedMapIndex;
+//  return selectedMapIndex;
 }
 
 

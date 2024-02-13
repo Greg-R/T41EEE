@@ -6,7 +6,6 @@
 // Major clean-up of calibration.  KF5N August 16, 2023
 
 int val;
-//bool corrChange;
 float correctionIncrement;  //AFP 2-7-23
 int userScale, userZoomIndex, userxmtMode;
 int transmitPowerLevelTemp, cwFreqOffsetTemp;
@@ -361,7 +360,7 @@ void DoXmitCarrierCalibrate(int toneFreqIndex) {
 
   SetFreqCal(freqOffset);
   tft.writeTo(L1);
-  // Transmit Calibration Loop
+  // Transmit Calibration Loop.  This is independent of loop().
   while (true) {
     ShowSpectrum2();
     val = ReadSelectedPushButton();
@@ -424,8 +423,8 @@ void DoXmitCarrierCalibrate(int toneFreqIndex) {
       void
  *****/
 void ProcessIQData2(int toneFreqIndex) {
-  float bandOutputFactor;                                          // AFP 2-11-23
-  float rfGainValue;                                               // AFP 2-11-23
+//  float bandOutputFactor;                                          // AFP 2-11-23
+  float rfGainValue, powerScale;                                     // AFP 2-11-23.  Greg KF5N February 13, 2023
   float recBandFactor[7] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };  // AFP 2-11-23  KF5N uniform values
 
   /**********************************************************************************  AFP 12-31-20
@@ -437,12 +436,12 @@ void ProcessIQData2(int toneFreqIndex) {
         BUFFER_SIZE*N_BLOCKS = 2024 samples
      **********************************************************************************/
 
-  bandOutputFactor = 0.127;  // This is a remnant of the calibration process which included the power amplifier.
+//  bandOutputFactor = 0.127;  // This is a remnant of the calibration process which included the power amplifier.
   // Generate I and Q for the transmit or receive calibration.  KF5N
-  if (IQChoice == 2 || IQChoice == 3) {                                   // KF5N
-    arm_scale_f32(cosBuffer, bandOutputFactor, float_buffer_L_EX, 256);  // AFP 2-11-23 Use pre-calculated sin & cos instead of Hilbert
-    arm_scale_f32(sinBuffer, bandOutputFactor, float_buffer_R_EX, 256);  // AFP 2-11-23 Sidetone = 3000
-  }
+//  if (IQChoice == 2 || IQChoice == 3) {                                   // KF5N
+    arm_scale_f32(cosBuffer, 0.20, float_buffer_L_EX, 256);  // AFP 2-11-23 Use pre-calculated sin & cos instead of Hilbert
+    arm_scale_f32(sinBuffer, 0.20, float_buffer_R_EX, 256);  // AFP 2-11-23 Sidetone = 3000
+//  }
 
   if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
     arm_scale_f32(float_buffer_L_EX, -EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L_EX, 256);       //Adjust level of L buffer // AFP 2-11-23
@@ -461,9 +460,11 @@ void ProcessIQData2(int toneFreqIndex) {
   arm_fir_interpolate_f32(&FIR_int2_EX_I, float_buffer_LTemp, float_buffer_L_EX, 512);
   arm_fir_interpolate_f32(&FIR_int2_EX_Q, float_buffer_RTemp, float_buffer_R_EX, 512);
 
+//  This is the correct place in the data stream to inject the scaling for power.
+powerScale = 30.0 * EEPROMData.powerOutCW[EEPROMData.currentBand];
   //  192KHz effective sample rate here
-  arm_scale_f32(float_buffer_L_EX, 40, float_buffer_L_EX, 2048);  //Scale to compensate for losses in Interpolation
-  arm_scale_f32(float_buffer_R_EX, 40, float_buffer_R_EX, 2048);
+  arm_scale_f32(float_buffer_L_EX, powerScale, float_buffer_L_EX, 2048);  //Scale to compensate for losses in Interpolation
+  arm_scale_f32(float_buffer_R_EX, powerScale, float_buffer_R_EX, 2048);
 
   // are there at least N_BLOCKS buffers in each channel available ?
   if ((uint32_t)Q_in_L.available() > N_BLOCKS + 0 && (uint32_t)Q_in_R.available() > N_BLOCKS + 0) {
