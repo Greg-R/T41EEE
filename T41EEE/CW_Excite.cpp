@@ -54,10 +54,10 @@ int16_t* rightSidetone;
 void CW_ExciterIQData(int shaping) //AFP 08-20-22
 {
   uint32_t N_BLOCKS_EX = N_B_EX;
-  float32_t powerScaling;
+  float32_t powerScale;
  
-  arm_scale_f32 (cosBuffer, 0.127, float_buffer_L_EX, 256);  // AFP 10-13-22 Use pre-calculated sin & cos instead of Hilbert
-  arm_scale_f32 (sinBuffer, 0.127, float_buffer_R_EX, 256);  // AFP 10-13-22
+  arm_scale_f32 (cosBuffer, 0.20, float_buffer_L_EX, 256);  // AFP 10-13-22 Use pre-calculated sin & cos instead of Hilbert
+  arm_scale_f32 (sinBuffer, 0.20, float_buffer_R_EX, 256);  // AFP 10-13-22
   /**********************************************************************************
             Additional scaling, if nesessary to compensate for down-stream gain variations
    **********************************************************************************/
@@ -99,11 +99,12 @@ void CW_ExciterIQData(int shaping) //AFP 08-20-22
     arm_scale_f32(float_buffer_L_EX, 20, float_buffer_LTemp, 2048); //Scale to compensate for losses in Interpolation
     arm_scale_f32(float_buffer_R_EX, 20, float_buffer_RTemp, 2048);
 
-powerScaling = EEPROMData.powerOutCW[EEPROMData.currentBand] * 40.0;
-
+//  This is the correct place in the data stream to inject the scaling for power.
+powerScale = 30.0 * EEPROMData.powerOutCW[EEPROMData.currentBand];
     //  192KHz effective sample rate here
-    arm_scale_f32(float_buffer_L_EX, powerScaling, float_buffer_L_EX, 2048); //Scale to compensate for losses in Interpolation
-    arm_scale_f32(float_buffer_R_EX, powerScaling, float_buffer_R_EX, 2048);
+    arm_scale_f32(float_buffer_L_EX, powerScale, float_buffer_L_EX, 2048); //Scale to compensate for losses in Interpolation
+    arm_scale_f32(float_buffer_R_EX, powerScale, float_buffer_R_EX, 2048);
+
 
     /**********************************************************************************  AFP 12-31-20
       CONVERT TO INTEGER AND PLAY AUDIO, I and Q of CW transmitter and also sidetone.
@@ -121,7 +122,7 @@ powerScaling = EEPROMData.powerOutCW[EEPROMData.currentBand] * 40.0;
       arm_float_to_q15 (&float_buffer_LTemp[BUFFER_SIZE * i], leftSidetone, BUFFER_SIZE);  // source, destination, number of samples
       arm_float_to_q15 (&float_buffer_RTemp[BUFFER_SIZE * i], rightSidetone, BUFFER_SIZE);
 
-    // Inject the DC offset from carrier calibration.
+    // Inject the DC offset from carrier calibration.  There is an ARM function for this.
       for(int i = 0; i < 128; i = i + 1) *(sp_L2 + i) = *(sp_L2 + i) + EEPROMData.iDCoffset[EEPROMData.currentBand] + 1300;
       for(int i = 0; i < 128; i = i + 1) *(sp_R2 + i) = *(sp_R2 + i) + EEPROMData.qDCoffset[EEPROMData.currentBand] + 1300;
 //    for(int i = 0; i < 2048; i = i + 1) q15_buffer_LTemp[i] = q15_buffer_LTemp[i] + EEPROMData.iDCoffset[EEPROMData.currentBand] + 1300;
