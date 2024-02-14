@@ -56,8 +56,8 @@ void ProcessIQData()
   uint32_t AudioMaxIndex;
   float rfGainValue;
   int rfGain;
-  float dataMax; 
-  uint32_t dataMaxIndex;
+//  float dataMax; 
+//  uint32_t dataMaxIndex;
 
   // Are there at least N_BLOCKS buffers in each channel available ?  N_BLOCKS should be 16.
   if ( (uint32_t) Q_in_L.available() > N_BLOCKS && (uint32_t) Q_in_R.available() > N_BLOCKS ) {     // Removed addition of 0 to N_BLOCKS.
@@ -97,13 +97,13 @@ void ProcessIQData()
     //  Set RFGain for all bands.
     if(EEPROMData.autoGain) rfGain = EEPROMData.rfGainCurrent;   // Auto-gain
        else rfGain = EEPROMData.rfGain[EEPROMData.currentBand];  // Manual gain adjust.
-    rfGainValue = pow(10, (float)rfGain / 20);  // KF5N January 16 2024
+    rfGainValue = pow(10, (float)rfGain / 20) * 4.0;  // KF5N January 16 2024
     arm_scale_f32 (float_buffer_L, rfGainValue, float_buffer_L, BUFFER_SIZE * N_BLOCKS); //AFP 09-27-22
     arm_scale_f32 (float_buffer_R, rfGainValue, float_buffer_R, BUFFER_SIZE * N_BLOCKS); //AFP 09-27-22
     arm_clip_f32	(float_buffer_L, float_buffer_L, -1.0, 1.0, 2048);
     arm_clip_f32	(float_buffer_R, float_buffer_R, -1.0, 1.0, 2048);
-    arm_max_f32(float_buffer_L, 2048, &dataMax, &dataMaxIndex);
-    Serial.printf("dataMax = %f\n", dataMax);
+//    arm_max_f32(float_buffer_L, 2048, &dataMax, &dataMaxIndex);
+//    Serial.printf("dataMax = %f\n", dataMax);
     /**********************************************************************************  AFP 12-31-20
         Remove DC offset to reduce central spike.  First read the Mean value of
         left and right channels.  Then fill L and R correction arrays with those Means

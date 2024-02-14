@@ -653,7 +653,7 @@ struct band {
   int mode;
   int FHiCut;
   int FLoCut;
-  int RFgain;
+  float32_t RFgain;  // This is not being used.  Greg KF5N February 14, 2024
   uint8_t band_type;
   float32_t gainCorrection;  // is hardware dependent and has to be calibrated ONCE and hardcoded in the table below
   int AGC_thresh;
