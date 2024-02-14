@@ -713,10 +713,10 @@ extern int16_t pixelnew[];
 extern int16_t pixelold[];
 extern int16_t pixelCurrent[];
 extern int16_t pixelold[];
-extern int16_t *sp_L1;
-extern int16_t *sp_R1;
-extern int16_t *sp_L2;
-extern int16_t *sp_R2;
+extern q15_t* sp_L1;
+extern q15_t* sp_R1;
+extern q15_t* sp_L2;
+extern q15_t* sp_R2;
 extern int16_t y_old, y_new, y1_new, y1_old, y_old2;
 extern const uint16_t gradient[];
 extern const uint32_t IIR_biquad_Zoom_FFT_N_stages;
@@ -937,6 +937,11 @@ void AGCPrep();
 float32_t AlphaBetaMag(float32_t inphase, float32_t quadrature);
 void AltNoiseBlanking(float *insamp, int Nsam, float *E);
 void AMDecodeSAM();  // AFP 11-03-22
+void arm_clip_f32(const float32_t * pSrc, 
+  float32_t * pDst, 
+  float32_t low, 
+  float32_t high, 
+  uint32_t numSamples);
 int BandOptions();
 float BearingHeading(char *dxCallPrefix);
 int BearingMaps();

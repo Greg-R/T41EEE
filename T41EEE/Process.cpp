@@ -1,5 +1,6 @@
 
 #include "SDT.h"
+#define ARM_MATH_CM7
 
 char atom, currentAtom;
 int8_t first_block = 1;
@@ -29,7 +30,7 @@ arm_biquad_cascade_df2T_instance_f32 S1_CW_AudioFilter5 = { 6, CW_AudioFilter5_s
 /*****
   Purpose: Read audio from Teensy Audio Library
              Calculate FFT for display
-             Process audio into SSB signalF
+             Process audio into SSB signal
              Output audio to amplifier
 
    Parameter List:
@@ -37,8 +38,6 @@ arm_biquad_cascade_df2T_instance_f32 S1_CW_AudioFilter5 = { 6, CW_AudioFilter5_s
 
    Return value:
       void
-
-   CAUTION: Assumes a spaces[] array is defined
  *****/
 void ProcessIQData()
 {
@@ -57,21 +56,25 @@ void ProcessIQData()
   uint32_t AudioMaxIndex;
   float rfGainValue;
   int rfGain;
+  float dataMax; 
+  uint32_t dataMaxIndex;
 
   // Are there at least N_BLOCKS buffers in each channel available ?  N_BLOCKS should be 16.
   if ( (uint32_t) Q_in_L.available() > N_BLOCKS && (uint32_t) Q_in_R.available() > N_BLOCKS ) {     // Removed addition of 0 to N_BLOCKS.
     usec = 0;
     // Get audio samples from the audio  buffers and convert them to float.
-    // Read in 32 blocks and 128 samples in I and Q.
+    // Read in 16 blocks and 128 samples in I and Q.  16 * 128 = 2048  (N_BLOCKS = 16)
     for (unsigned i = 0; i < N_BLOCKS; i++) {
       sp_L1 = Q_in_R.readBuffer();      // Teensy Audio component:  AudioRecordQueue, part of receiver.
-      sp_R1 = Q_in_L.readBuffer();      // These should be de-globalizec.
+      sp_R1 = Q_in_L.readBuffer();      // Why does R go into L and L go into R???
+      // Find the maximum value and record.
+    //  void arm_absmax_q15	(	const q15_t * 	pSrc, uint32_t 	blockSize, q15_t * 	pResult, uint32_t * 	pIndex);
       /**********************************************************************************  AFP 12-31-20
           Using arm_Math library, convert to float one buffer_size.
           Float_buffer samples are now standardized from > -1.0 to < 1.0
       **********************************************************************************/
-      arm_q15_to_float (sp_L1, &float_buffer_L[BUFFER_SIZE * i], BUFFER_SIZE); // convert int_buffer to float 32bit
-      arm_q15_to_float (sp_R1, &float_buffer_R[BUFFER_SIZE * i], BUFFER_SIZE); // convert int_buffer to float 32bit
+      arm_q15_to_float(sp_L1, &float_buffer_L[BUFFER_SIZE * i], BUFFER_SIZE); // convert int_buffer to float 32bit.  BUFFER_SIZE = 128.
+      arm_q15_to_float(sp_R1, &float_buffer_R[BUFFER_SIZE * i], BUFFER_SIZE); // convert int_buffer to float 32bit
       Q_in_L.freeBuffer();
       Q_in_R.freeBuffer();
     }  // end for loop
@@ -92,11 +95,15 @@ void ProcessIQData()
     resetTuningFlag = 0;
 
     //  Set RFGain for all bands.
-    if(EEPROMData.autoGain) rfGain = EEPROMData.rfGainCurrent;
-       else rfGain = EEPROMData.rfGain[EEPROMData.currentBand];
+    if(EEPROMData.autoGain) rfGain = EEPROMData.rfGainCurrent;   // Auto-gain
+       else rfGain = EEPROMData.rfGain[EEPROMData.currentBand];  // Manual gain adjust.
     rfGainValue = pow(10, (float)rfGain / 20);  // KF5N January 16 2024
     arm_scale_f32 (float_buffer_L, rfGainValue, float_buffer_L, BUFFER_SIZE * N_BLOCKS); //AFP 09-27-22
     arm_scale_f32 (float_buffer_R, rfGainValue, float_buffer_R, BUFFER_SIZE * N_BLOCKS); //AFP 09-27-22
+    arm_clip_f32	(float_buffer_L, float_buffer_L, -1.0, 1.0, 2048);
+    arm_clip_f32	(float_buffer_R, float_buffer_R, -1.0, 1.0, 2048);
+    arm_max_f32(float_buffer_L, 2048, &dataMax, &dataMaxIndex);
+    Serial.printf("dataMax = %f\n", dataMax);
     /**********************************************************************************  AFP 12-31-20
         Remove DC offset to reduce central spike.  First read the Mean value of
         left and right channels.  Then fill L and R correction arrays with those Means
@@ -122,8 +129,9 @@ void ProcessIQData()
     /**********************************************************************************  AFP 12-31-20
         Scale the data buffers by the RFgain value defined in bands[EEPROMData.currentBand] structure
     **********************************************************************************/
-    arm_scale_f32 (float_buffer_L, bands[EEPROMData.currentBand].RFgain, float_buffer_L, BUFFER_SIZE * N_BLOCKS); //AFP 09-23-22
-    arm_scale_f32 (float_buffer_R, bands[EEPROMData.currentBand].RFgain, float_buffer_R, BUFFER_SIZE * N_BLOCKS); //AFP 09-23-22
+    // This gain scaling is not necessary.  It is assumed that Auto-gain and AGC will appropriately scale the incoming signal data.
+//    arm_scale_f32 (float_buffer_L, bands[EEPROMData.currentBand].RFgain, float_buffer_L, BUFFER_SIZE * N_BLOCKS); //AFP 09-23-22
+//    arm_scale_f32 (float_buffer_R, bands[EEPROMData.currentBand].RFgain, float_buffer_R, BUFFER_SIZE * N_BLOCKS); //AFP 09-23-22
 
     /**********************************************************************************  AFP 12-31-20
       Clear Buffers

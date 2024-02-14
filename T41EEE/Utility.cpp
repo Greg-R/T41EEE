@@ -680,3 +680,21 @@ int SDPresentCheck() {
     return 0;
   }
 }
+
+void arm_clip_f32(const float32_t * pSrc, 
+  float32_t * pDst, 
+  float32_t low, 
+  float32_t high, 
+  uint32_t numSamples)
+{
+    uint32_t i;
+    for (i = 0; i < numSamples; i++)
+    {                                        
+        if (pSrc[i] > high)                  
+            pDst[i] = high;                  
+        else if (pSrc[i] < low)              
+            pDst[i] = low;                   
+        else                                 
+            pDst[i] = pSrc[i];               
+    }
+}
