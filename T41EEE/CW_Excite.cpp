@@ -123,8 +123,10 @@ powerScale = 30.0 * EEPROMData.powerOutCW[EEPROMData.currentBand];
       arm_float_to_q15 (&float_buffer_RTemp[BUFFER_SIZE * i], rightSidetone, BUFFER_SIZE);
 
     // Inject the DC offset from carrier calibration.  There is an ARM function for this.
-      for(int i = 0; i < 128; i = i + 1) *(sp_L2 + i) = *(sp_L2 + i) + EEPROMData.iDCoffset[EEPROMData.currentBand] + 1300;
-      for(int i = 0; i < 128; i = i + 1) *(sp_R2 + i) = *(sp_R2 + i) + EEPROMData.qDCoffset[EEPROMData.currentBand] + 1300;
+//      for(int i = 0; i < 128; i = i + 1) *(sp_L2 + i) = *(sp_L2 + i) + EEPROMData.iDCoffset[EEPROMData.currentBand] + 1300;
+//      for(int i = 0; i < 128; i = i + 1) *(sp_R2 + i) = *(sp_R2 + i) + EEPROMData.qDCoffset[EEPROMData.currentBand] + 1300;
+      arm_offset_q15(sp_L2, EEPROMData.iDCoffset[EEPROMData.currentBand] + 1300, sp_L2, 128);
+      arm_offset_q15(sp_R2, EEPROMData.qDCoffset[EEPROMData.currentBand] + 1300, sp_R2, 128);
 //    for(int i = 0; i < 2048; i = i + 1) q15_buffer_LTemp[i] = q15_buffer_LTemp[i] + EEPROMData.iDCoffset[EEPROMData.currentBand] + 1300;
 //    for(int i = 0; i < 2048; i = i + 1) q15_buffer_RTemp[i] = q15_buffer_RTemp[i] + EEPROMData.qDCoffset[EEPROMData.currentBand] + 1300;
 

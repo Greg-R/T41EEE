@@ -477,8 +477,13 @@ powerScale = 30.0 * EEPROMData.powerOutCW[EEPROMData.currentBand];
     arm_float_to_q15(float_buffer_L_EX, q15_buffer_LTemp, 2048);
     arm_float_to_q15(float_buffer_R_EX, q15_buffer_RTemp, 2048);
     // Inject the DC offset from carrier calibration.
-        for(int i = 0; i < 2048; i = i + 1) q15_buffer_LTemp[i] = q15_buffer_LTemp[i] + EEPROMData.iDCoffset[EEPROMData.currentBand] + 1300;
-        for(int i = 0; i < 2048; i = i + 1) q15_buffer_RTemp[i] = q15_buffer_RTemp[i] + EEPROMData.qDCoffset[EEPROMData.currentBand] + 1300;
+//        for(int i = 0; i < 2048; i = i + 1) q15_buffer_LTemp[i] = q15_buffer_LTemp[i] + EEPROMData.iDCoffset[EEPROMData.currentBand] + 1300;
+//        for(int i = 0; i < 2048; i = i + 1) q15_buffer_RTemp[i] = q15_buffer_RTemp[i] + EEPROMData.qDCoffset[EEPROMData.currentBand] + 1300;
+
+// arm_offset_q15	(q15_buffer_LTemp 	offset, q15_t * 	pDst, uint32_t 	blockSize )	
+   arm_offset_q15	(q15_buffer_LTemp, EEPROMData.iDCoffset[EEPROMData.currentBand] + 1300, q15_buffer_LTemp, 2048);
+   arm_offset_q15	(q15_buffer_RTemp, EEPROMData.qDCoffset[EEPROMData.currentBand] + 1300, q15_buffer_RTemp, 2048);
+
     Q_out_L_Ex.play(q15_buffer_LTemp, 2048);
     Q_out_R_Ex.play(q15_buffer_RTemp, 2048);
     Q_out_L_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
