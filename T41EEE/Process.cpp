@@ -337,6 +337,7 @@ void ProcessIQData()
       arm_max_f32 (audioSpectBuffer, 1024, &audioMaxSquared, &AudioMaxIndex);  // AFP 09-18-22 Max value of squared abin magnitued in audio
       audioMaxSquaredAve = .5 * audioMaxSquared + .5 * audioMaxSquaredAve;  //AFP 09-18-22Running averaged values
       DisplaydbM();
+      DisplayAGC();
     }
 
     /**********************************************************************************

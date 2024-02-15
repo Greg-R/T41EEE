@@ -724,6 +724,7 @@ extern const uint32_t N_stages_biquad_lowpass1;
 extern const uint16_t n_dec1_taps;
 extern const uint16_t n_dec2_taps;
 extern int mute;
+extern bool agc_action;
 extern int attenuator;
 extern int audioYPixel[];
 extern int bandswitchPins[];
@@ -977,7 +978,7 @@ int CWOptions();
 #define CW_SHAPING_FALL 2
 
 void CW_ExciterIQData(int shaping);  // AFP 08-18-22
-
+void DisplayAGC();
 void DisplayClock();
 void DisplaydbM();
 void DisplayIncrementField();

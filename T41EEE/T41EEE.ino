@@ -137,7 +137,7 @@ extern "C" uint32_t set_arm_clock(uint32_t frequency);
 
 //======================================== Global object definitions ==================================================
 // ===========================  AFP 08-22-22
-
+bool agc_action = false;
 // Teensy and OpenAudio dataflow code.
 AudioControlSGTL5000_Extended sgtl5000_1;      //controller for the Teensy Audio Board
 AudioConvert_I16toF32 int2Float1, int2Float2;  //Converts Int16 to Float.  See class in AudioStream_F32.h
