@@ -243,31 +243,34 @@ void SpectrumOptions() { /*
   ShowSpectrumdBScale();
 //  return spectrumSet;
 }
+
+
 /*****
-  Purpose: Present the bands available and return the selection
+  Purpose: Select AGC option.
 
   Parameter list:
     void
 
   Return value
-    int           an index into the band array
+    void
 *****/
 void AGCOptions() {
   const char *AGCChoices[] = { "Off", "Long", "Slow", "Medium", "Fast", "Cancel" };  // G0ORX (Added Long) September 5, 2023
 
   EEPROMData.AGCMode = SubmenuSelect(AGCChoices, 6, EEPROMData.AGCMode);  // G0ORX
   if (EEPROMData.AGCMode == 5) {
-//    return EEPROMData.AGCMode;  // Nope.
 return;
   }
 
   AGCLoadValues();  // G0ORX September 5, 2023
 
-  EEPROMData.AGCMode = EEPROMData.AGCMode;          // Store in EEPROM and...
-  EEPROM.put(EEPROM_BASE_ADDRESS + 4, EEPROMData);  // ...save it
+//  EEPROMData.AGCMode = EEPROMData.AGCMode;          // Store in EEPROM and...
+  EEPROMWrite();  // ...save it
   UpdateAGCField();
 //  return EEPROMData.AGCMode;
 }
+
+
 /*****
   Purpose: IQ Options
 
