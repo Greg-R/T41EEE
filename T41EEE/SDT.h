@@ -655,7 +655,7 @@ struct band {
   int mode;
   int FHiCut;
   int FLoCut;
-  int RFgain;
+  float32_t RFgain;  // This is not being used.  Greg KF5N February 14, 2024
   uint8_t band_type;
   float32_t gainCorrection;  // is hardware dependent and has to be calibrated ONCE and hardcoded in the table below
   int AGC_thresh;
@@ -715,10 +715,10 @@ extern int16_t pixelnew[];
 extern int16_t pixelold[];
 extern int16_t pixelCurrent[];
 extern int16_t pixelold[];
-extern int16_t *sp_L1;
-extern int16_t *sp_R1;
-extern int16_t *sp_L2;
-extern int16_t *sp_R2;
+extern q15_t* sp_L1;
+extern q15_t* sp_R1;
+extern q15_t* sp_L2;
+extern q15_t* sp_R2;
 extern int16_t y_old, y_new, y1_new, y1_old, y_old2;
 extern const uint16_t gradient[];
 extern const uint32_t IIR_biquad_Zoom_FFT_N_stages;
@@ -939,6 +939,11 @@ void AGCPrep();
 float32_t AlphaBetaMag(float32_t inphase, float32_t quadrature);
 void AltNoiseBlanking(float *insamp, int Nsam, float *E);
 void AMDecodeSAM();  // AFP 11-03-22
+void arm_clip_f32(const float32_t * pSrc, 
+  float32_t * pDst, 
+  float32_t low, 
+  float32_t high, 
+  uint32_t numSamples);
 int BandOptions();
 float BearingHeading(char *dxCallPrefix);
 void BearingMaps();

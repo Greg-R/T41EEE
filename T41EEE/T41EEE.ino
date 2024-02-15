@@ -386,10 +386,10 @@ int16_t pixelCurrent[SPECTRUM_RES];
 int16_t pixelnew[SPECTRUM_RES];
 int16_t pixelold[SPECTRUM_RES];
 
-int16_t *sp_L1;
-int16_t *sp_R1;
-int16_t *sp_L2;
-int16_t *sp_R2;
+q15_t* sp_L1 = new q15_t[2048];  // Arrays moved to RAM2.
+q15_t* sp_R1 = new q15_t[2048];;
+q15_t *sp_L2 = new q15_t[2048];;
+q15_t *sp_R2 = new q15_t[2048];;
 
 //===== New histogram stuff ===
 volatile int filterEncoderMove = 0;
@@ -413,7 +413,7 @@ const float32_t DF1 = 4.0;             // decimation factor
 const float32_t DF2 = 2.0;             // decimation factor
 const float32_t DF = DF1 * DF2;        // decimation factor
 const float32_t n_samplerate = 176.0;  // sample rate before decimation
-const uint32_t N_B = FFT_LENGTH / 2 / BUFFER_SIZE * (uint32_t)DF;
+const uint32_t N_B = FFT_LENGTH / 2 / BUFFER_SIZE * (uint32_t)DF;  // 512/2/128 * 8 = 16
 const uint32_t N_DEC_B = N_B / (uint32_t)DF;
 const uint32_t NR_add_counter = 128;
 const float32_t n_desired_BW = 9.0;  // desired max BW of the filters
