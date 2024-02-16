@@ -386,11 +386,6 @@ int16_t pixelCurrent[SPECTRUM_RES];
 int16_t pixelnew[SPECTRUM_RES];
 int16_t pixelold[SPECTRUM_RES];
 
-q15_t* sp_L1 = new q15_t[2048];  // Arrays moved to RAM2.
-q15_t* sp_R1 = new q15_t[2048];;
-q15_t *sp_L2 = new q15_t[2048];;
-q15_t *sp_R2 = new q15_t[2048];;
-
 //===== New histogram stuff ===
 volatile int filterEncoderMove = 0;
 volatile long fineTuneEncoderMove = 0L;

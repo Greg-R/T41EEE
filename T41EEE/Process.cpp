@@ -65,16 +65,16 @@ void ProcessIQData()
     // Get audio samples from the audio  buffers and convert them to float.
     // Read in 16 blocks and 128 samples in I and Q.  16 * 128 = 2048  (N_BLOCKS = 16)
     for (unsigned i = 0; i < N_BLOCKS; i++) {
-      sp_L1 = Q_in_R.readBuffer();      // Teensy Audio component:  AudioRecordQueue, part of receiver.
-      sp_R1 = Q_in_L.readBuffer();      // Why does R go into L and L go into R???
+//      sp_L1 = Q_in_R.readBuffer();      // Teensy Audio component:  AudioRecordQueue, part of receiver.
+//      sp_R1 = Q_in_L.readBuffer();      // Why does R go into L and L go into R???
       // Find the maximum value and record.
     //  void arm_absmax_q15	(	const q15_t * 	pSrc, uint32_t 	blockSize, q15_t * 	pResult, uint32_t * 	pIndex);
       /**********************************************************************************  AFP 12-31-20
           Using arm_Math library, convert to float one buffer_size.
           Float_buffer samples are now standardized from > -1.0 to < 1.0
       **********************************************************************************/
-      arm_q15_to_float(sp_L1, &float_buffer_L[BUFFER_SIZE * i], BUFFER_SIZE); // convert int_buffer to float 32bit.  BUFFER_SIZE = 128.
-      arm_q15_to_float(sp_R1, &float_buffer_R[BUFFER_SIZE * i], BUFFER_SIZE); // convert int_buffer to float 32bit
+      arm_q15_to_float(Q_in_R.readBuffer(), &float_buffer_L[BUFFER_SIZE * i], BUFFER_SIZE); // convert int_buffer to float 32bit.  BUFFER_SIZE = 128.
+      arm_q15_to_float(Q_in_L.readBuffer(), &float_buffer_R[BUFFER_SIZE * i], BUFFER_SIZE); // convert int_buffer to float 32bit
       Q_in_L.freeBuffer();
       Q_in_R.freeBuffer();
     }  // end for loop
@@ -534,10 +534,10 @@ void ProcessIQData()
     **********************************************************************************/
 
     for (unsigned  i = 0; i < N_BLOCKS; i++) {
-      sp_L1 = Q_out_L.getBuffer();
-      sp_R1 = Q_out_R.getBuffer();
-      arm_float_to_q15 (&float_buffer_L[BUFFER_SIZE * i], sp_L1, BUFFER_SIZE);
-      arm_float_to_q15 (&float_buffer_R[BUFFER_SIZE * i], sp_R1, BUFFER_SIZE);
+//      sp_L1 = Q_out_L.getBuffer();
+//      sp_R1 = Q_out_R.getBuffer();
+      arm_float_to_q15 (&float_buffer_L[BUFFER_SIZE * i], Q_out_L.getBuffer(), BUFFER_SIZE);
+      arm_float_to_q15 (&float_buffer_R[BUFFER_SIZE * i], Q_out_R.getBuffer(), BUFFER_SIZE);
       Q_out_L.playBuffer(); // play it !
       Q_out_R.playBuffer(); // play it !
     }

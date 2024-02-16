@@ -20,6 +20,7 @@
     6.  Interpolate 8x (upsample and filter) the data stream to 192KHz sample rate
     7.  Output the data stream thruogh the DACs at 192KHz
 *****/
+int16_t* sp_L2, sp_R2;
 void ExciterIQData()
 {
   uint32_t N_BLOCKS_EX                         = N_B_EX;
