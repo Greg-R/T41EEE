@@ -386,11 +386,6 @@ int16_t pixelCurrent[SPECTRUM_RES];
 int16_t pixelnew[SPECTRUM_RES];
 int16_t pixelold[SPECTRUM_RES];
 
-q15_t* sp_L1 = new q15_t[2048];  // Arrays moved to RAM2.
-q15_t* sp_R1 = new q15_t[2048];;
-q15_t *sp_L2 = new q15_t[2048];;
-q15_t *sp_R2 = new q15_t[2048];;
-
 //===== New histogram stuff ===
 volatile int filterEncoderMove = 0;
 volatile long fineTuneEncoderMove = 0L;
@@ -920,24 +915,20 @@ FLASHMEM void InitializeDataArrays() {
   CalcFIRCoeffs(FIR_dec1_coeffs, n_dec1_taps, (float32_t)(n_desired_BW * 1000.0), n_att, 0, 0.0, (float32_t)SR[SampleRate].rate);
 
   if (arm_fir_decimate_init_f32(&FIR_dec1_I, n_dec1_taps, (uint32_t)DF1, FIR_dec1_coeffs, FIR_dec1_I_state, BUFFER_SIZE * N_BLOCKS)) {
-    while (1)
-      ;
+    while (1);
   }
 
   if (arm_fir_decimate_init_f32(&FIR_dec1_Q, n_dec1_taps, (uint32_t)DF1, FIR_dec1_coeffs, FIR_dec1_Q_state, BUFFER_SIZE * N_BLOCKS)) {
-    while (1)
-      ;
+    while (1);
   }
   // Decimation filter 2, M2 = DF2
   CalcFIRCoeffs(FIR_dec2_coeffs, n_dec2_taps, (float32_t)(n_desired_BW * 1000.0), n_att, 0, 0.0, (float32_t)(SR[SampleRate].rate / DF1));
   if (arm_fir_decimate_init_f32(&FIR_dec2_I, n_dec2_taps, (uint32_t)DF2, FIR_dec2_coeffs, FIR_dec2_I_state, BUFFER_SIZE * N_BLOCKS / (uint32_t)DF1)) {
-    while (1)
-      ;
+    while (1);
   }
 
   if (arm_fir_decimate_init_f32(&FIR_dec2_Q, n_dec2_taps, (uint32_t)DF2, FIR_dec2_coeffs, FIR_dec2_Q_state, BUFFER_SIZE * N_BLOCKS / (uint32_t)DF1)) {
-    while (1)
-      ;
+    while (1);
   }
 
   // Interpolation filter 1, L1 = 2
@@ -945,12 +936,10 @@ FLASHMEM void InitializeDataArrays() {
   // yes, because the interpolation filter is AFTER the upsampling, so it has to be in the target sample rate!
   CalcFIRCoeffs(FIR_int1_coeffs, 48, (float32_t)(n_desired_BW * 1000.0), n_att, 0, 0.0, SR[SampleRate].rate / 4.0);
   if (arm_fir_interpolate_init_f32(&FIR_int1_I, (uint8_t)DF2, 48, FIR_int1_coeffs, FIR_int1_I_state, BUFFER_SIZE * N_BLOCKS / (uint32_t)DF)) {
-    while (1)
-      ;
+    while (1);
   }
   if (arm_fir_interpolate_init_f32(&FIR_int1_Q, (uint8_t)DF2, 48, FIR_int1_coeffs, FIR_int1_Q_state, BUFFER_SIZE * N_BLOCKS / (uint32_t)DF)) {
-    while (1)
-      ;
+    while (1);
   }
   // Interpolation filter 2, L2 = 4
   // not sure whether I should design with the final sample rate ??
@@ -958,12 +947,10 @@ FLASHMEM void InitializeDataArrays() {
   CalcFIRCoeffs(FIR_int2_coeffs, 32, (float32_t)(n_desired_BW * 1000.0), n_att, 0, 0.0, (float32_t)SR[SampleRate].rate);
 
   if (arm_fir_interpolate_init_f32(&FIR_int2_I, (uint8_t)DF1, 32, FIR_int2_coeffs, FIR_int2_I_state, BUFFER_SIZE * N_BLOCKS / (uint32_t)DF1)) {
-    while (1)
-      ;
+    while (1);
   }
   if (arm_fir_interpolate_init_f32(&FIR_int2_Q, (uint8_t)DF1, 32, FIR_int2_coeffs, FIR_int2_Q_state, BUFFER_SIZE * N_BLOCKS / (uint32_t)DF1)) {
-    while (1)
-      ;
+    while (1);
   }
 
   SetDecIntFilters();  // here, the correct bandwidths are calculated and set accordingly

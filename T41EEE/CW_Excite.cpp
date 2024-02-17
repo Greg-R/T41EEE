@@ -101,10 +101,10 @@ void CW_ExciterIQData(int shaping) //AFP 08-20-22
     **********************************************************************************/
 
     for (unsigned  i = 0; i < N_BLOCKS_EX; i++) {  //N_BLOCKS_EX=16  BUFFER_SIZE=128 16x128=2048
-      sp_L2 = Q_out_L_Ex.getBuffer();
-      sp_R2 = Q_out_R_Ex.getBuffer();
-      arm_float_to_q15 (&float_buffer_L_EX[BUFFER_SIZE * i], sp_L2, BUFFER_SIZE);
-      arm_float_to_q15 (&float_buffer_R_EX[BUFFER_SIZE * i], sp_R2, BUFFER_SIZE);
+//      sp_L2 = Q_out_L_Ex.getBuffer();
+//      sp_R2 = Q_out_R_Ex.getBuffer();
+      arm_float_to_q15 (&float_buffer_L_EX[BUFFER_SIZE * i], Q_out_L_Ex.getBuffer(), BUFFER_SIZE);
+      arm_float_to_q15 (&float_buffer_R_EX[BUFFER_SIZE * i], Q_out_R_Ex.getBuffer(), BUFFER_SIZE);
       Q_out_L_Ex.playBuffer(); // play it !
       Q_out_R_Ex.playBuffer(); // play it !
     }
