@@ -331,7 +331,7 @@ void ProcessIQData2(int toneFreq) {
         BUFFER_SIZE*N_BLOCKS = 2024 samples
      **********************************************************************************/
 
-  bandOutputFactor = 0.127;  // This is a remnant of the calibration process which included the power amplifier.
+  bandOutputFactor = 0.3;  // This is a remnant of the calibration process which included the power amplifier.
   // Generate I and Q for the transmit or receive calibration.  KF5N
   if (IQChoice == 2 || IQChoice == 3) {                                   // KF5N
     arm_scale_f32(cosBuffer, bandOutputFactor, float_buffer_L_EX, 256);  // AFP 2-11-23 Use pre-calculated sin & cos instead of Hilbert
@@ -356,8 +356,8 @@ void ProcessIQData2(int toneFreq) {
   arm_fir_interpolate_f32(&FIR_int2_EX_Q, float_buffer_RTemp, float_buffer_R_EX, 512);
 
   //  192KHz effective sample rate here
-  arm_scale_f32(float_buffer_L_EX, 20, float_buffer_L_EX, 2048);  //Scale to compensate for losses in Interpolation
-  arm_scale_f32(float_buffer_R_EX, 20, float_buffer_R_EX, 2048);
+  arm_scale_f32(float_buffer_L_EX, 25, float_buffer_L_EX, 2048);  //Scale to compensate for losses in Interpolation
+  arm_scale_f32(float_buffer_R_EX, 25, float_buffer_R_EX, 2048);
 
   // are there at least N_BLOCKS buffers in each channel available ?
   if ((uint32_t)Q_in_L.available() > N_BLOCKS + 0 && (uint32_t)Q_in_R.available() > N_BLOCKS + 0) {
