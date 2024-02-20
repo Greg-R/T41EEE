@@ -681,6 +681,13 @@ int SDPresentCheck() {
   }
 }
 
+
+/*****
+  Purpose: Arm function which is not included in the older library included with TeensyDuino.
+  
+  https://www.keil.com/pack/doc/cmsis/dsp/html/arm__clip__f32_8c.html
+
+*****/
 void arm_clip_f32(const float32_t * pSrc, 
   float32_t * pDst, 
   float32_t low, 
