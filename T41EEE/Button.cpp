@@ -236,6 +236,7 @@ void ExecuteButtonPress(int val) {
       if (EEPROMData.currentBand < 5) digitalWrite(bandswitchPins[EEPROMData.currentBand], LOW);  // Added if so unused GPOs will not be touched.  KF5N October 16, 2023.
       ButtonBandIncrease();
       if (EEPROMData.currentBand < 5) digitalWrite(bandswitchPins[EEPROMData.currentBand], HIGH);
+      EEPROMData.rfGainCurrent = 10;
       BandInformation();
       NCOFreq = 0L;
       DrawBandWidthIndicatorBar();  // AFP 10-20-22
@@ -265,6 +266,7 @@ void ExecuteButtonPress(int val) {
       BandInformation();
       NCOFreq = 0L;
       DrawBandWidthIndicatorBar();  //AFP 10-20-22
+      EEPROMData.rfGainCurrent = 10;
       break;
 
     case FILTER:  // 6

@@ -1263,7 +1263,7 @@ void UpdateVolumeField() {
   tft.setTextColor(RA8875_WHITE);
   tft.print("Vol:");
   tft.setTextColor(RA8875_GREEN);
-  tft.fillRect(BAND_INDICATOR_X + 90, BAND_INDICATOR_Y, tft.getFontWidth() * 3 + 2, tft.getFontHeight(), RA8875_BLACK);
+  tft.fillRect(BAND_INDICATOR_X + 90, BAND_INDICATOR_Y, tft.getFontWidth() * 3 - 3, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(FIELD_OFFSET_X, BAND_INDICATOR_Y);
   tft.print(EEPROMData.audioVolume);
 }
@@ -1280,16 +1280,17 @@ void UpdateVolumeField() {
 *****/
 void UpdateAGCField() {
   tft.setFontScale((enum RA8875tsize)1);
-  tft.fillRect(AGC_X_OFFSET, AGC_Y_OFFSET, tft.getFontWidth() * 6, tft.getFontHeight(), RA8875_BLACK);
-  tft.setCursor(BAND_INDICATOR_X + 140, BAND_INDICATOR_Y);
-  switch (EEPROMData.AGCMode) {  // The opted for AGC
+  tft.fillRect(AGC_X_OFFSET, AGC_Y_OFFSET, tft.getFontWidth() * 7 - 3, tft.getFontHeight(), RA8875_BLACK);
+  tft.setCursor(BAND_INDICATOR_X + 135, BAND_INDICATOR_Y);
+  switch (EEPROMData.AGCMode) {  // The option for AGC
     case 0:                      // Off
+//    tft.setCursor(BAND_INDICATOR_X + 140, BAND_INDICATOR_Y);
       tft.setTextColor(DARKGREY);
-      tft.print("AGC");
-      tft.setFontScale((enum RA8875tsize)0);
-      tft.setCursor(BAND_INDICATOR_X + 200, BAND_INDICATOR_Y + 15);
-      tft.print(" off");
-      tft.setFontScale((enum RA8875tsize)1);
+      tft.print("AGC OFF");
+//      tft.setFontScale((enum RA8875tsize)0);
+//      tft.setCursor(BAND_INDICATOR_X + 200, BAND_INDICATOR_Y + 15);
+//      tft.print(" off");
+//      tft.setFontScale((enum RA8875tsize)1);
       break;
 
     case 1:  // Long
@@ -1328,8 +1329,10 @@ void UpdateAGCField() {
     void
 *****/
 void DisplayAGC() {
+  if(EEPROMData.AGCMode != 0) {  // Don't update AGC indicator if AGC is off.
   if (agc_action) tft.fillRect(765, AGC_Y_OFFSET + 10, 15, 15, RA8875_GREEN);
   else tft.fillRect(765, AGC_Y_OFFSET + 10, 15, 15, RA8875_BLACK);
+  }
 //  Serial.printf("agc_action = %d\n", agc_action);
 }
 
