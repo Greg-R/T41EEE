@@ -1269,7 +1269,7 @@ FLASHMEM void setup() {
   sineTone(EEPROMData.CWOffset + 6);  // This function takes "number of cycles" which is the offset + 6.
   initCWShaping();
   initPowerCoefficients();
-  ResetHistograms();
+  ResetHistograms();  // KF5N February 20, 2024
   filterEncoderMove = 0;
   fineTuneEncoderMove = 0L;
   xrState = RECEIVE_STATE;  // Enter loop() in receive state.  KF5N July 22, 2023
