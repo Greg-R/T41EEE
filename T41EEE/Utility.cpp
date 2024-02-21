@@ -699,6 +699,22 @@ FLASHMEM void initPowerCoefficients() {
 }
 
 
+void initUserDefinedStuff() {
+  NR_Index = EEPROMData.nrOptionSelect;
+  TxRxFreq = EEPROMData.centerFreq = EEPROMData.lastFrequencies[EEPROMData.currentBand][EEPROMData.activeVFO];
+  SetupMode(bands[EEPROMData.currentBand].mode);
+  SetKeyPowerUp();  // Use EEPROMData.keyType and EEPROMData.paddleFlip to configure key GPIs.  KF5N August 27, 2023
+  SetDitLength(EEPROMData.currentWPM);
+  SetTransmitDitLength(EEPROMData.currentWPM);
+  // Initialize buffers used by the CW transmitter and CW decoder.
+  sineTone(EEPROMData.CWOffset + 6);  // This function takes "number of cycles" which is the offset + 6.
+  si5351.set_correction(EEPROMData.freqCorrectionFactor, SI5351_PLL_INPUT_XO);
+  initCWShaping();
+  initPowerCoefficients();
+  ResetHistograms();  // KF5N February 20, 2024
+}
+
+
 /*****
   Purpose: Arm function which is not included in the older library included with TeensyDuino.
   

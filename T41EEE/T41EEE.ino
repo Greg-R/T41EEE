@@ -1237,7 +1237,6 @@ FLASHMEM void setup() {
   Q_in_L.begin();  //Initialize receive input buffers
   Q_in_R.begin();
   MyDelay(100L);
-  NR_Index = EEPROMData.nrOptionSelect;
 
   // ========================  End set up of Parameters from EEPROM data ===============
   NCOFreq = 0;
@@ -1254,22 +1253,10 @@ FLASHMEM void setup() {
   si5351.output_enable(SI5351_CLK2, 0);
   si5351.output_enable(SI5351_CLK1, 0);
 
-  // Initialize the frequency setting based on the last used frequency stored to EEPROM.
-  TxRxFreq = EEPROMData.centerFreq = EEPROMData.lastFrequencies[EEPROMData.currentBand][EEPROMData.activeVFO];
-
   InitializeDataArrays();
+  // Initialize user defined stuff
+  initUserDefinedStuff();
 
-  SetupMode(bands[EEPROMData.currentBand].mode);
-
-  SetKeyPowerUp();  // Use EEPROMData.keyType and EEPROMData.paddleFlip to configure key GPIs.  KF5N August 27, 2023
-  SetDitLength(EEPROMData.currentWPM);
-  SetTransmitDitLength(EEPROMData.currentWPM);
-
-  // Initialize buffers used by the CW transmitter and CW decoder.
-  sineTone(EEPROMData.CWOffset + 6);  // This function takes "number of cycles" which is the offset + 6.
-  initCWShaping();
-  initPowerCoefficients();
-  ResetHistograms();  // KF5N February 20, 2024
   filterEncoderMove = 0;
   fineTuneEncoderMove = 0L;
   xrState = RECEIVE_STATE;  // Enter loop() in receive state.  KF5N July 22, 2023
