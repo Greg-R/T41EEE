@@ -827,6 +827,7 @@ void EEPROMOptions() {  // 0               1                2               3   
     case 5:                                     // Copy SD->EEPROM
       loadConfiguration(filename, EEPROMData);  // Copy from SD to struct in active memory (on the stack) EEPROMData.
       EEPROMWrite();                            // Write to EEPROM non-volatile memory.
+      setup();                                  // Required to initialize many things.
       tft.writeTo(L2);                          // This is specifically to clear the bandwidth indicator bar.  KF5N August 7, 2023
       tft.clearMemory();
       tft.writeTo(L1);

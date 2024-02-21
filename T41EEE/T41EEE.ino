@@ -1388,8 +1388,10 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       modeSelectInExL.gain(0, 1);
       modeSelectOutL.gain(0, 0);
       modeSelectOutR.gain(0, 0);
-      modeSelectOutExL.gain(0, EEPROMData.powerOutSSB[EEPROMData.currentBand]);  //AFP 10-21-22
-      modeSelectOutExR.gain(0, EEPROMData.powerOutSSB[EEPROMData.currentBand]);  //AFP 10-21-22
+//      modeSelectOutExL.gain(0, EEPROMData.powerOutSSB[EEPROMData.currentBand]);  //AFP 10-21-22
+//      modeSelectOutExR.gain(0, EEPROMData.powerOutSSB[EEPROMData.currentBand]);  //AFP 10-21-22
+      modeSelectOutExL.gain(0, 1);  //AFP 10-21-22
+      modeSelectOutExR.gain(0, 1);  //AFP 10-21-22
       ShowTransmitReceiveStatus();
 
       while (digitalRead(PTT) == LOW) {
@@ -1492,8 +1494,10 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
 
         if (digitalRead(EEPROMData.paddleDit) == LOW) {  // Keyer Dit
           ditTimerOn = millis();
-          modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
-          modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
+//          modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
+//          modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
+          modeSelectOutExL.gain(0, 1);  //AFP 10-21-22
+          modeSelectOutExR.gain(0, 1);  //AFP 10-21-22
           modeSelectOutL.gain(1, volumeLog[(int)EEPROMData.sidetoneVolume]);        // Sidetone
 
           // Queue audio blocks--execution time of this loop will be between 0-20ms shorter

@@ -24,6 +24,7 @@ int16_t* sp_L2, sp_R2;
 void ExciterIQData()
 {
   uint32_t N_BLOCKS_EX = N_B_EX;
+  float32_t powerScale;
 
   /**********************************************************************************  AFP 12-31-20
         Get samples from queue buffers
@@ -126,8 +127,9 @@ void ExciterIQData()
     arm_fir_interpolate_f32(&FIR_int2_EX_I, float_buffer_LTemp, float_buffer_L_EX, 512);
     arm_fir_interpolate_f32(&FIR_int2_EX_Q, float_buffer_RTemp, float_buffer_R_EX, 512);
     //  192KHz effective sample rate here
-    arm_scale_f32(float_buffer_L_EX, 20, float_buffer_L_EX, 2048); //Scale to compensate for losses in Interpolation
-    arm_scale_f32(float_buffer_R_EX, 20, float_buffer_R_EX, 2048);
+    powerScale = 30.0 * EEPROMData.powerOutCW[EEPROMData.currentBand];
+    arm_scale_f32(float_buffer_L_EX, powerScale, float_buffer_L_EX, 2048); //Scale to compensate for losses in Interpolation
+    arm_scale_f32(float_buffer_R_EX, powerScale, float_buffer_R_EX, 2048);
 
     /**********************************************************************************  AFP 12-31-20
       CONVERT TO INTEGER AND PLAY AUDIO
