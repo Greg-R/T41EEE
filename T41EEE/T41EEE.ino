@@ -1268,6 +1268,7 @@ FLASHMEM void setup() {
   // Initialize buffers used by the CW transmitter and CW decoder.
   sineTone(EEPROMData.CWOffset + 6);  // This function takes "number of cycles" which is the offset + 6.
   initCWShaping();
+  initPowerCoefficients();
   filterEncoderMove = 0;
   fineTuneEncoderMove = 0L;
   xrState = RECEIVE_STATE;  // Enter loop() in receive state.  KF5N July 22, 2023

@@ -449,9 +449,9 @@ struct config_t {
   float NR_beta = 0.85;     // 4 bytes
   float omegaN = 200.0;     // 4 bytes
   float pll_fmax = 4000.0;  // 4 bytes
-  float powerOutCW[NUMBER_OF_BANDS] = { 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02 };
-  float powerOutSSB[NUMBER_OF_BANDS] = { 0.03, 0.03, 0.03, 0.03, 0.03, 0.03, 0.03 };
-  float CWPowerCalibrationFactor[NUMBER_OF_BANDS] = { 0.019, 0.019, .0190, .019, .019, .019, .019 };       // 0.019;
+  float powerOutCW[NUMBER_OF_BANDS] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };  // powerOutCW and powerOutSSB are derived from the TX power setting and calibration factors.
+  float powerOutSSB[NUMBER_OF_BANDS] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+  float CWPowerCalibrationFactor[NUMBER_OF_BANDS] = { 0.04, 0.04, .04, .04, .04, .04, .04 };       // Increased to 0.04, was 0.019;  KF5N February 20, 2024
   float SSBPowerCalibrationFactor[NUMBER_OF_BANDS] = { 0.008, 0.008, 0.008, 0.008, 0.008, 0.008, 0.008 };  // 0.008
   float IQAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1, 1, 1, 1, 1, 1, 1 };
   float IQPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
@@ -1034,6 +1034,7 @@ int InitializeSDCard();
 void InitializeDataArrays();
 void InitFilterMask();
 void InitLMSNoiseReduction();
+void initPowerCoefficients();
 void initTempMon(uint16_t freq, uint32_t lowAlarmTemp, uint32_t highAlarmTemp, uint32_t panicAlarmTemp);
 void IQPhaseCorrection(float32_t *I_buffer, float32_t *Q_buffer, float32_t factor, uint32_t blocksize);
 float32_t Izero(float32_t x);

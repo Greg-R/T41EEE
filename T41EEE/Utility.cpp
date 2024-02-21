@@ -683,6 +683,23 @@ int SDPresentCheck() {
 
 
 /*****
+  Purpose: Initialize power coefficients based on transmit power level and calibration factor.
+
+  Parameter list:
+    void
+
+  Return value;
+    void
+*****/
+FLASHMEM void initPowerCoefficients() {
+      for(int i = 0; i < NUMBER_OF_BANDS; i = i + 1) {        
+         EEPROMData.powerOutCW[i] = sqrt(EEPROMData.transmitPowerLevel/20.0) * EEPROMData.CWPowerCalibrationFactor[i];
+         EEPROMData.powerOutSSB[i] =  sqrt(EEPROMData.transmitPowerLevel/20.0) * EEPROMData.SSBPowerCalibrationFactor[i];
+      }
+}
+
+
+/*****
   Purpose: Arm function which is not included in the older library included with TeensyDuino.
   
   https://www.keil.com/pack/doc/cmsis/dsp/html/arm__clip__f32_8c.html
