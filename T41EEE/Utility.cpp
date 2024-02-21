@@ -446,7 +446,6 @@ float ApproxAtan(float z) {
 }
 
 
-
 /*****
   Purpose: function reads the analog value for each matrix switch and stores that value in EEPROM.
            Only called if STORE_SWITCH_VALUES is uncommented.
