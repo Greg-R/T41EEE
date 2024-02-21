@@ -57,7 +57,7 @@ void CalibratePreamble(int setZoom) {
   radioState = CW_TRANSMIT_STRAIGHT_STATE;                 // KF5N
   transmitPowerLevelTemp = EEPROMData.transmitPowerLevel;  //AFP 05-11-23
   cwFreqOffsetTemp = EEPROMData.CWOffset;
-  //EEPROMData.CWOffset = 2;            // 750 Hz
+  EEPROMData.CWOffset = 2;            // Always use 750 Hz.
   //EEPROMData.transmitPowerLevel = 5;  //AFP 02-09-23  Set to 5 watts as a precaution to protect the power amplifier in case it is connected.
   //EEPROMData.powerOutCW[EEPROMData.currentBand] = (-.0133 * EEPROMData.transmitPowerLevel * EEPROMData.transmitPowerLevel + .7884 * EEPROMData.transmitPowerLevel + 4.5146) * EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];
   //  Serial.printf("preamble EEPROMData.powerOutCW = %f\n", EEPROMData.powerOutCW[EEPROMData.currentBand]);
@@ -135,8 +135,8 @@ void CalibratePrologue() {
   NCOFreq = 0L;
   xrState = RECEIVE_STATE;
   calibrateFlag = 0;  // KF5N
-  EEPROMData.CWOffset = cwFreqOffsetTemp;                  // Return user selected CW offset frequency.
-  sineTone(EEPROMData.CWOffset + 6);  // This function takes "number of cycles" which is the offset + 6.
+  EEPROMData.CWOffset = cwFreqOffsetTemp;   // Return user selected CW offset frequency.
+  sineTone(EEPROMData.CWOffset + 6);        // This function takes "number of cycles" which is the offset + 6.
   //calFreqShift = 0;
   EEPROMData.currentScale = userScale;  //  Restore vertical scale to user preference.  KF5N
   ShowSpectrumdBScale();
@@ -602,6 +602,4 @@ void SelectCalFreq() {
   tft.writeTo(L2);
   tft.clearMemory();
   RedrawDisplayScreen();
-//  BandInformation();
-//  DrawBandWidthIndicatorBar();
 }
