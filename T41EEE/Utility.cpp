@@ -702,7 +702,6 @@ FLASHMEM void initPowerCoefficients() {
 void initUserDefinedStuff() {
   NR_Index = EEPROMData.nrOptionSelect;
   TxRxFreq = EEPROMData.centerFreq = EEPROMData.lastFrequencies[EEPROMData.currentBand][EEPROMData.activeVFO];
-  SetupMode(bands[EEPROMData.currentBand].mode);
   SetKeyPowerUp();  // Use EEPROMData.keyType and EEPROMData.paddleFlip to configure key GPIs.  KF5N August 27, 2023
   SetDitLength(EEPROMData.currentWPM);
   SetTransmitDitLength(EEPROMData.currentWPM);
