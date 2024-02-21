@@ -136,8 +136,8 @@ void CalibratePrologue() {
   NCOFreq = 0L;
   xrState = RECEIVE_STATE;
   calibrateFlag = 0;  // KF5N
-  EEPROMData.CWOffset = cwFreqOffsetTemp;                  // Return user selected CW offset frequency.
-  sineTone(EEPROMData.CWOffset + 6);  // This function takes "number of cycles" which is the offset + 6.
+  EEPROMData.CWOffset = cwFreqOffsetTemp;   // Return user selected CW offset frequency.
+  sineTone(EEPROMData.CWOffset + 6);        // This function takes "number of cycles" which is the offset + 6.
   //calFreqShift = 0;
   EEPROMData.currentScale = userScale;  //  Restore vertical scale to user preference.  KF5N
   ShowSpectrumdBScale();
@@ -772,6 +772,4 @@ void SelectCalFreq() {
   tft.writeTo(L2);
   tft.clearMemory();
   RedrawDisplayScreen();
-  //  BandInformation();
-  //  DrawBandWidthIndicatorBar();
 }
