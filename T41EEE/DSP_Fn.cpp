@@ -8,7 +8,6 @@
 float knee_dBFS = -15.0;
 int8_t NB_taps = 10;
 int8_t NB_impulse_samples = 7;
-uint8_t agc_action = 0;
 uint8_t decay_type = 0;
 uint8_t hang_enable;
 uint8_t NB_test = 0;
@@ -607,9 +606,9 @@ void AGC()
     }
     if (volts < min_volts) {
       volts = min_volts; // no AGC action is taking place
-      agc_action = 0;
+      agc_action = false;
     } else {
-      agc_action = 1;                           // LED indicator for AGC action
+      agc_action = true;                           // LED indicator for AGC action
     }
 
     //#ifdef USE_LOG10FAST

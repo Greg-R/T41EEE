@@ -435,13 +435,9 @@ void ProcessIQData2(int toneFreqIndex) {
         N_BLOCKS = FFT_LENGTH / 2 / BUFFER_SIZE * (uint32_t)DF; // should be 16 with DF == 8 and FFT_LENGTH = 512
         BUFFER_SIZE*N_BLOCKS = 2024 samples
      **********************************************************************************/
-
-//  bandOutputFactor = 0.127;  // This is a remnant of the calibration process which included the power amplifier.
-  // Generate I and Q for the transmit or receive calibration.  KF5N
-//  if (IQChoice == 2 || IQChoice == 3) {                                   // KF5N
+  // Generate I and Q for the transmit or receive calibration.  KF5N                                  // KF5N
     arm_scale_f32(cosBuffer, 0.20, float_buffer_L_EX, 256);  // AFP 2-11-23 Use pre-calculated sin & cos instead of Hilbert
     arm_scale_f32(sinBuffer, 0.20, float_buffer_R_EX, 256);  // AFP 2-11-23 Sidetone = 3000
-//  }
 
   if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
     arm_scale_f32(float_buffer_L_EX, -EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L_EX, 256);       //Adjust level of L buffer // AFP 2-11-23
@@ -495,9 +491,6 @@ powerScale = 30.0 * EEPROMData.powerOutCW[EEPROMData.currentBand];
     // get audio samples from the audio  buffers and convert them to float
     // read in 32 blocks á 128 samples in I and Q
     for (unsigned i = 0; i < N_BLOCKS; i++) {
-// = Q_in_R.readBuffer();
-//      sp_R1 = Q_in_L.readBuffer();
-
       /**********************************************************************************  AFP 12-31-20
           Using arm_Math library, convert to float one buffer_size.
           Float_buffer samples are now standardized from > -1.0 to < 1.0

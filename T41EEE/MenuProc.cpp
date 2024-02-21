@@ -84,7 +84,7 @@ void CalibrateOptions() {
       
     case 5:  // SSB PA Cal
       EEPROMData.SSBPowerCalibrationFactor[EEPROMData.currentBand] = GetEncoderValueLive(-2.0, 2.0, EEPROMData.SSBPowerCalibrationFactor[EEPROMData.currentBand], 0.001, (char *)"SSB PA Cal: ");
-      EEPROMData.powerOutSSB[EEPROMData.currentBand] = (-.0133 * EEPROMData.transmitPowerLevel * EEPROMData.transmitPowerLevel + .7884 * EEPROMData.transmitPowerLevel + 4.5146) * EEPROMData.SSBPowerCalibrationFactor[EEPROMData.currentBand];  // AFP 10-21-22
+      EEPROMData.powerOutSSB[EEPROMData.currentBand] = sqrt(EEPROMData.transmitPowerLevel/20.0) * EEPROMData.SSBPowerCalibrationFactor[EEPROMData.currentBand];
       val = ReadSelectedPushButton();
       if (val != BOGUS_PIN_READ) {        // Any button press??
         val = ProcessButtonPress(val);    // Use ladder value to get menu choice
@@ -153,6 +153,8 @@ void CalibrateOptions() {
   UpdateEqualizerField(EEPROMData.receiveEQFlag, EEPROMData.xmitEQFlag);
 //  return 1;
 }
+
+
 // ==============  AFP 10-22-22 ==================
 /*****
   Purpose: Present the CW options available and return the selection
@@ -269,27 +271,6 @@ return;
   UpdateAGCField();
 //  return EEPROMData.AGCMode;
 }
-
-
-/*****
-  Purpose: IQ Options
-
-  Parameter list:
-    void
-
-  Return value
-****
-int IQOptions()  //============================== AFP 10-22-22  All new
-{
-  calibrateFlag = 1;
-  const char* IQOptions[7] { "Freq Cal", "CW PA Cal", "Rec Cal", "Xmit Cal", "SSB PA Cal", "Set Tone", "Cancel" };  //AFP 10-21-22
-  //const char *IQOptions[] = {"Rec Cal", "Xmit Cal", "Freq Cal", "SSB PA Cal", "CW PA Cal", "Cancel"}; //AFP 10-21-22
-  IQChoice = SubmenuSelect(IQOptions, 7, 0);  //AFP 10-21-22
-  Serial.printf("IQOptions returns %d\n", IQChoice);
-  CalibrateOptions(IQChoice);
-  return IQChoice;
-}
-*/
 
 
 /*****
@@ -444,6 +425,7 @@ void ProcessEqualizerChoices(int EQType, char *title) {
   EEPROMWrite();
 }
 
+
 /*****
   Purpose: Receive EQ set
 
@@ -478,6 +460,7 @@ void EqualizerRecOptions() {
   UpdateEqualizerField(EEPROMData.receiveEQFlag, EEPROMData.xmitEQFlag);
 //  return 0;
 }
+
 
 /*****
   Purpose: Xmit EQ options
@@ -566,6 +549,8 @@ void MicGainSet() {
 //  return micGainChoice;
   //  EraseMenus();
 }
+
+
 /*****
   Purpose: Turn mic compression on and set the level
 
@@ -611,6 +596,7 @@ void MicOptions()  // AFP 09-22-22 All new
 //  return micChoice;
 }
 
+
 /*****
   Purpose: Present the bands available and return the selection
 
@@ -646,8 +632,8 @@ void RFOptions() {
       BandInformation();
       break;
 
-    case 1:                                                                                                                                        // Gain
-      EEPROMData.rfGain[EEPROMData.currentBand] = GetEncoderValue(-60, 10, EEPROMData.rfGain[EEPROMData.currentBand], 5, (char *)"RF Gain dB: ");  // Argument: min, max, start, increment
+    case 1:  // Manual gain set.
+      EEPROMData.rfGain[EEPROMData.currentBand] = GetEncoderValue(-60, 20, EEPROMData.rfGain[EEPROMData.currentBand], 5, (char *)"RF Gain dB: ");  // Argument: min, max, start, increment
       //EEPROMData.rfGainAllBands = EEPROMData.rfGainAllBands;
       EEPROMWrite();
 //      returnValue = EEPROMData.rfGain[EEPROMData.currentBand];
@@ -799,6 +785,7 @@ void VFOSelect() {
   UpdateDecoderField();
 //  return EEPROMData.activeVFO;
 }
+
 
 /*****
   Purpose: Allow user to set current EEPROM values or restore default settings

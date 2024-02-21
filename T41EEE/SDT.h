@@ -449,10 +449,10 @@ struct config_t {
   float NR_beta = 0.85;     // 4 bytes
   float omegaN = 200.0;     // 4 bytes
   float pll_fmax = 4000.0;  // 4 bytes
-  float powerOutCW[NUMBER_OF_BANDS] = { 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01 };
-  float powerOutSSB[NUMBER_OF_BANDS] = { 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01 };
-  float CWPowerCalibrationFactor[NUMBER_OF_BANDS] = { 0.01, 0.01, .01, .01, .01, .01, .01 };       // 0.019;
-  float SSBPowerCalibrationFactor[NUMBER_OF_BANDS] = { 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01 };  // 0.008
+  float powerOutCW[NUMBER_OF_BANDS] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };  // powerOutCW and powerOutSSB are derived from the TX power setting and calibration factors.
+  float powerOutSSB[NUMBER_OF_BANDS] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+  float CWPowerCalibrationFactor[NUMBER_OF_BANDS] = { 0.05, 0.05, .05, .05, .05, .05, .05 };        // Increased to 0.04, was 0.019; KF5N February 20, 2024
+  float SSBPowerCalibrationFactor[NUMBER_OF_BANDS] = { 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05 };  // Increased to 0.04, was 0.008; KF5N February 21, 2024
   float IQAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1, 1, 1, 1, 1, 1, 1 };
   float IQPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
   float IQXAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1, 1, 1, 1, 1, 1, 1 };
@@ -722,6 +722,7 @@ extern const uint32_t N_stages_biquad_lowpass1;
 extern const uint16_t n_dec1_taps;
 extern const uint16_t n_dec2_taps;
 extern int mute;
+extern bool agc_action;
 extern int attenuator;
 extern int audioYPixel[];
 extern int bandswitchPins[];
@@ -975,7 +976,7 @@ void CWOptions();
 #define CW_SHAPING_FALL 2
 
 void CW_ExciterIQData(int shaping);  // AFP 08-18-22
-
+void DisplayAGC();
 void DisplayClock();
 void DisplaydbM();
 void DisplayIncrementField();

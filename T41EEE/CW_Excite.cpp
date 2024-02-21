@@ -135,6 +135,7 @@ powerScale = 30.0 * EEPROMData.powerOutCW[EEPROMData.currentBand];
       Q_out_R_Ex.playBuffer(); // Transmitter
       Q_out_L.playBuffer();    // Sidetone
       Q_out_R.playBuffer();    // Sidetone.  Are two channels needed for sidetone???
+
     }
     
 
