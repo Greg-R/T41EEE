@@ -266,7 +266,7 @@ FASTRUN void ShowSpectrum()  //AFP Extensively Modified 3-15-21 Adjusted 12-13-2
     }
     if (FH_max_box < LOWERPIXTARGET) {
       EEPROMData.rfGainCurrent = EEPROMData.rfGainCurrent + 1;
-      if(EEPROMData.rfGainCurrent > 20.0) EEPROMData.rfGainCurrent = 20.0;  //  Do not allow RF gain greater than 20.
+      if(EEPROMData.rfGainCurrent > 25.0) EEPROMData.rfGainCurrent = 25.0;  //  Do not allow RF gain greater than 25.
     }
   }
   tft.fillRect(SPECTRUM_LEFT_X + 131, SPECTRUM_TOP_Y + 10, 33, tft.getFontHeight(), RA8875_BLACK);
