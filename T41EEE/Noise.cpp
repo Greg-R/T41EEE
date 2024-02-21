@@ -314,6 +314,8 @@ void Kim1_NR()
   } // end of Kim et al. 2002 algorithm
 
 }
+
+
 /*****
   Purpose:   void xanr
   Parameter list:
@@ -369,6 +371,7 @@ void Xanr() // variable leak LMS algorithm for automatic notch or noise reductio
     ANR_in_idx = (ANR_in_idx + ANR_mask) & ANR_mask;
   }
 }
+
 
 /*****
   Purpose: spectral_noise_reduction
@@ -646,6 +649,7 @@ void SpectralNoiseReduction()
   }
 }
 
+
 /*****
   Purpose: void LMSNoiseReduction(
   
@@ -668,6 +672,7 @@ void LMSNoiseReduction(int16_t blockSize, float32_t *nrbuffer)
   lms1_inbuf %= 512;
   lms1_outbuf %= 512;
 }
+
 
 /*****
   Purpose: void InitLMSNoiseReduction()
@@ -706,6 +711,8 @@ void InitLMSNoiseReduction()
   arm_lms_norm_init_f32(&LMS_Norm_instance, calc_taps, &LMS_NormCoeff_f32[0], &LMS_StateF32[0], mu_calc, 256);
 
 }
+
+
 /*****
   Purpose:
   Parameter list:

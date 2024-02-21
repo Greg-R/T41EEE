@@ -439,8 +439,8 @@ void ProcessIQData()
         break;
       case 1:                               // Kim NR
         Kim1_NR();
-        arm_scale_f32 (float_buffer_L, 30, float_buffer_L, FFT_length / 2);
-        arm_scale_f32 (float_buffer_R, 30, float_buffer_R, FFT_length / 2);
+        arm_scale_f32 (float_buffer_L, 3, float_buffer_L, FFT_length / 2);  // Scalin factor reduced; was blasting speaker.  KF5N February 20, 2024.
+        arm_scale_f32 (float_buffer_R, 3, float_buffer_R, FFT_length / 2);
         break;
       case 2:                               // Spectral NR
         SpectralNoiseReduction();
