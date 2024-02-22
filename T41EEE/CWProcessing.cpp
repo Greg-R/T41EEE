@@ -145,7 +145,7 @@ void DoCWReceiveProcessing() {  // All New AFP 09-19-22
     goertzelMagnitude2 = goertzel_mag(256, freq[EEPROMData.CWOffset], 24000, float_buffer_R_CW);  //AFP 10-25-22
     goertzelMagnitude = (goertzelMagnitude1 + goertzelMagnitude2) / 2;
     //Combine Correlation and Gowetzel Coefficients
-    combinedCoeff = 100 * aveCorrResult * goertzelMagnitude;
+    combinedCoeff = 200 * aveCorrResult * goertzelMagnitude;
 //    Serial.printf("combinedCoeff = %f\n", combinedCoeff);  // Use this to tune decoder.
     // ==========  Changed CW decode "lock" indicator
     if (combinedCoeff > 50) {  // AFP 10-26-22
