@@ -154,6 +154,7 @@ void CalibratePrologue() {
   IQChoice = 9;
   calOnFlag = 0;
   radioState = CW_RECEIVE_STATE;  // KF5N
+  if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreq();                      // Return Si5351 to normal operation mode.  KF5N
   lastState = 1111;               // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 16, 2023
   return;
@@ -184,6 +185,7 @@ void DoReceiveCalibrate() {
                                                                               //  if (bands[EEPROMData.currentBand].mode == DEMOD_USB) calFreqShift = 24000 + 2250;  //  USB offset.  KF5N
   if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) calFreqShift = 24000;  //  LSB offset.  KF5N
   if (bands[EEPROMData.currentBand].mode == DEMOD_USB) calFreqShift = 24000;  //  USB offset.  KF5N
+  if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreqCal(calFreqShift);
   calTypeFlag = 0;  // RX cal
 
@@ -271,7 +273,7 @@ void DoXmitCalibrate(int toneFreqIndex) {
   tft.fillRect(400, 110, 50, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(400, 110);
   tft.print(correctionIncrement);
-
+  if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreqCal(freqOffset);
   tft.writeTo(L1);
   // Transmit Calibration Loop
@@ -357,7 +359,7 @@ void DoXmitCarrierCalibrate(int toneFreqIndex) {
   tft.fillRect(400, 110, 50, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(400, 110);
   tft.print(increment);
-
+  if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreqCal(freqOffset);
   tft.writeTo(L1);
   // Transmit Calibration Loop.  This is independent of loop().
