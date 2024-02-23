@@ -51,7 +51,7 @@ void KeyRingOn() //AFP 09-25-22
 *****/
 void CW_ExciterIQData(int shaping) //AFP 08-20-22
 {
-  uint32_t N_BLOCKS_EX = N_B_EX;
+ // uint32_t N_BLOCKS_EX = N_B_EX;
   float32_t powerScale;
  
   arm_scale_f32 (cosBuffer, 0.20, float_buffer_L_EX, 256);  // AFP 10-13-22 Use pre-calculated sin & cos instead of Hilbert
@@ -103,40 +103,44 @@ powerScale = 30.0 * EEPROMData.powerOutCW[EEPROMData.currentBand];
     arm_scale_f32(float_buffer_L_EX, powerScale, float_buffer_L_EX, 2048); //Scale to compensate for losses in Interpolation
     arm_scale_f32(float_buffer_R_EX, powerScale, float_buffer_R_EX, 2048);
 
-
     /**********************************************************************************  AFP 12-31-20
       CONVERT TO INTEGER AND PLAY AUDIO, I and Q of CW transmitter and also sidetone.
     **********************************************************************************/
 
+    q15_t q15_buffer_LTemp[2048];  //KF5N
+    q15_t q15_buffer_RTemp[2048];  //KF5N
+
+      // Transmitter I and Q.  Cast the array from float to q15_t.  q15_t is equivalent to int16_t.
+      arm_float_to_q15 (float_buffer_L_EX, q15_buffer_LTemp, 2048);  // source, destination, number of samples
+      arm_float_to_q15 (float_buffer_R_EX, q15_buffer_RTemp, 2048);
+
+    // Inject the DC offset from carrier calibration.  There is an ARM function for this.
+      arm_offset_q15(q15_buffer_LTemp, EEPROMData.iDCoffset[EEPROMData.currentBand] + 1900, q15_buffer_LTemp, 2048);
+      arm_offset_q15(q15_buffer_RTemp, EEPROMData.qDCoffset[EEPROMData.currentBand] + 1900, q15_buffer_RTemp, 2048);
+
+      Q_out_L_Ex.play(q15_buffer_LTemp, 2048); // Transmitter
+      Q_out_R_Ex.play(q15_buffer_RTemp, 2048); // Transmitter
+      Q_out_L.play(q15_buffer_LTemp, 2048);    // Sidetone
+
+/*
     for (unsigned  i = 0; i < N_BLOCKS_EX; i++) {  //N_BLOCKS_EX=16  BUFFER_SIZE=128 16x128=2048
       // Assign pointers to the Teensy Audio buffers.  The data will be played via the Teensy audio system.
-//      sp_L2 = Q_out_L_Ex.getBuffer();       // Q_out_L_Ex and Q_out_R_Ex are AudioPlayQueue objects.  sp_L2 and sp_R2 are pointers to q15_t.
-//      sp_R2 = Q_out_R_Ex.getBuffer();       // getBuffer() returns a pointer to an array of AUDIO_BLOCK_SAMPLES (usually 128) q15_t.
-//      leftSidetone = Q_out_L.getBuffer();
-//      rightSidetone = Q_out_R.getBuffer();
+      // Q_out_L_Ex.getBuffer()  This returns a pointer to a 128 size buffer.  Use this in arm functions to process streaming data.
 
-      // Transmitter I and Q.  Cast the array from float to q15_t.
+      // Transmitter I and Q.  Cast the array from float to q15_t.  q15_t is equivalent to int16_t.
       arm_float_to_q15 (&float_buffer_L_EX[BUFFER_SIZE * i], Q_out_L_Ex.getBuffer(), BUFFER_SIZE);  // source, destination, number of samples
       arm_float_to_q15 (&float_buffer_R_EX[BUFFER_SIZE * i], Q_out_R_Ex.getBuffer(), BUFFER_SIZE);
 
       // Sidetone.  Only one channel is used.  Cast the array from float to q15_t.
       arm_float_to_q15 (&float_buffer_LTemp[BUFFER_SIZE * i], Q_out_L.getBuffer(), BUFFER_SIZE);  // source, destination, number of samples
-//      arm_float_to_q15 (&float_buffer_RTemp[BUFFER_SIZE * i], Q_out_R.getBuffer(), BUFFER_SIZE);
 
     // Inject the DC offset from carrier calibration.  There is an ARM function for this.
-//      for(int i = 0; i < 128; i = i + 1) *(sp_L2 + i) = *(sp_L2 + i) + EEPROMData.iDCoffset[EEPROMData.currentBand] + 1300;
-//      for(int i = 0; i < 128; i = i + 1) *(sp_R2 + i) = *(sp_R2 + i) + EEPROMData.qDCoffset[EEPROMData.currentBand] + 1300;
-      arm_offset_q15(Q_out_L_Ex.getBuffer(), EEPROMData.iDCoffset[EEPROMData.currentBand] + 1300, Q_out_L_Ex.getBuffer(), 128);
-      arm_offset_q15(Q_out_R_Ex.getBuffer(), EEPROMData.qDCoffset[EEPROMData.currentBand] + 1300, Q_out_R_Ex.getBuffer(), 128);
-//    for(int i = 0; i < 2048; i = i + 1) q15_buffer_LTemp[i] = q15_buffer_LTemp[i] + EEPROMData.iDCoffset[EEPROMData.currentBand] + 1300;
-//    for(int i = 0; i < 2048; i = i + 1) q15_buffer_RTemp[i] = q15_buffer_RTemp[i] + EEPROMData.qDCoffset[EEPROMData.currentBand] + 1300;
+      arm_offset_q15(Q_out_L_Ex.getBuffer(), EEPROMData.iDCoffset[EEPROMData.currentBand] + 1900, Q_out_L_Ex.getBuffer(), 128);
+      arm_offset_q15(Q_out_R_Ex.getBuffer(), EEPROMData.qDCoffset[EEPROMData.currentBand] + 1900, Q_out_R_Ex.getBuffer(), 128);
 
       Q_out_L_Ex.playBuffer(); // Transmitter
       Q_out_R_Ex.playBuffer(); // Transmitter
       Q_out_L.playBuffer();    // Sidetone
-      Q_out_R.playBuffer();    // Sidetone.  Are two channels needed for sidetone???
-
     }
-    
-
+    */
 }

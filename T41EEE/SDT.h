@@ -1066,6 +1066,7 @@ float PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins);
 
 void printFile(const char *filename);
 void EnableButtonInterrupts();
+void playTransmitData();  // KF5N February 23, 2024
 int ProcessButtonPress(int valPin);
 void ProcessEqualizerChoices(int EQType, char *title);
 void ProcessIQData();

@@ -464,8 +464,9 @@ powerScale = 30.0 * EEPROMData.powerOutCW[EEPROMData.currentBand];
   arm_scale_f32(float_buffer_L_EX, powerScale, float_buffer_L_EX, 2048);  //Scale to compensate for losses in Interpolation
   arm_scale_f32(float_buffer_R_EX, powerScale, float_buffer_R_EX, 2048);
 
+  // This code block was introduced after TeensyDuino 1.58 appeared.  It doesn't use a for loop, but processes the entire 2048 buffer in one pass.
   // are there at least N_BLOCKS buffers in each channel available ?
-  if ((uint32_t)Q_in_L.available() > N_BLOCKS + 0 && (uint32_t)Q_in_R.available() > N_BLOCKS + 0) {
+  if ((uint32_t)Q_in_L.available() > N_BLOCKS && (uint32_t)Q_in_R.available() > N_BLOCKS) {  // Audio Record Queues!!!
 
     // Revised I and Q calibration signal generation using large buffers.  Greg KF5N June 4 2023
     q15_t q15_buffer_LTemp[2048];  //KF5N
@@ -479,8 +480,8 @@ powerScale = 30.0 * EEPROMData.powerOutCW[EEPROMData.currentBand];
 //        for(int i = 0; i < 2048; i = i + 1) q15_buffer_RTemp[i] = q15_buffer_RTemp[i] + EEPROMData.qDCoffset[EEPROMData.currentBand] + 1300;
 
 // arm_offset_q15	(q15_buffer_LTemp 	offset, q15_t * 	pDst, uint32_t 	blockSize )	
-   arm_offset_q15	(q15_buffer_LTemp, EEPROMData.iDCoffset[EEPROMData.currentBand] + 1300, q15_buffer_LTemp, 2048);
-   arm_offset_q15	(q15_buffer_RTemp, EEPROMData.qDCoffset[EEPROMData.currentBand] + 1300, q15_buffer_RTemp, 2048);
+   arm_offset_q15	(q15_buffer_LTemp, EEPROMData.iDCoffset[EEPROMData.currentBand] + 1900, q15_buffer_LTemp, 2048);
+   arm_offset_q15	(q15_buffer_RTemp, EEPROMData.qDCoffset[EEPROMData.currentBand] + 1900, q15_buffer_RTemp, 2048);
 
     Q_out_L_Ex.play(q15_buffer_LTemp, 2048);
     Q_out_R_Ex.play(q15_buffer_RTemp, 2048);
@@ -775,3 +776,27 @@ void SelectCalFreq() {
   tft.clearMemory();
   RedrawDisplayScreen();
 }
+
+FASTRUN void playTransmitData() {
+//  if ((uint32_t)Q_in_L.available() > N_BLOCKS && (uint32_t)Q_in_R.available() > N_BLOCKS) {
+  //  Try for loop from much earlier versions to see if this code block can be commonized.
+    for (unsigned  i = 0; i < 16; i++) {  //N_BLOCKS_EX=16  BUFFER_SIZE=128 16x128=2048
+      // Assign pointers to the Teensy Audio buffers.  The data will be played via the Teensy audio system.
+      // Q_out_L_Ex.getBuffer()  This returns a pointer to a 128 size buffer.  Use this in arm functions to process streaming data.
+
+      // Transmitter I and Q.  Cast the array from float to q15_t.  q15_t is equivalent to int16_t.
+      arm_float_to_q15 (&float_buffer_L_EX[BUFFER_SIZE * i], Q_out_L_Ex.getBuffer(), BUFFER_SIZE);  // source, destination, number of samples
+      arm_float_to_q15 (&float_buffer_R_EX[BUFFER_SIZE * i], Q_out_R_Ex.getBuffer(), BUFFER_SIZE);
+
+      // Sidetone.  Only one channel is used.  Cast the array from float to q15_t.
+      arm_float_to_q15 (&float_buffer_LTemp[BUFFER_SIZE * i], Q_out_L.getBuffer(), BUFFER_SIZE);  // source, destination, number of samples
+
+    // Inject the DC offset from carrier calibration.  There is an ARM function for this.
+      arm_offset_q15(Q_out_L_Ex.getBuffer(), EEPROMData.iDCoffset[EEPROMData.currentBand] + 1900, Q_out_L_Ex.getBuffer(), 128);
+      arm_offset_q15(Q_out_R_Ex.getBuffer(), EEPROMData.qDCoffset[EEPROMData.currentBand] + 1900, Q_out_R_Ex.getBuffer(), 128);
+
+      Q_out_L_Ex.playBuffer(); // Transmitter
+      Q_out_R_Ex.playBuffer(); // Transmitter
+      Q_out_L.playBuffer();    // Sidetone, play L channel only.
+    }
+  }
