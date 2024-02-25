@@ -1084,7 +1084,7 @@ void SaveAnalogSwitchValues();
 void SelectCalFreq();   // AFP 10-18-22
 void SelectCWFilter();  // AFP 10-18-22
 void SelectCWOffset();  // KF5N December 13, 2023
-extern "C" uint32_t set_arm_clock(uint32_t frequency);
+//extern "C" uint32_t set_arm_clock(uint32_t frequency);
 void SetBand();
 void SetBandRelay(int state);
 void SetDecIntFilters();

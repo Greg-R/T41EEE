@@ -133,7 +133,7 @@ const char *labels[] = { "Select", "Menu Up", "Band Up",
 
 uint32_t FFT_length = FFT_LENGTH;
 
-extern "C" uint32_t set_arm_clock(uint32_t frequency);
+//extern "C" uint32_t set_arm_clock(uint32_t frequency);
 
 //======================================== Global object definitions ==================================================
 // ===========================  AFP 08-22-22
