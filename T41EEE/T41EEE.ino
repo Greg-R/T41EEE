@@ -133,7 +133,7 @@ const char *labels[] = { "Select", "Menu Up", "Band Up",
 
 uint32_t FFT_length = FFT_LENGTH;
 
-extern "C" uint32_t set_arm_clock(uint32_t frequency);
+//extern "C" uint32_t set_arm_clock(uint32_t frequency);
 
 //======================================== Global object definitions ==================================================
 // ===========================  AFP 08-22-22
@@ -1440,6 +1440,7 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
             modeSelectOutExR.gain(0, 1.0);
 //            modeSelectOutL.gain(1, volumeLog[(int)EEPROMData.sidetoneVolume]);        // Sidetone  AFP 10-01-22
             modeSelectOutL.gain(0, volumeLog[(int)EEPROMData.sidetoneVolume]);        // Sidetone  AFP 10-01-22
+//            modeSelectOutL.gain(0, 1);
 
             CW_ExciterIQData(CW_SHAPING_RISE);
             cwKeyDown = true;

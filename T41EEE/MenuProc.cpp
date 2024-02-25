@@ -197,7 +197,6 @@ void CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
       break;
 
     case 5:  // Sidetone volume
-             //  SetEEPROMData.sidetoneVolume();
       SetSideToneVolume();
       break;
 
