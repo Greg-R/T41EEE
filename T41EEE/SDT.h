@@ -723,6 +723,7 @@ extern int mute;
 extern bool agc_action;
 extern int attenuator;
 extern int audioYPixel[];
+//extern int* audioYPixel;
 extern int bandswitchPins[];
 extern int calibrateFlag;
 extern int chipSelect;
