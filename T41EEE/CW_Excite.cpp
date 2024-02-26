@@ -52,7 +52,7 @@ void KeyRingOn() //AFP 09-25-22
 void CW_ExciterIQData(int shaping) //AFP 08-20-22
 {
  // uint32_t N_BLOCKS_EX = N_B_EX;
-  float32_t powerScale, sidetoneVolume;
+  float32_t powerScale;
   q15_t q15_buffer_LTemp[2048];  //KF5N
   q15_t q15_buffer_RTemp[2048];  //KF5N
   q15_t q15_buffer_Sidetone[2048];

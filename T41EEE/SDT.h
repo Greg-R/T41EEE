@@ -724,7 +724,7 @@ extern const uint16_t n_dec2_taps;
 extern int mute;
 extern bool agc_action;
 extern int attenuator;
-extern int audioYPixel[];
+extern int* audioYPixel;
 extern int bandswitchPins[];
 extern int calibrateFlag;
 extern int chipSelect;

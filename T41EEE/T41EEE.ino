@@ -425,7 +425,7 @@ const uint16_t n_dec2_taps = (1 + (uint16_t)(n_att / (22.0 * (n_fstop2 - n_fpass
 int mute = 0;
 int attenuator = 0;
 
-int DMAMEM audioYPixel[1024];  // Will int16_t save memory here???
+int* audioYPixel = new int[256]{0};  // Will int16_t save memory here???
 
 int bandswitchPins[] = {
   30,  // 80M

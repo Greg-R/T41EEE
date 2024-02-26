@@ -8,7 +8,7 @@ uint8_t NB_on = 0;
 uint8_t wait_flag;
 float32_t audiotmp = 0.0f;
 //float32_t audioSpectBuffer[1024];  // This can't be DMAMEM.  It will break the S-Meter.  KF5N October 10, 2023
-float32_t* audioSpectBuffer = new float32_t[1024];  // Assign to the heap.
+float32_t* audioSpectBuffer = new float32_t[1024]{0};  // Assign to the heap.
 float32_t sample_meanL = 0.0;
 float32_t sample_meanR = 0.0;
 float32_t wold = 0.0f;
@@ -322,7 +322,7 @@ void ProcessIQData()
       for (int k = 0; k < 1024; k++) {
         audioSpectBuffer[1024 - k] = (iFFT_buffer[k] * iFFT_buffer[k]);
       }
-      for (int k = 0; k < 256; k++) {
+      for (int k = 3; k < 256; k++) {
         if (bands[EEPROMData.currentBand].mode == 0  || bands[EEPROMData.currentBand].mode == DEMOD_AM || bands[EEPROMData.currentBand].mode == DEMOD_SAM) {  //AFP 10-26-22
           //audioYPixel[k] = 20+  map((int)displayScale[EEPROMData.currentScale].dBScale * log10f((audioSpectBuffer[1024 - k] + audioSpectBuffer[1024 - k + 1] + audioSpectBuffer[1024 - k + 2]) / 3), 0, 100, 0, 120);
           audioYPixel[k] = 50 +  map(15 * log10f((audioSpectBuffer[1024 - k] + audioSpectBuffer[1024 - k + 1] + audioSpectBuffer[1024 - k + 2]) / 3), 0, 100, 0, 120);
