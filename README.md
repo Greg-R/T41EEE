@@ -31,7 +31,7 @@ and feature enhancements become available.  You will be able to update and FLASH
 with the revised software quickly.
 
 Please note that the configuration structure is different than the predecessor V049.2
-It is recommended to perform a full FLASH erase before loading T41EEE.1.
+It is recommended to perform a full FLASH erase before loading T41EEE.3.
 
 You will need to install the ArduinoJSON library by Benoit Blanchon.  Using the IDE:
 Tools -> Manage Libraries ...
