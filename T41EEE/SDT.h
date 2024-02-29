@@ -974,6 +974,7 @@ void CWOptions();
 #define CW_SHAPING_NONE 0
 #define CW_SHAPING_RISE 1
 #define CW_SHAPING_FALL 2
+#define CW_SHAPING_ZERO 3
 
 void CW_ExciterIQData(int shaping);  // AFP 08-18-22
 void DisplayAGC();

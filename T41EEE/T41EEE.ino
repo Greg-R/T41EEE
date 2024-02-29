@@ -1425,7 +1425,7 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       modeSelectOutExL.gain(0, 0);
       modeSelectOutExR.gain(0, 0);
       digitalWrite(MUTE, LOW);  // unmutes audio
-      cwKeyDown = false;
+      cwKeyDown = false;  // false initiates CW_SHAPING_RISE.
       cwTimer = millis();
       while (millis() - cwTimer <= EEPROMData.cwTransmitDelay) {  //Start CW transmit timer on
         digitalWrite(RXTX, HIGH);
@@ -1451,10 +1451,10 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
           if (digitalRead(EEPROMData.paddleDit) == HIGH && EEPROMData.keyType == 0) {  //Turn off CW signal
             keyPressedOn = 0;
 
-            if (cwKeyDown) {
+            if (cwKeyDown) {       // Initiate falling CW signal.
               CW_ExciterIQData(CW_SHAPING_FALL);
               cwKeyDown = false;
-            }
+            } else CW_ExciterIQData(CW_SHAPING_ZERO);  //  No waveforms; but DC offset is still present.
           }
         }
       }

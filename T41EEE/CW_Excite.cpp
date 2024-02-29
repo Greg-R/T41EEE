@@ -84,6 +84,9 @@ void CW_ExciterIQData(int shaping) //AFP 08-20-22
   } else if (shaping == CW_SHAPING_FALL) {
     arm_mult_f32(float_buffer_L_EX, cwFallBuffer, float_buffer_L_EX, 256);
     arm_mult_f32(float_buffer_R_EX, cwFallBuffer, float_buffer_R_EX, 256);
+  } else if (shaping == CW_SHAPING_ZERO) {
+    arm_scale_f32(float_buffer_L_EX, 0.0, float_buffer_L_EX, 256);
+    arm_scale_f32(float_buffer_R_EX, 0.0, float_buffer_R_EX, 256);
   }
     /**********************************************************************************
               Interpolate (upsample the data streams by 8X to create the 192KHx sample rate for output
@@ -105,6 +108,7 @@ void CW_ExciterIQData(int shaping) //AFP 08-20-22
 
 //  This is the correct place in the data stream to inject the scaling for power.
 powerScale = 30.0 * EEPROMData.powerOutCW[EEPROMData.currentBand];
+//powerScale = 0.0;
     //  192KHz effective sample rate here
 //    arm_scale_f32(float_buffer_L_EX, sidetoneVolume, float_buffer_Sidetone, 2048);
     arm_scale_f32(float_buffer_L_EX, powerScale, float_buffer_L_EX, 2048); //Scale to compensate for losses in Interpolation
