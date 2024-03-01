@@ -532,7 +532,18 @@ void ProcessIQData()
     /**********************************************************************************  AFP 12-31-20
       CONVERT TO INTEGER AND PLAY AUDIO
     **********************************************************************************/
-
+    
+    q15_t q15_buffer_LTemp[2048];  //KF5N
+    q15_t q15_buffer_RTemp[2048];  //KF5N
+//    Q_out_L.setBehaviour(AudioPlayQueue::NON_STALLING);
+//    Q_out_R.setBehaviour(AudioPlayQueue::NON_STALLING);
+    arm_float_to_q15 (float_buffer_L, q15_buffer_LTemp, 2048);
+    arm_float_to_q15 (float_buffer_R, q15_buffer_RTemp, 2048);
+    Q_out_L.play(q15_buffer_LTemp, 2048);
+    Q_out_R.play(q15_buffer_RTemp, 2048);
+//    Q_out_L.setBehaviour(AudioPlayQueue::ORIGINAL);
+//    Q_out_R.setBehaviour(AudioPlayQueue::ORIGINAL);
+/*
     for (unsigned  i = 0; i < N_BLOCKS; i++) {
 //      sp_L1 = Q_out_L.getBuffer();
 //      sp_R1 = Q_out_R.getBuffer();
@@ -541,6 +552,8 @@ void ProcessIQData()
       Q_out_L.playBuffer(); // play it !
       Q_out_R.playBuffer(); // play it !
     }
+    */
+
 
 //      Codec_gain();
 

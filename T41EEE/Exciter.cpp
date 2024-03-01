@@ -20,9 +20,11 @@
     6.  Interpolate 8x (upsample and filter) the data stream to 192KHz sample rate
     7.  Output the data stream thruogh the DACs at 192KHz
 *****/
+int16_t* sp_L2, sp_R2;
 void ExciterIQData()
 {
   uint32_t N_BLOCKS_EX = N_B_EX;
+  float32_t powerScale;
 
   /**********************************************************************************  AFP 12-31-20
         Get samples from queue buffers
@@ -125,21 +127,39 @@ void ExciterIQData()
     arm_fir_interpolate_f32(&FIR_int2_EX_I, float_buffer_LTemp, float_buffer_L_EX, 512);
     arm_fir_interpolate_f32(&FIR_int2_EX_Q, float_buffer_RTemp, float_buffer_R_EX, 512);
     //  192KHz effective sample rate here
-    arm_scale_f32(float_buffer_L_EX, 20, float_buffer_L_EX, 2048); //Scale to compensate for losses in Interpolation
-    arm_scale_f32(float_buffer_R_EX, 20, float_buffer_R_EX, 2048);
+    powerScale = 30.0 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
+    arm_scale_f32(float_buffer_L_EX, powerScale, float_buffer_L_EX, 2048); //Scale to compensate for losses in Interpolation
+    arm_scale_f32(float_buffer_R_EX, powerScale, float_buffer_R_EX, 2048);
+
+
 
     /**********************************************************************************  AFP 12-31-20
       CONVERT TO INTEGER AND PLAY AUDIO
     **********************************************************************************/
+    q15_t q15_buffer_LTemp[2048];  //KF5N
+    q15_t q15_buffer_RTemp[2048];  //KF5N
+ 
+      arm_float_to_q15 (float_buffer_L_EX, q15_buffer_LTemp, 2048);
+      arm_float_to_q15 (float_buffer_R_EX, q15_buffer_RTemp, 2048);
+      arm_offset_q15(q15_buffer_LTemp, EEPROMData.iDCoffset[EEPROMData.currentBand] + 1900, q15_buffer_LTemp, 2048);  // Carrier suppression offset.
+      arm_offset_q15(q15_buffer_RTemp, EEPROMData.qDCoffset[EEPROMData.currentBand] + 1900, q15_buffer_RTemp, 2048);
+      Q_out_L_Ex.play(q15_buffer_LTemp, 2048); // play it !
+      Q_out_R_Ex.play(q15_buffer_RTemp, 2048); // play it !
 
+
+    /*
     for (unsigned  i = 0; i < N_BLOCKS_EX; i++) {  //N_BLOCKS_EX=16  BUFFER_SIZE=128 16x128=2048
 //      sp_L2 = Q_out_L_Ex.getBuffer();
 //      sp_R2 = Q_out_R_Ex.getBuffer();
       arm_float_to_q15 (&float_buffer_L_EX[BUFFER_SIZE * i], Q_out_L_Ex.getBuffer(), BUFFER_SIZE);
       arm_float_to_q15 (&float_buffer_R_EX[BUFFER_SIZE * i], Q_out_R_Ex.getBuffer(), BUFFER_SIZE);
+      arm_offset_q15(Q_out_L_Ex.getBuffer(), EEPROMData.iDCoffset[EEPROMData.currentBand] + 1900, Q_out_L_Ex.getBuffer(), 128);  // Carrier suppression offset.
+      arm_offset_q15(Q_out_R_Ex.getBuffer(), EEPROMData.qDCoffset[EEPROMData.currentBand] + 1900, Q_out_R_Ex.getBuffer(), 128);
       Q_out_L_Ex.playBuffer(); // play it !
       Q_out_R_Ex.playBuffer(); // play it !
     }
+    */
+
   }
 }
 

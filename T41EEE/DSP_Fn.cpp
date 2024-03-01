@@ -463,6 +463,8 @@ void AGCPrep()
 void AGCThresholdChanged() {
   max_gain = powf (10.0, (float32_t)bands[EEPROMData.currentBand].AGC_thresh / 20.0);
 }
+
+
 /*****
   Purpose: Audio AGC()
   Parameter list:
@@ -619,10 +621,8 @@ void AGC()
   }
 }
 
+
 // ========== AM-Decode stuff
-
-
-
 /*****
   Purpose: Demod IQ
   Parameter list:
@@ -636,7 +636,6 @@ void DecodeIQ() {
     float_buffer_R[i] = iFFT_buffer[FFT_length + i * 2 + 1];
   }
 }
-
 
 
 /*****
@@ -689,6 +688,7 @@ void SetCompressionLevel()
   EraseMenus();
 }
 
+
 /*****
   Purpose: Allow user to set the mic compression ratio
 
@@ -738,6 +738,8 @@ void SetCompressionRatio()
   }
   EraseMenus();
 }
+
+
 /*****
   Purpose: Allow user to set the mic Attack in sec
 
@@ -787,6 +789,7 @@ void SetCompressionAttack()
   }
   EraseMenus();
 }
+
 
 /*****
   Purpose: Allow user to set the mic compression ratio

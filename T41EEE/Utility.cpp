@@ -446,7 +446,6 @@ float ApproxAtan(float z) {
 }
 
 
-
 /*****
   Purpose: function reads the analog value for each matrix switch and stores that value in EEPROM.
            Only called if STORE_SWITCH_VALUES is uncommented.
@@ -699,7 +698,7 @@ FLASHMEM void initPowerCoefficients() {
 }
 
 
-void initUserDefinedStuff() {
+FLASHMEM void initUserDefinedStuff() {
   NR_Index = EEPROMData.nrOptionSelect;
   TxRxFreq = EEPROMData.centerFreq = EEPROMData.lastFrequencies[EEPROMData.currentBand][EEPROMData.activeVFO];
   SetKeyPowerUp();  // Use EEPROMData.keyType and EEPROMData.paddleFlip to configure key GPIs.  KF5N August 27, 2023

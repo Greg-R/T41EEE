@@ -229,6 +229,48 @@ float GetEncoderValueLive(float minValue, float maxValue, float startValue, floa
 }
 
 
+/*****
+  Purpose: Use the encoder to change the value of a number in some other function
+
+  Parameter list:
+    int minValue                the lowest value allowed
+    int maxValue                the largest value allowed
+    int startValue              the numeric value to begin the count
+    int increment               the amount by which each increment changes the value
+    char prompt[]               the input prompt
+  Return value;
+    int                         the new value
+*****/
+int GetEncoderValueLiveQ15t(int minValue, int maxValue, int startValue, int increment, char prompt[])  //AFP 10-22-22
+{
+  int currentValue = startValue;
+  tft.setFontScale((enum RA8875tsize)1);
+  tft.setTextColor(RA8875_WHITE);
+  tft.fillRect(250, 0, 285, CHAR_HEIGHT, RA8875_BLACK); // Increased rectangle size to full erase value.  KF5N August 12, 2023
+  tft.setCursor(257, 1);
+  tft.print(prompt);
+  tft.setCursor(440, 1);
+    tft.print(startValue);
+
+  //while (true) {
+  if (filterEncoderMove != 0) {
+    currentValue += filterEncoderMove * increment;  // Bump up or down...
+    if (currentValue < minValue)
+      currentValue = minValue;
+    else if (currentValue > maxValue)
+      currentValue = maxValue;
+
+  //  tft.fillRect(449, 0, 90, CHAR_HEIGHT, RA8875_BLACK);  // This is not required. KF5N August 12, 2023
+    tft.setCursor(440, 1);
+
+      tft.print(startValue);
+    filterEncoderMove = 0;
+  }
+  //tft.setTextColor(RA8875_WHITE);
+  return currentValue;
+}
+
+
 
 /*****
   Purpose: Use the encoder to change the value of a number in some other function

@@ -120,7 +120,7 @@ const char *topMenus[] = { "CW Options", "RF Set", "VFO Select",
                            "EQ Rec Set", "EQ Xmt Set", "Calibrate", "Bearing" };
 
 // Pointers to functions which execute the menu options.  Do these functions used the returned integer???
-int (*functionPtr[])() = { &CWOptions, &RFOptions, &VFOSelect,
+void (*functionPtr[])() = { &CWOptions, &RFOptions, &VFOSelect,
                            &EEPROMOptions, &AGCOptions, &SpectrumOptions,
                            &ButtonSetNoiseFloor, &MicGainSet, &MicOptions,
                            &EqualizerRecOptions, &EqualizerXmtOptions, &CalibrateOptions, &BearingMaps };
@@ -199,8 +199,8 @@ AudioConnection patchCord20(modeSelectOutExR, 0, i2s_quadOut, 1);
 AudioConnection patchCord21(modeSelectOutL, 0, i2s_quadOut, 2);  //Rec out
 AudioConnection patchCord22(modeSelectOutR, 0, i2s_quadOut, 3);
 
-AudioConnection patchCord23(Q_out_L_Ex, 0, modeSelectOutL, 1);  //Rec out Queue for sidetone
-AudioConnection patchCord24(Q_out_R_Ex, 0, modeSelectOutR, 1);
+//AudioConnection patchCord23(Q_out_L_Ex, 0, modeSelectOutL, 1);  //Rec out Queue for sidetone
+//AudioConnection patchCord24(Q_out_R_Ex, 0, modeSelectOutR, 1);
 AudioControlSGTL5000 sgtl5000_2;
 // End dataflow code
 
@@ -1015,8 +1015,8 @@ void SetAudioOperatingState(int operatingState) {
       Q_in_R_Ex.clear();
 
       // CW sidetone output disconnected
-      patchCord23.disconnect();
-      patchCord24.disconnect();
+//      patchCord23.disconnect();
+//      patchCord24.disconnect();
 
       break;
     case SSB_TRANSMIT_STATE:
@@ -1035,8 +1035,8 @@ void SetAudioOperatingState(int operatingState) {
       patchCord2.connect();
 
       // CW sidetone output disconnected
-      patchCord23.disconnect();
-      patchCord24.disconnect();
+//      patchCord17.disconnect();
+//      patchCord24.disconnect();
 
       break;
     case CW_TRANSMIT_STRAIGHT_STATE:
@@ -1057,9 +1057,9 @@ void SetAudioOperatingState(int operatingState) {
       Q_in_R_Ex.end();
       Q_in_R_Ex.clear();
 
-      // CW sidetone output connected
-      patchCord23.connect();
-      patchCord24.connect();
+      // CW sidetone output connected.  Use only left channel.
+//      patchCord17.connect();
+//      patchCord24.connect();
 
       break;
   }
@@ -1376,8 +1376,10 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       modeSelectInExL.gain(0, 1);
       modeSelectOutL.gain(0, 0);
       modeSelectOutR.gain(0, 0);
-      modeSelectOutExL.gain(0, EEPROMData.powerOutSSB[EEPROMData.currentBand]);  //AFP 10-21-22
-      modeSelectOutExR.gain(0, EEPROMData.powerOutSSB[EEPROMData.currentBand]);  //AFP 10-21-22
+//      modeSelectOutExL.gain(0, EEPROMData.powerOutSSB[EEPROMData.currentBand]);  //AFP 10-21-22
+//      modeSelectOutExR.gain(0, EEPROMData.powerOutSSB[EEPROMData.currentBand]);  //AFP 10-21-22
+      modeSelectOutExL.gain(0, 1);  //AFP 10-21-22
+      modeSelectOutExR.gain(0, 1);  //AFP 10-21-22
       ShowTransmitReceiveStatus();
 
       while (digitalRead(PTT) == LOW) {
@@ -1424,7 +1426,7 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       modeSelectOutExL.gain(0, 0);
       modeSelectOutExR.gain(0, 0);
       digitalWrite(MUTE, LOW);  // unmutes audio
-      cwKeyDown = false;
+      cwKeyDown = false;  // false initiates CW_SHAPING_RISE.
       cwTimer = millis();
       while (millis() - cwTimer <= EEPROMData.cwTransmitDelay) {  //Start CW transmit timer on
         digitalWrite(RXTX, HIGH);
@@ -1432,10 +1434,10 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
           cwTimer = millis();                                                       //Reset timer
 
           if (!cwKeyDown) {
-            modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
-            modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
-            modeSelectOutL.gain(1, volumeLog[(int)EEPROMData.sidetoneVolume]);        // Sidetone  AFP 10-01-22
-
+            // Don't scale for power here.  Scale in the CW exciter code.
+            modeSelectOutExL.gain(0, 1.0);
+            modeSelectOutExR.gain(0, 1.0);
+            modeSelectOutL.gain(0, volumeLog[(int)EEPROMData.sidetoneVolume]);  // Sidetone, left channel only.  AFP 10-01-22
             CW_ExciterIQData(CW_SHAPING_RISE);
             cwKeyDown = true;
           } else {
@@ -1445,10 +1447,10 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
           if (digitalRead(EEPROMData.paddleDit) == HIGH && EEPROMData.keyType == 0) {  //Turn off CW signal
             keyPressedOn = 0;
 
-            if (cwKeyDown) {
+            if (cwKeyDown) {       // Initiate falling CW signal.
               CW_ExciterIQData(CW_SHAPING_FALL);
               cwKeyDown = false;
-            }
+            } else CW_ExciterIQData(CW_SHAPING_ZERO);  //  No waveforms; but DC offset is still present.
           }
         }
       }
@@ -1476,8 +1478,10 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
 
         if (digitalRead(EEPROMData.paddleDit) == LOW) {  // Keyer Dit
           ditTimerOn = millis();
-          modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
-          modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
+//          modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
+//          modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
+          modeSelectOutExL.gain(0, 1);  //AFP 10-21-22
+          modeSelectOutExR.gain(0, 1);  //AFP 10-21-22
           modeSelectOutL.gain(1, volumeLog[(int)EEPROMData.sidetoneVolume]);        // Sidetone
 
           // Queue audio blocks--execution time of this loop will be between 0-20ms shorter

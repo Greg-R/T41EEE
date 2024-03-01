@@ -56,16 +56,16 @@ inline void writeClippedRect(int16_t x, int16_t y, int16_t cx, int16_t cy, uint1
 void writeClippedRect(int x, int y, int cx, int cy, uint16_t *pixels, bool waitForWRC = true);
 #endif
 
-char letters[] = { '\0',  // Make a 1's-based array
+PROGMEM char letters[] = { '\0',  // Make a 1's-based array
                    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I',
                    'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
                    'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '*',  // Space is for SP
                    '0', '1', '2', '3', '4', '5', '6', '7', '8',
                    '9' };
 
-int spacing[] = { 0, 70, 140, 210, 280, 350, 420, 490, 560, 630 };
+PROGMEM int spacing[] = { 0, 70, 140, 210, 280, 350, 420, 490, 560, 630 };
 
-struct cities {
+ struct cities {
   char callPrefix[12];
   char country[30];
   double lat;
@@ -539,7 +539,7 @@ PROGMEM struct cities dxCities[] = {
   Return value:
     void
 *****/
-void DrawKeyboard() {
+FLASHMEM void DrawKeyboard() {
   int i;
   int keyWidth = 60;
   int keySpace = 10;
@@ -637,7 +637,7 @@ void DrawKeyboard() {
   Return value:
     void
 *****/
-void CaptureKeystrokes() {
+FLASHMEM void CaptureKeystrokes() {
   int keyWidth = 60;
   int keySpace = 10;
   int keyHeight = 40;
@@ -831,7 +831,7 @@ void CaptureKeystrokes() {
   Return value:
     void
 *****/
-void DrawNormalLetter(int row, int horizontalSpacer, int whichLetterIndex, int keyWidth, int keyHeight) {
+FLASHMEM void DrawNormalLetter(int row, int horizontalSpacer, int whichLetterIndex, int keyWidth, int keyHeight) {
   tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
   tft.fillRect(horizontalSpacer, row + 5, keyWidth, keyHeight, RA8875_BLACK);
   tft.drawRect(horizontalSpacer, row + 5, keyWidth, keyHeight, RA8875_YELLOW);
@@ -863,7 +863,7 @@ void DrawNormalLetter(int row, int horizontalSpacer, int whichLetterIndex, int k
   Return value:
     void
 *****/
-void DrawActiveLetter(int row, int horizontalSpacer, int whichLetterIndex, int keyWidth, int keyHeight) {
+FLASHMEM void DrawActiveLetter(int row, int horizontalSpacer, int whichLetterIndex, int keyWidth, int keyHeight) {
   tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
   tft.fillRect(horizontalSpacer, row + 5, keyWidth, keyHeight, RA8875_BLUE);
   if (letters[whichLetterIndex] == '*') {  // Space
@@ -891,7 +891,7 @@ void DrawActiveLetter(int row, int horizontalSpacer, int whichLetterIndex, int k
     double               the bearing heading to DX in degrees
 
  *****/
-float BearingHeading(char *dxCallPrefix) {
+FLASHMEM float BearingHeading(char *dxCallPrefix) {
   float deltaLong;  // For radians conversion
   float x, y;       // Temporary variables
 
@@ -936,7 +936,7 @@ float BearingHeading(char *dxCallPrefix) {
     int                  the index of the country, -1 if not found
 
  *****/
-int FindCountry(char *prefix) {
+FLASHMEM int FindCountry(char *prefix) {
   // callPrefix country  lat  lon
   int i = 0,
       index = -1,
@@ -980,7 +980,7 @@ int FindCountry(char *prefix) {
 
 From: https://stackoverflow.com/questions/27928/calculate-distance-between-two-latitude-longitude-points-haversine-formula
 *****/
-float HaversineDistance(float lat2, float lon2) {
+FLASHMEM float HaversineDistance(float lat2, float lon2) {
   const float r = 6371;  // Earth's radius in km
   const float p = PI_BY_180;
   float lat1, lon1;
@@ -996,7 +996,7 @@ float HaversineDistance(float lat2, float lon2) {
 //======================================
 
 
-void bmpDraw(const char *filename, int x, int y) {
+FLASHMEM void bmpDraw(const char *filename, int x, int y) {
   //  int image_width, image_height;        // W+H in pixels
   int len;
   int rayStart = 0, rayEnd = 0;
@@ -1273,7 +1273,7 @@ inline void writeRect(int x, int y, int cx, int cy, uint16_t *pixels) {
 #endif
 }
 
-void writeClippedRect(int x, int y, int cx, int cy, uint16_t *pixels, bool waitForWRC) {
+FLASHMEM void writeClippedRect(int x, int y, int cx, int cy, uint16_t *pixels, bool waitForWRC) {
   x += g_image_offset_x;
   y += g_image_offset_y;
   int end_x = x + cx;
@@ -1421,7 +1421,7 @@ void WaitforWRComplete() {
   Return value;
     int                   0 if cannot initialize, 1 otherwise
 *****/
-int BearingMaps() {
+FLASHMEM void BearingMaps() {
   char ptrMaps[10][50];
   int count;
 
@@ -1432,7 +1432,7 @@ int BearingMaps() {
     MyDelay(SDCARD_MESSAGE_LENGTH);
     tft.fillRect(200, 300, tft.getFontWidth() * 12, tft.getFontHeight(), RA8875_BLACK);
     tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
-    return 0;
+//    return 0;
   }
   count = CreateMapList(ptrMaps, &count);  // Reads the SD card for BMP files and returns ptrMaps filled in with names and return the count
 
@@ -1440,7 +1440,7 @@ int BearingMaps() {
     tft.setCursor(300, 300);
     tft.print("No Maps found");
     selectedMapIndex = -1;
-    return -1;  // Didn't find any
+//    return -1;  // Didn't find any
   }
   if (count == 1) {
     selectedMapIndex = 0;
@@ -1462,7 +1462,7 @@ int BearingMaps() {
       tft.println("initialization failed!");
       MyDelay(5000L);
       tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
-      return -1;
+//      return -1;
     }
     selectedMapIndex = WhichOneToUse(ptrMaps, count);
   }
@@ -1475,7 +1475,7 @@ int BearingMaps() {
   ShowFrequency();
   DrawFrequencyBarValue();
 
-  return selectedMapIndex;
+//  return selectedMapIndex;
 }
 
 
@@ -1489,7 +1489,7 @@ int BearingMaps() {
   Return value;
     int                   0 if cannot initialize, 1 otherwise
 *****/
-int CreateMapList(char ptrMaps[][50], int *count) {
+FLASHMEM int CreateMapList(char ptrMaps[][50], int *count) {
   int index;
   int temp = 0;
 

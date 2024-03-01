@@ -2,7 +2,7 @@
 //====================== User Specific Preferences =============
 
 //#define DEBUG 		                                                        // Uncommented for debugging, comment out for normal use
-//#define DEBUG1                                                            // Uncomment to print temperature and load numbers to the display.
+//#define DEBUG1
 #define DEFAULT_KEYER_WPM   			15                                        // Startup value for keyer wpm
 #define FREQ_SEP_CHARACTER  			'.'					                              // Some may prefer period, space, or combo
 #define MAP_FILE_NAME   					"Cincinnati.bmp"                          // Name you gave to BMP map file. Max is 50 chars
@@ -48,7 +48,11 @@
 //#define                           FOURSQRP
 
 // Set multiplication factors for your QSD and QSE boards.
-#define MASTER_CLK_MULT_RX 4
-#define MASTER_CLK_MULT_TX 4
+#define MASTER_CLK_MULT_RX 2
+#define MASTER_CLK_MULT_TX 2
+
+// Uncomment this line for QSE2.
+
+#define QSE2
 
 

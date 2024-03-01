@@ -412,7 +412,7 @@ void ButtonNotchFilter() {
   Return value;
     int           the current noise floor value
 *****/
-int ButtonSetNoiseFloor() {
+void ButtonSetNoiseFloor() {
   int floor = EEPROMData.currentNoiseFloor[EEPROMData.currentBand];  // KF5N
   int val;
 
@@ -457,7 +457,7 @@ int ButtonSetNoiseFloor() {
   tft.writeTo(L2);
   DrawFrequencyBarValue();
   tft.writeTo(L1);
-  return EEPROMData.spectrumNoiseFloor;
+//  return EEPROMData.spectrumNoiseFloor;
 }
 
 /*****
