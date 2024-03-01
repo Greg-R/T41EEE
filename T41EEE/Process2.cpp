@@ -337,7 +337,7 @@ void DoXmitCalibrate(int toneFreqIndex) {
  *****/
 //  q15_t iDCoffset;
 //  q15_t qDCoffset;
-
+#ifdef QSE2
 void DoXmitCarrierCalibrate(int toneFreqIndex) {
   int task = -1;
   int lastUsedTask = -2;
@@ -413,10 +413,10 @@ void DoXmitCarrierCalibrate(int toneFreqIndex) {
   }                            // end while
   CalibratePrologue();
 }
-
+#endif
 
 /*****
-  Purpose: Signal processing for th purpose of calibrating the transmit IQ
+  Purpose: Signal processing for the purpose of calibrating the transmit IQ
 
    Parameter List:
       int toneFreq, index of an array of tone frequencies.
@@ -475,13 +475,11 @@ powerScale = 30.0 * EEPROMData.powerOutCW[EEPROMData.currentBand];
     Q_out_R_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
     arm_float_to_q15(float_buffer_L_EX, q15_buffer_LTemp, 2048);
     arm_float_to_q15(float_buffer_R_EX, q15_buffer_RTemp, 2048);
-    // Inject the DC offset from carrier calibration.
-//        for(int i = 0; i < 2048; i = i + 1) q15_buffer_LTemp[i] = q15_buffer_LTemp[i] + EEPROMData.iDCoffset[EEPROMData.currentBand] + 1300;
-//        for(int i = 0; i < 2048; i = i + 1) q15_buffer_RTemp[i] = q15_buffer_RTemp[i] + EEPROMData.qDCoffset[EEPROMData.currentBand] + 1300;
 
-// arm_offset_q15	(q15_buffer_LTemp 	offset, q15_t * 	pDst, uint32_t 	blockSize )	
+#ifdef QSE2
    arm_offset_q15	(q15_buffer_LTemp, EEPROMData.iDCoffset[EEPROMData.currentBand] + 1900, q15_buffer_LTemp, 2048);
    arm_offset_q15	(q15_buffer_RTemp, EEPROMData.qDCoffset[EEPROMData.currentBand] + 1900, q15_buffer_RTemp, 2048);
+#endif
 
     Q_out_L_Ex.play(q15_buffer_LTemp, 2048);
     Q_out_R_Ex.play(q15_buffer_RTemp, 2048);

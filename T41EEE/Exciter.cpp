@@ -141,8 +141,10 @@ void ExciterIQData()
  
       arm_float_to_q15 (float_buffer_L_EX, q15_buffer_LTemp, 2048);
       arm_float_to_q15 (float_buffer_R_EX, q15_buffer_RTemp, 2048);
+      #ifdef QSE2
       arm_offset_q15(q15_buffer_LTemp, EEPROMData.iDCoffset[EEPROMData.currentBand] + 1900, q15_buffer_LTemp, 2048);  // Carrier suppression offset.
       arm_offset_q15(q15_buffer_RTemp, EEPROMData.qDCoffset[EEPROMData.currentBand] + 1900, q15_buffer_RTemp, 2048);
+      #endif
       Q_out_L_Ex.play(q15_buffer_LTemp, 2048); // play it !
       Q_out_R_Ex.play(q15_buffer_RTemp, 2048); // play it !
 

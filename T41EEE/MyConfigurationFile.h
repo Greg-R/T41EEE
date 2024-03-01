@@ -52,7 +52,6 @@
 #define MASTER_CLK_MULT_TX 2
 
 // Uncomment this line for QSE2.
-
 #define QSE2
 
 
