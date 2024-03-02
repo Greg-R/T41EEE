@@ -1,5 +1,14 @@
 The following change log documents changes to versions prior to the current.
 
+No new features are introduced in T41EEE.3.  This is a "clean-up" version.
+
+1.  Removal of extraneous #define statements.
+2.  Removal of unused variables.
+3.  Global variables which do not require global access are moved to their individual
+    files and are no longer extern (removed from SDT.h).
+4.  Some larger arrays are now DMAMEM.  This moves them to RAM2, thereby increasing the
+    stack size.
+
 ## Highlight of Features included in T41EEE.2
 
 Thank you to Jonathan KN6LFB and Harry GM3RVL for their contributions to the T41EEE code!
