@@ -203,7 +203,6 @@ void CalibrateOptions() {
 
     case 5:  // Choose CW calibration tone frequency.
       SelectCalFreq();
-      Serial.printf("End of case 5 in IQOptions\n");
       calibrateFlag = 0;
       break;
 

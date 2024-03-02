@@ -444,20 +444,19 @@ void ProcessIQData()
       case 2:                               // Spectral NR
         SpectralNoiseReduction();
         break;
-      case 3:                               // LMS NR
-        ANR_notch = 0;
+      case 3:                               // LMS NR.  KF5N March 2, 2024.
         Xanr();
-        arm_scale_f32 (float_buffer_L, 1.5, float_buffer_L, FFT_length / 2);
-        arm_scale_f32 (float_buffer_R, 2, float_buffer_R, FFT_length / 2);
+//        arm_scale_f32 (float_buffer_L, 1.5, float_buffer_L, FFT_length / 2);  // Why is scaling different???
+//        arm_scale_f32 (float_buffer_R, 2, float_buffer_R, FFT_length / 2);
+          arm_copy_f32(float_buffer_R, float_buffer_L, FFT_length / 2);  //  This is apparently required by the algorithm; it works on right channel only.
         break;
 
     }
     //==================  End NR ============================
     // ===========================Automatic Notch ==================
-    if (ANR_notchOn == 1) {
-      ANR_notch = 1;
+    if (ANR_notch) {    // KF5N March 2, 2024.
       Xanr();
-      arm_copy_f32(float_buffer_R, float_buffer_L, FFT_length / 2);  //AFP 10-21-22
+      arm_copy_f32(float_buffer_R, float_buffer_L, FFT_length / 2);  //  This is apparently required by the algorithm; it works on right channel only.
     }
     // ====================End notch =================================
     /**********************************************************************************

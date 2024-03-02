@@ -1,10 +1,10 @@
-
 #include "SDT.h"
 
 bool save_last_frequency = false;
 int directFreqFlag = 0;
-int32_t subMenuMaxOptions;    // Holds the number of submenu options.
+int32_t subMenuMaxOptions;  // Holds the number of submenu options.
 long TxRxFreqOld;
+
 
 /*****
   Purpose: To process a menu increase button push
@@ -31,6 +31,7 @@ void ButtonMenuIncrease() {
   }
 }
 
+
 /*****
   Purpose: To process a menu decrease button push
 
@@ -55,7 +56,7 @@ void ButtonMenuDecrease() {
     }
   }
 }
-//==================  AFP 09-27-22
+
 
 /*****
   Purpose: To process a band increase button push
@@ -145,6 +146,7 @@ void ButtonBandIncrease() {
   DrawFrequencyBarValue();
   UpdateDecoderField();
 }
+
 
 /*****
   Purpose: To process a band decrease button push
@@ -277,6 +279,7 @@ void ButtonZoom() {
   ResetTuning();  // AFP 10-11-22
 }
 
+
 /*****
   Purpose: To process a filter button push
 
@@ -293,6 +296,7 @@ void ButtonFilter() {
   //SetFreq();
   ShowFrequency();
 }
+
 
 /*****
   Purpose: Process demodulation mode
@@ -369,6 +373,7 @@ void ButtonMode()  //====== Changed AFP 10-05-22  =================
   DrawBandWidthIndicatorBar();
 }
 
+
 /*****
   Purpose: To process select noise reduction
 
@@ -384,9 +389,11 @@ void ButtonNR()  //AFP 09-19-22 update
   if (EEPROMData.nrOptionSelect > 3) {
     EEPROMData.nrOptionSelect = 0;
   }
-  NROptions();  //AFP 09-19-22
+  if (EEPROMData.nrOptionSelect == 3) ANR_notch = false;  // Turn off AutoNotch if LMS NR is selected.
+  NROptions();                                        //AFP 09-19-22
   UpdateNoiseField();
 }
+
 
 /*****
   Purpose: To set the notch filter
@@ -398,8 +405,12 @@ void ButtonNR()  //AFP 09-19-22 update
     void
 *****/
 void ButtonNotchFilter() {
-  ANR_notchOn = !ANR_notchOn;
-  MyDelay(100L);
+  ANR_notch = !ANR_notch;
+  //  If the notch is activated and LMS NR is also active, turn off NR and update display.
+  if (ANR_notch && EEPROMData.nrOptionSelect == 3) {
+    EEPROMData.nrOptionSelect = 0;  // Turn off noise reduction.  Other NR selections will be valid.
+    UpdateNoiseField();
+  }
 }
 
 
@@ -457,7 +468,7 @@ void ButtonSetNoiseFloor() {
   tft.writeTo(L2);
   DrawFrequencyBarValue();
   tft.writeTo(L1);
-//  return EEPROMData.spectrumNoiseFloor;
+  //  return EEPROMData.spectrumNoiseFloor;
 }
 
 /*****

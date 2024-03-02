@@ -78,6 +78,7 @@ void CW_ExciterIQData(int shaping) //AFP 08-20-22
     }
   }
 
+
   if (shaping == CW_SHAPING_RISE) {
     arm_mult_f32(float_buffer_L_EX, cwRiseBuffer, float_buffer_L_EX, 256);
     arm_mult_f32(float_buffer_R_EX, cwRiseBuffer, float_buffer_R_EX, 256);
@@ -88,6 +89,7 @@ void CW_ExciterIQData(int shaping) //AFP 08-20-22
     arm_scale_f32(float_buffer_L_EX, 0.0, float_buffer_L_EX, 256);
     arm_scale_f32(float_buffer_R_EX, 0.0, float_buffer_R_EX, 256);
   }
+
     /**********************************************************************************
               Interpolate (upsample the data streams by 8X to create the 192KHx sample rate for output
               Requires a LPF FIR 48 tap 10KHz and 8KHz
@@ -120,7 +122,7 @@ powerScale = 30.0 * EEPROMData.powerOutCW[EEPROMData.currentBand];
     **********************************************************************************/
 
       // Transmitter I and Q.  Cast the arrays from float to q15_t.  q15_t is equivalent to int16_t.
-//      arm_float_to_q15 (float_buffer_Sidetone, q15_buffer_Sidetone, 2048);  // source, destination, number of samples
+      arm_float_to_q15 (float_buffer_Sidetone, q15_buffer_Sidetone, 2048);  // source, destination, number of samples
       arm_float_to_q15 (float_buffer_L_EX, q15_buffer_LTemp, 2048);  // source, destination, number of samples
       arm_float_to_q15 (float_buffer_R_EX, q15_buffer_RTemp, 2048);
 

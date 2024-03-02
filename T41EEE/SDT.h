@@ -700,8 +700,7 @@ extern const char *zoomOptions[];
 extern byte currentDashJump;
 extern byte currentDecoderIndex;
 extern int8_t menuStatus;  // 0 = no primary or secondary menu, 1 = primary, 2 = secondary
-extern uint8_t ANR_notch;
-extern uint8_t ANR_notchOn;
+extern bool ANR_notch;  // KF5N March 2, 2024
 extern uint8_t display_S_meter_or_spectrum_state;
 extern uint8_t keyPressedOn;  //AFP 09-01-22
 extern uint8_t NR_first_time;
@@ -1064,7 +1063,7 @@ void MyDrawFloat(float val, int decimals, int x, int y, char *buff);
 float MSinc(int m, float fc);
 void NoActiveMenu();
 void NoiseBlanker(float32_t *inputsamples, float32_t *outputsamples);
-int NROptions();
+void NROptions();
 
 float PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins);
 

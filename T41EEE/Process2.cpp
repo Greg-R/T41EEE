@@ -766,7 +766,6 @@ float PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
 *****/
 const char *calFreqs[2]{ "750 Hz", "3.0 kHz" };
 void SelectCalFreq() {
-  Serial.printf("Call to SelectCalFreq\n");
   EEPROMData.calFreq = SubmenuSelect(calFreqs, 2, EEPROMData.calFreq);  // Returns the index of the array.
   //  RedrawDisplayScreen();  Kills the bandwidth graphics in the audio display window, remove. KF5N July 30, 2023
   // Clear the current CW filter graphics and then restore the bandwidth indicator bar.  KF5N July 30, 2023
@@ -775,6 +774,9 @@ void SelectCalFreq() {
   RedrawDisplayScreen();
 }
 
+
+// Consolidate transmit code into a function?
+/*
 FASTRUN void playTransmitData() {
 //  if ((uint32_t)Q_in_L.available() > N_BLOCKS && (uint32_t)Q_in_R.available() > N_BLOCKS) {
   //  Try for loop from much earlier versions to see if this code block can be commonized.
@@ -798,3 +800,4 @@ FASTRUN void playTransmitData() {
       Q_out_L.playBuffer();    // Sidetone, play L channel only.
     }
   }
+*/

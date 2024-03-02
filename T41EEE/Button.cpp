@@ -287,6 +287,7 @@ void ExecuteButtonPress(int val) {
 
     case NOISE_REDUCTION:  // 9
       ButtonNR();
+      UpdateNotchField();  // This is required because LMS NR must turn off AutoNotch.
       break;
 
     case NOTCH_FILTER:  // 10

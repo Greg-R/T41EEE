@@ -1413,11 +1413,11 @@ void UpdateNotchField() {
   tft.print("AutoNotch:");
   tft.setCursor(FIELD_OFFSET_X, NOTCH_Y - 2);
   tft.setTextColor(RA8875_GREEN);
-  if (ANR_notchOn == 0) {
+  if (ANR_notch == 0) {
     tft.print("Off");
   } else {
     tft.print("On");
-    ANR_notchOn = 1;  //AFP 10-21-22
+//    ANR_notchOn = 1;  //AFP 10-21-22
   }
 }
 
