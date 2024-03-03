@@ -1483,8 +1483,8 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
         }
       }
       digitalWrite(MUTE, HIGH);   // mutes audio
-      modeSelectOutL.gain(1, 0);  // Sidetone off
-      modeSelectOutR.gain(1, 0);
+      modeSelectOutL.gain(0, 0);  // Sidetone off
+//      modeSelectOutR.gain(1, 0);
       modeSelectOutExL.gain(0, 0);  //Power = 0 //AFP 10-11-22
       modeSelectOutExR.gain(0, 0);  //AFP 10-11-22
       digitalWrite(RXTX, LOW);      // End Straight Key Mode
@@ -1510,7 +1510,7 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
 //          modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
           modeSelectOutExL.gain(0, 1);  //AFP 10-21-22
           modeSelectOutExR.gain(0, 1);  //AFP 10-21-22
-          modeSelectOutL.gain(1, volumeLog[(int)EEPROMData.sidetoneVolume]);        // Sidetone
+          modeSelectOutL.gain(0, volumeLog[(int)EEPROMData.sidetoneVolume]);        // Sidetone
 
           // Queue audio blocks--execution time of this loop will be between 0-20ms shorter
           // than the desired dit time, due to audio buffering
@@ -1526,23 +1526,24 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
           }
 
           // Pause for one dit length of silence
+          modeSelectOutL.gain(0, 0);  // Sidetone off
           ditTimerOff = millis();
           while (millis() - ditTimerOff <= transmitDitLength) {
-            ;
+          CW_ExciterIQData(CW_SHAPING_ZERO);
           }
 
-          modeSelectOutExL.gain(0, 0);  //Power =0
-          modeSelectOutExR.gain(0, 0);
-          modeSelectOutL.gain(1, 0);  // Sidetone off
-          modeSelectOutR.gain(1, 0);
+      //    modeSelectOutExL.gain(0, 0);  //Power =0
+      //    modeSelectOutExR.gain(0, 0);
+       //   modeSelectOutR.gain(1, 0);
 
           cwTimer = millis();
-        } else {
-          if (digitalRead(EEPROMData.paddleDah) == LOW) {  //Keyer DAH
+        } else if (digitalRead(EEPROMData.paddleDah) == LOW) {  //Keyer DAH
             dahTimerOn = millis();
-            modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);
-            modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);
-            modeSelectOutL.gain(1, volumeLog[(int)EEPROMData.sidetoneVolume]);
+   //         modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);
+   //         modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);
+            modeSelectOutExL.gain(0, 1);  //AFP 10-21-22
+            modeSelectOutExR.gain(0, 1);  //AFP 10-21-22
+            modeSelectOutL.gain(0, volumeLog[(int)EEPROMData.sidetoneVolume]);
 
             // Queue audio blocks--execution time of this loop will be between 0-20ms shorter
             // than the desired dah time, due to audio buffering
@@ -1558,25 +1559,27 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
             }
 
             // Pause for one dit length of silence
+            modeSelectOutL.gain(0, 0);  // Sidetone off
             ditTimerOff = millis();
             while (millis() - ditTimerOff <= transmitDitLength) {
-              ;
+            CW_ExciterIQData(CW_SHAPING_ZERO);
             }
 
-            modeSelectOutExL.gain(0, 0);  //Power =0
-            modeSelectOutExR.gain(0, 0);
-            modeSelectOutL.gain(1, 0);  // Sidetone off
-            modeSelectOutR.gain(1, 0);
+//            modeSelectOutExL.gain(0, 0);  //Power =0
+//            modeSelectOutExR.gain(0, 0); 
+        //    modeSelectOutR.gain(1, 0);
 
             cwTimer = millis();
+          } else {            
+            CW_ExciterIQData(CW_SHAPING_ZERO);
           }
-        }
+
         keyPressedOn = 0;  // Fix for keyer click-clack.  KF5N August 16, 2023
       }                    //End Relay timer
 
       digitalWrite(MUTE, HIGH);   // mutes audio
-      modeSelectOutL.gain(1, 0);  // Sidetone off
-      modeSelectOutR.gain(1, 0);
+  //    modeSelectOutL.gain(1, 0);  // Sidetone off
+  //    modeSelectOutR.gain(1, 0);
       modeSelectOutExL.gain(0, 0);  //Power = 0 //AFP 10-11-22
       modeSelectOutExR.gain(0, 0);  //AFP 10-11-22
       digitalWrite(RXTX, LOW);      // End Straight Key Mode
