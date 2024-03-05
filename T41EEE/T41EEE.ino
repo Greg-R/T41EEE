@@ -1526,15 +1526,15 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
           }
 
           // Pause for one dit length of silence
-          modeSelectOutL.gain(0, 0);  // Sidetone off
+       //   modeSelectOutL.gain(0, 0);  // Sidetone off
           ditTimerOff = millis();
           while (millis() - ditTimerOff <= transmitDitLength) {
           CW_ExciterIQData(CW_SHAPING_ZERO);
           }
 
-      //    modeSelectOutExL.gain(0, 0);  //Power =0
-      //    modeSelectOutExR.gain(0, 0);
-       //   modeSelectOutR.gain(1, 0);
+//          modeSelectOutExL.gain(0, 0);  //Power =0
+//          modeSelectOutExR.gain(0, 0);
+          modeSelectOutL.gain(0, 0);      // Sidetone off
 
           cwTimer = millis();
         } else if (digitalRead(EEPROMData.paddleDah) == LOW) {  //Keyer DAH
@@ -1559,7 +1559,7 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
             }
 
             // Pause for one dit length of silence
-            modeSelectOutL.gain(0, 0);  // Sidetone off
+//            modeSelectOutL.gain(0, 0);  // Sidetone off
             ditTimerOff = millis();
             while (millis() - ditTimerOff <= transmitDitLength) {
             CW_ExciterIQData(CW_SHAPING_ZERO);
@@ -1567,13 +1567,13 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
 
 //            modeSelectOutExL.gain(0, 0);  //Power =0
 //            modeSelectOutExR.gain(0, 0); 
-        //    modeSelectOutR.gain(1, 0);
+            modeSelectOutL.gain(0, 0);    // Sidetone off
 
             cwTimer = millis();
           } else {            
             CW_ExciterIQData(CW_SHAPING_ZERO);
           }
-
+  //      CW_ExciterIQData(CW_SHAPING_ZERO);
         keyPressedOn = 0;  // Fix for keyer click-clack.  KF5N August 16, 2023
       }                    //End Relay timer
 
