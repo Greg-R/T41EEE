@@ -410,6 +410,8 @@ uint8_t zoom_display = 1;
 const uint8_t NR_L_frames = 3;
 const uint8_t NR_N_frames = 15;
 
+//PI = 3.1415926535897932384626433832795;
+
 int16_t pixelCurrent[SPECTRUM_RES];
 int16_t pixelnew[SPECTRUM_RES];
 int16_t pixelold[SPECTRUM_RES];

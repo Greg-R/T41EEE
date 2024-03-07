@@ -9,6 +9,7 @@ float32_t dbmhz = -145.0;
 float32_t m_AttackAlpha = 0.03;
 float32_t m_DecayAlpha = 0.01;
 
+
 /*****
   Purpose: Generate Array with variable sinewave frequency tone AFP 05-17-22
   Parameter list:
@@ -17,19 +18,17 @@ float32_t m_DecayAlpha = 0.01;
     void
 *****/
 FLASHMEM void sineTone(int numCycles) {
-  float theta;
-  float freqSideTone2;
-  // freqSideTone3, 3000 Hz, is used during TX calibration.
-  //  float freqSideTone3 = 3000;         // Refactored 32 * 24000 / 256; //AFP 2-7-23
-  //  float freqSideTone4 = 375;  Not used.
-  freqSideTone2 = numCycles * 24000 / 256;  // 750.0
-  for (int kf = 0; kf < 256; kf++) {        //Calc: numCycles=8, 750 hz sine wave.
-    theta = kf * 2 * PI * freqSideTone2 / 24000;
+  int kf;
+  float theta, increment;
+  float freqSideTone;
+  freqSideTone = numCycles * 24000.0 / 256.0;
+  for (kf = 0, increment = 0.0; kf < 256; increment += 1.0, kf++) {        // Calc: numCycles = 8, 750 hz sine wave.
+    theta = increment * 2.0 * PI * freqSideTone / 24000.0;
     sinBuffer[kf] = sin(theta);  // Used in CW decoder. 
-//    sinBuffer[kf] = sin(theta);  // Used in CW_Excite.cpp
     cosBuffer[kf] = cos(theta);  // Used in CW_Excite.cpp
   }
 }
+
 
 /*****
   Purpose: Generate ~5ms raised cosine wave-shaping arrays

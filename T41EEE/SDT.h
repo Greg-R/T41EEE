@@ -254,10 +254,10 @@ extern struct maps myMapFiles[];
 #define TMS0_POWER_DOWN_MASK (0x1U)
 #define TMS1_MEASURE_FREQ(x) (((uint32_t)(((uint32_t)(x)) << 0U)) & 0xFFFFU)
 #undef round
-#undef PI
+//#undef PI  Try using PI defined in Arduino and/or Teensy.  KF5N March 7, 2024
 #undef HALF_PI
 #undef TWO_PI
-#define PI 3.1415926535897932384626433832795f
+//extern const float PI;
 #define HALF_PI 1.5707963267948966192313216916398f
 #define TWO_PI 6.283185307179586476925286766559f
 #define PIH HALF_PI
