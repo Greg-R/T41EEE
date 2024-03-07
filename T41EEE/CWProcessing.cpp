@@ -248,7 +248,7 @@ void SetTransmitDitLength(int wpm) {
 void SetKeyType() {
   const char *keyChoice[] = { "Straight Key", "Keyer" };
 
-  EEPROMData.keyType = SubmenuSelect(keyChoice, 2, 0);
+  EEPROMData.keyType = SubmenuSelect(keyChoice, 2, EEPROMData.keyType);
   // Make sure the EEPROMData.paddleDit and EEPROMData.paddleDah variables are set correctly for straight key.
   // Paddle flip can reverse these, making the straight key inoperative.  KF5N August 9, 2023
   if (EEPROMData.keyType == 0) {
