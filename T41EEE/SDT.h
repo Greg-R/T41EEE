@@ -241,9 +241,9 @@ extern struct maps myMapFiles[];
 #define PTT 37           // Transmit/Receive
 #define MUTE 38          // Mute Audio,  HIGH = "On" Audio available from Audio PA, LOW = Mute audio
 //========================================= Switch pins
-#define NO_MENUS_ACTIVE 0        // No menus displayed
-#define PRIMARY_MENU_ACTIVE 1    // A primary menu is active
-#define SECONDARY_MENU_ACTIVE 2  // Both primary and secondary menus active
+//#define NO_MENUS_ACTIVE 0        // No menus displayed
+//#define PRIMARY_MENU_ACTIVE 1    // A primary menu is active
+//#define SECONDARY_MENU_ACTIVE 2  // Both primary and secondary menus active
 //========================================= Keyer pins
 #define KEYER_DAH_INPUT_RING 35  // Ring connection for keyer  -- default for righthanded user
 #define KEYER_DIT_INPUT_TIP 36   // Tip connection for keyer
@@ -765,7 +765,7 @@ extern unsigned ring_buffsize;
 extern long long freqCorrectionFactor;
 extern long long freqCorrectionFactorOld;  //AFP 09-21-22
 extern int32_t mainMenuIndex;
-extern int32_t secondaryMenuIndex;  // -1 means haven't determined secondary menu
+//extern int32_t secondaryMenuIndex;  // -1 means haven't determined secondary menu
 extern const uint32_t N_B;
 extern const uint32_t N_DEC_B;
 extern uint32_t FFT_length;

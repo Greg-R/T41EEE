@@ -16,12 +16,18 @@ long TxRxFreqOld;
     void
 *****/
 void ButtonMenuIncrease() {
-  if (menuStatus == PRIMARY_MENU_ACTIVE) {
+//  if (menuStatus == PRIMARY_MENU_ACTIVE) {
+//  Serial.printf("ButtonMenuIncrease\n");
     mainMenuIndex++;
+//    Serial.printf("ButtonMenuDecrease, mainMenuIndex = %d\n", mainMenuIndex);
     if (mainMenuIndex == TOP_MENU_COUNT) {  // At last menu option, so...
       mainMenuIndex = 0;                    // ...wrap around to first menu option
     }
-  } else {
+//  } 
+  
+  /*
+  else {
+    Serial.printf("ALERT menuStatus = 2!\n");
     if (menuStatus == SECONDARY_MENU_ACTIVE) {
       secondaryMenuIndex++;
       if (secondaryMenuIndex == subMenuMaxOptions) {  // Same here...
@@ -29,6 +35,7 @@ void ButtonMenuIncrease() {
       }
     }
   }
+  */
 }
 
 
@@ -42,12 +49,17 @@ void ButtonMenuIncrease() {
     void
 *****/
 void ButtonMenuDecrease() {
-  if (menuStatus == PRIMARY_MENU_ACTIVE) {
+//  if (menuStatus == PRIMARY_MENU_ACTIVE) {
+
     mainMenuIndex--;
+//    Serial.printf("ButtonMenuDecrease, mainMenuIndex = %d\n", mainMenuIndex);
     if (mainMenuIndex < 0) {               // At last menu option, so...
       mainMenuIndex = TOP_MENU_COUNT - 1;  // ...wrap around to first menu option
     }
-  } else {
+//  }
+  
+  /*
+   else {
     if (menuStatus == SECONDARY_MENU_ACTIVE) {
       secondaryMenuIndex--;
       if (secondaryMenuIndex < 0) {  // Same here...
@@ -55,6 +67,7 @@ void ButtonMenuDecrease() {
       }
     }
   }
+  */
 }
 
 

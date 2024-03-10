@@ -395,7 +395,7 @@ int fLoCutOld;
 int fHiCutOld;
 int filterWidth = (int)((bands[EEPROMData.currentBand].FHiCut - bands[EEPROMData.currentBand].FLoCut) / 1000.0 * pixel_per_khz);
 int h = SPECTRUM_HEIGHT + 3;
-int8_t menuStatus = NO_MENUS_ACTIVE;
+int8_t menuStatus = 0;
 bool ANR_notch = false;
 uint8_t auto_codec_gain = 1;
 uint8_t display_S_meter_or_spectrum_state = 0;
@@ -493,7 +493,7 @@ const int INT2_STATE_SIZE = 8 + BUFFER_SIZE * N_B / (uint32_t)DF1 - 1;
 unsigned ring_buffsize = RB_SIZE;
 
 int32_t mainMenuIndex = START_MENU;  // Done so we show menu[0] at startup
-int32_t secondaryMenuIndex = -1;     // -1 means haven't determined secondary menu
+//int32_t secondaryMenuIndex = -1;     // -1 means haven't determined secondary menu
 
 uint32_t N_BLOCKS = N_B;
 
@@ -1296,7 +1296,7 @@ FLASHMEM void setup() {
   RedrawDisplayScreen();
 
   mainMenuIndex = 0;             // Changed from middle to first. Do Menu Down to get to Calibrate quickly
-  menuStatus = NO_MENUS_ACTIVE;  // Blank menu field
+  menuStatus = 0;  // Blank menu field
   ShowName();
 
   ShowBandwidth();
@@ -1339,6 +1339,8 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   long dahTimerOn;
   bool cwKeyDown;
   unsigned long cwBlockIndex;
+
+  Serial.printf("mainMenuIndex = %d menuStatus = %d\n", mainMenuIndex, menuStatus);
 
   valPin = ReadSelectedPushButton();
   if (valPin != BOGUS_PIN_READ && xrState != TRANSMIT_STATE) {

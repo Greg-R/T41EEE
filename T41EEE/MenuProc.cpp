@@ -347,7 +347,7 @@ void SpectrumOptions() { /*
     void
 *****/
 void AGCOptions() {
-  const char *AGCChoices[] = { "Off", "Long", "Slow", "Medium", "Fast", "Cancel" };  // G0ORX (Added Long) September 5, 2023
+  const char *AGCChoices[] = { "AGC Off", "AGC Long", "AGC Slow", "AGC Medium", "AGC Fast", "Cancel" };  // G0ORX (Added Long) September 5, 2023
 
   EEPROMData.AGCMode = SubmenuSelect(AGCChoices, 6, EEPROMData.AGCMode);  // G0ORX
   if (EEPROMData.AGCMode == 5) {
@@ -526,7 +526,7 @@ void ProcessEqualizerChoices(int EQType, char *title) {
     int           an index into the band array
 *****/
 void EqualizerRecOptions() {
-  const char *RecEQChoices[] = { "On", "Off", "EQSet", "Cancel" };  // Add code practice oscillator
+  const char *RecEQChoices[] = { "RX EQ On", "RX EQ Off", "RX EQSet", "Cancel" };  // Add code practice oscillator
   int EQChoice = 0;
 
   EQChoice = SubmenuSelect(RecEQChoices, 4, 0);
@@ -562,7 +562,7 @@ void EqualizerRecOptions() {
     int           an index into the band array
 *****/
 void EqualizerXmtOptions() {
-  const char *XmtEQChoices[] = { "On", "Off", "EQSet", "Cancel" };  // Add code practice oscillator
+  const char *XmtEQChoices[] = { "TX EQ On", "TX EQ Off", "TX EQSet", "Cancel" };  // Add code practice oscillator
   int EQChoice = 0;
 
   EQChoice = SubmenuSelect(XmtEQChoices, 4, 0);
@@ -652,7 +652,7 @@ void MicGainSet() {
 *****/
 void MicOptions()  // AFP 09-22-22 All new
 {
-  const char *micChoices[] = { "On", "Off", "Set Threshold", "Set Comp_Ratio", "Set Attack", "Set Decay", "Cancel" };
+  const char *micChoices[] = { "Mic Comp On", "Mic Comp Off", "Set Threshold", "Set Comp_Ratio", "Set Attack", "Set Decay", "Cancel" };
 
   micChoice = SubmenuSelect(micChoices, 7, micChoice);
   switch (micChoice) {
@@ -682,7 +682,7 @@ void MicOptions()  // AFP 09-22-22 All new
       micChoice = -1;
       break;
   }
-  secondaryMenuIndex = -1;
+//  secondaryMenuIndex = -1;
 //  return micChoice;
 }
 
@@ -697,7 +697,7 @@ void MicOptions()  // AFP 09-22-22 All new
     int           an index into the band array
 *****/
 void RFOptions() {
-  const char *rfOptions[] = { "Power level", "Gain", "Auto-Gain On", "Auto-Gain Off", "Cancel" };
+  const char *rfOptions[] = { "TX Power Set", "RF Gain Set", "RF Auto-Gain On", "RF Auto-Gain Off", "Cancel" };
   int rfSet = 0;
 //  int returnValue = 0;
 
@@ -814,7 +814,7 @@ void DoPaddleFlip() {
     int             // the currently active VFO, A = 1, B = 0
 *****/
 void VFOSelect() {
-  const char *VFOOptions[] = { "VFO A", "VFO B", "Split", "Cancel" };
+  const char *VFOOptions[] = { "VFO A", "VFO B", "VFO Split", "Cancel" };
   int toggle;
   int choice, lastChoice;
 
