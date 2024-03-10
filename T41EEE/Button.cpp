@@ -201,31 +201,12 @@ int ReadSelectedPushButton() {
     void
 *****/
 void ExecuteButtonPress(int val) {
-//  if (val == MENU_OPTION_SELECT && menuStatus == NO_MENUS_ACTIVE) {  // Pressed Select with no primary/secondary menu selected
-//    NoActiveMenu();
-//    return;
-//  } else {
-//    menuStatus = PRIMARY_MENU_ACTIVE;
-//  }
+
   switch (val) {
     case MENU_OPTION_SELECT:  // 0
 
-//      if (menuStatus == PRIMARY_MENU_ACTIVE) {  // Doing primary menu
-//        ErasePrimaryMenu();
         ShowMenu(&topMenus[mainMenuIndex], PRIMARY_MENU);
         functionPtr[mainMenuIndex]();  // These are processed in MenuProcessing.cpp
- //       menuStatus = SECONDARY_MENU_ACTIVE;
-//        Serial.printf("menuStatus = %d\n", menuStatus);
-//        secondaryMenuIndex = -1;  // Reset secondary menu
-//      }
-      /*
-       else {
-        if (menuStatus == SECONDARY_MENU_ACTIVE) {  // Doing primary menu
-          menuStatus = PRIMARY_MENU_ACTIVE;
-          mainMenuIndex = 0;
-        }
-      }
-      */
       EraseMenus();
       break;
 
@@ -250,16 +231,13 @@ void ExecuteButtonPress(int val) {
       break;
 
     case ZOOM:  // 3
-//      menuStatus = PRIMARY_MENU_ACTIVE;
       EraseMenus();
       ButtonZoom();
       break;
 
     case MAIN_MENU_DN:  // 4
       ButtonMenuDecrease();
-//      if (menuStatus != NO_MENUS_ACTIVE) {  // Doing primary menu
         ShowMenu(&topMenus[mainMenuIndex], PRIMARY_MENU);
-//      }
       break;
 
     case BAND_DN:  // 5
@@ -405,8 +383,4 @@ void NoActiveMenu() {
   tft.setTextColor(RA8875_RED);
   tft.setCursor(10, 0);
   tft.print("No menu selected");
-
-//  menuStatus = NO_MENUS_ACTIVE;
-//  mainMenuIndex = 0;
-//  secondaryMenuIndex = 0;
 }

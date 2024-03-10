@@ -1340,8 +1340,6 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   bool cwKeyDown;
   unsigned long cwBlockIndex;
 
-  Serial.printf("mainMenuIndex = %d menuStatus = %d\n", mainMenuIndex, menuStatus);
-
   valPin = ReadSelectedPushButton();
   if (valPin != BOGUS_PIN_READ && xrState != TRANSMIT_STATE) {
     pushButtonSwitchIndex = ProcessButtonPress(valPin);

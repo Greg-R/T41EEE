@@ -26,8 +26,6 @@ int (*functionPtr[])() = { &BearingMaps, &CWOptions, &RFOptions, &VFOSelect,
 void ShowMenu(const char *menu[], int where)
 {
   tft.setFontScale( (enum RA8875tsize) 1);  
-
-//  if (menuStatus == NO_MENUS_ACTIVE)                                        // No menu selected??
      NoActiveMenu();  // Does this erase only?
      
   if (where == PRIMARY_MENU) {                                              // Should print on left edge of top line

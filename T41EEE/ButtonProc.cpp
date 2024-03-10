@@ -49,25 +49,11 @@ void ButtonMenuIncrease() {
     void
 *****/
 void ButtonMenuDecrease() {
-//  if (menuStatus == PRIMARY_MENU_ACTIVE) {
 
-    mainMenuIndex--;
-//    Serial.printf("ButtonMenuDecrease, mainMenuIndex = %d\n", mainMenuIndex);
+   mainMenuIndex--;
     if (mainMenuIndex < 0) {               // At last menu option, so...
       mainMenuIndex = TOP_MENU_COUNT - 1;  // ...wrap around to first menu option
     }
-//  }
-  
-  /*
-   else {
-    if (menuStatus == SECONDARY_MENU_ACTIVE) {
-      secondaryMenuIndex--;
-      if (secondaryMenuIndex < 0) {  // Same here...
-        secondaryMenuIndex = subMenuMaxOptions - 1;
-      }
-    }
-  }
-  */
 }
 
 
