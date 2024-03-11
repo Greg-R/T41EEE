@@ -57,8 +57,8 @@ void ExciterIQData()
 
     /**********************************************************************************  AFP 12-31-20
               Decimation is the process of downsampling the data stream and LP filtering
-              Decimation is done in two stages to prevent reversal of the spectrum, which occure with each even
-              Decimation.  First select every 4th asmple and then every 2nd sample, yielding 8x downsampling
+              Decimation is done in two stages to prevent reversal of the spectrum, which occurs with each even
+              Decimation.  First select every 4th sample and then every 2nd sample, yielding 8x downsampling
               192KHz/8 = 24KHz, with 8xsmaller sample sizes
      **********************************************************************************/
 
@@ -130,13 +130,11 @@ void ExciterIQData()
     arm_scale_f32(float_buffer_L_EX, powerScale, float_buffer_L_EX, 2048); //Scale to compensate for losses in Interpolation
     arm_scale_f32(float_buffer_R_EX, powerScale, float_buffer_R_EX, 2048);
 
-
-
     /**********************************************************************************  AFP 12-31-20
       CONVERT TO INTEGER AND PLAY AUDIO
     **********************************************************************************/
-    q15_t q15_buffer_LTemp[2048];  //KF5N
-    q15_t q15_buffer_RTemp[2048];  //KF5N
+    q15_t q15_buffer_LTemp[2048];  // KF5N
+    q15_t q15_buffer_RTemp[2048];  // KF5N
  
       arm_float_to_q15 (float_buffer_L_EX, q15_buffer_LTemp, 2048);
       arm_float_to_q15 (float_buffer_R_EX, q15_buffer_RTemp, 2048);
@@ -144,9 +142,8 @@ void ExciterIQData()
       arm_offset_q15(q15_buffer_LTemp, EEPROMData.iDCoffset[EEPROMData.currentBand] + 1260, q15_buffer_LTemp, 2048);  // Carrier suppression offset.
       arm_offset_q15(q15_buffer_RTemp, EEPROMData.qDCoffset[EEPROMData.currentBand] + 1260, q15_buffer_RTemp, 2048);
       #endif
-      Q_out_L_Ex.play(q15_buffer_LTemp, 2048); // play it !
-      Q_out_R_Ex.play(q15_buffer_RTemp, 2048); // play it !
-
+      Q_out_L_Ex.play(q15_buffer_LTemp, 2048); // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
+      Q_out_R_Ex.play(q15_buffer_RTemp, 2048); // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.
 
     /*
     for (unsigned  i = 0; i < N_BLOCKS_EX; i++) {  //N_BLOCKS_EX=16  BUFFER_SIZE=128 16x128=2048

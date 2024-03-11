@@ -124,8 +124,8 @@ void CalibrateOptions() {
       ShowFrequency();
       BandInformation();
       calibrateFlag = 0;
-      modeSelectOutExL.gain(0, 0);
-      modeSelectOutExR.gain(0, 0);
+//      modeSelectOutExL.gain(0, 0);
+//      modeSelectOutExR.gain(0, 0);
       break;
 
     default:

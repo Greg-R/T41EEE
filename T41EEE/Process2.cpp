@@ -62,8 +62,10 @@ void CalibratePreamble(int setZoom) {
   //  Serial.printf("preamble EEPROMData.powerOutCW = %f\n", EEPROMData.powerOutCW[EEPROMData.currentBand]);
   //modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
   //modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
-  modeSelectOutExL.gain(0, 1);               //AFP 10-21-22
-  modeSelectOutExR.gain(0, 1);               //AFP 10-21-22
+  //modeSelectOutExL.gain(0, 1);               //AFP 10-21-22
+  //modeSelectOutExR.gain(0, 1);               //AFP 10-21-22
+  patchCord15.connect();  // Connect the I and Q output channels so the transmitter will work.
+  patchCord16.connect();
   userxmtMode = EEPROMData.xmtMode;          // Store the user's mode setting.  KF5N July 22, 2023
   userZoomIndex = EEPROMData.spectrum_zoom;  // Save the zoom index so it can be reset at the conclusion.  KF5N August 12, 2023
   zoomIndex = setZoom - 1;
@@ -97,13 +99,14 @@ void CalibratePreamble(int setZoom) {
   modeSelectInR.gain(0, 1);
   modeSelectInL.gain(0, 1);
 //  modeSelectInExR.gain(0, 0);  2nd microphone channel not required.  KF5N March 11, 2024
-  modeSelectInExL.gain(0, 0);
+//  modeSelectInExL.gain(0, 0);
+  patchCord1.disconnect();  // Disconnect microphone. modeSelectInExL replaced with patchcord.  KF5N March 11, 2024
   modeSelectOutL.gain(0, 1);
   modeSelectOutR.gain(0, 1);
   modeSelectOutL.gain(1, 0);
   modeSelectOutR.gain(1, 0);
-  modeSelectOutExL.gain(0, 1);
-  modeSelectOutExR.gain(0, 1);
+//  modeSelectOutExL.gain(0, 1);
+//  modeSelectOutExR.gain(0, 1);
   EEPROMData.centerFreq = TxRxFreq;
   NCOFreq = 0L;
   xrState = TRANSMIT_STATE;

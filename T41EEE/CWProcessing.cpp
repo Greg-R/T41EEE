@@ -312,8 +312,10 @@ void SetSideToneVolume() {
 //  modeSelectInExR.gain(0, 0); 2nd microphone channel not required.  KF5N March 11, 2024
   modeSelectOutL.gain(0, 0);
   modeSelectOutR.gain(0, 0);
-  modeSelectOutExL.gain(0, 0);
-  modeSelectOutExR.gain(0, 0);
+  patchCord15.disconnect();  // Disconnect the I and Q AudioPlayQueues.
+  patchCord16.disconnect();
+  //modeSelectOutExL.gain(0, 0);
+  //modeSelectOutExR.gain(0, 0);
   digitalWrite(MUTE, LOW);      // unmutes audio
   modeSelectOutL.gain(1, 0.0);  // Sidetone  AFP 10-01-22
   modeSelectOutR.gain(1, 0.0);  // Sidetone  AFP 10-01-22

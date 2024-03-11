@@ -179,57 +179,41 @@ AudioOutputI2SQuad i2s_quadOut;
 
 AudioMixer4 modeSelectInR;    // AFP 09-01-22
 AudioMixer4 modeSelectInL;    // AFP 09-01-22
-//AudioMixer4 modeSelectInExR;  // AFP 09-01-22  2nd microphone channel not required.  KF5N March 11, 2024
-AudioMixer4 modeSelectInExL;  // AFP 09-01-22
 
 AudioMixer4 modeSelectOutL;    // AFP 09-01-22
 AudioMixer4 modeSelectOutR;    // AFP 09-01-22
-AudioMixer4 modeSelectOutExL;  // AFP 09-01-22
-AudioMixer4 modeSelectOutExR;  // AFP 09-01-22
 
 AudioRecordQueue Q_in_L;
 AudioRecordQueue Q_in_R;
-AudioRecordQueue Q_in_L_Ex;
-// AudioRecordQueue Q_in_R_Ex;  Not required, microphone audio one channel only.
+AudioRecordQueue Q_in_L_Ex;  // AudioRecordQueue for input Microphone channel.
 
 AudioPlayQueue Q_out_L;
 AudioPlayQueue Q_out_R;
-AudioPlayQueue Q_out_L_Ex;
-AudioPlayQueue Q_out_R_Ex;
+AudioPlayQueue Q_out_L_Ex;   // AudioPlayQueue for driving the I channel to the QSE.
+AudioPlayQueue Q_out_R_Ex;   // AudioPlayQueue for driving the Q channel to the QSE.
 
-AudioConnection patchCord1(i2s_quadIn, 0, int2Float1, 0);  //connect the Left input to the Left Int->Float converter
-//AudioConnection patchCord2(i2s_quadIn, 1, int2Float2, 0);  //connect the Right input to the Right Int->Float converter
+AudioConnection patchCord1(i2s_quadIn, 0, int2Float1, 0);  // Microphone channel.
 
-AudioConnection_F32 patchCord3(int2Float1, 0, comp1, 0);  //Left.  makes Float connections between objects
-//AudioConnection_F32 patchCord4(int2Float2, 0, comp2, 0);  //Right.  makes Float connections between objects
-AudioConnection_F32 patchCord5(comp1, 0, float2Int1, 0);  //Left.  makes Float connections between objects
-//AudioConnection_F32 patchCord6(comp2, 0, float2Int2, 0);  //Right.  makes Float connections between objects
+AudioConnection_F32 patchCord3(int2Float1, 0, comp1, 0);  // Microphone to compressor.
+AudioConnection_F32 patchCord5(comp1, 0, float2Int1, 0);  // Compressor output.
 
-AudioConnection patchCord7(float2Int1, 0, modeSelectInExL, 0);  //Input Ex
-//AudioConnection patchCord8(float2Int2, 0, modeSelectInExR, 0);  2nd microphone channel not required.  KF5N March 11, 2024
+AudioConnection patchCord7(float2Int1, 0, Q_in_L_Ex, 0);  // Microphone to AudioRecordQueue.
 
 AudioConnection patchCord9(i2s_quadIn, 2, modeSelectInL, 0);  //Input Rec
 AudioConnection patchCord10(i2s_quadIn, 3, modeSelectInR, 0);
 
-//AudioConnection patchCord11(modeSelectInExR, 0, Q_in_R_Ex, 0);  //Ex in Queue
-AudioConnection patchCord12(modeSelectInExL, 0, Q_in_L_Ex, 0);
-
 AudioConnection patchCord13(modeSelectInR, 0, Q_in_R, 0);  //Rec in Queue
 AudioConnection patchCord14(modeSelectInL, 0, Q_in_L, 0);
 
-AudioConnection patchCord15(Q_out_L_Ex, 0, modeSelectOutExL, 0);  //Ex out Queue
-AudioConnection patchCord16(Q_out_R_Ex, 0, modeSelectOutExR, 0);
+AudioConnection patchCord15(Q_out_L_Ex, 0, i2s_quadOut, 0);  //Ex out Queue
+AudioConnection patchCord16(Q_out_R_Ex, 0, i2s_quadOut, 1);
 
 AudioConnection patchCord17(Q_out_L, 0, modeSelectOutL, 0);  //Rec out Queue
 AudioConnection patchCord18(Q_out_R, 0, modeSelectOutR, 0);
 
-AudioConnection patchCord19(modeSelectOutExL, 0, i2s_quadOut, 0);  //Ex out
-AudioConnection patchCord20(modeSelectOutExR, 0, i2s_quadOut, 1);
 AudioConnection patchCord21(modeSelectOutL, 0, i2s_quadOut, 2);  //Rec out
 AudioConnection patchCord22(modeSelectOutR, 0, i2s_quadOut, 3);
 
-//AudioConnection patchCord23(Q_out_L_Ex, 0, modeSelectOutL, 1);  //Rec out Queue for sidetone
-//AudioConnection patchCord24(Q_out_R_Ex, 0, modeSelectOutR, 1);
 AudioControlSGTL5000 sgtl5000_2;  // This is not a 2nd Audio Adapter.  It is I2S to the PCM1808 and PCM5102.
 // End dataflow code
 
@@ -1062,6 +1046,8 @@ void SetAudioOperatingState(int operatingState) {
       Q_in_L_Ex.begin();
 //      Q_in_R_Ex.begin();
       patchCord1.connect();
+      patchCord15.connect();
+      patchCord16.connect();
 //      patchCord2.connect(); 2nd microphone channel not required.  KF5N March 11, 2024
 
       // CW sidetone output disconnected
@@ -1082,8 +1068,10 @@ void SetAudioOperatingState(int operatingState) {
       // Microphone input disabled and disconnected
       patchCord1.disconnect();
 //      patchCord2.disconnect();  2nd microphone channel not required.  KF5N March 11, 2024
-      Q_in_L_Ex.end();
+      Q_in_L_Ex.end();  // Clear microphone queue.  
       Q_in_L_Ex.clear();
+      patchCord15.connect();  // Connect I and Q transmitter output channels.
+      patchCord16.connect();
 //      Q_in_R_Ex.end();
 //      Q_in_R_Ex.clear();
 
@@ -1378,13 +1366,15 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
         modeSelectInR.gain(0, 1);
         modeSelectInL.gain(0, 1);
 //        modeSelectInExR.gain(0, 0);  2nd microphone channel not required.  KF5N March, 2024
-        modeSelectInExL.gain(0, 0);
+//        modeSelectInExL.gain(0, 0);
         modeSelectOutL.gain(0, 1);
         modeSelectOutR.gain(0, 1);
         modeSelectOutL.gain(1, 0);
         modeSelectOutR.gain(1, 0);
-        modeSelectOutExL.gain(0, 0);
-        modeSelectOutExR.gain(0, 0);
+//        modeSelectOutExL.gain(0, 0);
+//        modeSelectOutExR.gain(0, 0);
+        patchCord15.disconnect();  // Disconnect transmitter I and Q channel outputs.
+        patchCord16.disconnect();
         if (keyPressedOn == 1) {
           return;
         }
@@ -1409,13 +1399,15 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       modeSelectInR.gain(0, 0);
       modeSelectInL.gain(0, 0);
 //      modeSelectInExR.gain(0, 1);  2nd microphone channel not required.  KF5N March 11, 2024
-      modeSelectInExL.gain(0, 1);
+//      modeSelectInExL.gain(0, 1);
       modeSelectOutL.gain(0, 0);
       modeSelectOutR.gain(0, 0);
 //      modeSelectOutExL.gain(0, EEPROMData.powerOutSSB[EEPROMData.currentBand]);  //AFP 10-21-22
 //      modeSelectOutExR.gain(0, EEPROMData.powerOutSSB[EEPROMData.currentBand]);  //AFP 10-21-22
-      modeSelectOutExL.gain(0, 1);  //AFP 10-21-22
-      modeSelectOutExR.gain(0, 1);  //AFP 10-21-22
+//      modeSelectOutExL.gain(0, 1);  //AFP 10-21-22
+//      modeSelectOutExR.gain(0, 1);  //AFP 10-21-22
+      patchCord15.connect();  // Connect I and Q channel transmitter outputs.
+      patchCord16.connect();
       ShowTransmitReceiveStatus();
 
       while (digitalRead(PTT) == LOW) {
@@ -1440,12 +1432,14 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
         modeSelectInR.gain(0, 1);
         modeSelectInL.gain(0, 1);
 //        modeSelectInExR.gain(0, 0);  2nd microphone channel not required.  KF5N March 11, 2024
-        modeSelectInExL.gain(0, 0);
+//        modeSelectInExL.gain(0, 0);
         modeSelectOutL.gain(0, 1);
         modeSelectOutR.gain(0, 1);
         modeSelectOutL.gain(1, 0);
         modeSelectOutR.gain(1, 0);
-        modeSelectOutExL.gain(0, 0);
+        patchCord15.disconnect();  // Disconnect I and Q transmitter outputs.
+        patchCord16.disconnect();       
+//        modeSelectOutExL.gain(0, 0);
 //        modeSelectOutExR.gain(0, 0);  2nd microphone channel not required.  KF5N March 11, 2024
         keyPressedOn = 0;
       }
@@ -1459,8 +1453,9 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
 //      modeSelectInExR.gain(0, 0);  2nd microphone channel not required.  KF5N March 11, 2024
       modeSelectOutL.gain(0, 0);
       modeSelectOutR.gain(0, 0);
-      modeSelectOutExL.gain(0, 0);
-      modeSelectOutExR.gain(0, 0);
+//      modeSelectOutExL.gain(0, 0);
+//      modeSelectOutExR.gain(0, 0);
+
       digitalWrite(MUTE, LOW);  // unmutes audio
       cwKeyDown = false;  // false initiates CW_SHAPING_RISE.
       cwTimer = millis();
@@ -1471,8 +1466,8 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
 
           if (!cwKeyDown) {
             // Don't scale for power here.  Scale in the CW exciter code.
-            modeSelectOutExL.gain(0, 1.0);
-            modeSelectOutExR.gain(0, 1.0);
+//            modeSelectOutExL.gain(0, 1.0);
+//            modeSelectOutExR.gain(0, 1.0);
             modeSelectOutL.gain(0, volumeLog[(int)EEPROMData.sidetoneVolume]);  // Sidetone, left channel only.  AFP 10-01-22
             CW_ExciterIQData(CW_SHAPING_RISE);
             cwKeyDown = true;
@@ -1493,8 +1488,8 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       digitalWrite(MUTE, HIGH);   // mutes audio
       modeSelectOutL.gain(0, 0);  // Sidetone off
 //      modeSelectOutR.gain(1, 0);
-      modeSelectOutExL.gain(0, 0);  //Power = 0 //AFP 10-11-22
-      modeSelectOutExR.gain(0, 0);  //AFP 10-11-22
+//      modeSelectOutExL.gain(0, 0);  //Power = 0 //AFP 10-11-22
+//      modeSelectOutExR.gain(0, 0);  //AFP 10-11-22
       digitalWrite(RXTX, LOW);      // End Straight Key Mode
       break;
     case CW_TRANSMIT_KEYER_STATE:
@@ -1505,8 +1500,8 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
 //      modeSelectInExR.gain(0, 0);  2nd microphone channel not required.  KF5N March 11, 2024
       modeSelectOutL.gain(0, 0);
       modeSelectOutR.gain(0, 0);
-      modeSelectOutExL.gain(0, 0);
-      modeSelectOutExR.gain(0, 0);
+//      modeSelectOutExL.gain(0, 0);
+//      modeSelectOutExR.gain(0, 0);
       digitalWrite(MUTE, LOW);  // unmutes audio
       cwTimer = millis();
       while (millis() - cwTimer <= EEPROMData.cwTransmitDelay) {
@@ -1516,8 +1511,8 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
           ditTimerOn = millis();
 //          modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
 //          modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
-          modeSelectOutExL.gain(0, 1);  //AFP 10-21-22
-          modeSelectOutExR.gain(0, 1);  //AFP 10-21-22
+//          modeSelectOutExL.gain(0, 1);  //AFP 10-21-22
+//          modeSelectOutExR.gain(0, 1);  //AFP 10-21-22
           modeSelectOutL.gain(0, volumeLog[(int)EEPROMData.sidetoneVolume]);        // Sidetone
 
           // Queue audio blocks--execution time of this loop will be between 0-20ms shorter
@@ -1549,8 +1544,8 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
             dahTimerOn = millis();
    //         modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);
    //         modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);
-            modeSelectOutExL.gain(0, 1);  //AFP 10-21-22
-            modeSelectOutExR.gain(0, 1);  //AFP 10-21-22
+//            modeSelectOutExL.gain(0, 1);  //AFP 10-21-22
+//            modeSelectOutExR.gain(0, 1);  //AFP 10-21-22
             modeSelectOutL.gain(0, volumeLog[(int)EEPROMData.sidetoneVolume]);
 
             // Queue audio blocks--execution time of this loop will be between 0-20ms shorter
@@ -1588,8 +1583,10 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       digitalWrite(MUTE, HIGH);   // mutes audio
   //    modeSelectOutL.gain(1, 0);  // Sidetone off
   //    modeSelectOutR.gain(1, 0);
-      modeSelectOutExL.gain(0, 0);  //Power = 0 //AFP 10-11-22
-      modeSelectOutExR.gain(0, 0);  //AFP 10-11-22
+  //    modeSelectOutExL.gain(0, 0);  //Power = 0 //AFP 10-11-22
+  //    modeSelectOutExR.gain(0, 0);  //AFP 10-11-22
+      patchCord15.disconnect();  // Disconnect the I and Q transmitter outputs.
+      patchCord15.disconnect();
       digitalWrite(RXTX, LOW);      // End Straight Key Mode
       break;
     default:

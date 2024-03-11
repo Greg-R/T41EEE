@@ -568,13 +568,14 @@ extern long NCOFreq;  // AFP 04-16-22
 
 extern AudioMixer4 modeSelectInR;
 extern AudioMixer4 modeSelectInL;
-extern AudioMixer4 modeSelectInExR;
-extern AudioMixer4 modeSelectInExL;
+extern AudioConnection patchCord1;  // This patchcord is used to disconnect the microphone input datastream.
+extern AudioConnection patchCord15; // Patch cords 15 and 16 are used to connect/disconnect the I and Q datastreams.
+extern AudioConnection patchCord16;
 
 extern AudioMixer4 modeSelectOutL;
 extern AudioMixer4 modeSelectOutR;
-extern AudioMixer4 modeSelectOutExL;
-extern AudioMixer4 modeSelectOutExR;
+//extern AudioMixer4 modeSelectOutExL;
+//extern AudioMixer4 modeSelectOutExR;
 
 extern AudioRecordQueue Q_in_L;
 extern AudioRecordQueue Q_in_R;
