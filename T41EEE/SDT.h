@@ -579,7 +579,7 @@ extern AudioMixer4 modeSelectOutExR;
 extern AudioRecordQueue Q_in_L;
 extern AudioRecordQueue Q_in_R;
 extern AudioRecordQueue Q_in_L_Ex;
-extern AudioRecordQueue Q_in_R_Ex;
+//extern AudioRecordQueue Q_in_R_Ex;  Two channels not required for microphone audio.  KF5N March 11, 2024
 
 extern AudioPlayQueue Q_out_L;
 extern AudioPlayQueue Q_out_R;

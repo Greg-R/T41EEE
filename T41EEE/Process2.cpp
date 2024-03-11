@@ -96,7 +96,7 @@ void CalibratePreamble(int setZoom) {
   T41State = CW_RECEIVE;
   modeSelectInR.gain(0, 1);
   modeSelectInL.gain(0, 1);
-  modeSelectInExR.gain(0, 0);
+//  modeSelectInExR.gain(0, 0);  2nd microphone channel not required.  KF5N March 11, 2024
   modeSelectInExL.gain(0, 0);
   modeSelectOutL.gain(0, 1);
   modeSelectOutR.gain(0, 1);
@@ -477,8 +477,8 @@ void ProcessIQData2(int toneFreqIndex) {
     arm_float_to_q15(float_buffer_R_EX, q15_buffer_RTemp, 2048);
 
 #ifdef QSE2
-    arm_offset_q15(q15_buffer_LTemp, EEPROMData.iDCoffset[EEPROMData.currentBand] + 1900, q15_buffer_LTemp, 2048);
-    arm_offset_q15(q15_buffer_RTemp, EEPROMData.qDCoffset[EEPROMData.currentBand] + 1900, q15_buffer_RTemp, 2048);
+    arm_offset_q15(q15_buffer_LTemp, EEPROMData.iDCoffset[EEPROMData.currentBand] + 1260, q15_buffer_LTemp, 2048);
+    arm_offset_q15(q15_buffer_RTemp, EEPROMData.qDCoffset[EEPROMData.currentBand] + 1260, q15_buffer_RTemp, 2048);
 #endif
 
     Q_out_L_Ex.play(q15_buffer_LTemp, 2048);

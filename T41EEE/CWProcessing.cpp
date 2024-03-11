@@ -309,7 +309,7 @@ void SetSideToneVolume() {
   tft.print(sidetoneDisplay);  // Display in range of 0 to 100.
   modeSelectInR.gain(0, 0);
   modeSelectInL.gain(0, 0);
-  modeSelectInExR.gain(0, 0);
+//  modeSelectInExR.gain(0, 0); 2nd microphone channel not required.  KF5N March 11, 2024
   modeSelectOutL.gain(0, 0);
   modeSelectOutR.gain(0, 0);
   modeSelectOutExL.gain(0, 0);

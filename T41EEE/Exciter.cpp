@@ -35,7 +35,7 @@ void ExciterIQData()
         BUFFER_SIZE*N_BLOCKS = 2024 samples
      **********************************************************************************/
   // are there at least N_BLOCKS buffers in each channel available ?
-  if ( (uint32_t) Q_in_L_Ex.available() > N_BLOCKS_EX + 0 && (uint32_t) Q_in_R_Ex.available() > N_BLOCKS_EX + 0 ) {
+  if ( (uint32_t) Q_in_L_Ex.available() > N_BLOCKS_EX) {
 
     // get audio samples from the audio  buffers and convert them to float
     // read in 32 blocks á 128 samples in I and Q
@@ -48,9 +48,9 @@ void ExciterIQData()
           Float_buffer samples are now standardized from > -1.0 to < 1.0
       **********************************************************************************/
       arm_q15_to_float (Q_in_L_Ex.readBuffer(), &float_buffer_L_EX[BUFFER_SIZE * i], BUFFER_SIZE); // convert int_buffer to float 32bit
-      arm_q15_to_float (Q_in_R_Ex.readBuffer(), &float_buffer_R_EX[BUFFER_SIZE * i], BUFFER_SIZE); // convert int_buffer to float 32bit
+//      arm_q15_to_float (Q_in_R_Ex.readBuffer(), &float_buffer_R_EX[BUFFER_SIZE * i], BUFFER_SIZE); // Right channel not used.  KF5N March 11, 2024
       Q_in_L_Ex.freeBuffer();
-      Q_in_R_Ex.freeBuffer();
+//      Q_in_R_Ex.freeBuffer(); // Right channel not used.  KF5N March 11, 2024
     }
 
     float exciteMaxL = 0;
@@ -65,19 +65,18 @@ void ExciterIQData()
     // 192KHz effective sample rate here
     // decimation-by-4 in-place!
     arm_fir_decimate_f32(&FIR_dec1_EX_I, float_buffer_L_EX, float_buffer_L_EX, BUFFER_SIZE * N_BLOCKS_EX );
-    arm_fir_decimate_f32(&FIR_dec1_EX_Q, float_buffer_R_EX, float_buffer_R_EX, BUFFER_SIZE * N_BLOCKS_EX );
+//    arm_fir_decimate_f32(&FIR_dec1_EX_Q, float_buffer_R_EX, float_buffer_R_EX, BUFFER_SIZE * N_BLOCKS_EX ); // Right channel not used.  KF5N March 11, 2024
     // 48KHz effective sample rate here
     // decimation-by-2 in-place
     arm_fir_decimate_f32(&FIR_dec2_EX_I, float_buffer_L_EX, float_buffer_L_EX, 512);
-    arm_fir_decimate_f32(&FIR_dec2_EX_Q, float_buffer_R_EX, float_buffer_R_EX, 512);
+//    arm_fir_decimate_f32(&FIR_dec2_EX_Q, float_buffer_R_EX, float_buffer_R_EX, 512); // Right channel not used.  KF5N March 11, 2024
 
     //============================  Transmit EQ  ========================  AFP 10-02-22
     if (EEPROMData.xmitEQFlag == ON ) {
-      DoExciterEQ();
+      DoExciterEQ();  // The exciter equalizer works with left channel data only.
     }
-    //============================ End Receive EQ  AFP 10-02-22
 
-
+    // Microphone audio has only 1 channel, so copy left to right.
     arm_copy_f32 (float_buffer_L_EX, float_buffer_R_EX, 256);
 
     // =========================    End CW Xmit
@@ -142,8 +141,8 @@ void ExciterIQData()
       arm_float_to_q15 (float_buffer_L_EX, q15_buffer_LTemp, 2048);
       arm_float_to_q15 (float_buffer_R_EX, q15_buffer_RTemp, 2048);
       #ifdef QSE2
-      arm_offset_q15(q15_buffer_LTemp, EEPROMData.iDCoffset[EEPROMData.currentBand] + 1900, q15_buffer_LTemp, 2048);  // Carrier suppression offset.
-      arm_offset_q15(q15_buffer_RTemp, EEPROMData.qDCoffset[EEPROMData.currentBand] + 1900, q15_buffer_RTemp, 2048);
+      arm_offset_q15(q15_buffer_LTemp, EEPROMData.iDCoffset[EEPROMData.currentBand] + 1260, q15_buffer_LTemp, 2048);  // Carrier suppression offset.
+      arm_offset_q15(q15_buffer_RTemp, EEPROMData.qDCoffset[EEPROMData.currentBand] + 1260, q15_buffer_RTemp, 2048);
       #endif
       Q_out_L_Ex.play(q15_buffer_LTemp, 2048); // play it !
       Q_out_R_Ex.play(q15_buffer_RTemp, 2048); // play it !
