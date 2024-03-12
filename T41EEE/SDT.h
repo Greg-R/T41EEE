@@ -2,7 +2,7 @@
 
 //======================================== User section that might need to be changed ===================================
 #include "MyConfigurationFile.h"  // This file name should remain unchanged
-#define VERSION "T41EEE.4"        // Change this for updates. If you make this longer than 9 characters, brace yourself for surprises
+#define VERSION "T41EEE.5"        // Change this for updates. If you make this longer than 9 characters, brace yourself for surprises
 
 struct maps {
   char mapNames[50];
@@ -240,10 +240,6 @@ extern struct maps myMapFiles[];
 #define RXTX 22          // Transmit/Receive
 #define PTT 37           // Transmit/Receive
 #define MUTE 38          // Mute Audio,  HIGH = "On" Audio available from Audio PA, LOW = Mute audio
-//========================================= Switch pins
-//#define NO_MENUS_ACTIVE 0        // No menus displayed
-//#define PRIMARY_MENU_ACTIVE 1    // A primary menu is active
-//#define SECONDARY_MENU_ACTIVE 2  // Both primary and secondary menus active
 //========================================= Keyer pins
 #define KEYER_DAH_INPUT_RING 35  // Ring connection for keyer  -- default for righthanded user
 #define KEYER_DIT_INPUT_TIP 36   // Tip connection for keyer
@@ -257,7 +253,6 @@ extern struct maps myMapFiles[];
 //#undef PI  Try using PI defined in Arduino and/or Teensy.  KF5N March 7, 2024
 #undef HALF_PI
 #undef TWO_PI
-//extern const float PI;
 #define HALF_PI 1.5707963267948966192313216916398f
 #define TWO_PI 6.283185307179586476925286766559f
 #define PIH HALF_PI
@@ -565,35 +560,27 @@ void ExciterIQData();
 extern long NCOFreq;  // AFP 04-16-22
 
 //======================================== Global object declarations ==================================================
-
-extern AudioMixer4 modeSelectInR;
-extern AudioMixer4 modeSelectInL;
+// Teensy and OpenAudio objects.  Revised by KF5N March 12, 2024
 extern AudioConnection patchCord1;  // This patchcord is used to disconnect the microphone input datastream.
 extern AudioConnection patchCord15; // Patch cords 15 and 16 are used to connect/disconnect the I and Q datastreams.
 extern AudioConnection patchCord16;
 
-extern AudioMixer4 modeSelectOutL;
-extern AudioMixer4 modeSelectOutR;
-//extern AudioMixer4 modeSelectOutExL;
-//extern AudioMixer4 modeSelectOutExR;
 extern AudioAmplifier volumeAdjust;
 
 extern AudioRecordQueue Q_in_L;
 extern AudioRecordQueue Q_in_R;
 extern AudioRecordQueue Q_in_L_Ex;
-//extern AudioRecordQueue Q_in_R_Ex;  Two channels not required for microphone audio.  KF5N March 11, 2024
 
 extern AudioPlayQueue Q_out_L;
-extern AudioPlayQueue Q_out_R;
 extern AudioPlayQueue Q_out_L_Ex;
 extern AudioPlayQueue Q_out_R_Ex;
 
 // = AFP 11-01-22
 extern AudioControlSGTL5000_Extended sgtl5000_1;      //controller for the Teensy Audio Board
-extern AudioConvert_I16toF32 int2Float1, int2Float2;  //Converts Int16 to Float.  See class in AudioStream_F32.h
-extern AudioEffectCompressor_F32 comp1, comp2;
-extern AudioConvert_F32toI16 float2Int1, float2Int2;  //Converts Float to Int16.  See class in AudioStream_F32.h
-//===============  AFP 11-01-22
+extern AudioConvert_I16toF32 int2Float1;  //Converts Int16 to Float.  See class in AudioStream_F32.h
+extern AudioEffectCompressor_F32 comp1;
+extern AudioConvert_F32toI16 float2Int1;  //Converts Float to Int16.  See class in AudioStream_F32.h
+// end Teensy and OpenAudio objects
 
 extern void SetAudioOperatingState(int operatingState);
 
@@ -701,7 +688,6 @@ extern const char *topMenus[];
 extern const char *zoomOptions[];
 extern byte currentDashJump;
 extern byte currentDecoderIndex;
-extern int8_t menuStatus;  // 0 = no primary or secondary menu, 1 = primary, 2 = secondary
 extern bool ANR_notch;  // KF5N March 2, 2024
 extern uint8_t display_S_meter_or_spectrum_state;
 extern uint8_t keyPressedOn;  //AFP 09-01-22
@@ -767,7 +753,6 @@ extern unsigned ring_buffsize;
 extern long long freqCorrectionFactor;
 extern long long freqCorrectionFactorOld;  //AFP 09-21-22
 extern int32_t mainMenuIndex;
-//extern int32_t secondaryMenuIndex;  // -1 means haven't determined secondary menu
 extern const uint32_t N_B;
 extern const uint32_t N_DEC_B;
 extern uint32_t FFT_length;
@@ -1087,7 +1072,6 @@ void ResetHistograms();
 void ResetTuning();  // AFP 10-11-22
 void RFOptions();
 void ResetZoom(int zoomIndex1);  // AFP 11-06-22
-//int SampleOptions();
 int SDPresentCheck();
 void SetCompressionLevel();
 void SetCompressionRatio();

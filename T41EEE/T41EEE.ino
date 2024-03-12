@@ -1,5 +1,5 @@
 /*
-### Version T41EEE.4 T41 Software Defined Transceiver Arduino Sketch
+### Version T41EEE.5 T41 Software Defined Transceiver Arduino Sketch
 
 This is the "T41 Extreme Experimenter's Edition" software for the 
 T41 Software Defined Transceiver.  The T41EEE was "forked" from the V049.2 version
@@ -32,7 +32,7 @@ and feature enhancements become available.  You will be able to update and FLASH
 with the revised software quickly.
 
 Please note that the configuration structure is different than the predecessor V049.2
-It is recommended to perform a full FLASH erase before loading T41EEE.4.
+It is recommended to perform a full FLASH erase before loading T41EEE.5.
 
 You will need to install the ArduinoJSON library by Benoit Blanchon.  Using the IDE:
 Tools -> Manage Libraries ...
@@ -381,7 +381,6 @@ int fLoCutOld;
 int fHiCutOld;
 int filterWidth = (int)((bands[EEPROMData.currentBand].FHiCut - bands[EEPROMData.currentBand].FLoCut) / 1000.0 * pixel_per_khz);
 int h = SPECTRUM_HEIGHT + 3;
-int8_t menuStatus = 0;
 bool ANR_notch = false;
 uint8_t auto_codec_gain = 1;
 uint8_t display_S_meter_or_spectrum_state = 0;
@@ -395,8 +394,6 @@ uint8_t T41State = 1;
 uint8_t zoom_display = 1;
 const uint8_t NR_L_frames = 3;
 const uint8_t NR_N_frames = 15;
-
-//PI = 3.1415926535897932384626433832795;
 
 int16_t pixelCurrent[SPECTRUM_RES];
 int16_t pixelnew[SPECTRUM_RES];
@@ -805,24 +802,6 @@ int SetI2SFreq(int freq) {
 
 
 /*****
-  Purpose: to cause a delay in program execution
-
-  Parameter list:
-    unsigned long millisWait    // the number of millseconds to wait
-
-  Return value:
-    void
-*****
-void MyDelay(unsigned long millisWait) {
-  unsigned long now = millis();
-
-  while (millis() - now < millisWait)
-    ;  // Twiddle thumbs until delay ends...
-}
-*/
-
-
-/*****
   Purpose: to collect array inits in one place
 
   Parameter list:
@@ -1017,45 +996,36 @@ void SetAudioOperatingState(int operatingState) {
   switch (operatingState) {
     case SSB_RECEIVE_STATE:
     case CW_RECEIVE_STATE:
+      // Disconnect and deactivate microphone audio.
+      patchCord1.disconnect();
+      Q_in_L_Ex.end();  // Microphone audio path.
+      Q_in_L_Ex.clear();
+      // Deactivate TX audio output path.
+      patchCord15.disconnect();  // Disconnect transmitter I and Q channel outputs.
+      patchCord16.disconnect();
       // QSD connected and enabled
-      Q_in_L.begin();
-      Q_in_R.begin();
+      Q_in_L.begin();  // Receiver I channel
+      Q_in_R.begin();  // Receiver Q channel
       patchCord9.connect();
       patchCord10.connect();
-
-      // Microphone input disabled and disconnected
-      patchCord1.disconnect();
-      //patchCord2.disconnect(); 2nd microphone channel not required.  KF5N March 11, 2024
-      Q_in_L_Ex.end();
-      Q_in_L_Ex.clear();
-//      Q_in_R_Ex.end();
-//      Q_in_R_Ex.clear();
-
-      // CW sidetone output disconnected
-//      patchCord23.disconnect();
-//      patchCord24.disconnect();
 
       break;
     case SSB_TRANSMIT_STATE:
       // QSD disabled and disconnected
-      patchCord9.disconnect();
-      patchCord10.disconnect();
+      patchCord9.disconnect();   // Receiver I channel
+      patchCord10.disconnect();  // Receiver Q channel
+      patchCord17.disconnect();  // CW sidetone
       Q_in_L.end();
       Q_in_L.clear();
       Q_in_R.end();
       Q_in_R.clear();
 
       // Microphone input enabled and connected
-      Q_in_L_Ex.begin();
-//      Q_in_R_Ex.begin();
-      patchCord1.connect();
-      patchCord15.connect();
-      patchCord16.connect();
-//      patchCord2.connect(); 2nd microphone channel not required.  KF5N March 11, 2024
+      patchCord1.connect();  // Microphone audio
+      Q_in_L_Ex.begin();     // Microphone audio
 
-      // CW sidetone output disconnected
-//      patchCord17.disconnect();
-//      patchCord24.disconnect();
+      patchCord15.connect(); // Transmitter I channel
+      patchCord16.connect(); // Transmitter Q channel
 
       break;
     case CW_TRANSMIT_STRAIGHT_STATE:
@@ -1070,15 +1040,12 @@ void SetAudioOperatingState(int operatingState) {
 
       // Microphone input disabled and disconnected
       patchCord1.disconnect();
-//      patchCord2.disconnect();  2nd microphone channel not required.  KF5N March 11, 2024
       Q_in_L_Ex.end();  // Clear microphone queue.  
       Q_in_L_Ex.clear();
+
       patchCord15.connect();  // Connect I and Q transmitter output channels.
       patchCord16.connect();
       patchCord17.connect();  // Sidetone goes into receiver audio path.
-//      Q_in_L.begin();         // Activate sidetone audio stream.
-//      Q_in_R_Ex.end();
-//      Q_in_R_Ex.clear();
 
       break;
   }
@@ -1251,7 +1218,7 @@ FLASHMEM void setup() {
     tft.setTextColor(RA8875_GREEN);
     tft.setCursor(10, 10);
     tft.print("Release button to start calibration.");
-    MyDelay(2000);
+    delay(2000);
     EnableButtonInterrupts();
     SaveAnalogSwitchValues();
     delay(3000);
@@ -1262,7 +1229,6 @@ FLASHMEM void setup() {
   h = 135;
   Q_in_L.begin();  //Initialize receive input buffers
   Q_in_R.begin();
-  //delay(100L);
 
   // ========================  End set up of Parameters from EEPROM data ===============
   NCOFreq = 0;
@@ -1292,7 +1258,6 @@ FLASHMEM void setup() {
   RedrawDisplayScreen();
 
   mainMenuIndex = 0;             // Changed from middle to first. Do Menu Down to get to Calibrate quickly
-  menuStatus = 0;  // Blank menu field
   ShowName();
 
   ShowBandwidth();
@@ -1304,8 +1269,7 @@ FLASHMEM void setup() {
   comp_ratio = 5.0;
   attack_sec = .1;
   release_sec = 2.0;
-  comp1.setPreGain_dB(-10);  //set the gain of the Left-channel gain processor
-  //comp2.setPreGain_dB(-10);  //set the gain of the Right-channel gain processor
+  comp1.setPreGain_dB(-10);  // Set the gain of the microphone audio gain processor.
 
   EEPROMData.sdCardPresent = SDPresentCheck();  // JJP 7/18/23
   lastState = 1111;                             // To make sure the receiver will be configured on the first pass through.  KF5N September 3, 2023
@@ -1327,7 +1291,7 @@ elapsedMicros usec = 0;  // Automatically increases as time passes; no ++ necess
   Return value:
     void
 *****/
-FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
+void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
 {
   int pushButtonSwitchIndex = -1;
   int valPin;
@@ -1360,23 +1324,9 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
     case (SSB_RECEIVE_STATE):
       if (lastState != radioState) {  // G0ORX 01092023
         digitalWrite(MUTE, LOW);      // Audio Mute off
-//        modeSelectInR.gain(0, 1);
-//        modeSelectInL.gain(0, 1);
         digitalWrite(RXTX, LOW);  //xmit off
         T41State = SSB_RECEIVE;
         xrState = RECEIVE_STATE;
-//        modeSelectInR.gain(0, 1);
-//        modeSelectInL.gain(0, 1);
-//        modeSelectInExR.gain(0, 0);  2nd microphone channel not required.  KF5N March, 2024
-//        modeSelectInExL.gain(0, 0);
-//        modeSelectOutL.gain(0, 1);
-//        modeSelectOutR.gain(0, 1);
-//        modeSelectOutL.gain(1, 0);
-//        modeSelectOutR.gain(1, 0);
-//        modeSelectOutExL.gain(0, 0);
-//        modeSelectOutExR.gain(0, 0);
-        patchCord15.disconnect();  // Disconnect transmitter I and Q channel outputs.
-        patchCord16.disconnect();
         if (keyPressedOn == 1) {
           return;
         }
@@ -1398,18 +1348,7 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       digitalWrite(MUTE, HIGH);  //  Mute Audio  (HIGH=Mute)
       digitalWrite(RXTX, HIGH);  //xmit on
       xrState = TRANSMIT_STATE;
-//      modeSelectInR.gain(0, 0);
-//      modeSelectInL.gain(0, 0);
-//      modeSelectInExR.gain(0, 1);  2nd microphone channel not required.  KF5N March 11, 2024
-//      modeSelectInExL.gain(0, 1);
-//      modeSelectOutL.gain(0, 0);
-//      modeSelectOutR.gain(0, 0);
-//      modeSelectOutExL.gain(0, EEPROMData.powerOutSSB[EEPROMData.currentBand]);  //AFP 10-21-22
-//      modeSelectOutExR.gain(0, EEPROMData.powerOutSSB[EEPROMData.currentBand]);  //AFP 10-21-22
-//      modeSelectOutExL.gain(0, 1);  //AFP 10-21-22
-//      modeSelectOutExR.gain(0, 1);  //AFP 10-21-22
-      patchCord15.connect();  // Connect I and Q channel transmitter outputs.
-      patchCord16.connect();
+
       ShowTransmitReceiveStatus();
 
       while (digitalRead(PTT) == LOW) {
@@ -1431,20 +1370,6 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
         T41State = CW_RECEIVE;
         ShowTransmitReceiveStatus();
         xrState = RECEIVE_STATE;
-//        modeSelectInR.gain(0, 1);
-//        modeSelectInL.gain(0, 1);
-//        modeSelectInExR.gain(0, 0);  2nd microphone channel not required.  KF5N March 11, 2024
-//        modeSelectInExL.gain(0, 0);
-//        modeSelectOutL.gain(0, 1);
-//        modeSelectOutR.gain(0, 1);
-//        modeSelectOutL.gain(1, 0);
-//        modeSelectOutR.gain(1, 0);
-        patchCord15.disconnect();  // Disconnect I and Q transmitter outputs.
-        patchCord16.disconnect(); 
-
-//          volumeAdjust.gain(0);  
-//        modeSelectOutExL.gain(0, 0);
-//        modeSelectOutExR.gain(0, 0);  2nd microphone channel not required.  KF5N March 11, 2024
         keyPressedOn = 0;
       }
       ShowSpectrum();  // if removed CW signal on is 2 mS
@@ -1452,14 +1377,6 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
     case CW_TRANSMIT_STRAIGHT_STATE:
       xrState = TRANSMIT_STATE;
       ShowTransmitReceiveStatus();
-//      modeSelectInR.gain(0, 0);
-//      modeSelectInL.gain(0, 0);
-//      modeSelectInExR.gain(0, 0);  2nd microphone channel not required.  KF5N March 11, 2024
-//      modeSelectOutL.gain(0, 0);
-//      modeSelectOutR.gain(0, 0);
-//      modeSelectOutExL.gain(0, 0);
-//      modeSelectOutExR.gain(0, 0);
-
       digitalWrite(MUTE, LOW);  // unmutes audio
       cwKeyDown = false;  // false initiates CW_SHAPING_RISE.
       cwTimer = millis();
@@ -1469,10 +1386,6 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
           cwTimer = millis();                                                       //Reset timer
 
           if (!cwKeyDown) {
-            // Don't scale for power here.  Scale in the CW exciter code.
-//            modeSelectOutExL.gain(0, 1.0);
-//            modeSelectOutExR.gain(0, 1.0);
-//            modeSelectOutL.gain(0, volumeLog[(int)EEPROMData.sidetoneVolume]);  // Sidetone, left channel only.  AFP 10-01-22
             CW_ExciterIQData(CW_SHAPING_RISE);
             cwKeyDown = true;
           } else {
@@ -1481,7 +1394,6 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
         } else {
           if (digitalRead(EEPROMData.paddleDit) == HIGH && EEPROMData.keyType == 0) {  //Turn off CW signal
             keyPressedOn = 0;
-
             if (cwKeyDown) {       // Initiate falling CW signal.
               CW_ExciterIQData(CW_SHAPING_FALL);
               cwKeyDown = false;
@@ -1490,23 +1402,11 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
         }
       }
       digitalWrite(MUTE, HIGH);   // mutes audio
-//      modeSelectOutL.gain(0, 0);  // Sidetone off
-
-//      modeSelectOutR.gain(1, 0);
-//      modeSelectOutExL.gain(0, 0);  //Power = 0 //AFP 10-11-22
-//      modeSelectOutExR.gain(0, 0);  //AFP 10-11-22
       digitalWrite(RXTX, LOW);      // End Straight Key Mode
       break;
     case CW_TRANSMIT_KEYER_STATE:
       xrState = TRANSMIT_STATE;
       ShowTransmitReceiveStatus();
-//      modeSelectInR.gain(0, 0);
-//      modeSelectInL.gain(0, 0);
-//      modeSelectInExR.gain(0, 0);  2nd microphone channel not required.  KF5N March 11, 2024
-//      modeSelectOutL.gain(0, 0);
-//      modeSelectOutR.gain(0, 0);
-//      modeSelectOutExL.gain(0, 0);
-//      modeSelectOutExR.gain(0, 0);
       digitalWrite(MUTE, LOW);  // unmutes audio
       cwTimer = millis();
       while (millis() - cwTimer <= EEPROMData.cwTransmitDelay) {
@@ -1514,12 +1414,6 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
 
         if (digitalRead(EEPROMData.paddleDit) == LOW) {  // Keyer Dit
           ditTimerOn = millis();
-//          modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
-//          modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
-//          modeSelectOutExL.gain(0, 1);  //AFP 10-21-22
-//          modeSelectOutExR.gain(0, 1);  //AFP 10-21-22
-//          modeSelectOutL.gain(0, volumeLog[(int)EEPROMData.sidetoneVolume]);        // Sidetone
-
           // Queue audio blocks--execution time of this loop will be between 0-20ms shorter
           // than the desired dit time, due to audio buffering
           CW_ExciterIQData(CW_SHAPING_RISE);
@@ -1534,25 +1428,13 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
           }
 
           // Pause for one dit length of silence
-       //   modeSelectOutL.gain(0, 0);  // Sidetone off
           ditTimerOff = millis();
           while (millis() - ditTimerOff <= transmitDitLength) {
           CW_ExciterIQData(CW_SHAPING_ZERO);
           }
-
-//          modeSelectOutExL.gain(0, 0);  //Power =0
-//          modeSelectOutExR.gain(0, 0);
-//          modeSelectOutL.gain(0, 0);      // Sidetone off
-
           cwTimer = millis();
         } else if (digitalRead(EEPROMData.paddleDah) == LOW) {  //Keyer DAH
             dahTimerOn = millis();
-   //         modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);
-   //         modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);
-//            modeSelectOutExL.gain(0, 1);  //AFP 10-21-22
-//            modeSelectOutExR.gain(0, 1);  //AFP 10-21-22
-//            modeSelectOutL.gain(0, volumeLog[(int)EEPROMData.sidetoneVolume]);
-
             // Queue audio blocks--execution time of this loop will be between 0-20ms shorter
             // than the desired dah time, due to audio buffering
             CW_ExciterIQData(CW_SHAPING_RISE);
@@ -1567,31 +1449,20 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
             }
 
             // Pause for one dit length of silence
-//            modeSelectOutL.gain(0, 0);  // Sidetone off
             ditTimerOff = millis();
             while (millis() - ditTimerOff <= transmitDitLength) {
             CW_ExciterIQData(CW_SHAPING_ZERO);
             }
-
-//            modeSelectOutExL.gain(0, 0);  //Power =0
-//            modeSelectOutExR.gain(0, 0); 
-//            modeSelectOutL.gain(0, 0);    // Sidetone off
-
             cwTimer = millis();
           } else {            
             CW_ExciterIQData(CW_SHAPING_ZERO);
           }
-  //      CW_ExciterIQData(CW_SHAPING_ZERO);
         keyPressedOn = 0;  // Fix for keyer click-clack.  KF5N August 16, 2023
       }                    //End Relay timer
 
       digitalWrite(MUTE, HIGH);   // mutes audio
-  //    modeSelectOutL.gain(1, 0);  // Sidetone off
-  //    modeSelectOutR.gain(1, 0);
-  //    modeSelectOutExL.gain(0, 0);  //Power = 0 //AFP 10-11-22
-  //    modeSelectOutExR.gain(0, 0);  //AFP 10-11-22
-      patchCord15.disconnect();  // Disconnect the I and Q transmitter outputs.
-      patchCord16.disconnect();
+//      patchCord15.disconnect();  // Disconnect the I and Q transmitter outputs.
+//      patchCord16.disconnect();
       digitalWrite(RXTX, LOW);      // End Straight Key Mode
       break;
     default:
@@ -1603,7 +1474,6 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
     lastState = radioState;
     ShowTransmitReceiveStatus();
   }
-  //  ShowTransmitReceiveStatus();
 
 #ifdef DEBUG1
   if (elapsed_micros_idx_t > (SR[SampleRate].rate / 960)) {
