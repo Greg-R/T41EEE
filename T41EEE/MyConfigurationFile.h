@@ -2,7 +2,7 @@
 //====================== User Specific Preferences =============
 
 //#define DEBUG 		                                                        // Uncommented for debugging, comment out for normal use
-//#define DEBUG1
+//#define DEBUG1                                                            // Uncomment to see temperature and load information.
 #define DEFAULT_KEYER_WPM   			15                                        // Startup value for keyer wpm
 #define FREQ_SEP_CHARACTER  			'.'					                              // Some may prefer period, space, or combo
 #define MAP_FILE_NAME   					"Cincinnati.bmp"                          // Name you gave to BMP map file. Max is 50 chars

@@ -407,7 +407,7 @@ struct config_t {
   int keyType = STRAIGHT_KEY_OR_PADDLES;  // straight key = 0, keyer = 1  JJP 7-3-23
   int currentWPM = DEFAULT_KEYER_WPM;     // 4 bytes default = 15 JJP 7-3-23
   int CWOffset = 2;                       // Default is 750 Hz.
-  float32_t sidetoneVolume = 30.0;        // 4 bytes
+  int sidetoneVolume = 30;        // 4 bytes
   uint32_t cwTransmitDelay = 1000;
   int activeVFO = 0;                // 2 bytes
   int freqIncrement = 10000;        // 4 bytes
@@ -576,6 +576,7 @@ extern AudioMixer4 modeSelectOutL;
 extern AudioMixer4 modeSelectOutR;
 //extern AudioMixer4 modeSelectOutExL;
 //extern AudioMixer4 modeSelectOutExR;
+extern AudioAmplifier volumeAdjust;
 
 extern AudioRecordQueue Q_in_L;
 extern AudioRecordQueue Q_in_R;

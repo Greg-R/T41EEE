@@ -58,7 +58,7 @@ void ProcessIQData()
 //  float dataMax; 
 //  uint32_t dataMaxIndex;
 
-  // Are there at least N_BLOCKS buffers in each channel available ?  N_BLOCKS should be 16.
+  // Are there at least N_BLOCKS buffers in each channel available ?  N_BLOCKS should be 16.  Fill float_buffer_L/R[2048].
   if ( (uint32_t) Q_in_L.available() > N_BLOCKS && (uint32_t) Q_in_R.available() > N_BLOCKS ) {     // Removed addition of 0 to N_BLOCKS.
     usec = 0;
     // Get audio samples from the audio  buffers and convert them to float.
@@ -504,18 +504,16 @@ void ProcessIQData()
             break;
         }
       }
-
-
     }
 
     // ======================================Interpolation  ================
-
+//  Right channel audio deactivated.  KF5N March 11, 2024
     arm_fir_interpolate_f32(&FIR_int1_I, float_buffer_L, iFFT_buffer, BUFFER_SIZE * N_BLOCKS / (uint32_t)(DF));   // Interpolatikon
-    arm_fir_interpolate_f32(&FIR_int1_Q, float_buffer_R, FFT_buffer, BUFFER_SIZE * N_BLOCKS / (uint32_t)(DF));
+//    arm_fir_interpolate_f32(&FIR_int1_Q, float_buffer_R, FFT_buffer, BUFFER_SIZE * N_BLOCKS / (uint32_t)(DF));
 
     // interpolation-by-4
     arm_fir_interpolate_f32(&FIR_int2_I, iFFT_buffer, float_buffer_L, BUFFER_SIZE * N_BLOCKS / (uint32_t)(DF1));
-    arm_fir_interpolate_f32(&FIR_int2_Q, FFT_buffer, float_buffer_R, BUFFER_SIZE * N_BLOCKS / (uint32_t)(DF1));
+//    arm_fir_interpolate_f32(&FIR_int2_Q, FFT_buffer, float_buffer_R, BUFFER_SIZE * N_BLOCKS / (uint32_t)(DF1));
 
     /**********************************************************************************  AFP 12-31-20
       Digital Volume Control
@@ -523,23 +521,24 @@ void ProcessIQData()
 
     if (mute == 1) {
       arm_scale_f32(float_buffer_L, 0.0, float_buffer_L, BUFFER_SIZE * N_BLOCKS);
-      arm_scale_f32(float_buffer_R, 0.0, float_buffer_R, BUFFER_SIZE * N_BLOCKS);
+//      arm_scale_f32(float_buffer_R, 0.0, float_buffer_R, BUFFER_SIZE * N_BLOCKS);
     } else if (mute == 0) {
-      arm_scale_f32(float_buffer_L, DF * volumeLog[EEPROMData.audioVolume] * 4, float_buffer_L, BUFFER_SIZE * N_BLOCKS);  // Scaled up by factor of 4
-      arm_scale_f32(float_buffer_R, DF * volumeLog[EEPROMData.audioVolume] * 4, float_buffer_R, BUFFER_SIZE * N_BLOCKS);  // to achieve comfortable volume.
+      arm_scale_f32(float_buffer_L, 20.0, float_buffer_L, BUFFER_SIZE * N_BLOCKS);  // Set scaling constant to optimize volume control range.
+//      arm_scale_f32(float_buffer_R, DF * volumeLog[EEPROMData.audioVolume] * 4, float_buffer_R, BUFFER_SIZE * N_BLOCKS);
     }
     /**********************************************************************************  AFP 12-31-20
       CONVERT TO INTEGER AND PLAY AUDIO
     **********************************************************************************/
     
     q15_t q15_buffer_LTemp[2048];  //KF5N
-    q15_t q15_buffer_RTemp[2048];  //KF5N
+//    q15_t q15_buffer_RTemp[2048];  // KF5N  Unused audio channel deactivated.
 //    Q_out_L.setBehaviour(AudioPlayQueue::NON_STALLING);
 //    Q_out_R.setBehaviour(AudioPlayQueue::NON_STALLING);
     arm_float_to_q15 (float_buffer_L, q15_buffer_LTemp, 2048);
-    arm_float_to_q15 (float_buffer_R, q15_buffer_RTemp, 2048);
+//    arm_float_to_q15 (float_buffer_R, q15_buffer_RTemp, 2048);  Unused audio channel deactivated.
     Q_out_L.play(q15_buffer_LTemp, 2048);
-    Q_out_R.play(q15_buffer_RTemp, 2048);
+//    Q_out_R.play(q15_buffer_RTemp, 2048);  Unused audio channel deactivated.
+
 //    Q_out_L.setBehaviour(AudioPlayQueue::ORIGINAL);
 //    Q_out_R.setBehaviour(AudioPlayQueue::ORIGINAL);
 /*

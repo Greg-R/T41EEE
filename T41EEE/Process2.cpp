@@ -96,15 +96,15 @@ void CalibratePreamble(int setZoom) {
   digitalWrite(MUTE, LOW);  //turn off mute
   xrState = RECEIVE_STATE;
   T41State = CW_RECEIVE;
-  modeSelectInR.gain(0, 1);
-  modeSelectInL.gain(0, 1);
+//  modeSelectInR.gain(0, 1);
+//  modeSelectInL.gain(0, 1);
 //  modeSelectInExR.gain(0, 0);  2nd microphone channel not required.  KF5N March 11, 2024
 //  modeSelectInExL.gain(0, 0);
   patchCord1.disconnect();  // Disconnect microphone. modeSelectInExL replaced with patchcord.  KF5N March 11, 2024
-  modeSelectOutL.gain(0, 1);
-  modeSelectOutR.gain(0, 1);
-  modeSelectOutL.gain(1, 0);
-  modeSelectOutR.gain(1, 0);
+//  modeSelectOutL.gain(0, 1);
+//  modeSelectOutR.gain(0, 1);
+//  modeSelectOutL.gain(1, 0);
+//  modeSelectOutR.gain(1, 0);
 //  modeSelectOutExL.gain(0, 1);
 //  modeSelectOutExR.gain(0, 1);
   EEPROMData.centerFreq = TxRxFreq;

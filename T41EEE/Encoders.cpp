@@ -130,13 +130,13 @@ void EncoderCenterTune() {
 
 
 /*****
-  Purpose: Encoder volume control
+  Purpose: Encoder volume control.  Sets EEPROMData.audioVolume between 0 and 100.
 
   Parameter list:
     void
 
   Return value;
-    int               0 means encoder didn't move; otherwise it moved
+    void
 *****/
 void EncoderVolume()  //============================== AFP 10-22-22  Begin new
 {

@@ -106,7 +106,7 @@ void CW_ExciterIQData(int shaping) //AFP 08-20-22
 //    arm_scale_f32(float_buffer_L_EX, 20, float_buffer_LTemp, 2048); //Scale to compensate for losses in Interpolation
 //    arm_scale_f32(float_buffer_R_EX, 20, float_buffer_RTemp, 2048);
       arm_scale_f32(float_buffer_L_EX, 20, float_buffer_Sidetone, 2048);
-      arm_float_to_q15 (float_buffer_Sidetone, q15_buffer_Sidetone, 2048);  // Sidetone to integer here before RF power scaling.
+//      arm_float_to_q15 (float_buffer_Sidetone, q15_buffer_Sidetone, 2048);  // Sidetone to integer here before RF power scaling.
 
 //  This is the correct place in the data stream to inject the scaling for power.
 powerScale = 30.0 * EEPROMData.powerOutCW[EEPROMData.currentBand];
@@ -133,6 +133,8 @@ powerScale = 30.0 * EEPROMData.powerOutCW[EEPROMData.currentBand];
       arm_offset_q15(q15_buffer_RTemp, EEPROMData.qDCoffset[EEPROMData.currentBand] + 1260, q15_buffer_RTemp, 2048);
     #endif
 
+      Q_out_L_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);  // This mode is required when setting sidetone volume.
+      Q_out_R_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);  // The process will stall due to disconnection of I and Q patchcords.
       Q_out_L_Ex.play(q15_buffer_LTemp, 2048); // Transmitter
       Q_out_R_Ex.play(q15_buffer_RTemp, 2048); // Transmitter
       Q_out_L.play(q15_buffer_Sidetone, 2048);

@@ -297,28 +297,32 @@ void SetSideToneVolume() {
   int val, sidetoneDisplay;
   bool keyDown;
 
-  SetAudioOperatingState(CW_TRANSMIT_STRAIGHT_STATE);
+ SetAudioOperatingState(CW_TRANSMIT_STRAIGHT_STATE);
   tft.setFontScale((enum RA8875tsize)1);
   tft.fillRect(SECONDARY_MENU_X - 50, MENUS_Y, EACH_MENU_WIDTH + 60, CHAR_HEIGHT, RA8875_MAGENTA);
   tft.setTextColor(RA8875_WHITE);
   tft.setCursor(SECONDARY_MENU_X - 48, MENUS_Y + 1);
   tft.print("Sidetone Volume:");
   tft.setCursor(SECONDARY_MENU_X + 220, MENUS_Y + 1);
-  sidetoneDisplay = (int)(EEPROMData.sidetoneVolume);
+  sidetoneDisplay = EEPROMData.sidetoneVolume;
   keyDown = false;
   tft.print(sidetoneDisplay);  // Display in range of 0 to 100.
-  modeSelectInR.gain(0, 0);
-  modeSelectInL.gain(0, 0);
+//  modeSelectInR.gain(0, 0);
+//  modeSelectInL.gain(0, 0);
 //  modeSelectInExR.gain(0, 0); 2nd microphone channel not required.  KF5N March 11, 2024
-  modeSelectOutL.gain(0, 0);
-  modeSelectOutR.gain(0, 0);
+//  modeSelectOutL.gain(0, 0);
+//  modeSelectOutR.gain(0, 0);
+
   patchCord15.disconnect();  // Disconnect the I and Q AudioPlayQueues.
   patchCord16.disconnect();
+
   //modeSelectOutExL.gain(0, 0);
   //modeSelectOutExR.gain(0, 0);
+//  patchCord17.connect();  // Sidetone goes into receiver audio path.
+//  Q_in_L.begin();         // Activate sidetone audio stream.
   digitalWrite(MUTE, LOW);      // unmutes audio
-  modeSelectOutL.gain(1, 0.0);  // Sidetone  AFP 10-01-22
-  modeSelectOutR.gain(1, 0.0);  // Sidetone  AFP 10-01-22
+//  modeSelectOutL.gain(1, 0.0);  // Sidetone  AFP 10-01-22
+//  modeSelectOutR.gain(1, 0.0);  // Sidetone  AFP 10-01-22
 
   while (true) {
     if (digitalRead(EEPROMData.paddleDit) == LOW || digitalRead(EEPROMData.paddleDah) == LOW) {
@@ -344,12 +348,12 @@ void SetSideToneVolume() {
         sidetoneDisplay = 100;
       tft.fillRect(SECONDARY_MENU_X + 200, MENUS_Y, 70, CHAR_HEIGHT, RA8875_MAGENTA);
       tft.setCursor(SECONDARY_MENU_X + 220, MENUS_Y + 1);
-      EEPROMData.sidetoneVolume = (float32_t)sidetoneDisplay;
+      EEPROMData.sidetoneVolume = sidetoneDisplay;
       tft.setTextColor(RA8875_WHITE);
       tft.print(sidetoneDisplay);
       filterEncoderMove = 0;
     }
-    modeSelectOutL.gain(0, volumeLog[(int)EEPROMData.sidetoneVolume]);  // Sidetone  AFP 10-01-22
+    volumeAdjust.gain(volumeLog[EEPROMData.sidetoneVolume]);  // Sidetone  AFP 10-01-22
                                                                         //    modeSelectOutR.gain(1, volumeLog[(int)EEPROMData.sidetoneVolume]);  // Right side not used.  KF5N September 1, 2023
     val = ReadSelectedPushButton();                                     // Read pin that controls all switches
     val = ProcessButtonPress(val);

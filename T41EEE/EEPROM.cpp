@@ -62,7 +62,6 @@ FLASHMEM int EEPROMReadSize() {
 }
 
 
-
 /*****
   Purpose: Read default favorite frequencies
 

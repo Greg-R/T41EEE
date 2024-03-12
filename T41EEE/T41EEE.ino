@@ -168,53 +168,55 @@ uint32_t FFT_length = FFT_LENGTH;
 // ===========================  AFP 08-22-22
 bool agc_action = false;
 // Teensy and OpenAudio dataflow code.
-AudioControlSGTL5000_Extended sgtl5000_1;      //controller for the Teensy Audio Board
-AudioConvert_I16toF32 int2Float1;  //Converts Int16 to Float.  See class in AudioStream_F32.h
-AudioEffectGain_F32 gain1, gain2;              //Applies digital gain to audio data.  Expected Float data.
-AudioEffectCompressor_F32 comp1;
-AudioConvert_F32toI16 float2Int1;  //Converts Float to Int16.  See class in AudioStream_F32.h
 
+// Common to Transmitter and Receiver
 AudioInputI2SQuad i2s_quadIn;
 AudioOutputI2SQuad i2s_quadOut;
 
-AudioMixer4 modeSelectInR;    // AFP 09-01-22
-AudioMixer4 modeSelectInL;    // AFP 09-01-22
+// Transmitter
+AudioControlSGTL5000_Extended sgtl5000_1;      // Controller for the Teensy Audio Board, transmitter only.
+AudioConvert_I16toF32 int2Float1;  // Converts Int16 to Float.  See class in AudioStream_F32.h
+AudioEffectCompressor_F32 comp1;   // Compressor from OpenAudio library.  Used in microphone dataflow path.
+AudioConvert_F32toI16 float2Int1;  // Converts Float to Int16.  See class in AudioStream_F32.h
+AudioRecordQueue Q_in_L_Ex;  // AudioRecordQueue for input Microphone channel.
+AudioPlayQueue Q_out_L_Ex;   // AudioPlayQueue for driving the I channel (CW/SSB) to the QSE.
+AudioPlayQueue Q_out_R_Ex;   // AudioPlayQueue for driving the Q channel (CW/SSB) to the QSE.
+AudioConnection patchCord1(i2s_quadIn, 0, int2Float1, 0);  // Microphone channel.
+AudioConnection_F32 patchCord3(int2Float1, 0, comp1, 0);   // Microphone to compressor.
+AudioConnection_F32 patchCord5(comp1, 0, float2Int1, 0);   // Compressor output.
+AudioConnection patchCord7(float2Int1, 0, Q_in_L_Ex, 0);   // Microphone to AudioRecordQueue.
+AudioConnection patchCord15(Q_out_L_Ex, 0, i2s_quadOut, 0);  // I channel to line out
+AudioConnection patchCord16(Q_out_R_Ex, 0, i2s_quadOut, 1);  // Q channel to line out
 
-AudioMixer4 modeSelectOutL;    // AFP 09-01-22
-AudioMixer4 modeSelectOutR;    // AFP 09-01-22
+// Receiver
+//AudioMixer4 modeSelectInR;    // AFP 09-01-22
+//AudioMixer4 modeSelectInL;    // AFP 09-01-22
+
+//AudioMixer4 modeSelectOutL;    // AFP 09-01-22
+//AudioMixer4 modeSelectOutR;    // AFP 09-01-22
 
 AudioRecordQueue Q_in_L;
 AudioRecordQueue Q_in_R;
-AudioRecordQueue Q_in_L_Ex;  // AudioRecordQueue for input Microphone channel.
 
 AudioPlayQueue Q_out_L;
-AudioPlayQueue Q_out_R;
-AudioPlayQueue Q_out_L_Ex;   // AudioPlayQueue for driving the I channel to the QSE.
-AudioPlayQueue Q_out_R_Ex;   // AudioPlayQueue for driving the Q channel to the QSE.
+//AudioPlayQueue Q_out_R;  2nd audio channel not used.  KF5N March 11, 2024
 
-AudioConnection patchCord1(i2s_quadIn, 0, int2Float1, 0);  // Microphone channel.
+AudioConnection patchCord9(i2s_quadIn, 2, Q_in_L, 0);  //Input Rec
+AudioConnection patchCord10(i2s_quadIn, 3, Q_in_R, 0);
 
-AudioConnection_F32 patchCord3(int2Float1, 0, comp1, 0);  // Microphone to compressor.
-AudioConnection_F32 patchCord5(comp1, 0, float2Int1, 0);  // Compressor output.
+//AudioConnection patchCord13(modeSelectInR, 0, Q_in_R, 0);  // Rec in Queue
+//AudioConnection patchCord14(modeSelectInL, 0, Q_in_L, 0);
 
-AudioConnection patchCord7(float2Int1, 0, Q_in_L_Ex, 0);  // Microphone to AudioRecordQueue.
+//AudioConnection patchCord17(Q_out_L, 0, i2s_quadOut, 2);  // Rec out Queue
+//AudioConnection patchCord18(Q_out_R, 0, i2s_quadOut, 3);  2nd audio channel not used.  KF5N March 11, 2024
 
-AudioConnection patchCord9(i2s_quadIn, 2, modeSelectInL, 0);  //Input Rec
-AudioConnection patchCord10(i2s_quadIn, 3, modeSelectInR, 0);
+//AudioConnection patchCord21(modeSelectOutL, 0, i2s_quadOut, 2);  //Rec out
+//AudioConnection patchCord22(modeSelectOutR, 0, i2s_quadOut, 3);
+AudioAmplifier volumeAdjust;
+AudioConnection patchCord17(Q_out_L, 0, volumeAdjust, 0);
+AudioConnection patchCord18(volumeAdjust, 0, i2s_quadOut, 2);
 
-AudioConnection patchCord13(modeSelectInR, 0, Q_in_R, 0);  //Rec in Queue
-AudioConnection patchCord14(modeSelectInL, 0, Q_in_L, 0);
-
-AudioConnection patchCord15(Q_out_L_Ex, 0, i2s_quadOut, 0);  //Ex out Queue
-AudioConnection patchCord16(Q_out_R_Ex, 0, i2s_quadOut, 1);
-
-AudioConnection patchCord17(Q_out_L, 0, modeSelectOutL, 0);  //Rec out Queue
-AudioConnection patchCord18(Q_out_R, 0, modeSelectOutR, 0);
-
-AudioConnection patchCord21(modeSelectOutL, 0, i2s_quadOut, 2);  //Rec out
-AudioConnection patchCord22(modeSelectOutR, 0, i2s_quadOut, 3);
-
-AudioControlSGTL5000 sgtl5000_2;  // This is not a 2nd Audio Adapter.  It is I2S to the PCM1808 and PCM5102.
+AudioControlSGTL5000 sgtl5000_2;  // This is not a 2nd Audio Adapter.  It is I2S to the PCM1808 (ADC I and Q receiver in) and PCM5102 (DAC audio out).
 // End dataflow code
 
 Rotary volumeEncoder = Rotary(VOLUME_ENCODER_A, VOLUME_ENCODER_B);        //( 2,  3)
@@ -1072,12 +1074,10 @@ void SetAudioOperatingState(int operatingState) {
       Q_in_L_Ex.clear();
       patchCord15.connect();  // Connect I and Q transmitter output channels.
       patchCord16.connect();
+      patchCord17.connect();  // Sidetone goes into receiver audio path.
+//      Q_in_L.begin();         // Activate sidetone audio stream.
 //      Q_in_R_Ex.end();
 //      Q_in_R_Ex.clear();
-
-      // CW sidetone output connected.  Use only left channel.
-//      patchCord17.connect();
-//      patchCord24.connect();
 
       break;
   }
@@ -1281,7 +1281,8 @@ FLASHMEM void setup() {
   InitializeDataArrays();
   // Initialize user defined stuff
   initUserDefinedStuff();
-
+  volumeAdjust.gain(0.0);   // Set volume to zero at power-up.
+  volumeChangeFlag = true;  // Adjust volume so saved value.
   filterEncoderMove = 0;
   fineTuneEncoderMove = 0L;
   xrState = RECEIVE_STATE;  // Enter loop() in receive state.  KF5N July 22, 2023
@@ -1358,19 +1359,19 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
     case (SSB_RECEIVE_STATE):
       if (lastState != radioState) {  // G0ORX 01092023
         digitalWrite(MUTE, LOW);      // Audio Mute off
-        modeSelectInR.gain(0, 1);
-        modeSelectInL.gain(0, 1);
+//        modeSelectInR.gain(0, 1);
+//        modeSelectInL.gain(0, 1);
         digitalWrite(RXTX, LOW);  //xmit off
         T41State = SSB_RECEIVE;
         xrState = RECEIVE_STATE;
-        modeSelectInR.gain(0, 1);
-        modeSelectInL.gain(0, 1);
+//        modeSelectInR.gain(0, 1);
+//        modeSelectInL.gain(0, 1);
 //        modeSelectInExR.gain(0, 0);  2nd microphone channel not required.  KF5N March, 2024
 //        modeSelectInExL.gain(0, 0);
-        modeSelectOutL.gain(0, 1);
-        modeSelectOutR.gain(0, 1);
-        modeSelectOutL.gain(1, 0);
-        modeSelectOutR.gain(1, 0);
+//        modeSelectOutL.gain(0, 1);
+//        modeSelectOutR.gain(0, 1);
+//        modeSelectOutL.gain(1, 0);
+//        modeSelectOutR.gain(1, 0);
 //        modeSelectOutExL.gain(0, 0);
 //        modeSelectOutExR.gain(0, 0);
         patchCord15.disconnect();  // Disconnect transmitter I and Q channel outputs.
@@ -1396,12 +1397,12 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       digitalWrite(MUTE, HIGH);  //  Mute Audio  (HIGH=Mute)
       digitalWrite(RXTX, HIGH);  //xmit on
       xrState = TRANSMIT_STATE;
-      modeSelectInR.gain(0, 0);
-      modeSelectInL.gain(0, 0);
+//      modeSelectInR.gain(0, 0);
+//      modeSelectInL.gain(0, 0);
 //      modeSelectInExR.gain(0, 1);  2nd microphone channel not required.  KF5N March 11, 2024
 //      modeSelectInExL.gain(0, 1);
-      modeSelectOutL.gain(0, 0);
-      modeSelectOutR.gain(0, 0);
+//      modeSelectOutL.gain(0, 0);
+//      modeSelectOutR.gain(0, 0);
 //      modeSelectOutExL.gain(0, EEPROMData.powerOutSSB[EEPROMData.currentBand]);  //AFP 10-21-22
 //      modeSelectOutExR.gain(0, EEPROMData.powerOutSSB[EEPROMData.currentBand]);  //AFP 10-21-22
 //      modeSelectOutExL.gain(0, 1);  //AFP 10-21-22
@@ -1429,16 +1430,18 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
         T41State = CW_RECEIVE;
         ShowTransmitReceiveStatus();
         xrState = RECEIVE_STATE;
-        modeSelectInR.gain(0, 1);
-        modeSelectInL.gain(0, 1);
+//        modeSelectInR.gain(0, 1);
+//        modeSelectInL.gain(0, 1);
 //        modeSelectInExR.gain(0, 0);  2nd microphone channel not required.  KF5N March 11, 2024
 //        modeSelectInExL.gain(0, 0);
-        modeSelectOutL.gain(0, 1);
-        modeSelectOutR.gain(0, 1);
-        modeSelectOutL.gain(1, 0);
-        modeSelectOutR.gain(1, 0);
+//        modeSelectOutL.gain(0, 1);
+//        modeSelectOutR.gain(0, 1);
+//        modeSelectOutL.gain(1, 0);
+//        modeSelectOutR.gain(1, 0);
         patchCord15.disconnect();  // Disconnect I and Q transmitter outputs.
-        patchCord16.disconnect();       
+        patchCord16.disconnect(); 
+
+//          volumeAdjust.gain(0);  
 //        modeSelectOutExL.gain(0, 0);
 //        modeSelectOutExR.gain(0, 0);  2nd microphone channel not required.  KF5N March 11, 2024
         keyPressedOn = 0;
@@ -1448,11 +1451,11 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
     case CW_TRANSMIT_STRAIGHT_STATE:
       xrState = TRANSMIT_STATE;
       ShowTransmitReceiveStatus();
-      modeSelectInR.gain(0, 0);
-      modeSelectInL.gain(0, 0);
+//      modeSelectInR.gain(0, 0);
+//      modeSelectInL.gain(0, 0);
 //      modeSelectInExR.gain(0, 0);  2nd microphone channel not required.  KF5N March 11, 2024
-      modeSelectOutL.gain(0, 0);
-      modeSelectOutR.gain(0, 0);
+//      modeSelectOutL.gain(0, 0);
+//      modeSelectOutR.gain(0, 0);
 //      modeSelectOutExL.gain(0, 0);
 //      modeSelectOutExR.gain(0, 0);
 
@@ -1468,7 +1471,7 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
             // Don't scale for power here.  Scale in the CW exciter code.
 //            modeSelectOutExL.gain(0, 1.0);
 //            modeSelectOutExR.gain(0, 1.0);
-            modeSelectOutL.gain(0, volumeLog[(int)EEPROMData.sidetoneVolume]);  // Sidetone, left channel only.  AFP 10-01-22
+//            modeSelectOutL.gain(0, volumeLog[(int)EEPROMData.sidetoneVolume]);  // Sidetone, left channel only.  AFP 10-01-22
             CW_ExciterIQData(CW_SHAPING_RISE);
             cwKeyDown = true;
           } else {
@@ -1486,7 +1489,8 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
         }
       }
       digitalWrite(MUTE, HIGH);   // mutes audio
-      modeSelectOutL.gain(0, 0);  // Sidetone off
+//      modeSelectOutL.gain(0, 0);  // Sidetone off
+
 //      modeSelectOutR.gain(1, 0);
 //      modeSelectOutExL.gain(0, 0);  //Power = 0 //AFP 10-11-22
 //      modeSelectOutExR.gain(0, 0);  //AFP 10-11-22
@@ -1495,11 +1499,11 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
     case CW_TRANSMIT_KEYER_STATE:
       xrState = TRANSMIT_STATE;
       ShowTransmitReceiveStatus();
-      modeSelectInR.gain(0, 0);
-      modeSelectInL.gain(0, 0);
+//      modeSelectInR.gain(0, 0);
+//      modeSelectInL.gain(0, 0);
 //      modeSelectInExR.gain(0, 0);  2nd microphone channel not required.  KF5N March 11, 2024
-      modeSelectOutL.gain(0, 0);
-      modeSelectOutR.gain(0, 0);
+//      modeSelectOutL.gain(0, 0);
+//      modeSelectOutR.gain(0, 0);
 //      modeSelectOutExL.gain(0, 0);
 //      modeSelectOutExR.gain(0, 0);
       digitalWrite(MUTE, LOW);  // unmutes audio
@@ -1513,7 +1517,7 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
 //          modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
 //          modeSelectOutExL.gain(0, 1);  //AFP 10-21-22
 //          modeSelectOutExR.gain(0, 1);  //AFP 10-21-22
-          modeSelectOutL.gain(0, volumeLog[(int)EEPROMData.sidetoneVolume]);        // Sidetone
+//          modeSelectOutL.gain(0, volumeLog[(int)EEPROMData.sidetoneVolume]);        // Sidetone
 
           // Queue audio blocks--execution time of this loop will be between 0-20ms shorter
           // than the desired dit time, due to audio buffering
@@ -1537,7 +1541,7 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
 
 //          modeSelectOutExL.gain(0, 0);  //Power =0
 //          modeSelectOutExR.gain(0, 0);
-          modeSelectOutL.gain(0, 0);      // Sidetone off
+//          modeSelectOutL.gain(0, 0);      // Sidetone off
 
           cwTimer = millis();
         } else if (digitalRead(EEPROMData.paddleDah) == LOW) {  //Keyer DAH
@@ -1546,7 +1550,7 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
    //         modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);
 //            modeSelectOutExL.gain(0, 1);  //AFP 10-21-22
 //            modeSelectOutExR.gain(0, 1);  //AFP 10-21-22
-            modeSelectOutL.gain(0, volumeLog[(int)EEPROMData.sidetoneVolume]);
+//            modeSelectOutL.gain(0, volumeLog[(int)EEPROMData.sidetoneVolume]);
 
             // Queue audio blocks--execution time of this loop will be between 0-20ms shorter
             // than the desired dah time, due to audio buffering
@@ -1570,7 +1574,7 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
 
 //            modeSelectOutExL.gain(0, 0);  //Power =0
 //            modeSelectOutExR.gain(0, 0); 
-            modeSelectOutL.gain(0, 0);    // Sidetone off
+//            modeSelectOutL.gain(0, 0);    // Sidetone off
 
             cwTimer = millis();
           } else {            
@@ -1586,7 +1590,7 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   //    modeSelectOutExL.gain(0, 0);  //Power = 0 //AFP 10-11-22
   //    modeSelectOutExR.gain(0, 0);  //AFP 10-11-22
       patchCord15.disconnect();  // Disconnect the I and Q transmitter outputs.
-      patchCord15.disconnect();
+      patchCord16.disconnect();
       digitalWrite(RXTX, LOW);      // End Straight Key Mode
       break;
     default:
@@ -1608,6 +1612,7 @@ FASTRUN void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
 #endif
 
   if (volumeChangeFlag == true) {
+    volumeAdjust.gain(volumeLog[EEPROMData.audioVolume]);
     volumeChangeFlag = false;
     UpdateVolumeField();
   }
