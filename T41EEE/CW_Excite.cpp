@@ -139,7 +139,6 @@ powerScale = 30.0 * EEPROMData.powerOutCW[EEPROMData.currentBand];
       Q_out_R_Ex.play(q15_buffer_RTemp, 2048); // Transmitter
       Q_out_L.play(q15_buffer_Sidetone, 2048);
 
-
 /*
     for (unsigned  i = 0; i < N_BLOCKS_EX; i++) {  //N_BLOCKS_EX=16  BUFFER_SIZE=128 16x128=2048
       // Assign pointers to the Teensy Audio buffers.  The data will be played via the Teensy audio system.

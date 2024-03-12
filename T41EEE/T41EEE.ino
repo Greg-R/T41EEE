@@ -1008,7 +1008,7 @@ void SetAudioOperatingState(int operatingState) {
       Q_in_R.begin();  // Receiver Q channel
       patchCord9.connect();
       patchCord10.connect();
-
+      volumeAdjust.gain(volumeLog[EEPROMData.audioVolume]); // Set volume because sidetone may have changed it.
       break;
     case SSB_TRANSMIT_STATE:
       // QSD disabled and disconnected
@@ -1046,6 +1046,7 @@ void SetAudioOperatingState(int operatingState) {
       patchCord15.connect();  // Connect I and Q transmitter output channels.
       patchCord16.connect();
       patchCord17.connect();  // Sidetone goes into receiver audio path.
+      volumeAdjust.gain(volumeLog[EEPROMData.sidetoneVolume]);  // Adjust sidetone volume.
 
       break;
   }
