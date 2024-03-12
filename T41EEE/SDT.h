@@ -402,7 +402,7 @@ struct config_t {
   int keyType = STRAIGHT_KEY_OR_PADDLES;  // straight key = 0, keyer = 1  JJP 7-3-23
   int currentWPM = DEFAULT_KEYER_WPM;     // 4 bytes default = 15 JJP 7-3-23
   int CWOffset = 2;                       // Default is 750 Hz.
-  int sidetoneVolume = 30;        // 4 bytes
+  int sidetoneVolume = 40;        // 4 bytes
   uint32_t cwTransmitDelay = 1000;
   int activeVFO = 0;                // 2 bytes
   int freqIncrement = 10000;        // 4 bytes
@@ -474,7 +474,7 @@ struct config_t {
   int compressorFlag = 0;                                            // JJP 8/28/23
   bool xmitEQFlag = false;
   bool receiveEQFlag = false;
-  int calFreq = 1;                    // This is an index into an array of tone frequencies, for example:  {750, 3000}
+  int calFreq = 0;                    // This is an index into an array of tone frequencies, for example:  {750, 3000}.  Default to 750 Hz. KF5N March 12, 2024
   int buttonThresholdPressed = 944;   // switchValues[0] + WIGGLE_ROOM
   int buttonThresholdReleased = 964;  // buttonThresholdPressed + WIGGLE_ROOM
   int buttonRepeatDelay = 300000;     // Increased to 300000 from 200000 to better handle cheap, wornout buttons.

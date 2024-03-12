@@ -92,7 +92,6 @@ void CalibrateOptions() {
 
     case 6:  // Choose CW calibration tone frequency.
       SelectCalFreq();
-      Serial.printf("End of case 5 in IQOptions\n");
       calibrateFlag = 0;
       break;
 
@@ -234,8 +233,6 @@ void CalibrateOptions() {
       ShowFrequency();
       BandInformation();
       calibrateFlag = 0;
-      modeSelectOutExL.gain(0, 0);
-      modeSelectOutExR.gain(0, 0);
       break;
 
     default:

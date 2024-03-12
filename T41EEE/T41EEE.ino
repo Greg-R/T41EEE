@@ -150,9 +150,9 @@ const char *topMenus[] = { "CW Options", "RF Set", "VFO Select",
 
 // Pointers to functions which execute the menu options.  Do these functions used the returned integer???
 void (*functionPtr[])() = { &CWOptions, &RFOptions, &VFOSelect,
-                           &EEPROMOptions, &AGCOptions, &SpectrumOptions,
-                           &ButtonSetNoiseFloor, &MicGainSet, &MicOptions,
-                           &EqualizerRecOptions, &EqualizerXmtOptions, &CalibrateOptions, &BearingMaps };
+                            &EEPROMOptions, &AGCOptions, &SpectrumOptions,
+                            &ButtonSetNoiseFloor, &MicGainSet, &MicOptions,
+                            &EqualizerRecOptions, &EqualizerXmtOptions, &CalibrateOptions, &BearingMaps };
 const char *labels[] = { "Select", "Menu Up", "Band Up",
                          "Zoom", "Menu Dn", "Band Dn",
                          "Filter", "DeMod", "Mode",
@@ -174,17 +174,17 @@ AudioInputI2SQuad i2s_quadIn;
 AudioOutputI2SQuad i2s_quadOut;
 
 // Transmitter
-AudioControlSGTL5000_Extended sgtl5000_1;      // Controller for the Teensy Audio Board, transmitter only.
-AudioConvert_I16toF32 int2Float1;  // Converts Int16 to Float.  See class in AudioStream_F32.h
-AudioEffectCompressor_F32 comp1;   // Compressor from OpenAudio library.  Used in microphone dataflow path.
-AudioConvert_F32toI16 float2Int1;  // Converts Float to Int16.  See class in AudioStream_F32.h
-AudioRecordQueue Q_in_L_Ex;  // AudioRecordQueue for input Microphone channel.
-AudioPlayQueue Q_out_L_Ex;   // AudioPlayQueue for driving the I channel (CW/SSB) to the QSE.
-AudioPlayQueue Q_out_R_Ex;   // AudioPlayQueue for driving the Q channel (CW/SSB) to the QSE.
-AudioConnection patchCord1(i2s_quadIn, 0, int2Float1, 0);  // Microphone channel.
-AudioConnection_F32 patchCord3(int2Float1, 0, comp1, 0);   // Microphone to compressor.
-AudioConnection_F32 patchCord5(comp1, 0, float2Int1, 0);   // Compressor output.
-AudioConnection patchCord7(float2Int1, 0, Q_in_L_Ex, 0);   // Microphone to AudioRecordQueue.
+AudioControlSGTL5000_Extended sgtl5000_1;                    // Controller for the Teensy Audio Board, transmitter only.
+AudioConvert_I16toF32 int2Float1;                            // Converts Int16 to Float.  See class in AudioStream_F32.h
+AudioEffectCompressor_F32 comp1;                             // Compressor from OpenAudio library.  Used in microphone dataflow path.
+AudioConvert_F32toI16 float2Int1;                            // Converts Float to Int16.  See class in AudioStream_F32.h
+AudioRecordQueue Q_in_L_Ex;                                  // AudioRecordQueue for input Microphone channel.
+AudioPlayQueue Q_out_L_Ex;                                   // AudioPlayQueue for driving the I channel (CW/SSB) to the QSE.
+AudioPlayQueue Q_out_R_Ex;                                   // AudioPlayQueue for driving the Q channel (CW/SSB) to the QSE.
+AudioConnection patchCord1(i2s_quadIn, 0, int2Float1, 0);    // Microphone channel.
+AudioConnection_F32 patchCord3(int2Float1, 0, comp1, 0);     // Microphone to compressor.
+AudioConnection_F32 patchCord5(comp1, 0, float2Int1, 0);     // Compressor output.
+AudioConnection patchCord7(float2Int1, 0, Q_in_L_Ex, 0);     // Microphone to AudioRecordQueue.
 AudioConnection patchCord15(Q_out_L_Ex, 0, i2s_quadOut, 0);  // I channel to line out
 AudioConnection patchCord16(Q_out_R_Ex, 0, i2s_quadOut, 1);  // Q channel to line out
 
@@ -293,24 +293,24 @@ struct config_t EEPROMData;
 
 const struct SR_Descriptor SR[18] = {
   //   SR_n,        rate,  text
-  { SAMPLE_RATE_8K, 8000, "  8k"},       // not OK
-  { SAMPLE_RATE_11K, 11025, " 11k"},     // not OK
-  { SAMPLE_RATE_16K, 16000, " 16k"},      // OK
-  { SAMPLE_RATE_22K, 22050, " 22k"},      // OK
-  { SAMPLE_RATE_32K, 32000, " 32k"},     // OK, one more indicator?
-  { SAMPLE_RATE_44K, 44100, " 44k"},      // OK
-  { SAMPLE_RATE_48K, 48000, " 48k"},     // OK
-  { SAMPLE_RATE_50K, 50223, " 50k"},     // NOT OK
-  { SAMPLE_RATE_88K, 88200, " 88k"},      // OK
-  { SAMPLE_RATE_96K, 96000, " 96k"},     // OK
-  { SAMPLE_RATE_100K, 100000, "100k"},   // NOT OK
-  { SAMPLE_RATE_101K, 100466, "101k"},   // NOT OK
-  { SAMPLE_RATE_176K, 176400, "176k"},   // OK
-  { SAMPLE_RATE_192K, 192000, "192k"},  // OK    THIS IS USED IN THE T41
-  { SAMPLE_RATE_234K, 234375, "234k"},  // NOT OK
-  { SAMPLE_RATE_256K, 256000, "256k"},  // NOT OK
-  { SAMPLE_RATE_281K, 281000, "281k"},  // NOT OK
-  { SAMPLE_RATE_353K, 352800, "353k"}   // NOT OK
+  { SAMPLE_RATE_8K, 8000, "  8k" },      // not OK
+  { SAMPLE_RATE_11K, 11025, " 11k" },    // not OK
+  { SAMPLE_RATE_16K, 16000, " 16k" },    // OK
+  { SAMPLE_RATE_22K, 22050, " 22k" },    // OK
+  { SAMPLE_RATE_32K, 32000, " 32k" },    // OK, one more indicator?
+  { SAMPLE_RATE_44K, 44100, " 44k" },    // OK
+  { SAMPLE_RATE_48K, 48000, " 48k" },    // OK
+  { SAMPLE_RATE_50K, 50223, " 50k" },    // NOT OK
+  { SAMPLE_RATE_88K, 88200, " 88k" },    // OK
+  { SAMPLE_RATE_96K, 96000, " 96k" },    // OK
+  { SAMPLE_RATE_100K, 100000, "100k" },  // NOT OK
+  { SAMPLE_RATE_101K, 100466, "101k" },  // NOT OK
+  { SAMPLE_RATE_176K, 176400, "176k" },  // OK
+  { SAMPLE_RATE_192K, 192000, "192k" },  // OK    THIS IS USED IN THE T41
+  { SAMPLE_RATE_234K, 234375, "234k" },  // NOT OK
+  { SAMPLE_RATE_256K, 256000, "256k" },  // NOT OK
+  { SAMPLE_RATE_281K, 281000, "281k" },  // NOT OK
+  { SAMPLE_RATE_353K, 352800, "353k" }   // NOT OK
 };
 
 const arm_cfft_instance_f32 *S;
@@ -353,8 +353,8 @@ long NCOFreq;
 
 //======================================== Global variables declarations ===============================================
 //================== Global CW Correlation and FFT Variables =================
-float32_t* cosBuffer = new float32_t[256];  // Was cosBuffer2; Greg KF5N February 7, 2024
-float32_t* sinBuffer = new float32_t[256];  // This can't be DMAMEM.  It will cause problems with the CW decoder.
+float32_t *cosBuffer = new float32_t[256];  // Was cosBuffer2; Greg KF5N February 7, 2024
+float32_t *sinBuffer = new float32_t[256];  // This can't be DMAMEM.  It will cause problems with the CW decoder.
 //float32_t DMAMEM sinBuffer2[256];
 float32_t DMAMEM cwRiseBuffer[256];
 float32_t DMAMEM cwFallBuffer[256];
@@ -417,10 +417,10 @@ unsigned long transmitDahUnshapedBlocks;
 
 int16_t y_old, y_new, y1_new, y1_old, y_old2;  //A
 
-const float32_t DF1 = 4.0;             // decimation factor
-const float32_t DF2 = 2.0;             // decimation factor
-const float32_t DF = DF1 * DF2;        // decimation factor
-const float32_t n_samplerate = 176.0;  // sample rate before decimation
+const float32_t DF1 = 4.0;                                         // decimation factor
+const float32_t DF2 = 2.0;                                         // decimation factor
+const float32_t DF = DF1 * DF2;                                    // decimation factor
+const float32_t n_samplerate = 176.0;                              // sample rate before decimation
 const uint32_t N_B = FFT_LENGTH / 2 / BUFFER_SIZE * (uint32_t)DF;  // 512/2/128 * 8 = 16
 const uint32_t N_DEC_B = N_B / (uint32_t)DF;
 const uint32_t NR_add_counter = 128;
@@ -438,7 +438,7 @@ const uint16_t n_dec2_taps = (1 + (uint16_t)(n_att / (22.0 * (n_fstop2 - n_fpass
 int mute = 0;
 int attenuator = 0;
 
-int audioYPixel[256]{0};  // Will int16_t save memory here???  DMAMEM not working here.  Causes audio spectrum glitch.  KF5N February 26, 2024.
+int audioYPixel[256]{ 0 };  // Will int16_t save memory here???  DMAMEM not working here.  Causes audio spectrum glitch.  KF5N February 26, 2024.
 //int* audioYPixel = new int[256]{0};
 
 int bandswitchPins[] = {
@@ -912,20 +912,24 @@ FLASHMEM void InitializeDataArrays() {
   CalcFIRCoeffs(FIR_dec1_coeffs, n_dec1_taps, (float32_t)(n_desired_BW * 1000.0), n_att, 0, 0.0, (float32_t)SR[SampleRate].rate);
 
   if (arm_fir_decimate_init_f32(&FIR_dec1_I, n_dec1_taps, (uint32_t)DF1, FIR_dec1_coeffs, FIR_dec1_I_state, BUFFER_SIZE * N_BLOCKS)) {
-    while (1);
+    while (1)
+      ;
   }
 
   if (arm_fir_decimate_init_f32(&FIR_dec1_Q, n_dec1_taps, (uint32_t)DF1, FIR_dec1_coeffs, FIR_dec1_Q_state, BUFFER_SIZE * N_BLOCKS)) {
-    while (1);
+    while (1)
+      ;
   }
   // Decimation filter 2, M2 = DF2
   CalcFIRCoeffs(FIR_dec2_coeffs, n_dec2_taps, (float32_t)(n_desired_BW * 1000.0), n_att, 0, 0.0, (float32_t)(SR[SampleRate].rate / DF1));
   if (arm_fir_decimate_init_f32(&FIR_dec2_I, n_dec2_taps, (uint32_t)DF2, FIR_dec2_coeffs, FIR_dec2_I_state, BUFFER_SIZE * N_BLOCKS / (uint32_t)DF1)) {
-    while (1);
+    while (1)
+      ;
   }
 
   if (arm_fir_decimate_init_f32(&FIR_dec2_Q, n_dec2_taps, (uint32_t)DF2, FIR_dec2_coeffs, FIR_dec2_Q_state, BUFFER_SIZE * N_BLOCKS / (uint32_t)DF1)) {
-    while (1);
+    while (1)
+      ;
   }
 
   // Interpolation filter 1, L1 = 2
@@ -933,10 +937,12 @@ FLASHMEM void InitializeDataArrays() {
   // yes, because the interpolation filter is AFTER the upsampling, so it has to be in the target sample rate!
   CalcFIRCoeffs(FIR_int1_coeffs, 48, (float32_t)(n_desired_BW * 1000.0), n_att, 0, 0.0, SR[SampleRate].rate / 4.0);
   if (arm_fir_interpolate_init_f32(&FIR_int1_I, (uint8_t)DF2, 48, FIR_int1_coeffs, FIR_int1_I_state, BUFFER_SIZE * N_BLOCKS / (uint32_t)DF)) {
-    while (1);
+    while (1)
+      ;
   }
   if (arm_fir_interpolate_init_f32(&FIR_int1_Q, (uint8_t)DF2, 48, FIR_int1_coeffs, FIR_int1_Q_state, BUFFER_SIZE * N_BLOCKS / (uint32_t)DF)) {
-    while (1);
+    while (1)
+      ;
   }
   // Interpolation filter 2, L2 = 4
   // not sure whether I should design with the final sample rate ??
@@ -944,10 +950,12 @@ FLASHMEM void InitializeDataArrays() {
   CalcFIRCoeffs(FIR_int2_coeffs, 32, (float32_t)(n_desired_BW * 1000.0), n_att, 0, 0.0, (float32_t)SR[SampleRate].rate);
 
   if (arm_fir_interpolate_init_f32(&FIR_int2_I, (uint8_t)DF1, 32, FIR_int2_coeffs, FIR_int2_I_state, BUFFER_SIZE * N_BLOCKS / (uint32_t)DF1)) {
-    while (1);
+    while (1)
+      ;
   }
   if (arm_fir_interpolate_init_f32(&FIR_int2_Q, (uint8_t)DF1, 32, FIR_int2_coeffs, FIR_int2_Q_state, BUFFER_SIZE * N_BLOCKS / (uint32_t)DF1)) {
-    while (1);
+    while (1)
+      ;
   }
 
   SetDecIntFilters();  // here, the correct bandwidths are calculated and set accordingly
@@ -1004,11 +1012,12 @@ void SetAudioOperatingState(int operatingState) {
       patchCord15.disconnect();  // Disconnect transmitter I and Q channel outputs.
       patchCord16.disconnect();
       // QSD connected and enabled
-      Q_in_L.begin();  // Receiver I channel
-      Q_in_R.begin();  // Receiver Q channel
-      patchCord9.connect();
-      patchCord10.connect();
-      volumeAdjust.gain(volumeLog[EEPROMData.audioVolume]); // Set volume because sidetone may have changed it.
+      Q_in_L.begin();                                        // Receiver I channel
+      Q_in_R.begin();                                        // Receiver Q channel
+      patchCord9.connect();                                  // Receiver I channel
+      patchCord10.connect();                                 // Receiver Q channel
+      patchCord17.connect();                                 // Receiver audio channel
+      volumeAdjust.gain(volumeLog[EEPROMData.audioVolume]);  // Set volume because sidetone may have changed it.
       break;
     case SSB_TRANSMIT_STATE:
       // QSD disabled and disconnected
@@ -1024,8 +1033,8 @@ void SetAudioOperatingState(int operatingState) {
       patchCord1.connect();  // Microphone audio
       Q_in_L_Ex.begin();     // Microphone audio
 
-      patchCord15.connect(); // Transmitter I channel
-      patchCord16.connect(); // Transmitter Q channel
+      patchCord15.connect();  // Transmitter I channel
+      patchCord16.connect();  // Transmitter Q channel
 
       break;
     case CW_TRANSMIT_STRAIGHT_STATE:
@@ -1040,12 +1049,12 @@ void SetAudioOperatingState(int operatingState) {
 
       // Microphone input disabled and disconnected
       patchCord1.disconnect();
-      Q_in_L_Ex.end();  // Clear microphone queue.  
+      Q_in_L_Ex.end();  // Clear microphone queue.
       Q_in_L_Ex.clear();
 
       patchCord15.connect();  // Connect I and Q transmitter output channels.
       patchCord16.connect();
-      patchCord17.connect();  // Sidetone goes into receiver audio path.
+      patchCord17.connect();                                    // Sidetone goes into receiver audio path.
       volumeAdjust.gain(volumeLog[EEPROMData.sidetoneVolume]);  // Adjust sidetone volume.
 
       break;
@@ -1126,17 +1135,17 @@ FLASHMEM void setup() {
   sgtl5000_1.muteHeadphone();  // KF5N March 11, 2024
   sgtl5000_1.micGain(20);
   sgtl5000_1.lineInLevel(0);
-  #ifdef QSE2
-  sgtl5000_1.lineOutLevel(13);  // Setting of 20 limits line-out level to 3.15 volts p-p (maximum).
-  #else
-  sgtl5000_1.lineOutLevel(20);  // Setting of 13 limits line-out level to 2.14 volts p-p.
-  #endif
+#ifdef QSE2
+  sgtl5000_1.lineOutLevel(13);  // Setting of 13 limits line-out level to 3.15 volts p-p (maximum).
+#else
+  sgtl5000_1.lineOutLevel(20);  // Setting of 20 limits line-out level to 2.14 volts p-p.
+#endif
   sgtl5000_1.adcHighPassFilterDisable();  //reduces noise.  https://forum.pjrc.com/threads/27215-24-bit-audio-boards?p=78831&viewfull=1#post78831
-  sgtl5000_2.setAddress(HIGH);  // T41 has only a single Audio Adaptor.  This is being used essentially as a 2nd I2S port.
+  sgtl5000_2.setAddress(HIGH);            // T41 has only a single Audio Adaptor.  This is being used essentially as a 2nd I2S port.
   sgtl5000_2.enable();
   sgtl5000_2.inputSelect(AUDIO_INPUT_LINEIN);  // Why is a second sgtl5000 device used???  This is the receiver ADCs, PCM1808?
-  sgtl5000_2.muteHeadphone();  // KF5N March 11, 2024
-//  sgtl5000_2.volume(0.5);   //  Headphone volume???  Not required as headphone is muted.
+  sgtl5000_2.muteHeadphone();                  // KF5N March 11, 2024
+                                               //  sgtl5000_2.volume(0.5);   //  Headphone volume???  Not required as headphone is muted.
 
   pinMode(FILTERPIN15M, OUTPUT);
   pinMode(FILTERPIN20M, OUTPUT);
@@ -1258,7 +1267,7 @@ FLASHMEM void setup() {
   DrawSpectrumDisplayContainer();
   RedrawDisplayScreen();
 
-  mainMenuIndex = 0;             // Changed from middle to first. Do Menu Down to get to Calibrate quickly
+  mainMenuIndex = 0;  // Changed from middle to first. Do Menu Down to get to Calibrate quickly
   ShowName();
 
   ShowBandwidth();
@@ -1325,7 +1334,7 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
     case (SSB_RECEIVE_STATE):
       if (lastState != radioState) {  // G0ORX 01092023
         digitalWrite(MUTE, LOW);      // Audio Mute off
-        digitalWrite(RXTX, LOW);  //xmit off
+        digitalWrite(RXTX, LOW);      //xmit off
         T41State = SSB_RECEIVE;
         xrState = RECEIVE_STATE;
         if (keyPressedOn == 1) {
@@ -1337,7 +1346,7 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       break;
     case SSB_TRANSMIT_STATE:
       comp1.setPreGain_dB(EEPROMData.currentMicGain);
-//      comp2.setPreGain_dB(EEPROMData.currentMicGain);
+      //      comp2.setPreGain_dB(EEPROMData.currentMicGain);
       if (EEPROMData.compressorFlag == 1) {
         SetupMyCompressors(use_HP_filter, (float)EEPROMData.currentMicThreshold, comp_ratio, attack_sec, release_sec);  // Cast EEPROMData.currentMicThreshold to float.  KF5N, October 31, 2023
       } else {
@@ -1379,7 +1388,7 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       xrState = TRANSMIT_STATE;
       ShowTransmitReceiveStatus();
       digitalWrite(MUTE, LOW);  // unmutes audio
-      cwKeyDown = false;  // false initiates CW_SHAPING_RISE.
+      cwKeyDown = false;        // false initiates CW_SHAPING_RISE.
       cwTimer = millis();
       while (millis() - cwTimer <= EEPROMData.cwTransmitDelay) {  //Start CW transmit timer on
         digitalWrite(RXTX, HIGH);
@@ -1395,15 +1404,15 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
         } else {
           if (digitalRead(EEPROMData.paddleDit) == HIGH && EEPROMData.keyType == 0) {  //Turn off CW signal
             keyPressedOn = 0;
-            if (cwKeyDown) {       // Initiate falling CW signal.
+            if (cwKeyDown) {  // Initiate falling CW signal.
               CW_ExciterIQData(CW_SHAPING_FALL);
               cwKeyDown = false;
             } else CW_ExciterIQData(CW_SHAPING_ZERO);  //  No waveforms; but DC offset is still present.
           }
         }
       }
-      digitalWrite(MUTE, HIGH);   // mutes audio
-      digitalWrite(RXTX, LOW);      // End Straight Key Mode
+      digitalWrite(MUTE, HIGH);  // mutes audio
+      digitalWrite(RXTX, LOW);   // End Straight Key Mode
       break;
     case CW_TRANSMIT_KEYER_STATE:
       xrState = TRANSMIT_STATE;
@@ -1431,40 +1440,40 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
           // Pause for one dit length of silence
           ditTimerOff = millis();
           while (millis() - ditTimerOff <= transmitDitLength) {
-          CW_ExciterIQData(CW_SHAPING_ZERO);
+            CW_ExciterIQData(CW_SHAPING_ZERO);
           }
           cwTimer = millis();
         } else if (digitalRead(EEPROMData.paddleDah) == LOW) {  //Keyer DAH
-            dahTimerOn = millis();
-            // Queue audio blocks--execution time of this loop will be between 0-20ms shorter
-            // than the desired dah time, due to audio buffering
-            CW_ExciterIQData(CW_SHAPING_RISE);
-            for (cwBlockIndex = 0; cwBlockIndex < transmitDahUnshapedBlocks; cwBlockIndex++) {
-              CW_ExciterIQData(CW_SHAPING_NONE);
-            }
-            CW_ExciterIQData(CW_SHAPING_FALL);
+          dahTimerOn = millis();
+          // Queue audio blocks--execution time of this loop will be between 0-20ms shorter
+          // than the desired dah time, due to audio buffering
+          CW_ExciterIQData(CW_SHAPING_RISE);
+          for (cwBlockIndex = 0; cwBlockIndex < transmitDahUnshapedBlocks; cwBlockIndex++) {
+            CW_ExciterIQData(CW_SHAPING_NONE);
+          }
+          CW_ExciterIQData(CW_SHAPING_FALL);
 
-            // Wait for calculated dah time, allowing audio blocks to be played
-            while (millis() - dahTimerOn <= 3UL * transmitDitLength) {
-              ;
-            }
+          // Wait for calculated dah time, allowing audio blocks to be played
+          while (millis() - dahTimerOn <= 3UL * transmitDitLength) {
+            ;
+          }
 
-            // Pause for one dit length of silence
-            ditTimerOff = millis();
-            while (millis() - ditTimerOff <= transmitDitLength) {
-            CW_ExciterIQData(CW_SHAPING_ZERO);
-            }
-            cwTimer = millis();
-          } else {            
+          // Pause for one dit length of silence
+          ditTimerOff = millis();
+          while (millis() - ditTimerOff <= transmitDitLength) {
             CW_ExciterIQData(CW_SHAPING_ZERO);
           }
+          cwTimer = millis();
+        } else {
+          CW_ExciterIQData(CW_SHAPING_ZERO);
+        }
         keyPressedOn = 0;  // Fix for keyer click-clack.  KF5N August 16, 2023
       }                    //End Relay timer
 
-      digitalWrite(MUTE, HIGH);   // mutes audio
-//      patchCord15.disconnect();  // Disconnect the I and Q transmitter outputs.
-//      patchCord16.disconnect();
-      digitalWrite(RXTX, LOW);      // End Straight Key Mode
+      digitalWrite(MUTE, HIGH);  // mutes audio
+                                 //      patchCord15.disconnect();  // Disconnect the I and Q transmitter outputs.
+                                 //      patchCord16.disconnect();
+      digitalWrite(RXTX, LOW);   // End Straight Key Mode
       break;
     default:
       break;
