@@ -133,7 +133,7 @@ void ButtonBandIncrease() {
   SetFreq();
   ShowFrequency();
   ShowSpectrumdBScale();
-  MyDelay(1L);
+  //delay(1L);
   AudioInterrupts();
   EEPROMWrite();
   // Draw or not draw CW filter graphics to audio spectrum area.  KF5N July 30, 2023
@@ -230,7 +230,7 @@ void ButtonBandDecrease() {
   SetBand();
   SetFreq();
   ShowFrequency();
-  MyDelay(1L);
+  //delay(1L);
   ShowSpectrumdBScale();
   AudioInterrupts();
   EEPROMWrite();
@@ -434,7 +434,7 @@ void ButtonSetNoiseFloor() {
   tft.print("Pixels above axis:");
   tft.setCursor(SECONDARY_MENU_X + 200, MENUS_Y + 1);
   tft.print(EEPROMData.currentNoiseFloor[EEPROMData.currentBand]);
-  MyDelay(150L);
+  delay(150L);
 
   while (true) {
     if (filterEncoderMove != 0) {
@@ -448,7 +448,7 @@ void ButtonSetNoiseFloor() {
     }
 
     val = ReadSelectedPushButton();  // Get ADC value
-    MyDelay(100L);
+    delay(100L);
     val = ProcessButtonPress(val);
     if (val == MENU_OPTION_SELECT)  // If they made a choice...
     {
@@ -744,7 +744,7 @@ void ButtonFrequencyEntry() {
       tft.fillRect(SECONDARY_MENU_X + 195, MENUS_Y + 1, 85, CHAR_HEIGHT, RA8875_MAGENTA);
       tft.setCursor(SECONDARY_MENU_X + 200, MENUS_Y + 1);
       tft.print(strF);
-      MyDelay(250);  // only for analogue switch matrix
+      delay(250);  // only for analogue switch matrix
     }
   }
   if (key != 0x58) {
@@ -772,7 +772,7 @@ void ButtonFrequencyEntry() {
   SetBand();
   SetFreq();
   ShowFrequency();
-  MyDelay(1L);
+  //delay(1L);
   ShowSpectrumdBScale();
   AudioInterrupts();
   EEPROMWrite();

@@ -812,13 +812,14 @@ int SetI2SFreq(int freq) {
 
   Return value:
     void
-*****/
+*****
 void MyDelay(unsigned long millisWait) {
   unsigned long now = millis();
 
   while (millis() - now < millisWait)
     ;  // Twiddle thumbs until delay ends...
 }
+*/
 
 
 /*****
@@ -1127,7 +1128,7 @@ FLASHMEM void Splash() {
   centerCall = (XPIXELS - strlen(MY_CALL) * tft.getFontWidth()) / 2;
   tft.setCursor(centerCall, YPIXELS / 2 + 160);
   tft.print(MY_CALL);
-  MyDelay(SPLASH_DELAY);
+  delay(SPLASH_DELAY);
   tft.fillWindow(RA8875_BLACK);
 }
 
@@ -1261,7 +1262,7 @@ FLASHMEM void setup() {
   h = 135;
   Q_in_L.begin();  //Initialize receive input buffers
   Q_in_R.begin();
-  MyDelay(100L);
+  //delay(100L);
 
   // ========================  End set up of Parameters from EEPROM data ===============
   NCOFreq = 0;

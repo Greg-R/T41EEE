@@ -676,7 +676,7 @@ void SetCompressionLevel()
     }
     val = ReadSelectedPushButton();                                  // Read pin that controls all switches
     val = ProcessButtonPress(val);
-    MyDelay(150L);
+    delay(150L);
     if (val == MENU_OPTION_SELECT) {                             // Make a choice??
       // micCompression = EEPROMData.currentMicThreshold;
       //EEPROMData.EEPROMData.currentMicThreshold = EEPROMData.currentMicThreshold;
@@ -727,7 +727,7 @@ void SetCompressionRatio()
 
     val = ReadSelectedPushButton();                                  // Read pin that controls all switches
     val = ProcessButtonPress(val);
-    MyDelay(150L);
+    delay(150L);
 
     if (val == MENU_OPTION_SELECT) {                             // Make a choice??
      // EEPROMData.EEPROMData.currentMicCompRatio = EEPROMData.currentMicCompRatio;
@@ -778,7 +778,7 @@ void SetCompressionAttack()
 
     val = ReadSelectedPushButton();                                  // Read pin that controls all switches
     val = ProcessButtonPress(val);
-    MyDelay(150L);
+    delay(150L);
 
     if (val == MENU_OPTION_SELECT) {                             // Make a choice??
       //EEPROMData.EEPROMData.currentMicAttack = EEPROMData.currentMicAttack;
@@ -829,7 +829,7 @@ void SetCompressionRelease()
 
     val = ReadSelectedPushButton();                                  // Read pin that controls all switches
     val = ProcessButtonPress(val);
-    MyDelay(150L);
+    delay(150L);
 
     if (val == MENU_OPTION_SELECT) {                             // Make a choice??
       //EEPROMData.EEPROMData.currentMicCompRatio = EEPROMData.currentMicCompRatio;

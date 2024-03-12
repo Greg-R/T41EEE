@@ -504,7 +504,7 @@ void SaveAnalogSwitchValues() {
       while (true) {
         value = ReadSelectedPushButton();
         if (value < NOTHING_TO_SEE_HERE && value > 0) {
-          MyDelay(100L);
+          delay(100L);
           if (value < minVal) {
             minVal = value;
           } else {

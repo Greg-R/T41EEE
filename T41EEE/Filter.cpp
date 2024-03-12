@@ -228,7 +228,7 @@ void FilterBandwidth()
   SetDecIntFilters();
   ShowBandwidth();
 //BandInformation();
-  MyDelay(1L);
+//  delay(1L);
   AudioInterrupts();
 } // end filter_bandwidth
 

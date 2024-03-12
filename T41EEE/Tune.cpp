@@ -167,7 +167,7 @@ int DoSplitVFO()
 
     val = ReadSelectedPushButton();                                  // Read pin that controls all switches
     val = ProcessButtonPress(val);
-    MyDelay(150L);
+    delay(150L);
     if (val == MENU_OPTION_SELECT) {                              // Make a choice??
       Clk1SetFreq += splitOffset;                                    // New transmit frequency // AFP 09-27-22
       UpdateInfoWindow();
@@ -206,15 +206,13 @@ int DoSplitVFO()
 
 
 /*****
-  Purpose: Purpose is to sety VFOa to receive frequency and VFOb to the transmit frequency
+  Purpose: Reset the flip-flops in the QSD2/QSE2 quadrature generators.
 
   Parameter list:
     void
 
   Return value;
-    int           the offset as an int
-
-  CAUTION: SI5351_FREQ_MULT is set in the si5253.h header file and is 100UL
+    void
 *****/
 void ResetFlipFlops() {
   // Toggle GPO1 high momentarily to reset the divide-by-2 flop-flops.

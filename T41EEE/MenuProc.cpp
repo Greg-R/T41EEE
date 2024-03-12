@@ -472,13 +472,13 @@ void ProcessEqualizerChoices(int EQType, char *title) {
         }
       }
       filterEncoderMove = 0;
-      MyDelay(200L);
+      delay(200L);
 
       val = ReadSelectedPushButton();  // Read the ladder value
 
       if (val != -1 && val < (EEPROMData.switchValues[0] + WIGGLE_ROOM)) {
         val = ProcessButtonPress(val);  // Use ladder value to get menu choice
-        MyDelay(100L);
+        delay(100L);
 
         tft.fillRect(xOffset,                // Indent to proper bar...
                      barBottomY - newValue,  // Start at red line
@@ -736,7 +736,7 @@ void DoPaddleFlip() {
   tft.print(paddleState[choice]);  // Show the default (right paddle = dah
 
   while (true) {
-    MyDelay(150L);
+    delay(150L);
     valPin = ReadSelectedPushButton();                     // Poll buttons
     if (valPin != -1) {                                    // button was pushed
       pushButtonSwitchIndex = ProcessButtonPress(valPin);  // Winner, winner...chicken dinner!
@@ -789,7 +789,7 @@ void VFOSelect() {
   tft.print(VFOOptions[choice]);  // Show the default (right paddle = dah
 
   choice = SubmenuSelect(VFOOptions, 4, 0);
-  MyDelay(10);
+  delay(10);
   NCOFreq = 0L;
   switch (choice) {
     case VFO_A:  // VFO A
@@ -966,11 +966,11 @@ int SubmenuSelect(const char *options[], int numberOfChoices, int defaultStart) 
     tft.print(options[encoderReturnValue]);  // Secondary Menu
     refreshFlag = 1;
   }
-  MyDelay(150L);
+  delay(150L);
 
   while (true) {
     val = ReadSelectedPushButton();  // Read the ladder value
-    MyDelay(150L);
+    delay(150L);
     if (val != -1 && val < (EEPROMData.switchValues[0] + WIGGLE_ROOM)) {
       val = ProcessButtonPress(val);  // Use ladder value to get menu choice
       if (val > -1) {                 // Valid choice?
@@ -1002,7 +1002,7 @@ int SubmenuSelect(const char *options[], int numberOfChoices, int defaultStart) 
           tft.setTextColor(RA8875_BLACK);
           tft.setCursor(SECONDARY_MENU_X + 1, MENUS_Y + 1);
           tft.print(options[encoderReturnValue]);
-          MyDelay(50L);
+          delay(50L);
           refreshFlag = 0;
         }
       }

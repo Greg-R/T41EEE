@@ -185,7 +185,7 @@ int ReadSelectedPushButton() {
   }
   minPinRead = buttonRead;
   if (!buttonInterruptsEnabled) {
-    MyDelay(100L);
+    delay(100L);
   }
   return minPinRead;
 }
@@ -326,7 +326,7 @@ void ExecuteButtonPress(int val) {
       }
       while (true) {
         valPin = ReadSelectedPushButton();  // Poll UI push buttons
-        MyDelay(100L);
+        delay(100L);
         if (valPin != BOGUS_PIN_READ) {              // If a button was pushed...
           buttonIndex = ProcessButtonPress(valPin);  // Winner, winner...chicken dinner!
           switch (buttonIndex) {
