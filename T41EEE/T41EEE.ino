@@ -1189,9 +1189,8 @@ FLASHMEM void setup() {
   EEPROMData.sdCardPresent = InitializeSDCard();  // Is there an SD card that can be initialized?
 
   // =============== EEPROM section =================
-
+  EnableButtonInterrupts();
   EEPROMStartup();
-
   // Push and hold a button at power up to activate switch matrix calibration.
   // Uncomment this code block to enable this feature.  Len KD0RC
   /* Remove this line and the matching block comment line below to activate.
@@ -1202,13 +1201,12 @@ FLASHMEM void setup() {
     tft.setCursor(10, 10);
     tft.print("Release button to start calibration.");
     delay(2000);
-    EnableButtonInterrupts();
+//    EnableButtonInterrupts();
     SaveAnalogSwitchValues();
     delay(3000);
     EEPROMRead();  // Call to reset switch matrix values
   }                // KD0RC end
   Remove this line and the matching block comment line above to activate. */
-  EnableButtonInterrupts();
   h = 135;
   Q_in_L.begin();  //Initialize receive input buffers
   Q_in_R.begin();
