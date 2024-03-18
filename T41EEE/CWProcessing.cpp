@@ -66,7 +66,7 @@ states decodeStates = state0;
 *****/
 FLASHMEM void SelectCWFilter() {
   const char *CWFilter[] = { "0.8kHz", "1.0kHz", "1.3kHz", "1.8kHz", "2.0kHz", " Off " };
-  EEPROMData.CWFilterIndex = SubmenuSelect(CWFilter, 6, 0);  // CWFilter is an array of strings.
+  EEPROMData.CWFilterIndex = SubmenuSelect(CWFilter, 6, EEPROMData.CWFilterIndex);  // CWFilter is an array of strings.
   // Clear the current CW filter graphics and then restore the bandwidth indicator bar.  KF5N July 30, 2023
   tft.writeTo(L2);
   tft.clearMemory();
