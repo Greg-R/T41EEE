@@ -78,7 +78,7 @@ void ProcessIQData()
       Q_in_R.freeBuffer();
     }  // end for loop
 
-    if (keyPressedOn == 1) { //AFP 09-01-22.  Bail out if transmitting.
+    if (keyPressedOn == 1) { //AFP 09-01-22.  Bail out if transmitting but ignore in AM mode.
       return;
     }
     // Set frequency here only to minimize interruption to signal stream during tuning.

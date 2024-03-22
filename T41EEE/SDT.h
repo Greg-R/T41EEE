@@ -267,6 +267,7 @@ extern struct maps myMapFiles[];
 #define SSB_RECEIVE_STATE 0
 #define SSB_TRANSMIT_STATE 1
 #define CW_RECEIVE_STATE 2
+#define AM_RECEIVE_STATE 5
 #define CW_TRANSMIT_STRAIGHT_STATE 3
 #define CW_TRANSMIT_KEYER_STATE 4
 #define SPECTRUM_ZOOM_1 0

@@ -118,6 +118,7 @@ void EncoderCenterTune() {
   }
 
   EEPROMData.centerFreq += ((long)EEPROMData.freqIncrement * tuneChange);  // tune the master vfo
+  if(EEPROMData.centerFreq < 300000) EEPROMData.centerFreq = 300000;
   TxRxFreq = EEPROMData.centerFreq + NCOFreq;
   EEPROMData.lastFrequencies[EEPROMData.currentBand][EEPROMData.activeVFO] = TxRxFreq;
   SetFreq();  //  Change to receiver tuning process.  KF5N July 22, 2023

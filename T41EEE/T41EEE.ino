@@ -976,6 +976,7 @@ void SetAudioOperatingState(int operatingState) {
 #endif
   switch (operatingState) {
     case SSB_RECEIVE_STATE:
+    case AM_RECEIVE_STATE:
     case CW_RECEIVE_STATE:
       // Disconnect and deactivate microphone audio.
       patchCord1.disconnect();
@@ -1291,6 +1292,11 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   if (EEPROMData.xmtMode == CW_MODE && (digitalRead(EEPROMData.paddleDit) == HIGH && digitalRead(EEPROMData.paddleDah) == HIGH)) radioState = CW_RECEIVE_STATE;  // Was using symbolic constants. Also changed in code below.  KF5N August 8, 2023
   if (EEPROMData.xmtMode == CW_MODE && (digitalRead(EEPROMData.paddleDit) == LOW && EEPROMData.xmtMode == CW_MODE && EEPROMData.keyType == 0)) radioState = CW_TRANSMIT_STRAIGHT_STATE;
   if (EEPROMData.xmtMode == CW_MODE && (keyPressedOn == 1 && EEPROMData.xmtMode == CW_MODE && EEPROMData.keyType == 1)) radioState = CW_TRANSMIT_KEYER_STATE;
+  if (bands[EEPROMData.currentBand].mode > 1) {
+  radioState = AM_RECEIVE_STATE;  // Inhibit transmit in AM demod modes.  KF5N March 21, 2024
+  keyPressedOn = 0;
+  }
+
   if (lastState != radioState) {
     SetFreq();  // Update frequencies if the radio state has changed.
     SetAudioOperatingState(radioState);
@@ -1301,7 +1307,8 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   //  Begin SSB Mode state machine
 
   switch (radioState) {
-    case (SSB_RECEIVE_STATE):
+    case AM_RECEIVE_STATE:
+    case SSB_RECEIVE_STATE:
       if (lastState != radioState) {  // G0ORX 01092023
         digitalWrite(MUTE, LOW);      // Audio Mute off
         digitalWrite(RXTX, LOW);      //xmit off
@@ -1344,6 +1351,7 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   // Begin CW Mode state machine
 
   switch (radioState) {
+//    case AM_RECEIVE_STATE:
     case CW_RECEIVE_STATE:
       if (lastState != radioState) {  // G0ORX 01092023
         digitalWrite(MUTE, LOW);      //turn off mute
