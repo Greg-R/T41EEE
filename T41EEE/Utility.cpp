@@ -537,7 +537,6 @@ void SaveAnalogSwitchValues() {
   }
 
   EEPROMData.buttonRepeatDelay = origRepeatDelay;  // Restore original repeat delay
-  //  EEPROM.put(0, EEPROMData);                        // Done by EEPROMStartup().
 }
 
 // ================== Clock stuff

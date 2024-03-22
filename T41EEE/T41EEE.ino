@@ -1199,8 +1199,7 @@ FLASHMEM void setup() {
     delay(2000);
     EnableButtonInterrupts();
     SaveAnalogSwitchValues();
-    delay(3000);
-    EEPROMRead();  // Call to reset switch matrix values
+    EEPROMWrite();  // Call to reset switch matrix values
   }                // KD0RC end
 #else
   EnableButtonInterrupts();
