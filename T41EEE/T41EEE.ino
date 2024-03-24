@@ -1094,7 +1094,7 @@ FLASHMEM void Splash() {
     void
 *****/
 FLASHMEM void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);  // Increased to modern speed.  KF5N March 24, 2024.
 
   setSyncProvider(getTeensy3Time);  // get TIME from real time clock with 3V backup battery
   setTime(now());
