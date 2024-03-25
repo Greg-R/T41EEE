@@ -109,8 +109,12 @@ void CW_ExciterIQData(int shaping) //AFP 08-20-22
 //      arm_float_to_q15 (float_buffer_Sidetone, q15_buffer_Sidetone, 2048);  // Sidetone to integer here before RF power scaling.
 
 //  This is the correct place in the data stream to inject the scaling for power.
+#ifdef QSE2
+powerScale = 40.0 * EEPROMData.powerOutCW[EEPROMData.currentBand];
+#else
 powerScale = 30.0 * EEPROMData.powerOutCW[EEPROMData.currentBand];
-//powerScale = 0.0;
+#endif
+
     //  192KHz effective sample rate here
 //    arm_scale_f32(float_buffer_L_EX, sidetoneVolume, float_buffer_Sidetone, 2048);
     arm_scale_f32(float_buffer_L_EX, powerScale, float_buffer_L_EX, 2048); //Scale to compensate for losses in Interpolation

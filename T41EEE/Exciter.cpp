@@ -126,7 +126,14 @@ void ExciterIQData()
     arm_fir_interpolate_f32(&FIR_int2_EX_I, float_buffer_LTemp, float_buffer_L_EX, 512);
     arm_fir_interpolate_f32(&FIR_int2_EX_Q, float_buffer_RTemp, float_buffer_R_EX, 512);
     //  192KHz effective sample rate here
-    powerScale = 30.0 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
+    
+    //  This is the correct place in the data stream to inject the scaling for power.
+#ifdef QSE2
+powerScale = 40.0 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
+#else
+powerScale = 30.0 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
+#endif
+
     arm_scale_f32(float_buffer_L_EX, powerScale, float_buffer_L_EX, 2048); //Scale to compensate for losses in Interpolation
     arm_scale_f32(float_buffer_R_EX, powerScale, float_buffer_R_EX, 2048);
 

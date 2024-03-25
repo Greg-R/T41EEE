@@ -462,7 +462,12 @@ void ProcessIQData2(int toneFreqIndex) {
   arm_fir_interpolate_f32(&FIR_int2_EX_Q, float_buffer_RTemp, float_buffer_R_EX, 512);
 
   //  This is the correct place in the data stream to inject the scaling for power.
-  powerScale = 30.0 * EEPROMData.powerOutCW[EEPROMData.currentBand];
+#ifdef QSE2
+powerScale = 40.0 * EEPROMData.powerOutCW[EEPROMData.currentBand];
+#else
+powerScale = 30.0 * EEPROMData.powerOutCW[EEPROMData.currentBand];
+#endif
+
   //  192KHz effective sample rate here
   arm_scale_f32(float_buffer_L_EX, powerScale, float_buffer_L_EX, 2048);  //Scale to compensate for losses in Interpolation
   arm_scale_f32(float_buffer_R_EX, powerScale, float_buffer_R_EX, 2048);
@@ -555,7 +560,7 @@ void ShowSpectrum2()  //AFP 2-10-23
 {
   int x1 = 0;
   float adjdB = 0.0;
-  int capture_bins = 10;  // Sets the number of bins to scan for signal peak.
+  int capture_bins = 9;  // Sets the number of bins to scan for signal peak.
 
   pixelnew[0] = 0;
   pixelnew[1] = 0;
