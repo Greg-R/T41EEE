@@ -219,7 +219,8 @@ int DoSplitVFO()
     void
 *****/
 void ResetFlipFlops() {
-  // Toggle GPO1 high momentarily to reset the divide-by-2 flop-flops.
+  // Toggle GPO0 low momentarily to reset the divide-by-2 flop-flops.
+  // GPO0 is held high during normal operation.
   si5351.output_enable(SI5351_CLK2, 0);
   si5351.output_enable(SI5351_CLK1, 0);
   digitalWrite(0, LOW);
