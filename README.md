@@ -9,7 +9,7 @@ introduced in the next releases.
 Purchase the book "Digital Signal Processing and Software Defined Radio" by
 Albert Peter and Jack Purdum here:
 
-<https://www.amazon.com/Software-Defined-Radio-Transceiver-Construction/dp/B09WYP1ST8>
+<https://www.amazon.com/Digial-Signal-Processing-Software-Defined/dp/B0D1JH5L65>
 
 Please bring your questions, bug reports, and complaints about this software to this
 group:
@@ -39,6 +39,19 @@ Search for ArduinoJSON.  Note this is a single word, as there is another library
 with the name Arduino_JSON, which is not the correct library.  Install the library,
 and if you have the other dependencies for the V049.2 version, compilation will be
 successful.
+
+## How to Compile T41EEE
+
+T41EEE.5 was developed and compiled using Arduino IDE version 2.3.2 with the following
+configuration:
+
+1.  Optimize is set to "Smallest Code" (Tools menu).
+2.  CPU speed is set to 528 MHz (Tools menu).
+3.  TeensyDuino version is 1.59.0.
+4.  You will need to install Arduinojson which is currently version 7.0.4.
+
+Completing a FLASH erase of the Teensy is strongly recommended before uploading this new version. 
+Remember to save to the SD card via the EEPROM menu EEPROM->SD command prior to erasing.
 
 ## Highlight of Changes included in T41EEE.5
 
