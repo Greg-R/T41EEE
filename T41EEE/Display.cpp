@@ -26,8 +26,8 @@ int16_t pos_x_time = 390;  // 14;
 int16_t pos_y_time = 5;    //114;
 float xExpand = 1.4;       //
 int16_t spectrum_pos_centre_f = 64 * xExpand;
-int filterLoPositionMarkerOld;
-int filterHiPositionMarkerOld;
+//int filterLoPositionMarkerOld;
+//int filterHiPositionMarkerOld;
 int pos_centre_f = 64;
 int smeterLength;
 float CPU_temperature = 0.0;
@@ -114,8 +114,8 @@ void ShowSpectrum() {
   //int j2;  KF5N
   int x1 = 0;  //AFP
   int h = SPECTRUM_HEIGHT + 3;
-  int filterLoPositionMarker;
-  int filterHiPositionMarker;
+  //int filterLoPositionMarker;
+  //int filterHiPositionMarker;
   int y_new_plot, y1_new_plot, y_old_plot, y_old2_plot;
   updateDisplayCounter = 0;
 
@@ -233,11 +233,11 @@ void ShowSpectrum() {
         tft.drawLine(BAND_INDICATOR_X - 7 + abs(filterHiPositionMarker), SPECTRUM_BOTTOM - 3, BAND_INDICATOR_X - 7 + abs(filterHiPositionMarker), SPECTRUM_BOTTOM - 112, RA8875_LIGHT_GREY);
 */
 
-        if (filterLoPositionMarker != filterLoPositionMarkerOld || filterHiPositionMarker != filterHiPositionMarkerOld) {
-          DrawBandWidthIndicatorBar();
-        }
-        filterLoPositionMarkerOld = filterLoPositionMarker;
-        filterHiPositionMarkerOld = filterHiPositionMarker;
+//        if (filterLoPositionMarker != filterLoPositionMarkerOld || filterHiPositionMarker != filterHiPositionMarkerOld) {
+//          DrawBandWidthIndicatorBar();
+//        }
+//        filterLoPositionMarkerOld = filterLoPositionMarker;
+//        filterHiPositionMarkerOld = filterHiPositionMarker;
       }
     }
 
