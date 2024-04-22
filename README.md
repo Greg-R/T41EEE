@@ -33,9 +33,9 @@ with the revised software quickly.
 Please note that the configuration structure is different than the predecessor V049.2
 It is recommended to perform a full FLASH erase before loading T41EEE.5.
 
-You will need to install the ArduinoJSON library by Benoit Blanchon.  Using the IDE:
+You will need to install the ArduinoJson library by Benoit Blanchon.  Using the IDE:
 Tools -> Manage Libraries ...
-Search for ArduinoJSON.  Note this is a single word, as there is another library
+Search for Arduinojson.  Note this is a single word, as there is another library
 with the name Arduino_JSON, which is not the correct library.  Install the library,
 and if you have the other dependencies for the V049.2 version, compilation will be
 successful.
@@ -48,7 +48,7 @@ configuration:
 1.  Optimize is set to "Smallest Code" (Tools menu).
 2.  CPU speed is set to 528 MHz (Tools menu).
 3.  TeensyDuino version is 1.59.0.
-4.  You will need to install Arduinojson which is currently version 7.0.4.
+4.  You will need to install ArduinoJson which is currently version 7.0.4.
 
 Completing a FLASH erase of the Teensy is strongly recommended before uploading this new version. 
 Remember to save to the SD card via the EEPROM menu EEPROM->SD command prior to erasing.
