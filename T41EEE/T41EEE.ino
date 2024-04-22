@@ -387,6 +387,9 @@ unsigned long transmitDitUnshapedBlocks;
 unsigned long transmitDahUnshapedBlocks;
 
 // ============ end new stuff =======
+// Global variables used by audio filter encoder.
+int last_filter_pos = 0;
+int filter_pos = 0;
 
 int16_t y_old, y_new, y1_new, y1_old, y_old2;  //A
 
@@ -875,7 +878,7 @@ FLASHMEM void InitializeDataArrays() {
     biquad_lowpass1_coeffs[i] = coefficient_set[i];
   }
 
-  ShowBandwidth();
+//  ShowBandwidth();
 
   /****************************************************************************************
      Initiate decimation and interpolation FIR filters
@@ -1255,7 +1258,9 @@ FLASHMEM void setup() {
   EEPROMData.sdCardPresent = SDPresentCheck();  // JJP 7/18/23
   lastState = 1111;                             // To make sure the receiver will be configured on the first pass through.  KF5N September 3, 2023
   UpdateDecoderField();                         // Adjust graphics for Morse decoder.
+  FilterSetSSB();
   UpdateEqualizerField(EEPROMData.receiveEQFlag, EEPROMData.xmitEQFlag);
+  EEPROMData.rfGainCurrent = 0;  // Start with lower gain so you don't get blasted.
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();  // Required only for QSD2/QSE2.
 }
 //============================================================== END setup() =================================================================

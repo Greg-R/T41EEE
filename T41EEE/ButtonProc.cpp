@@ -144,6 +144,7 @@ void ButtonBandIncrease() {
   DrawBandWidthIndicatorBar();
   DrawFrequencyBarValue();
   UpdateDecoderField();
+  FilterSetSSB();
 }
 
 
@@ -242,6 +243,7 @@ void ButtonBandDecrease() {
   DrawBandWidthIndicatorBar();
   DrawFrequencyBarValue();
   UpdateDecoderField();
+  FilterSetSSB();
 }
 
 
@@ -276,11 +278,13 @@ void ButtonZoom() {
   ShowFrequency();
   ShowBandwidth();
   ResetTuning();  // AFP 10-11-22
+  FilterSetSSB();
 }
 
 
 /*****
-  Purpose: To process a filter button push
+  Purpose: To process a filter button push.  This switches the Filter Encoder from the lower limit to the upper limit
+           of the audio filter.
 
   Parameter list:
     void
@@ -292,7 +296,6 @@ void ButtonFilter() {
   switchFilterSideband = !switchFilterSideband;
   ControlFilterF();
   FilterBandwidth();
-  //SetFreq();
   ShowFrequency();
 }
 
@@ -325,6 +328,7 @@ void ButtonDemodMode() {
   AudioInterrupts();
   SetFreq();                                                                                   // Must update frequency, for example moving from SSB to CW, the RX LO is shifted.  KF5N
   if ((EEPROMData.xmtMode == CW_MODE) && (EEPROMData.decoderFlag == 1)) UpdateDecoderField();  // KF5N December 28 2023.
+  FilterSetSSB();
 }
 
 
@@ -370,6 +374,7 @@ void ButtonMode()  //====== Changed AFP 10-05-22  =================
     tft.clearMemory();
   } else BandInformation();
   DrawBandWidthIndicatorBar();
+  FilterSetSSB();
 }
 
 
@@ -782,4 +787,5 @@ void ButtonFrequencyEntry() {
   if (EEPROMData.xmtMode == CW_MODE) BandInformation();
   DrawBandWidthIndicatorBar();
   RedrawDisplayScreen();  // KD0RC
+  FilterSetSSB();
 }

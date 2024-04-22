@@ -675,13 +675,15 @@ typedef struct Menu_Descriptor {
   const uint8_t no;         // Menu ID
   const char *const text1;  // upper text
   const char *text2;        // lower text
-  const uint8_t menu2;      // 0 = belongs to Menu, 1 = belongs to Menu2
+//  const uint8_t menu2;      // 0 = belongs to Menu, 1 = belongs to Menu2
 } Menu_D;
 extern Menu_D Menus[];
 
 //======================================== Global variables declarations ===============================================
 //========================== Some are not in alpha order because of forward references =================================
 
+extern int last_filter_pos;
+extern int filter_pos;
 extern bool volumeChangeFlag;
 extern char keyboardBuffer[];
 extern const char *labels[];
@@ -1026,7 +1028,6 @@ void GetFavoriteFrequency();
 float HaversineDistance(float dxLat, float dxLon);
 
 int InitializeSDCard();
-void InitializeDataArrays();
 void InitFilterMask();
 void InitLMSNoiseReduction();
 void initPowerCoefficients();

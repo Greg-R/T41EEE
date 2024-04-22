@@ -95,10 +95,11 @@ void ShowName() {
   Return value;
     void
 *****/
-FASTRUN void ShowSpectrum()  //AFP Extensively Modified 3-15-21 Adjusted 12-13-21 to align all elements.  Place in tightly-coupled memory.
-{
+void ShowSpectrum() {
 #define LOWERPIXTARGET 13  //  HB start
 #define UPPERPIXTARGET 15
+
+    tft.writeTo(L1);  // TEMPORARY for graphics debugging.
 
   char buff[10];
   int frequ_hist[32] = { 0, 0, 0, 0, 0, 0, 0, 0,
@@ -150,7 +151,9 @@ FASTRUN void ShowSpectrum()  //AFP Extensively Modified 3-15-21 Adjusted 12-13-2
       if (updateDisplayCounter == 7) updateDisplayFlag = 1;
     }
 
-    FilterSetSSB();                                           // Insert Filter encoder update here  AFP 06-22-22
+    // Don't call this function unless the filter bandwidth has been adjusted.  This requires 2 global variables.
+    if (filter_pos != last_filter_pos) FilterSetSSB();
+
     if (T41State == SSB_RECEIVE || T41State == CW_RECEIVE) {  // AFP 08-24-22
       ProcessIQData();                                        // Call the Audio process from within the display routine to eliminate conflicts with drawing the spectrum and waterfall displays
     }
@@ -218,15 +221,17 @@ FASTRUN void ShowSpectrum()  //AFP Extensively Modified 3-15-21 Adjusted 12-13-2
           }
           tft.drawFastVLine(BAND_INDICATOR_X - 8 + x1, AUDIO_SPECTRUM_BOTTOM - audioYPixel[x1] - 1, audioYPixel[x1] - 2, RA8875_MAGENTA);  //AFP draw new AUDIO spectrum line
         }
-        tft.drawFastHLine(SPECTRUM_LEFT_X - 1, SPECTRUM_TOP_Y + SPECTRUM_HEIGHT, MAX_WATERFALL_WIDTH, RA8875_YELLOW);
+//        tft.drawFastHLine(SPECTRUM_LEFT_X - 1, SPECTRUM_TOP_Y + SPECTRUM_HEIGHT, MAX_WATERFALL_WIDTH, RA8875_YELLOW);  Necessary??? Greg KF5N April 21, 2024
         // The following lines calculate the position of the Filter bar below the spectrum display
         // and then draw the Audio spectrum in its own container to the right of the Main spectrum display
 
+/*
         filterLoPositionMarker = map(bands[EEPROMData.currentBand].FLoCut, 0, 6000, 0, 256);
         filterHiPositionMarker = map(bands[EEPROMData.currentBand].FHiCut, 0, 6000, 0, 256);
         //Draw Fiter indicator lines on audio plot AFP 10-30-22
         tft.drawLine(BAND_INDICATOR_X - 6 + abs(filterLoPositionMarker), SPECTRUM_BOTTOM - 3, BAND_INDICATOR_X - 6 + abs(filterLoPositionMarker), SPECTRUM_BOTTOM - 112, RA8875_LIGHT_GREY);
         tft.drawLine(BAND_INDICATOR_X - 7 + abs(filterHiPositionMarker), SPECTRUM_BOTTOM - 3, BAND_INDICATOR_X - 7 + abs(filterHiPositionMarker), SPECTRUM_BOTTOM - 112, RA8875_LIGHT_GREY);
+*/
 
         if (filterLoPositionMarker != filterLoPositionMarkerOld || filterHiPositionMarker != filterHiPositionMarkerOld) {
           DrawBandWidthIndicatorBar();
@@ -502,7 +507,7 @@ void ShowBandwidth() {
     pos_left = spectrum_x;
   }
 
-  // Need tto add in code for zoom factor here AFP 10-20-22
+  // Need to add in code for zoom factor here AFP 10-20-22
 
   filterWidthX = pos_left + newCursorPosition - centerLine;
   tft.writeTo(L2);
@@ -1472,7 +1477,7 @@ void UpdateCompressionField()  // JJP 8/26/2023
 
 
 /*****
-  Purpose: Updates whether the decoder is on or off
+  Purpose: Updates whether the decoder is on or off and decoder related graphics.
 
   Parameter list:
     void

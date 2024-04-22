@@ -59,6 +59,7 @@ void ResetTuning()
   BandInformation();
   ShowFrequency();
   UpdateDecoderField();  // Update Morse decoder if used.
+  FilterSetSSB();
 }
 // ===== End AFP 10-11-22
 

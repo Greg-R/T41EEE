@@ -1,33 +1,27 @@
 
 #include "SDT.h"
 
-int8_t Menu2 = MENU_F_LO_CUT;
-long last_filter_pos = 0;
-long filter_pos = 0;
 float adjustVolEncoder;
 
 /*****
-  Purpose: EncoderFilter
-
+  Purpose: Audio filter adjust with encoder.  This function is called from ShowSpectrum() in Display.cpp.
+           This function runs only if the encoder has been rotated.
   Parameter list:
     void
-
   Return value;
     void
     Modified AFP21-12-15
 *****/
 void FilterSetSSB() {
   long filter_change;
-
-  // SSB
-  if (filter_pos != last_filter_pos) {
+//  if (filter_pos != last_filter_pos) {  Move decision to ShowSpectrum() in Display.cpp.  KF5N April 21, 2024
     tft.writeTo(L2);  // Clear layer 2.  KF5N July 31, 2023
     tft.clearMemory();
     if(EEPROMData.xmtMode == CW_MODE) BandInformation(); 
     tft.fillRect((MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2 - filterWidth, SPECTRUM_TOP_Y + 17, filterWidth, SPECTRUM_HEIGHT - 20, RA8875_BLACK);  // Erase old filter background
     filter_change = (filter_pos - last_filter_pos);
     if (filter_change >= 1) {
-      filterWidth--;
+      filterWidth--;           // filterWidth is used in graphics only!
       if (filterWidth < 10)
         filterWidth = 10;
     }
@@ -37,53 +31,81 @@ void FilterSetSSB() {
         filterWidth = 50;
     }
     last_filter_pos = filter_pos;
-    // =============  AFP 10-27-22
+    // Change the FLoCut and FhiCut variables which adjust the DSP filters.
     switch (bands[EEPROMData.currentBand].mode) {
       case DEMOD_LSB:
-        if (switchFilterSideband == 0)  // "0" = normal, "1" means change opposite filter
-        {
-          bands[EEPROMData.currentBand].FLoCut = bands[EEPROMData.currentBand].FLoCut + filter_change * 50 * ENCODER_FACTOR;
-          //fHiCutOld= bands[EEPROMData.currentBand].FHiCut;
-          FilterBandwidth();
-        } else if (switchFilterSideband == 1) {
-          //if (abs(bands[EEPROMData.currentBand].FHiCut) < 500) {
-          bands[EEPROMData.currentBand].FHiCut = bands[EEPROMData.currentBand].FHiCut + filter_change * 50 * ENCODER_FACTOR;
-          fLoCutOld = bands[EEPROMData.currentBand].FLoCut;
+        if (switchFilterSideband == 0)  // LSB "0" = normal, "1" means change opposite filter.  ButtonFilter() function swaps this.
+        {  // Adjust FLoCut and limit FLoCut based on the current frequency of FHiCut.
+          bands[EEPROMData.currentBand].FLoCut = bands[EEPROMData.currentBand].FLoCut - filterEncoderMove * 100 * ENCODER_FACTOR;  
+          // Don't allow FLoCut to be less than 100 Hz below FHiCut.
+          if(bands[EEPROMData.currentBand].FLoCut >= (bands[EEPROMData.currentBand].FHiCut - 100)) bands[EEPROMData.currentBand].FLoCut = bands[EEPROMData.currentBand].FHiCut - 100;          
+        } else if (switchFilterSideband == 1) {  // Adjust and limit FHiCut.
+          bands[EEPROMData.currentBand].FHiCut = bands[EEPROMData.currentBand].FHiCut - filterEncoderMove * 100 * ENCODER_FACTOR;
+          if(bands[EEPROMData.currentBand].FHiCut >= -100) bands[EEPROMData.currentBand].FHiCut = -100;  // Don't allow FLoCut to go above -100.
+          // Don't allow FHiCut to be less than 100 Hz above FLoCut.
+          if(bands[EEPROMData.currentBand].FHiCut <= (bands[EEPROMData.currentBand].FLoCut + 100)) bands[EEPROMData.currentBand].FHiCut = bands[EEPROMData.currentBand].FLoCut + 100;
         }
+        FilterBandwidth();
         break;
       case DEMOD_USB:
-        if (switchFilterSideband == 0) {
-          bands[EEPROMData.currentBand].FHiCut = bands[EEPROMData.currentBand].FHiCut - filter_change * 50 * ENCODER_FACTOR;
-          //bands[EEPROMData.currentBand].FLoCut= fLoCutOld;
-          FilterBandwidth();
-        } else if (switchFilterSideband == 1) {
-          bands[EEPROMData.currentBand].FLoCut = bands[EEPROMData.currentBand].FLoCut - filter_change * 50 * ENCODER_FACTOR;
-          // bands[EEPROMData.currentBand].FHiCut= fHiCutOld;
-        }
+      if (switchFilterSideband == 0)
+ {  // Adjust and limit FHiCut.
+          bands[EEPROMData.currentBand].FHiCut = bands[EEPROMData.currentBand].FHiCut + filterEncoderMove * 100 * ENCODER_FACTOR;
+          // Don't allow FHiCut to be less than 100 Hz above FLoCut.
+          if(bands[EEPROMData.currentBand].FHiCut <= (bands[EEPROMData.currentBand].FLoCut + 100)) bands[EEPROMData.currentBand].FHiCut = bands[EEPROMData.currentBand].FLoCut + 100;
+        }        
+        else if         (switchFilterSideband == 1)
+        {  // Adjust FLoCut and limit FLoCut based on the current frequency of FHiCut.
+          bands[EEPROMData.currentBand].FLoCut = bands[EEPROMData.currentBand].FLoCut + filterEncoderMove * 100 * ENCODER_FACTOR;  
+          // Don't allow FLoCut to go below 100.
+          if(bands[EEPROMData.currentBand].FLoCut <= 100) bands[EEPROMData.currentBand].FLoCut = 100;  
+          // Don't allow FLoCut to be less than 100 Hz below FHiCut.
+          if(bands[EEPROMData.currentBand].FLoCut >= (bands[EEPROMData.currentBand].FHiCut - 100)) bands[EEPROMData.currentBand].FLoCut = bands[EEPROMData.currentBand].FHiCut - 100;          
+        } 
+        FilterBandwidth();
         break;
       case DEMOD_AM:
         bands[EEPROMData.currentBand].FHiCut = bands[EEPROMData.currentBand].FHiCut - filter_change * 50 * ENCODER_FACTOR;
         bands[EEPROMData.currentBand].FLoCut = -bands[EEPROMData.currentBand].FHiCut;
         FilterBandwidth();
-        InitFilterMask();
+//        InitFilterMask();  This function is called by FilterBandwidth().  Greg KF5N April 21, 2024
         break;
       case DEMOD_SAM:  // AFP 11-03-22
         bands[EEPROMData.currentBand].FHiCut = bands[EEPROMData.currentBand].FHiCut - filter_change * 50 * ENCODER_FACTOR;
         bands[EEPROMData.currentBand].FLoCut = -bands[EEPROMData.currentBand].FHiCut;
         FilterBandwidth();
-        InitFilterMask();
+//        InitFilterMask();
         break;
     }
     // =============  AFP 10-27-22
 
     //ControlFilterF();
-    Menu2 = MENU_F_LO_CUT;  // set Menu2 to MENU_F_LO_CUT
-    FilterBandwidth();
-    ShowBandwidth();
-    DrawFrequencyBarValue();
-    UpdateDecoderField();   // Adjust Morse decoder graphics.
-  }
-    tft.writeTo(L1);  // Exit function in layer 1.  KF5N August 3, 2023
+//    Menu2 = MENU_F_LO_CUT;  // set Menu2 to MENU_F_LO_CUT
+//    FilterBandwidth();  // Do any of these functions do anything???
+//    ShowBandwidth();
+//  Which function adjusts the frequency limit bars in the audio spectrum display???
+//    DrawFrequencyBarValue();  // This calls ShowBandwidth().  YES, this function is useful here.
+//    UpdateDecoderField();   // Redraw Morse decoder graphics because they get erased due to filter graphics updates.
+
+//  The following code was moved from ShowSpectrum() in Display.cpp.
+        int filterLoPositionMarker;
+        int filterHiPositionMarker;
+        filterLoPositionMarker = map(bands[EEPROMData.currentBand].FLoCut, 0, 6000, 0, 256);
+        filterHiPositionMarker = map(bands[EEPROMData.currentBand].FHiCut, 0, 6000, 0, 256);
+        //Draw Fiter indicator lines on audio plot to Layer 2.
+        tft.writeTo(L2);
+        tft.drawLine(BAND_INDICATOR_X - 6 + abs(filterLoPositionMarker), SPECTRUM_BOTTOM - 3, BAND_INDICATOR_X - 6 + abs(filterLoPositionMarker), SPECTRUM_BOTTOM - 112, RA8875_LIGHT_GREY);
+        tft.drawLine(BAND_INDICATOR_X - 7 + abs(filterHiPositionMarker), SPECTRUM_BOTTOM - 3, BAND_INDICATOR_X - 7 + abs(filterHiPositionMarker), SPECTRUM_BOTTOM - 112, RA8875_LIGHT_GREY);
+
+    tft.writeTo(L1);    
+    DrawFrequencyBarValue();  // This calls ShowBandwidth().  YES, this function is useful here.
+    UpdateDecoderField();   // Redraw Morse decoder graphics because they get erased due to filter graphics updates.
+    DrawBandWidthIndicatorBar();
+
+//  }
+//    tft.writeTo(L1);  // Exit function in layer 1.  KF5N August 3, 2023
+
+//tft.writeTo(L1);
 }
 
 
@@ -434,9 +456,8 @@ long SetTransmitDelay()  // new function JJP 9/1/22
   Return value;
     void               cannot return value from interrupt
 *****/
-FASTRUN  // Causes function to be allocated in RAM1 at startup for fastest performance.
-  void
-  EncoderFineTune() {
+//FASTRUN  // Causes function to be allocated in RAM1 at startup for fastest performance.
+  void EncoderFineTune() {
   char result;
 
   result = fineTuneEncoder.process();  // Read the encoder
@@ -479,7 +500,8 @@ FASTRUN  // Causes function to be allocated in RAM1 at startup for fastest perfo
 }
 
 
-FASTRUN  // Causes function to be allocated in RAM1 at startup for fastest performance.
+// FASTRUN  // Causes function to be allocated in RAM1 at startup for fastest performance.
+// This function is attached to interrupts (in the .ino file).
   void EncoderFilter() {
   char result;
   result = filterEncoder.process();  // Read the encoder
@@ -501,6 +523,6 @@ FASTRUN  // Causes function to be allocated in RAM1 at startup for fastest perfo
       break;
   }
   if (calibrateFlag == 0) {                                // AFP 10-22-22
-    filter_pos = last_filter_pos - 5 * filterEncoderMove;  // AFP 10-22-22
-  }                                                        // AFP 10-22-22
+    filter_pos = last_filter_pos - 5 * filterEncoderMove;  // AFP 10-22-22.  Hmmm.  Why multiply by 5???  Greg KF5N April 21, 2024
+  }                                                        // AFP 10-22-22   filter_pos is allowed to go negative.  This may be a problem.
 }
