@@ -26,8 +26,6 @@ int16_t pos_x_time = 390;  // 14;
 int16_t pos_y_time = 5;    //114;
 float xExpand = 1.4;       //
 int16_t spectrum_pos_centre_f = 64 * xExpand;
-//int filterLoPositionMarkerOld;
-//int filterHiPositionMarkerOld;
 int pos_centre_f = 64;
 int smeterLength;
 float CPU_temperature = 0.0;
@@ -35,7 +33,7 @@ double elapsed_micros_mean;
 
 
 /*****
-  Purpose: Draw audio spectrum box  AFP added 3-14-21
+  Purpose: Draw audio spectrum box.  AFP added 3-14-21
 
   Parameter list:
 
@@ -56,7 +54,7 @@ void DrawAudioSpectContainer() {
 
 
 /*****
-  Purpose: Show the program name and version number
+  Purpose: Show the program name and version number.
 
   Parameter list:
     void
@@ -1682,7 +1680,7 @@ void RedrawDisplayScreen() {
   SetBandRelay(HIGH);
   SpectralNoiseReductionInit();
   UpdateNoiseField();
-  SetI2SFreq(SR[SampleRate].rate);
+  // SetI2SFreq(SR[SampleRate].rate);
   DrawBandWidthIndicatorBar();
   ShowName();
   ShowTransmitReceiveStatus();
@@ -1693,51 +1691,54 @@ void RedrawDisplayScreen() {
   ShowSpectrumdBScale();
   UpdateDecoderField();
   UpdateInfoWindow();
+  FilterSetSSB();
 }
 
 
 /*****
-  Purpose: Draw Tuned Bandwidth on Spectrum Plot // AFP 03-27-22 Layers
+  Purpose: Draw Tuned Bandwidth on Spectrum Plot. // Calculations simplified KF5N April 22, 2024
 
   Parameter list:
 
   Return value;
     void
 *****/
-FASTRUN void DrawBandWidthIndicatorBar()  // AFP 10-30-22
+void DrawBandWidthIndicatorBar()  // AFP 10-30-22
 {
-  float zoomMultFactor = 0.0;
+  int zoomMultFactor = 0;
   float Zoom1Offset = 0.0;
 
   switch (zoomIndex) {
     case 0:
-      zoomMultFactor = 0.5;
-      Zoom1Offset = 24000 * 0.0053333;
+      zoomMultFactor = 16;
+//      Zoom1Offset = 24000 * 0.0053333;
+      Zoom1Offset = -128;  // KF5N April 23, 2024
       break;
 
     case 1:
-      zoomMultFactor = 1.0;
+      zoomMultFactor = 8;
       Zoom1Offset = 0;
       break;
 
     case 2:
-      zoomMultFactor = 2.0;
+      zoomMultFactor = 4;
       Zoom1Offset = 0;
       break;
 
-    case 3:
-      zoomMultFactor = 4.0;
+    case 3:  //  8X
+      zoomMultFactor = 2;
       Zoom1Offset = 0;
       break;
 
-    case 4:
-      zoomMultFactor = 8.0;
+    case 4:  // 16X
+      zoomMultFactor = 1;
       Zoom1Offset = 0;
       break;
   }
-  newCursorPosition = (int)(NCOFreq * 0.0053333) * zoomMultFactor - Zoom1Offset;  // AFP 10-28-22
-
-  tft.writeTo(L2);
+  ///newCursorPosition = (int)((NCOFreq >> 5) * 1) * zoomMultFactor - static_cast<int>(Zoom1Offset);  // There is a potential resolution loss here due to mix of floats and integers.
+  //newCursorPosition = static_cast<int>(0.043 * static_cast<float>(NCOFreq));
+  newCursorPosition = (NCOFreq/23)/zoomMultFactor + Zoom1Offset;  // KF5N April 22, 2024
+  tft.writeTo(L2);  // Write graphics to Layer 2.
   //  tft.clearMemory();              // This destroys the CW filter graphics, removed.  KF5N July 30, 2023
   //  tft.clearScreen(RA8875_BLACK);  // This causes an audio hole in fine tuning.  KF5N 7-16-23
 

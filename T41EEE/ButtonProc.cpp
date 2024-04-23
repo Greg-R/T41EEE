@@ -333,7 +333,7 @@ void ButtonDemodMode() {
 
 
 /*****
-  Purpose: Set transmission mode for SSB or CW
+  Purpose: Set transmission mode for SSB or CW.
 
   Parameter list:
     void
@@ -364,7 +364,7 @@ void ButtonMode()  //====== Changed AFP 10-05-22  =================
   DrawAudioSpectContainer();
   SpectralNoiseReductionInit();
   UpdateNoiseField();
-  ShowName();
+//  ShowName();
   ShowSpectrumdBScale();
   ShowTransmitReceiveStatus();
   ShowFrequency();

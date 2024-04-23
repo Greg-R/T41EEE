@@ -448,16 +448,17 @@ long SetTransmitDelay()  // new function JJP 9/1/22
   EraseMenus();
   return EEPROMData.cwTransmitDelay;
 }
+
+
 /*****
-  Purpose: Fine tune control.
+  Purpose: Fine frequency tune control.
 
   Parameter list:
     void
 
   Return value;
-    void               cannot return value from interrupt
+    void
 *****/
-//FASTRUN  // Causes function to be allocated in RAM1 at startup for fastest performance.
   void EncoderFineTune() {
   char result;
 
@@ -472,7 +473,7 @@ long SetTransmitDelay()  // new function JJP 9/1/22
       fineTuneEncoderMove = -1L;
     }
   }
-  NCOFreq += EEPROMData.stepFineTune * fineTuneEncoderMove;  //AFP 11-01-22
+  NCOFreq = NCOFreq + EEPROMData.stepFineTune * fineTuneEncoderMove;  // Increment NCOFreq per encoder movement.
   centerTuneFlag = 1;
   // ============  AFP 10-28-22
   if (EEPROMData.activeVFO == VFO_A) {
@@ -501,7 +502,6 @@ long SetTransmitDelay()  // new function JJP 9/1/22
 }
 
 
-// FASTRUN  // Causes function to be allocated in RAM1 at startup for fastest performance.
 // This function is attached to interrupts (in the .ino file).
   void EncoderFilter() {
   char result;
