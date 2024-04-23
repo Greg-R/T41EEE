@@ -14,7 +14,7 @@ float adjustVolEncoder;
 *****/
 void FilterSetSSB() {
   long filter_change;
-//  if (filter_pos != last_filter_pos) {  Move decision to ShowSpectrum() in Display.cpp.  KF5N April 21, 2024
+  if (filter_pos != last_filter_pos) {  // This decision is required as this function is required to be used in many locations.  KF5N April 21, 2024
     tft.writeTo(L2);  // Clear layer 2.  KF5N July 31, 2023
     tft.clearMemory();
     if(EEPROMData.xmtMode == CW_MODE) BandInformation(); 
@@ -77,6 +77,7 @@ void FilterSetSSB() {
 //        InitFilterMask();
         break;
     }
+  }
     // =============  AFP 10-27-22
 
     //ControlFilterF();
