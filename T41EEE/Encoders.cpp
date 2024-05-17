@@ -474,7 +474,7 @@ long SetTransmitDelay()  // new function JJP 9/1/22
     }
   }
   NCOFreq = NCOFreq + EEPROMData.stepFineTune * fineTuneEncoderMove;  // Increment NCOFreq per encoder movement.
-  centerTuneFlag = 1;
+  centerTuneFlag = 1;   // This is used in Process.cpp.  Greg KF5N May 16, 2024
   // ============  AFP 10-28-22
   if (EEPROMData.activeVFO == VFO_A) {
     EEPROMData.currentFreqA = EEPROMData.centerFreq + NCOFreq;  //AFP 10-05-22

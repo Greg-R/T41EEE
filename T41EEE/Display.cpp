@@ -31,7 +31,6 @@ int smeterLength;
 float CPU_temperature = 0.0;
 double elapsed_micros_mean;
 
-
 /*****
   Purpose: Draw audio spectrum box.  AFP added 3-14-21
 
@@ -491,15 +490,11 @@ void ShowBandwidth() {
   char buff[10];
   int centerLine = (MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2;
   int pos_left;
-  float32_t pixel_per_khz;
 
   if (EEPROMData.spectrum_zoom != SPECTRUM_ZOOM_1)
     spectrum_pos_centre_f = 128 * xExpand - 1;  //AFP
   else
     spectrum_pos_centre_f = 64 * xExpand;  //AFP
-
-  pixel_per_khz = 0.0055652173913043;  // Al: I factored this constant: 512/92000;
-  //pixel_per_khz = ((1 << EEPROMData.spectrum_zoom) * SPECTRUM_RES * 1000.0 / SR[SampleRate].rate) ;
   pos_left = centerLine + ((int)(bands[EEPROMData.currentBand].FLoCut / 1000.0 * pixel_per_khz));
   if (pos_left < spectrum_x) {
     pos_left = spectrum_x;
@@ -1705,47 +1700,44 @@ void RedrawDisplayScreen() {
 *****/
 void DrawBandWidthIndicatorBar()  // AFP 10-30-22
 {
-  int zoomMultFactor = 0;
-  float Zoom1Offset = 0.0;
+  int Zoom1Offset = 0.0;
+  float hz_per_pixel = 0.0;
 
   switch (zoomIndex) {
-    case 0:
-      zoomMultFactor = 16;
-//      Zoom1Offset = 24000 * 0.0053333;
-      Zoom1Offset = -128;  // KF5N April 23, 2024
+    case 0:  // 1X
+      hz_per_pixel = 375.0;
+      Zoom1Offset = -128;  // The "center" is halfway to the left of the spectrum window center.  // KF5N April 23, 2024
       break;
 
     case 1:
-      zoomMultFactor = 8;
+      hz_per_pixel = 187.5;
       Zoom1Offset = 0;
       break;
 
     case 2:
-      zoomMultFactor = 4;
+      hz_per_pixel = 93.75;
       Zoom1Offset = 0;
       break;
 
     case 3:  //  8X
-      zoomMultFactor = 2;
+      hz_per_pixel = 46.875;
       Zoom1Offset = 0;
       break;
 
     case 4:  // 16X
-      zoomMultFactor = 1;
+      hz_per_pixel = 23.4375;
       Zoom1Offset = 0;
       break;
   }
-  ///newCursorPosition = (int)((NCOFreq >> 5) * 1) * zoomMultFactor - static_cast<int>(Zoom1Offset);  // There is a potential resolution loss here due to mix of floats and integers.
-  //newCursorPosition = static_cast<int>(0.043 * static_cast<float>(NCOFreq));
-  newCursorPosition = (NCOFreq/23)/zoomMultFactor + Zoom1Offset;  // KF5N April 22, 2024
+  newCursorPosition = static_cast<int>(NCOFreq/hz_per_pixel) + Zoom1Offset;  // More accurate tuning bar position.  KF5N May 17, 2024
   tft.writeTo(L2);  // Write graphics to Layer 2.
   //  tft.clearMemory();              // This destroys the CW filter graphics, removed.  KF5N July 30, 2023
   //  tft.clearScreen(RA8875_BLACK);  // This causes an audio hole in fine tuning.  KF5N 7-16-23
 
   pixel_per_khz = ((1 << EEPROMData.spectrum_zoom) * SPECTRUM_RES * 1000.0 / SR[SampleRate].rate);
   filterWidth = (int)(((bands[EEPROMData.currentBand].FHiCut - bands[EEPROMData.currentBand].FLoCut) / 1000.0) * pixel_per_khz * 1.06);  // AFP 10-30-22
-  //======================= AFP 09-22-22
 
+  //======================= AFP 09-22-22
   switch (bands[EEPROMData.currentBand].mode) {
     case DEMOD_LSB:
       tft.fillRect(centerLine - filterWidth + oldCursorPosition, SPECTRUM_TOP_Y + 20, filterWidth * 1.0, SPECTRUM_HEIGHT - 20, RA8875_BLACK);  // Was 0.96.  KF5N July 31, 2023
@@ -1756,30 +1748,23 @@ void DrawBandWidthIndicatorBar()  // AFP 10-30-22
 
     case DEMOD_USB:
       tft.fillRect(centerLine + oldCursorPosition, SPECTRUM_TOP_Y + 20, filterWidth, SPECTRUM_HEIGHT - 20, RA8875_BLACK);  //AFP 03-27-22 Layers
-      tft.fillRect(centerLine + newCursorPosition, SPECTRUM_TOP_Y + 20, filterWidth, SPECTRUM_HEIGHT - 20, FILTER_WIN);    //AFP 03-27-22 Layers
-                                                                                                                           //      tft.drawFastVLine(centerLine + oldCursorPosition, SPECTRUM_TOP_Y + 20, h - 10, RA8875_BLACK); // Yep. Erase old, draw new...//AFP 03-27-22 Layers
-                                                                                                                           //      tft.drawFastVLine(centerLine + newCursorPosition , SPECTRUM_TOP_Y + 20, h - 10, RA8875_CYAN); //AFP 03-27-22 Layers
+      tft.fillRect(centerLine + newCursorPosition, SPECTRUM_TOP_Y + 20, filterWidth, SPECTRUM_HEIGHT - 20, FILTER_WIN);    //AFP 03-27-22 Layers                                                                                                                           //      tft.drawFastVLine(centerLine + oldCursorPosition, SPECTRUM_TOP_Y + 20, h - 10, RA8875_BLACK); // Yep. Erase old, draw new...//AFP 03-27-22 Layers                                                                                                                          //      tft.drawFastVLine(centerLine + newCursorPosition , SPECTRUM_TOP_Y + 20, h - 10, RA8875_CYAN); //AFP 03-27-22 Layers
       break;
 
     case DEMOD_AM:
       tft.fillRect(centerLine - filterWidth / 2 + oldCursorPosition, SPECTRUM_TOP_Y + 20, filterWidth, SPECTRUM_HEIGHT - 20, RA8875_BLACK);                //AFP 10-30-22
-      tft.fillRect(centerLine - (filterWidth / 2) * 0.93 + newCursorPosition, SPECTRUM_TOP_Y + 20, filterWidth * 0.95, SPECTRUM_HEIGHT - 20, FILTER_WIN);  //AFP 10-30-22
-                                                                                                                                                           //      tft.drawFastVLine(centerLine + oldCursorPosition, SPECTRUM_TOP_Y + 20, h - 10, RA8875_BLACK);                 // AFP 10-30-22
-                                                                                                                                                           //      tft.drawFastVLine(centerLine + newCursorPosition, SPECTRUM_TOP_Y + 20, h - 10, RA8875_CYAN);                 //AFP 10-30-22*/
+      tft.fillRect(centerLine - (filterWidth / 2) * 0.93 + newCursorPosition, SPECTRUM_TOP_Y + 20, filterWidth * 0.95, SPECTRUM_HEIGHT - 20, FILTER_WIN);  //AFP 10-30-22                                                                                                                                                           //      tft.drawFastVLine(centerLine + oldCursorPosition, SPECTRUM_TOP_Y + 20, h - 10, RA8875_BLACK);                 // AFP 10-30-2                                                                                                                                                           //      tft.drawFastVLine(centerLine + newCursorPosition, SPECTRUM_TOP_Y + 20, h - 10, RA8875_CYAN);                 //AFP 10-30-22*/
       break;
 
     case DEMOD_SAM:
       tft.fillRect(centerLine - filterWidth / 2 + oldCursorPosition, SPECTRUM_TOP_Y + 20, filterWidth, SPECTRUM_HEIGHT - 20, RA8875_BLACK);                //AFP 10-30-22
-      tft.fillRect(centerLine - (filterWidth / 2) * 0.93 + newCursorPosition, SPECTRUM_TOP_Y + 20, filterWidth * 0.95, SPECTRUM_HEIGHT - 20, FILTER_WIN);  //AFP 10-30-22
-                                                                                                                                                           //      tft.drawFastVLine(centerLine + oldCursorPosition, SPECTRUM_TOP_Y + 20, h - 10, RA8875_BLACK);                 // AFP 10-30-22
-                                                                                                                                                           //      tft.drawFastVLine(centerLine + newCursorPosition, SPECTRUM_TOP_Y + 20, h - 10, RA8875_CYAN);                 //AFP 10-30-22*/
+      tft.fillRect(centerLine - (filterWidth / 2) * 0.93 + newCursorPosition, SPECTRUM_TOP_Y + 20, filterWidth * 0.95, SPECTRUM_HEIGHT - 20, FILTER_WIN);  //AFP 10-30-22                                                                                                                                                          //      tft.drawFastVLine(centerLine + oldCursorPosition, SPECTRUM_TOP_Y + 20, h - 10, RA8875_BLACK);                 // AFP 10-30-22                                                                                                                                                           //      tft.drawFastVLine(centerLine + newCursorPosition, SPECTRUM_TOP_Y + 20, h - 10, RA8875_CYAN);                 //AFP 10-30-22*/
       break;
   }
   tft.drawFastVLine(centerLine + oldCursorPosition, SPECTRUM_TOP_Y + 20, h - 10, RA8875_BLACK);  // refactored from above JJP 7/12/23
   tft.drawFastVLine(centerLine + newCursorPosition, SPECTRUM_TOP_Y + 20, h - 10, RA8875_CYAN);
   //  BandInformation();  //AFP 03-27-22 Layers
   oldCursorPosition = newCursorPosition;
-
   tft.writeTo(L1);  //AFP 03-27-22 Layers
 }
 
