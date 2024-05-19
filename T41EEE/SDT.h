@@ -130,7 +130,7 @@ extern struct maps myMapFiles[];
 #define SMETER_Y YPIXELS * 0.22  // 480 * 0.22 = 106
 #define SMETER_BAR_HEIGHT 18
 #define SMETER_BAR_LENGTH 180
-#define SPECTRUM_NOISE_FLOOR (SPECTRUM_TOP_Y + SPECTRUM_HEIGHT - 3)
+#define SPECTRUM_NOISE_FLOOR (SPECTRUM_TOP_Y + SPECTRUM_HEIGHT - 3)  // 100 + 150 - 3 = 247
 #define TIME_X (XPIXELS * 0.73)  // Upper-left corner for time
 #define TIME_Y (YPIXELS * 0.07)
 #define FILTER_PARAMETERS_X (XPIXELS * 0.22)
@@ -387,7 +387,7 @@ struct config_t {
   int rfGainCurrent = 0;
   int rfGain[NUMBER_OF_BANDS] = {0};
   bool autoGain = false;
-  int spectrumNoiseFloor = SPECTRUM_NOISE_FLOOR;  // AFP 09-26-22
+  int spectrumNoiseFloor = SPECTRUM_NOISE_FLOOR;  // 247
   int tuneIndex = DEFAULTFREQINCREMENT;           // JJP 7-3-23
   long stepFineTune = FINE_TUNE_STEP;             // JJP 7-3-23
   float32_t transmitPowerLevel = DEFAULT_POWER_LEVEL;   // Changed from int to float; Greg KF5N February 12, 2024
@@ -1062,8 +1062,6 @@ void playTransmitData();  // KF5N February 23, 2024
 int ProcessButtonPress(int valPin);
 void ProcessEqualizerChoices(int EQType, char *title);
 void ProcessIQData();
-
-void ProcessIQData2(int toneFreqIndex);
 
 uint16_t read16(File &f);
 uint32_t read32(File &f);

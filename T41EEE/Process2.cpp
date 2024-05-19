@@ -9,10 +9,11 @@ int val;
 float correctionIncrement;  //AFP 2-7-23
 int userScale, userZoomIndex, userxmtMode;
 int transmitPowerLevelTemp, cwFreqOffsetTemp;
-uint16_t base_y = SPECTRUM_BOTTOM;
+uint16_t base_y = SPECTRUM_BOTTOM;  // 247
 int calTypeFlag = 0;
 int IQCalType;
-
+void ProcessIQData2();
+float adjdBold = 0.0;  // Used in exponential averager.  KF5N May 19, 2024
 
 /*****
   Purpose: Load buffers used to modulate the transmitter during calibration.
@@ -50,20 +51,11 @@ FLASHMEM void loadCalToneBuffers() {
  *****/
 void CalibratePreamble(int setZoom) {
   calOnFlag = 1;
-  //corrChange = false;
-  //correctionIncrement = 0.01;  //AFP 2-7-23
   IQCalType = 0;
   radioState = CW_TRANSMIT_STRAIGHT_STATE;                 // KF5N
   transmitPowerLevelTemp = EEPROMData.transmitPowerLevel;  //AFP 05-11-23
   cwFreqOffsetTemp = EEPROMData.CWOffset;
   EEPROMData.CWOffset = 2;  // 750 Hz for TX calibration.  Prologue restores user selected offset.
-  //EEPROMData.transmitPowerLevel = 5;  //AFP 02-09-23  Set to 5 watts as a precaution to protect the power amplifier in case it is connected.
-  //EEPROMData.powerOutCW[EEPROMData.currentBand] = (-.0133 * EEPROMData.transmitPowerLevel * EEPROMData.transmitPowerLevel + .7884 * EEPROMData.transmitPowerLevel + 4.5146) * EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];
-  //  Serial.printf("preamble EEPROMData.powerOutCW = %f\n", EEPROMData.powerOutCW[EEPROMData.currentBand]);
-  //modeSelectOutExL.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
-  //modeSelectOutExR.gain(0, EEPROMData.powerOutCW[EEPROMData.currentBand]);  //AFP 10-21-22
-  //modeSelectOutExL.gain(0, 1);               //AFP 10-21-22
-  //modeSelectOutExR.gain(0, 1);               //AFP 10-21-22
   patchCord15.connect();  // Connect the I and Q output channels so the transmitter will work.
   patchCord16.connect();
   userxmtMode = EEPROMData.xmtMode;          // Store the user's mode setting.  KF5N July 22, 2023
@@ -88,25 +80,14 @@ void CalibratePreamble(int setZoom) {
   tft.print("dB");
   tft.setCursor(350, 110);
   tft.print("Incr= ");
-  //  tft.setCursor(400, 110);
-  //  tft.print(correctionIncrement, 3);
   userScale = EEPROMData.currentScale;  //  Remember user preference so it can be reset when done.  KF5N
   EEPROMData.currentScale = 1;          //  Set vertical scale to 10 dB during calibration.  KF5N
+//  EEPROMData.currentScale = 0;          //  Set vertical scale to 20 dB during calibration.  KF5N May 19, 2024
   updateDisplayFlag = 0;
   digitalWrite(MUTE, LOW);  //turn off mute
   xrState = RECEIVE_STATE;
   T41State = CW_RECEIVE;
-//  modeSelectInR.gain(0, 1);
-//  modeSelectInL.gain(0, 1);
-//  modeSelectInExR.gain(0, 0);  2nd microphone channel not required.  KF5N March 11, 2024
-//  modeSelectInExL.gain(0, 0);
   patchCord1.disconnect();  // Disconnect microphone. modeSelectInExL replaced with patchcord.  KF5N March 11, 2024
-//  modeSelectOutL.gain(0, 1);
-//  modeSelectOutR.gain(0, 1);
-//  modeSelectOutL.gain(1, 0);
-//  modeSelectOutR.gain(1, 0);
-//  modeSelectOutExL.gain(0, 1);
-//  modeSelectOutExR.gain(0, 1);
   EEPROMData.centerFreq = TxRxFreq;
   NCOFreq = 0L;
   xrState = TRANSMIT_STATE;
@@ -192,7 +173,8 @@ void DoReceiveCalibrate() {
   tft.fillRect(400, 110, 50, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(400, 110);
   tft.print(correctionIncrement);
-
+  // Run ProcessIQData2() a few times to load and settle out buffers.  KF5N May 19, 2024
+  for(int i = 0; i < 128; i = i + 1) ProcessIQData2();
   // Receive calibration loop
   while (true) {
     ShowSpectrum2();  //  Using 750 Hz or 3 kHz???
@@ -274,6 +256,8 @@ void DoXmitCalibrate(int toneFreqIndex) {
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreqCal(freqOffset);
   tft.writeTo(L1);
+  // Run ProcessIQData2() a few times to load and settle out buffers.  KF5N May 19, 2024
+  for(int i = 0; i < 128; i = i + 1) ProcessIQData2();
   // Transmit Calibration Loop
   while (true) {
     ShowSpectrum2();
@@ -356,6 +340,9 @@ void DoXmitCarrierCalibrate(int toneFreqIndex) {
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreqCal(freqOffset);
   tft.writeTo(L1);
+
+  // Run ProcessIQData2() a few times to load and settle out buffers.  KF5N May 19, 2024
+  for(int i = 0; i < 128; i = i + 1) ProcessIQData2();
   // Transmit Calibration Loop.  This is independent of loop().
   while (true) {
     ShowSpectrum2();
@@ -417,7 +404,7 @@ void DoXmitCarrierCalibrate(int toneFreqIndex) {
    Return value:
       void
  *****/
-void ProcessIQData2(int toneFreqIndex) {
+void ProcessIQData2() {
   //  float bandOutputFactor;                                          // AFP 2-11-23
   float rfGainValue, powerScale;                                   // AFP 2-11-23.  Greg KF5N February 13, 2023
   float recBandFactor[7] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };  // AFP 2-11-23  KF5N uniform values
@@ -535,6 +522,7 @@ powerScale = 30.0 * EEPROMData.powerOutCW[EEPROMData.currentBand];
   }
 }
 
+
 /*****
   Purpose: Show Spectrum display modified for IQ calibration.
            This is similar to the function used for normal reception, however, it has
@@ -582,22 +570,6 @@ void ShowSpectrum2()  //AFP 2-10-23
     cal_bins[1] = 225;  // Carrier
     cal_bins[2] = 193;  // Undesired sideband
   }                     // Transmit and Carrier calibration, LSB.  KF5N
-  //  if (calTypeFlag == 2 && bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
-  //    cal_bins[0] = 257;  // Carrier
-  //    cal_bins[1] = 289;
-  //    cal_bins[2]
-  //  }  // Transmit calibration, LSB.  KF5N
-  //  if (calTypeFlag == 2 && bands[EEPROMData.currentBand].mode == DEMOD_USB) {
-  //    cal_bins[0] = 193;
-  //    cal_bins[1] = 257;  // Carrier
-  //  }  // Transmit calibration, USB.  KF5N
-
-  // Draw vertical markers for the reference, undesired sideband locations, and centerline.  For debugging only!
-  //    tft.drawFastVLine(cal_bins[0], SPECTRUM_TOP_Y, h, RA8875_GREEN);
-  //    tft.drawFastVLine(cal_bins[1], SPECTRUM_TOP_Y, h, RA8875_GREEN);
-  //    tft.drawFastVLine(cal_bins[2], SPECTRUM_TOP_Y, h, RA8875_GREEN);
-  //    int centerLine = (MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2;    //  (512 + 3)/2 = 257.5
-  //    tft.drawFastVLine(centerLine, SPECTRUM_TOP_Y, h, RA8875_GREEN);  // Draws centerline on spectrum display
 
   //  There are 2 for-loops, one for the reference signal and another for the undesired sideband.
   if (calTypeFlag == 0) {  // Receive cal
@@ -619,7 +591,7 @@ void ShowSpectrum2()  //AFP 2-10-23
 
   // Finish up:
   //= AFP 2-11-23
-  tft.fillRect(350, 125, 50, tft.getFontHeight(), RA8875_BLACK);
+  tft.fillRect(350, 125, 50, tft.getFontHeight(), RA8875_BLACK);  // Erase old adjdB number.
   tft.setCursor(350, 125);  // 350, 125
   tft.print(adjdB, 1);
 
@@ -646,6 +618,8 @@ float PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
   float adjdB = 0.0;
   int16_t adjAmplitude = 0;  // Was float; cast to float in dB calculation.  KF5N
   int16_t refAmplitude = 0;  // Was float; cast to float in dB calculation.  KF5N
+  float alpha = 0.01;
+  float adjdB_avg = 0.0;
   uint32_t index_of_max;     // This variable is not currently used, but it is required by the ARM max function.  KF5N
 
   // The FFT should be performed only at the beginning of the sweep, and buffers must be full.
@@ -654,7 +628,7 @@ float PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
     ShowBandwidth();                         // Without this call, the calibration value in dB will not be updated.  KF5N
   } else updateDisplayFlag = 0;              //  Do not save the the display data for the remainder of the sweep.
 
-  ProcessIQData2(EEPROMData.calFreq);  // Call the Audio process from within the display routine to eliminate conflicts with drawing the spectrum.
+  ProcessIQData2();  // Call the Audio process from within the display routine to eliminate conflicts with drawing the spectrum.
 
   y_new = pixelnew[x1];
   y1_new = pixelnew[x1 - 1];
@@ -696,17 +670,22 @@ float PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
   if (y_old2 > base_y) y_old2 = base_y;
   if (y1_new > base_y) y1_new = base_y;
 
-  if (y_new < 0) y_new = 0;
-  if (y_old < 0) y_old = 0;
-  if (y_old2 < 0) y_old2 = 0;
-  if (y1_new < 0) y1_new = 0;
+  if (y_new < -140) y_new = -140;
+  if (y_old < -140) y_old = -140;
+  if (y_old2 < -140) y_old2 = -140;
+  if (y1_new < -140) y1_new = -140;
 
   // Erase the old spectrum and draw the new spectrum.
-  tft.drawLine(x1, EEPROMData.spectrumNoiseFloor - y_old2, x1, EEPROMData.spectrumNoiseFloor - y_old, RA8875_BLACK);   // Erase old...
-  tft.drawLine(x1, EEPROMData.spectrumNoiseFloor - y1_new, x1, EEPROMData.spectrumNoiseFloor - y_new, RA8875_YELLOW);  // Draw new
-  pixelCurrent[x1] = pixelnew[x1];                                                                                     //  This is the actual "old" spectrum! Copied to pixelold by the FFT function.
+//  tft.drawLine(x1, EEPROMData.spectrumNoiseFloor - y_old2, x1, EEPROMData.spectrumNoiseFloor - y_old, RA8875_BLACK);   // Erase old...
+//  tft.drawLine(x1, EEPROMData.spectrumNoiseFloor - y1_new, x1, EEPROMData.spectrumNoiseFloor - y_new, RA8875_YELLOW);  // Draw new
+  tft.drawLine(x1, 320 - y_old2, x1, 320 - y_old, RA8875_BLACK);   // Erase old...
+  tft.drawLine(x1, 320 - y1_new, x1, 320 - y_new, RA8875_YELLOW);  // Draw new
 
-  adjdB = ((float)adjAmplitude - (float)refAmplitude) / 1.95;  // Cast to float and calculate the dB level.  KF5N
+  pixelCurrent[x1] = pixelnew[x1];    //  This is the actual "old" spectrum! Copied to pixelold by the FFT function.
+
+  adjdB = ((float)adjAmplitude - (float)refAmplitude) / (1.95 * 2.0);  // Cast to float and calculate the dB level.  Needs further refinement for accuracy.  KF5N
+  adjdB_avg = adjdB * alpha + adjdBold * (1.0 - alpha);  // Exponential average.
+  adjdBold = adjdB_avg;
   if(bands[EEPROMData.currentBand].mode == DEMOD_USB && not (calTypeFlag == 0)) adjdB = -adjdB;  // Flip sign for USB only for TX cal.
 
   if (calTypeFlag == 0) {  // Receive Cal
@@ -744,7 +723,7 @@ float PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
     }
   }
   tft.writeTo(L1);
-  return adjdB;
+  return adjdB_avg;
 }
 
 
