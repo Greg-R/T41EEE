@@ -14,6 +14,7 @@ int calTypeFlag = 0;
 int IQCalType;
 void ProcessIQData2();
 float adjdBold = 0.0;  // Used in exponential averager.  KF5N May 19, 2024
+int i;
 
 /*****
   Purpose: Load buffers used to modulate the transmitter during calibration.
@@ -34,6 +35,52 @@ FLASHMEM void loadCalToneBuffers() {
     sinBuffer[kf] = sin(theta);
     cosBuffer[kf] = cos(theta);
   }
+}
+
+
+/*****
+  Purpose: Plot calibration graphics (colored spectrum delimiter columns).
+           New function, KF5N May 20, 2024
+  Parameter list:
+    int calType
+
+  Return value:
+    void
+*****/
+void plotCalGraphics(int calType) {
+    tft.writeTo(L2);
+    if (calType == 0) {  // Receive Cal
+    if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
+      tft.fillRect(445, SPECTRUM_TOP_Y + 20, 20, 341, DARK_RED);     // SPECTRUM_TOP_Y = 100, h = 135
+      tft.fillRect(304, SPECTRUM_TOP_Y + 20, 20, 341, RA8875_BLUE);  // h = SPECTRUM_HEIGHT + 3
+    } else {                                                           // SPECTRUM_HEIGHT = 150 so h = 153
+      tft.fillRect(50, SPECTRUM_TOP_Y + 20, 20, 341, DARK_RED);
+      tft.fillRect(188, SPECTRUM_TOP_Y + 20, 20, 341, RA8875_BLUE);
+    }
+  }
+  if (calType == 1) {  // Transmit Cal
+    if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
+      tft.fillRect(312, SPECTRUM_TOP_Y + 20, 20, 341, DARK_RED);  // Adjusted height due to other graphics changes.  KF5N August 3, 2023
+      tft.fillRect(247, SPECTRUM_TOP_Y + 20, 20, 341, RA8875_BLUE);
+    } else {
+      if (bands[EEPROMData.currentBand].mode == DEMOD_USB) {
+        tft.fillRect(183, SPECTRUM_TOP_Y + 20, 20, 341, DARK_RED);
+        tft.fillRect(247, SPECTRUM_TOP_Y + 20, 20, 341, RA8875_BLUE);
+      }
+    }
+  }
+  if (calType == 2) {  // Carrier Cal
+    if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
+      tft.fillRect(279, SPECTRUM_TOP_Y + 20, 20, 341, DARK_RED);  // Adjusted height due to other graphics changes.  KF5N August 3, 2023
+      tft.fillRect(247, SPECTRUM_TOP_Y + 20, 20, 341, RA8875_BLUE);
+    } else {
+      if (bands[EEPROMData.currentBand].mode == DEMOD_USB) {  //mode == DEMOD_LSB
+        tft.fillRect(215, SPECTRUM_TOP_Y + 20, 20, 341, DARK_RED);
+        tft.fillRect(247, SPECTRUM_TOP_Y + 20, 20, 341, RA8875_BLUE);
+      }
+    }
+  }
+  tft.writeTo(L1);
 }
 
 
@@ -82,7 +129,6 @@ void CalibratePreamble(int setZoom) {
   tft.print("Incr= ");
   userScale = EEPROMData.currentScale;  //  Remember user preference so it can be reset when done.  KF5N
   EEPROMData.currentScale = 1;          //  Set vertical scale to 10 dB during calibration.  KF5N
-//  EEPROMData.currentScale = 0;          //  Set vertical scale to 20 dB during calibration.  KF5N May 19, 2024
   updateDisplayFlag = 0;
   digitalWrite(MUTE, LOW);  //turn off mute
   xrState = RECEIVE_STATE;
@@ -168,7 +214,7 @@ void DoReceiveCalibrate() {
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreqCal(calFreqShift);
   calTypeFlag = 0;  // RX cal
-
+  plotCalGraphics(calTypeFlag);
   tft.setFontScale((enum RA8875tsize)0);
   tft.fillRect(400, 110, 50, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(400, 110);
@@ -248,7 +294,7 @@ void DoXmitCalibrate(int toneFreqIndex) {
     freqOffset = 2250;       // Need 750 + 2250 = 3 kHz
   }
   calTypeFlag = 1;  // TX cal
-
+  plotCalGraphics(calTypeFlag);
   tft.setFontScale((enum RA8875tsize)0);
   tft.fillRect(400, 110, 50, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(400, 110);
@@ -332,7 +378,7 @@ void DoXmitCarrierCalibrate(int toneFreqIndex) {
     freqOffset = 2250;       // Need 750 + 2250 = 3 kHz
   }
   calTypeFlag = 2;  // TX carrier calibration.
-
+  plotCalGraphics(calTypeFlag);
   tft.setFontScale((enum RA8875tsize)0);
   tft.fillRect(400, 110, 50, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(400, 110);
@@ -473,7 +519,7 @@ powerScale = 30.0 * EEPROMData.powerOutCW[EEPROMData.currentBand];
 
     // End of transmit code.  Begin receive code.
 
-    usec = 0;
+//    usec = 0;
     // get audio samples from the audio  buffers and convert them to float
     // read in 32 blocks á 128 samples in I and Q
     for (unsigned i = 0; i < N_BLOCKS; i++) {
@@ -595,9 +641,8 @@ void ShowSpectrum2()  //AFP 2-10-23
   tft.setCursor(350, 125);  // 350, 125
   tft.print(adjdB, 1);
 
-  //  At least a partial waterfall is necessary.  It seems to provide some important timing function.  KF5N August 14, 2023
-  tft.BTE_move(WATERFALL_LEFT_X, FIRST_WATERFALL_LINE, MAX_WATERFALL_WIDTH, MAX_WATERFALL_ROWS - 2, WATERFALL_LEFT_X, FIRST_WATERFALL_LINE + 1, 1, 2);
-  while (tft.readStatus());
+//delay(5);
+
 }
 
 
@@ -688,40 +733,6 @@ float PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
   adjdBold = adjdB_avg;
   if(bands[EEPROMData.currentBand].mode == DEMOD_USB && not (calTypeFlag == 0)) adjdB = -adjdB;  // Flip sign for USB only for TX cal.
 
-  if (calTypeFlag == 0) {  // Receive Cal
-    tft.writeTo(L2);
-    if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
-      tft.fillRect(445, SPECTRUM_TOP_Y + 20, 20, h - 6, DARK_RED);     // SPECTRUM_TOP_Y = 100
-      tft.fillRect(304, SPECTRUM_TOP_Y + 20, 20, h - 6, RA8875_BLUE);  // h = SPECTRUM_HEIGHT + 3
-    } else {                                                           // SPECTRUM_HEIGHT = 150 so h = 153
-      tft.fillRect(50, SPECTRUM_TOP_Y + 20, 20, h - 6, DARK_RED);
-      tft.fillRect(188, SPECTRUM_TOP_Y + 20, 20, h - 6, RA8875_BLUE);
-    }
-  }
-  if (calTypeFlag == 1) {  //Transmit Cal
-    tft.writeTo(L2);
-    if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
-      tft.fillRect(312, SPECTRUM_TOP_Y + 20, 20, h - 6, DARK_RED);  // Adjusted height due to other graphics changes.  KF5N August 3, 2023
-      tft.fillRect(247, SPECTRUM_TOP_Y + 20, 20, h - 6, RA8875_BLUE);
-    } else {
-      if (bands[EEPROMData.currentBand].mode == DEMOD_USB) {
-        tft.fillRect(183, SPECTRUM_TOP_Y + 20, 20, h - 6, DARK_RED);
-        tft.fillRect(247, SPECTRUM_TOP_Y + 20, 20, h - 6, RA8875_BLUE);
-      }
-    }
-  }
-  if (calTypeFlag == 2) {  //Transmit Cal
-    tft.writeTo(L2);
-    if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
-      tft.fillRect(279, SPECTRUM_TOP_Y + 20, 20, h - 6, DARK_RED);  // Adjusted height due to other graphics changes.  KF5N August 3, 2023
-      tft.fillRect(247, SPECTRUM_TOP_Y + 20, 20, h - 6, RA8875_BLUE);
-    } else {
-      if (bands[EEPROMData.currentBand].mode == DEMOD_USB) {  //mode == DEMOD_LSB
-        tft.fillRect(215, SPECTRUM_TOP_Y + 20, 20, h - 6, DARK_RED);
-        tft.fillRect(247, SPECTRUM_TOP_Y + 20, 20, h - 6, RA8875_BLUE);
-      }
-    }
-  }
   tft.writeTo(L1);
   return adjdB_avg;
 }

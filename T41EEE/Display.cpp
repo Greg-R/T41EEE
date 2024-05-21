@@ -252,15 +252,14 @@ void ShowSpectrum() {
     return;
   } else {
     tft.BTE_move(WATERFALL_LEFT_X, FIRST_WATERFALL_LINE, MAX_WATERFALL_WIDTH, MAX_WATERFALL_ROWS - 2, WATERFALL_LEFT_X, FIRST_WATERFALL_LINE + 1, 1, 2);
-    while (tft.readStatus())  // Make sure it is done.  Memory moves can take time.
-      ;
+    while (tft.readStatus());  // Make sure it is done.  Memory moves can take time.
+
     // Now bring waterfall back to the beginning of the 2nd row.
     tft.BTE_move(WATERFALL_LEFT_X, FIRST_WATERFALL_LINE + 1, MAX_WATERFALL_WIDTH, MAX_WATERFALL_ROWS - 2, WATERFALL_LEFT_X, FIRST_WATERFALL_LINE + 1, 2);
-    while (tft.readStatus())  // Make sure it's done.
-      ;
+    while (tft.readStatus());  // Make sure it's done.
   }
   // Then write new row data into the missing top row to get a scroll effect using display hardware, not the CPU.
-  tft.writeRect(WATERFALL_LEFT_X, FIRST_WATERFALL_LINE, MAX_WATERFALL_WIDTH, 1, waterfall);
+    tft.writeRect(WATERFALL_LEFT_X, FIRST_WATERFALL_LINE, MAX_WATERFALL_WIDTH, 1, waterfall);
 
   if (EEPROMData.autoGain) {
     if (FH_max_box > UPPERPIXTARGET) {  //  HB Start adjust rfGainAllBands  15 and 13 to alter to move target base up and down
