@@ -244,11 +244,14 @@ void CalcZoom1Magn() {
       spec_help = EEPROMData.LPFcoeff * FFT_spec[x] + (1.0 - EEPROMData.LPFcoeff) * FFT_spec_old[x];
       FFT_spec_old[x] = spec_help;
 
-#ifdef USE_LOG10FAST
-      pixelnew[x] = displayScale[EEPROMData.currentScale].baseOffset + bands[EEPROMData.currentBand].pixel_offset + (int16_t)(displayScale[EEPROMData.currentScale].dBScale * log10f_fast(FFT_spec[x]));
-#else
-      pixelnew[x] = displayScale[EEPROMData.currentScale].baseOffset + bands[EEPROMData.currentBand].pixel_offset + (int16_t)(displayScale[EEPROMData.currentScale].dBScale * log10f(spec_help));
-#endif
+//#ifdef USE_LOG10FAST
+//      pixelnew[x] = displayScale[EEPROMData.currentScale].baseOffset + bands[EEPROMData.currentBand].pixel_offset + (int16_t)(displayScale[EEPROMData.currentScale].dBScale * log10f_fast(FFT_spec[x]));
+//#else
+if(calOnFlag)
+      pixelnew[x] = displayScale[EEPROMData.currentScale].baseOffset + bands[EEPROMData.currentBand].pixel_offset + (int16_t)(displayScale[EEPROMData.currentScale].dBScale * log10f_fast(spec_help));
+      else
+      pixelnew[x] = displayScale[EEPROMData.currentScale].baseOffset + bands[EEPROMData.currentBand].pixel_offset + (int16_t)(displayScale[EEPROMData.currentScale].dBScale * log10f_fast(spec_help));
+//#endif
     }
   }
 }  // end calc_256_magn
