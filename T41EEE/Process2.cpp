@@ -108,6 +108,61 @@ void warmUpCal() {
 
 
 /*****
+  Purpose: Print the calibration type to the display.  KF5N May 23, 2024
+  
+  Parameter list:
+    void
+
+  Return value:
+    void
+*****/
+FLASHMEM void printCalType(int IQCalType) {
+  const char* calName;
+  const char *IQName[4] = {"Receive", "Transmit", "Carrier", "Calibrate"}; 
+  tft.writeTo(L1);
+  calName = IQName[calTypeFlag];
+  tft.setFontScale((enum RA8875tsize)1);
+  tft.setTextColor(RA8875_RED);
+  if((bands[EEPROMData.currentBand].mode == DEMOD_LSB) && (calTypeFlag == 0)) {
+  tft.setCursor(35, 260);
+  tft.print(calName);
+  tft.setCursor(35, 295);
+  tft.print(IQName[3]);
+  }
+  if((bands[EEPROMData.currentBand].mode == DEMOD_USB) && (calTypeFlag == 0)) {
+  tft.setCursor(275, 260);
+  tft.print(calName);
+  tft.setCursor(275, 295);
+  tft.print(IQName[3]);  
+  }
+  if((bands[EEPROMData.currentBand].mode == DEMOD_LSB) && (calTypeFlag == 1)) {
+  tft.setCursor(35, 260);
+  tft.print(calName);
+  tft.setCursor(35, 295);
+  tft.print(IQName[3]);
+  }
+  if((bands[EEPROMData.currentBand].mode == DEMOD_USB) && (calTypeFlag == 1)) {
+  tft.setCursor(325, 260);
+  tft.print(calName);
+  tft.setCursor(325, 295);
+  tft.print(IQName[3]);
+  }
+  if((bands[EEPROMData.currentBand].mode == DEMOD_LSB) && (calTypeFlag == 2)) {
+    tft.setCursor(35, 260); 
+    tft.print(calName);
+    tft.setCursor(35, 295);
+    tft.print(IQName[3]);
+    }
+  if((bands[EEPROMData.currentBand].mode == DEMOD_USB) && (calTypeFlag == 2)) {
+  tft.setCursor(325, 260);
+  tft.print(calName);
+  tft.setCursor(325, 295);
+  tft.print(IQName[3]);
+  }
+}
+
+
+/*****
   Purpose: Set up prior to IQ calibrations.  New function.  KF5N August 14, 2023
   These things need to be saved here and restored in the prologue function:
   Vertical scale in dB  (set to 10 dB during calibration)
@@ -243,6 +298,7 @@ void DoReceiveCalibrate() {
   tft.fillRect(400, 110, 50, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(400, 110);
   tft.print(correctionIncrement);
+  printCalType(calTypeFlag);
   warmUpCal();
 
   // Receive calibration loop
@@ -325,7 +381,7 @@ void DoXmitCalibrate(int toneFreqIndex) {
   tft.print(correctionIncrement);
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreqCal(freqOffset);
-  tft.writeTo(L1);
+  printCalType(calTypeFlag);
   warmUpCal();
 
   // Transmit Calibration Loop
@@ -409,7 +465,7 @@ void DoXmitCarrierCalibrate(int toneFreqIndex) {
   tft.print(increment);
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreqCal(freqOffset);
-  tft.writeTo(L1);
+  printCalType(calTypeFlag);
   warmUpCal();
 
   // Transmit Calibration Loop.  This is independent of loop().
@@ -662,7 +718,7 @@ void ShowSpectrum2()  //AFP 2-10-23
   tft.setCursor(350, 125);  // 350, 125
   tft.print(adjdB, 1);
 
-delay(6);
+delay(6);  // This requires "tuning" in order to get best response.
 
 }
 

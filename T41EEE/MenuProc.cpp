@@ -27,7 +27,7 @@ void CalibrateOptions() {
 
   // Select the type of calibration, and then skip this during the loop() function.
   if (calibrateFlag == 0) {
-    const char *IQOptions[10]{ "Freq Cal", "CW PA Cal", "Rec Cal", "Carrier Cal", "Xmit Cal", "SSB PA Cal", "Set Tone", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
+    const char* IQOptions[10]{ "Freq Cal", "CW PA Cal", "Rec Cal", "Carrier Cal", "Xmit Cal", "SSB PA Cal", "Set Tone", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
     IQChoice = SubmenuSelect(IQOptions, 10, 0);                                                                                                //AFP 10-21-22
   }
   calibrateFlag = 1;
