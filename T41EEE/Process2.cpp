@@ -97,7 +97,7 @@ void plotCalGraphics(int calType) {
 void warmUpCal() {
   // Run ProcessIQData2() a few times to load and settle out buffers.  Compute FFT.  KF5N May 19, 2024
   uint32_t index_of_max;  // Not used, but required by arm_max_q15 function.
-  for(int i = 0; i < 256; i = i + 1) {
+  for(int i = 0; i < 1024; i = i + 1) {
    updateDisplayFlag = true;  // Causes FFT to be calculated.
    ProcessIQData2();
   }
@@ -661,7 +661,7 @@ void ShowSpectrum2()  //AFP 2-10-23
 {
   int x1 = 0;
   float adjdB = 0.0;
-  int capture_bins = 6;  // Sets the number of bins to scan for signal peak.
+  int capture_bins = 8;  // Sets the number of bins to scan for signal peak.
 
   pixelnew[0] = 0;
   pixelnew[1] = 0;
@@ -718,7 +718,7 @@ void ShowSpectrum2()  //AFP 2-10-23
   tft.setCursor(350, 125);  // 350, 125
   tft.print(adjdB, 1);
 
-delay(6);  // This requires "tuning" in order to get best response.
+delay(5);  // This requires "tuning" in order to get best response.
 
 }
 
@@ -836,7 +836,7 @@ if (y1_new_plot > base_y) y1_new_plot = base_y;
     void
 *****/
 const char *calFreqs[2]{ "750 Hz", "3.0 kHz" };
-void SelectCalFreq() {
+FLASHMEM void SelectCalFreq() {
   EEPROMData.calFreq = SubmenuSelect(calFreqs, 2, EEPROMData.calFreq);  // Returns the index of the array.
   //  RedrawDisplayScreen();  Kills the bandwidth graphics in the audio display window, remove. KF5N July 30, 2023
   // Clear the current CW filter graphics and then restore the bandwidth indicator bar.  KF5N July 30, 2023
