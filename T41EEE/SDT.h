@@ -387,7 +387,7 @@ struct config_t {
   int rfGainCurrent = 0;
   int rfGain[NUMBER_OF_BANDS] = {0};
   bool autoGain = false;
-  int spectrumNoiseFloor = SPECTRUM_NOISE_FLOOR;  // 247
+  int spectrumNoiseFloor = SPECTRUM_NOISE_FLOOR;  // 247  This is a constant.  Eliminate from this struct at next opportunity.
   int tuneIndex = DEFAULTFREQINCREMENT;           // JJP 7-3-23
   long stepFineTune = FINE_TUNE_STEP;             // JJP 7-3-23
   float32_t transmitPowerLevel = DEFAULT_POWER_LEVEL;   // Changed from int to float; Greg KF5N February 12, 2024
@@ -706,7 +706,7 @@ extern const uint8_t NR_N_frames;
 extern int16_t pixelnew[];
 extern int16_t pixelold[];
 extern int16_t pixelCurrent[];
-extern int16_t pixelold[];
+//extern int16_t pixelold[];
 extern int16_t y_old, y_new, y1_new, y1_old, y_old2;
 extern const uint16_t gradient[];
 extern const uint32_t IIR_biquad_Zoom_FFT_N_stages;
@@ -717,9 +717,8 @@ extern int mute;
 extern bool agc_action;
 extern int attenuator;
 extern int audioYPixel[];
-//extern int* audioYPixel;
 extern int bandswitchPins[];
-extern int calibrateFlag;
+extern bool calibrateFlag;
 extern int chipSelect;
 extern int decoderFlag;
 extern int fLoCutOld;
@@ -746,7 +745,7 @@ extern int x2;  //AFP
 extern int xrState;
 extern int zeta_help;
 extern int zoomIndex;
-extern int updateDisplayFlag;
+extern bool updateDisplayFlag;
 extern int updateDisplayCounter;
 
 extern const int DEC2STATESIZE;
@@ -871,7 +870,7 @@ extern float32_t /*DMAMEM*/ last_sample_buffer_L[];
 extern float32_t /*DMAMEM*/ last_sample_buffer_R[];
 extern float32_t L_BufferOffset[];
 extern float32_t *mag_coeffs[];
-extern int calOnFlag;
+extern bool calOnFlag;
 extern float32_t mid;
 extern float32_t /*DMAMEM*/ NR_FFT_buffer[];
 extern float32_t NR_output_audio_buffer[];

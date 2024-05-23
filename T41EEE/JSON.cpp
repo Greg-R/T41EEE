@@ -30,7 +30,7 @@ FLASHMEM void loadConfiguration(const char *filename, config_t &EEPROMData) {
   EEPROMData.rfGainCurrent = doc["rfGainCurrent"];
   for (int i = 0; i < NUMBER_OF_BANDS; i++) EEPROMData.rfGain[i] = doc["rfGain"][i];
   EEPROMData.autoGain = doc["autoGain"];
-  EEPROMData.spectrumNoiseFloor = doc["spectrumNoiseFloor"];
+  EEPROMData.spectrumNoiseFloor = doc["spectrumNoiseFloor"];  // This is a constant.  This does not need to be included in user data.
   EEPROMData.tuneIndex = doc["tuneIndex"];
   EEPROMData.stepFineTune = doc["stepFineTune"];
   EEPROMData.transmitPowerLevel = doc["transmitPowerLevel"];

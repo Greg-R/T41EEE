@@ -160,10 +160,10 @@ void ShowSpectrum() {
     y_old = pixelold[x1];  // pixelold spectrum is saved by the FFT function prior to a new FFT which generates the pixelnew spectrum.  KF5N
     y_old2 = pixelold[x1 - 1];
 
-    y_new_plot = EEPROMData.spectrumNoiseFloor - y_new - EEPROMData.currentNoiseFloor[EEPROMData.currentBand];
-    y1_new_plot = EEPROMData.spectrumNoiseFloor - y1_new - EEPROMData.currentNoiseFloor[EEPROMData.currentBand];
-    y_old_plot = EEPROMData.spectrumNoiseFloor - y_old - EEPROMData.currentNoiseFloor[EEPROMData.currentBand];
-    y_old2_plot = EEPROMData.spectrumNoiseFloor - y_old2 - EEPROMData.currentNoiseFloor[EEPROMData.currentBand];
+    y_new_plot = 247 - y_new - EEPROMData.currentNoiseFloor[EEPROMData.currentBand];
+    y1_new_plot = 247 - y1_new - EEPROMData.currentNoiseFloor[EEPROMData.currentBand];
+    y_old_plot = 247 - y_old - EEPROMData.currentNoiseFloor[EEPROMData.currentBand];
+    y_old2_plot = 247 - y_old2 - EEPROMData.currentNoiseFloor[EEPROMData.currentBand];
 
     if ((x1 > 51) && (x1 < 461))  //  HB start  for auto RFgain collect frequency distribution
     {
@@ -360,10 +360,10 @@ FASTRUN void ShowSpectrum()  //AFP Extensively Modified 3-15-21 Adjusted 12-13-2
     y_old = pixelold[x1];  // pixelold spectrum is saved by the FFT function prior to a new FFT which generates the pixelnew spectrum.  KF5N
     y_old2 = pixelold[x1 - 1];
 
-    y_new_plot = EEPROMData.spectrumNoiseFloor - y_new - EEPROMData.currentNoiseFloor[EEPROMData.currentBand];
-    y1_new_plot = EEPROMData.spectrumNoiseFloor - y1_new - EEPROMData.currentNoiseFloor[EEPROMData.currentBand];
-    y_old_plot = EEPROMData.spectrumNoiseFloor - y_old - EEPROMData.currentNoiseFloor[EEPROMData.currentBand];
-    y_old2_plot = EEPROMData.spectrumNoiseFloor - y_old2 - EEPROMData.currentNoiseFloor[EEPROMData.currentBand];
+    y_new_plot = 247 - y_new - EEPROMData.currentNoiseFloor[EEPROMData.currentBand];
+    y1_new_plot = 247 - y1_new - EEPROMData.currentNoiseFloor[EEPROMData.currentBand];
+    y_old_plot = 247 - y_old - EEPROMData.currentNoiseFloor[EEPROMData.currentBand];
+    y_old2_plot = 247 - y_old2 - EEPROMData.currentNoiseFloor[EEPROMData.currentBand];
 
 
     if ((x1 > 51) && (x1 < 461))                                                                //  HB start  for auto RFgain collect frequency distribution
@@ -614,10 +614,14 @@ void ShowSpectrumdBScale() {
     void
   Return value;
     void
-    // This function draws the frequency bar at the bottom of the spectrum scope, putting markers at every graticule and the full frequency
 *****/
 void DrawSpectrumDisplayContainer() {
-  tft.drawRect(SPECTRUM_LEFT_X - 1, SPECTRUM_TOP_Y, MAX_WATERFALL_WIDTH + 2, SPECTRUM_HEIGHT, RA8875_YELLOW);  // Spectrum box
+  if(calOnFlag)
+  tft.drawRect(SPECTRUM_LEFT_X - 1, SPECTRUM_TOP_Y, MAX_WATERFALL_WIDTH + 2, 362, RA8875_YELLOW);  // Spectrum box for calibration.
+  else {
+  tft.drawRect(SPECTRUM_LEFT_X - 1, SPECTRUM_TOP_Y, MAX_WATERFALL_WIDTH + 2, 362, RA8875_BLACK);   // Erase pectrum box for calibration.
+  tft.drawRect(SPECTRUM_LEFT_X - 1, SPECTRUM_TOP_Y, MAX_WATERFALL_WIDTH + 2, SPECTRUM_HEIGHT, RA8875_YELLOW);  // Spectrum box.  SPECTRUM_HEIGHT = 150
+  }
 }
 
 

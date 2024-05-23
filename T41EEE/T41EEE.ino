@@ -440,8 +440,8 @@ int bandswitchPins[] = {
   0    // 10M
 };
 
-int calibrateFlag = 0;
-int calOnFlag = 0;
+bool calibrateFlag = 0;
+bool calOnFlag = false;
 int chipSelect = BUILTIN_SDCARD;
 int idx;
 int IQChoice;
@@ -454,7 +454,7 @@ int switchFilterSideband = 0;
 int x2 = 0;  //AFP
 
 int zoomIndex = 1;  //AFP 9-26-22
-int updateDisplayFlag = 0;
+bool updateDisplayFlag = false;
 int updateDisplayCounter = 0;
 int xrState;  // Is the T41 in xmit or rec state? 1 = rec, 0 = xmt
 
@@ -465,7 +465,6 @@ const int INT2_STATE_SIZE = 8 + BUFFER_SIZE * N_B / (uint32_t)DF1 - 1;
 unsigned ring_buffsize = RB_SIZE;
 
 int32_t mainMenuIndex = START_MENU;  // Done so we show menu[0] at startup
-//int32_t secondaryMenuIndex = -1;     // -1 means haven't determined secondary menu
 
 uint32_t N_BLOCKS = N_B;
 

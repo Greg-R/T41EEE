@@ -166,7 +166,7 @@ void ZoomFFTExe(uint32_t blockSize) {
 
   // The rest of the function is activated when the buffers are full and ready.
   // Save old pixels for lowpass filter.
-  if (updateDisplayFlag == 1) {
+  if (updateDisplayFlag == true) {
     for (int i = 0; i < fftWidth; i++) {
       pixelold[i] = pixelCurrent[i];
     }
@@ -186,15 +186,16 @@ void ZoomFFTExe(uint32_t blockSize) {
       FFT_spec[x] = LPFcoeff * FFT_spec[x] + onem_LPFcoeff * FFT_spec_old[x];
       FFT_spec_old[x] = FFT_spec[x];
     }
-// Write the FFT bins into the display buffer.
+    // Write the FFT bins into the display buffer.
     if (calOnFlag)  // Expanded dynamic range during calibration.
       for (int16_t x = 0; x < fftWidth; x++) {
-        pixelnew[x] = displayScale[EEPROMData.currentScale].baseOffset + bands[EEPROMData.currentBand].pixel_offset + (int16_t)(40.0 * log10f_fast(FFT_spec[x]));
-//        if (pixelnew[x] > 220) pixelnew[x] = 220;
+//        pixelnew[x] = displayScale[EEPROMData.currentScale].baseOffset + bands[EEPROMData.currentBand].pixel_offset + (int16_t)(40.0 * log10f_fast(FFT_spec[x]));
+        pixelnew[x] = displayScale[EEPROMData.currentScale].baseOffset + (int16_t)(40.0 * log10f_fast(FFT_spec[x]));
+        //        if (pixelnew[x] > 220) pixelnew[x] = 220;
       }
     else
       for (int16_t x = 0; x < fftWidth; x++) {
-        pixelnew[x] = displayScale[EEPROMData.currentScale].baseOffset + bands[EEPROMData.currentBand].pixel_offset + (int16_t)(displayScale[EEPROMData.currentScale].dBScale * log10f_fast(FFT_spec[x]));
+        pixelnew[x] = displayScale[EEPROMData.currentScale].baseOffset + (int16_t)(displayScale[EEPROMData.currentScale].dBScale * log10f_fast(FFT_spec[x]));
         if (pixelnew[x] > 220) pixelnew[x] = 220;
       }
   }
@@ -244,14 +245,14 @@ void CalcZoom1Magn() {
       spec_help = EEPROMData.LPFcoeff * FFT_spec[x] + (1.0 - EEPROMData.LPFcoeff) * FFT_spec_old[x];
       FFT_spec_old[x] = spec_help;
 
-//#ifdef USE_LOG10FAST
-//      pixelnew[x] = displayScale[EEPROMData.currentScale].baseOffset + bands[EEPROMData.currentBand].pixel_offset + (int16_t)(displayScale[EEPROMData.currentScale].dBScale * log10f_fast(FFT_spec[x]));
-//#else
-if(calOnFlag)
-      pixelnew[x] = displayScale[EEPROMData.currentScale].baseOffset + bands[EEPROMData.currentBand].pixel_offset + (int16_t)(displayScale[EEPROMData.currentScale].dBScale * log10f_fast(spec_help));
+#ifdef USE_LOG10FAST
+      if (calOnFlag)  // Higher dynamic range spectral display during calibration.
+        pixelnew[x] = displayScale[EEPROMData.currentScale].baseOffset + (int16_t)(40.0 * log10f_fast(FFT_spec[x]));
       else
-      pixelnew[x] = displayScale[EEPROMData.currentScale].baseOffset + bands[EEPROMData.currentBand].pixel_offset + (int16_t)(displayScale[EEPROMData.currentScale].dBScale * log10f_fast(spec_help));
-//#endif
+        pixelnew[x] = displayScale[EEPROMData.currentScale].baseOffset + (int16_t)(displayScale[EEPROMData.currentScale].dBScale * log10f_fast(FFT_spec[x]));
+#else
+      pixelnew[x] = displayScale[EEPROMData.currentScale].baseOffset + (int16_t)(displayScale[EEPROMData.currentScale].dBScale * log10f(spec_help));
+#endif
     }
   }
 }  // end calc_256_magn
