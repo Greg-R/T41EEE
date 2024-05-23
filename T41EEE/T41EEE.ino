@@ -56,7 +56,22 @@ Remember to save to the SD card via the EEPROM menu EEPROM->SD command prior to 
 
 ## Highlight of Changes included in T41EEE.6
 
-
+ 1.  Fixed CW sidetone problem.
+ 2.  Fixed ordering of button interrupt enabling and EEPROM startup function calls in setup().
+ 3.  Added #define DEBUG_SWITCH_CAL and .ino code.
+ 4.  Fixed version not updating in SD file.  CW filter shown rather than default in menu.
+ 5.  Fixed switch matrix debug mode not saving to EEPROM.
+ 6.  Inhibit transmit in AM demod modes.
+ 7.  Changed Serial speed from 9600 to 115200, a modern speed.
+ 8.  Boosted QSE2DC transmit gain, which increases power by about 3 dB.
+ 9.  Corrected comment in the ResetFlipFlops() function.
+10.  Fixed strange filter band limit behavior and moved graphics to FilterSetSSB() function.
+11.  Updated README with new link to book and compile configuration.
+12.  Removed unused variables and code, formerly used for audio bandwidth delimiters.
+13.  Fixed bug in FilterSetSSB() which caused audio filter bandwidth to change inadvertently.
+14.  Smoother tuning in 16X Zoom.
+15.  Improved accuracy of location of blue tuning bar.
+16.  Higher dynamic range calibration display working.
 
 *********************************************************************************************
 
