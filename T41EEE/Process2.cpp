@@ -17,15 +17,19 @@ float adjdB = 0.0;
 float adjdBold = 0.0;  // Used in exponential averager.  KF5N May 19, 2024
 float adjdB_old = 0.0;
 float adjdB_sample = 0.0;
-float adjdB_sample_old = -10.0;
+//float adjdB_sample_old = -10.0;
 int i;
 q15_t rawSpectrumPeak = 0;
 float adjdB_avg = 0.0;
 enum class State { state1,
                    state2,
-                   compute_adjdB_plus,
-                   compute_adjdB_minus,
+                   average,
+                   setOptimal,
                    exit };
+enum class averagingState { iChannel,
+                            qChannel };
+float sweepArray[1001] = { 0 };
+int sweepArrayOffset[1001] = { 0 };
 
 
 /*****
@@ -458,10 +462,23 @@ void DoXmitCarrierCalibrate(int toneFreqIndex) {
   int lastUsedTask = -2;
   int freqOffset;
   bool corrChange = true;
-  int increment = 10;
-  q15_t adjdB_avgOld = 0;
   State state = State::state1;
+  averagingState avgState = averagingState::iChannel;
   uint32_t warmup = 0;
+  int count = 0;
+  int index = 1;
+  float adjdBMin;
+  uint32_t adjdBMinIndex;
+  int averageCount = 0;
+  int maxSweep = 400;
+  EEPROMData.qDCoffset[EEPROMData.currentBand] = 0;
+  EEPROMData.iDCoffset[EEPROMData.currentBand] = -maxSweep;
+  int iOptimal = 0;
+  int qOptimal = 0;
+  int increment = 5;
+  int points = (maxSweep * 2)/increment;
+  float sweepArray[1001] = { 0 };
+  int sweepArrayOffset[1001] = { 0 };
 
   if (toneFreqIndex == 0) {  // 750 Hz
     CalibratePreamble(4);    // Set zoom to 16X.
@@ -520,55 +537,73 @@ void DoXmitCarrierCalibrate(int toneFreqIndex) {
         break;
     }  // end switch
 
-//  Automatic calibration state machine.
-if(warmup > 100) {  // Don't begin automatic calibration before the system is settled out.
-    switch (state) {
-      case State::state1:
-        EEPROMData.iDCoffset[EEPROMData.currentBand] = EEPROMData.iDCoffset[EEPROMData.currentBand] + 50;
-        // Need to generate a new adjDB number here.
-        state = State::compute_adjdB_plus;
-        break;
-      case State::state2:
-        EEPROMData.iDCoffset[EEPROMData.currentBand] = EEPROMData.iDCoffset[EEPROMData.currentBand] - 50;
-        state = State::compute_adjdB_minus;
-        break;
-      case State::compute_adjdB_plus:
-        if (adjdB_sample < adjdB_sample_old) state = State::state1;  // Going in the correct direction; repeat.
-        if (adjdB_sample > adjdB_sample_old) state = State::state2;  // Going in the wrong direction; reverse.
-//        if ((adjdB_sample_old - adjdB_sample) <= 0.1) state = State::exit;
-        break;
-      case State::compute_adjdB_minus:
-        if (adjdB_sample < adjdB_sample_old) state = State::state2;  // Going in the correct direction; repeat.
-        if (adjdB_sample > adjdB_sample_old) state = State::state1;  // Going in the wrong direction; reverse.
-//        if ((adjdB_sample_old - adjdB_sample) <= 0.1) state = State::exit;
-        break;
-      case State::exit:
-        break;
-    }
-}
+    //  Automatic calibration state machine.
+    if (warmup > 10) {  // Don't begin automatic calibration before the system is settled out.
+      if (count == 6) {
+        state = State::setOptimal;
+        count = 1000;
+      }
+      switch (state) {
+        case State::state1:
+          sweepArrayOffset[index - 1] = EEPROMData.iDCoffset[EEPROMData.currentBand];
+          sweepArray[index - 1] = adjdB_avg;
+          EEPROMData.iDCoffset[EEPROMData.currentBand] = EEPROMData.iDCoffset[EEPROMData.currentBand] + increment;  // Next one!
+          // Go to Q channel when I channel sweep is finished.
+          if (EEPROMData.iDCoffset[EEPROMData.currentBand] == maxSweep) {
+            count = count + 1;
+            state = State::state2;
+            index = 1;
+            IQCalType = 1;
+            arm_min_f32(sweepArray, points, &adjdBMin, &adjdBMinIndex);
+            EEPROMData.iDCoffset[EEPROMData.currentBand] = sweepArrayOffset[adjdBMinIndex];
+            iOptimal = sweepArrayOffset[adjdBMinIndex];  // Set to the discovered minimum.
+            Serial.printf("The optimal iOffset = %d at index %d\n", sweepArrayOffset[adjdBMinIndex], adjdBMinIndex);
+            EEPROMData.qDCoffset[EEPROMData.currentBand] = -maxSweep;  // Reset for next sweep.
+            break;
+          }
+          index = index + 1;
+          avgState = averagingState::iChannel;
+          state = State::average;
+          break;
+        case State::state2:
+          sweepArrayOffset[index - 1] = EEPROMData.qDCoffset[EEPROMData.currentBand];
+          sweepArray[index - 1] = adjdB_avg;
+          EEPROMData.qDCoffset[EEPROMData.currentBand] = EEPROMData.qDCoffset[EEPROMData.currentBand] + increment;
+          if (EEPROMData.qDCoffset[EEPROMData.currentBand] == maxSweep) {
+            count = count + 1;
+            state = State::state1;
+            index = 1;
+            IQCalType = 0;
+            arm_min_f32(sweepArray, points, &adjdBMin, &adjdBMinIndex);
+            EEPROMData.qDCoffset[EEPROMData.currentBand] = sweepArrayOffset[adjdBMinIndex];  // Set to the discovered minimum.
+            qOptimal = sweepArrayOffset[adjdBMinIndex];                                      // Set to the discovered minimum.
+            Serial.printf("The optimal qOffset = %d at index %d\n", sweepArrayOffset[adjdBMinIndex], adjdBMinIndex);
+            EEPROMData.iDCoffset[EEPROMData.currentBand] = -maxSweep;
+            break;
+          }
+          index = index + 1;
+          avgState = averagingState::qChannel;
+          state = State::average;
+          break;
+        case State::average:  // Stay in this state while averaging is in progress.
+          if (averageCount > 4) {
+            if (avgState == averagingState::iChannel) state = State::state1;
+            if (avgState == averagingState::qChannel) state = State::state2;
+            averageCount = 0;
+            break;
+          }
+          averageCount = averageCount + 1;
+          break;
+        case State::setOptimal:
+          EEPROMData.iDCoffset[EEPROMData.currentBand] = iOptimal;
+          EEPROMData.qDCoffset[EEPROMData.currentBand] = qOptimal;
+          state = State::exit;
+          break;
+        case State::exit:
+          break;
+      }
+    }  // end automatic calibration state machine
     warmup = warmup + 1;
-    adjdB_sample_old = adjdB_sample;
-
-    /*
-if(adjdB_avg < adjdB_avgOld)) {
-if(EEPROMData.iDCoffset[EEPROMData.currentBand] < 400 || EEPROMData.iDCoffset[EEPROMData.currentBand] > 400) {
-EEPROMData.iDCoffset[EEPROMData.currentBand] = EEPROMData.iDCoffset[EEPROMData.currentBand] + 10;
-}}
-
-if(adjdB_avg > adjdB_avgOld)) {
-if(EEPROMData.iDCoffset[EEPROMData.currentBand] < 400 || EEPROMData.iDCoffset[EEPROMData.currentBand] > 400) {
-EEPROMData.iDCoffset[EEPROMData.currentBand] = EEPROMData.iDCoffset[EEPROMData.currentBand] - 10;
-}}
-*/
-
-    /*
-if(adjdB_avg < adjdB_avgOld && (qTune == true)) {
-if(EEPROMData.iDCoffset[EEPROMData.currentBand] < 400 || EEPROMData.iDCoffset[EEPROMData.currentBand] > 400) {
-EEPROMData.qDCoffset[EEPROMData.currentBand] = EEPROMData.qDCoffset[EEPROMData.currentBand] + 0x1;
-}}
-*/
-
-    //    adjdB_avgOld = adjdB_avg;
 
     if (task != -1) lastUsedTask = task;  //  Save the last used task.
     task = -100;                          // Reset task after it is used.
@@ -582,13 +617,6 @@ EEPROMData.qDCoffset[EEPROMData.currentBand] = EEPROMData.qDCoffset[EEPROMData.c
 
   }  // end while
   CalibratePrologue();
-  //  Serial.printf("EEPROMData.iDCoffset[EEPROMData.currentBand] = %d\n", EEPROMData.iDCoffset[EEPROMData.currentBand]);
-  //  Serial.printf("EEPROMData.qDCoffset[EEPROMData.currentBand] = %d\n", EEPROMData.qDCoffset[EEPROMData.currentBand]);
-  //  Serial.printf("EEPROMData.iDCoffset[EEPROMData.currentBand] = %d\n", EEPROMData.iDCoffset[EEPROMData.currentBand] - 0x1);
-  //  Serial.printf("EEPROMData.qDCoffset[EEPROMData.currentBand] = %d\n", EEPROMData.qDCoffset[EEPROMData.currentBand] - 0x10);
-  //  Serial.printf("adjdB_avg = %s\n", std::to_string(adjdB_avg).c_str());
-  //  Serial.print(abs(20.0 - 10.1), 2);
-//  Serial.print(state);
 }
 #endif
 
