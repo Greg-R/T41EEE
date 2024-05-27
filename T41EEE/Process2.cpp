@@ -17,19 +17,11 @@ float adjdB = 0.0;
 float adjdBold = 0.0;  // Used in exponential averager.  KF5N May 19, 2024
 float adjdB_old = 0.0;
 float adjdB_sample = 0.0;
-//float adjdB_sample_old = -10.0;
 int i;
 q15_t rawSpectrumPeak = 0;
 float adjdB_avg = 0.0;
-enum class State { state1,
-                   state2,
-                   average,
-                   setOptimal,
-                   exit };
-enum class averagingState { iChannel,
-                            qChannel };
-float sweepArray[1001] = { 0 };
-int sweepArrayOffset[1001] = { 0 };
+
+
 
 
 /*****
@@ -374,11 +366,35 @@ void DoReceiveCalibrate() {
       void
  *****/
 void DoXmitCalibrate(int toneFreqIndex) {
+    enum class State { state1,
+                     state2,
+                     average,
+                     setOptimal,
+                     exit };
+  enum class averagingState { iChannel,
+                              qChannel };
   int task = -1;
   int lastUsedTask = -2;
   int freqOffset;
   bool corrChange = false;
   float correctionIncrement = 0.01;
+  State state = State::state1;
+  averagingState avgState = averagingState::iChannel;
+  uint32_t warmup = 0;
+  int count = 1;
+  int index = 1;
+  float adjdBMin;
+  uint32_t adjdBMinIndex;
+  int averageCount = 0;
+  float maxSweep = 0.2;
+  EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand] = 0.0;
+  EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] = 1.0 -maxSweep;
+  float iOptimal = 0;
+  float qOptimal = 0;
+  float increment = 0.001;
+  int points = static_cast<int>((maxSweep * 2) / increment);
+  float sweepArray[1001] = { 0 };
+  float sweepArrayValue[1001] = { 0 };
 
   if (toneFreqIndex == 0) {  // 750 Hz
     CalibratePreamble(4);    // Set zoom to 16X.
@@ -432,7 +448,84 @@ void DoXmitCalibrate(int toneFreqIndex) {
         break;
       default:
         break;
-    }                                     // end switch
+    }                                  // end switch
+
+
+  //  Begin automatic calibration state machine.
+    if (warmup > 10) {  // Don't begin automatic calibration before the system is settled out.
+      if (count == 5) {
+        state = State::setOptimal;
+        count = 1000;
+      }
+      switch (state) {
+        case State::state1:
+          sweepArrayValue[index - 1] = EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand];
+          sweepArray[index - 1] = adjdB_avg;
+          EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] = EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] + increment;  // Next one!
+    //      Serial.println(EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand]);
+          // Go to Q channel when I channel sweep is finished.
+          if (abs(EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] - 1.0) > maxSweep) {  // Needs to be subtracted from 1.0.
+            count = count + 1;
+            state = State::state2;
+            index = 1;
+            IQCalType = 1;
+            arm_min_f32(sweepArray, points, &adjdBMin, &adjdBMinIndex);
+            EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] = sweepArrayValue[adjdBMinIndex];
+            iOptimal = sweepArrayValue[adjdBMinIndex];  // Set to the discovered minimum.
+            Serial.printf("The optimal amplitude = %.3f at index %d with value %.1f\n", sweepArrayValue[adjdBMinIndex], adjdBMinIndex, adjdBMin);
+            EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand] = -maxSweep;  // Reset for next sweep.
+            break;
+          }
+          index = index + 1;
+          avgState = averagingState::iChannel;
+          state = State::average;
+          break;
+        case State::state2:
+          sweepArrayValue[index - 1] = EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand];
+          sweepArray[index - 1] = adjdB_avg;
+          EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand] = EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand] + increment;
+          if (EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand] > maxSweep) {
+            count = count + 1;
+            state = State::state1;
+            index = 1;
+            IQCalType = 0;
+            arm_min_f32(sweepArray, points, &adjdBMin, &adjdBMinIndex);
+            EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand] = sweepArrayValue[adjdBMinIndex];  // Set to the discovered minimum.
+            qOptimal = sweepArrayValue[adjdBMinIndex];                                      // Set to the discovered minimum.
+            Serial.printf("The optimal phase = %.3f at index %d with value %.1f\n", sweepArrayValue[adjdBMinIndex], adjdBMinIndex, adjdBMin);
+            EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] = 1.0 - maxSweep;
+            break;
+          }
+          index = index + 1;
+          avgState = averagingState::qChannel;
+          state = State::average;
+          break;
+        case State::average:  // Stay in this state while averaging is in progress.
+          if (averageCount > 4) {
+            if (avgState == averagingState::iChannel) state = State::state1;
+            if (avgState == averagingState::qChannel) state = State::state2;
+            averageCount = 0;
+            break;
+          }
+            if(count == 1 || count == 2) {  // Skip averaging for 1st and 2nd sweeps.
+            if (avgState == averagingState::iChannel) state = State::state1;
+            if (avgState == averagingState::qChannel) state = State::state2;
+            break;
+            }
+          averageCount = averageCount + 1;
+          break;
+        case State::setOptimal:
+          EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] = iOptimal;
+          EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand] = qOptimal;
+          state = State::exit;
+          break;
+        case State::exit:
+          break;
+      }
+    }  // end automatic calibration state machine
+
+warmup = warmup + 1;
+
     if (task != -1) lastUsedTask = task;  //  Save the last used task.
     task = -100;                          // Reset task after it is used.
     //  Read encoder and update values.
@@ -458,6 +551,13 @@ void DoXmitCalibrate(int toneFreqIndex) {
  *****/
 #ifdef QSE2
 void DoXmitCarrierCalibrate(int toneFreqIndex) {
+  enum class State { state1,
+                     state2,
+                     average,
+                     setOptimal,
+                     exit };
+  enum class averagingState { iChannel,
+                              qChannel };
   int task = -1;
   int lastUsedTask = -2;
   int freqOffset;
@@ -465,7 +565,7 @@ void DoXmitCarrierCalibrate(int toneFreqIndex) {
   State state = State::state1;
   averagingState avgState = averagingState::iChannel;
   uint32_t warmup = 0;
-  int count = 0;
+  int count = 1;
   int index = 1;
   float adjdBMin;
   uint32_t adjdBMinIndex;
@@ -476,7 +576,7 @@ void DoXmitCarrierCalibrate(int toneFreqIndex) {
   int iOptimal = 0;
   int qOptimal = 0;
   int increment = 5;
-  int points = (maxSweep * 2)/increment;
+  int points = (maxSweep * 2) / increment;
   float sweepArray[1001] = { 0 };
   int sweepArrayOffset[1001] = { 0 };
 
@@ -499,7 +599,7 @@ void DoXmitCarrierCalibrate(int toneFreqIndex) {
   printCalType(calTypeFlag);
   warmUpCal();
 
-  // Transmit Calibration Loop.  This is independent of loop().
+  // Carrier Calibration Loop.  This is independent of loop().
   while (true) {
     ShowSpectrum2();
     val = ReadSelectedPushButton();
@@ -537,9 +637,9 @@ void DoXmitCarrierCalibrate(int toneFreqIndex) {
         break;
     }  // end switch
 
-    //  Automatic calibration state machine.
+    //  Begin automatic calibration state machine.
     if (warmup > 10) {  // Don't begin automatic calibration before the system is settled out.
-      if (count == 6) {
+      if (count == 4) {
         state = State::setOptimal;
         count = 1000;
       }
@@ -557,7 +657,7 @@ void DoXmitCarrierCalibrate(int toneFreqIndex) {
             arm_min_f32(sweepArray, points, &adjdBMin, &adjdBMinIndex);
             EEPROMData.iDCoffset[EEPROMData.currentBand] = sweepArrayOffset[adjdBMinIndex];
             iOptimal = sweepArrayOffset[adjdBMinIndex];  // Set to the discovered minimum.
-            Serial.printf("The optimal iOffset = %d at index %d\n", sweepArrayOffset[adjdBMinIndex], adjdBMinIndex);
+            Serial.printf("The optimal iOffset = %d at index %d with value %.1f\n", sweepArrayOffset[adjdBMinIndex], adjdBMinIndex, adjdBMin);
             EEPROMData.qDCoffset[EEPROMData.currentBand] = -maxSweep;  // Reset for next sweep.
             break;
           }
@@ -577,7 +677,7 @@ void DoXmitCarrierCalibrate(int toneFreqIndex) {
             arm_min_f32(sweepArray, points, &adjdBMin, &adjdBMinIndex);
             EEPROMData.qDCoffset[EEPROMData.currentBand] = sweepArrayOffset[adjdBMinIndex];  // Set to the discovered minimum.
             qOptimal = sweepArrayOffset[adjdBMinIndex];                                      // Set to the discovered minimum.
-            Serial.printf("The optimal qOffset = %d at index %d\n", sweepArrayOffset[adjdBMinIndex], adjdBMinIndex);
+            Serial.printf("The optimal qOffset = %d at index %d with value %.1f\n", sweepArrayOffset[adjdBMinIndex], adjdBMinIndex, adjdBMin);
             EEPROMData.iDCoffset[EEPROMData.currentBand] = -maxSweep;
             break;
           }
@@ -586,12 +686,19 @@ void DoXmitCarrierCalibrate(int toneFreqIndex) {
           state = State::average;
           break;
         case State::average:  // Stay in this state while averaging is in progress.
-          if (averageCount > 4) {
+          if (averageCount > 8) {
             if (avgState == averagingState::iChannel) state = State::state1;
             if (avgState == averagingState::qChannel) state = State::state2;
             averageCount = 0;
             break;
           }
+          //  This may reduce accuracy of the calibration.
+            if(count == 1 || count == 2) {  // Skip averaging for 1st and 2nd sweeps.
+            if (avgState == averagingState::iChannel) state = State::state1;
+            if (avgState == averagingState::qChannel) state = State::state2;
+            break;
+            }
+            
           averageCount = averageCount + 1;
           break;
         case State::setOptimal:
@@ -603,6 +710,7 @@ void DoXmitCarrierCalibrate(int toneFreqIndex) {
           break;
       }
     }  // end automatic calibration state machine
+
     warmup = warmup + 1;
 
     if (task != -1) lastUsedTask = task;  //  Save the last used task.
@@ -619,6 +727,7 @@ void DoXmitCarrierCalibrate(int toneFreqIndex) {
   CalibratePrologue();
 }
 #endif
+
 
 // Automatic calibration
 void autoCal() {
