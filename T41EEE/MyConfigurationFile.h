@@ -3,7 +3,7 @@
 
 //#define DEBUG 		                                                        // Uncommented for debugging, comment out for normal use
 //#define DEBUG1                                                            // Uncomment to see temperature and load information.
-//#define DEBUG_SWITCH_CAL                                                      // Uncomment to run switch cal by pushing and holding a button at power-up.
+//#define DEBUG_SWITCH_CAL                                                  // Uncomment to run switch cal by pushing and holding a button at power-up.
 #define DEFAULT_KEYER_WPM   			15                                        // Startup value for keyer wpm
 #define FREQ_SEP_CHARACTER  			'.'					                              // Some may prefer period, space, or combo
 #define MAP_FILE_NAME   					"Cincinnati.bmp"                          // Name you gave to BMP map file. Max is 50 chars

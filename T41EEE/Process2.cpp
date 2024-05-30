@@ -5,7 +5,9 @@
 // Updated PlotCalSpectrum() function to clean up graphics.  KF5N August 3, 2023
 // Major clean-up of calibration.  KF5N August 16, 2023
 
+#include <vector>
 #include <valarray>
+#include <algorithm>
 
 int val;
 float correctionIncrement;  //AFP 2-7-23
@@ -451,10 +453,13 @@ void DoXmitCalibrate(int toneFreqIndex) {
   float qOptimal = 0;
   float increment = 0.001;
   int points = static_cast<int>((maxSweep * 2) / increment);
-  std::valarray<float32_t> sweepArray[1001];
+  float sweepArray[1001];
   float sweepArrayValue[1001] = { 0 };
+  std::vector<float32_t> sweepVector(1001);
+  std::vector<float32_t> sweepVectorValue(1001);
   bool autoCal = false;
   bool averageFlag = false;
+  std::vector<float>::iterator result;
 
   if (toneFreqIndex == 0) {  // 750 Hz
     CalibratePreamble(4);    // Set zoom to 16X.
@@ -535,21 +540,30 @@ void DoXmitCalibrate(int toneFreqIndex) {
             adjdB_avg = 0;
             state = State::state1;  // Let this fall through.
           case State::state1:
-            sweepArrayValue[index - 1] = EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand];
 
-            if (averageFlag) sweepArray[index - 1] = adjdB_avg;
-            else sweepArray[index - 1] = adjdB;
+            sweepVectorValue[index - 1] = EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand];
+
+            if (averageFlag) sweepVector[index - 1] = adjdB_avg;
+            else sweepVector[index - 1] = adjdB;
 
             EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] = EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] + increment;  // Next one!
+
             // Go to Q channel when I channel sweep is finished.
             if (abs(EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] - 1.0) > maxSweep) {  // Needs to be subtracted from 1.0.
               state = State::state2;
               index = 1;
               IQCalType = 1;
-              arm_min_f32(sweepArray, points, &adjdBMin, &adjdBMinIndex);  // This will still work, but need to have array filled with zeros.
-              EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] = sweepArrayValue[adjdBMinIndex];
+       //       arm_min_f32(sweepArray, points, &adjdBMin, &adjdBMinIndex);  // This will still work, but need to have array filled with zeros.
+              // Replace arm function with C++ STL functions.
+              result = std::min_element(sweepVector.begin(), sweepVector.end());
+    // std::cout << "min element has value " << *result << " and index ["
+    //          << std::distance(v.begin(), result) << "]\n";
+
+              adjdBMinIndex = std::distance(sweepVector.begin(), result);
+
+              EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] = sweepVectorValue[adjdBMinIndex];
               iOptimal = sweepArrayValue[adjdBMinIndex];  // Set to the discovered minimum.
-              Serial.printf("The optimal amplitude = %.3f at index %d with value %.1f count = %d\n", sweepArrayValue[adjdBMinIndex], adjdBMinIndex, adjdBMin, count);
+              Serial.printf("The optimal amplitude = %.3f at index %d with value %.1f count = %d\n", sweepVectorValue[adjdBMinIndex], adjdBMinIndex, *result, count);
               EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand] = -maxSweep;  // Reset for next sweep.
               count = count + 1;
               if(count == 4) state = State::setOptimal;
@@ -562,18 +576,27 @@ void DoXmitCalibrate(int toneFreqIndex) {
           case State::state2:
             sweepArrayValue[index - 1] = EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand];
 
-            if (averageFlag) sweepArray[index - 1] = adjdB_avg;
-            else sweepArray[index - 1] = adjdB;
+            if (averageFlag) sweepVector[index - 1] = adjdB_avg;
+            else sweepVector[index - 1] = adjdB;
 
             EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand] = EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand] + increment;
+
             if (EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand] > maxSweep) {
               state = State::state1;
               index = 1;
               IQCalType = 0;
-              arm_min_f32(sweepArray, points, &adjdBMin, &adjdBMinIndex);
+
+          // Replace arm function with C++ STL functions.
+              result = std::min_element(sweepVector.begin(), sweepVector.end());
+    // std::cout << "min element has value " << *result << " and index ["
+    //          << std::distance(v.begin(), result) << "]\n";
+
+              adjdBMinIndex = std::distance(sweepVector.begin(), result);
+
+           //   arm_min_f32(sweepArray, points, &adjdBMin, &adjdBMinIndex);
               EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand] = sweepArrayValue[adjdBMinIndex];  // Set to the discovered minimum.
               qOptimal = sweepArrayValue[adjdBMinIndex];                                                     // Set to the discovered minimum.
-              Serial.printf("The optimal phase = %.3f at index %d with value %.1f count = %d\n", sweepArrayValue[adjdBMinIndex], adjdBMinIndex, adjdBMin, count);
+              Serial.printf("The optimal phase = %.3f at index %d with value %.1f count = %d\n", sweepArrayValue[adjdBMinIndex], adjdBMinIndex, *result, count);
               EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] = 1.0 - maxSweep;
               count = count + 1;
               if(count == 4) state = State::setOptimal;
@@ -603,6 +626,7 @@ void DoXmitCalibrate(int toneFreqIndex) {
           case State::setOptimal:
             EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] = iOptimal;
             EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand] = qOptimal;
+            Serial.printf("iOptimal = %.3f qOptimal = %.3f\n", iOptimal, qOptimal);
             state = State::exit;
             break;
           case State::exit:
