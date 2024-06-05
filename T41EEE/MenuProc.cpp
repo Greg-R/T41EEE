@@ -146,8 +146,8 @@ void CalibrateOptions() {
 
   // Select the type of calibration, and then skip this during the loop() function.
   if (calibrateFlag == 0) {
-    const char *IQOptions[10]{ "Freq Cal", "CW PA Cal", "Rec Cal", "Xmit Cal", "SSB PA Cal", "Set Tone", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
-    IQChoice = SubmenuSelect(IQOptions, 9, 0);                                                                                                //AFP 10-21-22
+    const char* IQOptions[11]{ "Freq Cal", "CW PA Cal", "Rec Cal", "Xmit Cal", "SSB PA Cal", "Radio Cal", "Set Tone", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
+    IQChoice = SubmenuSelect(IQOptions, 11, 0);                                                                                                //AFP 10-21-22
   }
   calibrateFlag = 1;
   switch (IQChoice) {
@@ -205,12 +205,17 @@ void CalibrateOptions() {
       }
       break;  // Missing break.  KF5N August 12, 2023
 
-    case 5:  // Choose CW calibration tone frequency.
+          case 5:
+      RadioCal();
+      calibrateFlag = 0;
+    break;
+
+    case 6:  // Choose CW calibration tone frequency.
       SelectCalFreq();
       calibrateFlag = 0;
       break;
 
-    case 6:  // Calibrate buttons
+    case 7:  // Calibrate buttons
       SaveAnalogSwitchValues();
       calibrateFlag = 0;
       RedrawDisplayScreen();
@@ -218,7 +223,7 @@ void CalibrateOptions() {
       DrawFrequencyBarValue();
       break;
 
-    case 7:  // Set button repeat rate
+    case 8:  // Set button repeat rate
       EEPROMData.buttonRepeatDelay = 1000 * GetEncoderValueLive(0, 5000, EEPROMData.buttonRepeatDelay / 1000, 1, (char *)"Btn Repeat:  ");
       val = ReadSelectedPushButton();
       if (val != BOGUS_PIN_READ) {
@@ -231,7 +236,7 @@ void CalibrateOptions() {
       }
       break;
 
-    case 8:  // Cancelled choice
+    case 9:  // Cancelled choice
       RedrawDisplayScreen();
       currentFreq = TxRxFreq = EEPROMData.centerFreq + NCOFreq;
       DrawBandWidthIndicatorBar();  // AFP 10-20-22
