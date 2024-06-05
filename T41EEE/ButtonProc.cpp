@@ -247,6 +247,97 @@ void ButtonBandDecrease() {
 }
 
 
+/*****
+  Purpose: Set the radio to a band using the band parameter.
+
+  Parameter list:
+    int band
+
+  Return value:
+    void
+*****/
+void BandSet(int band) {
+  int tempIndex;
+  tempIndex = EEPROMData.currentBandA;
+  if (EEPROMData.currentBand == NUMBER_OF_BANDS) {  // Incremented too far?
+    EEPROMData.currentBand = 0;                     // Yep. Roll to list front.
+  }
+  NCOFreq = 0L;
+  switch (EEPROMData.activeVFO) {
+    case VFO_A:
+      tempIndex = EEPROMData.currentBandA;
+      if (save_last_frequency == 1) {
+        EEPROMData.lastFrequencies[tempIndex][VFO_A] = TxRxFreq;
+      } else {
+        if (save_last_frequency == 0) {
+          if (directFreqFlag == 1) {
+            EEPROMData.lastFrequencies[tempIndex][VFO_A] = TxRxFreqOld;
+          } else {
+            if (directFreqFlag == 0) {
+              EEPROMData.lastFrequencies[tempIndex][VFO_A] = TxRxFreq;
+            }
+          }
+          TxRxFreqOld = TxRxFreq;
+        }
+      }
+      EEPROMData.currentBandA = band;
+      if (EEPROMData.currentBandA == NUMBER_OF_BANDS) {  // Incremented too far?
+        EEPROMData.currentBandA = 0;                     // Yep. Roll to list front.
+      }
+      EEPROMData.currentBand = EEPROMData.currentBandA;
+      EEPROMData.centerFreq = TxRxFreq = EEPROMData.currentFreqA = EEPROMData.lastFrequencies[EEPROMData.currentBandA][VFO_A] + NCOFreq;
+      break;
+
+    case VFO_B:
+      tempIndex = EEPROMData.currentBandB;
+      if (save_last_frequency == 1) {
+        EEPROMData.lastFrequencies[tempIndex][VFO_B] = TxRxFreq;
+      } else {
+        if (save_last_frequency == 0) {
+          if (directFreqFlag == 1) {
+            EEPROMData.lastFrequencies[tempIndex][VFO_B] = TxRxFreqOld;
+          } else {
+            if (directFreqFlag == 0) {
+              EEPROMData.lastFrequencies[tempIndex][VFO_B] = TxRxFreq;
+            }
+          }
+          TxRxFreqOld = TxRxFreq;
+        }
+      }
+      EEPROMData.currentBandB = band;
+      if (EEPROMData.currentBandB == NUMBER_OF_BANDS) {  // Incremented too far?
+        EEPROMData.currentBandB = 0;                     // Yep. Roll to list front.
+      }
+      EEPROMData.currentBand = EEPROMData.currentBandB;
+      EEPROMData.centerFreq = TxRxFreq = EEPROMData.currentFreqB = EEPROMData.lastFrequencies[EEPROMData.currentBandB][VFO_B] + NCOFreq;
+      break;
+
+    case VFO_SPLIT:
+      DoSplitVFO();
+      break;
+  }
+  directFreqFlag = 0;
+  EraseSpectrumDisplayContainer();
+  DrawSpectrumDisplayContainer();
+  SetBand();
+  SetFreq();
+  ShowFrequency();
+  ShowSpectrumdBScale();
+  //delay(1L);
+  AudioInterrupts();
+  EEPROMWrite();
+  // Draw or not draw CW filter graphics to audio spectrum area.  KF5N July 30, 2023
+  tft.writeTo(L2);
+  tft.clearMemory();
+  tft.writeTo(L1);
+  if (EEPROMData.xmtMode == CW_MODE) BandInformation();
+  DrawBandWidthIndicatorBar();
+  DrawFrequencyBarValue();
+  UpdateDecoderField();
+  FilterSetSSB();
+}
+
+
 //================ AFP 09-27-22
 /*****
   Purpose: Chnage the horizontal scale of the frequency display

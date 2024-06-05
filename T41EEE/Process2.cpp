@@ -344,7 +344,7 @@ void CalibratePrologue() {
    Return value:
       void
  *****/
-void DoReceiveCalibrate() {
+void DoReceiveCalibrate(bool radioCal) {
   int task = -1;
   int lastUsedTask = -2;
   int calFreqTemp, calFreqShift;
@@ -403,6 +403,19 @@ void DoReceiveCalibrate() {
   std::vector<float>::iterator result;
   bool stopSweep = false;
 
+  if(radioCal) {
+            autoCal = true;
+        printCalType(calTypeFlag, autoCal);
+        count = 0;
+        warmup = 0;
+        index = 1;
+        stopSweep = false;
+        IQCalType = 0;
+        std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
+        std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
+        state = State::warmup;
+  }
+
   // Receive calibration loop
   while (true) {
     ShowSpectrum2();  //  Using 750 Hz or 3 kHz???
@@ -417,6 +430,13 @@ void DoReceiveCalibrate() {
       case ZOOM:  // 2nd row, 1st column button
         autoCal = true;
         printCalType(calTypeFlag, autoCal);
+        count = 0;
+        warmup = 0;
+        index = 1;
+        stopSweep = false;
+        IQCalType = 0;
+        std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
+        std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
         state = State::warmup;
         break;
         // Toggle gain and phase
@@ -446,7 +466,7 @@ void DoReceiveCalibrate() {
 
 
     //  Begin automatic calibration state machine.
-    if (autoCal) {
+    if (autoCal || radioCal) {
       switch (state) {
         case State::warmup:
           EEPROMData.IQPhaseCorrectionFactor[EEPROMData.currentBand] = 0.0 + maxSweepPhase;  //  Need to use these values during warmup
@@ -633,6 +653,10 @@ void DoReceiveCalibrate() {
         case State::exit:
           autoCal = false;
           printCalType(calTypeFlag, autoCal);
+                              if(radioCal) {
+            CalibratePrologue();
+          return;
+                              }
           break;
       }
     }  // end automatic calibration state machine
@@ -660,7 +684,7 @@ void DoReceiveCalibrate() {
    Return value:
       void
  *****/
-void DoXmitCalibrate(int toneFreqIndex) {
+void DoXmitCalibrate(int toneFreqIndex, bool radioCal) {
   enum class State { warmup,
                      state0,
                      initialSweepAmp,
@@ -722,6 +746,19 @@ void DoXmitCalibrate(int toneFreqIndex) {
   printCalType(calTypeFlag, autoCal);
   warmUpCal();
 
+if(radioCal) {
+        autoCal = true;
+        printCalType(calTypeFlag, autoCal);
+        count = 0;
+        warmup = 0;
+        index = 1;
+        stopSweep = false;
+        IQCalType = 0;
+        std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
+        std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
+        state = State::warmup;
+}
+
   // Transmit Calibration Loop
   while (true) {
     ShowSpectrum2();
@@ -736,6 +773,13 @@ void DoXmitCalibrate(int toneFreqIndex) {
       case ZOOM:  // 2nd row, 1st column button
         autoCal = true;
         printCalType(calTypeFlag, autoCal);
+        count = 0;
+        warmup = 0;
+        index = 1;
+        stopSweep = false;
+        IQCalType = 0;
+        std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
+        std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
         state = State::warmup;
         break;
       // Toggle gain and phase
@@ -764,7 +808,7 @@ void DoXmitCalibrate(int toneFreqIndex) {
     }  // end switch
 
     //  Begin automatic calibration state machine.
-    if (autoCal) {
+    if (autoCal || radioCal) {
       switch (state) {
         case State::warmup:
           EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand] = 0.0 + maxSweepPhase;  //  Need to use these values during warmup
@@ -951,6 +995,10 @@ void DoXmitCalibrate(int toneFreqIndex) {
         case State::exit:
           autoCal = false;
           printCalType(calTypeFlag, autoCal);
+                    if(radioCal) {
+            CalibratePrologue();
+          return;
+      }
           break;
       }
     }  // end automatic calibration state machine
@@ -973,13 +1021,13 @@ void DoXmitCalibrate(int toneFreqIndex) {
   Purpose: Manually tuned cancellation of the undesired transmitter carrier output.
 
    Parameter List:
-      int toneFreqIndex
+      int toneFreqIndex, bool radioCal
 
    Return value:
       void
  *****/
 #ifdef QSE2
-void DoXmitCarrierCalibrate(int toneFreqIndex) {
+void DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal) {
   enum class State { warmup,
                      state0,
                      initialSweepAmp,
@@ -1041,7 +1089,21 @@ void DoXmitCarrierCalibrate(int toneFreqIndex) {
   printCalType(calTypeFlag, autoCal);
   warmUpCal();
 
+  if(radioCal) {
+            autoCal = true;
+        printCalType(calTypeFlag, autoCal);
+        count = 0;
+        warmup = 0;
+        index = 1;
+        stopSweep = false;
+        IQCalType = 0;
+        std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
+        std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
+        state = State::warmup;
+  }
+
   // Carrier Calibration Loop.  This is independent of loop().
+  // Bypass this while if using automated calibration (radioCal == true).
   while (true) {
     ShowSpectrum2();
     val = ReadSelectedPushButton();
@@ -1055,6 +1117,13 @@ void DoXmitCarrierCalibrate(int toneFreqIndex) {
       case ZOOM:  // 2nd row, 1st column button
         autoCal = true;
         printCalType(calTypeFlag, autoCal);
+        count = 0;
+        warmup = 0;
+        index = 1;
+        stopSweep = false;
+        IQCalType = 0;
+        std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
+        std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
         state = State::warmup;
         break;
       // Toggle gain and phase
@@ -1082,9 +1151,8 @@ void DoXmitCarrierCalibrate(int toneFreqIndex) {
         break;
     }  // end switch
 
-
     //  Begin automatic calibration state machine.
-    if (autoCal) {
+    if (autoCal || radioCal) {
       switch (state) {
         case State::warmup:
           EEPROMData.qDCoffset[EEPROMData.currentBand] = maxSweep;  //  Need to use these values during warmup
@@ -1271,6 +1339,10 @@ void DoXmitCarrierCalibrate(int toneFreqIndex) {
         case State::exit:
           autoCal = false;
           printCalType(calTypeFlag, autoCal);
+          if(radioCal) {
+            CalibratePrologue();
+          return;
+      }
           break;
       }
     }  // end automatic calibration state machine
@@ -1527,8 +1599,53 @@ void DoXmitCarrierCalibrate(int toneFreqIndex) {
 #endif
 */
 
-// Automatic calibration
-void autoCal() {
+
+// Automatic calibration of all bands.  Greg KF5N June 4, 2024
+void RadioCal() {
+IQChoice = 0;  // Global variable.
+BandSet(BAND_80M);
+#ifdef QSE2 
+DoXmitCarrierCalibrate(EEPROMData.calFreq, true); 
+#endif
+DoXmitCalibrate(EEPROMData.calFreq, true);
+DoReceiveCalibrate(true);
+BandSet(BAND_40M);
+#ifdef QSE2 
+DoXmitCarrierCalibrate(EEPROMData.calFreq, true); 
+#endif
+DoXmitCalibrate(EEPROMData.calFreq, true);
+DoReceiveCalibrate(true);
+BandSet(BAND_20M);
+#ifdef QSE2 
+DoXmitCarrierCalibrate(EEPROMData.calFreq, true); 
+#endif
+DoXmitCalibrate(EEPROMData.calFreq, true);
+DoReceiveCalibrate(true);
+BandSet(BAND_17M);
+#ifdef QSE2 
+DoXmitCarrierCalibrate(EEPROMData.calFreq, true); 
+#endif
+DoXmitCalibrate(EEPROMData.calFreq, true);
+DoReceiveCalibrate(true);
+BandSet(BAND_15M);
+#ifdef QSE2 
+DoXmitCarrierCalibrate(EEPROMData.calFreq, true); 
+#endif
+DoXmitCalibrate(EEPROMData.calFreq, true);
+DoReceiveCalibrate(true);
+BandSet(BAND_12M);
+#ifdef QSE2 
+DoXmitCarrierCalibrate(EEPROMData.calFreq, true); 
+#endif
+DoXmitCalibrate(EEPROMData.calFreq, true);
+DoReceiveCalibrate(true);
+BandSet(BAND_10M);
+#ifdef QSE2 
+DoXmitCarrierCalibrate(EEPROMData.calFreq, true); 
+#endif
+DoXmitCalibrate(EEPROMData.calFreq, true);
+DoReceiveCalibrate(true);
+  return;
 }
 
 

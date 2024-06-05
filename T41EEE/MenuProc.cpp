@@ -27,8 +27,8 @@ void CalibrateOptions() {
 
   // Select the type of calibration, and then skip this during the loop() function.
   if (calibrateFlag == 0) {
-    const char* IQOptions[10]{ "Freq Cal", "CW PA Cal", "Rec Cal", "Carrier Cal", "Xmit Cal", "SSB PA Cal", "Set Tone", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
-    IQChoice = SubmenuSelect(IQOptions, 10, 0);                                                                                                //AFP 10-21-22
+    const char* IQOptions[11]{ "Freq Cal", "CW PA Cal", "Rec Cal", "Carrier Cal", "Xmit Cal", "SSB PA Cal", "Radio Cal", "Set Tone", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
+    IQChoice = SubmenuSelect(IQOptions, 11, 0);                                                                                                //AFP 10-21-22
   }
   calibrateFlag = 1;
   switch (IQChoice) {
@@ -64,15 +64,15 @@ void CalibrateOptions() {
       }
       break;
     case 2:                  // IQ Receive Cal - Gain and Phase
-      DoReceiveCalibrate();  // This function was significantly revised.  KF5N August 16, 2023
+      DoReceiveCalibrate(false);  // This function was significantly revised.  KF5N August 16, 2023
       break;
 
     case 3:                  // Xmit Carrier calibration.
-      DoXmitCarrierCalibrate(EEPROMData.calFreq);
+      DoXmitCarrierCalibrate(EEPROMData.calFreq, false);
       break;
 
     case 4:                                 // IQ Transmit Cal - Gain and Phase  //AFP 2-21-23
-      DoXmitCalibrate(EEPROMData.calFreq);  // This function was significantly revised.  KF5N August 16, 2023
+      DoXmitCalibrate(EEPROMData.calFreq, false);  // This function was significantly revised.  KF5N August 16, 2023
       break;
       
     case 5:  // SSB PA Cal
@@ -90,12 +90,17 @@ void CalibrateOptions() {
       }
       break;  // Missing break.  KF5N August 12, 2023
 
-    case 6:  // Choose CW calibration tone frequency.
+    case 6:
+      RadioCal();
+      calibrateFlag = 0;
+    break;
+
+    case 7:  // Choose CW calibration tone frequency.
       SelectCalFreq();
       calibrateFlag = 0;
       break;
 
-    case 7:  // Calibrate buttons
+    case 8:  // Calibrate buttons
       SaveAnalogSwitchValues();
       calibrateFlag = 0;
       RedrawDisplayScreen();
@@ -103,7 +108,7 @@ void CalibrateOptions() {
       DrawFrequencyBarValue();
       break;
 
-    case 8:  // Set button repeat rate
+    case 9:  // Set button repeat rate
       EEPROMData.buttonRepeatDelay = 1000 * GetEncoderValueLive(0, 5000, EEPROMData.buttonRepeatDelay / 1000, 1, (char *)"Btn Repeat:  ");
       val = ReadSelectedPushButton();
       if (val != BOGUS_PIN_READ) {
@@ -116,7 +121,7 @@ void CalibrateOptions() {
       }
       break;
 
-    case 9:  // Cancelled choice
+    case 10:  // Cancelled choice
       RedrawDisplayScreen();
       currentFreq = TxRxFreq = EEPROMData.centerFreq + NCOFreq;
       DrawBandWidthIndicatorBar();  // AFP 10-20-22
@@ -178,11 +183,11 @@ void CalibrateOptions() {
       }
       break;
     case 2:                  // IQ Receive Cal - Gain and Phase
-      DoReceiveCalibrate();  // This function was significantly revised.  KF5N August 16, 2023
+      DoReceiveCalibrate(false);  // This function was significantly revised.  KF5N August 16, 2023
       break;
 
     case 3:                                 // IQ Transmit Cal - Gain and Phase  //AFP 2-21-23
-      DoXmitCalibrate(EEPROMData.calFreq);  // This function was significantly revised.  KF5N August 16, 2023
+      DoXmitCalibrate(EEPROMData.calFreq, false);  // This function was significantly revised.  KF5N August 16, 2023
       break;
       
     case 4:  // SSB PA Cal

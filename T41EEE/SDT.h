@@ -933,6 +933,7 @@ void arm_clip_f32(const float32_t * pSrc,
   float32_t high, 
   uint32_t numSamples);
 int BandOptions();
+void BandSet(int band);  // Used in RadioCal().  Greg KF5N June 4, 2024.
 float BearingHeading(char *dxCallPrefix);
 void BearingMaps();
 void bmpDraw(const char *filename, int x, int y);
@@ -980,9 +981,9 @@ void DoSignalHistogram(long val);
 void DoGapHistogram(long val);
 int DoSplitVFO();
 void DoPaddleFlip();
-void DoXmitCalibrate(int toneFreqIndex);
-void DoXmitCarrierCalibrate(int toneFreqIndex);
-void DoReceiveCalibrate();
+void DoXmitCalibrate(int toneFreqIndex, bool radioCal);
+void DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal);
+void DoReceiveCalibrate(bool radioCal);
 void DrawActiveLetter(int row, int horizontalSpacer, int whichLetterIndex, int keyWidth, int keyHeight);
 void DrawBandWidthIndicatorBar();  // AFP 03-27-22 Layers
 void DrawFrequencyBarValue();
@@ -1061,7 +1062,7 @@ void playTransmitData();  // KF5N February 23, 2024
 int ProcessButtonPress(int valPin);
 void ProcessEqualizerChoices(int EQType, char *title);
 void ProcessIQData();
-
+void RadioCal();  // Greg KF5N June 4, 2024.
 uint16_t read16(File &f);
 uint32_t read32(File &f);
 int ReadSelectedPushButton();
