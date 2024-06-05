@@ -56,7 +56,7 @@ void FreqShift1()
 }
 
 /*****
-  Purpose: Shift Receive frequency by an arbitray amount
+  Purpose: Shift Receive frequency by an arbitrary amount
 
   Parameter list:
     void

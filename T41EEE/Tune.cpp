@@ -100,7 +100,7 @@ void SetFreq() {  //AFP 09-22-22   Revised July 7 KF5N
 //  if(Clk1SetFreq < 300000) Clk1SetFreq = 300000;
 //  if(Clk2SetFreq < 300000) Clk2SetFreq = 300000;
 
-  if (radioState == SSB_RECEIVE_STATE || radioState == CW_RECEIVE_STATE) {   //  Receive state
+  if (radioState == SSB_RECEIVE_STATE || radioState == CW_RECEIVE_STATE || radioState == AM_RECEIVE_STATE) {   //  Receive state
     si5351.set_freq(Clk2SetFreq, SI5351_CLK2);
     si5351.output_enable(SI5351_CLK1, 0);  // CLK1 (transmit) off during receive to prevent birdies
     si5351.output_enable(SI5351_CLK2, 1);
