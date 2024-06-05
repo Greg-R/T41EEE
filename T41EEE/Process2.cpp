@@ -125,7 +125,7 @@ void warmUpCal() {
   Return value:
     void
 *****/
-FLASHMEM void printCalType(int IQCalType, bool autoCal) {
+FLASHMEM void printCalType(int IQCalType, bool autoCal, bool autoCalDone) {
   const char *calName;
   const char *IQName[4] = { "Receive", "Transmit", "Carrier", "Calibrate" };
   tft.writeTo(L1);
@@ -140,7 +140,13 @@ FLASHMEM void printCalType(int IQCalType, bool autoCal) {
     if (autoCal) {
       tft.setCursor(35, 330);
       tft.fillRect(35, 330, 215, 40, RA8875_BLACK);
-      tft.print("Auto-Cal Mode");
+      if (autoCalDone) {
+        tft.setTextColor(RA8875_GREEN);
+        tft.print("Auto-Cal Mode");
+      } else {
+        tft.setTextColor(RA8875_RED);
+        tft.print("Auto-Cal Mode");
+      }
     } else {
       tft.setCursor(35, 330);
       tft.fillRect(35, 330, 215, 40, RA8875_BLACK);
@@ -155,7 +161,13 @@ FLASHMEM void printCalType(int IQCalType, bool autoCal) {
     if (autoCal) {
       tft.setCursor(275, 330);
       tft.fillRect(275, 330, 215, 40, RA8875_BLACK);
-      tft.print("Auto-Cal Mode");
+      if (autoCalDone) {
+        tft.setTextColor(RA8875_GREEN);
+        tft.print("Auto-Cal Mode");
+      } else {
+        tft.setTextColor(RA8875_RED);
+        tft.print("Auto-Cal Mode");
+      }
     } else {
       tft.setCursor(275, 330);
       tft.fillRect(275, 330, 215, 40, RA8875_BLACK);
@@ -170,7 +182,13 @@ FLASHMEM void printCalType(int IQCalType, bool autoCal) {
     if (autoCal) {
       tft.setCursor(30, 330);
       tft.fillRect(30, 330, 215, 40, RA8875_BLACK);
-      tft.print("Auto-Cal Mode");
+           if (autoCalDone) {
+        tft.setTextColor(RA8875_GREEN);
+        tft.print("Auto-Cal Mode");
+      } else {
+        tft.setTextColor(RA8875_RED);
+        tft.print("Auto-Cal Mode");
+      }
     } else {
       tft.setCursor(30, 330);
       tft.fillRect(30, 330, 215, 40, RA8875_BLACK);
@@ -185,7 +203,13 @@ FLASHMEM void printCalType(int IQCalType, bool autoCal) {
     if (autoCal) {
       tft.setCursor(290, 330);
       tft.fillRect(290, 330, 215, 40, RA8875_BLACK);
-      tft.print("Auto-Cal Mode");
+            if (autoCalDone) {
+        tft.setTextColor(RA8875_GREEN);
+        tft.print("Auto-Cal Mode");
+      } else {
+        tft.setTextColor(RA8875_RED);
+        tft.print("Auto-Cal Mode");
+      }
     } else {
       tft.setCursor(290, 330);
       tft.fillRect(290, 330, 215, 40, RA8875_BLACK);
@@ -200,7 +224,13 @@ FLASHMEM void printCalType(int IQCalType, bool autoCal) {
     if (autoCal) {
       tft.setCursor(30, 330);
       tft.fillRect(30, 330, 215, 40, RA8875_BLACK);
-      tft.print("Auto-Cal Mode");
+            if (autoCalDone) {
+        tft.setTextColor(RA8875_GREEN);
+        tft.print("Auto-Cal Mode");
+      } else {
+        tft.setTextColor(RA8875_RED);
+        tft.print("Auto-Cal Mode");
+      }
     } else {
       tft.setCursor(30, 330);
       tft.fillRect(30, 330, 215, 40, RA8875_BLACK);
@@ -215,7 +245,13 @@ FLASHMEM void printCalType(int IQCalType, bool autoCal) {
     if (autoCal) {
       tft.setCursor(290, 330);
       tft.fillRect(290, 330, 215, 40, RA8875_BLACK);
-      tft.print("Auto-Cal Mode");
+            if (autoCalDone) {
+        tft.setTextColor(RA8875_GREEN);
+        tft.print("Auto-Cal Mode");
+      } else {
+        tft.setTextColor(RA8875_RED);
+        tft.print("Auto-Cal Mode");
+      }
     } else {
       tft.setCursor(290, 330);
       tft.fillRect(290, 330, 215, 40, RA8875_BLACK);
@@ -364,7 +400,7 @@ void DoReceiveCalibrate(bool radioCal) {
   tft.setCursor(400, 110);
   tft.print(correctionIncrement);
   bool autoCal = false;
-  printCalType(calTypeFlag, autoCal);
+  printCalType(calTypeFlag, autoCal, false);
   warmUpCal();
 
   enum class State { warmup,
@@ -398,22 +434,24 @@ void DoReceiveCalibrate(bool radioCal) {
   std::vector<float32_t> sub_vectorPhase(20);
   std::vector<float32_t> sub_vectorAmpResult(20);
   std::vector<float32_t> sub_vectorPhaseResult(20);
+  elapsedMillis fiveSeconds;
+  int viewTime = 0;
 
   bool averageFlag = false;
   std::vector<float>::iterator result;
   bool stopSweep = false;
 
-  if(radioCal) {
-            autoCal = true;
-        printCalType(calTypeFlag, autoCal);
-        count = 0;
-        warmup = 0;
-        index = 1;
-        stopSweep = false;
-        IQCalType = 0;
-        std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
-        std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
-        state = State::warmup;
+  if (radioCal) {
+    autoCal = true;
+    printCalType(calTypeFlag, autoCal, false);
+    count = 0;
+    warmup = 0;
+    index = 1;
+    stopSweep = false;
+    IQCalType = 0;
+    std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
+    std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
+    state = State::warmup;
   }
 
   // Receive calibration loop
@@ -426,10 +464,10 @@ void DoReceiveCalibrate(bool radioCal) {
       else task = BOGUS_PIN_READ;
     }
     switch (task) {
-            // Activate automatic calibration.
+        // Activate automatic calibration.
       case ZOOM:  // 2nd row, 1st column button
         autoCal = true;
-        printCalType(calTypeFlag, autoCal);
+        printCalType(calTypeFlag, autoCal, false);
         count = 0;
         warmup = 0;
         index = 1;
@@ -462,7 +500,7 @@ void DoReceiveCalibrate(bool radioCal) {
         break;
       default:
         break;
-    }                                     // End switch
+    }  // End switch
 
 
     //  Begin automatic calibration state machine.
@@ -499,18 +537,18 @@ void DoReceiveCalibrate(bool radioCal) {
             result = std::min_element(sweepVector.begin(), sweepVector.end());  // Value of the minimum.
             adjdBMinIndex = std::distance(sweepVector.begin(), result);         // Find the index.
             EEPROMData.IQAmpCorrectionFactor[EEPROMData.currentBand] = sweepVectorValue[adjdBMinIndex];
-            iOptimal = sweepVectorValue[adjdBMinIndex];                                    // Set to the discovered minimum.
-                                                                                           //              Serial.printf("The optimal amplitude = %.3f at index %d with value %.1f count = %d\n", sweepVectorValue[adjdBMinIndex], adjdBMinIndex, *result, count);
+            iOptimal = sweepVectorValue[adjdBMinIndex];                                   // Set to the discovered minimum.
+                                                                                          //              Serial.printf("The optimal amplitude = %.3f at index %d with value %.1f count = %d\n", sweepVectorValue[adjdBMinIndex], adjdBMinIndex, *result, count);
             EEPROMData.IQPhaseCorrectionFactor[EEPROMData.currentBand] = -maxSweepPhase;  // Reset for next sweep.
             count = count + 1;
             // Save the sub_vector which will be used to refine the optimal result.
             sub_vectorAmp = { sweepVectorValue.begin() + adjdBMinIndex - 10, sweepVectorValue.begin() + adjdBMinIndex + 10 };
-        //    for (uint32_t i = 0; i < sweepVectorValue.size(); i = i + 1) {
-        //      Serial.printf("Amp sweepVectorValue[%d] = %.3f sweepVector[%d] = %.3f\n", i, sweepVectorValue[i], i, sweepVector[i]);
-        //    }
-        //    for (uint32_t i = 0; i < sub_vectorAmp.size(); i = i + 1) {
-        //      Serial.printf("sub_vectorAmp[%d] = %.3f\n", i, sub_vectorAmp[i]);
-        //    }
+            //    for (uint32_t i = 0; i < sweepVectorValue.size(); i = i + 1) {
+            //      Serial.printf("Amp sweepVectorValue[%d] = %.3f sweepVector[%d] = %.3f\n", i, sweepVectorValue[i], i, sweepVector[i]);
+            //    }
+            //    for (uint32_t i = 0; i < sub_vectorAmp.size(); i = i + 1) {
+            //      Serial.printf("sub_vectorAmp[%d] = %.3f\n", i, sub_vectorAmp[i]);
+            //    }
             // Clear the vector before moving to phase.
             std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
             std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
@@ -540,19 +578,19 @@ void DoReceiveCalibrate(bool radioCal) {
             result = std::min_element(sweepVector.begin(), sweepVector.end());
             adjdBMinIndex = std::distance(sweepVector.begin(), result);
             EEPROMData.IQPhaseCorrectionFactor[EEPROMData.currentBand] = sweepVectorValue[adjdBMinIndex];  // Set to the discovered minimum.
-            qOptimal = sweepVectorValue[adjdBMinIndex];                                                     // Set to the discovered minimum.
-                                                                                                            //             Serial.printf("The optimal phase = %.3f at index %d with value %.1f count = %d\n", sweepVectorValue[adjdBMinIndex], adjdBMinIndex, *result, count);
-                                                                                                            //             EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] = 1.0 - maxSweepAmp;
+            qOptimal = sweepVectorValue[adjdBMinIndex];                                                    // Set to the discovered minimum.
+                                                                                                           //             Serial.printf("The optimal phase = %.3f at index %d with value %.1f count = %d\n", sweepVectorValue[adjdBMinIndex], adjdBMinIndex, *result, count);
+                                                                                                           //             EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] = 1.0 - maxSweepAmp;
             count = count + 1;
             // Save the sub_vector which will be used to refine the optimal result.
             sub_vectorPhase = { sweepVectorValue.begin() + adjdBMinIndex - 10, sweepVectorValue.begin() + adjdBMinIndex + 10 };
-        //    for (uint32_t i = 0; i < sweepVectorValue.size(); i = i + 1) {
-        //      Serial.printf("Phase sweepVectorValue[%d] = %.3f sweepVector[%d] = %.3f\n", i, sweepVectorValue[i], i, sweepVector[i]);
-        //    }
+            //    for (uint32_t i = 0; i < sweepVectorValue.size(); i = i + 1) {
+            //      Serial.printf("Phase sweepVectorValue[%d] = %.3f sweepVector[%d] = %.3f\n", i, sweepVectorValue[i], i, sweepVector[i]);
+            //    }
 
-        //    for (uint32_t i = 0; i < sub_vectorPhase.size(); i = i + 1) {
-        //      Serial.printf("sub_vectorPhase[%d] = %.3f\n", i, sub_vectorPhase[i]);
-        //    }
+            //    for (uint32_t i = 0; i < sub_vectorPhase.size(); i = i + 1) {
+            //      Serial.printf("sub_vectorPhase[%d] = %.3f\n", i, sub_vectorPhase[i]);
+            //    }
 
             state = State::refineAmp;  // Proceed to refine the I channel.
             index = 0;
@@ -647,19 +685,27 @@ void DoReceiveCalibrate(bool radioCal) {
         case State::setOptimal:
           EEPROMData.IQAmpCorrectionFactor[EEPROMData.currentBand] = iOptimal;
           EEPROMData.IQPhaseCorrectionFactor[EEPROMData.currentBand] = qOptimal;
-      //    Serial.printf("iOptimal = %.3f qOptimal = %.3f\n", iOptimal, qOptimal);
+          //    Serial.printf("iOptimal = %.3f qOptimal = %.3f\n", iOptimal, qOptimal);
           state = State::exit;
+          viewTime = fiveSeconds;  // Start result view timer.
           break;
         case State::exit:
+          if (radioCal) {
+            printCalType(calTypeFlag, autoCal, true);
+            if ((fiveSeconds - viewTime) < 5000) {  // Show calibration result for 5 seconds at conclusion during Radio Cal.
+              state = State::exit;
+              break;
+            } else {
+              CalibratePrologue();
+              EEPROMData.calFreq = calFreqTemp;  // Set back to the user selected calibration tone frequency.
+              return;
+            }
+          }
           autoCal = false;
-          printCalType(calTypeFlag, autoCal);
-                              if(radioCal) {
-            CalibratePrologue();
-          return;
-                              }
+          printCalType(calTypeFlag, autoCal, false);
           break;
-      }
-    }  // end automatic calibration state machine
+      }  // end switch
+    }    // end automatic calibration state machine
 
     if (task != -1) lastUsedTask = task;  //  Save the last used task.
     task = -100;                          // Reset task after it is used.
@@ -721,6 +767,8 @@ void DoXmitCalibrate(int toneFreqIndex, bool radioCal) {
   std::vector<float32_t> sub_vectorPhase(20);
   std::vector<float32_t> sub_vectorAmpResult(20);
   std::vector<float32_t> sub_vectorPhaseResult(20);
+  elapsedMillis fiveSeconds;
+  int viewTime = 0;
 
   bool autoCal = false;
   bool averageFlag = false;
@@ -743,21 +791,21 @@ void DoXmitCalibrate(int toneFreqIndex, bool radioCal) {
   tft.print(correctionIncrement);
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreqCal(freqOffset);
-  printCalType(calTypeFlag, autoCal);
+  printCalType(calTypeFlag, autoCal, false);
   warmUpCal();
 
-if(radioCal) {
-        autoCal = true;
-        printCalType(calTypeFlag, autoCal);
-        count = 0;
-        warmup = 0;
-        index = 1;
-        stopSweep = false;
-        IQCalType = 0;
-        std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
-        std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
-        state = State::warmup;
-}
+  if (radioCal) {
+    autoCal = true;
+    printCalType(calTypeFlag, autoCal, false);
+    count = 0;
+    warmup = 0;
+    index = 1;
+    stopSweep = false;
+    IQCalType = 0;
+    std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
+    std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
+    state = State::warmup;
+  }
 
   // Transmit Calibration Loop
   while (true) {
@@ -772,7 +820,7 @@ if(radioCal) {
       // Activate automatic calibration.
       case ZOOM:  // 2nd row, 1st column button
         autoCal = true;
-        printCalType(calTypeFlag, autoCal);
+        printCalType(calTypeFlag, autoCal, false);
         count = 0;
         warmup = 0;
         index = 1;
@@ -847,12 +895,12 @@ if(radioCal) {
             count = count + 1;
             // Save the sub_vector which will be used to refine the optimal result.
             sub_vectorAmp = { sweepVectorValue.begin() + adjdBMinIndex - 10, sweepVectorValue.begin() + adjdBMinIndex + 10 };
-        //    for (uint32_t i = 0; i < sweepVectorValue.size(); i = i + 1) {
-        //      Serial.printf("Amp sweepVectorValue[%d] = %.3f sweepVector[%d] = %.3f\n", i, sweepVectorValue[i], i, sweepVector[i]);
-        //    }
-        //    for (uint32_t i = 0; i < sub_vectorAmp.size(); i = i + 1) {
-        //      Serial.printf("sub_vectorAmp[%d] = %.3f\n", i, sub_vectorAmp[i]);
-        //    }
+            //    for (uint32_t i = 0; i < sweepVectorValue.size(); i = i + 1) {
+            //      Serial.printf("Amp sweepVectorValue[%d] = %.3f sweepVector[%d] = %.3f\n", i, sweepVectorValue[i], i, sweepVector[i]);
+            //    }
+            //    for (uint32_t i = 0; i < sub_vectorAmp.size(); i = i + 1) {
+            //      Serial.printf("sub_vectorAmp[%d] = %.3f\n", i, sub_vectorAmp[i]);
+            //    }
             // Clear the vector before moving to phase.
             std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
             std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
@@ -888,13 +936,13 @@ if(radioCal) {
             count = count + 1;
             // Save the sub_vector which will be used to refine the optimal result.
             sub_vectorPhase = { sweepVectorValue.begin() + adjdBMinIndex - 10, sweepVectorValue.begin() + adjdBMinIndex + 10 };
-        //    for (uint32_t i = 0; i < sweepVectorValue.size(); i = i + 1) {
-        //      Serial.printf("Phase sweepVectorValue[%d] = %.3f sweepVector[%d] = %.3f\n", i, sweepVectorValue[i], i, sweepVector[i]);
-        //    }
+            //    for (uint32_t i = 0; i < sweepVectorValue.size(); i = i + 1) {
+            //      Serial.printf("Phase sweepVectorValue[%d] = %.3f sweepVector[%d] = %.3f\n", i, sweepVectorValue[i], i, sweepVector[i]);
+            //    }
 
-        //    for (uint32_t i = 0; i < sub_vectorPhase.size(); i = i + 1) {
-        //      Serial.printf("sub_vectorPhase[%d] = %.3f\n", i, sub_vectorPhase[i]);
-        //    }
+            //    for (uint32_t i = 0; i < sub_vectorPhase.size(); i = i + 1) {
+            //      Serial.printf("sub_vectorPhase[%d] = %.3f\n", i, sub_vectorPhase[i]);
+            //    }
 
             state = State::refineAmp;  // Proceed to refine the I channel.
             index = 0;
@@ -989,16 +1037,23 @@ if(radioCal) {
         case State::setOptimal:
           EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] = iOptimal;
           EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand] = qOptimal;
-      //    Serial.printf("iOptimal = %.3f qOptimal = %.3f\n", iOptimal, qOptimal);
+          //    Serial.printf("iOptimal = %.3f qOptimal = %.3f\n", iOptimal, qOptimal);
           state = State::exit;
+          viewTime = fiveSeconds;  // Start result view timer.
           break;
         case State::exit:
+          if (radioCal) {
+            printCalType(calTypeFlag, autoCal, true);
+            if ((fiveSeconds - viewTime) < 5000) {  // Show calibration result for 5 seconds at conclusion during Radio Cal.
+              state = State::exit;
+              break;
+            } else {
+              CalibratePrologue();
+              return;
+            }
+          }
           autoCal = false;
-          printCalType(calTypeFlag, autoCal);
-                    if(radioCal) {
-            CalibratePrologue();
-          return;
-      }
+          printCalType(calTypeFlag, autoCal, false);
           break;
       }
     }  // end automatic calibration state machine
@@ -1065,6 +1120,8 @@ void DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal) {
   std::vector<int> sub_vectorPhase(20);
   std::vector<float> sub_vectorAmpResult(20);
   std::vector<float> sub_vectorPhaseResult(20);
+  elapsedMillis fiveSeconds;
+  int viewTime = 0;
 
   bool averageFlag = false;
   std::vector<float>::iterator result;
@@ -1086,20 +1143,20 @@ void DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal) {
   tft.print(increment);
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreqCal(freqOffset);
-  printCalType(calTypeFlag, autoCal);
+  printCalType(calTypeFlag, autoCal, false);
   warmUpCal();
 
-  if(radioCal) {
-            autoCal = true;
-        printCalType(calTypeFlag, autoCal);
-        count = 0;
-        warmup = 0;
-        index = 1;
-        stopSweep = false;
-        IQCalType = 0;
-        std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
-        std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
-        state = State::warmup;
+  if (radioCal) {
+    autoCal = true;
+    printCalType(calTypeFlag, autoCal, false);
+    count = 0;
+    warmup = 0;
+    index = 1;
+    stopSweep = false;
+    IQCalType = 0;
+    std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
+    std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
+    state = State::warmup;
   }
 
   // Carrier Calibration Loop.  This is independent of loop().
@@ -1116,7 +1173,7 @@ void DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal) {
       // Activate automatic calibration.
       case ZOOM:  // 2nd row, 1st column button
         autoCal = true;
-        printCalType(calTypeFlag, autoCal);
+        printCalType(calTypeFlag, autoCal, false);
         count = 0;
         warmup = 0;
         index = 1;
@@ -1156,7 +1213,7 @@ void DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal) {
       switch (state) {
         case State::warmup:
           EEPROMData.qDCoffset[EEPROMData.currentBand] = maxSweep;  //  Need to use these values during warmup
-          EEPROMData.iDCoffset[EEPROMData.currentBand] = maxSweep;      //  so adjdB and adjdB_avg are high.
+          EEPROMData.iDCoffset[EEPROMData.currentBand] = maxSweep;  //  so adjdB and adjdB_avg are high.
           warmup = warmup + 1;
           state = State::warmup;
           if (warmup == 10) state = State::state0;
@@ -1176,27 +1233,27 @@ void DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal) {
           else sweepVector[index - 1] = adjdB;
           EEPROMData.iDCoffset[EEPROMData.currentBand] = EEPROMData.iDCoffset[EEPROMData.currentBand] + increment;  // Next one!
           // Go to Q channel when I channel sweep is finished.
-//          if (index > 20) {
-//            if (sweepVector[index - 1] > (sweepVector[index - 11] + 1.0)) stopSweep = true;  // Stop sweep if past the null.
-//          }
+          //          if (index > 20) {
+          //            if (sweepVector[index - 1] > (sweepVector[index - 11] + 1.0)) stopSweep = true;  // Stop sweep if past the null.
+          //          }
           if (abs(EEPROMData.iDCoffset[EEPROMData.currentBand]) > maxSweep) {  // Needs to be subtracted from 1.0.
             index = 1;
             IQCalType = 1;
             result = std::min_element(sweepVector.begin(), sweepVector.end());  // Value of the minimum.
             adjdBMinIndex = std::distance(sweepVector.begin(), result);         // Find the index.
             EEPROMData.iDCoffset[EEPROMData.currentBand] = sweepVectorValue[adjdBMinIndex];
-            iOptimal = sweepVectorValue[adjdBMinIndex];                                    // Set to the discovered minimum.
-          //  Serial.printf("The optimal iDCoffset = %d at index %d with value %.3f count = %d\n", sweepVectorValue[adjdBMinIndex], adjdBMinIndex, *result, count);
+            iOptimal = sweepVectorValue[adjdBMinIndex];                // Set to the discovered minimum.
+                                                                       //  Serial.printf("The optimal iDCoffset = %d at index %d with value %.3f count = %d\n", sweepVectorValue[adjdBMinIndex], adjdBMinIndex, *result, count);
             EEPROMData.qDCoffset[EEPROMData.currentBand] = -maxSweep;  // Reset for next sweep.
             count = count + 1;
             // Save the sub_vector which will be used to refine the optimal result.
             sub_vectorAmp = { sweepVectorValue.begin() + adjdBMinIndex - 10, sweepVectorValue.begin() + adjdBMinIndex + 10 };
-         //   for (uint32_t i = 0; i < sweepVectorValue.size(); i = i + 1) {
-         //     Serial.printf("Amp sweepVectorValue[%d] = %.3f sweepVector[%d] = %.3f\n", i, sweepVectorValue[i], i, sweepVector[i]);
-         //   }
-         //   for (uint32_t i = 0; i < sub_vectorAmp.size(); i = i + 1) {
-         //     Serial.printf("sub_vectorAmp[%d] = %d\n", i, sub_vectorAmp[i]);
-         //   }
+            //   for (uint32_t i = 0; i < sweepVectorValue.size(); i = i + 1) {
+            //     Serial.printf("Amp sweepVectorValue[%d] = %.3f sweepVector[%d] = %.3f\n", i, sweepVectorValue[i], i, sweepVector[i]);
+            //   }
+            //   for (uint32_t i = 0; i < sub_vectorAmp.size(); i = i + 1) {
+            //     Serial.printf("sub_vectorAmp[%d] = %d\n", i, sub_vectorAmp[i]);
+            //   }
             // Clear the vector before moving to phase.
             std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0);
             std::fill(sweepVector.begin(), sweepVector.end(), 0);
@@ -1218,27 +1275,27 @@ void DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal) {
           else sweepVector[index - 1] = adjdB;
           // Increment for the next measurement.
           EEPROMData.qDCoffset[EEPROMData.currentBand] = EEPROMData.qDCoffset[EEPROMData.currentBand] + increment;
-//          if (index > 20) {
-//            if (sweepVector[index - 1] > (sweepVector[index - 11] + 2.0)) stopSweep = true;  // Stop sweep if past the null.
-//          }
+          //          if (index > 20) {
+          //            if (sweepVector[index - 1] > (sweepVector[index - 11] + 2.0)) stopSweep = true;  // Stop sweep if past the null.
+          //          }
           if (EEPROMData.qDCoffset[EEPROMData.currentBand] > maxSweep) {
             IQCalType = 0;
             result = std::min_element(sweepVector.begin(), sweepVector.end());
             adjdBMinIndex = std::distance(sweepVector.begin(), result);
             EEPROMData.qDCoffset[EEPROMData.currentBand] = sweepVectorValue[adjdBMinIndex];  // Set to the discovered minimum.
-            qOptimal = sweepVectorValue[adjdBMinIndex];                                                     // Set to the discovered minimum.
-        //    Serial.printf("The optimal qDCoffset = %d at index %d with value %.3f count = %d\n", sweepVectorValue[adjdBMinIndex], adjdBMinIndex, *result, count);
-                                                                                                            //             EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] = 1.0 - maxSweepAmp;
+            qOptimal = sweepVectorValue[adjdBMinIndex];                                      // Set to the discovered minimum.
+                                                                                             //    Serial.printf("The optimal qDCoffset = %d at index %d with value %.3f count = %d\n", sweepVectorValue[adjdBMinIndex], adjdBMinIndex, *result, count);
+                                                                                             //             EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] = 1.0 - maxSweepAmp;
             count = count + 1;
             // Save the sub_vector which will be used to refine the optimal result.
             sub_vectorPhase = { sweepVectorValue.begin() + adjdBMinIndex - 10, sweepVectorValue.begin() + adjdBMinIndex + 10 };
-//            for (uint32_t i = 0; i < sweepVectorValue.size(); i = i + 1) {
-//              Serial.printf("Phase sweepVectorValue[%d] = %.3f sweepVector[%d] = %.3f\n", i, sweepVectorValue[i], i, sweepVector[i]);
-//            }
+            //            for (uint32_t i = 0; i < sweepVectorValue.size(); i = i + 1) {
+            //              Serial.printf("Phase sweepVectorValue[%d] = %.3f sweepVector[%d] = %.3f\n", i, sweepVectorValue[i], i, sweepVector[i]);
+            //            }
 
-          //  for (uint32_t i = 0; i < sub_vectorPhase.size(); i = i + 1) {
-          //    Serial.printf("sub_vectorPhase[%d] = %d\n", i, sub_vectorPhase[i]);
-          //  }
+            //  for (uint32_t i = 0; i < sub_vectorPhase.size(); i = i + 1) {
+            //    Serial.printf("sub_vectorPhase[%d] = %d\n", i, sub_vectorPhase[i]);
+            //  }
 
             state = State::refineAmp;  // Proceed to refine the I channel.
             index = 0;
@@ -1333,16 +1390,23 @@ void DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal) {
         case State::setOptimal:
           EEPROMData.iDCoffset[EEPROMData.currentBand] = iOptimal;
           EEPROMData.qDCoffset[EEPROMData.currentBand] = qOptimal;
-        //  Serial.printf("iOptimal = %d qOptimal = %d\n", iOptimal, qOptimal);
+          //  Serial.printf("iOptimal = %d qOptimal = %d\n", iOptimal, qOptimal);
           state = State::exit;
+          viewTime = fiveSeconds;  // Start result view timer.
           break;
         case State::exit:
+          if (radioCal) {
+            printCalType(calTypeFlag, autoCal, true);
+            if ((fiveSeconds - viewTime) < 5000) {  // Show calibration result for 5 seconds at conclusion during Radio Cal.
+              state = State::exit;
+              break;
+            } else {
+              CalibratePrologue();
+              return;
+            }
+          }
           autoCal = false;
-          printCalType(calTypeFlag, autoCal);
-          if(radioCal) {
-            CalibratePrologue();
-          return;
-      }
+          printCalType(calTypeFlag, autoCal, false);
           break;
       }
     }  // end automatic calibration state machine
@@ -1602,49 +1666,49 @@ void DoXmitCarrierCalibrate(int toneFreqIndex) {
 
 // Automatic calibration of all bands.  Greg KF5N June 4, 2024
 void RadioCal() {
-IQChoice = 0;  // Global variable.
-BandSet(BAND_80M);
-#ifdef QSE2 
-DoXmitCarrierCalibrate(EEPROMData.calFreq, true); 
+  IQChoice = 0;  // Global variable.
+  BandSet(BAND_80M);
+#ifdef QSE2
+  DoXmitCarrierCalibrate(EEPROMData.calFreq, true);
 #endif
-DoXmitCalibrate(EEPROMData.calFreq, true);
-DoReceiveCalibrate(true);
-BandSet(BAND_40M);
-#ifdef QSE2 
-DoXmitCarrierCalibrate(EEPROMData.calFreq, true); 
+  DoXmitCalibrate(EEPROMData.calFreq, true);
+  DoReceiveCalibrate(true);
+  BandSet(BAND_40M);
+#ifdef QSE2
+  DoXmitCarrierCalibrate(EEPROMData.calFreq, true);
 #endif
-DoXmitCalibrate(EEPROMData.calFreq, true);
-DoReceiveCalibrate(true);
-BandSet(BAND_20M);
-#ifdef QSE2 
-DoXmitCarrierCalibrate(EEPROMData.calFreq, true); 
+  DoXmitCalibrate(EEPROMData.calFreq, true);
+  DoReceiveCalibrate(true);
+  BandSet(BAND_20M);
+#ifdef QSE2
+  DoXmitCarrierCalibrate(EEPROMData.calFreq, true);
 #endif
-DoXmitCalibrate(EEPROMData.calFreq, true);
-DoReceiveCalibrate(true);
-BandSet(BAND_17M);
-#ifdef QSE2 
-DoXmitCarrierCalibrate(EEPROMData.calFreq, true); 
+  DoXmitCalibrate(EEPROMData.calFreq, true);
+  DoReceiveCalibrate(true);
+  BandSet(BAND_17M);
+#ifdef QSE2
+  DoXmitCarrierCalibrate(EEPROMData.calFreq, true);
 #endif
-DoXmitCalibrate(EEPROMData.calFreq, true);
-DoReceiveCalibrate(true);
-BandSet(BAND_15M);
-#ifdef QSE2 
-DoXmitCarrierCalibrate(EEPROMData.calFreq, true); 
+  DoXmitCalibrate(EEPROMData.calFreq, true);
+  DoReceiveCalibrate(true);
+  BandSet(BAND_15M);
+#ifdef QSE2
+  DoXmitCarrierCalibrate(EEPROMData.calFreq, true);
 #endif
-DoXmitCalibrate(EEPROMData.calFreq, true);
-DoReceiveCalibrate(true);
-BandSet(BAND_12M);
-#ifdef QSE2 
-DoXmitCarrierCalibrate(EEPROMData.calFreq, true); 
+  DoXmitCalibrate(EEPROMData.calFreq, true);
+  DoReceiveCalibrate(true);
+  BandSet(BAND_12M);
+#ifdef QSE2
+  DoXmitCarrierCalibrate(EEPROMData.calFreq, true);
 #endif
-DoXmitCalibrate(EEPROMData.calFreq, true);
-DoReceiveCalibrate(true);
-BandSet(BAND_10M);
-#ifdef QSE2 
-DoXmitCarrierCalibrate(EEPROMData.calFreq, true); 
+  DoXmitCalibrate(EEPROMData.calFreq, true);
+  DoReceiveCalibrate(true);
+  BandSet(BAND_10M);
+#ifdef QSE2
+  DoXmitCarrierCalibrate(EEPROMData.calFreq, true);
 #endif
-DoXmitCalibrate(EEPROMData.calFreq, true);
-DoReceiveCalibrate(true);
+  DoXmitCalibrate(EEPROMData.calFreq, true);
+  DoReceiveCalibrate(true);
   return;
 }
 
@@ -1971,6 +2035,7 @@ FLASHMEM void SelectCalFreq() {
   EEPROMData.calFreq = SubmenuSelect(calFreqs, 2, EEPROMData.calFreq);  // Returns the index of the array.
   //  RedrawDisplayScreen();  Kills the bandwidth graphics in the audio display window, remove. KF5N July 30, 2023
   // Clear the current CW filter graphics and then restore the bandwidth indicator bar.  KF5N July 30, 2023
+  EEPROMWrite();  // Save selection to EEPROM.  Greg KF5N, June 5, 2024
   tft.writeTo(L2);
   tft.clearMemory();
   RedrawDisplayScreen();
