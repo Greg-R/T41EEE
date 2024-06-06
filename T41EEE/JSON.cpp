@@ -107,6 +107,7 @@ FLASHMEM void loadConfiguration(const char *filename, config_t &EEPROMData) {
   #ifdef QSE2
   for (int i = 0; i < 7; i++) EEPROMData.iDCoffset[i] = doc["iDCoffset"][i];
   for (int i = 0; i < 7; i++) EEPROMData.qDCoffset[i] = doc["qDCoffset"][i];
+  EEPROMData.dacOffset = doc["dacOffset"] | 0;
   #endif
 
   // How to copy strings:
@@ -209,6 +210,7 @@ FLASHMEM void saveConfiguration(const char *filename, const config_t &EEPROMData
   #ifdef QSE2
   for (int i = 0; i < 7; i++) doc["iDCoffset"][i] = EEPROMData.iDCoffset[i];
   for (int i = 0; i < 7; i++) doc["qDCoffset"][i] = EEPROMData.qDCoffset[i];
+  doc["dacOffset"] = EEPROMData.dacOffset;
   #endif
 
 

@@ -1706,6 +1706,8 @@ void RadioCal() {
   BandSet(BAND_10M);
 #ifdef QSE2
   DoXmitCarrierCalibrate(EEPROMData.calFreq, true);
+//  DoXmitCalibrate(EEPROMData.calFreq, true);
+//  DoXmitCarrierCalibrate(EEPROMData.calFreq, true);
 #endif
   DoXmitCalibrate(EEPROMData.calFreq, true);
   DoReceiveCalibrate(true);
@@ -1779,8 +1781,8 @@ void ProcessIQData2() {
     arm_float_to_q15(float_buffer_R_EX, q15_buffer_RTemp, 2048);
 
 #ifdef QSE2
-    arm_offset_q15(q15_buffer_LTemp, EEPROMData.iDCoffset[EEPROMData.currentBand] + 1260, q15_buffer_LTemp, 2048);
-    arm_offset_q15(q15_buffer_RTemp, EEPROMData.qDCoffset[EEPROMData.currentBand] + 1260, q15_buffer_RTemp, 2048);
+    arm_offset_q15(q15_buffer_LTemp, EEPROMData.iDCoffset[EEPROMData.currentBand] + EEPROMData.dacOffset, q15_buffer_LTemp, 2048);
+    arm_offset_q15(q15_buffer_RTemp, EEPROMData.qDCoffset[EEPROMData.currentBand] + EEPROMData.dacOffset, q15_buffer_RTemp, 2048);
 #endif
 
     Q_out_L_Ex.play(q15_buffer_LTemp, 2048);

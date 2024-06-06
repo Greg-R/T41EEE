@@ -27,8 +27,8 @@ void CalibrateOptions() {
 
   // Select the type of calibration, and then skip this during the loop() function.
   if (calibrateFlag == 0) {
-    const char* IQOptions[11]{ "Freq Cal", "CW PA Cal", "Rec Cal", "Carrier Cal", "Xmit Cal", "SSB PA Cal", "Radio Cal", "Set Tone", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
-    IQChoice = SubmenuSelect(IQOptions, 11, 0);                                                                                                //AFP 10-21-22
+    const char* IQOptions[12]{ "Freq Cal", "CW PA Cal", "Rec Cal", "Carrier Cal", "Xmit Cal", "SSB PA Cal", "Radio Cal", "Set Tone", "DAC Offset", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
+    IQChoice = SubmenuSelect(IQOptions, 12, 0);                                                                                                //AFP 10-21-22
   }
   calibrateFlag = 1;
   switch (IQChoice) {
@@ -100,7 +100,20 @@ void CalibrateOptions() {
       calibrateFlag = 0;
       break;
 
-    case 8:  // Calibrate buttons
+    case 8:  // Set DAC offset for carrier cancellation.
+    EEPROMData.dacOffset = GetEncoderValueLiveQ15t(-5000, 5000, EEPROMData.dacOffset, 50, (char *)"DAC Offset:");
+      val = ReadSelectedPushButton();
+      if (val != BOGUS_PIN_READ) {
+        val = ProcessButtonPress(val);
+        if (val == MENU_OPTION_SELECT) {
+          tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
+          EEPROMWrite();
+          calibrateFlag = 0;
+        }
+      }
+    break;
+
+    case 9:  // Calibrate buttons
       SaveAnalogSwitchValues();
       calibrateFlag = 0;
       RedrawDisplayScreen();
@@ -108,7 +121,7 @@ void CalibrateOptions() {
       DrawFrequencyBarValue();
       break;
 
-    case 9:  // Set button repeat rate
+    case 10:  // Set button repeat rate
       EEPROMData.buttonRepeatDelay = 1000 * GetEncoderValueLive(0, 5000, EEPROMData.buttonRepeatDelay / 1000, 1, (char *)"Btn Repeat:  ");
       val = ReadSelectedPushButton();
       if (val != BOGUS_PIN_READ) {
@@ -121,7 +134,7 @@ void CalibrateOptions() {
       }
       break;
 
-    case 10:  // Cancelled choice
+    case 11:  // Cancelled choice
       RedrawDisplayScreen();
       currentFreq = TxRxFreq = EEPROMData.centerFreq + NCOFreq;
       DrawBandWidthIndicatorBar();  // AFP 10-20-22

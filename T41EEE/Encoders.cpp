@@ -291,7 +291,7 @@ int GetEncoderValueLiveQ15t(int minValue, int maxValue, int startValue, int incr
     filterEncoderMove = 0;
   }
   //tft.setTextColor(RA8875_WHITE);
-  return currentValue;
+  return static_cast<q15_t>(currentValue);
 }
 
 
