@@ -420,7 +420,7 @@ void DoReceiveCalibrate(bool radioCal) {
   averagingState avgState = averagingState::iChannel;
   uint32_t warmup = 0;
   float maxSweepAmp = 0.2;
-  float maxSweepPhase = 0.1;
+  float maxSweepPhase = 0.2;
   int count = 0;
   uint32_t index = 1;
   uint32_t adjdBMinIndex;
@@ -430,10 +430,10 @@ void DoReceiveCalibrate(bool radioCal) {
   float increment = 0.001;
   std::vector<float32_t> sweepVector(401);
   std::vector<float32_t> sweepVectorValue(401);
-  std::vector<float32_t> sub_vectorAmp(20);
-  std::vector<float32_t> sub_vectorPhase(20);
-  std::vector<float32_t> sub_vectorAmpResult(20);
-  std::vector<float32_t> sub_vectorPhaseResult(20);
+  std::vector<float32_t> sub_vectorAmp(21);
+  std::vector<float32_t> sub_vectorPhase(21);
+  std::vector<float32_t> sub_vectorAmpResult(21);
+  std::vector<float32_t> sub_vectorPhaseResult(21);
   elapsedMillis fiveSeconds;
   int viewTime = 0;
 
@@ -752,7 +752,7 @@ void DoXmitCalibrate(int toneFreqIndex, bool radioCal) {
   State state = State::warmup;  // Start calibration state machine in warmup state.
   averagingState avgState = averagingState::iChannel;
   uint32_t warmup = 0;
-  float maxSweepAmp = 0.2;
+  float maxSweepAmp = 0.7;
   float maxSweepPhase = 0.1;
   int count = 0;
   uint32_t index = 1;
@@ -761,12 +761,12 @@ void DoXmitCalibrate(int toneFreqIndex, bool radioCal) {
   float iOptimal = 0;
   float qOptimal = 0;
   float increment = 0.001;
-  std::vector<float32_t> sweepVector(401);
-  std::vector<float32_t> sweepVectorValue(401);
-  std::vector<float32_t> sub_vectorAmp(20);
-  std::vector<float32_t> sub_vectorPhase(20);
-  std::vector<float32_t> sub_vectorAmpResult(20);
-  std::vector<float32_t> sub_vectorPhaseResult(20);
+  std::vector<float32_t> sweepVector(1401);
+  std::vector<float32_t> sweepVectorValue(1401);
+  std::vector<float32_t> sub_vectorAmp(21);
+  std::vector<float32_t> sub_vectorPhase(21);
+  std::vector<float32_t> sub_vectorAmpResult(21);
+  std::vector<float32_t> sub_vectorPhaseResult(21);
   elapsedMillis fiveSeconds;
   int viewTime = 0;
 
@@ -880,10 +880,10 @@ void DoXmitCalibrate(int toneFreqIndex, bool radioCal) {
           else sweepVector[index - 1] = adjdB;
           EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] = EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] + increment;  // Next one!
           // Go to Q channel when I channel sweep is finished.
-          if (index > 20) {
-            if (sweepVector[index - 1] > (sweepVector[index - 11] + 3.0)) stopSweep = true;  // Stop sweep if past the null.
-          }
-          if (abs(EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] - 1.0) > maxSweepAmp || stopSweep) {  // Needs to be subtracted from 1.0.
+      //    if (index > 20) {
+      //      if (sweepVector[index - 1] > (sweepVector[index - 11] + 3.0)) stopSweep = true;  // Stop sweep if past the null.
+      //    }
+          if (abs(EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] - 1.0) > maxSweepAmp) {  // Needs to be subtracted from 1.0.
             index = 1;
             IQCalType = 1;
             result = std::min_element(sweepVector.begin(), sweepVector.end());  // Value of the minimum.
@@ -1104,7 +1104,7 @@ void DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal) {
   int count = 0;
   uint32_t adjdBMinIndex;
   int averageCount = 0;
-  int maxSweep = 400;
+  int maxSweep = 700;
   int iOptimal = 0;
   int qOptimal = 0;
   int increment = 5;
@@ -1114,12 +1114,12 @@ void DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal) {
 
   uint32_t index = 1;
 
-  std::vector<float> sweepVector(401);
-  std::vector<int> sweepVectorValue(401);
-  std::vector<int> sub_vectorAmp(20);
-  std::vector<int> sub_vectorPhase(20);
-  std::vector<float> sub_vectorAmpResult(20);
-  std::vector<float> sub_vectorPhaseResult(20);
+  std::vector<float> sweepVector(1401);
+  std::vector<int> sweepVectorValue(1401);
+  std::vector<int> sub_vectorAmp(21);
+  std::vector<int> sub_vectorPhase(21);
+  std::vector<float> sub_vectorAmpResult(21);
+  std::vector<float> sub_vectorPhaseResult(21);
   elapsedMillis fiveSeconds;
   int viewTime = 0;
 
