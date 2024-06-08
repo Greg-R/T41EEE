@@ -484,6 +484,7 @@ struct config_t {
   q15_t qDCoffset[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
   q15_t dacOffset = 1250; // This must be "tuned" for each radio and/or Audio Adapter board.
   #endif
+  bool radioCalComplete = false;
 };
 
 extern struct config_t EEPROMData;
@@ -982,9 +983,11 @@ void DoSignalHistogram(long val);
 void DoGapHistogram(long val);
 int DoSplitVFO();
 void DoPaddleFlip();
-void DoXmitCalibrate(int toneFreqIndex, bool radioCal);
-void DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal);
-void DoReceiveCalibrate(bool radioCal);
+void DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool refineCal);
+#ifdef QSE2
+void DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool refineCal);
+#endif
+void DoReceiveCalibrate(bool radioCal, bool refineCal);
 void DrawActiveLetter(int row, int horizontalSpacer, int whichLetterIndex, int keyWidth, int keyHeight);
 void DrawBandWidthIndicatorBar();  // AFP 03-27-22 Layers
 void DrawFrequencyBarValue();
@@ -1063,7 +1066,7 @@ void playTransmitData();  // KF5N February 23, 2024
 int ProcessButtonPress(int valPin);
 void ProcessEqualizerChoices(int EQType, char *title);
 void ProcessIQData();
-void RadioCal();  // Greg KF5N June 4, 2024.
+void RadioCal(bool refineCal);  // Greg KF5N June 4, 2024.
 uint16_t read16(File &f);
 uint32_t read32(File &f);
 int ReadSelectedPushButton();

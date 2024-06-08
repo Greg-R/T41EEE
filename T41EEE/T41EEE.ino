@@ -1104,7 +1104,6 @@ FLASHMEM void Splash() {
   tft.fillWindow(RA8875_BLACK);
 }
 
-
 /*****
   Purpose: program entry point that sets the environment for program
 

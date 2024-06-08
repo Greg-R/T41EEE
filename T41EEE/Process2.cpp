@@ -24,6 +24,7 @@ float adjdB_sample = 0.0;
 int i;
 q15_t rawSpectrumPeak = 0;
 float adjdB_avg = 0.0;
+bool radioCalComplete = false;
 
 
 /*****
@@ -380,7 +381,7 @@ void CalibratePrologue() {
    Return value:
       void
  *****/
-void DoReceiveCalibrate(bool radioCal) {
+void DoReceiveCalibrate(bool radioCal, bool refineCal) {
   int task = -1;
   int lastUsedTask = -2;
   int calFreqTemp, calFreqShift;
@@ -560,8 +561,8 @@ void DoReceiveCalibrate(bool radioCal) {
             break;
           }
           index = index + 1;
-          avgState = averagingState::iChannel;
-          state = State::average;
+     //     avgState = averagingState::iChannel;
+          state = State::initialSweepAmp;
           break;
 
         case State::initialSweepPhase:
@@ -599,8 +600,8 @@ void DoReceiveCalibrate(bool radioCal) {
             break;
           }
           index = index + 1;
-          avgState = averagingState::qChannel;
-          state = State::average;
+     //     avgState = averagingState::qChannel;
+          state = State::initialSweepPhase;
           break;
 
         case State::refineAmp:
@@ -662,8 +663,8 @@ void DoReceiveCalibrate(bool radioCal) {
 
         case State::average:  // Stay in this state while averaging is in progress.
           if (averageCount > 4) {
-            if (avgState == averagingState::iChannel) state = State::initialSweepAmp;
-            if (avgState == averagingState::qChannel) state = State::initialSweepPhase;
+      //      if (avgState == averagingState::iChannel) state = State::initialSweepAmp;
+      //      if (avgState == averagingState::qChannel) state = State::initialSweepPhase;
             if (avgState == averagingState::refineAmp) state = State::refineAmp;
             if (avgState == averagingState::refinePhase) state = State::refinePhase;
             averageCount = 0;
@@ -671,12 +672,12 @@ void DoReceiveCalibrate(bool radioCal) {
             break;
           }
           //  This may reduce accuracy of the calibration.
-          if (count == 0 || count == 1) {  // Skip averaging for 1st and 2nd sweeps.
-            if (avgState == averagingState::iChannel) state = State::initialSweepAmp;
-            if (avgState == averagingState::qChannel) state = State::initialSweepPhase;
-            averageFlag = false;  // Don't average.  We are going for speed in the first sweeps.
-            break;
-          }
+      //    if (count == 0 || count == 1) {  // Skip averaging for 1st and 2nd sweeps.
+      //      if (avgState == averagingState::iChannel) state = State::initialSweepAmp;
+      //      if (avgState == averagingState::qChannel) state = State::initialSweepPhase;
+      //      averageFlag = false;  // Don't average.  We are going for speed in the first sweeps.
+      //      break;
+      //    }
 
           averageCount = averageCount + 1;
           averageFlag = false;
@@ -730,7 +731,7 @@ void DoReceiveCalibrate(bool radioCal) {
    Return value:
       void
  *****/
-void DoXmitCalibrate(int toneFreqIndex, bool radioCal) {
+void DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool RefineCal) {
   enum class State { warmup,
                      state0,
                      initialSweepAmp,
@@ -912,8 +913,8 @@ void DoXmitCalibrate(int toneFreqIndex, bool radioCal) {
             break;
           }
           index = index + 1;
-          avgState = averagingState::iChannel;
-          state = State::average;
+       //   avgState = averagingState::iChannel;
+          state = State::initialSweepAmp;
           break;
 
         case State::initialSweepPhase:
@@ -951,8 +952,8 @@ void DoXmitCalibrate(int toneFreqIndex, bool radioCal) {
             break;
           }
           index = index + 1;
-          avgState = averagingState::qChannel;
-          state = State::average;
+      //    avgState = averagingState::qChannel;
+          state = State::initialSweepPhase;
           break;
 
         case State::refineAmp:
@@ -1014,8 +1015,8 @@ void DoXmitCalibrate(int toneFreqIndex, bool radioCal) {
 
         case State::average:  // Stay in this state while averaging is in progress.
           if (averageCount > 4) {
-            if (avgState == averagingState::iChannel) state = State::initialSweepAmp;
-            if (avgState == averagingState::qChannel) state = State::initialSweepPhase;
+       //     if (avgState == averagingState::iChannel) state = State::initialSweepAmp;
+       //     if (avgState == averagingState::qChannel) state = State::initialSweepPhase;
             if (avgState == averagingState::refineAmp) state = State::refineAmp;
             if (avgState == averagingState::refinePhase) state = State::refinePhase;
             averageCount = 0;
@@ -1023,12 +1024,12 @@ void DoXmitCalibrate(int toneFreqIndex, bool radioCal) {
             break;
           }
           //  This may reduce accuracy of the calibration.
-          if (count == 0 || count == 1) {  // Skip averaging for 1st and 2nd sweeps.
-            if (avgState == averagingState::iChannel) state = State::initialSweepAmp;
-            if (avgState == averagingState::qChannel) state = State::initialSweepPhase;
-            averageFlag = false;  // Don't average.  We are going for speed in the first sweeps.
-            break;
-          }
+      //    if (count == 0 || count == 1) {  // Skip averaging for 1st and 2nd sweeps.
+      //      if (avgState == averagingState::iChannel) state = State::initialSweepAmp;
+      //      if (avgState == averagingState::qChannel) state = State::initialSweepPhase;
+      //      averageFlag = false;  // Don't average.  We are going for speed in the first sweeps.
+      //      break;
+      //    }
 
           averageCount = averageCount + 1;
           averageFlag = false;
@@ -1082,7 +1083,7 @@ void DoXmitCalibrate(int toneFreqIndex, bool radioCal) {
       void
  *****/
 #ifdef QSE2
-void DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal) {
+void DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool refineCal) {
   enum class State { warmup,
                      state0,
                      initialSweepAmp,
@@ -1118,11 +1119,13 @@ void DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal) {
   std::vector<int> sub_vectorPhase(21);
   std::vector<float> sub_vectorAmpResult(21);
   std::vector<float> sub_vectorPhaseResult(21);
+
   elapsedMillis fiveSeconds;
   int viewTime = 0;
   bool averageFlag = false;
   std::vector<float>::iterator result;
   bool stopSweep = false;
+  IQCalType = 1;  // Begin with phase optimization.
 
   if (toneFreqIndex == 0) {  // 750 Hz
     CalibratePreamble(4);    // Set zoom to 16X.
@@ -1151,7 +1154,7 @@ void DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal) {
     warmup = 0;
     index = 1;
     stopSweep = false;
-    IQCalType = 0;
+    IQCalType = 1;
     std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
     std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
     state = State::warmup;
@@ -1175,9 +1178,12 @@ void DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal) {
         warmup = 0;
         index = 1;
         stopSweep = false;
-        IQCalType = 0;
+        IQCalType = 1;
         std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
         std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
+        // Save the current numbers in case of refineCal.
+        iOptimal = EEPROMData.iDCoffset[EEPROMData.currentBand];
+        qOptimal = EEPROMData.qDCoffset[EEPROMData.currentBand];
         state = State::warmup;
         break;
       // Toggle gain and phase
@@ -1209,6 +1215,7 @@ void DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal) {
     if (autoCal || radioCal) {
       switch (state) {
         case State::warmup:
+       
           EEPROMData.qDCoffset[EEPROMData.currentBand] = maxSweep;  //  Need to use these values during warmup
           EEPROMData.iDCoffset[EEPROMData.currentBand] = maxSweep;  //  so adjdB and adjdB_avg are high.
           warmup = warmup + 1;
@@ -1216,55 +1223,31 @@ void DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal) {
           if (warmup == 10) state = State::state0;
           break;
         case State::state0:
-          // Starting values for sweeps.  First sweep is amplitude (gain).
-          EEPROMData.qDCoffset[EEPROMData.currentBand] = 0;
-          EEPROMData.iDCoffset[EEPROMData.currentBand] = -maxSweep;  // Begin sweep at low end and move upwards.
+        // Create arrays to be used in calibration refinement.
+        if(refineCal && EEPROMData.radioCalComplete) {       
+        for(int i = 0; i < 21; i = i + 1) {
+        sub_vectorAmp[i] = iOptimal - (10 * increment) + i * increment;
+        sub_vectorPhase[i] = qOptimal - (10 * increment) + i * increment;        
+        Serial.printf("sub_vectorAmp[%d] = %d\n", i, sub_vectorAmp[i]);
+        }
+        EEPROMData.iDCoffset[EEPROMData.currentBand] = iOptimal; // refineCal should start with already optimized value.
+        adjdB = 0;
+        adjdB_avg = 0;
+        index = 0;
+        averageFlag = false;
+        averageCount = 0;
+        state = State::refineAmp;  // Skip the initial sweeps in case of refineCal.
+        break;
+        }
+
+          // Starting values for sweeps.  First sweep is phase.
+          EEPROMData.qDCoffset[EEPROMData.currentBand] = -maxSweep;  // Begin sweep at low end and move upwards.
+          EEPROMData.iDCoffset[EEPROMData.currentBand] = 0;
           adjdB = 0;
           adjdB_avg = 0;
-          state = State::initialSweepAmp;  // Let this fall through.
+          state = State::initialSweepPhase;  // Let this fall through.
 
-        case State::initialSweepAmp:
-          sweepVectorValue[index - 1] = EEPROMData.iDCoffset[EEPROMData.currentBand];
 
-          if (averageFlag) sweepVector[index - 1] = adjdB_avg;
-          else sweepVector[index - 1] = adjdB;
-          EEPROMData.iDCoffset[EEPROMData.currentBand] = EEPROMData.iDCoffset[EEPROMData.currentBand] + increment;  // Next one!
-          // Go to Q channel when I channel sweep is finished.
-          //          if (index > 20) {
-          //            if (sweepVector[index - 1] > (sweepVector[index - 11] + 1.0)) stopSweep = true;  // Stop sweep if past the null.
-          //          }
-          if (abs(EEPROMData.iDCoffset[EEPROMData.currentBand]) > maxSweep) {  // Needs to be subtracted from 1.0.
-            index = 1;
-            IQCalType = 1;
-            result = std::min_element(sweepVector.begin(), sweepVector.end());  // Value of the minimum.
-            adjdBMinIndex = std::distance(sweepVector.begin(), result);         // Find the index.
-            EEPROMData.iDCoffset[EEPROMData.currentBand] = sweepVectorValue[adjdBMinIndex];
-            iOptimal = sweepVectorValue[adjdBMinIndex];                // Set to the discovered minimum.
-                                                                       //  Serial.printf("The optimal iDCoffset = %d at index %d with value %.3f count = %d\n", sweepVectorValue[adjdBMinIndex], adjdBMinIndex, *result, count);
-            EEPROMData.qDCoffset[EEPROMData.currentBand] = -maxSweep;  // Reset for next sweep.
-            count = count + 1;
-            // Save the sub_vector which will be used to refine the optimal result.
-            sub_vectorAmp = { sweepVectorValue.begin() + adjdBMinIndex - 10, sweepVectorValue.begin() + adjdBMinIndex + 10 };
-            //   for (uint32_t i = 0; i < sweepVectorValue.size(); i = i + 1) {
-            //     Serial.printf("Amp sweepVectorValue[%d] = %.3f sweepVector[%d] = %.3f\n", i, sweepVectorValue[i], i, sweepVector[i]);
-            //   }
-            //   for (uint32_t i = 0; i < sub_vectorAmp.size(); i = i + 1) {
-            //     Serial.printf("sub_vectorAmp[%d] = %d\n", i, sub_vectorAmp[i]);
-            //   }
-            // Clear the vector before moving to phase.
-            std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0);
-            std::fill(sweepVector.begin(), sweepVector.end(), 0);
-            stopSweep = false;
-            state = State::initialSweepPhase;
-            //              for(int i = 0; i < 40; i = i + 1) {
-            //               Serial.printf("sweepVectorValue[%d] = %.3f sweepVector[%d] = %.3f\n", i, sweepVectorValue[i], i, sweepVector[i]);
-            //              }
-            break;
-          }
-          index = index + 1;
-          avgState = averagingState::iChannel;
-          state = State::average;  // Maybe the initial state does not need to use averaging at all???  So instead state = State::initialSweepPhase;
-          break;
 
         case State::initialSweepPhase:
           sweepVectorValue[index - 1] = EEPROMData.qDCoffset[EEPROMData.currentBand];
@@ -1281,8 +1264,9 @@ void DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal) {
             adjdBMinIndex = std::distance(sweepVector.begin(), result);
             EEPROMData.qDCoffset[EEPROMData.currentBand] = sweepVectorValue[adjdBMinIndex];  // Set to the discovered minimum.
             qOptimal = sweepVectorValue[adjdBMinIndex];                                      // Set to the discovered minimum.
-                                                                                             // Serial.printf("The optimal qDCoffset = %d at index %d with value %.3f count = %d\n", sweepVectorValue[adjdBMinIndex], adjdBMinIndex, *result, count);
-                                                                                             // EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] = 1.0 - maxSweepAmp;
+            Serial.printf("The initial optimal qDCoffset = %d at index %d with value %.3f count = %d\n", sweepVectorValue[adjdBMinIndex], adjdBMinIndex, *result, count);
+            // EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] = 1.0 - maxSweepAmp;
+            EEPROMData.iDCoffset[EEPROMData.currentBand] = -maxSweep;  // Set to begin initialSweepAmp.                                                                                
             count = count + 1;
             // Save the sub_vector which will be used to refine the optimal result.
             sub_vectorPhase = { sweepVectorValue.begin() + adjdBMinIndex - 10, sweepVectorValue.begin() + adjdBMinIndex + 10 };
@@ -1292,47 +1276,65 @@ void DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal) {
             //  for (uint32_t i = 0; i < sub_vectorPhase.size(); i = i + 1) {
             //    Serial.printf("sub_vectorPhase[%d] = %d\n", i, sub_vectorPhase[i]);
             //  }
-            state = State::refineAmp;  // Proceed to refine the I channel.
-            index = 0;
+            state = State::initialSweepAmp;  // Proceed to refine the I channel.
+            index = 1;
             averageFlag = false;
             averageCount = 0;
             break;
           }
           index = index + 1;
-          avgState = averagingState::qChannel;
-          state = State::average;  // Maybe the initial state does not need to use averaging at all???  So instead state = State::initialSweepPhase;
+      //    avgState = averagingState::qChannel;
+          state = State::initialSweepPhase;  // Maybe the initial state does not need to use averaging at all???  So instead state = State::initialSweepPhase;
           break;
 
-        case State::refineAmp:
-          // Now sweep over the entire sub_vectorAmp array with averaging on. index starts at 0.
-          EEPROMData.iDCoffset[EEPROMData.currentBand] = sub_vectorAmp[index];  // Starting value.
-          // Don't record this until there is data.  So that will be AFTER this pass.
-          if (averageFlag) {
-            sub_vectorAmpResult[index] = adjdB_avg;  // Measure and record adjdB_avg at this value of correction factor.
-            EEPROMData.iDCoffset[EEPROMData.currentBand] = sub_vectorAmp[index] + increment;
-            index = index + 1;
-          }
-          // Terminate when all values in sub_vectorAmp have been measured.
-          if (index == sub_vectorAmp.size()) {
-            // Find the index of the minimum and record as iOptimal.
-            result = std::min_element(sub_vectorAmpResult.begin(), sub_vectorAmpResult.end());
-            adjdBMinIndex = std::distance(sub_vectorAmpResult.begin(), result);
-            // Serial.printf("*result = %.3f adjdBMinIndex = %d\n", *result, adjdBMinIndex);
-            // iOptimal is simply the value of sub_vectorAmp[adjdBMinIndex].
-            iOptimal = sub_vectorAmp[adjdBMinIndex];
-            EEPROMData.iDCoffset[EEPROMData.currentBand] = iOptimal;  // Set to optimal value before refining phase.
-            state = State::refinePhase;
+
+
+
+        case State::initialSweepAmp:
+          sweepVectorValue[index - 1] = EEPROMData.iDCoffset[EEPROMData.currentBand];
+
+          if (averageFlag) sweepVector[index - 1] = adjdB_avg;
+          else sweepVector[index - 1] = adjdB;
+          EEPROMData.iDCoffset[EEPROMData.currentBand] = EEPROMData.iDCoffset[EEPROMData.currentBand] + increment;  // Next one!
+          // Go to Q channel when I channel sweep is finished.
+          //          if (index > 20) {
+          //            if (sweepVector[index - 1] > (sweepVector[index - 11] + 1.0)) stopSweep = true;  // Stop sweep if past the null.
+          //          }
+          if (abs(EEPROMData.iDCoffset[EEPROMData.currentBand]) > maxSweep) {  // Needs to be subtracted from 1.0.
+          
+            IQCalType = 1;
+            result = std::min_element(sweepVector.begin(), sweepVector.end());  // Value of the minimum.
+            adjdBMinIndex = std::distance(sweepVector.begin(), result);         // Find the index.
+            EEPROMData.iDCoffset[EEPROMData.currentBand] = sweepVectorValue[adjdBMinIndex];
+            iOptimal = sweepVectorValue[adjdBMinIndex];                // Set to the discovered minimum.
+            Serial.printf("The initial optimal iDCoffset = %d at index %d with value %.3f count = %d\n", sweepVectorValue[adjdBMinIndex], adjdBMinIndex, *result, count);
+
+            count = count + 1;
+            // Save the sub_vector which will be used to refine the optimal result.
+            sub_vectorAmp = { sweepVectorValue.begin() + adjdBMinIndex - 10, sweepVectorValue.begin() + adjdBMinIndex + 10 };
+            //   for (uint32_t i = 0; i < sweepVectorValue.size(); i = i + 1) {
+            //     Serial.printf("Amp sweepVectorValue[%d] = %.3f sweepVector[%d] = %.3f\n", i, sweepVectorValue[i], i, sweepVector[i]);
+            //   }
+            //   for (uint32_t i = 0; i < sub_vectorAmp.size(); i = i + 1) {
+            //     Serial.printf("sub_vectorAmp[%d] = %d\n", i, sub_vectorAmp[i]);
+            //   }
+            // Clear the vector before moving to phase.
+            std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0);
+            std::fill(sweepVector.begin(), sweepVector.end(), 0);
+            stopSweep = false;
             IQCalType = 1;
             index = 0;
-            averageFlag = false;
+            state = State::refinePhase;
             //              for(int i = 0; i < 40; i = i + 1) {
-            //               Serial.printf("sub_vectorAmpResult[%d] = %.3f sub_VectorAmp[%d] = %.3f\n", i, sub_vectorAmpResult[i], i, sub_vectorAmp[i]);
+            //               Serial.printf("sweepVectorValue[%d] = %.3f sweepVector[%d] = %.3f\n", i, sweepVectorValue[i], i, sweepVector[i]);
             //              }
             break;
           }
-          avgState = averagingState::refineAmp;
-          state = State::average;
+          index = index + 1;
+      //    avgState = averagingState::iChannel;
+          state = State::initialSweepAmp;  // Maybe the initial state does not need to use averaging at all???  So instead state = State::initialSweepPhase;
           break;
+
 
         case State::refinePhase:
           // Now sweep over the entire sub_vectorAmp array with averaging on. index starts at 0.
@@ -1351,28 +1353,55 @@ void DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal) {
             //           Serial.printf("*result = %.3f adjdBMinIndex = %d\n", *result, adjdBMinIndex);
             // qOptimal is simply the value of sub_vectorAmp[adjdBMinIndex].
             qOptimal = sub_vectorPhase[adjdBMinIndex];
-            state = State::setOptimal;
+            EEPROMData.qDCoffset[EEPROMData.currentBand] = qOptimal;  // Set to optimal value before refining gain.
+            IQCalType = 0;
+            index = 0;
+            averageFlag = false;
+            state = State::refineAmp;
             break;
           }
           avgState = averagingState::refinePhase;
           state = State::average;
           break;
 
+
+        case State::refineAmp:
+          // Now sweep over the entire sub_vectorAmp array with averaging on. index starts at 0.
+          EEPROMData.iDCoffset[EEPROMData.currentBand] = sub_vectorAmp[index];  // Starting value.
+          // Don't record this until there is data.  So that will be AFTER this pass.
+          if (averageFlag) {
+            sub_vectorAmpResult[index] = adjdB_avg;  // Measure and record adjdB_avg at this value of correction factor.
+            EEPROMData.iDCoffset[EEPROMData.currentBand] = sub_vectorAmp[index] + increment;
+            index = index + 1;
+          }
+          // Terminate when all values in sub_vectorAmp have been measured.
+          if (index == sub_vectorAmp.size()) {
+            // Find the index of the minimum and record as iOptimal.
+            result = std::min_element(sub_vectorAmpResult.begin(), sub_vectorAmpResult.end());
+            adjdBMinIndex = std::distance(sub_vectorAmpResult.begin(), result);
+            // Serial.printf("*result = %.3f adjdBMinIndex = %d\n", *result, adjdBMinIndex);
+            // iOptimal is simply the value of sub_vectorAmp[adjdBMinIndex].
+            iOptimal = sub_vectorAmp[adjdBMinIndex];   
+            state = State::setOptimal;
+        //    index = 0;
+            averageFlag = false;
+            //              for(int i = 0; i < 40; i = i + 1) {
+            //               Serial.printf("sub_vectorAmpResult[%d] = %.3f sub_VectorAmp[%d] = %.3f\n", i, sub_vectorAmpResult[i], i, sub_vectorAmp[i]);
+            //              }
+            break;
+          }
+          avgState = averagingState::refineAmp;
+          state = State::average;
+          break;
+
+
+
         case State::average:  // Stay in this state while averaging is in progress.
-          if (averageCount > 8) {
-            if (avgState == averagingState::iChannel) state = State::initialSweepAmp;
-            if (avgState == averagingState::qChannel) state = State::initialSweepPhase;
+          if (averageCount > 10) {
             if (avgState == averagingState::refineAmp) state = State::refineAmp;
             if (avgState == averagingState::refinePhase) state = State::refinePhase;
             averageCount = 0;
             averageFlag = true;  // Averaging is complete!
-            break;
-          }
-          //  This may reduce accuracy of the calibration.
-          if (count == 0 || count == 1) {  // Skip averaging for 1st and 2nd sweeps.
-            if (avgState == averagingState::iChannel) state = State::initialSweepAmp;
-            if (avgState == averagingState::qChannel) state = State::initialSweepPhase;
-            averageFlag = false;  // Don't average.  We are going for speed in the first sweeps.
             break;
           }
 
@@ -1422,52 +1451,55 @@ void DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal) {
 
 
 // Automatic calibration of all bands.  Greg KF5N June 4, 2024
-void RadioCal() {
+void RadioCal(bool refineCal) {
   IQChoice = 0;  // Global variable.
   BandSet(BAND_80M);
 #ifdef QSE2
-  DoXmitCarrierCalibrate(EEPROMData.calFreq, true);
+  DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
 #endif
-  DoXmitCalibrate(EEPROMData.calFreq, true);
-  DoReceiveCalibrate(true);
+  DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
+  DoReceiveCalibrate(true, refineCal);
   BandSet(BAND_40M);
 #ifdef QSE2
-  DoXmitCarrierCalibrate(EEPROMData.calFreq, true);
+  DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
 #endif
-  DoXmitCalibrate(EEPROMData.calFreq, true);
-  DoReceiveCalibrate(true);
+  DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
+  DoReceiveCalibrate(true, refineCal);
   BandSet(BAND_20M);
 #ifdef QSE2
-  DoXmitCarrierCalibrate(EEPROMData.calFreq, true);
+  DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
 #endif
-  DoXmitCalibrate(EEPROMData.calFreq, true);
-  DoReceiveCalibrate(true);
+  DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
+  DoReceiveCalibrate(true, refineCal);
   BandSet(BAND_17M);
 #ifdef QSE2
-  DoXmitCarrierCalibrate(EEPROMData.calFreq, true);
+  DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
 #endif
-  DoXmitCalibrate(EEPROMData.calFreq, true);
-  DoReceiveCalibrate(true);
+  DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
+  DoReceiveCalibrate(true, refineCal);
   BandSet(BAND_15M);
 #ifdef QSE2
-  DoXmitCarrierCalibrate(EEPROMData.calFreq, true);
+  DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
 #endif
-  DoXmitCalibrate(EEPROMData.calFreq, true);
-  DoReceiveCalibrate(true);
+  DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
+  DoReceiveCalibrate(true, refineCal);
   BandSet(BAND_12M);
 #ifdef QSE2
-  DoXmitCarrierCalibrate(EEPROMData.calFreq, true);
+  DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
 #endif
-  DoXmitCalibrate(EEPROMData.calFreq, true);
-  DoReceiveCalibrate(true);
+  DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
+  DoReceiveCalibrate(true, refineCal);
   BandSet(BAND_10M);
 #ifdef QSE2
-  DoXmitCarrierCalibrate(EEPROMData.calFreq, true);
+  DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
 //  DoXmitCalibrate(EEPROMData.calFreq, true);
 //  DoXmitCarrierCalibrate(EEPROMData.calFreq, true);
 #endif
-  DoXmitCalibrate(EEPROMData.calFreq, true);
-  DoReceiveCalibrate(true);
+  DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
+  DoReceiveCalibrate(true, refineCal);
+  // Set flag for initial calibration completed.
+  EEPROMData.radioCalComplete = true;
+  EEPROMWrite();
   return;
 }
 
