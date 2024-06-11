@@ -106,7 +106,7 @@ void CalibrateOptions() {
       break;
 
     case 9:  // Set DAC offset for carrier cancellation.
-    EEPROMData.dacOffset = GetEncoderValueLiveQ15t(-5000, 5000, EEPROMData.dacOffset, 50, (char *)"DAC Offset:");
+    EEPROMData.dacOffset = GetEncoderValueLiveQ15t(-5000, 5000, EEPROMData.dacOffset, 50, (char *)"DAC Offset:", false);
       val = ReadSelectedPushButton();
       if (val != BOGUS_PIN_READ) {
         val = ProcessButtonPress(val);

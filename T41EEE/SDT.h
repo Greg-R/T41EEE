@@ -1026,7 +1026,7 @@ void FreqShift2();
 float goertzel_mag(int numSamples, int TARGET_FREQUENCY, int SAMPLING_RATE, float *data);
 int GetEncoderValue(int minValue, int maxValue, int startValue, int increment, char prompt[]);
 float GetEncoderValueLive(float minValue, float maxValue, float startValue, float increment, char prompt[], bool left);  //AFP 10-22-22
-int GetEncoderValueLiveQ15t(int minValue, int maxValue, int startValue, int increment, char prompt[]);
+q15_t GetEncoderValueLiveQ15t(int minValue, int maxValue, int startValue, int increment, char prompt[], bool left);
 void GetFavoriteFrequency();
 
 float HaversineDistance(float dxLat, float dxLon);
