@@ -302,7 +302,7 @@ void CalibratePreamble(int setZoom) {
   tft.setCursor(350, 190);
   tft.print("Zoom - Auto-Cal");
   tft.setCursor(350, 205);
-  tft.print("Zoom - Refine-Cal");
+  tft.print("Filter - Refine-Cal");
   tft.setTextColor(RA8875_CYAN);
   tft.fillRect(350, 125, 100, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(400, 125);
