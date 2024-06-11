@@ -27,8 +27,8 @@ void CalibrateOptions() {
 
   // Select the type of calibration, and then skip this during the loop() function.
   if (calibrateFlag == 0) {
-    const char* IQOptions[13]{ "Freq Cal", "CW PA Cal", "Rec Cal", "Carrier Cal", "Xmit Cal", "SSB PA Cal", "Radio Cal", "Refine Cal", "Set Tone", "DAC Offset", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
-    IQChoice = SubmenuSelect(IQOptions, 13, 0);                                                                                                //AFP 10-21-22
+    const char *IQOptions[13]{ "Freq Cal", "CW PA Cal", "Rec Cal", "Carrier Cal", "Xmit Cal", "SSB PA Cal", "Radio Cal", "Refine Cal", "Set Tone", "DAC Offset", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
+    IQChoice = SubmenuSelect(IQOptions, 13, 0);                                                                                                                                                        //AFP 10-21-22
   }
   calibrateFlag = 1;
   switch (IQChoice) {
@@ -52,7 +52,7 @@ void CalibrateOptions() {
 
     case 1:  // CW PA Cal
       EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand] = GetEncoderValueLive(0.0, 1.0, EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand], 0.01, (char *)"CW PA Cal: ", false);
-      EEPROMData.powerOutCW[EEPROMData.currentBand] = sqrt(EEPROMData.transmitPowerLevel/20.0) * EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];
+      EEPROMData.powerOutCW[EEPROMData.currentBand] = sqrt(EEPROMData.transmitPowerLevel / 20.0) * EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];
       val = ReadSelectedPushButton();
       if (val != BOGUS_PIN_READ) {        // Any button press??
         val = ProcessButtonPress(val);    // Use ladder value to get menu choice
@@ -63,21 +63,21 @@ void CalibrateOptions() {
         }
       }
       break;
-    case 2:                  // IQ Receive Cal - Gain and Phase
+    case 2:                              // IQ Receive Cal - Gain and Phase
       DoReceiveCalibrate(false, false);  // This function was significantly revised.  KF5N August 16, 2023
       break;
 
-    case 3:                  // Xmit Carrier calibration.
+    case 3:  // Xmit Carrier calibration.
       DoXmitCarrierCalibrate(EEPROMData.calFreq, false, false);
       break;
 
-    case 4:                  // IQ Transmit Cal - Gain and Phase  //AFP 2-21-23
+    case 4:                                               // IQ Transmit Cal - Gain and Phase  //AFP 2-21-23
       DoXmitCalibrate(EEPROMData.calFreq, false, false);  // This function was significantly revised.  KF5N August 16, 2023
       break;
-      
+
     case 5:  // SSB PA Cal
       EEPROMData.SSBPowerCalibrationFactor[EEPROMData.currentBand] = GetEncoderValueLive(0.0, 1.0, EEPROMData.SSBPowerCalibrationFactor[EEPROMData.currentBand], 0.01, (char *)"SSB PA Cal: ", false);
-      EEPROMData.powerOutSSB[EEPROMData.currentBand] = sqrt(EEPROMData.transmitPowerLevel/20.0) * EEPROMData.SSBPowerCalibrationFactor[EEPROMData.currentBand];
+      EEPROMData.powerOutSSB[EEPROMData.currentBand] = sqrt(EEPROMData.transmitPowerLevel / 20.0) * EEPROMData.SSBPowerCalibrationFactor[EEPROMData.currentBand];
       val = ReadSelectedPushButton();
       if (val != BOGUS_PIN_READ) {        // Any button press??
         val = ProcessButtonPress(val);    // Use ladder value to get menu choice
@@ -93,12 +93,12 @@ void CalibrateOptions() {
     case 6:  // Fully automatic radio calibration.
       RadioCal(false);
       calibrateFlag = 0;
-    break;
+      break;
 
     case 7:  // Full automatic calibration refinement.
       RadioCal(true);
       calibrateFlag = 0;
-    break;
+      break;
 
     case 8:  // Choose CW calibration tone frequency.
       SelectCalFreq();
@@ -106,7 +106,7 @@ void CalibrateOptions() {
       break;
 
     case 9:  // Set DAC offset for carrier cancellation.
-    EEPROMData.dacOffset = GetEncoderValueLiveQ15t(-5000, 5000, EEPROMData.dacOffset, 50, (char *)"DAC Offset:", false);
+      EEPROMData.dacOffset = GetEncoderValueLiveQ15t(-5000, 5000, EEPROMData.dacOffset, 50, (char *)"DAC Offset:", false);
       val = ReadSelectedPushButton();
       if (val != BOGUS_PIN_READ) {
         val = ProcessButtonPress(val);
@@ -116,7 +116,7 @@ void CalibrateOptions() {
           calibrateFlag = 0;
         }
       }
-    break;
+      break;
 
     case 10:  // Calibrate buttons
       SaveAnalogSwitchValues();
@@ -146,8 +146,8 @@ void CalibrateOptions() {
       ShowFrequency();
       BandInformation();
       calibrateFlag = 0;
-//      modeSelectOutExL.gain(0, 0);
-//      modeSelectOutExR.gain(0, 0);
+      //      modeSelectOutExL.gain(0, 0);
+      //      modeSelectOutExR.gain(0, 0);
       break;
 
     default:
@@ -164,14 +164,14 @@ void CalibrateOptions() {
 
   // Select the type of calibration, and then skip this during the loop() function.
   if (calibrateFlag == 0) {
-    const char* IQOptions[12]{ "Freq Cal", "CW PA Cal", "Rec Cal", "Xmit Cal", "SSB PA Cal", "Radio Cal", "Refine Cal", "Set Tone", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
-    IQChoice = SubmenuSelect(IQOptions, 12, 0);                                                                                                //AFP 10-21-22
+    const char *IQOptions[12]{ "Freq Cal", "CW PA Cal", "Rec Cal", "Xmit Cal", "SSB PA Cal", "Radio Cal", "Refine Cal", "Set Tone", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
+    IQChoice = SubmenuSelect(IQOptions, 12, 0);                                                                                                                           //AFP 10-21-22
   }
   calibrateFlag = 1;
   switch (IQChoice) {
 
     case 0:  // Calibrate Frequency  - uses WWV
-      EEPROMData.freqCorrectionFactor = GetEncoderValueLive(-200000, 200000, EEPROMData.freqCorrectionFactor, increment, (char *)"Freq Cal: ");
+      EEPROMData.freqCorrectionFactor = GetEncoderValueLive(-200000, 200000, EEPROMData.freqCorrectionFactor, increment, (char *)"Freq Cal: ", false);
       if (EEPROMData.freqCorrectionFactor != freqCorrectionFactorOld) {
         si5351.set_correction(EEPROMData.freqCorrectionFactor, SI5351_PLL_INPUT_XO);
         freqCorrectionFactorOld = EEPROMData.freqCorrectionFactor;
@@ -188,8 +188,8 @@ void CalibrateOptions() {
       break;
 
     case 1:  // CW PA Cal
-      EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand] = GetEncoderValueLive(0.0, 1.0, EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand], 0.01, (char *)"CW PA Cal: ");
-      EEPROMData.powerOutCW[EEPROMData.currentBand] = sqrt(EEPROMData.transmitPowerLevel/20.0) * EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];
+      EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand] = GetEncoderValueLive(0.0, 1.0, EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand], 0.01, (char *)"CW PA Cal: ", false);
+      EEPROMData.powerOutCW[EEPROMData.currentBand] = sqrt(EEPROMData.transmitPowerLevel / 20.0) * EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];
       val = ReadSelectedPushButton();
       if (val != BOGUS_PIN_READ) {        // Any button press??
         val = ProcessButtonPress(val);    // Use ladder value to get menu choice
@@ -200,17 +200,17 @@ void CalibrateOptions() {
         }
       }
       break;
-    case 2:                  // IQ Receive Cal - Gain and Phase
+    case 2:                              // IQ Receive Cal - Gain and Phase
       DoReceiveCalibrate(false, false);  // This function was significantly revised.  KF5N August 16, 2023
       break;
 
-    case 3:                                 // IQ Transmit Cal - Gain and Phase  //AFP 2-21-23
+    case 3:                                               // IQ Transmit Cal - Gain and Phase  //AFP 2-21-23
       DoXmitCalibrate(EEPROMData.calFreq, false, false);  // This function was significantly revised.  KF5N August 16, 2023
       break;
-      
+
     case 4:  // SSB PA Cal
-      EEPROMData.SSBPowerCalibrationFactor[EEPROMData.currentBand] = GetEncoderValueLive(0.0, 1.0, EEPROMData.SSBPowerCalibrationFactor[EEPROMData.currentBand], 0.01, (char *)"SSB PA Cal: ");
-      EEPROMData.powerOutSSB[EEPROMData.currentBand] = sqrt(EEPROMData.transmitPowerLevel/20.0) * EEPROMData.SSBPowerCalibrationFactor[EEPROMData.currentBand];
+      EEPROMData.SSBPowerCalibrationFactor[EEPROMData.currentBand] = GetEncoderValueLive(0.0, 1.0, EEPROMData.SSBPowerCalibrationFactor[EEPROMData.currentBand], 0.01, (char *)"SSB PA Cal: ", false);
+      EEPROMData.powerOutSSB[EEPROMData.currentBand] = sqrt(EEPROMData.transmitPowerLevel / 20.0) * EEPROMData.SSBPowerCalibrationFactor[EEPROMData.currentBand];
       val = ReadSelectedPushButton();
       if (val != BOGUS_PIN_READ) {        // Any button press??
         val = ProcessButtonPress(val);    // Use ladder value to get menu choice
@@ -223,15 +223,15 @@ void CalibrateOptions() {
       }
       break;  // Missing break.  KF5N August 12, 2023
 
-          case 5:  // Fully automatic radio calibration.
+    case 5:  // Fully automatic radio calibration.
       RadioCal(false);
       calibrateFlag = 0;
-    break;
+      break;
 
-        case 6:  // Full automatic calibration refinement.
+    case 6:  // Full automatic calibration refinement.
       RadioCal(true);
       calibrateFlag = 0;
-    break;
+      break;
 
     case 7:  // Choose CW calibration tone frequency.
       SelectCalFreq();
@@ -247,7 +247,7 @@ void CalibrateOptions() {
       break;
 
     case 9:  // Set button repeat rate
-      EEPROMData.buttonRepeatDelay = 1000 * GetEncoderValueLive(0, 5000, EEPROMData.buttonRepeatDelay / 1000, 1, (char *)"Btn Repeat:  ");
+      EEPROMData.buttonRepeatDelay = 1000 * GetEncoderValueLive(0, 5000, EEPROMData.buttonRepeatDelay / 1000, 1, (char *)"Btn Repeat:  ", false);
       val = ReadSelectedPushButton();
       if (val != BOGUS_PIN_READ) {
         val = ProcessButtonPress(val);
@@ -377,11 +377,11 @@ void AGCOptions() {
 
   EEPROMData.AGCMode = SubmenuSelect(AGCChoices, 6, EEPROMData.AGCMode);  // G0ORX
   if (EEPROMData.AGCMode == 5) {
-return;
+    return;
   }
 
   AGCLoadValues();  // G0ORX September 5, 2023
-  EEPROMWrite();  // ...save it
+  EEPROMWrite();    // ...save it
   UpdateAGCField();
 }
 
@@ -566,7 +566,7 @@ void EqualizerRecOptions() {
   EEPROMWrite();
   RedrawDisplayScreen();
   UpdateEqualizerField(EEPROMData.receiveEQFlag, EEPROMData.xmitEQFlag);
-//  return 0;
+  //  return 0;
 }
 
 
@@ -601,7 +601,7 @@ void EqualizerXmtOptions() {
   EEPROMWrite();
   RedrawDisplayScreen();
   UpdateEqualizerField(EEPROMData.receiveEQFlag, EEPROMData.xmitEQFlag);
-//  return 0;
+  //  return 0;
 }
 
 
@@ -718,11 +718,11 @@ void RFOptions() {
       // When the transmit power level is set, this means ALL of the power coefficients must be revised!
       // powerOutCW and powerOutSSB must be updated.
       initPowerCoefficients();
-      EEPROMWrite();                                                  //AFP 10-21-22
+      EEPROMWrite();  //AFP 10-21-22
       BandInformation();
       break;
 
-    case 1:  // Manual gain set.
+    case 1:                                                                                                                                        // Manual gain set.
       EEPROMData.rfGain[EEPROMData.currentBand] = GetEncoderValue(-60, 20, EEPROMData.rfGain[EEPROMData.currentBand], 5, (char *)"RF Gain dB: ");  // Argument: min, max, start, increment
       EEPROMWrite();
       break;
@@ -736,7 +736,6 @@ void RFOptions() {
       EEPROMData.autoGain = false;
       EEPROMWrite();
       break;
-
   }
 }
 
@@ -947,7 +946,7 @@ void EEPROMOptions() {  // 0               1                2               3   
       defaultOpt = -1;  // No choice made
       break;
   }
-//  return defaultOpt;
+  //  return defaultOpt;
 }
 
 
