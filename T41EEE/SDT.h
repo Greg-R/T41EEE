@@ -482,7 +482,7 @@ struct config_t {
   #ifdef QSE2
   q15_t iDCoffset[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
   q15_t qDCoffset[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-  q15_t dacOffset = 1250; // This must be "tuned" for each radio and/or Audio Adapter board.
+  q15_t dacOffset = 1100; // This must be "tuned" for each radio and/or Audio Adapter board.
   #endif
   bool radioCalComplete = false;
 };
