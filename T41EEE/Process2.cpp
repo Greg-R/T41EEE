@@ -1,32 +1,6 @@
 
 #include "SDT.h"
 
-// Automatic calibration added.  Greg KF5N June 11, 2024
-// Updates to DoReceiveCalibration() and DoXmitCalibrate() functions by KF5N.  July 20, 2023
-// Updated PlotCalSpectrum() function to clean up graphics.  KF5N August 3, 2023
-// Major clean-up of calibration.  KF5N August 16, 2023
-
-#include <vector>
-//#include <valarray>
-#include <algorithm>
-
-int val;
-float correctionIncrement;  //AFP 2-7-23
-int userScale, userZoomIndex, userxmtMode;
-int transmitPowerLevelTemp, cwFreqOffsetTemp;
-uint16_t base_y = 460;  // 247
-int calTypeFlag = 0;
-int IQCalType;
-void ProcessIQData2();
-float adjdB = 0.0;
-float adjdBold = 0.0;  // Used in exponential averager.  KF5N May 19, 2024
-float adjdB_old = 0.0;
-float adjdB_sample = 0.0;
-int i;
-q15_t rawSpectrumPeak = 0;
-float adjdB_avg = 0.0;
-
-
 /*****
   Purpose: Load buffers used to modulate the transmitter during calibration.
           The prologue must restore the buffers for normal operation!
@@ -37,7 +11,7 @@ float adjdB_avg = 0.0;
    Return value:
       void
  *****/
-FLASHMEM void loadCalToneBuffers() {
+void Calibrate::loadCalToneBuffers() {
   float theta;
   float32_t tones[2]{ 750.0, 3000.0 };
   // This loop creates the sinusoidal waveform for the tone.
@@ -58,7 +32,7 @@ FLASHMEM void loadCalToneBuffers() {
   Return value:
     void
 *****/
-void plotCalGraphics(int calType) {
+void Calibrate::plotCalGraphics(int calType) {
   tft.writeTo(L2);
   if (calType == 0) {  // Receive Cal
     if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
@@ -104,12 +78,12 @@ void plotCalGraphics(int calType) {
   Return value:
     void
 *****/
-void warmUpCal() {
+void Calibrate::warmUpCal() {
   // Run ProcessIQData2() a few times to load and settle out buffers.  Compute FFT.  KF5N May 19, 2024
   uint32_t index_of_max;  // Not used, but required by arm_max_q15 function.
   for (int i = 0; i < 1024; i = i + 1) {
     updateDisplayFlag = true;  // Causes FFT to be calculated.
-    ProcessIQData2();
+    Calibrate::ProcessIQData2();
   }
   updateDisplayFlag = false;
   // Find peak of spectrum, which is 512 wide.  Use this to adjust spectrum peak to top of spectrum display.
@@ -126,7 +100,7 @@ void warmUpCal() {
   Return value:
     void
 *****/
-FLASHMEM void printCalType(int IQCalType, bool autoCal, bool autoCalDone) {
+void Calibrate::printCalType(int IQCalType, bool autoCal, bool autoCalDone) {
   const char *calName;
   const char *IQName[4] = { "Receive", "Transmit", "Carrier", "Calibrate" };
   tft.writeTo(L1);
@@ -274,7 +248,7 @@ FLASHMEM void printCalType(int IQCalType, bool autoCal, bool autoCalDone) {
    Return value:
       void
  *****/
-void CalibratePreamble(int setZoom) {
+void Calibrate::CalibratePreamble(int setZoom) {
   calOnFlag = true;
   IQCalType = 0;
   radioState = CW_TRANSMIT_STRAIGHT_STATE;                 // KF5N
@@ -336,7 +310,7 @@ void CalibratePreamble(int setZoom) {
    Return value:
       void
  *****/
-void CalibratePrologue() {
+void Calibrate::CalibratePrologue() {
   digitalWrite(RXTX, LOW);  // Turn off the transmitter.
   updateDisplayFlag = false;
   xrState = RECEIVE_STATE;
@@ -383,7 +357,7 @@ void CalibratePrologue() {
    Return value:
       void
  *****/
-void DoReceiveCalibrate(bool radioCal, bool shortCal) {
+void Calibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
   enum class State { warmup,
                      refineCal,
                      state0,
@@ -789,7 +763,7 @@ void DoReceiveCalibrate(bool radioCal, bool shortCal) {
    Return value:
       void
  *****/
-void DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal) {
+void Calibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal) {
   enum class State { warmup,
                      refineCal,
                      state0,
@@ -838,11 +812,11 @@ void DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal) {
   // bool stopSweep = false;
 
   if (toneFreqIndex == 0) {  // 750 Hz
-    CalibratePreamble(4);    // Set zoom to 16X.
+    Calibrate::CalibratePreamble(4);    // Set zoom to 16X.
     freqOffset = 0;          // Calibration tone same as regular modulation tone.
   }
   if (toneFreqIndex == 1) {  // 3 kHz
-    CalibratePreamble(2);    // Set zoom to 4X.
+    Calibrate::CalibratePreamble(2);    // Set zoom to 4X.
     freqOffset = 2250;       // Need 750 + 2250 = 3 kHz
   }
   calTypeFlag = 1;  // TX cal
@@ -1585,7 +1559,7 @@ void DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool shortCal) {
 
 
 // Automatic calibration of all bands.  Greg KF5N June 4, 2024
-void RadioCal(bool refineCal) {
+void Calibrate::RadioCal(bool refineCal) {
   // Warn the user if the radio is not calibrated and refine cal is attempted.
   if (refineCal && not EEPROMData.radioCalComplete) {
     tft.setFontScale((enum RA8875tsize)2);
@@ -1597,48 +1571,48 @@ void RadioCal(bool refineCal) {
   IQChoice = 0;  // Global variable.
   BandSet(BAND_80M);
 #ifdef QSE2
-  DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
+  Calibrate::DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
 #endif
-  DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
-  DoReceiveCalibrate(true, refineCal);
+  Calibrate::DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
+  Calibrate::DoReceiveCalibrate(true, refineCal);
   BandSet(BAND_40M);
 #ifdef QSE2
-  DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
+  Calibrate::DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
 #endif
-  DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
-  DoReceiveCalibrate(true, refineCal);
+  Calibrate::DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
+  Calibrate::DoReceiveCalibrate(true, refineCal);
   BandSet(BAND_20M);
 #ifdef QSE2
-  DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
+  Calibrate::DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
 #endif
-  DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
-  DoReceiveCalibrate(true, refineCal);
+  Calibrate::DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
+  Calibrate::DoReceiveCalibrate(true, refineCal);
   BandSet(BAND_17M);
 #ifdef QSE2
-  DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
+  Calibrate::DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
 #endif
-  DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
-  DoReceiveCalibrate(true, refineCal);
+  Calibrate::DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
+  Calibrate::DoReceiveCalibrate(true, refineCal);
   BandSet(BAND_15M);
 #ifdef QSE2
-  DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
+  Calibrate::DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
 #endif
-  DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
-  DoReceiveCalibrate(true, refineCal);
+  Calibrate::DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
+  Calibrate::DoReceiveCalibrate(true, refineCal);
   BandSet(BAND_12M);
 #ifdef QSE2
-  DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
+  Calibrate::DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
 #endif
-  DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
-  DoReceiveCalibrate(true, refineCal);
+  Calibrate::DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
+  Calibrate::DoReceiveCalibrate(true, refineCal);
   BandSet(BAND_10M);
 #ifdef QSE2
-  DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
+  Calibrate::DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
 //  DoXmitCalibrate(EEPROMData.calFreq, true);
 //  DoXmitCarrierCalibrate(EEPROMData.calFreq, true);
 #endif
-  DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
-  DoReceiveCalibrate(true, refineCal);
+  Calibrate::DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
+  Calibrate::DoReceiveCalibrate(true, refineCal);
   // Set flag for initial calibration completed.
   EEPROMData.radioCalComplete = true;
   EEPROMWrite();
@@ -1655,7 +1629,7 @@ void RadioCal(bool refineCal) {
    Return value:
       void
  *****/
-void ProcessIQData2() {
+void Calibrate::ProcessIQData2() {
   float rfGainValue, powerScale;                                   // AFP 2-11-23.  Greg KF5N February 13, 2023
   float recBandFactor[7] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };  // AFP 2-11-23  KF5N uniform values
 
@@ -1783,7 +1757,7 @@ void ProcessIQData2() {
   Return value;
     void
 *****/
-void ShowSpectrum2()  //AFP 2-10-23
+void Calibrate::ShowSpectrum2()  //AFP 2-10-23
 {
   int x1 = 0;
   int capture_bins = 8;  // Sets the number of bins to scan for signal peak.
@@ -1860,7 +1834,7 @@ void ShowSpectrum2()  //AFP 2-10-23
   Return value;
     float, returns the adjusted value in dB
 *****/
-float PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
+float Calibrate::PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
   //  float adjdB = 0.0;
   int16_t adjAmplitude = 0;  // Was float; cast to float in dB calculation.  KF5N
   int16_t refAmplitude = 0;  // Was float; cast to float in dB calculation.  KF5N
@@ -1875,7 +1849,7 @@ float PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
     ShowBandwidth();                         // Without this call, the calibration value in dB will not be updated.  KF5N
   } else updateDisplayFlag = false;          //  Do not save the the display data for the remainder of the sweep.
 
-  ProcessIQData2();  // Call the Audio process from within the display routine to eliminate conflicts with drawing the spectrum.
+  Calibrate::ProcessIQData2();  // Call the Audio process from within the display routine to eliminate conflicts with drawing the spectrum.
 
   y_new = pixelnew[x1];
   y1_new = pixelnew[x1 - 1];
@@ -1952,7 +1926,7 @@ float PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
     void
 *****/
 const char *calFreqs[2]{ "750 Hz", "3.0 kHz" };
-FLASHMEM void SelectCalFreq() {
+void Calibrate::SelectCalFreq() {
   EEPROMData.calFreq = SubmenuSelect(calFreqs, 2, EEPROMData.calFreq);  // Returns the index of the array.
   //  RedrawDisplayScreen();  Kills the bandwidth graphics in the audio display window, remove. KF5N July 30, 2023
   // Clear the current CW filter graphics and then restore the bandwidth indicator bar.  KF5N July 30, 2023

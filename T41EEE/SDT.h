@@ -38,6 +38,9 @@ extern struct maps myMapFiles[];
 #include <util/crc16.h>        // mdrhere
 #include <utility/imxrt_hw.h>  // for setting I2S freq, Thanks, FrankB!
 #include <EEPROM.h>
+
+#include "Process2.h"
+
 //======================================== Symbolic Constants for the T41 ===================================================
 #define RIGNAME "T41-EP SDT"
 #define NUMBER_OF_SWITCHES 18  // Number of push button switches. 16 on older boards
@@ -593,6 +596,8 @@ extern Rotary filterEncoder;    // (14, 15)
 extern Rotary fineTuneEncoder;  // (4,  5);
 
 extern Metro ms_500;
+
+extern Calibrate calibrater;
 
 extern Si5351 si5351;
 
