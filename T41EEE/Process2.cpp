@@ -375,7 +375,7 @@ void CalibratePrologue() {
 
 
 /*****
-  Purpose: Combined input/output for the purpose of calibrating the transmit IQ.
+  Purpose: Combined input/output for the purpose of calibrating the receiver IQ.
 
    Parameter List:
       int toneFreqIndex
@@ -547,7 +547,6 @@ void DoReceiveCalibrate(bool radioCal, bool shortCal) {
           autoCal = true;
           printCalType(calTypeFlag, autoCal, false);
           count = 0;
-          //    warmup = 0;
           index = 0;
           //  stopSweep = false;
           IQCalType = 0;
@@ -703,7 +702,6 @@ void DoReceiveCalibrate(bool radioCal, bool shortCal) {
             // Find the index of the minimum and record as iOptimal.
             result = std::min_element(sub_vectorPhaseResult.begin(), sub_vectorPhaseResult.end());
             adjdBMinIndex = std::distance(sub_vectorPhaseResult.begin(), result);
-            //  Serial.printf("*result = %.3f adjdBMinIndex = %d\n", *result, adjdBMinIndex);
             // qOptimal is simply the value of sub_vectorAmp[adjdBMinIndex].
             index = 0;
             qOptimal = sub_vectorPhase[adjdBMinIndex];  // - .001;
@@ -950,7 +948,6 @@ void DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal) {
           autoCal = true;
           printCalType(calTypeFlag, autoCal, false);
           count = 0;
-          //    warmup = 0;
           index = 0;
           //  stopSweep = false;
           IQCalType = 0;
@@ -1106,7 +1103,6 @@ void DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal) {
             // Find the index of the minimum and record as iOptimal.
             result = std::min_element(sub_vectorPhaseResult.begin(), sub_vectorPhaseResult.end());
             adjdBMinIndex = std::distance(sub_vectorPhaseResult.begin(), result);
-            //  Serial.printf("*result = %.3f adjdBMinIndex = %d\n", *result, adjdBMinIndex);
             // qOptimal is simply the value of sub_vectorAmp[adjdBMinIndex].
             index = 0;
             qOptimal = sub_vectorPhase[adjdBMinIndex];  // - .001;
@@ -1354,7 +1350,6 @@ void DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool shortCal) {
           autoCal = true;
           printCalType(calTypeFlag, autoCal, false);
           count = 0;
-          //    warmup = 0;
           index = 0;
           //  stopSweep = false;
           IQCalType = 0;
@@ -1512,7 +1507,6 @@ void DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool shortCal) {
             // Find the index of the minimum and record as iOptimal.
             result = std::min_element(sub_vectorPhaseResult.begin(), sub_vectorPhaseResult.end());
             adjdBMinIndex = std::distance(sub_vectorPhaseResult.begin(), result);
-            //  Serial.printf("*result = %.3f adjdBMinIndex = %d\n", *result, adjdBMinIndex);
             // qOptimal is simply the value of sub_vectorAmp[adjdBMinIndex].
             index = 0;
             qOptimal = sub_vectorPhase[adjdBMinIndex];  // - .001;
@@ -1537,8 +1531,6 @@ void DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool shortCal) {
 
         case State::average:  // Stay in this state while averaging is in progress.
           if (averageCount > 5) {
-            //     if (avgState == averagingState::iChannel) state = State::initialSweepAmp;
-            //     if (avgState == averagingState::qChannel) state = State::initialSweepPhase;
             if (avgState == averagingState::refineAmp) state = State::refineAmp;
             if (avgState == averagingState::refinePhase) state = State::refinePhase;
             averageCount = 0;
@@ -1918,17 +1910,6 @@ float PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
     arm_max_q15(&pixelnew[(cal_bins[0] - capture_bins)], capture_bins * 2, &adjAmplitude, &index_of_max);
     arm_max_q15(&pixelnew[(cal_bins[1] - capture_bins)], capture_bins * 2, &refAmplitude, &index_of_max);
   }
-
-  //=== // AFP 2-11-23
-  //  if (y_new > base_y) y_new = base_y;
-  //  if (y_old > base_y) y_old = base_y;
-  //  if (y_old2 > base_y) y_old2 = base_y;
-  //  if (y1_new > base_y) y1_new = base_y;
-
-  //  if (y_new < -140) y_new = -140;  // Bottom of expanded calibration spectrum display.
-  //  if (y_old < -140) y_old = -140;
-  //  if (y_old2 < -140) y_old2 = -140;
-  //  if (y1_new < -140) y1_new = -140;
 
   y_old2_plot = 135 + (-y_old2 + rawSpectrumPeak);
   y_old_plot = 135 + (-y_old + rawSpectrumPeak);
