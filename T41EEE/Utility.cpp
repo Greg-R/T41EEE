@@ -37,7 +37,6 @@ FLASHMEM void sineTone(int numCycles) {
   Return value;
     void
 *****/
-
 FLASHMEM void initCWShaping() {
   int pos;
   float deg;
@@ -62,6 +61,7 @@ FLASHMEM void initCWShaping() {
     cwFallBuffer[pos] = (1.0 + cos(deg / 57.3 /* fixed conversion to radians */)) / 2.0;
   }
 }
+
 
 const float32_t atanTable[68] = {
   -0.015623728620477f,
@@ -136,9 +136,9 @@ const float32_t atanTable[68] = {
 
 
 /*****
-  Purpose: Correct Phase angle between I andQ channels
+  Purpose: Correct Phase angle between I and Q channels
   Parameter list:
-    void
+    float32_t *I_buffer, float32_t *Q_buffer, float32_t factor, uint32_t blocksize
   Return value;
     void
 *****/
@@ -152,6 +152,7 @@ void IQPhaseCorrection(float32_t *I_buffer, float32_t *Q_buffer, float32_t facto
     arm_add_f32(I_buffer, temp_buffer, I_buffer, blocksize);
   }
 }  // end IQphase_correction
+
 
 /*****
   Purpose: Calculate sinc function
@@ -168,6 +169,7 @@ float MSinc(int m, float fc) {
   else
     return sinf(x * fc) / (fc * x);
 }
+
 
 /*****
   Purpose: Izero
@@ -224,6 +226,7 @@ float32_t log10f_fast(float32_t X) {
   return (Y * 0.3010299956639812f);
 }
 
+
 /*****
   Purpose: void Calculatedbm()
 
@@ -234,7 +237,6 @@ float32_t log10f_fast(float32_t X) {
     void
 *****/
 void Calculatedbm() {
-
   // calculation of the signal level inside the filter bandwidth
   // taken from the spectrum display FFT
   // taking into account the analog gain before the ADC
@@ -268,7 +270,6 @@ void Calculatedbm() {
 
   //  determine Lbin and Ubin from ts.dmod_mode and FilterInfo.width
   //  = determine bandwith separately for lower and upper sideband
-
 
   bw_LSB = bands[EEPROMData.currentBand].FLoCut;
   bw_USB = bands[EEPROMData.currentBand].FHiCut;
@@ -306,8 +307,6 @@ void Calculatedbm() {
         break;
     }
   }
-
-
   // lowpass IIR filter
   // Wheatley 2011: two averagers with two time constants
   // IIR filter with one element analog to 1st order RC filter
@@ -399,6 +398,7 @@ float32_t arm_atan2_f32(float32_t y, float32_t x) {
 
   return (atan2Val); /* Return the output value */
 }
+
 
 /*****
   Purpose:
@@ -539,6 +539,7 @@ void SaveAnalogSwitchValues() {
   EEPROMData.buttonRepeatDelay = origRepeatDelay;  // Restore original repeat delay
 }
 
+
 // ================== Clock stuff
 /*****
   Purpose: DisplayClock()
@@ -625,12 +626,6 @@ void SetupMode(int sideBand) {
   //tft.fillRect(OPERATION_STATS_X + 170, FREQUENCY_Y + 30, tft.getFontWidth() * 5, tft.getFontHeight(), RA8875_BLACK);        // Clear top-left menu area
   old_demod_mode = bands[EEPROMData.currentBand].mode;  // set old_mode flag for next time, at the moment only used for first time radio is switched on . . .
 }  // end void setup_mode
-
-
-int Xmit_IQ_Cal()  //AFP 09-21-22
-{
-  return -1;
-}
 
 
 /*****

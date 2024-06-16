@@ -133,8 +133,8 @@ powerScale = 30.0 * EEPROMData.powerOutCW[EEPROMData.currentBand];
 //      Q_out_L.play(q15_buffer_LTemp, 2048);    // Sidetone
     // Inject the DC offset from carrier calibration.  There is an ARM function for this.
     #ifdef QSE2
-      arm_offset_q15(q15_buffer_LTemp, EEPROMData.iDCoffset[EEPROMData.currentBand] + 1260, q15_buffer_LTemp, 2048);
-      arm_offset_q15(q15_buffer_RTemp, EEPROMData.qDCoffset[EEPROMData.currentBand] + 1260, q15_buffer_RTemp, 2048);
+      arm_offset_q15(q15_buffer_LTemp, EEPROMData.iDCoffset[EEPROMData.currentBand] + EEPROMData.dacOffset, q15_buffer_LTemp, 2048);
+      arm_offset_q15(q15_buffer_RTemp, EEPROMData.qDCoffset[EEPROMData.currentBand] + EEPROMData.dacOffset, q15_buffer_RTemp, 2048);
     #endif
 
       Q_out_L_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);  // This mode is required when setting sidetone volume.

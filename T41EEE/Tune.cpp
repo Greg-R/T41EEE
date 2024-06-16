@@ -1,8 +1,12 @@
 
 #include "SDT.h"
 
-long CWFreqShift = 750;
-int32_t IFFreq = SR[SampleRate].rate / 4;  // IF (intermediate) frequency
+//long CWFreqShift = 750;
+uint64_t IFFreq = SR[SampleRate].rate / 4;  // IF (intermediate) frequency
+//uint64_t Clk0SetFreq = 0;
+uint64_t Clk1SetFreq = 0;
+uint64_t Clk2SetFreq = 0;
+
 
 /*****
   Purpose: A special variant of SetFreq() used only for calibration.
@@ -35,33 +39,8 @@ void SetFreqCal(int calFreqShift)
   si5351.set_freq(Clk1SetFreq, SI5351_CLK1);
   si5351.output_enable(SI5351_CLK2, 1);
   si5351.output_enable(SI5351_CLK1, 1);
-
 }
 
-/***** //AFP 10-11-22 all new
-  Purpose:  Reset tuning to center
-
-  Parameter list:
-  void
-
-  Return value;
-  void
-*****/
-void ResetTuning()
-{
-  currentFreq = EEPROMData.centerFreq + NCOFreq;  // currentFreqA changed to currentFreq.  KF5N August 7, 2023
-  NCOFreq = 0L;
-  EEPROMData.centerFreq = TxRxFreq = currentFreq ;  //AFP 10-28-22  // currentFreqA changed to currentFreq.  KF5N August 7, 2023
-  tft.writeTo(L2);  // Clear layer 2.  KF5N July 31, 2023
-  tft.clearMemory();
-  SetFreq();  // For new tuning scheme.  KF5N July 22, 2023
-  DrawBandWidthIndicatorBar();
-  BandInformation();
-  ShowFrequency();
-  UpdateDecoderField();  // Update Morse decoder if used.
-  FilterSetSSB();
-}
-// ===== End AFP 10-11-22
 
 /*****
   Purpose: SetFrequency
@@ -96,10 +75,6 @@ void SetFreq() {  //AFP 09-22-22   Revised July 7 KF5N
   //  The receive LO frequency is not dependent on mode or sideband.  CW frequency shift is done in DSP code.
   Clk2SetFreq = ((EEPROMData.centerFreq * SI5351_FREQ_MULT) + IFFreq * SI5351_FREQ_MULT) * MASTER_CLK_MULT_RX;
 
-// Limit the lowest possible frequency to 300 kHz.  Probably better to limit in the center tune encoder.
-//  if(Clk1SetFreq < 300000) Clk1SetFreq = 300000;
-//  if(Clk2SetFreq < 300000) Clk2SetFreq = 300000;
-
   if (radioState == SSB_RECEIVE_STATE || radioState == CW_RECEIVE_STATE || radioState == AM_RECEIVE_STATE) {   //  Receive state
     si5351.set_freq(Clk2SetFreq, SI5351_CLK2);
     si5351.output_enable(SI5351_CLK1, 0);  // CLK1 (transmit) off during receive to prevent birdies
@@ -114,6 +89,32 @@ void SetFreq() {  //AFP 09-22-22   Revised July 7 KF5N
   //=====================  AFP 10-03-22 =================
   DrawFrequencyBarValue();
 }
+
+
+/***** //AFP 10-11-22 all new
+  Purpose:  Reset tuning to center
+
+  Parameter list:
+  void
+
+  Return value;
+  void
+*****/
+void ResetTuning()
+{
+  currentFreq = EEPROMData.centerFreq + NCOFreq;  // currentFreqA changed to currentFreq.  KF5N August 7, 2023
+  NCOFreq = 0L;
+  EEPROMData.centerFreq = TxRxFreq = currentFreq ;  //AFP 10-28-22  // currentFreqA changed to currentFreq.  KF5N August 7, 2023
+  tft.writeTo(L2);  // Clear layer 2.  KF5N July 31, 2023
+  tft.clearMemory();
+  SetFreq();  // For new tuning scheme.  KF5N July 22, 2023
+  DrawBandWidthIndicatorBar();
+  BandInformation();
+  ShowFrequency();
+  UpdateDecoderField();  // Update Morse decoder if used.
+  FilterSetSSB();
+}
+// ===== End AFP 10-11-22
 
 
 /*****

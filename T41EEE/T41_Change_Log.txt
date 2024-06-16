@@ -1,5 +1,18 @@
 The following change log documents changes to versions prior to the current.
 
+## Highlight of Changes included in T41EEE.5
+
+1.  Fixed keyer problem introduced by last version changes.
+2.  Corrected TX cal on USB to show correct sign.
+3.  Added default values for CW and SSB power arrays in EEPROMData struct.
+4.  Fixed type conversion problem in sinusoidal tone array function.
+5.  Keyer selection is remembered in CW Option menu.
+6.  Re-do of button operations to make select button "repeat last command".
+7.  Removed redundant microphone audio path from Teensy audio system.
+8.  Removd redundant speaker audio path from Teensy audio system.
+9.  SetAudioOperatingState() function updated to match new audio paths.
+10. Removed MyDelay() function and replaced with delay() function.
+
 ## Highlight of Changes included in T41EEE.4
 
 1.   Moved CW and SSB power calculations out of loop().
