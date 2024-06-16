@@ -1,3 +1,4 @@
+// Class Calibrate replaces Process2.cpp.  Greg KF5N June 16, 2024
 
 #include "SDT.h"
 
@@ -745,15 +746,15 @@ void Calibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal)
   //  bool corrChange = false;
   float correctionIncrement = 0.001;
   State state = State::warmup;  // Start calibration state machine in warmup state.
-  float maxSweepAmp = 0.3;
+  float maxSweepAmp = 0.35;
   float maxSweepPhase = 0.1;
   float increment = 0.002;
   int averageCount = 0;
   IQCalType = 0;  // Begin with gain optimization.
   float iOptimal = 1.0;
   float qOptimal = 0.0;
-  std::vector<float32_t> sweepVector(301);
-  std::vector<float32_t> sweepVectorValue(301);
+  std::vector<float32_t> sweepVector(351);
+  std::vector<float32_t> sweepVectorValue(351);
   elapsedMillis fiveSeconds;
   int viewTime = 0;
   bool autoCal = false;
@@ -1832,7 +1833,7 @@ float Calibrate::PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
 
 
 /*****
-  Purpose: Function pointer to select the transmit calibration tone frequency.  Possible values:
+  Purpose: Function to select the transmit calibration tone frequency.  Possible values:
            0 = 750 Hz
            1 = 3 kHz
 

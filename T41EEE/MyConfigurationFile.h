@@ -56,4 +56,6 @@
 // Uncomment this line for QSE2.
 //#define QSE2
 
+// Uncomment this line if using an external PLL module.
+//#define PLLMODULE
 

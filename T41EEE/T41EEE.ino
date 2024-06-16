@@ -1239,11 +1239,15 @@ FLASHMEM void setup() {
   si5351.reset();                                                                           // KF5N.  Moved Si5351 start-up to setup. JJP  7/14/23
   si5351.init(SI5351_CRYSTAL_LOAD_10PF, Si_5351_crystal, EEPROMData.freqCorrectionFactor);  // JJP  7/14/23
   si5351.set_ms_source(SI5351_CLK2, SI5351_PLLB);                                           // Allows CLK1 and CLK2 to exceed 100 MHz simultaneously.
-  si5351.drive_strength(SI5351_CLK1, SI5351_DRIVE_8MA);                                     // AFP 10-13-22
+  #ifdef PLLMODULE
+  si5351.drive_strength(SI5351_CLK0, SI5351_DRIVE_8MA);                                     // AFP 10-13-22
+  #else
+  si5351.drive_strength(SI5351_CLK1, SI5351_DRIVE_8MA);
+  #endif
   si5351.drive_strength(SI5351_CLK2, SI5351_DRIVE_8MA);                                     // CWP AFP 10-13-22
-  // Turn off LOs.  Should be default state after init.
-  //si5351.output_enable(SI5351_CLK2, 0);
-  //si5351.output_enable(SI5351_CLK1, 0);
+  // Turn off LOs.  Should be default state after init, so probably not really necessary here.
+  si5351.output_enable(SI5351_CLK2, 0);
+  si5351.output_enable(SI5351_CLK1, 0);
 
   InitializeDataArrays();
   // Initialize user defined stuff
@@ -1263,7 +1267,6 @@ FLASHMEM void setup() {
   ShowBandwidth();
   FilterBandwidth();
   ShowFrequency();
-  SetFreq();
   zoomIndex = EEPROMData.spectrum_zoom - 1;  // ButtonZoom() increments zoomIndex, so this cancels it so the read from EEPROM is accurately restored.  KF5N August 3, 2023
   ButtonZoom();                              // Restore zoom settings.  KF5N August 3, 2023
   comp_ratio = 5.0;
