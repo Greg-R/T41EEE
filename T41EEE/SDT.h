@@ -253,7 +253,6 @@ extern struct maps myMapFiles[];
 #define TMS0_POWER_DOWN_MASK (0x1U)
 #define TMS1_MEASURE_FREQ(x) (((uint32_t)(((uint32_t)(x)) << 0U)) & 0xFFFFU)
 #undef round
-//#undef PI  Try using PI defined in Arduino and/or Teensy.  KF5N March 7, 2024
 #undef HALF_PI
 #undef TWO_PI
 #define HALF_PI 1.5707963267948966192313216916398f
@@ -713,7 +712,6 @@ extern const uint8_t NR_N_frames;
 extern int16_t pixelnew[];
 extern int16_t pixelold[];
 extern int16_t pixelCurrent[];
-//extern int16_t pixelold[];
 extern int16_t y_old, y_new, y1_new, y1_old, y_old2;
 extern const uint16_t gradient[];
 extern const uint32_t IIR_biquad_Zoom_FFT_N_stages;
@@ -961,7 +959,6 @@ void CalcFIRCoeffs(float *coeffs_I, int numCoeffs, float32_t fc, float32_t Astop
 void CalcCplxFIRCoeffs(float *coeffs_I, float *coeffs_Q, int numCoeffs, float32_t FLoCut, float32_t FHiCut, float SampleRate);
 void CaptureKeystrokes();
 void CalibrateOptions();    // AFP 10-22-22, changed JJP 2/3/23
-//void Codec_gain();
 uint16_t Color565(uint8_t r, uint8_t g, uint8_t b);
 void ControlFilterF();
 int CreateMapList(char ptrMaps[10][50], int *count);
@@ -1017,7 +1014,6 @@ void ErasePrimaryMenu();
 void EraseSpectrumDisplayContainer();
 void EraseSpectrumWindow();
 void ExecuteButtonPress(int val);
-
 void FilterBandwidth();
 void FilterOverlay();
 void FilterSetSSB();
@@ -1030,9 +1026,7 @@ int GetEncoderValue(int minValue, int maxValue, int startValue, int increment, c
 float GetEncoderValueLive(float minValue, float maxValue, float startValue, float increment, char prompt[], bool left);  //AFP 10-22-22
 q15_t GetEncoderValueLiveQ15t(int minValue, int maxValue, int startValue, int increment, char prompt[], bool left);
 void GetFavoriteFrequency();
-
 float HaversineDistance(float dxLat, float dxLon);
-
 int InitializeSDCard();
 void InitFilterMask();
 void InitLMSNoiseReduction();
@@ -1059,9 +1053,7 @@ float MSinc(int m, float fc);
 void NoActiveMenu();
 void NoiseBlanker(float32_t *inputsamples, float32_t *outputsamples);
 void NROptions();
-
 float PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins);
-
 void printFile(const char *filename);
 void EnableButtonInterrupts();
 void playTransmitData();  // KF5N February 23, 2024
@@ -1088,7 +1080,6 @@ void SaveAnalogSwitchValues();
 void SelectCalFreq();   // AFP 10-18-22
 void SelectCWFilter();  // AFP 10-18-22
 void SelectCWOffset();  // KF5N December 13, 2023
-//extern "C" uint32_t set_arm_clock(uint32_t frequency);
 void SetBand();
 void SetBandRelay(int state);
 void SetDecIntFilters();
