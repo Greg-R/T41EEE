@@ -39,7 +39,7 @@ extern struct maps myMapFiles[];
 #include <utility/imxrt_hw.h>  // for setting I2S freq, Thanks, FrankB!
 #include <EEPROM.h>
 
-#include "Process2.h"
+#include "Calibrate.h"
 
 //======================================== Symbolic Constants for the T41 ===================================================
 #define RIGNAME "T41-EP SDT"
@@ -779,9 +779,6 @@ extern long TxRxFreq;  // = centerFreq+NCOFreq  NCOFreq from FreqShift2()
 extern unsigned long cwTransmitDelay;  // ms to keep relay on after last atom read
 extern long lastFrequencies[][2];
 extern long int n_clear;
-
-extern unsigned long long Clk2SetFreq;  // AFP 09-27-22
-extern unsigned long long Clk1SetFreq;  // AFP 09-27-22
 
 float ApproxAtan(float z);
 float ApproxAtan2(float y, float x);

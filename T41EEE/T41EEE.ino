@@ -483,9 +483,6 @@ long currentFreq;
 long int n_clear;
 long TxRxFreq;  // = EEPROMData.centerFreq + NCOFreq  NCOFreq from FreqShift2()
 
-unsigned long long Clk2SetFreq;                  // AFP 09-27-22
-unsigned long long Clk1SetFreq = 1000000000ULL;  // AFP 09-27-22
-
 float help;
 float s_hotT_ROOM; /*!< The value of s_hotTemp minus room temperature(25¡æ).*/
 
@@ -1240,13 +1237,13 @@ FLASHMEM void setup() {
      start local oscillator Si5351
   ****************************************************************************************/
   si5351.reset();                                                                           // KF5N.  Moved Si5351 start-up to setup. JJP  7/14/23
-  si5351.init(SI5351_CRYSTAL_LOAD_10PF, Si_5351_crystal, EEPROMData.freqCorrectionFactor);  //JJP  7/14/23
-  si5351.set_ms_source(SI5351_CLK2, SI5351_PLLB);                                           //  Allows CLK1 and CLK2 to exceed 100 MHz simultaneously.
-  si5351.drive_strength(SI5351_CLK1, SI5351_DRIVE_8MA);                                     //AFP 10-13-22
-  si5351.drive_strength(SI5351_CLK2, SI5351_DRIVE_8MA);                                     //CWP AFP 10-13-22
-  // Turn off LOs.
-  si5351.output_enable(SI5351_CLK2, 0);
-  si5351.output_enable(SI5351_CLK1, 0);
+  si5351.init(SI5351_CRYSTAL_LOAD_10PF, Si_5351_crystal, EEPROMData.freqCorrectionFactor);  // JJP  7/14/23
+  si5351.set_ms_source(SI5351_CLK2, SI5351_PLLB);                                           // Allows CLK1 and CLK2 to exceed 100 MHz simultaneously.
+  si5351.drive_strength(SI5351_CLK1, SI5351_DRIVE_8MA);                                     // AFP 10-13-22
+  si5351.drive_strength(SI5351_CLK2, SI5351_DRIVE_8MA);                                     // CWP AFP 10-13-22
+  // Turn off LOs.  Should be default state after init.
+  //si5351.output_enable(SI5351_CLK2, 0);
+  //si5351.output_enable(SI5351_CLK1, 0);
 
   InitializeDataArrays();
   // Initialize user defined stuff

@@ -64,15 +64,15 @@ void CalibrateOptions() {
       }
       break;
     case 2:                              // IQ Receive Cal - Gain and Phase
-      DoReceiveCalibrate(false, false);  // This function was significantly revised.  KF5N August 16, 2023
+      calibrater.DoReceiveCalibrate(false, false);  // This function was significantly revised.  KF5N August 16, 2023
       break;
 
     case 3:  // Xmit Carrier calibration.
-      DoXmitCarrierCalibrate(EEPROMData.calFreq, false, false);
+      calibrater.DoXmitCarrierCalibrate(EEPROMData.calFreq, false, false);
       break;
 
     case 4:                                               // IQ Transmit Cal - Gain and Phase  //AFP 2-21-23
-      DoXmitCalibrate(EEPROMData.calFreq, false, false);  // This function was significantly revised.  KF5N August 16, 2023
+      calibrater.DoXmitCalibrate(EEPROMData.calFreq, false, false);  // This function was significantly revised.  KF5N August 16, 2023
       break;
 
     case 5:  // SSB PA Cal
@@ -91,17 +91,17 @@ void CalibrateOptions() {
       break;  // Missing break.  KF5N August 12, 2023
 
     case 6:  // Fully automatic radio calibration.
-      RadioCal(false);
+      calibrater.RadioCal(false);
       calibrateFlag = 0;
       break;
 
     case 7:  // Full automatic calibration refinement.
-      RadioCal(true);
+      calibrater.RadioCal(true);
       calibrateFlag = 0;
       break;
 
     case 8:  // Choose CW calibration tone frequency.
-      SelectCalFreq();
+      calibrater.SelectCalFreq();
       calibrateFlag = 0;
       break;
 
