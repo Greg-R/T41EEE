@@ -71,6 +71,52 @@ Remember to save to the SD card via the EEPROM menu EEPROM->SD command prior to 
 14.  Smoother tuning in 16X Zoom.
 15.  Improved accuracy of location of blue tuning bar.
 16.  Higher dynamic range calibration display working.
+18.  Automated calibration feature is available in the Calibration menu (details below).
+
+## Automated Calibration
+
+Automated calibration is available starting with this version T41EEE.6.
+
+Automated calibration set-up is the same as for manual calibration.  A loop-back path from the
+output of the QSE to the input of the QSD must be connected.  An attenuator, in the value of 
+30 to 50 dB, must be inserted in this path.  The value for optimal calibration must be determined
+empirically.  If a spectrum analyzer is available, it is strongly recommended to view the result
+in a narrow sweep (~10kHz) to determine if the undesired sideband (and carrier in the case of QSE2DC)
+is adequately suppressed.
+
+After the loop-back path is inserted, use the following command from the main function buttons (2 and 5):
+
+Calibrate (select) Radio Cal (select)
+
+The radio will move to the 80 meter band and begin the calibration process.  The process will pause
+for 5 seconds at the conclusion of each individual calibration process.  The process will continue
+through all bands and will exit into regular radio mode after 10 meters is completed.  Calibration
+numbers are saved to non-volatile EEPROM onboard the Teensy.  If desired, save to the SD card as
+follows using the main function buttons:
+
+EEPROM (select) Copy EEPROM->SD (select)
+
+Note that individual band manual tuning remains possible.  Also, it is possible to automatically
+calibrate a single band from the individual menu using button 4 (2nd row, 1st column).  After
+the automatic calibration process completes, manual tuning again becomes available.
+
+A faster, more precise process is possible.  This is also in the Calibrate menu, and is called
+"Refine Cal".  This will calibrate all bands except it will use the current numbers as a starting
+point.  Refine Cal will not proceed until Radio Cal has been completed.  Refine Cal will also work
+in individual bands using button 7 (3rd row, 1st column).
+
+Here are a few tips on using automated calibration modes:
+
+1.  Turn on the radio for about 5 minutes before beginning automatic calibration modes.  This is so the circuitry is thermally stable before calibration begins.
+2.  RF Auto-Gain status does not matter.  Calibration will use the rf gain value assigned to the band which is being calibrated.
+3.  The desired carrier peak should be close to the top of the blue column.  Adjust the loop-back attenuation and/or the rf gain until this looks good.
+4.  "Refine Cal" which uses the previously saved numbers as a starting point.  This runs a little faster.  Refine calibration
+     can be run on the entire radio, all bands, as long as Radio Cal has been completed.  Refine cal can be run on individual band at any time (Filter button).
+5.  Don't try to run Radio Cal or Refine Cal on an unhealthy radio.  If there is a band which is not working, the results may be unpredictable.
+
+A short movie showing the latest automatic calibration features in action:
+
+<https://drive.google.com/file/d/1bSDNnU4UXCL27KUWEFmHZ__9FZ7w2gWG/view?usp=sharing>
 
 *********************************************************************************************
 

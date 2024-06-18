@@ -118,7 +118,7 @@ Here are a few tips on using automated calibration modes:
 
 A short movie showing the latest automatic calibration features in action:
 
-https://drive.google.com/file/d/1bSDNnU4UXCL27KUWEFmHZ__9FZ7w2gWG/view?usp=sharing
+<https://drive.google.com/file/d/1bSDNnU4UXCL27KUWEFmHZ__9FZ7w2gWG/view?usp=sharing>
 
 *********************************************************************************************
 
