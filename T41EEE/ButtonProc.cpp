@@ -385,6 +385,7 @@ void ButtonZoom() {
 *****/
 void ButtonFilter() {
   switchFilterSideband = !switchFilterSideband;
+  FilterSetSSB();  // Call this so the delimiter is set to the correct color.
   ControlFilterF();
   FilterBandwidth();
   ShowFrequency();

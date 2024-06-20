@@ -165,7 +165,7 @@ void ShowSpectrum() {
     y_old_plot = 247 - y_old - EEPROMData.currentNoiseFloor[EEPROMData.currentBand];
     y_old2_plot = 247 - y_old2 - EEPROMData.currentNoiseFloor[EEPROMData.currentBand];
 
-    if ((x1 > 51) && (x1 < 461))  //  HB start  for auto RFgain collect frequency distribution
+    if ((x1 > 51) && (x1 < 461))  //  HB start for auto RFgain collect frequency distribution
     {
       j = 247 - y_new_plot + 40;  // +40 to get 10 bins below zero - want to straddle zero
       k = j >> 2;
@@ -262,7 +262,7 @@ void ShowSpectrum() {
     tft.writeRect(WATERFALL_LEFT_X, FIRST_WATERFALL_LINE, MAX_WATERFALL_WIDTH, 1, waterfall);
 
   if (EEPROMData.autoGain) {
-    if (FH_max_box > UPPERPIXTARGET) {  //  HB Start adjust rfGainAllBands  15 and 13 to alter to move target base up and down
+    if (FH_max_box > UPPERPIXTARGET) {  //  HB Start adjust rfGainAllBands 15 and 13 to alter to move target base up and down
       EEPROMData.rfGainCurrent = EEPROMData.rfGainCurrent - 1;
     }
     if (FH_max_box < LOWERPIXTARGET) {
