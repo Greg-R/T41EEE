@@ -4,7 +4,9 @@
 int buttonRead = 0;
 int minPinRead = 1024;
 int secondaryMenuChoiceMade;
-long incrementValues[] = { 10, 50, 100, 250, 1000, 10000, 100000, 1000000 };
+//long incrementValues[] = { 10, 50, 100, 250, 1000, 10000, 100000, 1000000 };
+long incrementValues[] = CENTER_TUNE_ARRAY;          // k3pto
+#define CENTER_TUNE_SIZE  ( sizeof(incrementValues)/sizeof(incrementValues[0]) )  // k3pto
 
 /*
 The button interrupt routine implements a first-order recursive filter, or "leaky integrator,"
@@ -362,8 +364,10 @@ void ExecuteButtonPress(int val) {
 *****/
 void ButtonFreqIncrement() {
   EEPROMData.tuneIndex--;
-  if (EEPROMData.tuneIndex < 0)
-    EEPROMData.tuneIndex = MAX_FREQ_INDEX - 1;
+//  if (EEPROMData.tuneIndex < 0) EEPROMData.tuneIndex = MAX_FREQ_INDEX - 1;
+
+  if (EEPROMData.tuneIndex < 0) EEPROMData.tuneIndex = CENTER_TUNE_SIZE - 1;  // k3pto
+
   EEPROMData.freqIncrement = incrementValues[EEPROMData.tuneIndex];
   DisplayIncrementField();
 }

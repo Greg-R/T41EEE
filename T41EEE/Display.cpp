@@ -1349,8 +1349,11 @@ void DisplayAGC() {
     void
 *****/
 void UpdateIncrementField() {
-  long selectFT[] = { 10, 50, 250, 500 };
+//  long selectFT[] = { 10, 50, 250, 500 };
   static int selectFTIndex = 0;  // JJP 6/16/23
+
+long selectFT[] = FINE_TUNE_ARRAY;    // k3pto
+#define FINE_TUNE_SIZE  ( sizeof(selectFT)/sizeof(selectFT[0]) ) // k3pto
 
   for (int i = 0; i < 4; i++) {  // Get index for current value
     if (EEPROMData.stepFineTune == selectFT[i]) {
