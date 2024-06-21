@@ -693,7 +693,7 @@ extern int last_filter_pos;
 extern int filter_pos;
 extern bool volumeChangeFlag;
 extern char keyboardBuffer[];
-extern const char *labels[];
+//extern const char *labels[];
 extern const char *topMenus[];
 extern const char *zoomOptions[];
 extern byte currentDashJump;

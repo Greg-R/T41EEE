@@ -192,12 +192,6 @@ void (*functionPtr[])() = { &CWOptions, &RFOptions, &VFOSelect,
                             &EEPROMOptions, &AGCOptions, &SpectrumOptions,
                             &ButtonSetNoiseFloor, &MicGainSet, &MicOptions,
                             &EqualizerRecOptions, &EqualizerXmtOptions, &CalibrateOptions, &BearingMaps };
-const char *labels[] = { "Select", "Menu Up", "Band Up",
-                         "Zoom", "Menu Dn", "Band Dn",
-                         "Filter", "DeMod", "Mode",
-                         "NR", "Notch", "Noise Floor",
-                         "Fine Tune", "Decoder", "Tune Increment",
-                         "Reset Tuning", "Frequ Entry", "User 2" };
 
 uint32_t FFT_length = FFT_LENGTH;
 

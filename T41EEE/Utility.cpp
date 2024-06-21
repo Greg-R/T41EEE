@@ -8,6 +8,12 @@ int pos_x_frequency = 12;
 float32_t dbmhz = -145.0;
 float32_t m_AttackAlpha = 0.03;
 float32_t m_DecayAlpha = 0.01;
+const char *labels[] = { "Select", "Menu Up", "Band Up",
+                         "Zoom", "Menu Dn", "Band Dn",
+                         "Filter", "DeMod", "Mode",
+                         "NR", "Notch", "Noise Floor",
+                         "Fine Tune", "Decoder", "Tune Increment",
+                         "Reset Tuning", "Frequ Entry", "User 2" };
 
 
 /*****
