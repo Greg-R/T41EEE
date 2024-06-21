@@ -283,8 +283,8 @@ void ExecuteButtonPress(int val) {
       ButtonSetNoiseFloor();
       break;
 
-    case FINE_TUNE_INCREMENT:  // 12
-      UpdateIncrementField();
+    case MAIN_TUNE_INCREMENT:  // 12
+      ButtonFreqIncrement();
       break;
 
     case DECODER_TOGGLE:  // 13
@@ -292,8 +292,8 @@ void ExecuteButtonPress(int val) {
       UpdateDecoderField();
       break;
 
-    case MAIN_TUNE_INCREMENT:  // 14
-      ButtonFreqIncrement();
+    case FINE_TUNE_INCREMENT:  // 14
+      UpdateIncrementField();
       break;
 
     case RESET_TUNING:  // 15   AFP 10-11-22

@@ -1314,6 +1314,8 @@ FLASHMEM void setup() {
   ShowBandwidth();
   FilterBandwidth();
   ShowFrequency();
+  switchFilterSideband = 0;
+//  FilterSetSSB();  // Call this so the delimiter is set to the correct color.
   zoomIndex = EEPROMData.spectrum_zoom - 1;  // ButtonZoom() increments zoomIndex, so this cancels it so the read from EEPROM is accurately restored.  KF5N August 3, 2023
   ButtonZoom();                              // Restore zoom settings.  KF5N August 3, 2023
   comp_ratio = 5.0;

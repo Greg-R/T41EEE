@@ -88,9 +88,9 @@ extern struct maps myMapFiles[];
 #define NOISE_REDUCTION 9
 #define NOTCH_FILTER 10
 #define NOISE_FLOOR 11
-#define FINE_TUNE_INCREMENT 12
+#define FINE_TUNE_INCREMENT 14
 #define DECODER_TOGGLE 13
-#define MAIN_TUNE_INCREMENT 14
+#define MAIN_TUNE_INCREMENT 12
 #define RESET_TUNING 15  // AFP 10-11-22
 #define UNUSED_1 16      // AFP 10-11-22
 #define BEARING 17       // AFP 10-11-22
