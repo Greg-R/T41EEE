@@ -59,3 +59,8 @@
 // Uncomment this line if using an external PLL module.
 //#define PLLMODULE
 
+// k3pto definitions
+#define CENTER_TUNE_ARRAY         { 1000, 10000, 100000, 1000000 }
+#define FINE_TUNE_ARRAY           { 10, 20, 50, 100, 200, 500 }
+
+
