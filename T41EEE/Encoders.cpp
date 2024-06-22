@@ -495,7 +495,7 @@ long SetTransmitDelay()  // new function JJP 9/1/22
   }
   // ===============  Recentering at band edges ==========
   if (EEPROMData.spectrum_zoom != 0) {
-    if (NCOFreq >= static_cast<int64_t>((95000 / (1 << EEPROMData.spectrum_zoom))) || NCOFreq < static_cast<int64_t>((-93000 / (1 << EEPROMData.spectrum_zoom)))) {  // 47500 with 2x zoom.
+    if (NCOFreq >= static_cast<int32_t>((95000 / (1 << EEPROMData.spectrum_zoom))) || NCOFreq < static_cast<int32_t>((-93000 / (1 << EEPROMData.spectrum_zoom)))) {  // 47500 with 2x zoom.
       centerTuneFlag = 0;
       resetTuningFlag = 1;
       return;

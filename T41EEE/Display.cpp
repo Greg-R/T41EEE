@@ -912,7 +912,7 @@ void ShowCurrentPowerSetting() {
     void
     // show frequency
 *****/
-void FormatFrequency(uint64_t freq, char *freqBuffer) {
+void FormatFrequency(uint32_t freq, char *freqBuffer) {
   char outBuffer[15];
   int i;
   int len;
@@ -1030,7 +1030,6 @@ void ShowFrequency() {
     Serial.printf("bands[EEPROMData.currentBandA].fBandLow = %d\n", bands[EEPROMData.currentBandA].fBandLow);  
     Serial.printf("bands[EEPROMData.currentBandA].fBandHigh = %d\n", bands[EEPROMData.currentBandA].fBandHigh);    
     Serial.printf("TxRxFreq = %d\n", TxRxFreq);
-    TxRxFreq = static_cast<uint64_t>(TxRxFreq);
 //    if (TxRxFreq < bands[EEPROMData.currentBandA].fBandLow || TxRxFreq > bands[EEPROMData.currentBandA].fBandHigh) {
     if (TxRxFreq < bands[EEPROMData.currentBandA].fBandLow) {
       tft.setTextColor(RA8875_RED);  // Out of band

@@ -386,7 +386,7 @@ dispSc displayScale[] =  //r *dbText,dBScale, pixelsPerDB, baseOffset, offsetInc
   };
 
 //======================================== Global variables declarations for Quad Oscillator 2 ===============================================
-int64_t NCOFreq;
+int32_t NCOFreq;
 
 //======================================== Global variables declarations ===============================================
 //================== Global CW Correlation and FFT Variables =================
@@ -522,9 +522,9 @@ uint32_t N_BLOCKS = N_B;
 uint32_t s_roomC_hotC; /*!< The value of s_roomCount minus s_hotCount.*/
 uint32_t s_hotTemp;    /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] at room temperature .*/
 uint32_t s_hotCount;   /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] at the hot temperature.*/
-uint64_t currentFreq;
+uint32_t currentFreq;
 long int n_clear;
-uint64_t TxRxFreq;  // = EEPROMData.centerFreq + NCOFreq  NCOFreq from FreqShift2()
+uint32_t TxRxFreq;  // = EEPROMData.centerFreq + NCOFreq  NCOFreq from FreqShift2()
 
 float help;
 float s_hotT_ROOM; /*!< The value of s_hotTemp minus room temperature(25¡æ).*/

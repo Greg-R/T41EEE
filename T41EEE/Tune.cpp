@@ -2,10 +2,10 @@
 #include "SDT.h"
 
 //long CWFreqShift = 750;
-uint64_t IFFreq = SR[SampleRate].rate / 4;  // IF (intermediate) frequency
-uint64_t Clk0SetFreq = 0;
-uint64_t Clk1SetFreq = 0;
-uint64_t Clk2SetFreq = 0;
+uint32_t IFFreq = SR[SampleRate].rate / 4;  // IF (intermediate) frequency
+uint32_t Clk0SetFreq = 0;
+uint32_t Clk1SetFreq = 0;
+uint32_t Clk2SetFreq = 0;
 
 #ifdef PLLMODULE
 /*****

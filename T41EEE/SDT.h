@@ -418,11 +418,11 @@ struct config_t {
 
   //DB2OO, 23-AUG-23 7.1MHz for Region 1
 #if defined(ITU_REGION) && ITU_REGION == 1
-  uint64_t currentFreqA = 7100000;
+  uint32_t currentFreqA = 7100000;
 #else
-  uint64_t currentFreqA = 7200000;
+  uint32_t currentFreqA = 7200000;
 #endif
-  uint64_t currentFreqB = 7030000;
+  uint32_t currentFreqB = 7030000;
   //DB2OO, 23-AUG-23: with TCXO needs to be 0
 #ifdef TCXO_25MHZ
   int freqCorrectionFactor = 0;  //68000;
@@ -458,16 +458,16 @@ struct config_t {
   float IQPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
   float IQXAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1, 1, 1, 1, 1, 1, 1 };
   float IQXPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-  uint64_t favoriteFreqs[13] = { 3560000, 3690000, 7030000, 7200000, 14060000, 14200000, 21060000, 21285000, 28060000, 28365000, 5000000, 10000000, 15000000 };
+  uint32_t favoriteFreqs[13] = { 3560000, 3690000, 7030000, 7200000, 14060000, 14200000, 21060000, 21285000, 28060000, 28365000, 5000000, 10000000, 15000000 };
 
   //DB2OO, 23-AUG-23: Region 1 freqs (from https://qrper.com/qrp-calling-frequencies/)
 #if defined(ITU_REGION) && ITU_REGION == 1
-  uint64_t lastFrequencies[NUMBER_OF_BANDS][2] = { { 3690000, 3560000 }, { 7090000, 7030000 }, { 14285000, 14060000 }, { 18130000, 18096000 }, { 21285000, 21060000 }, { 24950000, 24906000 }, { 28365000, 28060000 } };
+  uint32_t lastFrequencies[NUMBER_OF_BANDS][2] = { { 3690000, 3560000 }, { 7090000, 7030000 }, { 14285000, 14060000 }, { 18130000, 18096000 }, { 21285000, 21060000 }, { 24950000, 24906000 }, { 28365000, 28060000 } };
 #else
-  uint64_t lastFrequencies[NUMBER_OF_BANDS][2] = { { 3985000, 3560000 }, { 7200000, 7030000 }, { 14285000, 14060000 }, { 18130000, 18096000 }, { 21385000, 21060000 }, { 24950000, 24906000 }, { 28385000, 28060000 } };
+  uint32_t lastFrequencies[NUMBER_OF_BANDS][2] = { { 3985000, 3560000 }, { 7200000, 7030000 }, { 14285000, 14060000 }, { 18130000, 18096000 }, { 21385000, 21060000 }, { 24950000, 24906000 }, { 28385000, 28060000 } };
 #endif
 
-  uint64_t centerFreq = 7030000;  // 4 bytes
+  uint32_t centerFreq = 7030000;  // 4 bytes
   // New user config data                                JJP 7-3-23
   char mapFileName[50] = MAP_FILE_NAME;
   char myTimeZone[10] = MY_TIMEZONE;
@@ -565,7 +565,7 @@ void ExciterIQData();
 
 //======================================== Global object declarations ==================================================
 
-extern int64_t NCOFreq;  // AFP 04-16-22
+extern int32_t NCOFreq;  // AFP 04-16-22
 
 //======================================== Global object declarations ==================================================
 // Teensy and OpenAudio objects.  Revised by KF5N March 12, 2024
@@ -649,9 +649,9 @@ extern arm_lms_norm_instance_f32 LMS_Norm_instance;
 extern elapsedMicros usec;
 
 struct band {
-  uint64_t freq;         // Current frequency in Hz * 100
-  uint64_t fBandLow;     // Lower band edge
-  uint64_t fBandHigh;    // Upper band edge
+  uint32_t freq;         // Current frequency in Hz * 100
+  uint32_t fBandLow;     // Lower band edge
+  uint32_t fBandHigh;    // Upper band edge
   const char name[4];    // name of band, 3 characters + terminator.
   int mode;
   int FHiCut;
@@ -771,12 +771,12 @@ extern uint32_t roomCount;    /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] a
 extern uint32_t s_hotTemp;    /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] at room temperature .*/
 extern uint32_t s_hotCount;   /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] at the hot temperature.*/
 extern uint32_t s_roomC_hotC; /*!< The value of s_roomCount minus s_hotCount.*/
-extern uint64_t currentFreq;
+extern uint32_t currentFreq;
 extern unsigned long ditLength;
 extern unsigned long transmitDitLength;  // JJP 8/19/23
 extern unsigned long transmitDitUnshapedBlocks;
 extern unsigned long transmitDahUnshapedBlocks;
-extern uint64_t TxRxFreq;  // = centerFreq+NCOFreq  NCOFreq from FreqShift2()
+extern uint32_t TxRxFreq;  // = centerFreq+NCOFreq  NCOFreq from FreqShift2()
 extern unsigned long cwTransmitDelay;  // ms to keep relay on after last atom read
 extern long lastFrequencies[][2];
 extern long int n_clear;
@@ -1021,7 +1021,7 @@ void FilterBandwidth();
 void FilterOverlay();
 void FilterSetSSB();
 int FindCountry(char *prefix);
-void FormatFrequency(uint64_t f, char *b);
+void FormatFrequency(uint32_t f, char *b);
 void FreqShift1();
 void FreqShift2();
 float goertzel_mag(int numSamples, int TARGET_FREQUENCY, int SAMPLING_RATE, float *data);
