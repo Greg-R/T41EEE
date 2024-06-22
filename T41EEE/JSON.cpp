@@ -31,8 +31,8 @@ FLASHMEM void loadConfiguration(const char *filename, config_t &EEPROMData) {
   for (int i = 0; i < NUMBER_OF_BANDS; i++) EEPROMData.rfGain[i] = doc["rfGain"][i];
   EEPROMData.autoGain = doc["autoGain"];
   EEPROMData.spectrumNoiseFloor = doc["spectrumNoiseFloor"];  // This is a constant.  This does not need to be included in user data.
-  EEPROMData.tuneIndex = doc["tuneIndex"];
-  EEPROMData.stepFineTune = doc["stepFineTune"];
+  EEPROMData.centerTuneStep = doc["centerTuneStep"];
+  EEPROMData.fineTuneStep = doc["fineTuneStep"];
   EEPROMData.transmitPowerLevel = doc["transmitPowerLevel"];
   EEPROMData.xmtMode = doc["xmtMode"];
   EEPROMData.nrOptionSelect = doc["nrOptionSelect"];
@@ -49,7 +49,7 @@ FLASHMEM void loadConfiguration(const char *filename, config_t &EEPROMData) {
   EEPROMData.sidetoneVolume = doc["sidetoneVolume"];
   EEPROMData.cwTransmitDelay = doc["cwTransmitDelay"];
   EEPROMData.activeVFO = doc["activeVFO"];
-  EEPROMData.freqIncrement = doc["freqIncrement"];
+//  EEPROMData.freqIncrement = doc["freqIncrement"];
   EEPROMData.currentBand = doc["currentBand"];
   EEPROMData.currentBandA = doc["currentBandA"];
   EEPROMData.currentBandB = doc["currentBandB"];
@@ -137,8 +137,8 @@ FLASHMEM void saveConfiguration(const char *filename, const config_t &EEPROMData
   for (int i = 0; i < NUMBER_OF_BANDS; i++) doc["rfGain"][i] = EEPROMData.rfGain[i];
   doc["autoGain"] = EEPROMData.autoGain;
   doc["spectrumNoiseFloor"] = EEPROMData.spectrumNoiseFloor;
-  doc["tuneIndex"] = EEPROMData.tuneIndex;
-  doc["stepFineTune"] = EEPROMData.stepFineTune;
+  doc["centerTuneStep"] = EEPROMData.centerTuneStep;
+  doc["fineTuneStep"] = EEPROMData.fineTuneStep;
   doc["transmitPowerLevel"] = EEPROMData.transmitPowerLevel;
   doc["xmtMode"] = EEPROMData.xmtMode;
   doc["nrOptionSelect"] = EEPROMData.nrOptionSelect;
@@ -155,7 +155,7 @@ FLASHMEM void saveConfiguration(const char *filename, const config_t &EEPROMData
   doc["sidetoneVolume"] = EEPROMData.sidetoneVolume;
   doc["cwTransmitDelay"] = EEPROMData.cwTransmitDelay;
   doc["activeVFO"] = EEPROMData.activeVFO;
-  doc["freqIncrement"] = EEPROMData.freqIncrement;
+//  doc["freqIncrement"] = EEPROMData.freqIncrement;
   doc["currentBand"] = EEPROMData.currentBand;
   doc["currentBandA"] = EEPROMData.currentBandA;
   doc["currentBandB"] = EEPROMData.currentBandB;

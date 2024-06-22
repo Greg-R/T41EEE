@@ -33,9 +33,9 @@
 //====================== System specific ===============
 #define CURRENT_FREQ_A            7200000                                   // VFO_A
 #define CURRENT_FREQ_B            7030000                                   // VFO_B
-#define DEFAULTFREQINCREMENT		  5                                         // This is an array index: {10, 50, 100, 250, 1000, 10000, 100000, 1000000}
+                                         // This is an array index: {10, 50, 100, 250, 1000, 10000, 100000, 1000000}
 #define DEFAULT_POWER_LEVEL       10                                        // Startup power level. Probably 20 for most people
-#define FINE_TUNE_STEP        	  50			 		                              //  This is an array: { 10, 50, 250, 500 }
+			 		                              //  This is an array: { 10, 50, 250, 500 }
 #define SPLASH_DELAY              4000L                                     // How long to show Splash screen. Use 1000 for testing, 4000 normally
 #define STARTUP_BAND        			1                                         // This is the 40M band. see around line 575 in SDT.h
 
@@ -50,17 +50,19 @@
 //#define                           FOURSQRP
 
 // Set multiplication factors for your QSD and QSE boards.
-#define MASTER_CLK_MULT_RX 4
-#define MASTER_CLK_MULT_TX 4
+#define MASTER_CLK_MULT_RX 2
+#define MASTER_CLK_MULT_TX 2
 
 // Uncomment this line for QSE2.
-//#define QSE2
+#define QSE2
 
 // Uncomment this line if using an external PLL module.
-//#define PLLMODULE
+#define PLLMODULE
 
-// k3pto definitions
+// K3PTO definitions for center and fine tune defaults and increments.
+#define CENTER_TUNE_DEFAULT		      1000                           // Set to the desired default in the CENTER_TUNE_ARRAY.
 #define CENTER_TUNE_ARRAY         { 1000, 10000, 100000, 1000000 }
+#define FINE_TUNE_DEFAULT        	          50                     // Set to the desired default in the CENTER_TUNE_ARRAY.
 #define FINE_TUNE_ARRAY           { 10, 20, 50, 100, 200, 500 }
 
 

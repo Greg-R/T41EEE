@@ -971,14 +971,6 @@ int (*functionPtr[])() = { &BearingMaps, &CWOptions, &RFOptions, &VFOSelect,
                            &EqualizerRecOptions, &EqualizerXmtOptions, &IQOptions
 
 };
-  const char *labels[]        = {"Select",       "Menu Up",  "Band Up",
-                               "Zoom",         "Menu Dn",  "Band Dn",
-                               "Filter",       "DeMod",    "Mode",
-                               "NR",           "Notch",    "Noise Floor",
-                               "Fine Tune",    "Decoder",  "Tune Increment",
-                               "User 1",       "User 2",   "User 3"
-                              };
-
 *****/
 int SubmenuSelect(const char *options[], int numberOfChoices, int defaultStart) {
   int refreshFlag = 0;

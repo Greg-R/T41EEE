@@ -4,9 +4,11 @@
 int buttonRead = 0;
 int minPinRead = 1024;
 int secondaryMenuChoiceMade;
+void ButtonFineFreqIncrement();
+void ButtonCenterFreqIncrement();
 //long incrementValues[] = { 10, 50, 100, 250, 1000, 10000, 100000, 1000000 };
-long incrementValues[] = CENTER_TUNE_ARRAY;          // k3pto
-#define CENTER_TUNE_SIZE  ( sizeof(incrementValues)/sizeof(incrementValues[0]) )  // k3pto
+
+//#define CENTER_TUNE_SIZE  ( sizeof(incrementValues)/sizeof(incrementValues[0]) )  // k3pto
 
 /*
 The button interrupt routine implements a first-order recursive filter, or "leaky integrator,"
@@ -283,8 +285,8 @@ void ExecuteButtonPress(int val) {
       ButtonSetNoiseFloor();
       break;
 
-    case MAIN_TUNE_INCREMENT:  // 12
-      ButtonFreqIncrement();
+    case FINE_TUNE_INCREMENT:  // 12
+      ButtonFineFreqIncrement();
       break;
 
     case DECODER_TOGGLE:  // 13
@@ -292,8 +294,8 @@ void ExecuteButtonPress(int val) {
       UpdateDecoderField();
       break;
 
-    case FINE_TUNE_INCREMENT:  // 14
-      UpdateIncrementField();
+    case MAIN_TUNE_INCREMENT:  // 14
+      ButtonCenterFreqIncrement();
       break;
 
     case RESET_TUNING:  // 15   AFP 10-11-22
@@ -354,7 +356,7 @@ void ExecuteButtonPress(int val) {
 
 
 /*****
-  Purpose: To process a tuning increment button push
+  Purpose: To process a center tuning increment button push
 
   Parameter list:
     void
@@ -362,13 +364,58 @@ void ExecuteButtonPress(int val) {
   Return value:
     void
 *****/
-void ButtonFreqIncrement() {
-  EEPROMData.tuneIndex--;
+void ButtonCenterFreqIncrement() {
+  uint32_t index = 0;
+  std::vector<uint32_t>::iterator result;
+  std::vector<uint32_t> centerTuneArray = CENTER_TUNE_ARRAY;          // k3pto
+
+  // Find the index of the current fine tune setting.
+result = std::find(centerTuneArray.begin(), centerTuneArray.end(), EEPROMData.centerTuneStep);
+index = std::distance(centerTuneArray.begin(), result);
+
+//  EEPROMData.tuneIndex--;
 //  if (EEPROMData.tuneIndex < 0) EEPROMData.tuneIndex = MAX_FREQ_INDEX - 1;
 
-  if (EEPROMData.tuneIndex < 0) EEPROMData.tuneIndex = CENTER_TUNE_SIZE - 1;  // k3pto
+//  if (EEPROMData.tuneIndex < 0) EEPROMData.tuneIndex = incrementValues.size() - 1;  // k3pto
+  index++;  // Increment index.
+  if (index == centerTuneArray.size()) {  // Wrap around.
+    index = 0;
+  }
 
-  EEPROMData.freqIncrement = incrementValues[EEPROMData.tuneIndex];
+  EEPROMData.centerTuneStep = centerTuneArray[index];
+  DisplayIncrementField();
+}
+
+
+/*****
+  Purpose: Updates the fine tuning increment setting on the display
+
+  Parameter list:
+    void
+
+  Return value;
+    void
+*****/
+void ButtonFineFreqIncrement() {
+uint32_t index = 0;
+std::vector<uint32_t>::iterator result;
+std::vector<uint32_t> fineTuneArray = FINE_TUNE_ARRAY;    // K3PTO
+
+// Find the index of the current fine tune setting.
+result = std::find(fineTuneArray.begin(), fineTuneArray.end(), EEPROMData.fineTuneStep);
+index = std::distance(fineTuneArray.begin(), result);
+
+//  for (uint32_t i = 0; i < selectFT.size(); i++) {  // Get index for current value
+//    if (EEPROMData.stepFineTune == selectFT[i]) {
+//      selectFTIndex = i;
+//      break;
+//    }
+//  }
+  index++;  // Increment index.
+  if (index == fineTuneArray.size()) {  // Wrap around.
+    index = 0;
+  }
+  EEPROMData.fineTuneStep = fineTuneArray[index];
   DisplayIncrementField();
 }
 

@@ -158,7 +158,7 @@ struct maps myMapFiles[10] = {
   { "", 0.0, 0.0 }
 };
 
-struct band bands[NUMBER_OF_BANDS] = {  //AFP Changed 1-30-21 // G0ORX Changed AGC to 20
+struct band bands[NUMBER_OF_BANDS]{  //AFP Changed 1-30-21 // G0ORX Changed AGC to 20
 //freq    band low   band hi   name    mode      Low    Hi  Gain  type    gain  AGC   pixel
 //                                             filter filter             correct     offset
 //DB2OO, 29-AUG-23: take ITU_REGION into account for band limits
@@ -166,26 +166,28 @@ struct band bands[NUMBER_OF_BANDS] = {  //AFP Changed 1-30-21 // G0ORX Changed A
 // Calibration done with TinySA as signal generator with -73dBm levels (S9) at the FT8 frequencies
 // with V010 QSD with the 12V mod of the pre-amp
 #if defined(ITU_REGION) && ITU_REGION == 1
-  3700000, 3500000, 3800000, "80M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20, 20,
-  7150000, 7000000, 7200000, "40M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20, 20,
+ { 3700000UL, 3500000, 3800000, "80M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20, 20},
+ { 7150000, 7000000, 7200000, "40M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20, 20},
 #elif defined(ITU_REGION) && ITU_REGION == 2
-  3700000, 3500000, 4000000, "80M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20, 20,
-  7150000, 7000000, 7300000, "40M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20, 20,
+ {  3700000UL, 3500000, 4000000, "80M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20, 20},
+ {  7150000, 7000000, 7300000, "40M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20, 20},
 #elif defined(ITU_REGION) && ITU_REGION == 3
-  3700000, 3500000, 3900000, "80M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20, 20,
-  7150000, 7000000, 7200000, "40M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20, 20,
+ {  3700000UL, 3500000, 3900000, "80M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20, 20},
+ {  7150000, 7000000, 7200000, "40M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20, 20},
 #endif
-  14200000, 14000000, 14350000, "20M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20, 20,
-  18100000, 18068000, 18168000, "17M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20, 20,
-  21200000, 21000000, 21450000, "15M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20, 20,
-  24920000, 24890000, 24990000, "12M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20, 20,
-  28350000, 28000000, 29700000, "10M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20, 20
+ {  14200000, 14000000, 14350000, "20M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20, 20},
+ {  18100000, 18068000, 18168000, "17M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20, 20},
+ {  21200000, 21000000, 21450000, "15M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20, 20},
+ {  24920000, 24890000, 24990000, "12M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20, 20},
+ {  28350000, 28000000, 29700000, "10M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20, 20}
 };
 
 const char *topMenus[] = { "CW Options", "RF Set", "VFO Select",
                            "EEPROM", "AGC", "Spectrum Options",
                            "Noise Floor", "Mic Gain", "Mic Comp",
                            "EQ Rec Set", "EQ Xmt Set", "Calibrate", "Bearing" };
+
+// Button array labels array is located in Utility.cpp.
 
 // Pointers to functions which execute the menu options.  Do these functions used the returned integer???
 void (*functionPtr[])() = { &CWOptions, &RFOptions, &VFOSelect,
@@ -384,7 +386,7 @@ dispSc displayScale[] =  //r *dbText,dBScale, pixelsPerDB, baseOffset, offsetInc
   };
 
 //======================================== Global variables declarations for Quad Oscillator 2 ===============================================
-long NCOFreq;
+int64_t NCOFreq;
 
 //======================================== Global variables declarations ===============================================
 //================== Global CW Correlation and FFT Variables =================
@@ -499,7 +501,7 @@ int n_L;
 int n_R;
 int newCursorPosition = 0;
 int oldCursorPosition = 256;
-int switchFilterSideband = 0;
+bool switchFilterSideband = false;
 int x2 = 0;  //AFP
 
 int zoomIndex = 1;  //AFP 9-26-22
@@ -520,9 +522,9 @@ uint32_t N_BLOCKS = N_B;
 uint32_t s_roomC_hotC; /*!< The value of s_roomCount minus s_hotCount.*/
 uint32_t s_hotTemp;    /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] at room temperature .*/
 uint32_t s_hotCount;   /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] at the hot temperature.*/
-long currentFreq;
+uint64_t currentFreq;
 long int n_clear;
-long TxRxFreq;  // = EEPROMData.centerFreq + NCOFreq  NCOFreq from FreqShift2()
+uint64_t TxRxFreq;  // = EEPROMData.centerFreq + NCOFreq  NCOFreq from FreqShift2()
 
 float help;
 float s_hotT_ROOM; /*!< The value of s_hotTemp minus room temperature(25¡æ).*/
@@ -1308,7 +1310,7 @@ FLASHMEM void setup() {
   ShowBandwidth();
   FilterBandwidth();
   ShowFrequency();
-  switchFilterSideband = 0;
+//  switchFilterSideband = true;
 //  FilterSetSSB();  // Call this so the delimiter is set to the correct color.
   zoomIndex = EEPROMData.spectrum_zoom - 1;  // ButtonZoom() increments zoomIndex, so this cancels it so the read from EEPROM is accurately restored.  KF5N August 3, 2023
   ButtonZoom();                              // Restore zoom settings.  KF5N August 3, 2023

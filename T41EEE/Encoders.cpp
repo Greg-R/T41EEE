@@ -95,7 +95,7 @@ void FilterSetSSB() {
         filterHiPositionMarker = map(bands[EEPROMData.currentBand].FHiCut, 0, 6000, 0, 256);
         //Draw Fiter indicator lines on audio plot to Layer 2.
         tft.writeTo(L2);
-        if(switchFilterSideband) {
+        if(not switchFilterSideband) {
         tft.drawLine(BAND_INDICATOR_X - 6 + abs(filterLoPositionMarker), SPECTRUM_BOTTOM - 3, BAND_INDICATOR_X - 6 + abs(filterLoPositionMarker), SPECTRUM_BOTTOM - 112, RA8875_LIGHT_GREY);
         tft.drawLine(BAND_INDICATOR_X - 7 + abs(filterHiPositionMarker), SPECTRUM_BOTTOM - 3, BAND_INDICATOR_X - 7 + abs(filterHiPositionMarker), SPECTRUM_BOTTOM - 112, RA8875_YELLOW);
         } else {
@@ -145,7 +145,7 @@ void EncoderCenterTune() {
       break;
   }
 
-  EEPROMData.centerFreq += ((long)EEPROMData.freqIncrement * tuneChange);  // tune the master vfo
+  EEPROMData.centerFreq += (EEPROMData.centerTuneStep * tuneChange);  // tune the master vfo
   if(EEPROMData.centerFreq < 300000) EEPROMData.centerFreq = 300000;
   TxRxFreq = EEPROMData.centerFreq + NCOFreq;
   EEPROMData.lastFrequencies[EEPROMData.currentBand][EEPROMData.activeVFO] = TxRxFreq;
@@ -483,7 +483,7 @@ long SetTransmitDelay()  // new function JJP 9/1/22
       fineTuneEncoderMove = -1L;
     }
   }
-  NCOFreq = NCOFreq + EEPROMData.stepFineTune * fineTuneEncoderMove;  // Increment NCOFreq per encoder movement.
+  NCOFreq = NCOFreq + EEPROMData.fineTuneStep * fineTuneEncoderMove;  // Increment NCOFreq per encoder movement.
   centerTuneFlag = 1;   // This is used in Process.cpp.  Greg KF5N May 16, 2024
   // ============  AFP 10-28-22
   if (EEPROMData.activeVFO == VFO_A) {
@@ -495,7 +495,7 @@ long SetTransmitDelay()  // new function JJP 9/1/22
   }
   // ===============  Recentering at band edges ==========
   if (EEPROMData.spectrum_zoom != 0) {
-    if (NCOFreq >= (95000 / (1 << EEPROMData.spectrum_zoom)) || NCOFreq < (-93000 / (1 << EEPROMData.spectrum_zoom))) {  // 47500 with 2x zoom.
+    if (NCOFreq >= static_cast<int64_t>((95000 / (1 << EEPROMData.spectrum_zoom))) || NCOFreq < static_cast<int64_t>((-93000 / (1 << EEPROMData.spectrum_zoom)))) {  // 47500 with 2x zoom.
       centerTuneFlag = 0;
       resetTuningFlag = 1;
       return;
