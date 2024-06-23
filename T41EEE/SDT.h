@@ -392,6 +392,7 @@ struct config_t {
   int rfGainCurrent = 0;
   int rfGain[NUMBER_OF_BANDS]{0};
   bool autoGain = false;
+  bool autoSpectrum = false;
   int spectrumNoiseFloor = SPECTRUM_NOISE_FLOOR;  // 247  This is a constant.  Eliminate from this struct at next opportunity.
   uint32_t centerTuneStep = CENTER_TUNE_DEFAULT;           // JJP 7-3-23
   uint32_t fineTuneStep = FINE_TUNE_DEFAULT;             // JJP 7-3-23
@@ -476,7 +477,7 @@ struct config_t {
   int sdCardPresent = 0;               //   JJP  7/18/23
   float myLong = MY_LON;
   float myLat = MY_LAT;
-  int currentNoiseFloor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };  // JJP 7/17/23
+  int currentNoiseFloor[NUMBER_OF_BANDS]{ 0 };
   int compressorFlag = 0;                                            // JJP 8/28/23
   bool xmitEQFlag = false;
   bool receiveEQFlag = false;
@@ -693,6 +694,7 @@ extern Menu_D Menus[];
 
 extern int last_filter_pos;
 extern int filter_pos;
+extern int16_t fftOffset;
 extern bool volumeChangeFlag;
 extern char keyboardBuffer[];
 //extern const char *labels[];
@@ -1053,7 +1055,7 @@ void MorseCharacterDisplay(char currentLetter);
 void MyDelay(unsigned long millisWait);
 void MyDrawFloat(float val, int decimals, int x, int y, char *buff);
 float MSinc(int m, float fc);
-void NoActiveMenu();
+//void NoActiveMenu();
 void NoiseBlanker(float32_t *inputsamples, float32_t *outputsamples);
 void NROptions();
 float PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins);
@@ -1099,7 +1101,8 @@ void SetTransmitDitLength(int wpm);  // JJP 8/19/23
 void SetupMode(int sideBand);
 void SetupMyCompressors(bool use_HP_filter, float knee_dBFS, float comp_ratio, float attack_sec, float release_sec);  //AFP 11-01-22 in DSP.cpp
 int SetWPM();
-void ShowAnalogGain();
+//void ShowAnalogGain();
+void ShowAutoStatus();
 void ShowBandwidth();
 void ShowCurrentPowerSetting();
 void ShowDecoderMessage();

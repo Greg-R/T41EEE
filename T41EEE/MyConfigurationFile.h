@@ -62,7 +62,8 @@
 // K3PTO definitions for center and fine tune defaults and increments.
 #define CENTER_TUNE_DEFAULT		      1000                           // Set to the desired default in the CENTER_TUNE_ARRAY.
 #define CENTER_TUNE_ARRAY         { 1000, 10000, 100000, 1000000 }
-#define FINE_TUNE_DEFAULT        	          50                     // Set to the desired default in the CENTER_TUNE_ARRAY.
+#define FINE_TUNE_DEFAULT        	          50                     // Set to the desired default in the FINE_TUNE_ARRAY.
 #define FINE_TUNE_ARRAY           { 10, 20, 50, 100, 200, 500 }
+
 
 
