@@ -71,7 +71,15 @@ Remember to save to the SD card via the EEPROM menu EEPROM->SD command prior to 
 14.  Smoother tuning in 16X Zoom.
 15.  Improved accuracy of location of blue tuning bar.
 16.  Higher dynamic range calibration display working.
+17.  AM modes tuning problem is resolved.
 18.  Automated calibration feature is available in the Calibration menu (details below).
+19.  Audio filter bandwidth selection is indicated by yellow delimiter bar.
+20.  Volume is equalized when adjusting audio bandwidth.
+21.  Noise reduction algorithms are equalized to the same gains.
+22.  MyConfiguration.h includes customizable coarse (center) and fine frequency increments.
+23.  Auto-Spectrum mode optimizes the position of the spectral display without affecting gain.
+     This is activated in the RF Set menu.  The gain setting reverts to manual control, also
+     in the RF Set menu.
 
 ## Automated Calibration
 
