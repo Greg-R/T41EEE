@@ -364,7 +364,7 @@ void ExecuteButtonPress(int val) {
 void ButtonCenterFreqIncrement() {
   uint32_t index = 0;
   std::vector<uint32_t>::iterator result;
-  std::vector<uint32_t> centerTuneArray = CENTER_TUNE_ARRAY;  // k3pto
+  std::vector<uint32_t> centerTuneArray CENTER_TUNE_ARRAY;  // k3pto
 
   // Find the index of the current fine tune setting.
   result = std::find(centerTuneArray.begin(), centerTuneArray.end(), EEPROMData.centerTuneStep);
@@ -390,7 +390,7 @@ void ButtonCenterFreqIncrement() {
 void ButtonFineFreqIncrement() {
   uint32_t index = 0;
   std::vector<uint32_t>::iterator result;
-  std::vector<uint32_t> fineTuneArray = FINE_TUNE_ARRAY;  // K3PTO
+  std::vector<uint32_t> fineTuneArray FINE_TUNE_ARRAY;  // K3PTO
 
   // Find the index of the current fine tune setting.
   result = std::find(fineTuneArray.begin(), fineTuneArray.end(), EEPROMData.fineTuneStep);
