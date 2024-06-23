@@ -1341,6 +1341,8 @@ elapsedMicros usec = 0;  // Automatically increases as time passes; no ++ necess
   Return value:
     void
 *****/
+float audioBW{0.0}; 
+int dBoffset{0};
 void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
 {
   int pushButtonSwitchIndex = -1;
@@ -1540,7 +1542,14 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
 #endif
 
   if (volumeChangeFlag == true) {
-    volumeAdjust.gain(volumeLog[EEPROMData.audioVolume]);
+  
+    // Compensate for audio filter setting.
+    // Nominal bandwidth is 2.8kHz.  This will be the 0 dB reference.
+    // The upper and lower frequency limits are bands[EEPROMData.currentBand].FLoCut and bands[EEPROMData.currentBand].FHiCut.
+    audioBW = bands[EEPROMData.currentBand].FHiCut - bands[EEPROMData.currentBand].FLoCut;
+    // How many dB between reference and current setting?  Round to integer.
+    dBoffset = static_cast<int>(20.0 * log10f_fast(audioBW/2800.0));
+    volumeAdjust.gain(volumeLog[(EEPROMData.audioVolume - dBoffset)]);
     volumeChangeFlag = false;
     UpdateVolumeField();
   }

@@ -77,6 +77,7 @@ void FilterSetSSB() {
 //        InitFilterMask();
         break;
     }
+      volumeChangeFlag = true;
   }
     // =============  AFP 10-27-22
 
@@ -107,11 +108,6 @@ void FilterSetSSB() {
     DrawFrequencyBarValue();  // This calls ShowBandwidth().  YES, this function is useful here.
     UpdateDecoderField();   // Redraw Morse decoder graphics because they get erased due to filter graphics updates.
     DrawBandWidthIndicatorBar();
-
-//  }
-//    tft.writeTo(L1);  // Exit function in layer 1.  KF5N August 3, 2023
-
-//tft.writeTo(L1);
 }
 
 
@@ -187,16 +183,6 @@ void EncoderVolume()  //============================== AFP 10-22-22  Begin new
       break;
   }
   EEPROMData.audioVolume += adjustVolEncoder; 
-  // simulate log taper.  As we go higher in volume, the increment increases.
-
-//  if (EEPROMData.audioVolume < (MIN_AUDIO_VOLUME + 10)) increment = 2;
-//  else if (EEPROMData.audioVolume < (MIN_AUDIO_VOLUME + 20)) increment = 3;
-//  else if (EEPROMData.audioVolume < (MIN_AUDIO_VOLUME + 30)) increment = 4;
-//  else if (EEPROMData.audioVolume < (MIN_AUDIO_VOLUME + 40)) increment = 5;
-//  else if (EEPROMData.audioVolume < (MIN_AUDIO_VOLUME + 50)) increment = 6;
-//  else if (EEPROMData.audioVolume < (MIN_AUDIO_VOLUME + 60)) increment = 7;
-//  else increment = 8;
-
 
   if (EEPROMData.audioVolume > 100) {
     EEPROMData.audioVolume = 100;
@@ -206,7 +192,6 @@ void EncoderVolume()  //============================== AFP 10-22-22  Begin new
   }
 
   volumeChangeFlag = true;  // Need this because of unknown timing in display updating.
-
 }  //============================== AFP 10-22-22  End new
 
 
@@ -305,7 +290,6 @@ q15_t GetEncoderValueLiveQ15t(int minValue, int maxValue, int startValue, int in
 }
 
 
-
 /*****
   Purpose: Use the encoder to change the value of a number in some other function
 
@@ -355,6 +339,7 @@ int GetEncoderValue(int minValue, int maxValue, int startValue, int increment, c
     }
   }
 }
+
 
 /*****
   Purpose: Allows quick setting of WPM without going through a menu
@@ -407,6 +392,7 @@ int SetWPM() {
   EraseMenus();
   return EEPROMData.currentWPM;
 }
+
 
 /*****
   Purpose: Determines how long the transmit relay remains on after last CW atom is sent.
