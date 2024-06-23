@@ -343,6 +343,7 @@ void Calibrate::CalibratePrologue() {
   RedrawDisplayScreen();
   IQChoice = 9;
   radioState = CW_RECEIVE_STATE;  // KF5N
+  fftOffset = 0;  // Some reboots may be caused by large fftOffset values when Auto-Spectrum is on.
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreq();         // Return Si5351 to normal operation mode.  KF5N
   lastState = 1111;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 16, 2023
