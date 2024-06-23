@@ -8,7 +8,7 @@
 // Updated PlotCalSpectrum() function to clean up graphics.  KF5N August 3, 2023
 // Major clean-up of calibration.  KF5N August 16, 2023
 
-#include <vector>
+//#include <vector>
 #include <algorithm>
 
 class Calibrate {

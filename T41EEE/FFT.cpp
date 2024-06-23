@@ -195,7 +195,7 @@ void ZoomFFTExe(uint32_t blockSize) {
       }
     else
       for (int16_t x = 0; x < fftWidth; x++) {
-        pixelnew[x] = displayScale[EEPROMData.currentScale].baseOffset + (int16_t)(displayScale[EEPROMData.currentScale].dBScale * log10f_fast(FFT_spec[x]));
+        pixelnew[x] = displayScale[EEPROMData.currentScale].baseOffset + (int16_t)(displayScale[EEPROMData.currentScale].dBScale * log10f_fast(FFT_spec[x])) + fftOffset;
         if (pixelnew[x] > 220) pixelnew[x] = 220;
       }
   }
@@ -249,7 +249,7 @@ void CalcZoom1Magn() {
       if (calOnFlag)  // Higher dynamic range spectral display during calibration.
         pixelnew[x] = displayScale[EEPROMData.currentScale].baseOffset + (int16_t)(40.0 * log10f_fast(FFT_spec[x]));
       else
-        pixelnew[x] = displayScale[EEPROMData.currentScale].baseOffset + (int16_t)(displayScale[EEPROMData.currentScale].dBScale * log10f_fast(FFT_spec[x]));
+        pixelnew[x] = displayScale[EEPROMData.currentScale].baseOffset + (int16_t)(displayScale[EEPROMData.currentScale].dBScale * log10f_fast(FFT_spec[x])) + fftOffset;
 #else
       pixelnew[x] = displayScale[EEPROMData.currentScale].baseOffset + (int16_t)(displayScale[EEPROMData.currentScale].dBScale * log10f(spec_help));
 #endif

@@ -38,6 +38,8 @@ extern struct maps myMapFiles[];
 #include <util/crc16.h>        // mdrhere
 #include <utility/imxrt_hw.h>  // for setting I2S freq, Thanks, FrankB!
 #include <EEPROM.h>
+#include <vector>
+#include <algorithm>
 
 #include "Calibrate.h"
 
@@ -196,7 +198,8 @@ extern struct maps myMapFiles[];
 #define ORANGE 0xFD20             /* 255, 165,   0 */
 #define FILTER_WIN 0x10  // Color of SSB filter width
 #include <utility/imxrt_hw.h>  // for setting I2S freq, Thanks, FrankB!
-#define MAX_FREQ_INDEX 8
+//#define MAX_FREQ_INDEX 8
+//#define CENTER_TUNE_SIZE  (sizeof(incrementValues)/sizeof(incrementValues[0]) )
 #define TEMPMON_ROOMTEMP 25.0f
 #define MAX_WPM 60
 #define ENCODER_FACTOR 0.25F  // use 0.25f with cheap encoders that have 4 detents per step,
@@ -387,11 +390,12 @@ struct config_t {
   int AGCMode = 1;
   int audioVolume = 30;  // 4 bytes
   int rfGainCurrent = 0;
-  int rfGain[NUMBER_OF_BANDS] = {0};
+  int rfGain[NUMBER_OF_BANDS]{0};
   bool autoGain = false;
+  bool autoSpectrum = false;
   int spectrumNoiseFloor = SPECTRUM_NOISE_FLOOR;  // 247  This is a constant.  Eliminate from this struct at next opportunity.
-  int tuneIndex = DEFAULTFREQINCREMENT;           // JJP 7-3-23
-  long stepFineTune = FINE_TUNE_STEP;             // JJP 7-3-23
+  uint32_t centerTuneStep = CENTER_TUNE_DEFAULT;           // JJP 7-3-23
+  uint32_t fineTuneStep = FINE_TUNE_DEFAULT;             // JJP 7-3-23
   float32_t transmitPowerLevel = DEFAULT_POWER_LEVEL;   // Changed from int to float; Greg KF5N February 12, 2024
   int xmtMode = SSB_MODE;                         // AFP 09-26-22
   int nrOptionSelect = 0;                         // 1 byte
@@ -408,18 +412,18 @@ struct config_t {
   int sidetoneVolume = 40;        // 4 bytes
   uint32_t cwTransmitDelay = 1000;
   int activeVFO = 0;                // 2 bytes
-  int freqIncrement = 10000;        // 4 bytes
+//  uint32_t freqIncrement = 10000;        // 4 bytes
   int currentBand = STARTUP_BAND;   // 4 bytes   JJP 7-3-23
   int currentBandA = STARTUP_BAND;  // 4 bytes   JJP 7-3-23
   int currentBandB = STARTUP_BAND;  // 4 bytes   JJP 7-3-23
 
   //DB2OO, 23-AUG-23 7.1MHz for Region 1
 #if defined(ITU_REGION) && ITU_REGION == 1
-  int currentFreqA = 7100000;
+  uint32_t currentFreqA = 7100000;
 #else
-  int currentFreqA = 7200000;
+  uint32_t currentFreqA = 7200000;
 #endif
-  int currentFreqB = 7030000;
+  uint32_t currentFreqB = 7030000;
   //DB2OO, 23-AUG-23: with TCXO needs to be 0
 #ifdef TCXO_25MHZ
   int freqCorrectionFactor = 0;  //68000;
@@ -455,16 +459,16 @@ struct config_t {
   float IQPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
   float IQXAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1, 1, 1, 1, 1, 1, 1 };
   float IQXPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-  long favoriteFreqs[13] = { 3560000, 3690000, 7030000, 7200000, 14060000, 14200000, 21060000, 21285000, 28060000, 28365000, 5000000, 10000000, 15000000 };
+  uint32_t favoriteFreqs[13] = { 3560000, 3690000, 7030000, 7200000, 14060000, 14200000, 21060000, 21285000, 28060000, 28365000, 5000000, 10000000, 15000000 };
 
   //DB2OO, 23-AUG-23: Region 1 freqs (from https://qrper.com/qrp-calling-frequencies/)
 #if defined(ITU_REGION) && ITU_REGION == 1
-  int lastFrequencies[NUMBER_OF_BANDS][2] = { { 3690000, 3560000 }, { 7090000, 7030000 }, { 14285000, 14060000 }, { 18130000, 18096000 }, { 21285000, 21060000 }, { 24950000, 24906000 }, { 28365000, 28060000 } };
+  uint32_t lastFrequencies[NUMBER_OF_BANDS][2] = { { 3690000, 3560000 }, { 7090000, 7030000 }, { 14285000, 14060000 }, { 18130000, 18096000 }, { 21285000, 21060000 }, { 24950000, 24906000 }, { 28365000, 28060000 } };
 #else
-  int lastFrequencies[NUMBER_OF_BANDS][2] = { { 3985000, 3560000 }, { 7200000, 7030000 }, { 14285000, 14060000 }, { 18130000, 18096000 }, { 21385000, 21060000 }, { 24950000, 24906000 }, { 28385000, 28060000 } };
+  uint32_t lastFrequencies[NUMBER_OF_BANDS][2] = { { 3985000, 3560000 }, { 7200000, 7030000 }, { 14285000, 14060000 }, { 18130000, 18096000 }, { 21385000, 21060000 }, { 24950000, 24906000 }, { 28385000, 28060000 } };
 #endif
 
-  long centerFreq = 7030000L;  // 4 bytes
+  uint32_t centerFreq = 7030000;  // 4 bytes
   // New user config data                                JJP 7-3-23
   char mapFileName[50] = MAP_FILE_NAME;
   char myTimeZone[10] = MY_TIMEZONE;
@@ -473,7 +477,7 @@ struct config_t {
   int sdCardPresent = 0;               //   JJP  7/18/23
   float myLong = MY_LON;
   float myLat = MY_LAT;
-  int currentNoiseFloor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };  // JJP 7/17/23
+  int currentNoiseFloor[NUMBER_OF_BANDS]{ 0 };
   int compressorFlag = 0;                                            // JJP 8/28/23
   bool xmitEQFlag = false;
   bool receiveEQFlag = false;
@@ -562,7 +566,7 @@ void ExciterIQData();
 
 //======================================== Global object declarations ==================================================
 
-extern long NCOFreq;  // AFP 04-16-22
+extern int32_t NCOFreq;  // AFP 04-16-22
 
 //======================================== Global object declarations ==================================================
 // Teensy and OpenAudio objects.  Revised by KF5N March 12, 2024
@@ -646,18 +650,18 @@ extern arm_lms_norm_instance_f32 LMS_Norm_instance;
 extern elapsedMicros usec;
 
 struct band {
-  long freq;         // Current frequency in Hz * 100
-  long fBandLow;     // Lower band edge
-  long fBandHigh;    // Upper band edge
-  const char *name;  // name of band
+  uint32_t freq;         // Current frequency in Hz * 100
+  uint32_t fBandLow;     // Lower band edge
+  uint32_t fBandHigh;    // Upper band edge
+  const char name[4];    // name of band, 3 characters + terminator.
   int mode;
   int FHiCut;
   int FLoCut;
   float32_t RFgain;  // This is not being used.  Greg KF5N February 14, 2024
-  uint8_t band_type;
+  uint32_t band_type;
   float32_t gainCorrection;  // is hardware dependent and has to be calibrated ONCE and hardcoded in the table below
   int AGC_thresh;
-  int16_t pixel_offset;
+  int32_t pixel_offset;
 };
 extern struct band bands[];
 
@@ -690,9 +694,10 @@ extern Menu_D Menus[];
 
 extern int last_filter_pos;
 extern int filter_pos;
+extern int16_t fftOffset;
 extern bool volumeChangeFlag;
 extern char keyboardBuffer[];
-extern const char *labels[];
+//extern const char *labels[];
 extern const char *topMenus[];
 extern const char *zoomOptions[];
 extern byte currentDashJump;
@@ -745,7 +750,7 @@ extern int paddleFlip;
 extern int radioState, lastState;  // Used by the loop to monitor current state.
 extern int resetTuningFlag;  // Experimental flag for ResetTuning() due to possible timing issues.  KF5N July 31, 2023
 extern int selectedMapIndex;
-extern int switchFilterSideband;  //AFP 1-28-21
+extern bool switchFilterSideband;  //AFP 1-28-21
 extern int x2;  //AFP
 extern int xrState;
 extern int zeta_help;
@@ -768,12 +773,12 @@ extern uint32_t roomCount;    /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] a
 extern uint32_t s_hotTemp;    /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] at room temperature .*/
 extern uint32_t s_hotCount;   /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] at the hot temperature.*/
 extern uint32_t s_roomC_hotC; /*!< The value of s_roomCount minus s_hotCount.*/
-extern long currentFreq;
+extern uint32_t currentFreq;
 extern unsigned long ditLength;
 extern unsigned long transmitDitLength;  // JJP 8/19/23
 extern unsigned long transmitDitUnshapedBlocks;
 extern unsigned long transmitDahUnshapedBlocks;
-extern long TxRxFreq;  // = centerFreq+NCOFreq  NCOFreq from FreqShift2()
+extern uint32_t TxRxFreq;  // = centerFreq+NCOFreq  NCOFreq from FreqShift2()
 extern unsigned long cwTransmitDelay;  // ms to keep relay on after last atom read
 extern long lastFrequencies[][2];
 extern long int n_clear;
@@ -945,7 +950,7 @@ int ButtonDemod();
 void ButtonDemodMode();
 void ButtonFilter();
 void ButtonFrequencyEntry();
-void ButtonFreqIncrement();
+//void ButtonFreqIncrement();
 void ButtonMenuIncrease();
 void ButtonMenuDecrease();
 void ButtonMode();
@@ -1018,7 +1023,7 @@ void FilterBandwidth();
 void FilterOverlay();
 void FilterSetSSB();
 int FindCountry(char *prefix);
-void FormatFrequency(long f, char *b);
+void FormatFrequency(uint32_t f, char *b);
 void FreqShift1();
 void FreqShift2();
 float goertzel_mag(int numSamples, int TARGET_FREQUENCY, int SAMPLING_RATE, float *data);
@@ -1050,7 +1055,7 @@ void MorseCharacterDisplay(char currentLetter);
 void MyDelay(unsigned long millisWait);
 void MyDrawFloat(float val, int decimals, int x, int y, char *buff);
 float MSinc(int m, float fc);
-void NoActiveMenu();
+//void NoActiveMenu();
 void NoiseBlanker(float32_t *inputsamples, float32_t *outputsamples);
 void NROptions();
 float PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins);
@@ -1096,7 +1101,8 @@ void SetTransmitDitLength(int wpm);  // JJP 8/19/23
 void SetupMode(int sideBand);
 void SetupMyCompressors(bool use_HP_filter, float knee_dBFS, float comp_ratio, float attack_sec, float release_sec);  //AFP 11-01-22 in DSP.cpp
 int SetWPM();
-void ShowAnalogGain();
+//void ShowAnalogGain();
+void ShowAutoStatus();
 void ShowBandwidth();
 void ShowCurrentPowerSetting();
 void ShowDecoderMessage();
@@ -1130,7 +1136,7 @@ void UpdateAGCField();
 void UpdateCompressionField();
 void UpdateDecoderField();
 void UpdateEqualizerField(bool rxEqState, bool txEqState);
-void UpdateIncrementField();
+//void UpdateIncrementField();
 void UpdateNoiseField();
 void UpdateNotchField();
 void UpdateSDIndicator(int present);

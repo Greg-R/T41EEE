@@ -16,26 +16,10 @@ long TxRxFreqOld;
     void
 *****/
 void ButtonMenuIncrease() {
-//  if (menuStatus == PRIMARY_MENU_ACTIVE) {
-//  Serial.printf("ButtonMenuIncrease\n");
     mainMenuIndex++;
-//    Serial.printf("ButtonMenuDecrease, mainMenuIndex = %d\n", mainMenuIndex);
     if (mainMenuIndex == TOP_MENU_COUNT) {  // At last menu option, so...
       mainMenuIndex = 0;                    // ...wrap around to first menu option
     }
-//  } 
-  
-  /*
-  else {
-    Serial.printf("ALERT menuStatus = 2!\n");
-    if (menuStatus == SECONDARY_MENU_ACTIVE) {
-      secondaryMenuIndex++;
-      if (secondaryMenuIndex == subMenuMaxOptions) {  // Same here...
-        secondaryMenuIndex = 0;
-      }
-    }
-  }
-  */
 }
 
 
@@ -49,7 +33,6 @@ void ButtonMenuIncrease() {
     void
 *****/
 void ButtonMenuDecrease() {
-
    mainMenuIndex--;
     if (mainMenuIndex < 0) {               // At last menu option, so...
       mainMenuIndex = TOP_MENU_COUNT - 1;  // ...wrap around to first menu option
@@ -133,7 +116,6 @@ void ButtonBandIncrease() {
   SetFreq();
   ShowFrequency();
   ShowSpectrumdBScale();
-  //delay(1L);
   AudioInterrupts();
   EEPROMWrite();
   // Draw or not draw CW filter graphics to audio spectrum area.  KF5N July 30, 2023
@@ -231,7 +213,6 @@ void ButtonBandDecrease() {
   SetBand();
   SetFreq();
   ShowFrequency();
-  //delay(1L);
   ShowSpectrumdBScale();
   AudioInterrupts();
   EEPROMWrite();
@@ -323,7 +304,6 @@ void BandSet(int band) {
   SetFreq();
   ShowFrequency();
   ShowSpectrumdBScale();
-  //delay(1L);
   AudioInterrupts();
   EEPROMWrite();
   // Draw or not draw CW filter graphics to audio spectrum area.  KF5N July 30, 2023
@@ -384,7 +364,8 @@ void ButtonZoom() {
     void
 *****/
 void ButtonFilter() {
-  switchFilterSideband = !switchFilterSideband;
+  switchFilterSideband =  not switchFilterSideband;
+  FilterSetSSB();  // Call this so the delimiter is set to the correct color.
   ControlFilterF();
   FilterBandwidth();
   ShowFrequency();
@@ -415,7 +396,7 @@ void ButtonDemodMode() {
   DrawBandWidthIndicatorBar();  // Restory the bandwidth indicator bar.  KF5N July 30, 2023
   FilterBandwidth();
   DrawSMeterContainer();
-  ShowAnalogGain();
+//  ShowAnalogGain();
   AudioInterrupts();
   SetFreq();                                                                                   // Must update frequency, for example moving from SSB to CW, the RX LO is shifted.  KF5N
   if ((EEPROMData.xmtMode == CW_MODE) && (EEPROMData.decoderFlag == 1)) UpdateDecoderField();  // KF5N December 28 2023.
@@ -455,7 +436,6 @@ void ButtonMode()  //====== Changed AFP 10-05-22  =================
   DrawAudioSpectContainer();
   SpectralNoiseReductionInit();
   UpdateNoiseField();
-//  ShowName();
   ShowSpectrumdBScale();
   ShowTransmitReceiveStatus();
   ShowFrequency();
@@ -565,6 +545,7 @@ void ButtonSetNoiseFloor() {
   tft.writeTo(L1);
 }
 
+
 /*****
   Purpose: Draw in a red line at the new floor position
 
@@ -591,6 +572,7 @@ int DrawNewFloor(int floor) {
   return floor;
 }
 
+
 /*****
   Purpose: The next 3 functions are "empty" user-defined function stubs that can be filled in by the user with
            "real" code.
@@ -610,6 +592,8 @@ int Unused2() {
 int Unused3() {
   return -1;
 }
+
+
 /*****
   Purpose: Reset Zoom to zoomIndex
 
@@ -843,7 +827,6 @@ void ButtonFrequencyEntry() {
     }
   }
   if (key != 0x58) {
-
     TxRxFreq = enteredF;
   }
   NCOFreq = 0L;
@@ -851,7 +834,6 @@ void ButtonFrequencyEntry() {
   EEPROMData.centerFreq = TxRxFreq;
   centerTuneFlag = 1;  // Put back in so tuning bar is refreshed.  KF5N July 31, 2023
   SetFreq();           // Used here instead of centerTuneFlag.  KF5N July 22, 2023
-  //}
   if (save_last_frequency == 1) {
     EEPROMData.lastFrequencies[EEPROMData.currentBand][EEPROMData.activeVFO] = enteredF;
   } else {
@@ -867,7 +849,6 @@ void ButtonFrequencyEntry() {
   SetBand();
   SetFreq();
   ShowFrequency();
-  //delay(1L);
   ShowSpectrumdBScale();
   AudioInterrupts();
   EEPROMWrite();

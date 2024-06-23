@@ -707,13 +707,13 @@ void MicOptions()  // AFP 09-22-22 All new
     int           an index into the band array
 *****/
 void RFOptions() {
-  const char *rfOptions[] = { "TX Power Set", "RF Gain Set", "RF Auto-Gain On", "RF Auto-Gain Off", "Cancel" };
+  const char *rfOptions[] = { "TX Power Set", "RF Gain Set", "RF Auto-Gain On", "RF Auto-Gain Off", "Auto-Spectrum On", "AutoSpectrum Off", "Cancel" };
   int rfSet = 0;
 
-  rfSet = SubmenuSelect(rfOptions, 5, rfSet);
+  rfSet = SubmenuSelect(rfOptions, 7, rfSet);
 
   switch (rfSet) {
-    case 0:  // AFP 10-21-22
+    case 0:  // TX Power Set.  AFP 10-21-22
       EEPROMData.transmitPowerLevel = (float)GetEncoderValue(1, 20, EEPROMData.transmitPowerLevel, 1, (char *)"Power: ");
       // When the transmit power level is set, this means ALL of the power coefficients must be revised!
       // powerOutCW and powerOutSSB must be updated.
@@ -722,19 +722,40 @@ void RFOptions() {
       BandInformation();
       break;
 
-    case 1:                                                                                                                                        // Manual gain set.
-      EEPROMData.rfGain[EEPROMData.currentBand] = GetEncoderValue(-60, 20, EEPROMData.rfGain[EEPROMData.currentBand], 5, (char *)"RF Gain dB: ");  // Argument: min, max, start, increment
+    case 1:  // Manual gain set.
+      EEPROMData.rfGain[EEPROMData.currentBand] = GetEncoderValue(-60, 20, EEPROMData.rfGain[EEPROMData.currentBand], 5, (char *)"RF Gain dB: ");
       EEPROMWrite();
       break;
 
-    case 2:                        // Auto-Gain On                                                                                                  // Gain
-      EEPROMData.autoGain = true;  // Argument: min, max, start, increment
+    case 2:  // Auto-Gain On
+      EEPROMData.autoGain = true;
+      EEPROMData.autoSpectrum = false;  // Make sure Auto-Spectrum is off.
+      fftOffset = 0;
+      ShowAutoStatus();
       EEPROMWrite();
       break;
 
     case 3:  // Auto-Gain Off
       EEPROMData.autoGain = false;
+      ShowAutoStatus();
       EEPROMWrite();
+      break;
+
+      case 4: // Auto-Spectrum On
+      EEPROMData.autoSpectrum = true;
+      EEPROMData.autoGain = false;  // Make sure Auto-Gain is off.
+      ShowAutoStatus();
+      EEPROMWrite();
+      break;
+
+      case 5: // Auto-Spectrum Off
+      EEPROMData.autoSpectrum = false;
+      fftOffset = 0;
+      ShowAutoStatus();
+      EEPROMWrite();
+      break;
+
+      default:  // Cancel
       break;
   }
 }
@@ -971,14 +992,6 @@ int (*functionPtr[])() = { &BearingMaps, &CWOptions, &RFOptions, &VFOSelect,
                            &EqualizerRecOptions, &EqualizerXmtOptions, &IQOptions
 
 };
-  const char *labels[]        = {"Select",       "Menu Up",  "Band Up",
-                               "Zoom",         "Menu Dn",  "Band Dn",
-                               "Filter",       "DeMod",    "Mode",
-                               "NR",           "Notch",    "Noise Floor",
-                               "Fine Tune",    "Decoder",  "Tune Increment",
-                               "User 1",       "User 2",   "User 3"
-                              };
-
 *****/
 int SubmenuSelect(const char *options[], int numberOfChoices, int defaultStart) {
   int refreshFlag = 0;

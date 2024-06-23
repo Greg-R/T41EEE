@@ -280,10 +280,10 @@ void Calibrate::CalibratePreamble(int setZoom) {
   tft.print("Filter - Refine-Cal");
   tft.setTextColor(RA8875_CYAN);
   tft.fillRect(350, 125, 100, tft.getFontHeight(), RA8875_BLACK);
-  tft.setCursor(400, 125);
+  tft.setCursor(400, 140);
   tft.print("dB");
-  tft.setCursor(350, 110);
-  tft.print("Incr= ");
+  tft.setCursor(350, 125);
+  tft.print("Incr = ");
   userScale = EEPROMData.currentScale;  //  Remember user preference so it can be reset when done.  KF5N
   EEPROMData.currentScale = 1;          //  Set vertical scale to 10 dB during calibration.  KF5N
   updateDisplayFlag = false;
@@ -364,7 +364,6 @@ void Calibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
   int lastUsedTask = -2;
   int calFreqShift;
   float correctionIncrement = 0.001;
-  //  bool corrChange = false;
   bool autoCal = false;
   bool refineCal = false;
   calFreqTemp = EEPROMData.calFreq;                                           // Save user selected calibration frequency.
@@ -377,14 +376,13 @@ void Calibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
   calTypeFlag = 0;  // RX cal
   plotCalGraphics(calTypeFlag);
   tft.setFontScale((enum RA8875tsize)0);
-  tft.fillRect(400, 110, 50, tft.getFontHeight(), RA8875_BLACK);
-  tft.setCursor(400, 110);
-  tft.print(correctionIncrement);
+  tft.setTextColor(RA8875_WHITE);
+  tft.fillRect(405, 125, 50, tft.getFontHeight(), RA8875_BLACK);
+  tft.setCursor(405, 125);
+  tft.print(correctionIncrement,3);
   printCalType(calTypeFlag, autoCal, false);
   warmUpCal();
-
   State state = State::warmup;  // Start calibration state machine in warmup state.
-
   float maxSweepAmp = 0.2;
   float maxSweepPhase = 0.1;
   float increment = 0.002;
@@ -400,10 +398,6 @@ void Calibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
   // bool stopSweep = false;
 
   plotCalGraphics(calTypeFlag);
-  tft.setFontScale((enum RA8875tsize)0);
-  tft.fillRect(400, 110, 50, tft.getFontHeight(), RA8875_BLACK);
-  tft.setCursor(400, 110);
-  tft.print(correctionIncrement, 3);
   printCalType(calTypeFlag, autoCal, false);
   // Run this so Phase shows from begining.
   GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQPhaseCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
@@ -480,8 +474,8 @@ void Calibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
           correctionIncrement = 0.01;  // AFP 2-11-23
         }
         tft.setFontScale((enum RA8875tsize)0);
-        tft.fillRect(400, 110, 50, tft.getFontHeight(), RA8875_BLACK);
-        tft.setCursor(400, 110);
+        tft.fillRect(405, 125, 50, tft.getFontHeight(), RA8875_BLACK);
+        tft.setCursor(405, 125);
         tft.print(correctionIncrement, 3);
         break;
       case MENU_OPTION_SELECT:  // Save values and exit calibration.
@@ -774,8 +768,8 @@ void Calibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal)
   calTypeFlag = 1;  // TX cal
   plotCalGraphics(calTypeFlag);
   tft.setFontScale((enum RA8875tsize)0);
-  tft.fillRect(400, 110, 50, tft.getFontHeight(), RA8875_BLACK);
-  tft.setCursor(400, 110);
+  tft.fillRect(405, 125, 50, tft.getFontHeight(), RA8875_BLACK);
+  tft.setCursor(405, 125);
   tft.print(correctionIncrement, 3);
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreqCal(freqOffset);
@@ -856,8 +850,8 @@ void Calibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal)
           correctionIncrement = 0.01;  // AFP 2-11-23
         }
         tft.setFontScale((enum RA8875tsize)0);
-        tft.fillRect(400, 110, 50, tft.getFontHeight(), RA8875_BLACK);
-        tft.setCursor(400, 110);
+        tft.fillRect(405, 125, 50, tft.getFontHeight(), RA8875_BLACK);
+        tft.setCursor(405, 125);
         tft.print(correctionIncrement, 3);
         break;
       case MENU_OPTION_SELECT:  // Save values and exit calibration.
@@ -1149,8 +1143,8 @@ void Calibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool sh
   calTypeFlag = 2;  // Carrier cal
   plotCalGraphics(calTypeFlag);
   tft.setFontScale((enum RA8875tsize)0);
-  tft.fillRect(400, 110, 50, tft.getFontHeight(), RA8875_BLACK);
-  tft.setCursor(400, 110);
+  tft.fillRect(405, 125, 50, tft.getFontHeight(), RA8875_BLACK);
+  tft.setCursor(405, 125);
   tft.print(correctionIncrement);
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreqCal(freqOffset);
@@ -1231,8 +1225,8 @@ void Calibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool sh
           correctionIncrement = 5;  // AFP 2-11-23
         }
         tft.setFontScale((enum RA8875tsize)0);
-        tft.fillRect(400, 110, 50, tft.getFontHeight(), RA8875_BLACK);
-        tft.setCursor(400, 110);
+        tft.fillRect(405, 125, 50, tft.getFontHeight(), RA8875_BLACK);
+        tft.setCursor(405, 125);
         tft.print(correctionIncrement);
         break;
       case MENU_OPTION_SELECT:  // Save values and exit calibration.
@@ -1731,8 +1725,8 @@ void Calibrate::ShowSpectrum2()  //AFP 2-10-23
 
   // Finish up:
   //= AFP 2-11-23
-  tft.fillRect(350, 125, 50, tft.getFontHeight(), RA8875_BLACK);  // Erase old adjdB number.
-  tft.setCursor(350, 125);                                        // 350, 125
+  tft.fillRect(350, 140, 50, tft.getFontHeight(), RA8875_BLACK);  // Erase old adjdB number.
+  tft.setCursor(350, 140);                                        // 350, 125
   tft.print(adjdB, 1);
 
   delay(5);  // This requires "tuning" in order to get best response.
