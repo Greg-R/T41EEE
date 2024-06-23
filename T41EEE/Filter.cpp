@@ -1,6 +1,6 @@
 
 #include "SDT.h"
-//#include "Filter.h"
+
 uint32_t m_NumTaps = (FFT_LENGTH / 2) + 1;
 float32_t xmtEqScaleFactor = 150.0;
 
@@ -144,6 +144,7 @@ void DoReceiveEQ() //AFP 08-09-22
   arm_add_f32(float_buffer_L , EQ14_float_buffer_L, float_buffer_L , 256 ) ;
 }
 
+
 /*****
   Purpose: void DoExciterEQ
 
@@ -200,8 +201,9 @@ void DoExciterEQ() //AFP 10-02-22
   arm_add_f32(float_buffer_L_EX , EQ14_float_buffer_L, float_buffer_L_EX , 256 ) ;
 }
 
+
 /*****
-  Purpose: void FilterBandwidth()  Parameter list:
+  Purpose: Adjust the audio filter band limits based on user input from encoder.
     void
   Return value;
     void
@@ -210,7 +212,7 @@ void FilterBandwidth()
 {
   AudioNoInterrupts();
 
-  CalcCplxFIRCoeffs(FIR_Coef_I, FIR_Coef_Q, m_NumTaps, (float32_t)bands[EEPROMData.currentBand].FLoCut, (float32_t)bands[EEPROMData.currentBand].FHiCut, (float)SR[SampleRate].rate / DF);
+  CalcCplxFIRCoeffs(FIR_Coef_I, FIR_Coef_Q, m_NumTaps, static_cast<float>(bands[EEPROMData.currentBand].FLoCut), static_cast<float>(bands[EEPROMData.currentBand].FHiCut), static_cast<float>(SR[SampleRate].rate / DF));
   InitFilterMask();
 
   // also adjust IIR AM filter
@@ -224,13 +226,12 @@ void FilterBandwidth()
     biquad_lowpass1_coeffs[i] = coefficient_set[i];
   }
 
-  // and adjust decimation and interpolation filters
+  // And adjust decimation and interpolation filters
   SetDecIntFilters();
   ShowBandwidth();
-//BandInformation();
-//  delay(1L);
   AudioInterrupts();
 } // end filter_bandwidth
+
 
 /*****
   Purpose: InitFilterMask()
@@ -243,7 +244,6 @@ void FilterBandwidth()
 *****/
 void InitFilterMask()
 {
-
   /****************************************************************************************
      Calculate the FFT of the FIR filter coefficients once to produce the FIR filter mask
   ****************************************************************************************/
@@ -267,6 +267,7 @@ void InitFilterMask()
   arm_cfft_f32(maskS, FIR_filter_mask, 0, 1);
 
 } // end init_filter_mask
+
 
 /*****
   Purpose: void control_filter_f()
@@ -300,6 +301,8 @@ void ControlFilterF()
       break;
   }   //== AFP 10-27-22
 }
+
+
 /*****
   Purpose: void SetDecIntFilters()
   Parameter list:

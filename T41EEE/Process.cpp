@@ -438,16 +438,18 @@ void ProcessIQData()
         break;
       case 1:                               // Kim NR
         Kim1_NR();
-        arm_scale_f32 (float_buffer_L, 3, float_buffer_L, FFT_length / 2);  // Scalin factor reduced; was blasting speaker.  KF5N February 20, 2024.
-        arm_scale_f32 (float_buffer_R, 3, float_buffer_R, FFT_length / 2);
+        arm_scale_f32 (float_buffer_L, 2.0, float_buffer_L, FFT_length / 2);  // Scaling factor reduced; was blasting speaker.  KF5N February 20, 2024.
+        arm_scale_f32 (float_buffer_R, 2.0, float_buffer_R, FFT_length / 2);
         break;
       case 2:                               // Spectral NR
         SpectralNoiseReduction();
+        arm_scale_f32 (float_buffer_L, 3.0, float_buffer_L, FFT_length / 2);  // Scaling factor reduced; was blasting speaker.  KF5N February 20, 2024.
+        arm_scale_f32 (float_buffer_R, 3.0, float_buffer_R, FFT_length / 2);
         break;
       case 3:                               // LMS NR.  KF5N March 2, 2024.
         Xanr();
 //        arm_scale_f32 (float_buffer_L, 1.5, float_buffer_L, FFT_length / 2);  // Why is scaling different???
-//        arm_scale_f32 (float_buffer_R, 2, float_buffer_R, FFT_length / 2);
+          arm_scale_f32 (float_buffer_R, 4.0, float_buffer_R, FFT_length / 2);  // Attempt to equalize gains for all NR algorithms.  Greg KF5N June 24, 2024.
           arm_copy_f32(float_buffer_R, float_buffer_L, FFT_length / 2);  //  This is apparently required by the algorithm; it works on right channel only.
         break;
 
