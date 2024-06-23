@@ -3,9 +3,9 @@
 
 //long CWFreqShift = 750;
 uint32_t IFFreq = SR[SampleRate].rate / 4;  // IF (intermediate) frequency
-uint32_t Clk0SetFreq = 0;
-uint32_t Clk1SetFreq = 0;
-uint32_t Clk2SetFreq = 0;
+uint64_t Clk0SetFreq = 0;
+uint64_t Clk1SetFreq = 0;
+uint64_t Clk2SetFreq = 0;
 
 #ifdef PLLMODULE
 /*****
@@ -71,7 +71,7 @@ void SetFreq() {  //AFP 09-22-22   Revised July 7 KF5N
       }
     }
   }
-
+Serial.printf("Clk2SetFreq = %d\n", Clk2SetFreq);
   //  The receive LO frequency is not dependent on mode or sideband.  CW frequency shift is done in DSP code.
   Clk0SetFreq = ((EEPROMData.centerFreq * SI5351_FREQ_MULT) + IFFreq * SI5351_FREQ_MULT) * MASTER_CLK_MULT_RX;
 
