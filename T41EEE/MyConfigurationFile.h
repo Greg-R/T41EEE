@@ -59,7 +59,7 @@
 // Uncomment this line if using an external PLL module.
 //#define PLLMODULE
 
-// K3PTO definitions for center and fine tune defaults and increments.
+// Customizable definitions for center and fine tune defaults and increments.  Larry K3PTO June 24, 2024
 #define CENTER_TUNE_DEFAULT		      1000                           // Set to the desired default in the CENTER_TUNE_ARRAY.
 #define CENTER_TUNE_ARRAY         { 1000, 10000, 100000, 1000000 }
 #define FINE_TUNE_DEFAULT        	          50                     // Set to the desired default in the FINE_TUNE_ARRAY.
