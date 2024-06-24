@@ -443,8 +443,8 @@ void ProcessIQData()
         break;
       case 2:                               // Spectral NR
         SpectralNoiseReduction();
-        arm_scale_f32 (float_buffer_L, 3.0, float_buffer_L, FFT_length / 2);  // Scaling factor reduced; was blasting speaker.  KF5N February 20, 2024.
-        arm_scale_f32 (float_buffer_R, 3.0, float_buffer_R, FFT_length / 2);
+        arm_scale_f32 (float_buffer_L, 2.0, float_buffer_L, FFT_length / 2);  // Scaling factor reduced; was blasting speaker.  KF5N February 20, 2024.
+        arm_scale_f32 (float_buffer_R, 2.0, float_buffer_R, FFT_length / 2);
         break;
       case 3:                               // LMS NR.  KF5N March 2, 2024.
         Xanr();
