@@ -52,6 +52,11 @@ configuration:
 
 Completing a FLASH erase of the Teensy is strongly recommended before uploading this new version. 
 Remember to save to the SD card via the EEPROM menu EEPROM->SD command prior to erasing.
+The instructions for performing a FLASH erase of the Teensy are here:
+
+<https://www.pjrc.com/store/teensy41.html#programming>
+
+The bullet "Memory Wipe & LED Blink Restore" has the instructions.
 
 ## Highlight of Changes included in T41EEE.6
 
