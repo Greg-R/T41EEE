@@ -96,7 +96,7 @@ void FilterSetSSB() {
         filterHiPositionMarker = map(bands[EEPROMData.currentBand].FHiCut, 0, 6000, 0, 256);
         //Draw Fiter indicator lines on audio plot to Layer 2.
         tft.writeTo(L2);
-        if(not switchFilterSideband) {
+        if(switchFilterSideband) {
         tft.drawLine(BAND_INDICATOR_X - 6 + abs(filterLoPositionMarker), SPECTRUM_BOTTOM - 3, BAND_INDICATOR_X - 6 + abs(filterLoPositionMarker), SPECTRUM_BOTTOM - 112, RA8875_LIGHT_GREY);
         tft.drawLine(BAND_INDICATOR_X - 7 + abs(filterHiPositionMarker), SPECTRUM_BOTTOM - 3, BAND_INDICATOR_X - 7 + abs(filterHiPositionMarker), SPECTRUM_BOTTOM - 112, RA8875_RED);
         } else {
