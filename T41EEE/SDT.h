@@ -198,8 +198,7 @@ extern struct maps myMapFiles[];
 #define ORANGE 0xFD20             /* 255, 165,   0 */
 #define FILTER_WIN 0x10  // Color of SSB filter width
 #include <utility/imxrt_hw.h>  // for setting I2S freq, Thanks, FrankB!
-//#define MAX_FREQ_INDEX 8
-//#define CENTER_TUNE_SIZE  (sizeof(incrementValues)/sizeof(incrementValues[0]) )
+
 #define TEMPMON_ROOMTEMP 25.0f
 #define MAX_WPM 60
 #define ENCODER_FACTOR 0.25F  // use 0.25f with cheap encoders that have 4 detents per step,
