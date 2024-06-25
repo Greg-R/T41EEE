@@ -1151,7 +1151,7 @@ void DisplayIncrementField() {
   tft.setTextColor(RA8875_GREEN);
   tft.print(EEPROMData.fineTuneStep);
 
-  tft.fillRect(INCREMENT_X + 190, INCREMENT_Y, tft.getFontWidth() * 7, tft.getFontHeight(), RA8875_BLACK);
+  tft.fillRect(INCREMENT_X + 188, INCREMENT_Y, tft.getFontWidth() * 7 + 2, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(FIELD_OFFSET_X + 95, INCREMENT_Y - 1);
   tft.setTextColor(RA8875_GREEN);
   tft.print(EEPROMData.centerTuneStep);
