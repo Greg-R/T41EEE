@@ -12,7 +12,7 @@ PROGMEM const char *labels[] = { "Select", "Menu Up", "Band Up",
                          "Zoom", "Menu Dn", "Band Dn",
                          "Filter", "DeMod", "Mode",
                          "NR", "Notch", "Noise Floor",
-                         "Center Increment", "Decoder", "Fine Increment",
+                         "Coarse Incr", "Decoder", "Fine Increment",
                          "Reset Tuning", "Frequ Entry", "User 2" };
 
 

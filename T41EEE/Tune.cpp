@@ -195,7 +195,7 @@ void ResetTuning()
   BandInformation();
   ShowFrequency();
   UpdateDecoderField();  // Update Morse decoder if used.
-  FilterSetSSB();
+//  FilterSetSSB();  Not needed here?  Greg KF5N June 25, 2024
 }
 // ===== End AFP 10-11-22
 

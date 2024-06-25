@@ -13,7 +13,7 @@ float adjustVolEncoder;
     Modified AFP21-12-15
 *****/
 void FilterSetSSB() {
-  long filter_change;
+uint32_t filter_change;
   if (filter_pos != last_filter_pos) {  // This decision is required as this function is required to be used in many locations.  KF5N April 21, 2024
     tft.writeTo(L2);  // Clear layer 2.  KF5N July 31, 2023
     tft.clearMemory();
@@ -34,12 +34,12 @@ void FilterSetSSB() {
     // Change the FLoCut and FhiCut variables which adjust the DSP filters.
     switch (bands[EEPROMData.currentBand].mode) {
       case DEMOD_LSB:
-        if (switchFilterSideband == 0)  // LSB "0" = normal, "1" means change opposite filter.  ButtonFilter() function swaps this.
+        if (switchFilterSideband == false)  // LSB "0" = normal, "1" means change opposite filter.  ButtonFilter() function swaps this.
         {  // Adjust FLoCut and limit FLoCut based on the current frequency of FHiCut.
           bands[EEPROMData.currentBand].FLoCut = bands[EEPROMData.currentBand].FLoCut - filterEncoderMove * 100 * ENCODER_FACTOR;  
           // Don't allow FLoCut to be less than 100 Hz below FHiCut.
           if(bands[EEPROMData.currentBand].FLoCut >= (bands[EEPROMData.currentBand].FHiCut - 100)) bands[EEPROMData.currentBand].FLoCut = bands[EEPROMData.currentBand].FHiCut - 100;          
-        } else if (switchFilterSideband == 1) {  // Adjust and limit FHiCut.
+        } else if (switchFilterSideband == true) {  // Adjust and limit FHiCut.
           bands[EEPROMData.currentBand].FHiCut = bands[EEPROMData.currentBand].FHiCut - filterEncoderMove * 100 * ENCODER_FACTOR;
           if(bands[EEPROMData.currentBand].FHiCut >= -100) bands[EEPROMData.currentBand].FHiCut = -100;  // Don't allow FLoCut to go above -100.
           // Don't allow FHiCut to be less than 100 Hz above FLoCut.
@@ -48,13 +48,13 @@ void FilterSetSSB() {
         FilterBandwidth();
         break;
       case DEMOD_USB:
-      if (switchFilterSideband == 0)
+      if (switchFilterSideband == false)
  {  // Adjust and limit FHiCut.
           bands[EEPROMData.currentBand].FHiCut = bands[EEPROMData.currentBand].FHiCut + filterEncoderMove * 100 * ENCODER_FACTOR;
           // Don't allow FHiCut to be less than 100 Hz above FLoCut.
           if(bands[EEPROMData.currentBand].FHiCut <= (bands[EEPROMData.currentBand].FLoCut + 100)) bands[EEPROMData.currentBand].FHiCut = bands[EEPROMData.currentBand].FLoCut + 100;
         }        
-        else if         (switchFilterSideband == 1)
+        else if         (switchFilterSideband == true)
         {  // Adjust FLoCut and limit FLoCut based on the current frequency of FHiCut.
           bands[EEPROMData.currentBand].FLoCut = bands[EEPROMData.currentBand].FLoCut + filterEncoderMove * 100 * ENCODER_FACTOR;  
           // Don't allow FLoCut to go below 100.
@@ -90,13 +90,20 @@ void FilterSetSSB() {
 //    UpdateDecoderField();   // Redraw Morse decoder graphics because they get erased due to filter graphics updates.
 
 //  The following code was moved from ShowSpectrum() in Display.cpp.
-        int filterLoPositionMarker;
-        int filterHiPositionMarker;
+        int filterLoPositionMarker{0};
+        int filterHiPositionMarker{0};
+        int temp{0};
         filterLoPositionMarker = map(bands[EEPROMData.currentBand].FLoCut, 0, 6000, 0, 256);
         filterHiPositionMarker = map(bands[EEPROMData.currentBand].FHiCut, 0, 6000, 0, 256);
-        //Draw Fiter indicator lines on audio plot to Layer 2.
+        // Flip positions if LSB so that correct delimiter is highlighted.
+        if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
+           temp = filterLoPositionMarker;
+           filterLoPositionMarker = filterHiPositionMarker;
+           filterHiPositionMarker = temp;
+        }
+        //Draw Filter indicator lines on audio plot to Layer 2.
         tft.writeTo(L2);
-        if(switchFilterSideband) {
+        if(not switchFilterSideband) {
         tft.drawLine(BAND_INDICATOR_X - 6 + abs(filterLoPositionMarker), SPECTRUM_BOTTOM - 3, BAND_INDICATOR_X - 6 + abs(filterLoPositionMarker), SPECTRUM_BOTTOM - 112, RA8875_LIGHT_GREY);
         tft.drawLine(BAND_INDICATOR_X - 7 + abs(filterHiPositionMarker), SPECTRUM_BOTTOM - 3, BAND_INDICATOR_X - 7 + abs(filterHiPositionMarker), SPECTRUM_BOTTOM - 112, RA8875_RED);
         } else {
