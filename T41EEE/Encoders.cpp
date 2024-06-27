@@ -13,7 +13,7 @@ float adjustVolEncoder;
     Modified AFP21-12-15
 *****/
 void FilterSetSSB() {
-uint32_t filter_change;
+int32_t filter_change;
   if (filter_pos != last_filter_pos) {  // This decision is required as this function is required to be used in many locations.  KF5N April 21, 2024
     tft.writeTo(L2);  // Clear layer 2.  KF5N July 31, 2023
     tft.clearMemory();
