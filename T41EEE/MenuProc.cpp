@@ -355,6 +355,7 @@ void SpectrumOptions() { /*
 
   spectrumSet = SubmenuSelect(spectrumChoices, 6, spectrumSet);
   if (strcmp(spectrumChoices[spectrumSet], "Cancel") == 0) {
+    return;
   }
   EEPROMData.currentScale = spectrumSet;  // Yep...
   EEPROMWrite();
