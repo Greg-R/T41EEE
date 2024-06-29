@@ -1,7 +1,6 @@
 
 #include "SDT.h"
 
-//long CWFreqShift = 750;
 uint32_t IFFreq = SR[SampleRate].rate / 4;  // IF (intermediate) frequency
 uint64_t Clk0SetFreq = 0;
 uint64_t Clk1SetFreq = 0;
@@ -19,8 +18,7 @@ uint64_t Clk2SetFreq = 0;
 
   CAUTION: SI5351_FREQ_MULT is set in the si5253.h header file and is 100UL
 *****/
-void SetFreqCal(int calFreqShift) 
-{  // July 7 2023 KF5N
+void SetFreqCal(int calFreqShift) {  // July 7 2023 KF5N
   // NEVER USE AUDIONOINTERRUPTS HERE: that introduces annoying clicking noise with every frequency change
   // SI5351_FREQ_MULT is 100ULL, MASTER_CLK_MULT is 4;
   int cwFreqOffset = (EEPROMData.CWOffset + 6) * 24000 / 256;  // Calculate the CW offset based on user selected CW offset frequency.
@@ -75,7 +73,7 @@ void SetFreq() {  //AFP 09-22-22   Revised July 7 KF5N
   //  The receive LO frequency is not dependent on mode or sideband.  CW frequency shift is done in DSP code.
   Clk0SetFreq = ((EEPROMData.centerFreq * SI5351_FREQ_MULT) + IFFreq * SI5351_FREQ_MULT) * MASTER_CLK_MULT_RX;
 
-  if (radioState == SSB_RECEIVE_STATE || radioState == CW_RECEIVE_STATE || radioState == AM_RECEIVE_STATE) {   //  Receive state
+  if (radioState == SSB_RECEIVE_STATE || radioState == CW_RECEIVE_STATE || radioState == AM_RECEIVE_STATE) {  //  Receive state
     si5351.set_freq(Clk0SetFreq, SI5351_CLK0);
     si5351.output_enable(SI5351_CLK2, 0);  // CLK2 (transmit) off during receive to prevent birdies
     si5351.output_enable(SI5351_CLK0, 1);
@@ -101,8 +99,7 @@ void SetFreq() {  //AFP 09-22-22   Revised July 7 KF5N
 
   CAUTION: SI5351_FREQ_MULT is set in the si5253.h header file and is 100UL
 *****/
-void SetFreqCal(int calFreqShift) 
-{  // July 7 2023 KF5N
+void SetFreqCal(int calFreqShift) {  // July 7 2023 KF5N
   // NEVER USE AUDIONOINTERRUPTS HERE: that introduces annoying clicking noise with every frequency change
   // SI5351_FREQ_MULT is 100ULL, MASTER_CLK_MULT is 4;
   int cwFreqOffset = (EEPROMData.CWOffset + 6) * 24000 / 256;  // Calculate the CW offset based on user selected CW offset frequency.
@@ -157,7 +154,7 @@ void SetFreq() {  //AFP 09-22-22   Revised July 7 KF5N
   //  The receive LO frequency is not dependent on mode or sideband.  CW frequency shift is done in DSP code.
   Clk2SetFreq = ((EEPROMData.centerFreq * SI5351_FREQ_MULT) + IFFreq * SI5351_FREQ_MULT) * MASTER_CLK_MULT_RX;
 
-  if (radioState == SSB_RECEIVE_STATE || radioState == CW_RECEIVE_STATE || radioState == AM_RECEIVE_STATE) {   //  Receive state
+  if (radioState == SSB_RECEIVE_STATE || radioState == CW_RECEIVE_STATE || radioState == AM_RECEIVE_STATE) {  //  Receive state
     si5351.set_freq(Clk2SetFreq, SI5351_CLK2);
     si5351.output_enable(SI5351_CLK1, 0);  // CLK1 (transmit) off during receive to prevent birdies
     si5351.output_enable(SI5351_CLK2, 1);
@@ -183,21 +180,19 @@ void SetFreq() {  //AFP 09-22-22   Revised July 7 KF5N
   Return value;
   void
 *****/
-void ResetTuning()
-{
+void ResetTuning() {
   currentFreq = EEPROMData.centerFreq + NCOFreq;  // currentFreqA changed to currentFreq.  KF5N August 7, 2023
   NCOFreq = 0L;
-  EEPROMData.centerFreq = TxRxFreq = currentFreq ;  //AFP 10-28-22  // currentFreqA changed to currentFreq.  KF5N August 7, 2023
-  tft.writeTo(L2);  // Clear layer 2.  KF5N July 31, 2023
+  EEPROMData.centerFreq = TxRxFreq = currentFreq;  //AFP 10-28-22  // currentFreqA changed to currentFreq.  KF5N August 7, 2023
+  tft.writeTo(L2);                                 // Clear layer 2.  KF5N July 31, 2023
   tft.clearMemory();
   SetFreq();  // For new tuning scheme.  KF5N July 22, 2023
   DrawBandWidthIndicatorBar();
   BandInformation();
   ShowFrequency();
   UpdateDecoderField();  // Update Morse decoder if used.
-//  FilterSetSSB();  Not needed here?  Greg KF5N June 25, 2024
+  FilterSetSSB();
 }
-// ===== End AFP 10-11-22
 
 
 /*****
@@ -208,11 +203,11 @@ void ResetTuning()
   Return value;
     void
 *****/
-void CenterFastTune()
-{
+void CenterFastTune() {
   tft.drawFastVLine(oldCursorPosition, SPECTRUM_TOP_Y + 20, SPECTRUM_HEIGHT - 27, RA8875_BLACK);
-  tft.drawFastVLine(newCursorPosition , SPECTRUM_TOP_Y + 20, SPECTRUM_HEIGHT - 27, RA8875_RED);
+  tft.drawFastVLine(newCursorPosition, SPECTRUM_TOP_Y + 20, SPECTRUM_HEIGHT - 27, RA8875_RED);
 }
+
 
 /*****
   Purpose: Purpose is to sety VFOa to receive frequency and VFOb to the transmit frequency
@@ -225,8 +220,7 @@ void CenterFastTune()
 
   CAUTION: SI5351_FREQ_MULT is set in the si5253.h header file and is 100UL
 *****/
-int DoSplitVFO()
-{
+int DoSplitVFO() {
   char freqBuffer[15];
   int val;
   long chunk = SPLIT_INCREMENT;
@@ -234,18 +228,18 @@ int DoSplitVFO()
 
   tft.drawRect(INFORMATION_WINDOW_X - 10, INFORMATION_WINDOW_Y - 2, 260, 200, RA8875_MAGENTA);
   tft.fillRect(INFORMATION_WINDOW_X - 8, INFORMATION_WINDOW_Y, 250, 185, RA8875_BLACK);  // Clear volume field
-  tft.setFontScale( (enum RA8875tsize) 1);
+  tft.setFontScale((enum RA8875tsize)1);
   tft.setCursor(INFORMATION_WINDOW_X + 10, INFORMATION_WINDOW_Y + 5);
   tft.print("xmit offset: ");
 
-  splitOffset = chunk;                                                    // Set starting offset to 500Hz
+  splitOffset = chunk;  // Set starting offset to 500Hz
   tft.setTextColor(RA8875_GREEN);
   tft.setCursor(INFORMATION_WINDOW_X + 60, INFORMATION_WINDOW_Y + 90);
   tft.print(splitOffset);
   tft.print("Hz  ");
 
   while (true) {
-    if (filterEncoderMove != 0) {                     // Changed encoder?
+    if (filterEncoderMove != 0) {  // Changed encoder?
       splitOffset += filterEncoderMove * chunk;
       tft.fillRect(INFORMATION_WINDOW_X + 60, INFORMATION_WINDOW_Y + 90, 150, 50, RA8875_BLACK);
       tft.setCursor(INFORMATION_WINDOW_X + 60, INFORMATION_WINDOW_Y + 90);
@@ -254,11 +248,11 @@ int DoSplitVFO()
     }
     filterEncoderMove = 0L;
 
-    val = ReadSelectedPushButton();                                  // Read pin that controls all switches
+    val = ReadSelectedPushButton();  // Read pin that controls all switches
     val = ProcessButtonPress(val);
     delay(150L);
-    if (val == MENU_OPTION_SELECT) {                              // Make a choice??
-      Clk1SetFreq += splitOffset;                                    // New transmit frequency // AFP 09-27-22
+    if (val == MENU_OPTION_SELECT) {  // Make a choice??
+      Clk1SetFreq += splitOffset;     // New transmit frequency // AFP 09-27-22
       UpdateInfoWindow();
       filterEncoderMove = 0L;
       break;
@@ -270,15 +264,15 @@ int DoSplitVFO()
   tft.setCursor(FREQUENCY_X_SPLIT, FREQUENCY_Y);
   tft.setFont(&FreeMonoBold24pt7b);
   tft.setTextColor(RA8875_GREEN);
-  tft.print(freqBuffer);                                          // Show VFO_A
+  tft.print(freqBuffer);  // Show VFO_A
 
   tft.setFont(&FreeMonoBold18pt7b);
   FormatFrequency(EEPROMData.currentFreqA, freqBuffer);
   tft.setTextColor(RA8875_LIGHT_GREY);
   tft.setCursor(FREQUENCY_X, FREQUENCY_Y + 6);
-  tft.print(freqBuffer);                                          // Show VFO_A
+  tft.print(freqBuffer);  // Show VFO_A
 
-  tft.useLayers(1);                 //mainly used to turn on layers!
+  tft.useLayers(1);  //mainly used to turn on layers!
   tft.layerEffect(OR);
   tft.writeTo(L2);
   tft.clearMemory();
@@ -290,7 +284,7 @@ int DoSplitVFO()
   tft.print("Split Active");
 
   tft.setFontDefault();
-  return (int) splitOffset;                                       // Can be +/-
+  return (int)splitOffset;  // Can be +/-
 }
 
 
@@ -307,13 +301,13 @@ void ResetFlipFlops() {
   // Toggle GPO0 low momentarily to reset the divide-by-2 flop-flops.
   // GPO0 is held high during normal operation.
   si5351.output_enable(SI5351_CLK2, 0);
-  #ifdef PLLMODULE
+#ifdef PLLMODULE
   si5351.output_enable(SI5351_CLK0, 0);
-  #else
+#else
   si5351.output_enable(SI5351_CLK1, 0);
-  #endif
+#endif
   digitalWrite(0, LOW);  // Reset low.
   delay(500);
-  digitalWrite(0, HIGH); // Normal operation high.
+  digitalWrite(0, HIGH);  // Normal operation high.
   delay(500);
 }

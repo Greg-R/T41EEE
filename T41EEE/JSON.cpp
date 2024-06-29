@@ -1,7 +1,7 @@
 
 #include "SDT.h"
 
-// JSON experiment.  This was derived from a JSON example from the ArduinoJSON library.
+// JSON format used to save and read from SD card.  This was derived from a JSON example from the ArduinoJSON library.
 
 // Loads the EEPROMData configuration from a file
 FLASHMEM void loadConfiguration(const char *filename, config_t &EEPROMData) {
@@ -30,6 +30,7 @@ FLASHMEM void loadConfiguration(const char *filename, config_t &EEPROMData) {
   EEPROMData.rfGainCurrent = doc["rfGainCurrent"];
   for (int i = 0; i < NUMBER_OF_BANDS; i++) EEPROMData.rfGain[i] = doc["rfGain"][i];
   EEPROMData.autoGain = doc["autoGain"];
+  EEPROMData.autoSpectrum = doc["autoSpectrum"];
   EEPROMData.spectrumNoiseFloor = doc["spectrumNoiseFloor"];  // This is a constant.  This does not need to be included in user data.
   EEPROMData.centerTuneStep = doc["centerTuneStep"];
   EEPROMData.fineTuneStep = doc["fineTuneStep"];
@@ -136,6 +137,7 @@ FLASHMEM void saveConfiguration(const char *filename, const config_t &EEPROMData
   doc["rfGainCurrent"] = EEPROMData.rfGainCurrent;
   for (int i = 0; i < NUMBER_OF_BANDS; i++) doc["rfGain"][i] = EEPROMData.rfGain[i];
   doc["autoGain"] = EEPROMData.autoGain;
+  doc["autoSpectrum"] = EEPROMData.autoSpectrum;
   doc["spectrumNoiseFloor"] = EEPROMData.spectrumNoiseFloor;
   doc["centerTuneStep"] = EEPROMData.centerTuneStep;
   doc["fineTuneStep"] = EEPROMData.fineTuneStep;

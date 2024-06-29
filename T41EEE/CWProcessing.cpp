@@ -178,9 +178,9 @@ void DoCWReceiveProcessing() {  // All New AFP 09-19-22
 
   CAUTION: Assumes that a global named ditLength holds the value for dit spacing
 *****/
-void LetterSpace() {
-  MyDelay(3UL * ditLength);
-}
+//void LetterSpace() {
+//  MyDelay(3UL * ditLength);
+//}
 /*****
   Purpose: to provide spacing between words
 
@@ -192,9 +192,9 @@ void LetterSpace() {
 
   CAUTION: Assumes that a global named ditLength holds the value for dit spacing
 *****/
-void WordSpace() {
-  MyDelay(7UL * ditLength);
-}
+//void WordSpace() {
+//  MyDelay(7UL * ditLength);
+//}
 
 
 /*****

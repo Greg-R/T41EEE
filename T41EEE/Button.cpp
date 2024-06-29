@@ -249,7 +249,7 @@ void ExecuteButtonPress(int val) {
       BandInformation();
       NCOFreq = 0L;
       DrawBandWidthIndicatorBar();  //AFP 10-20-22
-//      EEPROMData.rfGainCurrent = 0;
+                                    //      EEPROMData.rfGainCurrent = 0;
       ShowAutoStatus();
       break;
 
@@ -361,11 +361,10 @@ void ExecuteButtonPress(int val) {
   Return value:
     void
 *****/
+std::vector<uint32_t>::iterator result;  // This is also used by fine tuning.  Greg KF5N June 29, 2024
+std::vector<uint32_t> centerTuneArray CENTER_TUNE_ARRAY;  // k3pto
 void ButtonCenterFreqIncrement() {
   uint32_t index = 0;
-  std::vector<uint32_t>::iterator result;
-  std::vector<uint32_t> centerTuneArray CENTER_TUNE_ARRAY;  // k3pto
-
   // Find the index of the current fine tune setting.
   result = std::find(centerTuneArray.begin(), centerTuneArray.end(), EEPROMData.centerTuneStep);
   index = std::distance(centerTuneArray.begin(), result);
@@ -387,11 +386,10 @@ void ButtonCenterFreqIncrement() {
   Return value;
     void
 *****/
+//std::vector<uint32_t>::iterator result;
+std::vector<uint32_t> fineTuneArray FINE_TUNE_ARRAY;  // K3PTO
 void ButtonFineFreqIncrement() {
   uint32_t index = 0;
-  std::vector<uint32_t>::iterator result;
-  std::vector<uint32_t> fineTuneArray FINE_TUNE_ARRAY;  // K3PTO
-
   // Find the index of the current fine tune setting.
   result = std::find(fineTuneArray.begin(), fineTuneArray.end(), EEPROMData.fineTuneStep);
   index = std::distance(fineTuneArray.begin(), result);
