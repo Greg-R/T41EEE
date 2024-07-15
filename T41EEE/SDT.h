@@ -42,6 +42,7 @@ extern struct maps myMapFiles[];
 #include <algorithm>
 
 #include "Calibrate.h"
+#include "SSBCalibrate.h"
 
 //======================================== Symbolic Constants for the T41 ===================================================
 #define RIGNAME "T41-EP SDT"

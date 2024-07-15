@@ -5,7 +5,7 @@ int micChoice;
 int micGainChoice;
 int splitOn = 0;
 
-// Updates by KF5N to CalibrateOptions() function. July 20, 2023
+// Updates by KF5N to CalibrateOptions() function.  Added SSB Carrier and SSB Transmit cal.  Greg KF5N July 10, 2024
 // Updated receive calibration code to clean up graphics.  KF5N August 3, 2023
 // ==============  AFP 10-22-22 ==================
 /*****
@@ -27,8 +27,8 @@ void CalibrateOptions() {
 
   // Select the type of calibration, and then skip this during the loop() function.
   if (calibrateFlag == 0) {
-    const char *IQOptions[13]{ "Freq Cal", "CW PA Cal", "Rec Cal", "Carrier Cal", "Xmit Cal", "SSB PA Cal", "Radio Cal", "Refine Cal", "Set Tone", "DAC Offset", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
-    IQChoice = SubmenuSelect(IQOptions, 13, 0);                                                                                                                                                        //AFP 10-21-22
+    const char *IQOptions[16]{ "Freq Cal", "CW PA Cal", "Rec Cal", "CW Carrier Cal", "CW Xmit Cal", "SSB PA Cal", "SSB Carrier Cal", "SSB Transmit Cal", "Radio Cal", "Refine Cal", "Set Tone", "DAC Offset CW", "DAC Offset SSB", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
+    IQChoice = SubmenuSelect(IQOptions, 16, 0);                                                                                                                                                        //AFP 10-21-22
   }
   calibrateFlag = 1;
   switch (IQChoice) {
@@ -90,23 +90,33 @@ void CalibrateOptions() {
       }
       break;  // Missing break.  KF5N August 12, 2023
 
-    case 6:  // Fully automatic radio calibration.
+      
+    case 6:  // SSB Carrier Cal
+          ssbcalibrater.DoXmitCarrierCalibrate(EEPROMData.calFreq, false, false);
+    break;
+
+    case 7:  // SSB Transmit cal
+          ssbcalibrater.DoXmitCalibrate(EEPROMData.calFreq, false, false);  // This function was significantly revised.  KF5N August 16, 2023
+    break;
+
+
+    case 8:  // Fully automatic radio calibration.
       calibrater.RadioCal(false);
       calibrateFlag = 0;
       break;
 
-    case 7:  // Full automatic calibration refinement.
+    case 9:  // Full automatic calibration refinement.
       calibrater.RadioCal(true);
       calibrateFlag = 0;
       break;
 
-    case 8:  // Choose CW calibration tone frequency.
+    case 10:  // Choose CW calibration tone frequency.
       calibrater.SelectCalFreq();
       calibrateFlag = 0;
       break;
 
-    case 9:  // Set DAC offset for carrier cancellation.
-      EEPROMData.dacOffset = GetEncoderValueLiveQ15t(-5000, 5000, EEPROMData.dacOffset, 50, (char *)"DAC Offset:", false);
+    case 11:  // Set DAC offset for CW carrier cancellation.
+      EEPROMData.dacOffsetCW = GetEncoderValueLiveQ15t(-5000, 5000, EEPROMData.dacOffsetCW, 50, (char *)"DC Offset:", false);
       val = ReadSelectedPushButton();
       if (val != BOGUS_PIN_READ) {
         val = ProcessButtonPress(val);
@@ -118,7 +128,20 @@ void CalibrateOptions() {
       }
       break;
 
-    case 10:  // Calibrate buttons
+          case 12:  // Set DAC offset for CW carrier cancellation.
+      EEPROMData.dacOffsetSSB = GetEncoderValueLiveQ15t(-5000, 5000, EEPROMData.dacOffsetSSB, 50, (char *)"DC Offset:", false);
+      val = ReadSelectedPushButton();
+      if (val != BOGUS_PIN_READ) {
+        val = ProcessButtonPress(val);
+        if (val == MENU_OPTION_SELECT) {
+          tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
+          EEPROMWrite();
+          calibrateFlag = 0;
+        }
+      }
+      break;
+
+    case 13:  // Calibrate buttons
       SaveAnalogSwitchValues();
       calibrateFlag = 0;
       RedrawDisplayScreen();
@@ -126,7 +149,7 @@ void CalibrateOptions() {
       DrawFrequencyBarValue();
       break;
 
-    case 11:  // Set button repeat rate
+    case 14:  // Set button repeat rate
       EEPROMData.buttonRepeatDelay = 1000 * GetEncoderValueLive(0, 5000, EEPROMData.buttonRepeatDelay / 1000, 1, (char *)"Btn Repeat:  ", false);
       val = ReadSelectedPushButton();
       if (val != BOGUS_PIN_READ) {
@@ -139,7 +162,7 @@ void CalibrateOptions() {
       }
       break;
 
-    case 12:  // Cancelled choice
+    case 15:  // Cancelled choice
       RedrawDisplayScreen();
       currentFreq = TxRxFreq = EEPROMData.centerFreq + NCOFreq;
       DrawBandWidthIndicatorBar();  // AFP 10-20-22
