@@ -1178,6 +1178,7 @@ FLASHMEM void setup() {
   Teensy3Clock.set(now());  // set the RTC
   T4_rtc_set(Teensy3Clock.get());
 
+/*
   sgtl5000_1.setAddress(LOW);  // This is not documented.  See QuadChannelOutput example.
   sgtl5000_1.enable();
   AudioMemory(500);  //  Increased to 450 from 400.  Memory was hitting max.  KF5N August 31, 2023
@@ -1197,6 +1198,57 @@ FLASHMEM void setup() {
   sgtl5000_2.inputSelect(AUDIO_INPUT_LINEIN);  // Why is a second sgtl5000 device used???  This is the receiver ADCs, PCM1808?
   sgtl5000_2.muteHeadphone();                  // KF5N March 11, 2024
                                                //  sgtl5000_2.volume(0.5);   //  Headphone volume???  Not required as headphone is muted.
+*/
+
+  sgtl5000_1.setAddress(LOW);  // This is not documented.  See QuadChannelOutput example.
+  sgtl5000_1.enable();
+//  sgtl5000_1.audioPreProcessorEnable();
+//  sgtl5000_1.audioPostProcessorEnable();
+  sgtl5000_1.audioProcessorDisable();
+  sgtl5000_1.eqSelect(3);
+  sgtl5000_1.eqBands(-1.0, -1.0, 0.5, 0.5, -1.0);
+  AudioMemory(500);  //  Increased to 450 from 400.  Memory was hitting max.  KF5N August 31, 2023
+  AudioMemory_F32(50);
+  sgtl5000_1.inputSelect(AUDIO_INPUT_MIC);
+  sgtl5000_1.muteHeadphone();  // KF5N March 11, 2024
+  sgtl5000_1.micGain(0);
+  sgtl5000_1.lineInLevel(0);
+#ifdef QSE2
+  sgtl5000_1.lineOutLevel(13);  // Setting of 13 limits line-out level to 3.15 volts p-p (maximum).
+#else
+  sgtl5000_1.lineOutLevel(20);  // Setting of 20 limits line-out level to 2.14 volts p-p.
+#endif
+sgtl5000_1.adcHighPassFilterEnable();  //reduces noise.  https://forum.pjrc.com/threads/27215-24-bit-audio-boards?p=78831&viewfull=1#post78831
+//sgtl5000_1.adcHighPassFilterFreeze();
+  sgtl5000_2.setAddress(HIGH);            // T41 has only a single Audio Adaptor.  This is being used essentially as a 2nd I2S port.
+  sgtl5000_2.enable();
+  sgtl5000_2.inputSelect(AUDIO_INPUT_LINEIN);  // Why is a second sgtl5000 device used???  This is the receiver ADCs, PCM1808?
+  sgtl5000_2.muteHeadphone();                  // KF5N March 11, 2024
+                                               //  sgtl5000_2.volume(0.5);   //  Headphone volume???  Not required as headphone is muted.
+
+int16_t delaySize = 256;     // Any power of 2, i.e., 256, 128, 64, etc.
+compressor1.setDelayBufferSize(delaySize);
+
+// Original example
+//  struct compressionCurve crv = { -2.0f, 0.0f,           // margin, offset
+//     {0.0f, -10.0f, -20.0f, -30.0f, -1000.0f},           // kneeDB[] 
+//{  100.0f,  2.5f,   1.5f,     1.0f,      1.0f} };    // compressionRatio
+
+//  This is using the compression after the kneeDB[0] only.
+  struct compressionCurve crv = { -2.0f, -25.0f,           // margin, offset
+     {0.0f, -20.0f, -1000.0f, -1000.0f, -1000.0f},           // kneeDB[] 
+     {  150.0f, 1.0f, 1.0f, 1.0f, 1.0f} };   // compressionRatio     
+
+  compressor1.setCompressionCurve(&crv);
+  compressor1.begin();
+
+// basicCompressorBegin(pc1, -25.0f, 2.0);
+//  limiterBegin(pc1, -3.0f, -15.0f);
+
+   cessb1.setSampleRate_Hz(48000);
+   cessb1.setGains(1.5f, 1.4f, 1.0f);
+   cessb1.setSideband(false);
+
 
   pinMode(FILTERPIN15M, OUTPUT);
   pinMode(FILTERPIN20M, OUTPUT);
