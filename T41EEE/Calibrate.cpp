@@ -401,7 +401,7 @@ void Calibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
   plotCalGraphics(calTypeFlag);
   printCalType(calTypeFlag, autoCal, false);
   // Run this so Phase shows from begining.
-  GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQPhaseCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
+  GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQRXPhaseCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
   warmUpCal();
 
   if (radioCal) {
@@ -439,8 +439,8 @@ void Calibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
         IQCalType = 0;
         std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
         std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
-        iOptimal = EEPROMData.IQAmpCorrectionFactor[EEPROMData.currentBand];
-        qOptimal = EEPROMData.IQPhaseCorrectionFactor[EEPROMData.currentBand];
+        iOptimal = EEPROMData.IQRXAmpCorrectionFactor[EEPROMData.currentBand];
+        qOptimal = EEPROMData.IQRXPhaseCorrectionFactor[EEPROMData.currentBand];
         state = State::warmup;
         averageFlag = false;
         break;
@@ -456,8 +456,8 @@ void Calibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
         IQCalType = 0;
         std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
         std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
-        iOptimal = EEPROMData.IQAmpCorrectionFactor[EEPROMData.currentBand];
-        qOptimal = EEPROMData.IQPhaseCorrectionFactor[EEPROMData.currentBand];
+        iOptimal = EEPROMData.IQRXAmpCorrectionFactor[EEPROMData.currentBand];
+        qOptimal = EEPROMData.IQRXPhaseCorrectionFactor[EEPROMData.currentBand];
         state = State::warmup;
         averageFlag = false;
         refineCal = true;
@@ -503,8 +503,8 @@ void Calibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
           std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
           warmup = warmup + 1;
           if (not refineCal) {
-            EEPROMData.IQPhaseCorrectionFactor[EEPROMData.currentBand] = 0.0 + maxSweepPhase;  //  Need to use these values during warmup
-            EEPROMData.IQAmpCorrectionFactor[EEPROMData.currentBand] = 1.0 + maxSweepAmp;      //  so adjdB and adjdB_avg are forced upwards.
+            EEPROMData.IQRXPhaseCorrectionFactor[EEPROMData.currentBand] = 0.0 + maxSweepPhase;  //  Need to use these values during warmup
+            EEPROMData.IQRXAmpCorrectionFactor[EEPROMData.currentBand] = 1.0 + maxSweepAmp;      //  so adjdB and adjdB_avg are forced upwards.
           }
           state = State::warmup;
           if (warmup == 10) state = State::state0;
@@ -523,9 +523,9 @@ void Calibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
           break;
         case State::state0:
           // Starting values for sweeps.  First sweep is amplitude (gain).
-          EEPROMData.IQPhaseCorrectionFactor[EEPROMData.currentBand] = 0.0;
-          EEPROMData.IQAmpCorrectionFactor[EEPROMData.currentBand] = 1.0 - maxSweepAmp;  // Begin sweep at low end and move upwards.
-          GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQPhaseCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
+          EEPROMData.IQRXPhaseCorrectionFactor[EEPROMData.currentBand] = 0.0;
+          EEPROMData.IQRXAmpCorrectionFactor[EEPROMData.currentBand] = 1.0 - maxSweepAmp;  // Begin sweep at low end and move upwards.
+          GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQRXPhaseCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
           adjdB = 0;
           adjdB_avg = 0;
           index = 0;
@@ -533,25 +533,25 @@ void Calibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
           state = State::initialSweepAmp;  // Let this fall through.
 
         case State::initialSweepAmp:
-          sweepVectorValue[index] = EEPROMData.IQAmpCorrectionFactor[EEPROMData.currentBand];
+          sweepVectorValue[index] = EEPROMData.IQRXAmpCorrectionFactor[EEPROMData.currentBand];
           sweepVector[index] = adjdB;
           index = index + 1;
           // Increment for next measurement.
-          EEPROMData.IQAmpCorrectionFactor[EEPROMData.currentBand] = EEPROMData.IQAmpCorrectionFactor[EEPROMData.currentBand] + increment;  // Next one!
+          EEPROMData.IQRXAmpCorrectionFactor[EEPROMData.currentBand] = EEPROMData.IQRXAmpCorrectionFactor[EEPROMData.currentBand] + increment;  // Next one!
           // Go to Q channel when I channel sweep is finished.
           //    if (index > 20) {
           //      if (sweepVector[index - 1] > (sweepVector[index - 11] + 3.0)) stopSweep = true;  // Stop sweep if past the null.
           //    }
-          if (abs(EEPROMData.IQAmpCorrectionFactor[EEPROMData.currentBand] - 1.0) > maxSweepAmp) {  // Needs to be subtracted from 1.0.
+          if (abs(EEPROMData.IQRXAmpCorrectionFactor[EEPROMData.currentBand] - 1.0) > maxSweepAmp) {  // Needs to be subtracted from 1.0.
             IQCalType = 1;                                                                          // Get ready for phase.
             result = std::min_element(sweepVector.begin(), sweepVector.end());                      // Value of the minimum.
             adjdBMinIndex = std::distance(sweepVector.begin(), result);                             // Find the index.
             iOptimal = sweepVectorValue[adjdBMinIndex];                                             // Set to the discovered minimum.
                                                                                                     //            Serial.printf("Init The optimal amplitude = %.3f at index %d with value %.1f count = %d\n", sweepVectorValue[adjdBMinIndex], adjdBMinIndex, *result, count);
-            EEPROMData.IQPhaseCorrectionFactor[EEPROMData.currentBand] = -maxSweepPhase;            // The starting value for phase.
-            EEPROMData.IQAmpCorrectionFactor[EEPROMData.currentBand] = iOptimal;                    // Reset for next sweep.
+            EEPROMData.IQRXPhaseCorrectionFactor[EEPROMData.currentBand] = -maxSweepPhase;            // The starting value for phase.
+            EEPROMData.IQRXAmpCorrectionFactor[EEPROMData.currentBand] = iOptimal;                    // Reset for next sweep.
             // Update display to optimal value.
-            GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQAmpCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Gain", true);
+            GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQRXAmpCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Gain", true);
             count = count + 1;
             // Save the sub_vector which will be used to refine the optimal result.
             for (int i = 0; i < 21; i = i + 1) {
@@ -573,20 +573,20 @@ void Calibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
           break;
 
         case State::initialSweepPhase:
-          sweepVectorValue[index] = EEPROMData.IQPhaseCorrectionFactor[EEPROMData.currentBand];
+          sweepVectorValue[index] = EEPROMData.IQRXPhaseCorrectionFactor[EEPROMData.currentBand];
           sweepVector[index] = adjdB;
           index = index + 1;
           // Increment for the next measurement.
-          EEPROMData.IQPhaseCorrectionFactor[EEPROMData.currentBand] = EEPROMData.IQPhaseCorrectionFactor[EEPROMData.currentBand] + increment;
+          EEPROMData.IQRXPhaseCorrectionFactor[EEPROMData.currentBand] = EEPROMData.IQRXPhaseCorrectionFactor[EEPROMData.currentBand] + increment;
           //     if (index > 20) {
           //       if (sweepVector[index - 1] > (sweepVector[index - 11] + 3.0)) stopSweep = true;  // Stop sweep if past the null.
           //     }
-          if (EEPROMData.IQPhaseCorrectionFactor[EEPROMData.currentBand] > maxSweepPhase) {
+          if (EEPROMData.IQRXPhaseCorrectionFactor[EEPROMData.currentBand] > maxSweepPhase) {
             result = std::min_element(sweepVector.begin(), sweepVector.end());
             adjdBMinIndex = std::distance(sweepVector.begin(), result);
             qOptimal = sweepVectorValue[adjdBMinIndex];                             // Set to the discovered minimum.
-            EEPROMData.IQPhaseCorrectionFactor[EEPROMData.currentBand] = qOptimal;  // Set to the discovered minimum.
-            GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQPhaseCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
+            EEPROMData.IQRXPhaseCorrectionFactor[EEPROMData.currentBand] = qOptimal;  // Set to the discovered minimum.
+            GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQRXPhaseCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
             //            Serial.printf("Init The optimal phase = %.5f at index %d with value %.1f count = %d\n", sweepVectorValue[adjdBMinIndex], adjdBMinIndex, *result, count);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorPhase[i] = (qOptimal - 10 * 0.001) + (0.001 * i);
@@ -605,7 +605,7 @@ void Calibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
 
         case State::refineAmp:
           // Now sweep over the entire sub_vectorAmp array with averaging on. index starts at 0.
-          EEPROMData.IQAmpCorrectionFactor[EEPROMData.currentBand] = sub_vectorAmp[index];  // Starting value.
+          EEPROMData.IQRXAmpCorrectionFactor[EEPROMData.currentBand] = sub_vectorAmp[index];  // Starting value.
           // Don't record this until there is data.  So that will be AFTER this pass.
           if (averageFlag) {
             sub_vectorAmpResult[index] = adjdB_avg;
@@ -618,8 +618,8 @@ void Calibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
             adjdBMinIndex = std::distance(sub_vectorAmpResult.begin(), result);
             // iOptimal is simply the value of sub_vectorAmp[adjdBMinIndex].
             iOptimal = sub_vectorAmp[adjdBMinIndex];                              // -.001;
-            EEPROMData.IQAmpCorrectionFactor[EEPROMData.currentBand] = iOptimal;  // Set to optimal value before refining phase.
-            GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQAmpCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Gain", true);
+            EEPROMData.IQRXAmpCorrectionFactor[EEPROMData.currentBand] = iOptimal;  // Set to optimal value before refining phase.
+            GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQRXAmpCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Gain", true);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorAmp[i] = (iOptimal - 10 * 0.001) + (0.001 * i);  // The next array to sweep.
             }
@@ -638,7 +638,7 @@ void Calibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
 
         case State::refinePhase:
           // Now sweep over the entire sub_vectorAmp array with averaging on. index starts at 0.
-          EEPROMData.IQPhaseCorrectionFactor[EEPROMData.currentBand] = sub_vectorPhase[index];  // Starting value.
+          EEPROMData.IQRXPhaseCorrectionFactor[EEPROMData.currentBand] = sub_vectorPhase[index];  // Starting value.
           // Don't record this until there is data.  So that will be AFTER this pass.
           if (averageFlag) {
             sub_vectorPhaseResult[index] = adjdB_avg;
@@ -652,8 +652,8 @@ void Calibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
             // qOptimal is simply the value of sub_vectorAmp[adjdBMinIndex].
             index = 0;
             qOptimal = sub_vectorPhase[adjdBMinIndex];  // - .001;
-            EEPROMData.IQPhaseCorrectionFactor[EEPROMData.currentBand] = qOptimal;
-            GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQPhaseCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
+            EEPROMData.IQRXPhaseCorrectionFactor[EEPROMData.currentBand] = qOptimal;
+            GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQRXPhaseCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorPhase[i] = (qOptimal - 10 * 0.001) + (0.001 * i);
             }
@@ -687,8 +687,8 @@ void Calibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
 
         case State::setOptimal:
           count = 0;  // In case automatic calibration is run again.
-          EEPROMData.IQAmpCorrectionFactor[EEPROMData.currentBand] = iOptimal;
-          EEPROMData.IQPhaseCorrectionFactor[EEPROMData.currentBand] = qOptimal;
+          EEPROMData.IQRXAmpCorrectionFactor[EEPROMData.currentBand] = iOptimal;
+          EEPROMData.IQRXPhaseCorrectionFactor[EEPROMData.currentBand] = qOptimal;
           //       Serial.printf("iOptimal = %.3f qOptimal = %.3f\n", iOptimal, qOptimal);
           state = State::exit;
           viewTime = fiveSeconds;  // Start result view timer.
@@ -715,9 +715,9 @@ void Calibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
     task = -100;                          // Reset task after it is used.
     //  Read encoder and update values.
     if (IQCalType == 0) {
-      EEPROMData.IQAmpCorrectionFactor[EEPROMData.currentBand] = GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQAmpCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Gain", true);
+      EEPROMData.IQRXAmpCorrectionFactor[EEPROMData.currentBand] = GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQRXAmpCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Gain", true);
     } else {
-      EEPROMData.IQPhaseCorrectionFactor[EEPROMData.currentBand] = GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQPhaseCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
+      EEPROMData.IQRXPhaseCorrectionFactor[EEPROMData.currentBand] = GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQRXPhaseCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
     }
     if (IQChoice == 6) break;  //  Exit the while loop.
   }                            // end while
@@ -776,7 +776,7 @@ void Calibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal)
   SetFreqCal(freqOffset);
   printCalType(calTypeFlag, autoCal, false);
   // Run this so Phase shows from begining.
-  GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
+  GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQCWPhaseCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
   warmUpCal();
 
   if (radioCal) {
@@ -816,8 +816,8 @@ void Calibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal)
         averageCount = 0;
         std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
         std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
-        iOptimal = EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand];
-        qOptimal = EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand];
+        iOptimal = EEPROMData.IQCWAmpCorrectionFactor[EEPROMData.currentBand];
+        qOptimal = EEPROMData.IQCWPhaseCorrectionFactor[EEPROMData.currentBand];
         state = State::warmup;
         break;
       // Automatic calibration using previously stored values.
@@ -832,8 +832,8 @@ void Calibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal)
         IQCalType = 0;
         std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
         std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
-        iOptimal = EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand];
-        qOptimal = EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand];
+        iOptimal = EEPROMData.IQCWAmpCorrectionFactor[EEPROMData.currentBand];
+        qOptimal = EEPROMData.IQCWPhaseCorrectionFactor[EEPROMData.currentBand];
         state = State::warmup;
         averageFlag = false;
         refineCal = true;
@@ -874,8 +874,8 @@ void Calibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal)
           std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
           warmup = warmup + 1;
           if (not refineCal) {
-            EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand] = 0.0 + maxSweepPhase;  //  Need to use these values during warmup
-            EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] = 1.0 + maxSweepAmp;      //  so adjdB and adjdB_avg are forced upwards.
+            EEPROMData.IQCWPhaseCorrectionFactor[EEPROMData.currentBand] = 0.0 + maxSweepPhase;  //  Need to use these values during warmup
+            EEPROMData.IQCWAmpCorrectionFactor[EEPROMData.currentBand] = 1.0 + maxSweepAmp;      //  so adjdB and adjdB_avg are forced upwards.
           }
           state = State::warmup;
           if (warmup == 10) state = State::state0;
@@ -894,9 +894,9 @@ void Calibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal)
           break;
         case State::state0:
           // Starting values for sweeps.  First sweep is amplitude (gain).
-          EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand] = 0.0;
-          EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] = 1.0 - maxSweepAmp;  // Begin sweep at low end and move upwards.
-          GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
+          EEPROMData.IQCWPhaseCorrectionFactor[EEPROMData.currentBand] = 0.0;
+          EEPROMData.IQCWAmpCorrectionFactor[EEPROMData.currentBand] = 1.0 - maxSweepAmp;  // Begin sweep at low end and move upwards.
+          GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQCWPhaseCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
           adjdB = 0;
           adjdB_avg = 0;
           index = 0;
@@ -904,25 +904,25 @@ void Calibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal)
           state = State::initialSweepAmp;  // Let this fall through.
 
         case State::initialSweepAmp:
-          sweepVectorValue[index] = EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand];
+          sweepVectorValue[index] = EEPROMData.IQCWAmpCorrectionFactor[EEPROMData.currentBand];
           sweepVector[index] = adjdB;
           index = index + 1;
           // Increment for next measurement.
-          EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] = EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] + increment;  // Next one!
+          EEPROMData.IQCWAmpCorrectionFactor[EEPROMData.currentBand] = EEPROMData.IQCWAmpCorrectionFactor[EEPROMData.currentBand] + increment;  // Next one!
           // Go to Q channel when I channel sweep is finished.
           //    if (index > 20) {
           //      if (sweepVector[index - 1] > (sweepVector[index - 11] + 3.0)) stopSweep = true;  // Stop sweep if past the null.
           //    }
-          if (abs(EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] - 1.0) > maxSweepAmp) {  // Needs to be subtracted from 1.0.
+          if (abs(EEPROMData.IQCWAmpCorrectionFactor[EEPROMData.currentBand] - 1.0) > maxSweepAmp) {  // Needs to be subtracted from 1.0.
             IQCalType = 1;                                                                           // Get ready for phase.
             result = std::min_element(sweepVector.begin(), sweepVector.end());                       // Value of the minimum.
             adjdBMinIndex = std::distance(sweepVector.begin(), result);                              // Find the index.
             iOptimal = sweepVectorValue[adjdBMinIndex];                                              // Set to the discovered minimum.
                                                                                                      //            Serial.printf("Init The optimal amplitude = %.3f at index %d with value %.1f count = %d\n", sweepVectorValue[adjdBMinIndex], adjdBMinIndex, *result, count);
-            EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand] = -maxSweepPhase;            // The starting value for phase.
-            EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] = iOptimal;                    // Reset for next sweep.
+            EEPROMData.IQCWPhaseCorrectionFactor[EEPROMData.currentBand] = -maxSweepPhase;            // The starting value for phase.
+            EEPROMData.IQCWAmpCorrectionFactor[EEPROMData.currentBand] = iOptimal;                    // Reset for next sweep.
             // Update display to optimal value.
-            GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Gain", true);
+            GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQCWAmpCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Gain", true);
             count = count + 1;
             // Save the sub_vector which will be used to refine the optimal result.
             for (int i = 0; i < 21; i = i + 1) {
@@ -944,7 +944,7 @@ void Calibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal)
           break;
 
         case State::initialSweepPhase:
-          sweepVectorValue[index] = EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand];
+          sweepVectorValue[index] = EEPROMData.IQCWPhaseCorrectionFactor[EEPROMData.currentBand];
           sweepVector[index] = adjdB;
           index = index + 1;
           // Increment for the next measurement.
@@ -952,13 +952,13 @@ void Calibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal)
           //     if (index > 20) {
           //       if (sweepVector[index - 1] > (sweepVector[index - 11] + 3.0)) stopSweep = true;  // Stop sweep if past the null.
           //     }
-          if (EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand] > maxSweepPhase) {
+          if (EEPROMData.IQCWPhaseCorrectionFactor[EEPROMData.currentBand] > maxSweepPhase) {
             result = std::min_element(sweepVector.begin(), sweepVector.end());
             adjdBMinIndex = std::distance(sweepVector.begin(), result);
             qOptimal = sweepVectorValue[adjdBMinIndex];                              // Set to the discovered minimum.
-            EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand] = qOptimal;  // Set to the discovered minimum.
+            EEPROMData.IQCWPhaseCorrectionFactor[EEPROMData.currentBand] = qOptimal;  // Set to the discovered minimum.
 
-            GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
+            GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQCWPhaseCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
             // Serial.printf("Init The optimal phase = %.5f at index %d with value %.1f count = %d\n", sweepVectorValue[adjdBMinIndex], adjdBMinIndex, *result, count);
             // Save the sub_vector which will be used to refine the optimal result.
             for (int i = 0; i < 21; i = i + 1) {
@@ -978,7 +978,7 @@ void Calibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal)
 
         case State::refineAmp:
           // Now sweep over the entire sub_vectorAmp array with averaging on. index starts at 0.
-          EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] = sub_vectorAmp[index];  // Starting value.
+          EEPROMData.IQCWAmpCorrectionFactor[EEPROMData.currentBand] = sub_vectorAmp[index];  // Starting value.
           // Don't record this until there is data.  So that will be AFTER this pass.
           if (averageFlag) {
             sub_vectorAmpResult[index] = adjdB_avg;
@@ -991,8 +991,8 @@ void Calibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal)
             adjdBMinIndex = std::distance(sub_vectorAmpResult.begin(), result);
             // iOptimal is simply the value of sub_vectorAmp[adjdBMinIndex].
             iOptimal = sub_vectorAmp[adjdBMinIndex];                               // -.001;
-            EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] = iOptimal;  // Set to optimal value before refining phase.
-            GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Gain", true);
+            EEPROMData.IQCWAmpCorrectionFactor[EEPROMData.currentBand] = iOptimal;  // Set to optimal value before refining phase.
+            GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQCWAmpCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Gain", true);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorAmp[i] = (iOptimal - 10 * 0.001) + (0.001 * i);  // The next array to sweep.
             }
@@ -1011,7 +1011,7 @@ void Calibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal)
 
         case State::refinePhase:
           // Now sweep over the entire sub_vectorAmp array with averaging on. index starts at 0.
-          EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand] = sub_vectorPhase[index];  // Starting value.
+          EEPROMData.IQCWPhaseCorrectionFactor[EEPROMData.currentBand] = sub_vectorPhase[index];  // Starting value.
           // Don't record this until there is data.  So that will be AFTER this pass.
           if (averageFlag) {
             sub_vectorPhaseResult[index] = adjdB_avg;
@@ -1025,8 +1025,8 @@ void Calibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal)
             // qOptimal is simply the value of sub_vectorAmp[adjdBMinIndex].
             index = 0;
             qOptimal = sub_vectorPhase[adjdBMinIndex];  // - .001;
-            EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand] = qOptimal;
-            GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
+            EEPROMData.IQCWPhaseCorrectionFactor[EEPROMData.currentBand] = qOptimal;
+            GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQCWPhaseCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorPhase[i] = (qOptimal - 10 * 0.001) + (0.001 * i);
             }
@@ -1060,8 +1060,8 @@ void Calibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal)
 
         case State::setOptimal:
           count = 0;  // In case automatic calibration is run again.
-          EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] = iOptimal;
-          EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand] = qOptimal;
+          EEPROMData.IQCWAmpCorrectionFactor[EEPROMData.currentBand] = iOptimal;
+          EEPROMData.IQCWPhaseCorrectionFactor[EEPROMData.currentBand] = qOptimal;
           //       Serial.printf("iOptimal = %.3f qOptimal = %.3f\n", iOptimal, qOptimal);
           state = State::exit;
           viewTime = fiveSeconds;  // Start result view timer.
@@ -1088,9 +1088,9 @@ void Calibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal)
     task = -100;                          // Reset task after it is used.
     //  Read encoder and update values.
     if (IQCalType == 0) {
-      EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand] = GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Gain", true);
+      EEPROMData.IQCWAmpCorrectionFactor[EEPROMData.currentBand] = GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQCWAmpCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Gain", true);
     } else {
-      EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand] = GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
+      EEPROMData.IQCWPhaseCorrectionFactor[EEPROMData.currentBand] = GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQCWPhaseCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
     }
     if (IQChoice == 6) break;  //  Exit the while loop.
   }                            // end while
@@ -1151,7 +1151,7 @@ void Calibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool sh
   SetFreqCal(freqOffset);
   printCalType(calTypeFlag, autoCal, false);
   // Run this so Phase shows from begining.
-  GetEncoderValueLiveQ15t(-1000, 1000, EEPROMData.qDCoffset[EEPROMData.currentBand], correctionIncrement, (char *)"Q Offset", false);
+  GetEncoderValueLiveQ15t(-1000, 1000, EEPROMData.qDCoffsetCW[EEPROMData.currentBand], correctionIncrement, (char *)"Q Offset", false);
   warmUpCal();
 
   if (radioCal) {
@@ -1191,8 +1191,8 @@ void Calibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool sh
         //stopSweep = false;
         std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0);
         std::fill(sweepVector.begin(), sweepVector.end(), 0);
-        iOptimal = EEPROMData.iDCoffset[EEPROMData.currentBand];
-        qOptimal = EEPROMData.qDCoffset[EEPROMData.currentBand];
+        iOptimal = EEPROMData.iDCoffsetCW[EEPROMData.currentBand];
+        qOptimal = EEPROMData.qDCoffsetCW[EEPROMData.currentBand];
         state = State::warmup;
         break;
       // Automatic calibration using previously stored values.
@@ -1207,8 +1207,8 @@ void Calibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool sh
         IQCalType = 0;
         std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0);
         std::fill(sweepVector.begin(), sweepVector.end(), 0);
-        iOptimal = EEPROMData.iDCoffset[EEPROMData.currentBand];
-        qOptimal = EEPROMData.qDCoffset[EEPROMData.currentBand];
+        iOptimal = EEPROMData.iDCoffsetCW[EEPROMData.currentBand];
+        qOptimal = EEPROMData.qDCoffsetCW[EEPROMData.currentBand];
         state = State::warmup;
         averageFlag = false;
         refineCal = true;
@@ -1249,8 +1249,8 @@ void Calibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool sh
           std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
           warmup = warmup + 1;
           if (not refineCal) {
-            EEPROMData.qDCoffset[EEPROMData.currentBand] = maxSweepPhase;  //  Need to use these values during warmup
-            EEPROMData.iDCoffset[EEPROMData.currentBand] = maxSweepAmp;    //  so adjdB and adjdB_avg are forced upwards.
+            EEPROMData.qDCoffsetCW[EEPROMData.currentBand] = maxSweepPhase;  //  Need to use these values during warmup
+            EEPROMData.iDCoffsetCW[EEPROMData.currentBand] = maxSweepAmp;    //  so adjdB and adjdB_avg are forced upwards.
           }
           state = State::warmup;
           if (warmup == 10) state = State::state0;
@@ -1270,9 +1270,9 @@ void Calibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool sh
           break;
         case State::state0:
           // Starting values for sweeps.  First sweep is the I offset.
-          EEPROMData.qDCoffset[EEPROMData.currentBand] = 0;
-          EEPROMData.iDCoffset[EEPROMData.currentBand] = -maxSweepAmp;  // Begin sweep at low end and move upwards.
-          GetEncoderValueLiveQ15t(1000, 1000, EEPROMData.qDCoffset[EEPROMData.currentBand], correctionIncrement, (char *)"Q Offset", false);
+          EEPROMData.qDCoffsetCW[EEPROMData.currentBand] = 0;
+          EEPROMData.iDCoffsetCW[EEPROMData.currentBand] = -maxSweepAmp;  // Begin sweep at low end and move upwards.
+          GetEncoderValueLiveQ15t(1000, 1000, EEPROMData.qDCoffsetCW[EEPROMData.currentBand], correctionIncrement, (char *)"Q Offset", false);
           adjdB = 0;
           adjdB_avg = 0;
           index = 0;
@@ -1280,25 +1280,25 @@ void Calibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool sh
           state = State::initialSweepAmp;  // Let this fall through.
 
         case State::initialSweepAmp:
-          sweepVectorValue[index] = EEPROMData.iDCoffset[EEPROMData.currentBand];
+          sweepVectorValue[index] = EEPROMData.iDCoffsetCW[EEPROMData.currentBand];
           sweepVector[index] = adjdB;
           index = index + 1;
           // Increment for next measurement.
-          EEPROMData.iDCoffset[EEPROMData.currentBand] = EEPROMData.iDCoffset[EEPROMData.currentBand] + increment;  // Next one!
+          EEPROMData.iDCoffset[EEPROMData.currentBand] = EEPROMData.iDCoffsetCW[EEPROMData.currentBand] + increment;  // Next one!
           // Go to Q channel when I channel sweep is finished.
           //    if (index > 20) {
           //      if (sweepVector[index - 1] > (sweepVector[index - 11] + 3.0)) stopSweep = true;  // Stop sweep if past the null.
           //    }
-          if (abs(EEPROMData.iDCoffset[EEPROMData.currentBand] - 1.0) > maxSweepAmp) {  // Needs to be subtracted from 1.0.
+          if (abs(EEPROMData.iDCoffsetCW[EEPROMData.currentBand] - 1.0) > maxSweepAmp) {  // Needs to be subtracted from 1.0.
             IQCalType = 1;                                                              // Get ready for phase.
             result = std::min_element(sweepVector.begin(), sweepVector.end());          // Value of the minimum.
             adjdBMinIndex = std::distance(sweepVector.begin(), result);                 // Find the index.
             iOptimal = sweepVectorValue[adjdBMinIndex];                                 // Set to the discovered minimum.
             // Serial.printf("Init The optimal I offset = %d at index %d with value %.1f count = %d\n", sweepVectorValue[adjdBMinIndex], adjdBMinIndex, *result, count);
-            EEPROMData.qDCoffset[EEPROMData.currentBand] = -maxSweepPhase;  // The starting value for phase.
-            EEPROMData.iDCoffset[EEPROMData.currentBand] = iOptimal;        // Reset for next sweep.
+            EEPROMData.qDCoffsetCW[EEPROMData.currentBand] = -maxSweepPhase;  // The starting value for phase.
+            EEPROMData.iDCoffsetCW[EEPROMData.currentBand] = iOptimal;        // Reset for next sweep.
             // Update display to optimal value.
-            GetEncoderValueLiveQ15t(-1000, 1000, EEPROMData.iDCoffset[EEPROMData.currentBand], correctionIncrement, (char *)"I Offset", true);
+            GetEncoderValueLiveQ15t(-1000, 1000, EEPROMData.iDCoffsetCW[EEPROMData.currentBand], correctionIncrement, (char *)"I Offset", true);
             count = count + 1;
             // Save the sub_vector which will be used to refine the optimal result.
             for (int i = 0; i < 21; i = i + 1) {
@@ -1321,20 +1321,20 @@ void Calibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool sh
           break;
 
         case State::initialSweepPhase:
-          sweepVectorValue[index] = EEPROMData.qDCoffset[EEPROMData.currentBand];
+          sweepVectorValue[index] = EEPROMData.qDCoffsetCW[EEPROMData.currentBand];
           sweepVector[index] = adjdB;
           index = index + 1;
           // Increment for the next measurement.
-          EEPROMData.qDCoffset[EEPROMData.currentBand] = EEPROMData.qDCoffset[EEPROMData.currentBand] + increment;
+          EEPROMData.qDCoffset[EEPROMData.currentBand] = EEPROMData.qDCoffsetCW[EEPROMData.currentBand] + increment;
           //     if (index > 20) {
           //       if (sweepVector[index - 1] > (sweepVector[index - 11] + 3.0)) stopSweep = true;  // Stop sweep if past the null.
           //     }
-          if (EEPROMData.qDCoffset[EEPROMData.currentBand] > maxSweepPhase) {
+          if (EEPROMData.qDCoffsetCW[EEPROMData.currentBand] > maxSweepPhase) {
             result = std::min_element(sweepVector.begin(), sweepVector.end());
             adjdBMinIndex = std::distance(sweepVector.begin(), result);
             qOptimal = sweepVectorValue[adjdBMinIndex];               // Set to the discovered minimum.
-            EEPROMData.qDCoffset[EEPROMData.currentBand] = qOptimal;  // Set to the discovered minimum.
-            GetEncoderValueLiveQ15t(-1000, 1000, EEPROMData.qDCoffset[EEPROMData.currentBand], correctionIncrement, (char *)"Q Offset", false);
+            EEPROMData.qDCoffsetCW[EEPROMData.currentBand] = qOptimal;  // Set to the discovered minimum.
+            GetEncoderValueLiveQ15t(-1000, 1000, EEPROMData.qDCoffsetCW[EEPROMData.currentBand], correctionIncrement, (char *)"Q Offset", false);
             //            Serial.printf("Init The optimal Q offset = %d at index %d with value %.1f count = %d\n", sweepVectorValue[adjdBMinIndex], adjdBMinIndex, *result, count);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorQoffset[i] = (qOptimal - 10 * 5) + (5 * i);
@@ -1353,7 +1353,7 @@ void Calibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool sh
 
         case State::refineAmp:
           // Now sweep over the entire sub_vectorAmp array with averaging on. index starts at 0.
-          EEPROMData.iDCoffset[EEPROMData.currentBand] = sub_vectorIoffset[index];  // Starting value.
+          EEPROMData.iDCoffsetCW[EEPROMData.currentBand] = sub_vectorIoffset[index];  // Starting value.
           // Don't record this until there is data.  So that will be AFTER this pass.
           if (averageFlag) {
             sub_vectorAmpResult[index] = adjdB_avg;
@@ -1366,8 +1366,8 @@ void Calibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool sh
             adjdBMinIndex = std::distance(sub_vectorAmpResult.begin(), result);
             // iOptimal is simply the value of sub_vectorAmp[adjdBMinIndex].
             iOptimal = sub_vectorIoffset[adjdBMinIndex];              // -.001;
-            EEPROMData.iDCoffset[EEPROMData.currentBand] = iOptimal;  // Set to optimal value before refining phase.
-            GetEncoderValueLiveQ15t(-1000, 1000, EEPROMData.iDCoffset[EEPROMData.currentBand], correctionIncrement, (char *)"I Offset", true);
+            EEPROMData.iDCoffsetCW[EEPROMData.currentBand] = iOptimal;  // Set to optimal value before refining phase.
+            GetEncoderValueLiveQ15t(-1000, 1000, EEPROMData.iDCoffsetCW[EEPROMData.currentBand], correctionIncrement, (char *)"I Offset", true);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorIoffset[i] = (iOptimal - 10 * 5) + (5 * i);  // The next array to sweep.
             }
@@ -1386,7 +1386,7 @@ void Calibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool sh
 
         case State::refinePhase:
           // Now sweep over the entire sub_vectorAmp array with averaging on. index starts at 0.
-          EEPROMData.qDCoffset[EEPROMData.currentBand] = sub_vectorQoffset[index];  // Starting value.
+          EEPROMData.qDCoffsetCW[EEPROMData.currentBand] = sub_vectorQoffset[index];  // Starting value.
           // Don't record this until there is data.  So that will be AFTER this pass.
           if (averageFlag) {
             sub_vectorPhaseResult[index] = adjdB_avg;
@@ -1400,8 +1400,8 @@ void Calibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool sh
             // qOptimal is simply the value of sub_vectorAmp[adjdBMinIndex].
             index = 0;
             qOptimal = sub_vectorQoffset[adjdBMinIndex];  // - .001;
-            EEPROMData.qDCoffset[EEPROMData.currentBand] = qOptimal;
-            GetEncoderValueLiveQ15t(-1000, 1000, EEPROMData.qDCoffset[EEPROMData.currentBand], correctionIncrement, (char *)"Q Offset", false);
+            EEPROMData.qDCoffsetCW[EEPROMData.currentBand] = qOptimal;
+            GetEncoderValueLiveQ15t(-1000, 1000, EEPROMData.qDCoffsetCW[EEPROMData.currentBand], correctionIncrement, (char *)"Q Offset", false);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorQoffset[i] = (qOptimal - 10 * 5) + (5 * i);
             }
@@ -1435,8 +1435,8 @@ void Calibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool sh
 
         case State::setOptimal:
           count = 0;  // In case automatic calibration is run again.
-          EEPROMData.iDCoffset[EEPROMData.currentBand] = iOptimal;
-          EEPROMData.qDCoffset[EEPROMData.currentBand] = qOptimal;
+          EEPROMData.iDCoffsetCW[EEPROMData.currentBand] = iOptimal;
+          EEPROMData.qDCoffsetCW[EEPROMData.currentBand] = qOptimal;
           state = State::exit;
           viewTime = fiveSeconds;  // Start result view timer.
           break;
@@ -1462,9 +1462,9 @@ void Calibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool sh
     task = -100;                          // Reset task after it is used.
     //  Read encoder and update values.
     if (IQCalType == 0) {
-      EEPROMData.iDCoffset[EEPROMData.currentBand] = GetEncoderValueLiveQ15t(-1000, 1000, EEPROMData.iDCoffset[EEPROMData.currentBand], correctionIncrement, (char *)"I Offset", true);
+      EEPROMData.iDCoffsetCW[EEPROMData.currentBand] = GetEncoderValueLiveQ15t(-1000, 1000, EEPROMData.iDCoffsetCW[EEPROMData.currentBand], correctionIncrement, (char *)"I Offset", true);
     } else {
-      EEPROMData.qDCoffset[EEPROMData.currentBand] = GetEncoderValueLiveQ15t(-1000, 1000, EEPROMData.qDCoffset[EEPROMData.currentBand], correctionIncrement, (char *)"Q Offset", false);
+      EEPROMData.qDCoffsetCW[EEPROMData.currentBand] = GetEncoderValueLiveQ15t(-1000, 1000, EEPROMData.qDCoffsetCW[EEPROMData.currentBand], correctionIncrement, (char *)"Q Offset", false);
     }
     if (IQChoice == 6) break;  //  Exit the while loop.
   }                            // end while

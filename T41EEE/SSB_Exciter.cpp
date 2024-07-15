@@ -97,13 +97,13 @@ void ExciterIQData()
 
     if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) { //AFP 12-27-21
       //arm_scale_f32 (float_buffer_L_EX, -EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBandA], float_buffer_L_EX, 256);
-      arm_scale_f32 (float_buffer_L_EX, + EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBandA], float_buffer_L_EX, 256);     // Flip SSB sideband KF5N, minus sign was original
-      IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBandA], 256);
+      arm_scale_f32 (float_buffer_L_EX, + EEPROMData.IQSSBAmpCorrectionFactor[EEPROMData.currentBandA], float_buffer_L_EX, 256);     // Flip SSB sideband KF5N, minus sign was original
+      IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, EEPROMData.IQSSBPhaseCorrectionFactor[EEPROMData.currentBandA], 256);
     }
     else if (bands[EEPROMData.currentBand].mode == DEMOD_USB) { //AFP 12-27-21
       //arm_scale_f32 (float_buffer_L_EX, + EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBandA], float_buffer_L_EX, 256);     // Flip SSB sideband KF5N, minus sign was original
-      arm_scale_f32 (float_buffer_L_EX, - EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBandA], float_buffer_L_EX, 256);    // Flip SSB sideband KF5N
-      IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBandA], 256);
+      arm_scale_f32 (float_buffer_L_EX, - EEPROMData.IQSSBAmpCorrectionFactor[EEPROMData.currentBandA], float_buffer_L_EX, 256);    // Flip SSB sideband KF5N
+      IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, EEPROMData.IQSSBPhaseCorrectionFactor[EEPROMData.currentBandA], 256);
     }
     arm_scale_f32 (float_buffer_R_EX, 1.00, float_buffer_R_EX, 256);
 
@@ -146,8 +146,8 @@ powerScale = 30.0 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
       arm_float_to_q15 (float_buffer_L_EX, q15_buffer_LTemp, 2048);
       arm_float_to_q15 (float_buffer_R_EX, q15_buffer_RTemp, 2048);
       #ifdef QSE2
-      arm_offset_q15(q15_buffer_LTemp, EEPROMData.iDCoffset[EEPROMData.currentBand] + EEPROMData.dacOffset, q15_buffer_LTemp, 2048);  // Carrier suppression offset.
-      arm_offset_q15(q15_buffer_RTemp, EEPROMData.qDCoffset[EEPROMData.currentBand] + EEPROMData.dacOffset, q15_buffer_RTemp, 2048);
+      arm_offset_q15(q15_buffer_LTemp, EEPROMData.iDCoffsetSSB[EEPROMData.currentBand] + EEPROMData.dacOffsetSSB, q15_buffer_LTemp, 2048);  // Carrier suppression offset.
+      arm_offset_q15(q15_buffer_RTemp, EEPROMData.qDCoffsetSSB[EEPROMData.currentBand] + EEPROMData.dacOffsetSSB, q15_buffer_RTemp, 2048);
       #endif
       Q_out_L_Ex.play(q15_buffer_LTemp, 2048); // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
       Q_out_R_Ex.play(q15_buffer_RTemp, 2048); // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.

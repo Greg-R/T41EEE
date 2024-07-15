@@ -455,10 +455,12 @@ struct config_t {
   float powerOutSSB[NUMBER_OF_BANDS] = { 0.035, 0.035, 0.035, 0.035, 0.035, 0.035, 0.035 };
   float CWPowerCalibrationFactor[NUMBER_OF_BANDS] = { 0.05, 0.05, .05, .05, .05, .05, .05 };        // Increased to 0.04, was 0.019; KF5N February 20, 2024
   float SSBPowerCalibrationFactor[NUMBER_OF_BANDS] = { 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05 };  // Increased to 0.04, was 0.008; KF5N February 21, 2024
-  float IQAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1, 1, 1, 1, 1, 1, 1 };
-  float IQPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-  float IQXAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1, 1, 1, 1, 1, 1, 1 };
-  float IQXPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+  float IQRXAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+  float IQRXPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+  float IQCWAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+  float IQCWPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+  float IQSSBAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+  float IQSSBPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
   uint32_t favoriteFreqs[13] = { 3560000, 3690000, 7030000, 7200000, 14060000, 14200000, 21060000, 21285000, 28060000, 28365000, 5000000, 10000000, 15000000 };
 
   //DB2OO, 23-AUG-23: Region 1 freqs (from https://qrper.com/qrp-calling-frequencies/)
@@ -486,9 +488,12 @@ struct config_t {
   int buttonThresholdReleased = 964;  // buttonThresholdPressed + WIGGLE_ROOM
   int buttonRepeatDelay = 300000;     // Increased to 300000 from 200000 to better handle cheap, wornout buttons.
 #ifdef QSE2
-  q15_t iDCoffset[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-  q15_t qDCoffset[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-  q15_t dacOffset = 1100;  // This must be "tuned" for each radio and/or Audio Adapter board.
+  q15_t iDCoffsetCW[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+  q15_t qDCoffsetCW[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+  q15_t iDCoffsetSSB[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+  q15_t qDCoffsetSSB[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+  q15_t dacOffsetCW = 1100;  // This must be "tuned" for each radio and/or Audio Adapter board.
+  q15_t dacOffsetSSB = 1100;  // This must be "tuned" for each radio and/or Audio Adapter board.
 #endif
   bool radioCalComplete = false;
 };
