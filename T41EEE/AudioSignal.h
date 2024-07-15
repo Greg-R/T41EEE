@@ -34,7 +34,7 @@ AudioRecordQueue Q_in_R_Ex;           // This 2nd channel is needed as we are br
 AudioConnection connect0(i2s_quadIn, 0, int2Float1, 0);    // Microphone audio channel.
 
 // Need a mixer to switch in an audio tone during calibration.  Should be a nominal tone amplitude.
-AudioConnection_F32 connect1(int2Float1, 0, mixer1, 0);  // Connect microphone
+AudioConnection_F32 connect1(int2Float1, 0, mixer1, 0);  // Connect microphone mixer1 output 0
 AudioConnection_F32 connect2(tone1kHz, 0, mixer1, 1);  // Connect tone for SSB calibration.
 
 AudioConnection_F32 connect3(mixer1, 0, compressor1, 0);  // Mixer output to input of compressor.

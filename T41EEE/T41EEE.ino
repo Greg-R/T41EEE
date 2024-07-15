@@ -1249,6 +1249,10 @@ compressor1.setDelayBufferSize(delaySize);
    cessb1.setGains(1.5f, 1.4f, 1.0f);
    cessb1.setSideband(false);
 
+// Turn off microphone and 1 kHz test tone.
+   mixer1.gain(0, 0);
+   mixer1.gain(1, 0);
+
 
   pinMode(FILTERPIN15M, OUTPUT);
   pinMode(FILTERPIN20M, OUTPUT);
@@ -1463,6 +1467,11 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
     case SSB_TRANSMIT_STATE:
     SampleRate = SAMPLE_RATE_48K;
     SetI2SFreq(SR[SampleRate].rate);
+// Start the audio dataflow.
+      mixer1.gain(0, 1.0);   // Connect microphone audio to transmit chain.
+      mixer1.gain(1, 0.0);   // Disconnect 1 kHz test tone. 
+      Q_in_L_Ex.begin();  // I channel Microphone audio
+      Q_in_R_Ex.begin();  // Q channel Microphone audio
 //      comp1.setPreGain_dB(EEPROMData.currentMicGain);
       //      comp2.setPreGain_dB(EEPROMData.currentMicGain);
 //      if (EEPROMData.compressorFlag == 1) {
