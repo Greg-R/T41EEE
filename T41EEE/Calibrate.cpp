@@ -290,7 +290,9 @@ void Calibrate::CalibratePreamble(int setZoom) {
   digitalWrite(MUTE, LOW);  //turn off mute
   xrState = RECEIVE_STATE;
   T41State = CW_RECEIVE;
-  patchCord1.disconnect();  // Disconnect microphone. modeSelectInExL replaced with patchcord.  KF5N March 11, 2024
+//  patchCord1.disconnect();  // Disconnect microphone. modeSelectInExL replaced with patchcord.  KF5N March 11, 2024
+  mixer1.gain(0, 0);  // Disconnect both the microphone and test tone.  CW calibrate generates the tone
+  mixer1.gain(1, 0);  // internally; the transmitter front-end is not used.
   EEPROMData.centerFreq = TxRxFreq;
   NCOFreq = 0L;
   xrState = TRANSMIT_STATE;
@@ -741,7 +743,7 @@ void Calibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal)
   //  bool corrChange = false;
   float correctionIncrement = 0.001;
   State state = State::warmup;  // Start calibration state machine in warmup state.
-  float maxSweepAmp = 0.35;
+  float maxSweepAmp = 0.15;
   float maxSweepPhase = 0.1;
   float increment = 0.002;
   int averageCount = 0;
@@ -948,7 +950,7 @@ void Calibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal)
           sweepVector[index] = adjdB;
           index = index + 1;
           // Increment for the next measurement.
-          EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand] = EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand] + increment;
+          EEPROMData.IQCWPhaseCorrectionFactor[EEPROMData.currentBand] = EEPROMData.IQCWPhaseCorrectionFactor[EEPROMData.currentBand] + increment;
           //     if (index > 20) {
           //       if (sweepVector[index - 1] > (sweepVector[index - 11] + 3.0)) stopSweep = true;  // Stop sweep if past the null.
           //     }
@@ -1284,7 +1286,7 @@ void Calibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool sh
           sweepVector[index] = adjdB;
           index = index + 1;
           // Increment for next measurement.
-          EEPROMData.iDCoffset[EEPROMData.currentBand] = EEPROMData.iDCoffsetCW[EEPROMData.currentBand] + increment;  // Next one!
+          EEPROMData.iDCoffsetCW[EEPROMData.currentBand] = EEPROMData.iDCoffsetCW[EEPROMData.currentBand] + increment;  // Next one!
           // Go to Q channel when I channel sweep is finished.
           //    if (index > 20) {
           //      if (sweepVector[index - 1] > (sweepVector[index - 11] + 3.0)) stopSweep = true;  // Stop sweep if past the null.
@@ -1325,7 +1327,7 @@ void Calibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool sh
           sweepVector[index] = adjdB;
           index = index + 1;
           // Increment for the next measurement.
-          EEPROMData.qDCoffset[EEPROMData.currentBand] = EEPROMData.qDCoffsetCW[EEPROMData.currentBand] + increment;
+          EEPROMData.qDCoffsetCW[EEPROMData.currentBand] = EEPROMData.qDCoffsetCW[EEPROMData.currentBand] + increment;
           //     if (index > 20) {
           //       if (sweepVector[index - 1] > (sweepVector[index - 11] + 3.0)) stopSweep = true;  // Stop sweep if past the null.
           //     }
@@ -1559,12 +1561,12 @@ void Calibrate::ProcessIQData2() {
   arm_scale_f32(sinBuffer, 0.20, float_buffer_R_EX, 256);  // AFP 2-11-23 Sidetone = 3000
 
   if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
-    arm_scale_f32(float_buffer_L_EX, -EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L_EX, 256);       //Adjust level of L buffer // AFP 2-11-23
-    IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand], 256);  // Adjust phase
+    arm_scale_f32(float_buffer_L_EX, -EEPROMData.IQCWAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L_EX, 256);       //Adjust level of L buffer // AFP 2-11-23
+    IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, EEPROMData.IQCWPhaseCorrectionFactor[EEPROMData.currentBand], 256);  // Adjust phase
   } else {
     if (bands[EEPROMData.currentBand].mode == DEMOD_USB) {
-      arm_scale_f32(float_buffer_L_EX, EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L_EX, 256);  // AFP 2-11-23
-      IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, EEPROMData.IQXPhaseCorrectionFactor[EEPROMData.currentBand], 256);
+      arm_scale_f32(float_buffer_L_EX, EEPROMData.IQCWAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L_EX, 256);  // AFP 2-11-23
+      IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, EEPROMData.IQCWPhaseCorrectionFactor[EEPROMData.currentBand], 256);
     }
   }
   //24KHz effective sample rate here
@@ -1599,8 +1601,8 @@ void Calibrate::ProcessIQData2() {
     arm_float_to_q15(float_buffer_R_EX, q15_buffer_RTemp, 2048);
 
 #ifdef QSE2
-    arm_offset_q15(q15_buffer_LTemp, EEPROMData.iDCoffset[EEPROMData.currentBand] + EEPROMData.dacOffset, q15_buffer_LTemp, 2048);
-    arm_offset_q15(q15_buffer_RTemp, EEPROMData.qDCoffset[EEPROMData.currentBand] + EEPROMData.dacOffset, q15_buffer_RTemp, 2048);
+    arm_offset_q15(q15_buffer_LTemp, EEPROMData.iDCoffsetCW[EEPROMData.currentBand] + EEPROMData.dacOffsetCW, q15_buffer_LTemp, 2048);
+    arm_offset_q15(q15_buffer_RTemp, EEPROMData.qDCoffsetCW[EEPROMData.currentBand] + EEPROMData.dacOffsetCW, q15_buffer_RTemp, 2048);
 #endif
 
     Q_out_L_Ex.play(q15_buffer_LTemp, 2048);
@@ -1635,12 +1637,12 @@ void Calibrate::ProcessIQData2() {
 
     // Manual IQ amplitude correction
     if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
-      arm_scale_f32(float_buffer_L, -EEPROMData.IQAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
-      IQPhaseCorrection(float_buffer_L, float_buffer_R, EEPROMData.IQPhaseCorrectionFactor[EEPROMData.currentBand], BUFFER_SIZE * N_BLOCKS);
+      arm_scale_f32(float_buffer_L, -EEPROMData.IQRXAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
+      IQPhaseCorrection(float_buffer_L, float_buffer_R, EEPROMData.IQRXPhaseCorrectionFactor[EEPROMData.currentBand], BUFFER_SIZE * N_BLOCKS);
     } else {
       if (bands[EEPROMData.currentBand].mode == DEMOD_USB) {
-        arm_scale_f32(float_buffer_L, -EEPROMData.IQAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22 KF5N changed sign
-        IQPhaseCorrection(float_buffer_L, float_buffer_R, EEPROMData.IQPhaseCorrectionFactor[EEPROMData.currentBand], BUFFER_SIZE * N_BLOCKS);
+        arm_scale_f32(float_buffer_L, -EEPROMData.IQRXAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22 KF5N changed sign
+        IQPhaseCorrection(float_buffer_L, float_buffer_R, EEPROMData.IQRXPhaseCorrectionFactor[EEPROMData.currentBand], BUFFER_SIZE * N_BLOCKS);
       }
     }
     FreqShift1();  // Why done here? KF5N

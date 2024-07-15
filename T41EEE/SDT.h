@@ -584,6 +584,8 @@ extern AudioAmplifier volumeAdjust;
 extern AudioRecordQueue Q_in_L;
 extern AudioRecordQueue Q_in_R;
 extern AudioRecordQueue Q_in_L_Ex;
+extern AudioRecordQueue Q_in_R_Ex;
+
 
 extern AudioPlayQueue Q_out_L;
 extern AudioPlayQueue Q_out_L_Ex;
@@ -594,6 +596,8 @@ extern AudioControlSGTL5000_Extended sgtl5000_1;  //controller for the Teensy Au
 extern AudioConvert_I16toF32 int2Float1;          //Converts Int16 to Float.  See class in AudioStream_F32.h
 extern AudioEffectCompressor_F32 comp1;
 extern AudioConvert_F32toI16 float2Int1;  //Converts Float to Int16.  See class in AudioStream_F32.h
+extern AudioSynthWaveformSine_F32 tone1kHz;
+extern AudioMixer4_F32 mixer1;
 // end Teensy and OpenAudio objects
 
 extern void SetAudioOperatingState(int operatingState);
@@ -606,6 +610,7 @@ extern Rotary fineTuneEncoder;  // (4,  5);
 extern Metro ms_500;
 
 extern Calibrate calibrater;
+extern SSBCalibrate ssbcalibrater;
 
 extern Si5351 si5351;
 
@@ -1090,7 +1095,7 @@ void SetSideToneVolume();  // This function uses encoder to set sidetone volume.
 long SetTransmitDelay();
 void SetTransmitDitLength(int wpm);  // JJP 8/19/23
 void SetupMode(int sideBand);
-void SetupMyCompressors(bool use_HP_filter, float knee_dBFS, float comp_ratio, float attack_sec, float release_sec);  //AFP 11-01-22 in DSP.cpp
+//void SetupMyCompressors(bool use_HP_filter, float knee_dBFS, float comp_ratio, float attack_sec, float release_sec);  //AFP 11-01-22 in DSP.cpp
 int SetWPM();
 void ShowAutoStatus();
 void ShowBandwidth();

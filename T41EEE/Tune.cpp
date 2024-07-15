@@ -1,7 +1,6 @@
 
 #include "SDT.h"
 
-uint32_t IFFreq = SR[SampleRate].rate / 4;  // IF (intermediate) frequency
 uint64_t Clk0SetFreq = 0;
 uint64_t Clk1SetFreq = 0;
 uint64_t Clk2SetFreq = 0;
@@ -19,6 +18,7 @@ uint64_t Clk2SetFreq = 0;
   CAUTION: SI5351_FREQ_MULT is set in the si5253.h header file and is 100UL
 *****/
 void SetFreqCal(int calFreqShift) {  // July 7 2023 KF5N
+uint32_t IFFreq = SR[SampleRate].rate / 4;  // IF (intermediate) frequency
   // NEVER USE AUDIONOINTERRUPTS HERE: that introduces annoying clicking noise with every frequency change
   // SI5351_FREQ_MULT is 100ULL, MASTER_CLK_MULT is 4;
   int cwFreqOffset = (EEPROMData.CWOffset + 6) * 24000 / 256;  // Calculate the CW offset based on user selected CW offset frequency.
@@ -52,7 +52,7 @@ void SetFreqCal(int calFreqShift) {  // July 7 2023 KF5N
   CAUTION: SI5351_FREQ_MULT is set in the si5253.h header file and is 100UL
 *****/
 void SetFreq() {  //AFP 09-22-22   Revised July 7 KF5N
-
+uint32_t IFFreq = SR[SampleRate].rate / 4;  // IF (intermediate) frequency
   // NEVER USE AUDIONOINTERRUPTS HERE: that introduces annoying clicking noise with every frequency change
   // SI5351_FREQ_MULT is 100ULL, MASTER_CLK_MULT is 4;
   int cwFreqOffset = (EEPROMData.CWOffset + 6) * 24000 / 256;  // Calculate the CW offset based on user selected CW offset frequency.
@@ -100,6 +100,7 @@ void SetFreq() {  //AFP 09-22-22   Revised July 7 KF5N
   CAUTION: SI5351_FREQ_MULT is set in the si5253.h header file and is 100UL
 *****/
 void SetFreqCal(int calFreqShift) {  // July 7 2023 KF5N
+uint32_t IFFreq = SR[SampleRate].rate / 4;  // IF (intermediate) frequency
   // NEVER USE AUDIONOINTERRUPTS HERE: that introduces annoying clicking noise with every frequency change
   // SI5351_FREQ_MULT is 100ULL, MASTER_CLK_MULT is 4;
   int cwFreqOffset = (EEPROMData.CWOffset + 6) * 24000 / 256;  // Calculate the CW offset based on user selected CW offset frequency.
@@ -133,7 +134,7 @@ void SetFreqCal(int calFreqShift) {  // July 7 2023 KF5N
   CAUTION: SI5351_FREQ_MULT is set in the si5253.h header file and is 100UL
 *****/
 void SetFreq() {  //AFP 09-22-22   Revised July 7 KF5N
-
+uint32_t IFFreq = SR[SampleRate].rate / 4;  // IF (intermediate) frequency
   // NEVER USE AUDIONOINTERRUPTS HERE: that introduces annoying clicking noise with every frequency change
   // SI5351_FREQ_MULT is 100ULL, MASTER_CLK_MULT is 4;
   int cwFreqOffset = (EEPROMData.CWOffset + 6) * 24000 / 256;  // Calculate the CW offset based on user selected CW offset frequency.

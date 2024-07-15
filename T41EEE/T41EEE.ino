@@ -215,8 +215,8 @@ uint32_t FFT_length = FFT_LENGTH;
 // ===========================  AFP 08-22-22
 bool agc_action = false;
 // Teensy and OpenAudio dataflow code.
-
-// Common to Transmitter and Receiver
+#include "AudioSignal.h"
+/* Common to Transmitter and Receiver
 AudioInputI2SQuad i2s_quadIn;
 AudioOutputI2SQuad i2s_quadOut;
 
@@ -264,9 +264,11 @@ AudioConnection patchCord17(Q_out_L, 0, volumeAdjust, 0);
 AudioConnection patchCord18(volumeAdjust, 0, i2s_quadOut, 2);
 
 AudioControlSGTL5000 sgtl5000_2;  // This is not a 2nd Audio Adapter.  It is I2S to the PCM1808 (ADC I and Q receiver in) and PCM5102 (DAC audio out).
-// End dataflow code
+*/ 
+//End dataflow code
 
 Calibrate calibrater;  // Instantiate the calibration object.
+SSBCalibrate ssbcalibrater;
 
 Rotary volumeEncoder = Rotary(VOLUME_ENCODER_A, VOLUME_ENCODER_B);        //( 2,  3)
 Rotary tuneEncoder = Rotary(TUNE_ENCODER_A, TUNE_ENCODER_B);              //(16, 17)
@@ -1037,7 +1039,7 @@ FLASHMEM void InitializeDataArrays() {
   Return value:
     void
 
-*****/
+*****
 void SetAudioOperatingState(int operatingState) {
 #ifdef DEBUG
   Serial.printf("lastState=%d radioState=%d memory_used=%d memory_used_max=%d f32_memory_used=%d f32_memory_used_max=%d\n",
@@ -1110,7 +1112,7 @@ void SetAudioOperatingState(int operatingState) {
       break;
   }
 }
-
+*/
 
 /*****
   Purpose: The initial screen display on startup. Expect this to be customized.
@@ -1329,7 +1331,7 @@ FLASHMEM void setup() {
   comp_ratio = 5.0;
   attack_sec = .1;
   release_sec = 2.0;
-  comp1.setPreGain_dB(-10);  // Set the gain of the microphone audio gain processor.
+//  comp1.setPreGain_dB(-10);  // Set the gain of the microphone audio gain processor.
 
   EEPROMData.sdCardPresent = SDPresentCheck();  // JJP 7/18/23
   lastState = 1111;                             // To make sure the receiver will be configured on the first pass through.  KF5N September 3, 2023
@@ -1393,6 +1395,8 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
     case AM_RECEIVE_STATE:
     case SSB_RECEIVE_STATE:
       if (lastState != radioState) {  // G0ORX 01092023
+    SampleRate = SAMPLE_RATE_192K;
+    SetI2SFreq(SR[SampleRate].rate);
         digitalWrite(MUTE, LOW);      // Audio Mute off
         digitalWrite(RXTX, LOW);      //xmit off
         T41State = SSB_RECEIVE;
@@ -1405,15 +1409,17 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       ShowSpectrum();
       break;
     case SSB_TRANSMIT_STATE:
-      comp1.setPreGain_dB(EEPROMData.currentMicGain);
+    SampleRate = SAMPLE_RATE_48K;
+    SetI2SFreq(SR[SampleRate].rate);
+//      comp1.setPreGain_dB(EEPROMData.currentMicGain);
       //      comp2.setPreGain_dB(EEPROMData.currentMicGain);
-      if (EEPROMData.compressorFlag == 1) {
-        SetupMyCompressors(use_HP_filter, (float)EEPROMData.currentMicThreshold, comp_ratio, attack_sec, release_sec);  // Cast EEPROMData.currentMicThreshold to float.  KF5N, October 31, 2023
-      } else {
-        if (EEPROMData.compressorFlag == 0) {
-          SetupMyCompressors(use_HP_filter, 0.0, comp_ratio, 0.01, 0.01);
-        }
-      }
+//      if (EEPROMData.compressorFlag == 1) {
+//        SetupMyCompressors(use_HP_filter, (float)EEPROMData.currentMicThreshold, comp_ratio, attack_sec, release_sec);  // Cast EEPROMData.currentMicThreshold to float.  KF5N, October 31, 2023
+//      } else {
+//        if (EEPROMData.compressorFlag == 0) {
+//          SetupMyCompressors(use_HP_filter, 0.0, comp_ratio, 0.01, 0.01);
+//        }
+//      }
       xrState = TRANSMIT_STATE;
       digitalWrite(MUTE, HIGH);  //  Mute Audio  (HIGH=Mute)
       digitalWrite(RXTX, HIGH);  //xmit on

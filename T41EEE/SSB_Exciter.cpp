@@ -64,20 +64,20 @@ void ExciterIQData()
 
     // 192KHz effective sample rate here
     // decimation-by-4 in-place!
-    arm_fir_decimate_f32(&FIR_dec1_EX_I, float_buffer_L_EX, float_buffer_L_EX, BUFFER_SIZE * N_BLOCKS_EX );
+//    arm_fir_decimate_f32(&FIR_dec1_EX_I, float_buffer_L_EX, float_buffer_L_EX, BUFFER_SIZE * N_BLOCKS_EX );
 //    arm_fir_decimate_f32(&FIR_dec1_EX_Q, float_buffer_R_EX, float_buffer_R_EX, BUFFER_SIZE * N_BLOCKS_EX ); // Right channel not used.  KF5N March 11, 2024
     // 48KHz effective sample rate here
     // decimation-by-2 in-place
-    arm_fir_decimate_f32(&FIR_dec2_EX_I, float_buffer_L_EX, float_buffer_L_EX, 512);
+//arm_fir_decimate_f32(&FIR_dec2_EX_I, float_buffer_L_EX, float_buffer_L_EX, 512);
 //    arm_fir_decimate_f32(&FIR_dec2_EX_Q, float_buffer_R_EX, float_buffer_R_EX, 512); // Right channel not used.  KF5N March 11, 2024
 
     //============================  Transmit EQ  ========================  AFP 10-02-22
-    if (EEPROMData.xmitEQFlag == ON ) {
-      DoExciterEQ();  // The exciter equalizer works with left channel data only.
-    }
+//    if (EEPROMData.xmitEQFlag == ON ) {
+//      DoExciterEQ();  // The exciter equalizer works with left channel data only.
+//    }
 
     // Microphone audio has only 1 channel, so copy left to right.
-    arm_copy_f32 (float_buffer_L_EX, float_buffer_R_EX, 256);
+//    arm_copy_f32 (float_buffer_L_EX, float_buffer_R_EX, 256);
 
     // =========================    End CW Xmit
     //--------------  Hilbert Transformers
@@ -88,8 +88,8 @@ void ExciterIQData()
              create the SSB signals.
              Two Hilbert Transformers are used to preserve eliminate the relative time delays created during processing of the data
     **********************************************************************************/
-    arm_fir_f32(&FIR_Hilbert_L, float_buffer_L_EX, float_buffer_L_EX, 256);
-    arm_fir_f32(&FIR_Hilbert_R, float_buffer_R_EX, float_buffer_R_EX, 256);
+//    arm_fir_f32(&FIR_Hilbert_L, float_buffer_L_EX, float_buffer_L_EX, 256);
+//    arm_fir_f32(&FIR_Hilbert_R, float_buffer_R_EX, float_buffer_R_EX, 256);
 
     /**********************************************************************************
               Additional scaling, if nesessary to compensate for down-stream gain variations
@@ -105,26 +105,26 @@ void ExciterIQData()
       arm_scale_f32 (float_buffer_L_EX, - EEPROMData.IQSSBAmpCorrectionFactor[EEPROMData.currentBandA], float_buffer_L_EX, 256);    // Flip SSB sideband KF5N
       IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, EEPROMData.IQSSBPhaseCorrectionFactor[EEPROMData.currentBandA], 256);
     }
-    arm_scale_f32 (float_buffer_R_EX, 1.00, float_buffer_R_EX, 256);
+//    arm_scale_f32 (float_buffer_R_EX, 1.00, float_buffer_R_EX, 256);
 
-    exciteMaxL = 0;
-    for (int k = 0; k < 256; k++) {
-      if (float_buffer_L_EX[k] > exciteMaxL) {
-        exciteMaxL = float_buffer_L_EX[k];
-      }
-    }
+//    exciteMaxL = 0;
+//    for (int k = 0; k < 256; k++) {
+//      if (float_buffer_L_EX[k] > exciteMaxL) {
+//        exciteMaxL = float_buffer_L_EX[k];
+//      }
+//    }
 
     /**********************************************************************************
               Interpolate (upsample the data streams by 8X to create the 192KHx sample rate for output
               Requires a LPF FIR 48 tap 10KHz and 8KHz
      **********************************************************************************/
     //24KHz effective sample rate here
-    arm_fir_interpolate_f32(&FIR_int1_EX_I, float_buffer_L_EX, float_buffer_LTemp, 256);
-    arm_fir_interpolate_f32(&FIR_int1_EX_Q, float_buffer_R_EX, float_buffer_RTemp, 256);
+//    arm_fir_interpolate_f32(&FIR_int1_EX_I, float_buffer_L_EX, float_buffer_LTemp, 256);
+//arm_fir_interpolate_f32(&FIR_int1_EX_Q, float_buffer_R_EX, float_buffer_RTemp, 256);
 
     // interpolation-by-4,  48KHz effective sample rate here
-    arm_fir_interpolate_f32(&FIR_int2_EX_I, float_buffer_LTemp, float_buffer_L_EX, 512);
-    arm_fir_interpolate_f32(&FIR_int2_EX_Q, float_buffer_RTemp, float_buffer_R_EX, 512);
+//arm_fir_interpolate_f32(&FIR_int2_EX_I, float_buffer_LTemp, float_buffer_L_EX, 512);
+//    arm_fir_interpolate_f32(&FIR_int2_EX_Q, float_buffer_RTemp, float_buffer_R_EX, 512);
     //  192KHz effective sample rate here
     
     //  This is the correct place in the data stream to inject the scaling for power.

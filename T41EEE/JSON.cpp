@@ -76,10 +76,10 @@ FLASHMEM void loadConfiguration(const char *filename, config_t &EEPROMData) {
   EEPROMData.powerOutSSB[0] = doc["powerOutSSB"][0];
   for (int i = 0; i < 7; i++) EEPROMData.CWPowerCalibrationFactor[i] = doc["CWPowerCalibrationFactor"][i];
   for (int i = 0; i < 7; i++) EEPROMData.SSBPowerCalibrationFactor[i] = doc["SSBPowerCalibrationFactor"][i];
-  for (int i = 0; i < 7; i++) EEPROMData.IQAmpCorrectionFactor[i] = doc["IQAmpCorrectionFactor"][i];
-  for (int i = 0; i < 7; i++) EEPROMData.IQPhaseCorrectionFactor[i] = doc["IQPhaseCorrectionFactor"][i];
-  for (int i = 0; i < 7; i++) EEPROMData.IQXAmpCorrectionFactor[i] = doc["IQXAmpCorrectionFactor"][i];
-  for (int i = 0; i < 7; i++) EEPROMData.IQXPhaseCorrectionFactor[i] = doc["IQXPhaseCorrectionFactor"][i];
+  for (int i = 0; i < 7; i++) EEPROMData.IQRXAmpCorrectionFactor[i] = doc["IQAmpCorrectionFactor"][i];
+  for (int i = 0; i < 7; i++) EEPROMData.IQRXPhaseCorrectionFactor[i] = doc["IQPhaseCorrectionFactor"][i];
+  for (int i = 0; i < 7; i++) EEPROMData.IQCWAmpCorrectionFactor[i] = doc["IQXAmpCorrectionFactor"][i];
+  for (int i = 0; i < 7; i++) EEPROMData.IQCWPhaseCorrectionFactor[i] = doc["IQXPhaseCorrectionFactor"][i];
   for (int i = 0; i < 13; i++) EEPROMData.favoriteFreqs[i] = doc["favoriteFreqs"][i];
   for (int i = 0; i < 7; i++) {
     for (int j = 0; j < 2; j++) EEPROMData.lastFrequencies[i][j] = doc["lastFrequencies"][i][j];
@@ -106,9 +106,12 @@ FLASHMEM void loadConfiguration(const char *filename, config_t &EEPROMData) {
   EEPROMData.buttonRepeatDelay = doc["buttonRepeatDelay"] | 300000;
   EEPROMData.autoGain = doc["autoGain"] | true;
   #ifdef QSE2
-  for (int i = 0; i < 7; i++) EEPROMData.iDCoffset[i] = doc["iDCoffset"][i];
-  for (int i = 0; i < 7; i++) EEPROMData.qDCoffset[i] = doc["qDCoffset"][i];
-  EEPROMData.dacOffset = doc["dacOffset"] | 0;
+  for (int i = 0; i < 7; i++) EEPROMData.iDCoffsetCW[i] = doc["iDCoffsetCW"][i];
+  for (int i = 0; i < 7; i++) EEPROMData.qDCoffsetCW[i] = doc["qDCoffsetCW"][i];
+  for (int i = 0; i < 7; i++) EEPROMData.iDCoffsetSSB[i] = doc["iDCoffsetSSB"][i];
+  for (int i = 0; i < 7; i++) EEPROMData.qDCoffsetSSB[i] = doc["qDCoffsetSSB"][i];  
+  EEPROMData.dacOffsetCW = doc["dacOffsetCW"] | 0;
+  EEPROMData.dacOffsetSSB = doc["dacOffsetSSB"] | 0; 
   #endif
   EEPROMData.radioCalComplete = doc["radioCalComplete"] | false;
 
@@ -184,10 +187,12 @@ FLASHMEM void saveConfiguration(const char *filename, const config_t &EEPROMData
     doc["CWPowerCalibrationFactor"][i] = EEPROMData.CWPowerCalibrationFactor[i];
   }
   for (int i = 0; i < 7; i++) doc["SSBPowerCalibrationFactor"][i] = EEPROMData.SSBPowerCalibrationFactor[i];
-  for (int i = 0; i < 7; i++) doc["IQAmpCorrectionFactor"][i] = EEPROMData.IQAmpCorrectionFactor[i];
-  for (int i = 0; i < 7; i++) doc["IQPhaseCorrectionFactor"][i] = EEPROMData.IQPhaseCorrectionFactor[i];
-  for (int i = 0; i < 7; i++) doc["IQXAmpCorrectionFactor"][i] = EEPROMData.IQXAmpCorrectionFactor[i];
-  for (int i = 0; i < 7; i++) doc["IQXPhaseCorrectionFactor"][i] = EEPROMData.IQXPhaseCorrectionFactor[i];
+  for (int i = 0; i < 7; i++) doc["IQRXAmpCorrectionFactor"][i] =   EEPROMData.IQRXAmpCorrectionFactor[i];
+  for (int i = 0; i < 7; i++) doc["IQRXPhaseCorrectionFactor"][i] = EEPROMData.IQRXPhaseCorrectionFactor[i];
+  for (int i = 0; i < 7; i++) doc["IQCWAmpCorrectionFactor"][i] =   EEPROMData.IQCWAmpCorrectionFactor[i];
+  for (int i = 0; i < 7; i++) doc["IQCWPhaseCorrectionFactor"][i] = EEPROMData.IQCWPhaseCorrectionFactor[i];
+  for (int i = 0; i < 7; i++) doc["IQSSBAmpCorrectionFactor"][i] =   EEPROMData.IQSSBAmpCorrectionFactor[i];
+  for (int i = 0; i < 7; i++) doc["IQSSBPhaseCorrectionFactor"][i] = EEPROMData.IQSSBPhaseCorrectionFactor[i];  
   for (int i = 0; i < 13; i++) doc["favoriteFreqs"][i] = EEPROMData.favoriteFreqs[i];
   for (int i = 0; i < 7; i++) {
     for (int j = 0; j < 2; j++) doc["lastFrequencies"][i][j] = EEPROMData.lastFrequencies[i][j];
@@ -211,9 +216,12 @@ FLASHMEM void saveConfiguration(const char *filename, const config_t &EEPROMData
   doc["buttonRepeatDelay"] = EEPROMData.buttonRepeatDelay;
   doc["autoGain"] = EEPROMData.autoGain;
   #ifdef QSE2
-  for (int i = 0; i < 7; i++) doc["iDCoffset"][i] = EEPROMData.iDCoffset[i];
-  for (int i = 0; i < 7; i++) doc["qDCoffset"][i] = EEPROMData.qDCoffset[i];
-  doc["dacOffset"] = EEPROMData.dacOffset;
+  for (int i = 0; i < 7; i++) doc["iDCoffsetCW"][i] = EEPROMData.iDCoffsetCW[i];
+  for (int i = 0; i < 7; i++) doc["qDCoffsetCW"][i] = EEPROMData.qDCoffsetCW[i];
+  for (int i = 0; i < 7; i++) doc["iDCoffsetSSB"][i] = EEPROMData.iDCoffsetSSB[i];
+  for (int i = 0; i < 7; i++) doc["qDCoffsetSSB"][i] = EEPROMData.qDCoffsetSSB[i];
+  doc["dacOffsetCW"] = EEPROMData.dacOffsetCW;
+  doc["dacOffsetSSB"] = EEPROMData.dacOffsetSSB;
   #endif
   doc["radioCalComplete"] = EEPROMData.radioCalComplete;
 
