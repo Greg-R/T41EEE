@@ -86,6 +86,7 @@ void Calibrate::warmUpCal() {
     updateDisplayFlag = true;  // Causes FFT to be calculated.
     Calibrate::ProcessIQData2();
   }
+  delay(5000);
   updateDisplayFlag = false;
   // Find peak of spectrum, which is 512 wide.  Use this to adjust spectrum peak to top of spectrum display.
   arm_max_q15(pixelnew, 512, &rawSpectrumPeak, &index_of_max);

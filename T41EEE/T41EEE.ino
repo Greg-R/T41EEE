@@ -439,7 +439,9 @@ uint8_t display_S_meter_or_spectrum_state = 0;
 uint8_t keyPressedOn = 0;
 uint8_t NR_first_time = 1;
 uint8_t NR_Kim;
+
 uint8_t SampleRate = SAMPLE_RATE_192K;
+
 uint8_t sch = 0;
 uint8_t state = 0;
 uint8_t T41State = 1;
@@ -1205,9 +1207,9 @@ FLASHMEM void setup() {
 //  sgtl5000_1.audioPreProcessorEnable();
 //  sgtl5000_1.audioPostProcessorEnable();
   sgtl5000_1.audioProcessorDisable();
-  sgtl5000_1.eqSelect(3);
-  sgtl5000_1.eqBands(-1.0, -1.0, 0.5, 0.5, -1.0);
-  AudioMemory(500);  //  Increased to 450 from 400.  Memory was hitting max.  KF5N August 31, 2023
+//  sgtl5000_1.eqSelect(3);
+//  sgtl5000_1.eqBands(-1.0, -1.0, 0.5, 0.5, -1.0);
+  AudioMemory(600);  //  Increased to 450 from 400.  Memory was hitting max.  KF5N August 31, 2023
   AudioMemory_F32(50);
   sgtl5000_1.inputSelect(AUDIO_INPUT_MIC);
   sgtl5000_1.muteHeadphone();  // KF5N March 11, 2024
@@ -1451,8 +1453,6 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
     case AM_RECEIVE_STATE:
     case SSB_RECEIVE_STATE:
       if (lastState != radioState) {  // G0ORX 01092023
-    SampleRate = SAMPLE_RATE_192K;
-    SetI2SFreq(SR[SampleRate].rate);
         digitalWrite(MUTE, LOW);      // Audio Mute off
         digitalWrite(RXTX, LOW);      //xmit off
         T41State = SSB_RECEIVE;
@@ -1465,13 +1465,14 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       ShowSpectrum();
       break;
     case SSB_TRANSMIT_STATE:
-    SampleRate = SAMPLE_RATE_48K;
-    SetI2SFreq(SR[SampleRate].rate);
+//    SampleRate = SAMPLE_RATE_48K;
+//    SetI2SFreq(SR[SampleRate].rate);
 // Start the audio dataflow.
-      mixer1.gain(0, 1.0);   // Connect microphone audio to transmit chain.
-      mixer1.gain(1, 0.0);   // Disconnect 1 kHz test tone. 
-      Q_in_L_Ex.begin();  // I channel Microphone audio
-      Q_in_R_Ex.begin();  // Q channel Microphone audio
+//      tone1kHz.end();
+//      mixer1.gain(0, 1.0);   // Connect microphone audio to transmit chain.
+//mixer1.gain(1, 0.0);   // Disconnect 1 kHz test tone. 
+//      Q_in_L_Ex.begin();  // I channel Microphone audio
+//      Q_in_R_Ex.begin();  // Q channel Microphone audio
 //      comp1.setPreGain_dB(EEPROMData.currentMicGain);
       //      comp2.setPreGain_dB(EEPROMData.currentMicGain);
 //      if (EEPROMData.compressorFlag == 1) {

@@ -20,7 +20,7 @@
     6.  Interpolate 8x (upsample and filter) the data stream to 192KHz sample rate
     7.  Output the data stream thruogh the DACs at 192KHz
 *****/
-int16_t* sp_L2, sp_R2;
+//int16_t* sp_L2, sp_R2;
 void ExciterIQData()
 {
   uint32_t N_BLOCKS_EX = N_B_EX;
@@ -48,12 +48,12 @@ void ExciterIQData()
           Float_buffer samples are now standardized from > -1.0 to < 1.0
       **********************************************************************************/
       arm_q15_to_float (Q_in_L_Ex.readBuffer(), &float_buffer_L_EX[BUFFER_SIZE * i], BUFFER_SIZE); // convert int_buffer to float 32bit
-//      arm_q15_to_float (Q_in_R_Ex.readBuffer(), &float_buffer_R_EX[BUFFER_SIZE * i], BUFFER_SIZE); // Right channel not used.  KF5N March 11, 2024
+      arm_q15_to_float (Q_in_R_Ex.readBuffer(), &float_buffer_R_EX[BUFFER_SIZE * i], BUFFER_SIZE); // Right channel not used.  KF5N March 11, 2024
       Q_in_L_Ex.freeBuffer();
-//      Q_in_R_Ex.freeBuffer(); // Right channel not used.  KF5N March 11, 2024
+      Q_in_R_Ex.freeBuffer(); // Right channel not used.  KF5N March 11, 2024
     }
 
-    float exciteMaxL = 0;
+//    float exciteMaxL = 0;
 
     /**********************************************************************************  AFP 12-31-20
               Decimation is the process of downsampling the data stream and LP filtering
@@ -97,13 +97,13 @@ void ExciterIQData()
 
     if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) { //AFP 12-27-21
       //arm_scale_f32 (float_buffer_L_EX, -EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBandA], float_buffer_L_EX, 256);
-      arm_scale_f32 (float_buffer_L_EX, + EEPROMData.IQSSBAmpCorrectionFactor[EEPROMData.currentBandA], float_buffer_L_EX, 256);     // Flip SSB sideband KF5N, minus sign was original
-      IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, EEPROMData.IQSSBPhaseCorrectionFactor[EEPROMData.currentBandA], 256);
+      arm_scale_f32 (float_buffer_L_EX, + EEPROMData.IQSSBAmpCorrectionFactor[EEPROMData.currentBandA], float_buffer_L_EX, 2048);     // Flip SSB sideband KF5N, minus sign was original
+      IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, EEPROMData.IQSSBPhaseCorrectionFactor[EEPROMData.currentBandA], 2048);
     }
     else if (bands[EEPROMData.currentBand].mode == DEMOD_USB) { //AFP 12-27-21
       //arm_scale_f32 (float_buffer_L_EX, + EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBandA], float_buffer_L_EX, 256);     // Flip SSB sideband KF5N, minus sign was original
-      arm_scale_f32 (float_buffer_L_EX, - EEPROMData.IQSSBAmpCorrectionFactor[EEPROMData.currentBandA], float_buffer_L_EX, 256);    // Flip SSB sideband KF5N
-      IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, EEPROMData.IQSSBPhaseCorrectionFactor[EEPROMData.currentBandA], 256);
+      arm_scale_f32 (float_buffer_L_EX, - EEPROMData.IQSSBAmpCorrectionFactor[EEPROMData.currentBandA], float_buffer_L_EX, 2048);    // Flip SSB sideband KF5N
+      IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, EEPROMData.IQSSBPhaseCorrectionFactor[EEPROMData.currentBandA], 2048);
     }
 //    arm_scale_f32 (float_buffer_R_EX, 1.00, float_buffer_R_EX, 256);
 

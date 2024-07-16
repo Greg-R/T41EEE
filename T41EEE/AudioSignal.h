@@ -25,9 +25,9 @@ AudioConnection patchCord7(float2Int1, 0, Q_in_L_Ex, 0);     // Microphone to Au
 AudioConnection patchCord15(Q_out_L_Ex, 0, i2s_quadOut, 0);  // I channel to line out
 AudioConnection patchCord16(Q_out_R_Ex, 0, i2s_quadOut, 1);  // Q channel to line out
 */
-const float sample_rate_Hz = 48000.0f;
-const int   audio_block_samples = 128;  // Always 128
-AudioSettings_F32 audio_settings(sample_rate_Hz, audio_block_samples);
+//const float sample_rate_Hz = 48000.0f;
+//const int   audio_block_samples = 128;  // Always 128
+//AudioSettings_F32 audio_settings(sample_rate_Hz, audio_block_samples);
 AudioRecordQueue Q_in_R_Ex;           // This 2nd channel is needed as we are bringing I and Q into the sketch instead of only microphone audio.
 
 //  Begin transmit signal chain.
@@ -64,7 +64,7 @@ AudioRecordQueue Q_in_R;
 AudioPlayQueue Q_out_L;
 //AudioPlayQueue Q_out_R;  2nd audio channel not used.  KF5N March 11, 2024
 
-AudioConnection patchCord9(i2s_quadIn, 2, Q_in_L, 0);  //Input Rec
+AudioConnection patchCord9(i2s_quadIn, 2, Q_in_L, 0);  // Receiver I and Q channel data stream.
 AudioConnection patchCord10(i2s_quadIn, 3, Q_in_R, 0);
 
 //AudioConnection patchCord13(modeSelectInR, 0, Q_in_R, 0);  // Rec in Queue
@@ -111,10 +111,14 @@ void SetAudioOperatingState(int operatingState) {
     case SSB_RECEIVE_STATE:
     case AM_RECEIVE_STATE:
     case CW_RECEIVE_STATE:
-      // Disconnect and deactivate microphone audio.
-      //      patchCord1.disconnect();
-      Q_in_L_Ex.end();  // Microphone audio path.
+      SampleRate = SAMPLE_RATE_192K;
+      SetI2SFreq(SR[SampleRate].rate);
+      // Deactivate microphone audio.
+      mixer1.gain(0, 0.0);
+      Q_in_L_Ex.end();  // Transmit I channel path.
       Q_in_L_Ex.clear();
+      Q_in_R_Ex.end();  // Transmit Q channel path.
+      Q_in_R_Ex.clear();
       // Deactivate TX audio output path.
       patchCord15.disconnect();  // Disconnect transmitter I and Q channel outputs.
       patchCord16.disconnect();
@@ -124,6 +128,7 @@ void SetAudioOperatingState(int operatingState) {
       patchCord9.connect();                                  // Receiver I channel
       patchCord10.connect();                                 // Receiver Q channel
       patchCord17.connect();                                 // Receiver audio channel
+      patchCord18.connect();      
       volumeAdjust.gain(volumeLog[EEPROMData.audioVolume]);  // Set volume because sidetone may have changed it.
       break;
     case SSB_TRANSMIT_STATE:
@@ -131,13 +136,16 @@ void SetAudioOperatingState(int operatingState) {
       patchCord9.disconnect();   // Receiver I channel
       patchCord10.disconnect();  // Receiver Q channel
       patchCord17.disconnect();  // CW sidetone
+      patchCord18.disconnect();
       Q_in_L.end();
       Q_in_L.clear();
       Q_in_R.end();
       Q_in_R.clear();
-
-      // Microphone input enabled and connected
-      //      patchCord1.connect();  // Microphone audio
+      SampleRate = SAMPLE_RATE_48K;
+      SetI2SFreq(SR[SampleRate].rate);
+      tone1kHz.end();
+      mixer1.gain(0, 1.0);   // Connect microphone audio to transmit chain.
+      mixer1.gain(1, 0.0);   // Disconnect 1 kHz test tone. 
       Q_in_L_Ex.begin();  // I channel Microphone audio
       Q_in_R_Ex.begin();  // Q channel Microphone audio
 
@@ -145,6 +153,38 @@ void SetAudioOperatingState(int operatingState) {
       patchCord16.connect();  // Transmitter Q channel
 
       break;
+
+    case SSB_CALIBRATE_STATE:
+      SampleRate = SAMPLE_RATE_192K;
+      SetI2SFreq(SR[SampleRate].rate);
+      // QSD disabled and disconnected
+      patchCord9.connect();   // Receiver I channel
+      patchCord10.connect();  // Receiver Q channel
+      patchCord17.disconnect();  // CW sidetone
+      patchCord18.disconnect();
+
+      Q_in_L.clear();
+      Q_in_R.clear();
+
+      // Test tone enabled and connected
+      //      patchCord1.connect();  // Microphone audio
+
+    //  tone1kHz.setSampleRate_Hz(192000);
+    //  tone1kHz.amplitude(0.02);
+    //  tone1kHz.frequency(750.0);
+    //  tone1kHz.begin();
+        tone1kHz.end();
+      mixer1.gain(0, 0);  // microphone audio off.
+      mixer1.gain(1, 1);  // testTone on.
+      Q_in_L_Ex.begin();  // I channel Microphone audio
+      Q_in_R_Ex.begin();  // Q channel Microphone audio
+      Q_in_L.begin();     // Calibration is full duplex!
+      Q_in_R.begin();
+      patchCord15.connect();  // Transmitter I channel
+      patchCord16.connect();  // Transmitter Q channel
+
+      break;
+
     case CW_TRANSMIT_STRAIGHT_STATE:
     case CW_TRANSMIT_KEYER_STATE:
       // QSD disabled and disconnected

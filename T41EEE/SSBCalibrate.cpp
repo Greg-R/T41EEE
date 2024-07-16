@@ -229,24 +229,26 @@ void SSBCalibrate::printCalType(int IQCalType, bool autoCal, bool autoCalDone) {
       void
  *****/
 void SSBCalibrate::CalibratePreamble(int setZoom) {
-  SampleRate = SAMPLE_RATE_48K;  // SSB transmitter uses 48ksps rate.  Greg KF5N July 10, 2024
-  SetI2SFreq(SR[SAMPLE_RATE_48K].rate);
-      tone1kHz.setSampleRate_Hz(48000);
-      tone1kHz.amplitude(0.02);
-      tone1kHz.frequency(1000.0);
-      tone1kHz.begin();
-      mixer1.gain(1, 1);  // testTone on.
-      mixer1.gain(0, 0);  // microphone audio off.
+//  SampleRate = SAMPLE_RATE_192K;  // SSB transmitter uses 48ksps rate.  Greg KF5N July 10, 2024
+//  SetI2SFreq(SR[SampleRate].rate);
+//      tone1kHz.setSampleRate_Hz(192000);
+//      tone1kHz.amplitude(0.005);
+//      tone1kHz.frequency(750.0);
+//      tone1kHz.begin();
+//      mixer1.gain(1, 1);  // testTone on.
+//      mixer1.gain(0, 0);  // microphone audio off.
+
+  SetAudioOperatingState(SSB_CALIBRATE_STATE);
   calOnFlag = true;
   IQCalType = 0;
 //  radioState = CW_TRANSMIT_STRAIGHT_STATE;                 // KF5N
   transmitPowerLevelTemp = EEPROMData.transmitPowerLevel;  //AFP 05-11-23
   cwFreqOffsetTemp = EEPROMData.CWOffset;
   EEPROMData.CWOffset = 2;  // 750 Hz for TX calibration.  Prologue restores user selected offset.
-  patchCord15.connect();    // Connect the I and Q output channels so the transmitter will work.
-  patchCord16.connect();
-      Q_in_L_Ex.begin();    // I channel Microphone audio
-      Q_in_R_Ex.begin();    // Q channel Microphone audio
+//  patchCord15.connect();    // Connect the I and Q output channels so the transmitter will work.
+//  patchCord16.connect();
+//      Q_in_L_Ex.begin();    // I channel Microphone audio
+//      Q_in_R_Ex.begin();    // Q channel Microphone audio
   userxmtMode = EEPROMData.xmtMode;          // Store the user's mode setting.  KF5N July 22, 2023
   userZoomIndex = EEPROMData.spectrum_zoom;  // Save the zoom index so it can be reset at the conclusion.  KF5N August 12, 2023
   zoomIndex = setZoom - 1;
@@ -304,12 +306,14 @@ void SSBCalibrate::CalibratePrologue() {
   updateDisplayFlag = false;
   xrState = RECEIVE_STATE;
   tone1kHz.end();
-  SetI2SFreq(SR[SAMPLE_RATE_192K].rate);
+  SampleRate = SAMPLE_RATE_192K;  // Return to receiver sample rate.
+  SetI2SFreq(SR[SampleRate].rate);
   ShowTransmitReceiveStatus();
   T41State = CW_RECEIVE;
   // Clear queues to reduce transient.
   Q_in_L.clear();
   Q_in_R.clear();
+  SetAudioOperatingState(SSB_RECEIVE_STATE);
   EEPROMData.centerFreq = TxRxFreq;
   NCOFreq = 0L;
   xrState = RECEIVE_STATE;
@@ -376,8 +380,8 @@ void SSBCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortC
   // bool stopSweep = false;
 
   if (toneFreqIndex == 0) {           // 750 Hz
-    SSBCalibrate::CalibratePreamble(4);  // Set zoom to 16X.
-    freqOffset = 250;                   // Calibration tone same as regular modulation tone.
+    SSBCalibrate::CalibratePreamble(2);  // Set zoom to 16X.
+    freqOffset = 0;                   // Calibration tone same as regular modulation tone.
   }
   if (toneFreqIndex == 1) {           // 3 kHz
     SSBCalibrate::CalibratePreamble(2);  // Set zoom to 4X.
@@ -391,11 +395,12 @@ void SSBCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortC
   tft.print(correctionIncrement, 3);
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   radioState = SSB_TRANSMIT_STATE;
-  SetFreq();
+  SetFreqCal(freqOffset);
   printCalType(calTypeFlag, autoCal, false);
   // Run this so Phase shows from begining.
   GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQSSBPhaseCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
   warmUpCal();
+//  delay(5000);
 
   if (radioCal) {
     autoCal = true;
@@ -754,7 +759,7 @@ void SSBCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool
   // bool stopSweep = false;
 
   if (toneFreqIndex == 0) {  // 750 Hz
-    SSBCalibrate::CalibratePreamble(4);    // Set zoom to 16X.
+    SSBCalibrate::CalibratePreamble(2);    // Set zoom to 16X.
     freqOffset = 0;          // Calibration tone same as regular modulation tone.
   }
   if (toneFreqIndex == 1) {  // 3 kHz
@@ -774,6 +779,7 @@ void SSBCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool
   // Run this so Phase shows from begining.
   GetEncoderValueLiveQ15t(-1000, 1000, EEPROMData.qDCoffsetSSB[EEPROMData.currentBand], correctionIncrement, (char *)"Q Offset", false);
   warmUpCal();
+//  delay(5000);
 
   if (radioCal) {
     autoCal = true;
@@ -1179,13 +1185,14 @@ void SSBCalibrate::ProcessIQData2() {
         Then the buffers are  read into two arrays sp_L and sp_R in blocks of 128 up to N_BLOCKS.  The arrarys are
         of size BUFFER_SIZE*N_BLOCKS.  BUFFER_SIZE is 128.
         N_BLOCKS = FFT_L / 2 / BUFFER_SIZE * (uint32_t)DF; // should be 16 with DF == 8 and FFT_L = 512
-        BUFFER_SIZE*N_BLOCKS = 2024 samples
+        BUFFER_SIZE*N_BLOCKS = 2048 samples
      **********************************************************************************/
+
   // are there at least N_BLOCKS buffers in each channel available ?
   if ( (uint32_t) Q_in_L_Ex.available() > N_BLOCKS_EX) {
-
+//     Serial.printf("Q_in_L_Ex.available = %d\n", Q_in_L_Ex.available());
     // get audio samples from the audio  buffers and convert them to float
-    // read in 32 blocks á 128 samples in I and Q
+    // read in 32 blocks of 128 samples in I and Q
     for (unsigned i = 0; i < N_BLOCKS_EX; i++) {
 
       /**********************************************************************************  AFP 12-31-20
@@ -1195,7 +1202,7 @@ void SSBCalibrate::ProcessIQData2() {
       arm_q15_to_float (Q_in_L_Ex.readBuffer(), &float_buffer_L_EX[BUFFER_SIZE * i], BUFFER_SIZE); // convert int_buffer to float 32bit
       arm_q15_to_float (Q_in_R_Ex.readBuffer(), &float_buffer_R_EX[BUFFER_SIZE * i], BUFFER_SIZE); // Right channel not used.  KF5N March 11, 2024
       Q_in_L_Ex.freeBuffer();
-      Q_in_R_Ex.freeBuffer(); // Right channel not used.  KF5N March 11, 2024
+      Q_in_R_Ex.freeBuffer();
     }
 
     if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) { //AFP 12-27-21
@@ -1214,7 +1221,7 @@ powerScale = 40.0 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
 powerScale = 30.0 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
 #endif
 
-    arm_scale_f32(float_buffer_L_EX, powerScale, float_buffer_L_EX, 2048); //Scale to compensate for losses in Interpolation
+    arm_scale_f32(float_buffer_L_EX, powerScale, float_buffer_L_EX, 2048);
     arm_scale_f32(float_buffer_R_EX, powerScale, float_buffer_R_EX, 2048);
 
     /**********************************************************************************  AFP 12-31-20
@@ -1386,7 +1393,7 @@ float SSBCalibrate::PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
     ShowBandwidth();                         // Without this call, the calibration value in dB will not be updated.  KF5N
   } else updateDisplayFlag = false;          //  Do not save the the display data for the remainder of the sweep.
 
-  SSBCalibrate::ProcessIQData2();  // Call the Audio process from within the display routine to eliminate conflicts with drawing the spectrum.
+  SSBCalibrate::ProcessIQData2();  // Used only to acquire data and perform FFT in calibrate.
 
   y_new = pixelnew[x1];
   y1_new = pixelnew[x1 - 1];
@@ -1449,27 +1456,3 @@ float SSBCalibrate::PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
   tft.writeTo(L1);
   return adjdB_avg;
 }
-
-
-/*****
-  Purpose: Function to select the transmit calibration tone frequency.  Possible values:
-           0 = 750 Hz
-           1 = 3 kHz
-
-  Parameter list:
-    void
-
-  Return value:
-    void
-*****
-void SSBCalibrate::SelectCalFreq() {
-  const char *calFreqs[2]{ "750 Hz", "3.0 kHz" };
-  EEPROMData.calFreq = SubmenuSelect(calFreqs, 2, EEPROMData.calFreq);  // Returns the index of the array.
-  //  RedrawDisplayScreen();  Kills the bandwidth graphics in the audio display window, remove. KF5N July 30, 2023
-  // Clear the current CW filter graphics and then restore the bandwidth indicator bar.  KF5N July 30, 2023
-  EEPROMWrite();  // Save selection to EEPROM.  Greg KF5N, June 5, 2024
-  tft.writeTo(L2);
-  tft.clearMemory();
-  RedrawDisplayScreen();
-}
-*/

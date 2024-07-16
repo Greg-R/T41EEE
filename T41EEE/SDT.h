@@ -268,13 +268,16 @@ extern struct maps myMapFiles[];
 #define CW_MODE 1
 #define SSB_RECEIVE 0
 #define CW_RECEIVE 2
-//  This second set of states are for the loop() modal state machine.
+
+//  This second set of states are for the loop() modal state machine.  This needs to be transformed to an enum.
 #define SSB_RECEIVE_STATE 0
 #define SSB_TRANSMIT_STATE 1
 #define CW_RECEIVE_STATE 2
-#define AM_RECEIVE_STATE 5
 #define CW_TRANSMIT_STRAIGHT_STATE 3
 #define CW_TRANSMIT_KEYER_STATE 4
+#define AM_RECEIVE_STATE 5
+#define SSB_CALIBRATE_STATE 6
+
 #define SPECTRUM_ZOOM_1 0
 #define SPECTRUM_ZOOM_2 1
 #define SPECTRUM_ZOOM_4 2
