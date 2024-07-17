@@ -112,7 +112,8 @@ void SetAudioOperatingState(int operatingState) {
     case AM_RECEIVE_STATE:
     case CW_RECEIVE_STATE:
       SampleRate = SAMPLE_RATE_192K;
-      SetI2SFreq(SR[SampleRate].rate);
+      SetI2SFreq(SR[SampleRate].rate);   
+      cessb1.setSampleRate_Hz(0);
       // Deactivate microphone audio.
       mixer1.gain(0, 0.0);
       Q_in_L_Ex.end();  // Transmit I channel path.
@@ -143,6 +144,7 @@ void SetAudioOperatingState(int operatingState) {
       Q_in_R.clear();
       SampleRate = SAMPLE_RATE_48K;
       SetI2SFreq(SR[SampleRate].rate);
+      cessb1.setSampleRate_Hz(48000);
       tone1kHz.end();
       mixer1.gain(0, 1.0);   // Connect microphone audio to transmit chain.
       mixer1.gain(1, 0.0);   // Disconnect 1 kHz test tone. 
@@ -155,8 +157,9 @@ void SetAudioOperatingState(int operatingState) {
       break;
 
     case SSB_CALIBRATE_STATE:
-      SampleRate = SAMPLE_RATE_192K;
+      SampleRate = SAMPLE_RATE_48K;
       SetI2SFreq(SR[SampleRate].rate);
+      cessb1.setSampleRate_Hz(48000);
       // QSD disabled and disconnected
       patchCord9.connect();   // Receiver I channel
       patchCord10.connect();  // Receiver Q channel
@@ -167,13 +170,11 @@ void SetAudioOperatingState(int operatingState) {
       Q_in_R.clear();
 
       // Test tone enabled and connected
-      //      patchCord1.connect();  // Microphone audio
-
-    //  tone1kHz.setSampleRate_Hz(192000);
-    //  tone1kHz.amplitude(0.02);
-    //  tone1kHz.frequency(750.0);
-    //  tone1kHz.begin();
-        tone1kHz.end();
+      tone1kHz.setSampleRate_Hz(48000);
+      tone1kHz.amplitude(0.02);
+      tone1kHz.frequency(750.0);
+      tone1kHz.begin();
+//        tone1kHz.end();
       mixer1.gain(0, 0);  // microphone audio off.
       mixer1.gain(1, 1);  // testTone on.
       Q_in_L_Ex.begin();  // I channel Microphone audio

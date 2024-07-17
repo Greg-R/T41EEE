@@ -82,11 +82,10 @@ void Calibrate::plotCalGraphics(int calType) {
 void Calibrate::warmUpCal() {
   // Run ProcessIQData2() a few times to load and settle out buffers.  Compute FFT.  KF5N May 19, 2024
   uint32_t index_of_max;  // Not used, but required by arm_max_q15 function.
-  for (int i = 0; i < 1024; i = i + 1) {
+  for (int i = 0; i < 512; i = i + 1) {
     updateDisplayFlag = true;  // Causes FFT to be calculated.
     Calibrate::ProcessIQData2();
   }
-  delay(5000);
   updateDisplayFlag = false;
   // Find peak of spectrum, which is 512 wide.  Use this to adjust spectrum peak to top of spectrum display.
   arm_max_q15(pixelnew, 512, &rawSpectrumPeak, &index_of_max);
@@ -744,7 +743,7 @@ void Calibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal)
   //  bool corrChange = false;
   float correctionIncrement = 0.001;
   State state = State::warmup;  // Start calibration state machine in warmup state.
-  float maxSweepAmp = 0.15;
+  float maxSweepAmp = 0.35;
   float maxSweepPhase = 0.1;
   float increment = 0.002;
   int averageCount = 0;
@@ -1762,6 +1761,7 @@ float Calibrate::PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
   // The FFT should be performed only at the beginning of the sweep, and buffers must be full.
   if (x1 == (cal_bins[0] - capture_bins)) {  // Set flag at revised beginning.  KF5N
     updateDisplayFlag = true;                // This flag is used in ZoomFFTExe().
+//      Calibrate::ProcessIQData2();  // Call the Audio process from within the display routine to eliminate conflicts with drawing the spectrum.
     ShowBandwidth();                         // Without this call, the calibration value in dB will not be updated.  KF5N
   } else updateDisplayFlag = false;          //  Do not save the the display data for the remainder of the sweep.
 

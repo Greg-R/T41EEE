@@ -14,6 +14,7 @@
 *****/
 void SSBCalibrate::plotCalGraphics(int calType) {
   tft.writeTo(L2);
+  /*
   if (calType == 0) {  // Receive Cal
     if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
       tft.fillRect(445, SPECTRUM_TOP_Y + 20, 20, 341, DARK_RED);     // SPECTRUM_TOP_Y = 100, h = 135
@@ -23,6 +24,7 @@ void SSBCalibrate::plotCalGraphics(int calType) {
       tft.fillRect(188, SPECTRUM_TOP_Y + 20, 20, 341, RA8875_BLUE);
     }
   }
+  */
   if (calType == 1) {  // Transmit Cal
     if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
       tft.fillRect(312, SPECTRUM_TOP_Y + 20, 20, 341, DARK_RED);  // Adjusted height due to other graphics changes.  KF5N August 3, 2023
@@ -61,7 +63,7 @@ void SSBCalibrate::plotCalGraphics(int calType) {
 void SSBCalibrate::warmUpCal() {
   // Run ProcessIQData2() a few times to load and settle out buffers.  Compute FFT.  KF5N May 19, 2024
   uint32_t index_of_max;  // Not used, but required by arm_max_q15 function.
-  for (int i = 0; i < 1024; i = i + 1) {
+  for (int i = 0; i < 16; i = i + 1) {
     updateDisplayFlag = true;  // Causes FFT to be calculated.
     SSBCalibrate::ProcessIQData2();
   }
@@ -82,7 +84,7 @@ void SSBCalibrate::warmUpCal() {
 *****/
 void SSBCalibrate::printCalType(int IQCalType, bool autoCal, bool autoCalDone) {
   const char *calName;
-  const char *IQName[4] = { "Receive", "Transmit", "Carrier", "Calibrate" };
+  const char *IQName[4] = { "Receive", "Transmit SSB", "Carrier SSB", "Calibrate" };
   tft.writeTo(L1);
   calName = IQName[calTypeFlag];
   tft.setFontScale((enum RA8875tsize)1);
@@ -229,15 +231,6 @@ void SSBCalibrate::printCalType(int IQCalType, bool autoCal, bool autoCalDone) {
       void
  *****/
 void SSBCalibrate::CalibratePreamble(int setZoom) {
-//  SampleRate = SAMPLE_RATE_192K;  // SSB transmitter uses 48ksps rate.  Greg KF5N July 10, 2024
-//  SetI2SFreq(SR[SampleRate].rate);
-//      tone1kHz.setSampleRate_Hz(192000);
-//      tone1kHz.amplitude(0.005);
-//      tone1kHz.frequency(750.0);
-//      tone1kHz.begin();
-//      mixer1.gain(1, 1);  // testTone on.
-//      mixer1.gain(0, 0);  // microphone audio off.
-
   SetAudioOperatingState(SSB_CALIBRATE_STATE);
   calOnFlag = true;
   IQCalType = 0;
@@ -245,14 +238,9 @@ void SSBCalibrate::CalibratePreamble(int setZoom) {
   transmitPowerLevelTemp = EEPROMData.transmitPowerLevel;  //AFP 05-11-23
   cwFreqOffsetTemp = EEPROMData.CWOffset;
   EEPROMData.CWOffset = 2;  // 750 Hz for TX calibration.  Prologue restores user selected offset.
-//  patchCord15.connect();    // Connect the I and Q output channels so the transmitter will work.
-//  patchCord16.connect();
-//      Q_in_L_Ex.begin();    // I channel Microphone audio
-//      Q_in_R_Ex.begin();    // Q channel Microphone audio
   userxmtMode = EEPROMData.xmtMode;          // Store the user's mode setting.  KF5N July 22, 2023
   userZoomIndex = EEPROMData.spectrum_zoom;  // Save the zoom index so it can be reset at the conclusion.  KF5N August 12, 2023
   zoomIndex = setZoom - 1;
-  //loadCalToneBuffers();  // Restore in the prologue.
   ButtonZoom();
   tft.fillRect(0, 272, 517, 399, RA8875_BLACK);  // Erase waterfall.  KF5N August 14, 2023
   RedrawDisplayScreen();                         // Erase any existing spectrum trace data.
@@ -362,7 +350,7 @@ void SSBCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortC
   //  bool corrChange = false;
   float correctionIncrement = 0.001;
   State state = State::warmup;  // Start calibration state machine in warmup state.
-  float maxSweepAmp = 0.35;
+  float maxSweepAmp = 0.1;
   float maxSweepPhase = 0.1;
   float increment = 0.002;
   int averageCount = 0;
@@ -380,7 +368,7 @@ void SSBCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortC
   // bool stopSweep = false;
 
   if (toneFreqIndex == 0) {           // 750 Hz
-    SSBCalibrate::CalibratePreamble(2);  // Set zoom to 16X.
+    SSBCalibrate::CalibratePreamble(3);  // Set zoom to 8X.
     freqOffset = 0;                   // Calibration tone same as regular modulation tone.
   }
   if (toneFreqIndex == 1) {           // 3 kHz
@@ -759,7 +747,7 @@ void SSBCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool
   // bool stopSweep = false;
 
   if (toneFreqIndex == 0) {  // 750 Hz
-    SSBCalibrate::CalibratePreamble(2);    // Set zoom to 16X.
+    SSBCalibrate::CalibratePreamble(3);    // Set zoom to 16X.
     freqOffset = 0;          // Calibration tone same as regular modulation tone.
   }
   if (toneFreqIndex == 1) {  // 3 kHz
@@ -1163,10 +1151,10 @@ void SSBCalibrate::RadioCal(bool refineCal) {
 
 
 /*****
-  Purpose: Signal processing for the purpose of calibration.
+  Purpose: Signal processing for the purpose of calibration.  FFT only, no audio!
 
    Parameter List:
-      int toneFreq, index of an array of tone frequencies.
+      
 
    Return value:
       void
@@ -1176,23 +1164,27 @@ void SSBCalibrate::ProcessIQData2() {
   float recBandFactor[7] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };  // AFP 2-11-23  KF5N uniform values
 
 //  Insert here essentially verbatim code from the SSB Exciter.
-  uint32_t N_BLOCKS_EX = N_B_EX;
+//  uint32_t N_BLOCKS_EX = N_B_EX;
+  uint32_t N_BLOCKS_EX = 16;  // was 16
+  uint32_t N_BLOCKS = 16;     // was 16
+  uint32_t dataWidth = 2048;  // was 2048
   float32_t powerScale;
+
 
   /**********************************************************************************  AFP 12-31-20
         Get samples from queue buffers
         Teensy Audio Library stores ADC data in two buffers size=128, Q_in_L and Q_in_R as initiated from the audio lib.
-        Then the buffers are  read into two arrays sp_L and sp_R in blocks of 128 up to N_BLOCKS.  The arrarys are
+        Then the buffers are  read into two arrays sp_L and sp_R in blocks of 128 up to N_BLOCKS.  The arrays are
         of size BUFFER_SIZE*N_BLOCKS.  BUFFER_SIZE is 128.
         N_BLOCKS = FFT_L / 2 / BUFFER_SIZE * (uint32_t)DF; // should be 16 with DF == 8 and FFT_L = 512
         BUFFER_SIZE*N_BLOCKS = 2048 samples
      **********************************************************************************/
-
-  // are there at least N_BLOCKS buffers in each channel available ?
+//     Serial.printf("Q_in_L_Ex.available = %d\n", Q_in_L_Ex.available());
+  // Are there at least N_BLOCKS buffers in each channel available ?
   if ( (uint32_t) Q_in_L_Ex.available() > N_BLOCKS_EX) {
 //     Serial.printf("Q_in_L_Ex.available = %d\n", Q_in_L_Ex.available());
     // get audio samples from the audio  buffers and convert them to float
-    // read in 32 blocks of 128 samples in I and Q
+    // read in 16 blocks of 128 samples in I and Q
     for (unsigned i = 0; i < N_BLOCKS_EX; i++) {
 
       /**********************************************************************************  AFP 12-31-20
@@ -1206,12 +1198,12 @@ void SSBCalibrate::ProcessIQData2() {
     }
 
     if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) { //AFP 12-27-21
-      arm_scale_f32 (float_buffer_L_EX, + EEPROMData.IQSSBAmpCorrectionFactor[EEPROMData.currentBandA], float_buffer_L_EX, 2048);     // Flip SSB sideband KF5N, minus sign was original
-      IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, EEPROMData.IQSSBPhaseCorrectionFactor[EEPROMData.currentBandA], 2048);
+      arm_scale_f32 (float_buffer_L_EX, + EEPROMData.IQSSBAmpCorrectionFactor[EEPROMData.currentBandA], float_buffer_L_EX, dataWidth);     // Flip SSB sideband KF5N, minus sign was original
+      IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, EEPROMData.IQSSBPhaseCorrectionFactor[EEPROMData.currentBandA], dataWidth);
     }
     else if (bands[EEPROMData.currentBand].mode == DEMOD_USB) { //AFP 12-27-21
-      arm_scale_f32 (float_buffer_L_EX, - EEPROMData.IQSSBAmpCorrectionFactor[EEPROMData.currentBandA], float_buffer_L_EX, 2048);    // Flip SSB sideband KF5N
-      IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, EEPROMData.IQSSBPhaseCorrectionFactor[EEPROMData.currentBandA], 2048);
+      arm_scale_f32 (float_buffer_L_EX, - EEPROMData.IQSSBAmpCorrectionFactor[EEPROMData.currentBandA], float_buffer_L_EX, dataWidth);    // Flip SSB sideband KF5N
+      IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, EEPROMData.IQSSBPhaseCorrectionFactor[EEPROMData.currentBandA], dataWidth);
     }
     
     //  This is the correct place in the data stream to inject the scaling for power.
@@ -1221,23 +1213,23 @@ powerScale = 40.0 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
 powerScale = 30.0 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
 #endif
 
-    arm_scale_f32(float_buffer_L_EX, powerScale, float_buffer_L_EX, 2048);
-    arm_scale_f32(float_buffer_R_EX, powerScale, float_buffer_R_EX, 2048);
+    arm_scale_f32(float_buffer_L_EX, powerScale, float_buffer_L_EX, dataWidth);
+    arm_scale_f32(float_buffer_R_EX, powerScale, float_buffer_R_EX, dataWidth);
 
     /**********************************************************************************  AFP 12-31-20
       CONVERT TO INTEGER AND PLAY AUDIO
     **********************************************************************************/
-    q15_t q15_buffer_LTemp[2048];  // KF5N
-    q15_t q15_buffer_RTemp[2048];  // KF5N
+    q15_t q15_buffer_LTemp[dataWidth];  // KF5N
+    q15_t q15_buffer_RTemp[dataWidth];  // KF5N
  
       arm_float_to_q15 (float_buffer_L_EX, q15_buffer_LTemp, 2048);
       arm_float_to_q15 (float_buffer_R_EX, q15_buffer_RTemp, 2048);
       #ifdef QSE2
-      arm_offset_q15(q15_buffer_LTemp, EEPROMData.iDCoffsetSSB[EEPROMData.currentBand] + EEPROMData.dacOffsetSSB, q15_buffer_LTemp, 2048);  // Carrier suppression offset.
-      arm_offset_q15(q15_buffer_RTemp, EEPROMData.qDCoffsetSSB[EEPROMData.currentBand] + EEPROMData.dacOffsetSSB, q15_buffer_RTemp, 2048);
+      arm_offset_q15(q15_buffer_LTemp, EEPROMData.iDCoffsetSSB[EEPROMData.currentBand] + EEPROMData.dacOffsetSSB, q15_buffer_LTemp, dataWidth);  // Carrier suppression offset.
+      arm_offset_q15(q15_buffer_RTemp, EEPROMData.qDCoffsetSSB[EEPROMData.currentBand] + EEPROMData.dacOffsetSSB, q15_buffer_RTemp, dataWidth);
       #endif
-      Q_out_L_Ex.play(q15_buffer_LTemp, 2048); // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
-      Q_out_R_Ex.play(q15_buffer_RTemp, 2048); // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.
+      Q_out_L_Ex.play(q15_buffer_LTemp, dataWidth); // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
+      Q_out_R_Ex.play(q15_buffer_RTemp, dataWidth); // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.
 
     // End of transmit code.  Begin receive code.
 
@@ -1276,16 +1268,16 @@ powerScale = 30.0 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
     }
     FreqShift1();  // Why done here? KF5N
 
-    if (EEPROMData.spectrum_zoom == SPECTRUM_ZOOM_1) {  // && display_S_meter_or_spectrum_state == 1)
-      zoom_display = 1;
-      CalcZoom1Magn();  //AFP Moved to display function
-    }
+//    if (EEPROMData.spectrum_zoom == SPECTRUM_ZOOM_1) {  // && display_S_meter_or_spectrum_state == 1)
+//      zoom_display = 1;
+//CalcZoom1Magn();  //AFP Moved to display function
+//    }
 
     // ZoomFFTExe is being called too many times in Calibration.  Should be called ONLY at the start of each sweep.
-    if (EEPROMData.spectrum_zoom != SPECTRUM_ZOOM_1) {
+//    if (EEPROMData.spectrum_zoom != SPECTRUM_ZOOM_1) {
       //AFP  Used to process Zoom>1 for display
-      ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
-    }
+      SSBCalibrate::ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
+//    }
   }
 }
 
@@ -1304,7 +1296,7 @@ powerScale = 30.0 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
 void SSBCalibrate::ShowSpectrum2()  //AFP 2-10-23
 {
   int x1 = 0;
-  int capture_bins = 8;  // Sets the number of bins to scan for signal peak.
+  int capture_bins = 30;  // Sets the number of bins to scan for signal peak.
 
   pixelnew[0] = 0;
   pixelnew[1] = 0;
@@ -1318,6 +1310,7 @@ void SSBCalibrate::ShowSpectrum2()  //AFP 2-10-23
   //  Thus there is a target "bin" for the reference signal and another "bin" for the undesired sideband.
   //  The target bin locations are used by the for-loop to sweep a small range in the FFT.  A maximum finding function finds the peak signal strength.
   int cal_bins[3] = { 0, 0, 0 };
+  /*
   if (calTypeFlag == 0 && bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
     cal_bins[0] = 315;
     cal_bins[1] = 455;
@@ -1326,6 +1319,7 @@ void SSBCalibrate::ShowSpectrum2()  //AFP 2-10-23
     cal_bins[0] = 59;
     cal_bins[1] = 199;
   }  // Receive calibration, USB.  KF5N
+  */
   if ((calTypeFlag == 1 || calTypeFlag == 2) && bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
     cal_bins[0] = 257;  // LSB
     cal_bins[1] = 289;  // Carrier
@@ -1335,13 +1329,14 @@ void SSBCalibrate::ShowSpectrum2()  //AFP 2-10-23
     cal_bins[0] = 257;  // USB
     cal_bins[1] = 225;  // Carrier
     cal_bins[2] = 193;  // Undesired sideband
-  }                     // Transmit and Carrier calibration, LSB.  KF5N
+  }                     // Transmit and Carrier calibration, USB.  KF5N
 
-  //  There are 2 for-loops, one for the reference signal and another for the undesired sideband.
+  /*  There are 2 for-loops, one for the reference signal and another for the undesired sideband.
   if (calTypeFlag == 0) {  // Receive cal
     for (x1 = cal_bins[0] - capture_bins; x1 < cal_bins[0] + capture_bins; x1++) adjdB = SSBCalibrate::PlotCalSpectrum(x1, cal_bins, capture_bins);
     for (x1 = cal_bins[1] - capture_bins; x1 < cal_bins[1] + capture_bins; x1++) adjdB = SSBCalibrate::PlotCalSpectrum(x1, cal_bins, capture_bins);
   }
+  */
 
   // Plot carrier during transmit cal, do not return a dB value:
   if (calTypeFlag == 1) {  // Transmit cal
@@ -1388,12 +1383,14 @@ float SSBCalibrate::PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
   int y_new_plot, y1_new_plot, y_old_plot, y_old2_plot;
 
   // The FFT should be performed only at the beginning of the sweep, and buffers must be full.
-  if (x1 == (cal_bins[0] - capture_bins)) {  // Set flag at revised beginning.  KF5N
+  if (x1 == (cal_bins[0] - capture_bins)) {  // Set flag at beginning of sweep.  FFT is calculated if enough data is available.  KF5N
     updateDisplayFlag = true;                // This flag is used in ZoomFFTExe().
+  SSBCalibrate::ProcessIQData2();
     ShowBandwidth();                         // Without this call, the calibration value in dB will not be updated.  KF5N
   } else updateDisplayFlag = false;          //  Do not save the the display data for the remainder of the sweep.
 
-  SSBCalibrate::ProcessIQData2();  // Used only to acquire data and perform FFT in calibrate.
+// This is going to acquire 2048 samples of I and Q from the receiver, and then perform the FFT.
+//  SSBCalibrate::ProcessIQData2();  // Used only to acquire data and perform FFT in calibrate.
 
   y_new = pixelnew[x1];
   y1_new = pixelnew[x1 - 1];
@@ -1456,3 +1453,124 @@ float SSBCalibrate::PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
   tft.writeTo(L1);
   return adjdB_avg;
 }
+
+
+void SSBCalibrate::ZoomFFTExe(uint32_t blockSize) {
+  // totally rebuilt 27.8.2020 DD4WH
+  // however, I did not manage to implement a correct routine for magnifications > 2048x
+  // maybe the next days
+  const int fftWidth = 512;  // Was 512
+  float32_t x_buffer[blockSize];  // can be 2048 (FFT length == 512), or 4096 [FFT length == 1024] or even 8192 [FFT length == 2048]
+  float32_t y_buffer[blockSize];
+  static float32_t FFT_ring_buffer_x[fftWidth * 2];
+  static float32_t FFT_ring_buffer_y[fftWidth * 2];
+//  static int32_t flag_2nd_decimation = 0;
+  //static uint32_t high_Zoom_buffer_ptr = 0;
+//  uint8_t high_Zoom = 0;
+  //uint32_t high_Zoom_2nd_dec_rounds = (1 << (EEPROMData.spectrum_zoom - 11));
+  //Serial.print("2nd dec rounds"); Serial.println(high_Zoom_2nd_dec_rounds);
+  int sample_no = 256;
+  // sample_no is 256, in high magnify modes it is smaller!
+  // but it must never be > 256
+
+  sample_no = BUFFER_SIZE * N_BLOCKS / (1 << EEPROMData.spectrum_zoom);
+
+  if (sample_no > fftWidth) {
+    sample_no = fftWidth;
+  }
+
+//  In SSB calibrate, the decimation should be the same as 4X
+
+  // decimation stage 1
+  arm_fir_decimate_f32(&Fir_Zoom_FFT_Decimate_I1, float_buffer_L, x_buffer, blockSize);
+  arm_fir_decimate_f32(&Fir_Zoom_FFT_Decimate_Q1, float_buffer_R, y_buffer, blockSize);
+//  if (high_Zoom == 1) flag_2nd_decimation++;
+  // decimation stage 2
+  arm_fir_decimate_f32(&Fir_Zoom_FFT_Decimate_I2, x_buffer, x_buffer, blockSize / Zoom_FFT_M1);
+  arm_fir_decimate_f32(&Fir_Zoom_FFT_Decimate_Q2, y_buffer, y_buffer, blockSize / Zoom_FFT_M1);
+
+  //this puts the sample_no samples into the ringbuffer -->
+  // the right order has to be thought about!
+  // we take all the samples from zoom_sample_ptr to 256 and
+  // then all samples from 0 to zoom_sampl_ptr - 1
+
+  // fill into ringbuffer
+  for (int i = 0; i < sample_no; i++) {  // interleave real and imaginary input values [real, imag, real, imag . . .]
+    FFT_ring_buffer_x[zoom_sample_ptr] = x_buffer[i];
+    FFT_ring_buffer_y[zoom_sample_ptr] = y_buffer[i];
+    zoom_sample_ptr++;
+    if (zoom_sample_ptr >= fftWidth) zoom_sample_ptr = 0;
+  }
+
+  // when do we want to display a new spectrum?
+  // if we wait for zoom_sample_ptr to be 255,
+  // it can last more than a few seconds in 4096x Zoom
+  // so we calculate an FFT and display the spectrum every time this function is called?
+
+  //    zoom_display = 1;
+
+  // copy from ringbuffer to FFT_buffer
+  // in the right order and
+  // apply FFT window here
+  // Nuttall window
+  // zoom_sample_ptr points to the oldest sample now
+
+  float32_t multiplier = (float32_t)EEPROMData.spectrum_zoom * (float32_t)EEPROMData.spectrum_zoom;
+
+  for (int idx = 0; idx < fftWidth; idx++) {
+    //   buffer_spec_FFT[idx * 2 + 0] =  multiplier * FFT_ring_buffer_x[zoom_sample_ptr] * nuttallWindow256[idx];
+    //   buffer_spec_FFT[idx * 2 + 1] =  multiplier * FFT_ring_buffer_y[zoom_sample_ptr] * nuttallWindow256[idx];
+    buffer_spec_FFT[idx * 2 + 0] = multiplier * FFT_ring_buffer_x[zoom_sample_ptr] * (0.5 - 0.5 * cos(6.28 * idx / SPECTRUM_RES));  //Hanning Window AFP 03-12-21
+    buffer_spec_FFT[idx * 2 + 1] = multiplier * FFT_ring_buffer_y[zoom_sample_ptr] * (0.5 - 0.5 * cos(6.28 * idx / SPECTRUM_RES));
+    zoom_sample_ptr++;
+    if (zoom_sample_ptr >= fftWidth) zoom_sample_ptr = 0;
+  }
+
+  //***************
+  // adjust lowpass filter coefficient, so that
+  // "spectrum display smoothness" is the same across the different sample rates
+  // and the same across different magnify modes . . .
+  //    float32_t LPFcoeff = LPF_spectrum * (AUDIO_SAMPLE_RATE_EXACT / SR[SampleRate].rate);
+  float32_t LPFcoeff = 0.6;
+  if (LPFcoeff > 1.0) LPFcoeff = 1.0;
+  if (LPFcoeff < 0.001) LPFcoeff = 0.001;
+  float32_t onem_LPFcoeff = 1.0 - LPFcoeff;
+
+  // The rest of the function is activated when the buffers are full and ready.
+  // Save old pixels for lowpass filter.
+  if (updateDisplayFlag == true) {
+    for (int i = 0; i < fftWidth; i++) {
+      pixelold[i] = pixelCurrent[i];
+    }
+//    Serial.printf("Call to FFT\n");
+    // perform complex FFT
+    // calculation is performed in-place the FFT_buffer [re, im, re, im, re, im . . .]
+    arm_cfft_f32(spec_FFT, buffer_spec_FFT, 0, 1);  // spec_FFT is width 512
+    // calculate mag = I*I + Q*Q,
+    // and simultaneously put them into the right order
+    for (int i = 0; i < fftWidth / 2; i++) {
+      FFT_spec[i + fftWidth / 2] = (buffer_spec_FFT[i * 2] * buffer_spec_FFT[i * 2] + buffer_spec_FFT[i * 2 + 1] * buffer_spec_FFT[i * 2 + 1]);
+      FFT_spec[i] = (buffer_spec_FFT[(i + fftWidth / 2) * 2] * buffer_spec_FFT[(i + fftWidth / 2) * 2] + buffer_spec_FFT[(i + fftWidth / 2) * 2 + 1] * buffer_spec_FFT[(i + fftWidth / 2) * 2 + 1]);
+    }
+    // apply low pass filter and scale the magnitude values and convert to int for spectrum display
+    // apply spectrum AGC
+    //
+    for (int16_t x = 0; x < fftWidth; x++) {
+      FFT_spec[x] = LPFcoeff * FFT_spec[x] + onem_LPFcoeff * FFT_spec_old[x];
+      FFT_spec_old[x] = FFT_spec[x];
+    }
+    // Write the FFT bins into the display buffer.
+    if (calOnFlag)  // Expanded dynamic range during calibration.
+      for (int16_t x = 0; x < fftWidth; x++) {
+//        pixelnew[x] = displayScale[EEPROMData.currentScale].baseOffset + bands[EEPROMData.currentBand].pixel_offset + (int16_t)(40.0 * log10f_fast(FFT_spec[x]));
+        pixelnew[x] = displayScale[EEPROMData.currentScale].baseOffset + (int16_t)(40.0 * log10f_fast(FFT_spec[x]));
+        //        if (pixelnew[x] > 220) pixelnew[x] = 220;
+      }
+    else
+      for (int16_t x = 0; x < fftWidth; x++) {
+        pixelnew[x] = displayScale[EEPROMData.currentScale].baseOffset + (int16_t)(displayScale[EEPROMData.currentScale].dBScale * log10f_fast(FFT_spec[x])) + fftOffset;
+        if (pixelnew[x] > 220) pixelnew[x] = 220;
+      }
+  }
+}
+

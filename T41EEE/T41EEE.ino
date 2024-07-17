@@ -1209,8 +1209,8 @@ FLASHMEM void setup() {
   sgtl5000_1.audioProcessorDisable();
 //  sgtl5000_1.eqSelect(3);
 //  sgtl5000_1.eqBands(-1.0, -1.0, 0.5, 0.5, -1.0);
-  AudioMemory(600);  //  Increased to 450 from 400.  Memory was hitting max.  KF5N August 31, 2023
-  AudioMemory_F32(50);
+  AudioMemory(500);  //  Increased to 450 from 400.  Memory was hitting max.  KF5N August 31, 2023
+  AudioMemory_F32(100);
   sgtl5000_1.inputSelect(AUDIO_INPUT_MIC);
   sgtl5000_1.muteHeadphone();  // KF5N March 11, 2024
   sgtl5000_1.micGain(0);
@@ -1247,7 +1247,7 @@ compressor1.setDelayBufferSize(delaySize);
 // basicCompressorBegin(pc1, -25.0f, 2.0);
 //  limiterBegin(pc1, -3.0f, -15.0f);
 
-   cessb1.setSampleRate_Hz(48000);
+   cessb1.setSampleRate_Hz(0);
    cessb1.setGains(1.5f, 1.4f, 1.0f);
    cessb1.setSideband(false);
 
