@@ -299,10 +299,10 @@ float32_t HP_DC_Butter_state2[2] = { 0, 0 };                                    
 arm_biquad_cascade_df2T_instance_f32 s1_Receive = { 3, HP_DC_Butter_state, HP_DC_Filter_Coeffs };     //AFP 09-23-22
 arm_biquad_cascade_df2T_instance_f32 s1_Receive2 = { 1, HP_DC_Butter_state2, HP_DC_Filter_Coeffs2 };  //AFP 11-04-22
 //Hilbert FIR Filters
-float32_t DMAMEM FIR_Hilbert_state_L[100 + 256 - 1];
-float32_t DMAMEM FIR_Hilbert_state_R[100 + 256 - 1];
-arm_fir_instance_f32 FIR_Hilbert_L;
-arm_fir_instance_f32 FIR_Hilbert_R;
+//float32_t DMAMEM FIR_Hilbert_state_L[100 + 256 - 1];
+// DMAMEM FIR_Hilbert_state_R[100 + 256 - 1];
+//arm_fir_instance_f32 FIR_Hilbert_L;
+//arm_fir_instance_f32 FIR_Hilbert_R;
 
 // CW decode Filters
 arm_fir_instance_f32 FIR_CW_DecodeL;  //AFP 10-25-22
@@ -1209,8 +1209,8 @@ FLASHMEM void setup() {
   sgtl5000_1.audioProcessorDisable();
 //  sgtl5000_1.eqSelect(3);
 //  sgtl5000_1.eqBands(-1.0, -1.0, 0.5, 0.5, -1.0);
-  AudioMemory(500);  //  Increased to 450 from 400.  Memory was hitting max.  KF5N August 31, 2023
-  AudioMemory_F32(100);
+  AudioMemory(700);  //  Increased to 450 from 400.  Memory was hitting max.  KF5N August 31, 2023
+  AudioMemory_F32(10);
   sgtl5000_1.inputSelect(AUDIO_INPUT_MIC);
   sgtl5000_1.muteHeadphone();  // KF5N March 11, 2024
   sgtl5000_1.micGain(0);
@@ -1241,8 +1241,13 @@ compressor1.setDelayBufferSize(delaySize);
      {0.0f, -20.0f, -1000.0f, -1000.0f, -1000.0f},           // kneeDB[] 
      {  150.0f, 1.0f, 1.0f, 1.0f, 1.0f} };   // compressionRatio     
 
+//pression after the kneeDB[0] only.
+//  struct compressionCurve crv = { -2.0f, -25.0f,           // margin, offset
+//     {0.0f, -20.0f, -1000.0f},           // kneeDB[] 
+//     {  150.0f, 1.0f, 1.0f} };   // compressionRatio         
+
   compressor1.setCompressionCurve(&crv);
-//  compressor1.begin();
+  compressor1.begin();
 
 // basicCompressorBegin(pc1, -25.0f, 2.0);
 //  limiterBegin(pc1, -3.0f, -15.0f);
@@ -1277,8 +1282,8 @@ compressor1.setDelayBufferSize(delaySize);
   pinMode(TFT_CS, OUTPUT);
   digitalWrite(TFT_CS, HIGH);
 
-  arm_fir_init_f32(&FIR_Hilbert_L, 100, FIR_Hilbert_coeffs_45, FIR_Hilbert_state_L, 256);  //AFP01-16-22
-  arm_fir_init_f32(&FIR_Hilbert_R, 100, FIR_Hilbert_coeffs_neg45, FIR_Hilbert_state_R, 256);
+//  arm_fir_init_f32(&FIR_Hilbert_L, 100, FIR_Hilbert_coeffs_45, FIR_Hilbert_state_L, 256);  //AFP01-16-22
+//  arm_fir_init_f32(&FIR_Hilbert_R, 100, FIR_Hilbert_coeffs_neg45, FIR_Hilbert_state_R, 256);
   arm_fir_init_f32(&FIR_CW_DecodeL, 64, CW_Filter_Coeffs2, FIR_CW_DecodeL_state, 256);  //AFP 10-25-22
   arm_fir_init_f32(&FIR_CW_DecodeR, 64, CW_Filter_Coeffs2, FIR_CW_DecodeR_state, 256);
   arm_fir_decimate_init_f32(&FIR_dec1_EX_I, 48, 4, coeffs192K_10K_LPF_FIR, FIR_dec1_EX_I_state, 2048);

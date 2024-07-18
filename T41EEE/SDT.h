@@ -530,14 +530,14 @@ extern float32_t EQ_Band14Coeffs[];
 // ================= end  AFP 10-02-22 ===========
 //Hilbert FIR Filter
 
-extern float32_t FIR_Hilbert_state_L[];
-extern float32_t FIR_Hilbert_state_R[];
+//extern float32_t FIR_Hilbert_state_L[];
+//extern float32_t FIR_Hilbert_state_R[];
 
-extern float32_t FIR_Hilbert_coeffs_45[];     //AFP 01-16-22
-extern float32_t FIR_Hilbert_coeffs_neg45[];  //AFP 01-16-22
+//extern float32_t FIR_Hilbert_coeffs_45[];     //AFP 01-16-22
+//extern float32_t FIR_Hilbert_coeffs_neg45[];  //AFP 01-16-22
 
-extern arm_fir_instance_f32 FIR_Hilbert_L;
-extern arm_fir_instance_f32 FIR_Hilbert_R;
+//extern arm_fir_instance_f32 FIR_Hilbert_L;
+//extern arm_fir_instance_f32 FIR_Hilbert_R;
 
 extern float32_t CW_Filter_Coeffs2[];        //AFP 10-25-22
 extern arm_fir_instance_f32 FIR_CW_DecodeL;  //AFP 10-25-22

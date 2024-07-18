@@ -290,6 +290,15 @@ void SSBCalibrate::CalibratePreamble(int setZoom) {
       void
  *****/
 void SSBCalibrate::CalibratePrologue() {
+    Serial.printf("lastState=%d radioState=%d memory_used=%d memory_used_max=%d f32_memory_used=%d f32_memory_used_max=%d\n",
+                lastState,
+                radioState,
+                (int)AudioStream::memory_used,
+                (int)AudioStream::memory_used_max,
+                (int)AudioStream_F32::f32_memory_used,
+                (int)AudioStream_F32::f32_memory_used_max);
+  AudioStream::memory_used_max = 0;
+  AudioStream_F32::f32_memory_used_max = 0;
   digitalWrite(RXTX, LOW);  // Turn off the transmitter.
   updateDisplayFlag = false;
   xrState = RECEIVE_STATE;
