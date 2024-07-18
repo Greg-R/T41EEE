@@ -82,7 +82,7 @@ void Calibrate::plotCalGraphics(int calType) {
 void Calibrate::warmUpCal() {
   // Run ProcessIQData2() a few times to load and settle out buffers.  Compute FFT.  KF5N May 19, 2024
   uint32_t index_of_max;  // Not used, but required by arm_max_q15 function.
-  for (int i = 0; i < 1024; i = i + 1) {
+  for (int i = 0; i < 512; i = i + 1) {
     updateDisplayFlag = true;  // Causes FFT to be calculated.
     Calibrate::ProcessIQData2();
   }
@@ -250,15 +250,14 @@ void Calibrate::printCalType(int IQCalType, bool autoCal, bool autoCalDone) {
       void
  *****/
 void Calibrate::CalibratePreamble(int setZoom) {
-  SetAudioOperatingState(CW_CALIBRATE_STATE);
   calOnFlag = true;
   IQCalType = 0;
   radioState = CW_TRANSMIT_STRAIGHT_STATE;                 // KF5N
   transmitPowerLevelTemp = EEPROMData.transmitPowerLevel;  //AFP 05-11-23
   cwFreqOffsetTemp = EEPROMData.CWOffset;
   EEPROMData.CWOffset = 2;  // 750 Hz for TX calibration.  Prologue restores user selected offset.
-//  patchCord15.connect();    // Connect the I and Q output channels so the transmitter will work.
-//  patchCord16.connect();
+  patchCord15.connect();    // Connect the I and Q output channels so the transmitter will work.
+  patchCord16.connect();
   userxmtMode = EEPROMData.xmtMode;          // Store the user's mode setting.  KF5N July 22, 2023
   userZoomIndex = EEPROMData.spectrum_zoom;  // Save the zoom index so it can be reset at the conclusion.  KF5N August 12, 2023
   zoomIndex = setZoom - 1;
@@ -292,6 +291,8 @@ void Calibrate::CalibratePreamble(int setZoom) {
   xrState = RECEIVE_STATE;
   T41State = CW_RECEIVE;
 //  patchCord1.disconnect();  // Disconnect microphone. modeSelectInExL replaced with patchcord.  KF5N March 11, 2024
+  mixer1.gain(0, 0);  // Disconnect both the microphone and test tone.  CW calibrate generates the tone
+  mixer1.gain(1, 0);  // internally; the transmitter front-end is not used.
   EEPROMData.centerFreq = TxRxFreq;
   NCOFreq = 0L;
   xrState = TRANSMIT_STATE;
@@ -348,17 +349,6 @@ void Calibrate::CalibratePrologue() {
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreq();         // Return Si5351 to normal operation mode.  KF5N
   lastState = 1111;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 16, 2023
-
-  Serial.printf("lastState=%d radioState=%d memory_used=%d memory_used_max=%d f32_memory_used=%d f32_memory_used_max=%d\n",
-                lastState,
-                radioState,
-                (int)AudioStream::memory_used,
-                (int)AudioStream::memory_used_max,
-                (int)AudioStream_F32::f32_memory_used,
-                (int)AudioStream_F32::f32_memory_used_max);
-  AudioStream::memory_used_max = 0;
-  AudioStream_F32::f32_memory_used_max = 0;
-
   return;
 }
 
@@ -1771,6 +1761,7 @@ float Calibrate::PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
   // The FFT should be performed only at the beginning of the sweep, and buffers must be full.
   if (x1 == (cal_bins[0] - capture_bins)) {  // Set flag at revised beginning.  KF5N
     updateDisplayFlag = true;                // This flag is used in ZoomFFTExe().
+//      Calibrate::ProcessIQData2();  // Call the Audio process from within the display routine to eliminate conflicts with drawing the spectrum.
     ShowBandwidth();                         // Without this call, the calibration value in dB will not be updated.  KF5N
   } else updateDisplayFlag = false;          //  Do not save the the display data for the remainder of the sweep.
 

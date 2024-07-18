@@ -1242,7 +1242,7 @@ compressor1.setDelayBufferSize(delaySize);
      {  150.0f, 1.0f, 1.0f, 1.0f, 1.0f} };   // compressionRatio     
 
   compressor1.setCompressionCurve(&crv);
-  compressor1.begin();
+//  compressor1.begin();
 
 // basicCompressorBegin(pc1, -25.0f, 2.0);
 //  limiterBegin(pc1, -3.0f, -15.0f);

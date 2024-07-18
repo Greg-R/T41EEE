@@ -1,7 +1,7 @@
 // Teensy and Open Audio Signal Chains include file.
 
 // Common to Transmitter and Receiver.  Use Open Audio version to simplify transmitter?
-AudioInputI2SQuad i2s_quadIn;
+AudioInputI2SQuad i2s_quadIn;     // 4 inputs/outputs available only in Teensy audio not Open Audio library.
 AudioOutputI2SQuad i2s_quadOut;
 
 // Transmitter
@@ -207,5 +207,41 @@ void SetAudioOperatingState(int operatingState) {
       volumeAdjust.gain(volumeLog[EEPROMData.sidetoneVolume]);  // Adjust sidetone volume.
 
       break;
+
+    case CW_CALIBRATE_STATE:
+      SampleRate = SAMPLE_RATE_192K;
+      SetI2SFreq(SR[SampleRate].rate);
+      cessb1.setSampleRate_Hz(0);  // Deactivate SSB signal chain.
+      // QSD receiver enabled.  Calibrate is full duplex.
+      patchCord9.connect();   // Receiver I channel
+      patchCord10.connect();  // Receiver Q channel
+      patchCord17.disconnect();  // CW sidetone
+      patchCord18.disconnect();
+
+      // CW does not use the transmitter front-end.
+      Q_in_L_Ex.clear();
+      Q_in_L_Ex.end();  // Transmit I channel path.
+      Q_in_R_Ex.clear();
+      Q_in_R_Ex.end();  // Transmit Q channel path.
+
+      Q_in_L.clear();
+      Q_in_R.clear();
+
+      // Test tone enabled and connected
+//      tone1kHz.setSampleRate_Hz(48000);
+//      tone1kHz.amplitude(0.02);
+//      tone1kHz.frequency(750.0);
+      tone1kHz.end();
+//        tone1kHz.end();
+      mixer1.gain(0, 0);  // microphone audio off.
+      mixer1.gain(1, 0);  // testTone off.
+      Q_in_L.begin();     // Calibration is full duplex!
+      Q_in_R.begin();
+      //  Transmitter back-end needs to be active during CW calibration.
+      patchCord15.connect();  // Transmitter I channel
+      patchCord16.connect();  // Transmitter Q channel
+
+      break;
+
   }
 }
