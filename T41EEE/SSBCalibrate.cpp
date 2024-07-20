@@ -232,6 +232,7 @@ void SSBCalibrate::printCalType(int IQCalType, bool autoCal, bool autoCalDone) {
  *****/
 void SSBCalibrate::CalibratePreamble(int setZoom) {
   SetAudioOperatingState(SSB_CALIBRATE_STATE);
+  cessb1.processorUsageMaxReset();
   calOnFlag = true;
   IQCalType = 0;
 //  radioState = CW_TRANSMIT_STRAIGHT_STATE;                 // KF5N
@@ -299,6 +300,7 @@ void SSBCalibrate::CalibratePrologue() {
                 (int)AudioStream_F32::f32_memory_used_max);
   AudioStream::memory_used_max = 0;
   AudioStream_F32::f32_memory_used_max = 0;
+  Serial.printf("cessb1 max processor usage = %d\n", cessb1.processorUsageMax());
   digitalWrite(RXTX, LOW);  // Turn off the transmitter.
   updateDisplayFlag = false;
   xrState = RECEIVE_STATE;
@@ -1305,7 +1307,7 @@ powerScale = 30.0 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
 void SSBCalibrate::ShowSpectrum2()  //AFP 2-10-23
 {
   int x1 = 0;
-  int capture_bins = 30;  // Sets the number of bins to scan for signal peak.
+  int capture_bins = 8;  // Sets the number of bins to scan for signal peak.
 
   pixelnew[0] = 0;
   pixelnew[1] = 0;

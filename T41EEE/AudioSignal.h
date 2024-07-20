@@ -12,6 +12,8 @@ AudioEffectCompressor2_F32  compressor1; // Audio Compressor
 AudioEffectCompressor2_F32 *pc1 = &compressor1;
 radioCESSB_Z_transmit_F32 cessb1;
 AudioConvert_F32toI16 float2Int1, float2Int2;  // Converts Float to Int16.  See class in AudioStream_F32.h
+AudioSwitch4_OA_F32 switch1;
+AudioSwitch4_OA_F32 switch2;
 AudioMixer4_F32 mixer1;                        // Used to switch in tone during calibration.
 AudioSynthWaveformSine_F32  tone1kHz;          // Tone for SSB calibration.
 AudioRecordQueue Q_in_L_Ex;                    // AudioRecordQueue for input Microphone channel.
@@ -33,11 +35,15 @@ AudioRecordQueue Q_in_R_Ex;           // This 2nd channel is needed as we are br
 //  Begin transmit signal chain.
 AudioConnection connect0(i2s_quadIn, 0, int2Float1, 0);    // Microphone audio channel.
 
+AudioConnection_F32 connect9(int2Float1, 0, switch1, 0);
+AudioConnection_F32 connect10(tone1kHz,  0, switch2, 0);
+
 // Need a mixer to switch in an audio tone during calibration.  Should be a nominal tone amplitude.
-AudioConnection_F32 connect1(int2Float1, 0, mixer1, 0);  // Connect microphone mixer1 output 0
-AudioConnection_F32 connect2(tone1kHz, 0, mixer1, 1);  // Connect tone for SSB calibration.
+AudioConnection_F32 connect1(switch1, 0, mixer1, 0);  // Connect microphone mixer1 output 0
+AudioConnection_F32 connect2(switch2, 0, mixer1, 1);  // Connect tone for SSB calibration.
 
 AudioConnection_F32 connect3(mixer1, 0, compressor1, 0);  // Mixer output to input of compressor.
+
 AudioConnection_F32 connect4(compressor1, 0, cessb1, 0);
 
 // Controlled envelope SSB from Open Audio library.
@@ -114,8 +120,11 @@ void SetAudioOperatingState(int operatingState) {
       SampleRate = SAMPLE_RATE_192K;
       SetI2SFreq(SR[SampleRate].rate);   
 //      cessb1.setSampleRate_Hz(0);
-      // Deactivate microphone audio.
+      // Deactivate microphone and 1 kHz test tone.
       mixer1.gain(0, 0.0);
+      mixer1.gain(1, 0.0);
+      switch1.setChannel(1);  // Disconnect microphone path.
+      switch2.setChannel(1);  //  Disconnect 1 kHz test tone path.
       Q_in_L_Ex.end();  // Transmit I channel path.
       Q_in_L_Ex.clear();
       Q_in_R_Ex.end();  // Transmit Q channel path.
@@ -144,10 +153,13 @@ void SetAudioOperatingState(int operatingState) {
       Q_in_R.clear();
       SampleRate = SAMPLE_RATE_48K;
       SetI2SFreq(SR[SampleRate].rate);
-//      cessb1.setSampleRate_Hz(48000);
+      cessb1.setSampleRate_Hz(48000);
       tone1kHz.end();
       mixer1.gain(0, 1.0);   // Connect microphone audio to transmit chain.
       mixer1.gain(1, 0.0);   // Disconnect 1 kHz test tone. 
+      switch1.setChannel(0);  // Connect microphone path.
+      switch2.setChannel(1);  //  Disconnect 1 kHz test tone path.
+
       Q_in_L_Ex.begin();  // I channel Microphone audio
       Q_in_R_Ex.begin();  // Q channel Microphone audio
 
@@ -166,6 +178,9 @@ void SetAudioOperatingState(int operatingState) {
       patchCord17.disconnect();  // CW sidetone
       patchCord18.disconnect();
 
+      switch1.setChannel(1);
+      switch2.setChannel(0);
+
       Q_in_L.clear();
       Q_in_R.clear();
 
@@ -177,6 +192,8 @@ void SetAudioOperatingState(int operatingState) {
 //        tone1kHz.end();
       mixer1.gain(0, 0);  // microphone audio off.
       mixer1.gain(1, 1);  // testTone on.
+      switch1.setChannel(1);  // Disconnect microphone path.
+      switch2.setChannel(0);  //  Disconnect 1 kHz test tone path.
       Q_in_L_Ex.begin();  // I channel Microphone audio
       Q_in_R_Ex.begin();  // Q channel Microphone audio
       Q_in_L.begin();     // Calibration is full duplex!
@@ -217,6 +234,8 @@ void SetAudioOperatingState(int operatingState) {
       patchCord10.connect();  // Receiver Q channel
       patchCord17.disconnect();  // CW sidetone
       patchCord18.disconnect();
+      switch1.setChannel(1);
+      switch2.setChannel(1);
 
       // CW does not use the transmitter front-end.
       Q_in_L_Ex.clear();
@@ -235,6 +254,8 @@ void SetAudioOperatingState(int operatingState) {
 //        tone1kHz.end();
       mixer1.gain(0, 0);  // microphone audio off.
       mixer1.gain(1, 0);  // testTone off.
+      switch1.setChannel(1);  // Disconnect microphone path.
+      switch2.setChannel(1);  //  Disconnect 1 kHz test tone path.
       Q_in_L.begin();     // Calibration is full duplex!
       Q_in_R.begin();
       //  Transmitter back-end needs to be active during CW calibration.

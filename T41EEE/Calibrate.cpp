@@ -251,6 +251,7 @@ void Calibrate::printCalType(int IQCalType, bool autoCal, bool autoCalDone) {
  *****/
 void Calibrate::CalibratePreamble(int setZoom) {
   SetAudioOperatingState(CW_CALIBRATE_STATE);
+  cessb1.processorUsageMaxReset();
   calOnFlag = true;
   IQCalType = 0;
   radioState = CW_TRANSMIT_STRAIGHT_STATE;                 // KF5N
@@ -313,7 +314,7 @@ void Calibrate::CalibratePreamble(int setZoom) {
       void
  *****/
 void Calibrate::CalibratePrologue() {
-    Serial.printf("lastState=%d radioState=%d memory_used=%d memory_used_max=%d f32_memory_used=%d f32_memory_used_max=%d\n",
+  Serial.printf("lastState=%d radioState=%d memory_used=%d memory_used_max=%d f32_memory_used=%d f32_memory_used_max=%d\n",
                 lastState,
                 radioState,
                 (int)AudioStream::memory_used,
@@ -322,6 +323,7 @@ void Calibrate::CalibratePrologue() {
                 (int)AudioStream_F32::f32_memory_used_max);
   AudioStream::memory_used_max = 0;
   AudioStream_F32::f32_memory_used_max = 0;
+  Serial.printf("cessb1 max processor usage = %d\n", cessb1.processorUsageMax());
   digitalWrite(RXTX, LOW);  // Turn off the transmitter.
   updateDisplayFlag = false;
   xrState = RECEIVE_STATE;
@@ -357,16 +359,6 @@ void Calibrate::CalibratePrologue() {
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreq();         // Return Si5351 to normal operation mode.  KF5N
   lastState = 1111;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 16, 2023
-
-  Serial.printf("lastState=%d radioState=%d memory_used=%d memory_used_max=%d f32_memory_used=%d f32_memory_used_max=%d\n",
-                lastState,
-                radioState,
-                (int)AudioStream::memory_used,
-                (int)AudioStream::memory_used_max,
-                (int)AudioStream_F32::f32_memory_used,
-                (int)AudioStream_F32::f32_memory_used_max);
-  AudioStream::memory_used_max = 0;
-  AudioStream_F32::f32_memory_used_max = 0;
 
   return;
 }

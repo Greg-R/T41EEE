@@ -2,7 +2,7 @@
 
 //======================================== User section that might need to be changed ===================================
 #include "MyConfigurationFile.h"  // This file name should remain unchanged
-#define VERSION "T41EEE.6"        // Change this for updates. If you make this longer than 9 characters, brace yourself for surprises.  Use quotes!
+#define VERSION "T41EEE.7"        // Change this for updates. If you make this longer than 9 characters, brace yourself for surprises.  Use quotes!
 
 struct maps {
   char mapNames[50];
@@ -598,10 +598,11 @@ extern AudioPlayQueue Q_out_R_Ex;
 // = AFP 11-01-22
 extern AudioControlSGTL5000_Extended sgtl5000_1;  //controller for the Teensy Audio Board
 extern AudioConvert_I16toF32 int2Float1;          //Converts Int16 to Float.  See class in AudioStream_F32.h
-extern AudioEffectCompressor_F32 comp1;
+//extern AudioEffectCompressor_F32 comp1;
 extern AudioConvert_F32toI16 float2Int1;  //Converts Float to Int16.  See class in AudioStream_F32.h
 extern AudioSynthWaveformSine_F32 tone1kHz;
 extern AudioMixer4_F32 mixer1;
+extern radioCESSB_Z_transmit_F32 cessb1;
 // end Teensy and OpenAudio objects
 
 extern void SetAudioOperatingState(int operatingState);

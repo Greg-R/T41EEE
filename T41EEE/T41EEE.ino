@@ -1209,7 +1209,7 @@ FLASHMEM void setup() {
   sgtl5000_1.audioProcessorDisable();
 //  sgtl5000_1.eqSelect(3);
 //  sgtl5000_1.eqBands(-1.0, -1.0, 0.5, 0.5, -1.0);
-  AudioMemory(700);  //  Increased to 450 from 400.  Memory was hitting max.  KF5N August 31, 2023
+  AudioMemory(500);  //  Increased to 450 from 400.  Memory was hitting max.  KF5N August 31, 2023
   AudioMemory_F32(10);
   sgtl5000_1.inputSelect(AUDIO_INPUT_MIC);
   sgtl5000_1.muteHeadphone();  // KF5N March 11, 2024
