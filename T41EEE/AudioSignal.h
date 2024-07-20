@@ -153,7 +153,7 @@ void SetAudioOperatingState(int operatingState) {
       Q_in_R.clear();
       SampleRate = SAMPLE_RATE_48K;
       SetI2SFreq(SR[SampleRate].rate);
-      cessb1.setSampleRate_Hz(48000);
+//      cessb1.setSampleRate_Hz(48000);
       tone1kHz.end();
       mixer1.gain(0, 1.0);   // Connect microphone audio to transmit chain.
       mixer1.gain(1, 0.0);   // Disconnect 1 kHz test tone. 
@@ -171,7 +171,7 @@ void SetAudioOperatingState(int operatingState) {
     case SSB_CALIBRATE_STATE:
       SampleRate = SAMPLE_RATE_48K;
       SetI2SFreq(SR[SampleRate].rate);
-      cessb1.setSampleRate_Hz(48000);
+//      cessb1.setSampleRate_Hz(48000);
       // QSD disabled and disconnected
       patchCord9.connect();   // Receiver I channel
       patchCord10.connect();  // Receiver Q channel
@@ -228,7 +228,7 @@ void SetAudioOperatingState(int operatingState) {
     case CW_CALIBRATE_STATE:
       SampleRate = SAMPLE_RATE_192K;
       SetI2SFreq(SR[SampleRate].rate);
-      cessb1.setSampleRate_Hz(0);  // Deactivate SSB signal chain.
+//      cessb1.setSampleRate_Hz(0);  // Deactivate SSB signal chain.
       // QSD receiver enabled.  Calibrate is full duplex.
       patchCord9.connect();   // Receiver I channel
       patchCord10.connect();  // Receiver Q channel

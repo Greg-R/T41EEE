@@ -1206,9 +1206,9 @@ FLASHMEM void setup() {
   sgtl5000_1.enable();
 //  sgtl5000_1.audioPreProcessorEnable();
 //  sgtl5000_1.audioPostProcessorEnable();
-  sgtl5000_1.audioProcessorDisable();
-//  sgtl5000_1.eqSelect(3);
-//  sgtl5000_1.eqBands(-1.0, -1.0, 0.5, 0.5, -1.0);
+  sgtl5000_1.audioPreProcessorEnable();  // Need to use one of the equalizers.
+  sgtl5000_1.eqSelect(3);
+  sgtl5000_1.eqBands(-1.0, 0.0, 1.0, 1.0, -1.0);
   AudioMemory(500);  //  Increased to 450 from 400.  Memory was hitting max.  KF5N August 31, 2023
   AudioMemory_F32(10);
   sgtl5000_1.inputSelect(AUDIO_INPUT_MIC);
@@ -1237,9 +1237,9 @@ compressor1.setDelayBufferSize(delaySize);
 //{  100.0f,  2.5f,   1.5f,     1.0f,      1.0f} };    // compressionRatio
 
 //  This is using the compression after the kneeDB[0] only.
-  struct compressionCurve crv = { -2.0f, -25.0f,           // margin, offset
+  struct compressionCurve crv = { -2.0f, -40.0f,           // margin, offset
      {0.0f, -20.0f, -1000.0f, -1000.0f, -1000.0f},           // kneeDB[] 
-     {  150.0f, 1.0f, 1.0f, 1.0f, 1.0f} };   // compressionRatio     
+     {  10.0f, 1.0f, 1.0f, 1.0f, 1.0f} };   // compressionRatio     
 
 //pression after the kneeDB[0] only.
 //  struct compressionCurve crv = { -2.0f, -25.0f,           // margin, offset
@@ -1252,7 +1252,7 @@ compressor1.setDelayBufferSize(delaySize);
 // basicCompressorBegin(pc1, -25.0f, 2.0);
 //  limiterBegin(pc1, -3.0f, -15.0f);
 
-   cessb1.setSampleRate_Hz(0);
+   cessb1.setSampleRate_Hz(48000);
    cessb1.setGains(1.5f, 1.4f, 1.0f);
    cessb1.setSideband(false);
 
