@@ -170,7 +170,8 @@ void SetAudioOperatingState(int operatingState) {
 
     case SSB_CALIBRATE_STATE:
       SampleRate = SAMPLE_RATE_48K;
-      SetI2SFreq(SR[SampleRate].rate);
+      InitializeDataArrays();
+//      SetI2SFreq(SR[SampleRate].rate);
 //      cessb1.setSampleRate_Hz(48000);
       // QSD disabled and disconnected
       patchCord9.connect();   // Receiver I channel
@@ -186,7 +187,7 @@ void SetAudioOperatingState(int operatingState) {
 
       // Test tone enabled and connected
       tone1kHz.setSampleRate_Hz(48000);
-      tone1kHz.amplitude(0.02);
+      tone1kHz.amplitude(0.2);
       tone1kHz.frequency(750.0);
       tone1kHz.begin();
 //        tone1kHz.end();

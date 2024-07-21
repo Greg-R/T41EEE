@@ -231,7 +231,8 @@ void SSBCalibrate::printCalType(int IQCalType, bool autoCal, bool autoCalDone) {
       void
  *****/
 void SSBCalibrate::CalibratePreamble(int setZoom) {
-  SetAudioOperatingState(SSB_CALIBRATE_STATE);
+  radioState = SSB_CALIBRATE_STATE;
+  SetAudioOperatingState(radioState);
   cessb1.processorUsageMaxReset();
   calOnFlag = true;
   IQCalType = 0;
@@ -312,7 +313,8 @@ void SSBCalibrate::CalibratePrologue() {
   // Clear queues to reduce transient.
   Q_in_L.clear();
   Q_in_R.clear();
-  SetAudioOperatingState(SSB_RECEIVE_STATE);
+  radioState = SSB_RECEIVE_STATE;
+  SetAudioOperatingState(radioState);
   EEPROMData.centerFreq = TxRxFreq;
   NCOFreq = 0L;
   xrState = RECEIVE_STATE;
@@ -368,8 +370,8 @@ void SSBCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortC
   IQCalType = 0;  // Begin with gain optimization.
   float iOptimal = 1.0;
   float qOptimal = 0.0;
-  std::vector<float32_t> sweepVector(351);
-  std::vector<float32_t> sweepVectorValue(351);
+  std::vector<float32_t> sweepVector(101);
+  std::vector<float32_t> sweepVectorValue(101);
   elapsedMillis fiveSeconds;
   int viewTime = 0;
   bool autoCal = false;
@@ -379,7 +381,7 @@ void SSBCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortC
   // bool stopSweep = false;
 
   if (toneFreqIndex == 0) {           // 750 Hz
-    SSBCalibrate::CalibratePreamble(3);  // Set zoom to 8X.
+    SSBCalibrate::CalibratePreamble(2);  // Set zoom to 8X.
     freqOffset = 0;                   // Calibration tone same as regular modulation tone.
   }
   if (toneFreqIndex == 1) {           // 3 kHz
@@ -758,7 +760,7 @@ void SSBCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool
   // bool stopSweep = false;
 
   if (toneFreqIndex == 0) {  // 750 Hz
-    SSBCalibrate::CalibratePreamble(3);    // Set zoom to 16X.
+    SSBCalibrate::CalibratePreamble(2);    // Set zoom to 16X.
     freqOffset = 0;          // Calibration tone same as regular modulation tone.
   }
   if (toneFreqIndex == 1) {  // 3 kHz
@@ -1409,7 +1411,7 @@ float SSBCalibrate::PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
   y_old2 = pixelold[x1 - 1];
 
   // Find the maximums of the desired and undesired signals.
-
+/*
   if ((bands[EEPROMData.currentBand].mode == DEMOD_LSB) && (calTypeFlag == 0)) {
     arm_max_q15(&pixelnew[(cal_bins[0] - capture_bins)], capture_bins * 2, &refAmplitude, &index_of_max);
     arm_max_q15(&pixelnew[(cal_bins[1] - capture_bins)], capture_bins * 2, &adjAmplitude, &index_of_max);
@@ -1418,6 +1420,7 @@ float SSBCalibrate::PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
     arm_max_q15(&pixelnew[(cal_bins[0] - capture_bins)], capture_bins * 2, &adjAmplitude, &index_of_max);
     arm_max_q15(&pixelnew[(cal_bins[1] - capture_bins)], capture_bins * 2, &refAmplitude, &index_of_max);
   }
+*/
 
   if ((bands[EEPROMData.currentBand].mode == DEMOD_LSB) && (calTypeFlag == 1)) {
     arm_max_q15(&pixelnew[(cal_bins[0] - capture_bins)], capture_bins * 2, &refAmplitude, &index_of_max);

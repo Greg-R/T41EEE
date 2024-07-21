@@ -23,6 +23,7 @@ void ZoomFFTPrep() {  // take value of spectrum_zoom and initialize FIR decimati
       break;
     case SPECTRUM_ZOOM_4:
       Zoom_FFT_M1 = 2;
+      if(radioState == SSB_CALIBRATE_STATE) Zoom_FFT_M1 = 4;  // Change decimation when sample rate = 48ksps.  Greg KF5N July 21, 2024.
       Zoom_FFT_M2 = 2;
       break;
     case SPECTRUM_ZOOM_8:

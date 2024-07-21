@@ -1039,6 +1039,7 @@ float GetEncoderValueLive(float minValue, float maxValue, float startValue, floa
 q15_t GetEncoderValueLiveQ15t(int minValue, int maxValue, int startValue, int increment, char prompt[], bool left);
 void GetFavoriteFrequency();
 float HaversineDistance(float dxLat, float dxLon);
+void InitializeDataArrays();
 int InitializeSDCard();
 void InitFilterMask();
 void InitLMSNoiseReduction();

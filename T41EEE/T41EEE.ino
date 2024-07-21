@@ -1446,8 +1446,8 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   }
 
   if (lastState != radioState) {
-    SetFreq();  // Update frequencies if the radio state has changed.
     SetAudioOperatingState(radioState);
+    SetFreq();  // Update frequencies if the radio state has changed.
   }
 
   //  Begin radio state machines

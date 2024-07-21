@@ -27,7 +27,7 @@ void CalibrateOptions() {
 
   // Select the type of calibration, and then skip this during the loop() function.
   if (calibrateFlag == 0) {
-    const char *IQOptions[18]{ "Freq Cal", "CW PA Cal", "Rec Cal", "CW Carrier Cal", "CW Xmit Cal", "SSB PA Cal", "SSB Carrier Cal", "SSB Transmit Cal", "CW Radio Cal", "CW Refine Cal", "SSB Radio Cal", "SSB Refine Cal" "CW Cal Tone", "DAC Offset CW", "DAC Offset SSB", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
+    const char *IQOptions[18]{ "Freq Cal", "CW PA Cal", "Rec Cal", "CW Carrier Cal", "CW Xmit Cal", "SSB PA Cal", "SSB Carrier Cal", "SSB Transmit Cal", "CW Radio Cal", "CW Refine Cal", "SSB Radio Cal", "SSB Refine Cal", "CW Cal Tone", "DAC Offset CW", "DAC Offset SSB", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
     IQChoice = SubmenuSelect(IQOptions, 18, 0);                                                                                                                                                        //AFP 10-21-22
   }
   calibrateFlag = 1;
@@ -612,7 +612,7 @@ void EqualizerRecOptions() {
 
   Return value
     int           an index into the band array
-*****/
+*****
 void EqualizerXmtOptions() {
   const char *XmtEQChoices[] = { "TX EQ On", "TX EQ Off", "TX EQSet", "Cancel" };  // Add code practice oscillator
   int EQChoice = 0;
@@ -637,6 +637,7 @@ void EqualizerXmtOptions() {
   UpdateEqualizerField(EEPROMData.receiveEQFlag, EEPROMData.xmitEQFlag);
   //  return 0;
 }
+*/
 
 
 /*****
@@ -698,10 +699,12 @@ void MicGainSet() {
 *****/
 void MicOptions()  // AFP 09-22-22 All new
 {
-  const char *micChoices[] = { "Mic Comp On", "Mic Comp Off", "Set Threshold", "Set Comp_Ratio", "Set Attack", "Set Decay", "Cancel" };
+//  const char *micChoices[] = { "Mic Comp On", "Mic Comp Off", "Set Threshold", "Set Comp_Ratio", "Set Attack", "Set Decay", "Cancel" };
+  const char *micChoices[] = { "Set Threshold", "Cancel" };
 
-  micChoice = SubmenuSelect(micChoices, 7, micChoice);
+  micChoice = SubmenuSelect(micChoices, 2, micChoice);
   switch (micChoice) {
+  /*
     case 0:                           // On
       EEPROMData.compressorFlag = 1;  // AFP 09-22-22
       UpdateCompressionField();       // JJP 8/26/2023
@@ -710,9 +713,11 @@ void MicOptions()  // AFP 09-22-22 All new
       EEPROMData.compressorFlag = 0;
       UpdateCompressionField();  // JJP 8/26/2023
       break;
-    case 2:
+  */
+    case 0:
       SetCompressionLevel();
       break;
+  /*
     case 3:
       SetCompressionRatio();
       break;
@@ -724,6 +729,7 @@ void MicOptions()  // AFP 09-22-22 All new
       break;
     case 6:
       break;
+  */
     default:  // Cancelled choice
       micChoice = -1;
       break;
