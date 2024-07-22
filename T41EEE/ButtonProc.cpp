@@ -1,5 +1,7 @@
 #include "SDT.h"
 
+#define TOP_MENU_COUNT 12      // Menus to process AFP 09-27-22, JJP 7-8-23
+
 bool save_last_frequency = false;
 int directFreqFlag = 0;
 int32_t subMenuMaxOptions;  // Holds the number of submenu options.

@@ -47,7 +47,7 @@ extern struct maps myMapFiles[];
 //======================================== Symbolic Constants for the T41 ===================================================
 #define RIGNAME "T41-EP SDT"
 #define NUMBER_OF_SWITCHES 18  // Number of push button switches. 16 on older boards
-#define TOP_MENU_COUNT 13      // Menus to process AFP 09-27-22, JJP 7-8-23
+
 #define RIGNAME_X_OFFSET 570   // Pixel count to rig name field
 #define RA8875_DISPLAY 1       // Comment out if not using RA8875 display
 #define TEMPMON_ROOMTEMP 25.0f
@@ -438,11 +438,11 @@ struct config_t {
 
   int equalizerRec[EQUALIZER_CELL_COUNT] = { 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100 };
   int equalizerXmt[EQUALIZER_CELL_COUNT] = { 0, 0, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 0, 0 };  // Provide equalizer optimized for SSB voice based on Neville's tests.  KF5N November 2, 2023
-  int currentMicThreshold = -10;                                                                              // 4 bytes       AFP 09-22-22
-  float currentMicCompRatio = 8.0;
-  float currentMicAttack = 0.1;
-  float currentMicRelease = 0.1;
-  int currentMicGain = 15;  // Was 20; revised downward as a more conservative default.  KF5N February 5, 2024.
+//  int currentMicThreshold = -10;                                                                              // 4 bytes       AFP 09-22-22
+  float currentMicCompRatio = 10.0;
+//  float currentMicAttack = 0.1;
+//  float currentMicRelease = 0.1;
+  float currentMicGain = -40.0;  // This is actually the Open Audio compressor threshold.
   int switchValues[18] = { 924, 870, 817,
                            769, 713, 669,
                            616, 565, 513,
@@ -484,7 +484,7 @@ struct config_t {
   float myLong = MY_LON;
   float myLat = MY_LAT;
   int currentNoiseFloor[NUMBER_OF_BANDS]{ 0 };
-  int compressorFlag = 0;  // JJP 8/28/23
+  int compressorFlag = 1;  // CESSB compressor is always on!
   bool xmitEQFlag = false;
   bool receiveEQFlag = false;
   int calFreq = 0;                    // This is an index into an array of tone frequencies, for example:  {750, 3000}.  Default to 750 Hz. KF5N March 12, 2024
@@ -602,6 +602,7 @@ extern AudioConvert_I16toF32 int2Float1;          //Converts Int16 to Float.  Se
 extern AudioConvert_F32toI16 float2Int1;  //Converts Float to Int16.  See class in AudioStream_F32.h
 extern AudioSynthWaveformSine_F32 tone1kHz;
 extern AudioMixer4_F32 mixer1;
+extern AudioEffectCompressor2_F32  compressor1; // Open Audio Compressor
 extern radioCESSB_Z_transmit_F32 cessb1;
 // end Teensy and OpenAudio objects
 
@@ -1136,6 +1137,7 @@ void UpdateAGCField();
 void UpdateCompressionField();
 void UpdateDecoderField();
 void UpdateEqualizerField(bool rxEqState, bool txEqState);
+void updateMic();  // This updates the Open Audio compressor.
 void UpdateNoiseField();
 void UpdateNotchField();
 void UpdateSDIndicator(int present);

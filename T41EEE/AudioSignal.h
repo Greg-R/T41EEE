@@ -8,7 +8,7 @@ AudioOutputI2SQuad i2s_quadOut;
 AudioControlSGTL5000_Extended sgtl5000_1;      // Controller for the Teensy Audio Board, transmitter only.
 AudioConvert_I16toF32 int2Float1;              // Converts Int16 to Float.  See class in AudioStream_F32.h
 //AudioEffectCompressor_F32 comp1;               // Compressor from OpenAudio library.  Used in microphone dataflow path.
-AudioEffectCompressor2_F32  compressor1; // Audio Compressor
+AudioEffectCompressor2_F32  compressor1; // Open Audio Compressor
 AudioEffectCompressor2_F32 *pc1 = &compressor1;
 radioCESSB_Z_transmit_F32 cessb1;
 AudioConvert_F32toI16 float2Int1, float2Int2;  // Converts Float to Int16.  See class in AudioStream_F32.h
@@ -42,7 +42,7 @@ AudioConnection_F32 connect10(tone1kHz,  0, switch2, 0);
 AudioConnection_F32 connect1(switch1, 0, mixer1, 0);  // Connect microphone mixer1 output 0
 AudioConnection_F32 connect2(switch2, 0, mixer1, 1);  // Connect tone for SSB calibration.
 
-AudioConnection_F32 connect3(mixer1, 0, compressor1, 0);  // Mixer output to input of compressor.
+AudioConnection_F32 connect3(mixer1, 0, compressor1, 0);  // Mixer output to input of Open Audio compressor.
 
 AudioConnection_F32 connect4(compressor1, 0, cessb1, 0);
 

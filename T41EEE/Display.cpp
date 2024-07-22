@@ -1230,7 +1230,7 @@ void UpdateCompressionField()  // JJP 8/26/2023
   tft.setTextColor(RA8875_GREEN);
   if (EEPROMData.compressorFlag == 1) {  // JJP 8/26/2023
     tft.print("On  ");
-    tft.print(EEPROMData.currentMicThreshold);
+    tft.print(EEPROMData.currentMicCompRatio);   // This is the compression ratio of the Open Audio compressor.  Greg KF5N July 22, 2024
   } else {
     tft.setCursor(FIELD_OFFSET_X, COMPRESSION_Y - 5);
     tft.print("Off");

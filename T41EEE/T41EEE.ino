@@ -197,7 +197,7 @@ struct band bands[NUMBER_OF_BANDS]{  //AFP Changed 1-30-21 // G0ORX Changed AGC 
 const char *topMenus[] = { "CW Options", "RF Set", "VFO Select",
                            "EEPROM", "AGC", "Spectrum Options",
                            "Noise Floor", "Mic Gain", "Mic Comp",
-                           "EQ Rec Set", "EQ Xmt Set", "Calibrate", "Bearing" };
+                           "EQ Rec Set", "Calibrate", "Bearing" };
 
 // Button array labels array is located in Utility.cpp.
 
@@ -205,7 +205,7 @@ const char *topMenus[] = { "CW Options", "RF Set", "VFO Select",
 void (*functionPtr[])() = { &CWOptions, &RFOptions, &VFOSelect,
                             &EEPROMOptions, &AGCOptions, &SpectrumOptions,
                             &ButtonSetNoiseFloor, &MicGainSet, &MicOptions,
-                            &EqualizerRecOptions, &EqualizerXmtOptions, &CalibrateOptions, &BearingMaps };
+                            &EqualizerRecOptions, &CalibrateOptions, &BearingMaps };
 
 uint32_t FFT_length = FFT_LENGTH;
 
@@ -1237,17 +1237,14 @@ compressor1.setDelayBufferSize(delaySize);
 //{  100.0f,  2.5f,   1.5f,     1.0f,      1.0f} };    // compressionRatio
 
 //  This is using the compression after the kneeDB[0] only.
-  struct compressionCurve crv = { -2.0f, -40.0f,           // margin, offset
-     {0.0f, -20.0f, -1000.0f, -1000.0f, -1000.0f},           // kneeDB[] 
-     {  10.0f, 1.0f, 1.0f, 1.0f, 1.0f} };   // compressionRatio     
+//  struct compressionCurve crv = { -2.0f, -40.0f,           // margin, offset
+//     {0.0f, -20.0f, -1000.0f, -1000.0f, -1000.0f},           // kneeDB[]  
+//     {  EEPROMData.currentMicCompRatio, 1.0f, 1.0f, 1.0, 1.0} };   // compressionRatio     
 
-//pression after the kneeDB[0] only.
-//  struct compressionCurve crv = { -2.0f, -25.0f,           // margin, offset
-//     {0.0f, -20.0f, -1000.0f},           // kneeDB[] 
-//     {  150.0f, 1.0f, 1.0f} };   // compressionRatio         
+//  compressor1.setCompressionCurve(&crv);
+//  compressor1.begin();
 
-  compressor1.setCompressionCurve(&crv);
-  compressor1.begin();
+  updateMic();  // This updates the Open Audio compressor settings.
 
 // basicCompressorBegin(pc1, -25.0f, 2.0);
 //  limiterBegin(pc1, -3.0f, -15.0f);

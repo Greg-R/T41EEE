@@ -1,6 +1,25 @@
 
 #include "SDT.h"
 
+int micGainChoice;
+//  This is using the compression after the kneeDB[0] only.
+  struct compressionCurve crv = { -2.0f, -40.0f,           // margin, offset
+     {0.0f, -20.0f, -1000.0f, -1000.0f, -1000.0f},           // kneeDB[]  
+     {  EEPROMData.currentMicCompRatio, 1.0f, 1.0f, 1.0, 1.0} };   // compressionRatio
+
+
+void updateMic() {
+
+//  This is using the compression after the kneeDB[0] only.
+  struct compressionCurve crv = { -2.0f, EEPROMData.currentMicGain,           // margin, offset
+     {0.0f, -20.0f, -1000.0f, -1000.0f, -1000.0f},           // kneeDB[]  
+     {  EEPROMData.currentMicCompRatio, 1.0f, 1.0f, 1.0, 1.0} };   // compressionRatio
+
+  compressor1.setCompressionCurve(&crv);
+  compressor1.begin();
+
+}
+
 /*****
   Purpose: Create I and Q signals from Mic input
 
@@ -186,3 +205,258 @@ void SetBandRelay(int state)
 // Set current band relay "on".  Ignore 12M and 10M.  15M and 17M use the same relay.  KF5N September 27, 2023.
   if(EEPROMData.currentBand < 5) digitalWrite(bandswitchPins[EEPROMData.currentBand], state);  
 }
+
+
+/*****
+  Purpose: Allow user to set the mic compression level
+
+  Parameter list:
+    void
+
+  Return value;
+    void
+*****
+void SetCompressionLevel()
+{
+  int val;
+  //EEPROMData.currentMicThreshold = knee_dBFS; // AFP 09-22-22  Commented out.  KF5N October 31, 2023
+
+  tft.setFontScale( (enum RA8875tsize) 1);
+
+  tft.fillRect(SECONDARY_MENU_X - 50, MENUS_Y, EACH_MENU_WIDTH + 50, CHAR_HEIGHT, RA8875_MAGENTA);
+  tft.setTextColor(RA8875_WHITE);
+  tft.setCursor(SECONDARY_MENU_X  - 48, MENUS_Y + 1);
+  tft.print("Compression:");
+  tft.setCursor(SECONDARY_MENU_X + 180, MENUS_Y + 1);
+  tft.print(EEPROMData.currentMicThreshold);
+
+  while (true) {
+    if (filterEncoderMove != 0) {
+      EEPROMData.currentMicThreshold += ((float) filterEncoderMove);
+      if (EEPROMData.currentMicThreshold < -60)
+        EEPROMData.currentMicThreshold = -60;
+      else if (EEPROMData.currentMicThreshold > 0)                 // 100% max
+        EEPROMData.currentMicThreshold = 0;
+
+      tft.fillRect(SECONDARY_MENU_X + 180, MENUS_Y, 80, CHAR_HEIGHT, RA8875_MAGENTA);
+      tft.setCursor(SECONDARY_MENU_X + 180, MENUS_Y + 1);
+      tft.print(EEPROMData.currentMicThreshold);
+      filterEncoderMove = 0;
+    }
+    val = ReadSelectedPushButton();                                  // Read pin that controls all switches
+    val = ProcessButtonPress(val);
+    delay(150L);
+    if (val == MENU_OPTION_SELECT) {                             // Make a choice??
+      // micCompression = EEPROMData.currentMicThreshold;
+      //EEPROMData.EEPROMData.currentMicThreshold = EEPROMData.currentMicThreshold;
+      EEPROMWrite();
+      UpdateCompressionField();
+      break;
+    }
+  }
+  EraseMenus();
+}
+*/
+
+/*****
+  Purpose: Allow user to set the mic compression ratio
+
+  Parameter list:
+    void
+
+  Return value;
+    void
+*****/
+void SetCompressionRatio()
+{
+  int val;
+
+  tft.setFontScale( (enum RA8875tsize) 1);
+
+  tft.fillRect(SECONDARY_MENU_X - 50, MENUS_Y, EACH_MENU_WIDTH + 50, CHAR_HEIGHT, RA8875_MAGENTA);
+  tft.setTextColor(RA8875_WHITE);
+  tft.setCursor(SECONDARY_MENU_X  - 48, MENUS_Y + 1);
+  tft.print("Comp Ratio:");
+  tft.setCursor(SECONDARY_MENU_X + 180, MENUS_Y + 1);
+  tft.print(EEPROMData.currentMicCompRatio, 1);
+
+  while (true) {
+    if (filterEncoderMove != 0) {
+      EEPROMData.currentMicCompRatio += ((float) filterEncoderMove * 1.0);
+      if (EEPROMData.currentMicCompRatio > 1000)
+        EEPROMData.currentMicCompRatio = 1000;
+      else if (EEPROMData.currentMicCompRatio < 1)                 // 100% max
+        EEPROMData.currentMicCompRatio = 1;
+
+      tft.fillRect(SECONDARY_MENU_X + 180, MENUS_Y, 80, CHAR_HEIGHT, RA8875_MAGENTA);
+      tft.setCursor(SECONDARY_MENU_X + 180, MENUS_Y + 1);
+      tft.print(EEPROMData.currentMicCompRatio, 1);
+      filterEncoderMove = 0;
+    }
+
+    val = ReadSelectedPushButton();                                  // Read pin that controls all switches
+    val = ProcessButtonPress(val);
+    delay(150L);
+
+    if (val == MENU_OPTION_SELECT) {                             // Make a choice??
+     // EEPROMData.EEPROMData.currentMicCompRatio = EEPROMData.currentMicCompRatio;
+     updateMic();  // This updates the compression ratio and the threshold.
+      EEPROMWrite();
+
+      break;
+    }
+  }
+  EraseMenus();
+}
+
+
+/*****
+  Purpose: Set Mic level
+
+  Parameter list:
+    void
+
+  Return value
+    int           an index into the band array
+*****/
+void MicGainSet() {
+  //=====
+  const char *micGainChoices[] = { "Set Mic Gain", "Cancel" };
+  micGainChoice = SubmenuSelect(micGainChoices, 2, micGainChoice);
+  switch (micGainChoice) {
+    case 0:
+      int val;
+      tft.setFontScale((enum RA8875tsize)1);
+      tft.fillRect(SECONDARY_MENU_X - 50, MENUS_Y, EACH_MENU_WIDTH + 50, CHAR_HEIGHT, RA8875_MAGENTA);
+      tft.setTextColor(RA8875_WHITE);
+      tft.setCursor(SECONDARY_MENU_X - 48, MENUS_Y + 1);
+      tft.print("Mic Gain:");
+      tft.setCursor(SECONDARY_MENU_X + 160, MENUS_Y + 1);
+      tft.print(EEPROMData.currentMicGain);
+      while (true) {
+        if (filterEncoderMove != 0) {
+          EEPROMData.currentMicGain += ((float)filterEncoderMove);
+          if (EEPROMData.currentMicGain < -60)
+            EEPROMData.currentMicGain = -60;
+          else if (EEPROMData.currentMicGain > 30)  // 100% max
+            EEPROMData.currentMicGain = 30;
+          tft.fillRect(SECONDARY_MENU_X + 160, MENUS_Y, 80, CHAR_HEIGHT, RA8875_MAGENTA);
+          tft.setCursor(SECONDARY_MENU_X + 160, MENUS_Y + 1);
+          tft.print(EEPROMData.currentMicGain);
+          filterEncoderMove = 0;
+        }
+        val = ReadSelectedPushButton();  // Read pin that controls all switches
+        val = ProcessButtonPress(val);
+        if (val == MENU_OPTION_SELECT) {  // Make a choice??
+          updateMic();  // Update the Open Audio compressor.
+          EEPROMWrite();
+          break;
+        }
+      }
+    case 1:
+      break;
+  }
+}
+
+
+/*****
+  Purpose: Allow user to set the mic Attack in sec
+
+  Parameter list:
+    void
+
+  Return value;
+    void
+*****
+void SetCompressionAttack()
+{
+  int val;
+
+  tft.setFontScale( (enum RA8875tsize) 1);
+
+  tft.fillRect(SECONDARY_MENU_X - 50, MENUS_Y, EACH_MENU_WIDTH + 50, CHAR_HEIGHT, RA8875_MAGENTA);
+  tft.setTextColor(RA8875_WHITE);
+  tft.setCursor(SECONDARY_MENU_X  - 48, MENUS_Y + 1);
+  tft.print("Attack Sec:");
+  tft.setCursor(SECONDARY_MENU_X + 180, MENUS_Y + 1);
+  tft.print(EEPROMData.currentMicAttack, 1);
+
+  while (true) {
+    if (filterEncoderMove != 0) {
+      EEPROMData.currentMicAttack += ((float) filterEncoderMove * 0.1);
+      if (EEPROMData.currentMicAttack > 10)
+        EEPROMData.currentMicAttack = 10;
+      else if (EEPROMData.currentMicAttack < .1)                 // 100% max
+        EEPROMData.currentMicAttack = .1;
+
+      tft.fillRect(SECONDARY_MENU_X + 180, MENUS_Y, 80, CHAR_HEIGHT, RA8875_MAGENTA);
+      tft.setCursor(SECONDARY_MENU_X + 180, MENUS_Y + 1);
+      tft.print(EEPROMData.currentMicAttack, 1);
+      filterEncoderMove = 0;
+    }
+
+    val = ReadSelectedPushButton();                                  // Read pin that controls all switches
+    val = ProcessButtonPress(val);
+    delay(150L);
+
+    if (val == MENU_OPTION_SELECT) {                             // Make a choice??
+      //EEPROMData.EEPROMData.currentMicAttack = EEPROMData.currentMicAttack;
+      EEPROMWrite();
+
+      break;
+    }
+  }
+  EraseMenus();
+}
+*/
+
+/*****
+  Purpose: Allow user to set the mic compression ratio
+
+  Parameter list:
+    void
+
+  Return value;
+    void
+*****
+void SetCompressionRelease()
+{
+  int val;
+
+  tft.setFontScale( (enum RA8875tsize) 1);
+
+  tft.fillRect(SECONDARY_MENU_X - 50, MENUS_Y, EACH_MENU_WIDTH + 50, CHAR_HEIGHT, RA8875_MAGENTA);
+  tft.setTextColor(RA8875_WHITE);
+  tft.setCursor(SECONDARY_MENU_X  - 48, MENUS_Y + 1);
+  tft.print("Decay Sec:");
+  tft.setCursor(SECONDARY_MENU_X + 180, MENUS_Y + 1);
+  tft.print(EEPROMData.currentMicRelease, 1);
+
+  while (true) {
+    if (filterEncoderMove != 0) {
+      EEPROMData.currentMicRelease += ((float) filterEncoderMove * 0.1);
+      if (EEPROMData.currentMicRelease > 10)
+        EEPROMData.currentMicRelease = 10;
+      else if (EEPROMData.currentMicRelease < 0.1)                 // 100% max
+        EEPROMData.currentMicRelease = 0.1;
+
+      tft.fillRect(SECONDARY_MENU_X + 180, MENUS_Y, 80, CHAR_HEIGHT, RA8875_MAGENTA);
+      tft.setCursor(SECONDARY_MENU_X + 180, MENUS_Y + 1);
+      tft.print(EEPROMData.currentMicRelease, 1);
+      filterEncoderMove = 0;
+    }
+
+    val = ReadSelectedPushButton();                                  // Read pin that controls all switches
+    val = ProcessButtonPress(val);
+    delay(150L);
+
+    if (val == MENU_OPTION_SELECT) {                             // Make a choice??
+      //EEPROMData.EEPROMData.currentMicCompRatio = EEPROMData.currentMicCompRatio;
+      EEPROMWrite();
+
+      break;
+    }
+  }
+  EraseMenus();
+}
+*/

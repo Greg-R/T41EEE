@@ -2,7 +2,7 @@
 #include "SDT.h"
 
 int micChoice;
-int micGainChoice;
+
 int splitOn = 0;
 
 // Updates by KF5N to CalibrateOptions() function.  Added SSB Carrier and SSB Transmit cal.  Greg KF5N July 10, 2024
@@ -640,52 +640,7 @@ void EqualizerXmtOptions() {
 */
 
 
-/*****
-  Purpose: Set Mic level
 
-  Parameter list:
-    void
-
-  Return value
-    int           an index into the band array
-*****/
-void MicGainSet() {
-  //=====
-  const char *micGainChoices[] = { "Set Mic Gain", "Cancel" };
-  micGainChoice = SubmenuSelect(micGainChoices, 2, micGainChoice);
-  switch (micGainChoice) {
-    case 0:
-      int val;
-      tft.setFontScale((enum RA8875tsize)1);
-      tft.fillRect(SECONDARY_MENU_X - 50, MENUS_Y, EACH_MENU_WIDTH + 50, CHAR_HEIGHT, RA8875_MAGENTA);
-      tft.setTextColor(RA8875_WHITE);
-      tft.setCursor(SECONDARY_MENU_X - 48, MENUS_Y + 1);
-      tft.print("Mic Gain:");
-      tft.setCursor(SECONDARY_MENU_X + 180, MENUS_Y + 1);
-      tft.print(EEPROMData.currentMicGain);
-      while (true) {
-        if (filterEncoderMove != 0) {
-          EEPROMData.currentMicGain += ((float)filterEncoderMove);
-          if (EEPROMData.currentMicGain < -40)
-            EEPROMData.currentMicGain = -40;
-          else if (EEPROMData.currentMicGain > 30)  // 100% max
-            EEPROMData.currentMicGain = 30;
-          tft.fillRect(SECONDARY_MENU_X + 180, MENUS_Y, 80, CHAR_HEIGHT, RA8875_MAGENTA);
-          tft.setCursor(SECONDARY_MENU_X + 180, MENUS_Y + 1);
-          tft.print(EEPROMData.currentMicGain);
-          filterEncoderMove = 0;
-        }
-        val = ReadSelectedPushButton();  // Read pin that controls all switches
-        val = ProcessButtonPress(val);
-        if (val == MENU_OPTION_SELECT) {  // Make a choice??
-          EEPROMWrite();
-          break;
-        }
-      }
-    case 1:
-      break;
-  }
-}
 
 
 /*****
@@ -715,7 +670,8 @@ void MicOptions()  // AFP 09-22-22 All new
       break;
   */
     case 0:
-      SetCompressionLevel();
+//      SetCompressionLevel();
+SetCompressionRatio();
       break;
   /*
     case 3:
@@ -1021,17 +977,6 @@ void EEPROMOptions() {  // 0               1                2               3   
 
   Return value
     int           an index into the band array
-const char *topMenus[] = { "Bearing", "CW Options", "RF Set", "VFO Select",
-                           "EEPROM", "AGC", "Spectrum Options",
-                           "Noise Floor", "Mic Gain", "Mic Comp",
-                           "EQ Rec Set", "EQ Xmt Set", "Calibrate" };
-
-int (*functionPtr[])() = { &BearingMaps, &CWOptions, &RFOptions, &VFOSelect,
-                           &EEPROMOptions, &AGCOptions, &SpectrumOptions,
-                           &ButtonSetNoiseFloor, &MicGainSet, &MicOptions,
-                           &EqualizerRecOptions, &EqualizerXmtOptions, &IQOptions
-
-};
 *****/
 int SubmenuSelect(const char *options[], int numberOfChoices, int defaultStart) {
   int refreshFlag = 0;
