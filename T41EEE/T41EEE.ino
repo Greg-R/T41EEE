@@ -1229,7 +1229,7 @@ sgtl5000_1.adcHighPassFilterEnable();  //reduces noise.  https://forum.pjrc.com/
                                                //  sgtl5000_2.volume(0.5);   //  Headphone volume???  Not required as headphone is muted.
 
 int16_t delaySize = 256;     // Any power of 2, i.e., 256, 128, 64, etc.
-compressor1.setDelayBufferSize(delaySize);
+compressor1.setDelayBufferSize(delaySize);  // Improves transient response of compressor.
 
 // Original example
 //  struct compressionCurve crv = { -2.0f, 0.0f,           // margin, offset

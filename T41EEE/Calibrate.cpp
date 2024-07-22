@@ -103,7 +103,7 @@ void Calibrate::warmUpCal() {
 *****/
 void Calibrate::printCalType(int IQCalType, bool autoCal, bool autoCalDone) {
   const char *calName;
-  const char *IQName[4] = { "Receive", "Transmit", "Carrier", "Calibrate" };
+  const char *IQName[4] = { "Receive", "Transmit CW", "Carrier CW", "Calibrate" };
   tft.writeTo(L1);
   calName = IQName[calTypeFlag];
   tft.setFontScale((enum RA8875tsize)1);
@@ -258,8 +258,6 @@ void Calibrate::CalibratePreamble(int setZoom) {
   transmitPowerLevelTemp = EEPROMData.transmitPowerLevel;  //AFP 05-11-23
   cwFreqOffsetTemp = EEPROMData.CWOffset;
   EEPROMData.CWOffset = 2;  // 750 Hz for TX calibration.  Prologue restores user selected offset.
-//  patchCord15.connect();    // Connect the I and Q output channels so the transmitter will work.
-//  patchCord16.connect();
   userxmtMode = EEPROMData.xmtMode;          // Store the user's mode setting.  KF5N July 22, 2023
   userZoomIndex = EEPROMData.spectrum_zoom;  // Save the zoom index so it can be reset at the conclusion.  KF5N August 12, 2023
   zoomIndex = setZoom - 1;
@@ -292,7 +290,6 @@ void Calibrate::CalibratePreamble(int setZoom) {
   digitalWrite(MUTE, LOW);  //turn off mute
   xrState = RECEIVE_STATE;
   T41State = CW_RECEIVE;
-//  patchCord1.disconnect();  // Disconnect microphone. modeSelectInExL replaced with patchcord.  KF5N March 11, 2024
   EEPROMData.centerFreq = TxRxFreq;
   NCOFreq = 0L;
   xrState = TRANSMIT_STATE;
