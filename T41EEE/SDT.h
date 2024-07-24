@@ -578,35 +578,31 @@ void ExciterIQData();
 extern int32_t NCOFreq;  // AFP 04-16-22
 
 //======================================== Global object declarations ==================================================
-// Teensy and OpenAudio objects.  Revised by KF5N March 12, 2024
-extern AudioConnection patchCord1;   // This patchcord is used to disconnect the microphone input datastream.
+// Teensy and OpenAudio objects.  Revised by KF5N July 24, 2024
+//extern AudioConnection patchCord1;   // This patchcord is used to disconnect the microphone input datastream.
 extern AudioConnection patchCord15;  // Patch cords 15 and 16 are used to connect/disconnect the I and Q datastreams.
 extern AudioConnection patchCord16;
 
 extern AudioAmplifier volumeAdjust;
-
 extern AudioRecordQueue Q_in_L;
 extern AudioRecordQueue Q_in_R;
 extern AudioRecordQueue Q_in_L_Ex;
 extern AudioRecordQueue Q_in_R_Ex;
-
-
 extern AudioPlayQueue Q_out_L;
 extern AudioPlayQueue Q_out_L_Ex;
 extern AudioPlayQueue Q_out_R_Ex;
 
-// = AFP 11-01-22
-extern AudioControlSGTL5000_Extended sgtl5000_1;  //controller for the Teensy Audio Board
-extern AudioConvert_I16toF32 int2Float1;          //Converts Int16 to Float.  See class in AudioStream_F32.h
-//extern AudioEffectCompressor_F32 comp1;
-extern AudioConvert_F32toI16 float2Int1;  //Converts Float to Int16.  See class in AudioStream_F32.h
+extern AudioControlSGTL5000_Extended sgtl5000_1;  // F32 controller for the Teensy Audio Board
+extern AudioConvert_I16toF32 int2Float1;          // Converts Int16 to Float.  See class in AudioStream_F32.h
+extern AudioEffectGain_F32 micGain;               // Added with CESSB.  Greg KF5N July 24, 2024.
+extern AudioConvert_F32toI16 float2Int1;          // Converts Float to Int16.  See class in AudioStream_F32.h
 extern AudioSynthWaveformSine_F32 tone1kHz;
 extern AudioMixer4_F32 mixer1;
-extern AudioEffectCompressor2_F32  compressor1; // Open Audio Compressor
+extern AudioEffectCompressor2_F32  compressor1;   // Open Audio Compressor 2
 extern radioCESSB_Z_transmit_F32 cessb1;
 // end Teensy and OpenAudio objects
 
-extern void SetAudioOperatingState(int operatingState);
+extern void SetAudioOperatingState(int operatingState);  // Configures audio system for requested mode state.
 
 extern Rotary volumeEncoder;    // (2,  3)
 extern Rotary tuneEncoder;      // (16, 17)
@@ -615,8 +611,8 @@ extern Rotary fineTuneEncoder;  // (4,  5);
 
 extern Metro ms_500;
 
-extern Calibrate calibrater;
-extern SSBCalibrate ssbcalibrater;
+extern Calibrate calibrater;         // CW mode calibration object.
+extern SSBCalibrate ssbcalibrater;   // SSB mode calibration object.
 
 extern Si5351 si5351;
 
@@ -1056,7 +1052,7 @@ void KeyRingOn();
 void KeyTipOn();
 void LMSNoiseReduction(int16_t blockSize, float32_t *nrbuffer);
 float32_t log10f_fast(float32_t X);
-void MicOptions();
+//void MicOptions();
 int ModeOptions();
 //DB2OO, 29-AUG-23: added
 void MorseCharacterDisplay(char currentLetter);
@@ -1080,10 +1076,10 @@ void ResetTuning();  // AFP 10-11-22
 void RFOptions();
 void ResetZoom(int zoomIndex1);  // AFP 11-06-22
 int SDPresentCheck();
-void SetCompressionLevel();
+void SetCompressionThreshold();
 void SetCompressionRatio();
-void SetCompressionAttack();
-void SetCompressionRelease();
+//void SetCompressionAttack();
+//void SetCompressionRelease();
 void MicGainSet();
 void SaveAnalogSwitchValues();
 void SelectCWFilter();  // AFP 10-18-22
@@ -1113,10 +1109,10 @@ void initCWShaping();
 void SpectrumOptions();
 void UpdateInfoWindow();
 void SetFreqCal(int calFreqShift);
-extern "C" {
-  void sincosf(float err, float *s, float *c);
-  void sincos(double err, double *s, double *c);
-}
+//extern "C" {
+//  void sincosf(float err, float *s, float *c);
+//  void sincos(double err, double *s, double *c);
+//}
 void ShowFrequency();
 void ShowMenu(const char *menu[], int where);
 void ShowName();
@@ -1128,6 +1124,7 @@ void BandInformation();
 void SpectralNoiseReduction(void);
 void SpectralNoiseReductionInit();
 void Splash();
+void SSBOptions();
 int SubmenuSelect(const char *options[], int numberOfChoices, int defaultStart);
 
 void T4_rtc_set(unsigned long t);

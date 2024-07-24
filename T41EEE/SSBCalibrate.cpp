@@ -1469,6 +1469,7 @@ float SSBCalibrate::PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
 }
 
 
+
 void SSBCalibrate::ZoomFFTExe(uint32_t blockSize) {
   // totally rebuilt 27.8.2020 DD4WH
   // however, I did not manage to implement a correct routine for magnifications > 2048x

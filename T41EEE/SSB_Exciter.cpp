@@ -6,24 +6,25 @@ int micGainChoice;
 
 void updateMic() {
 
-//  This is using the compression after the kneeDB[0] only.
-//  struct compressionCurve crv = { -6.0f, EEPROMData.currentMicGain,           // margin, offset
-//     {0.0f, -20.0f, -1000.0f, -1000.0f, -1000.0f},           // kneeDB[]  
-//     {  EEPROMData.currentMicCompRatio, 1.0f, 1.0f, 1.0, 1.0} };   // compressionRatio
+  //  This is using the compression after the kneeDB[0] only.
+  //  struct compressionCurve crv = { -6.0f, EEPROMData.currentMicGain,           // margin, offset
+  //     {0.0f, -20.0f, -1000.0f, -1000.0f, -1000.0f},           // kneeDB[]
+  //     {  EEPROMData.currentMicCompRatio, 1.0f, 1.0f, 1.0, 1.0} };   // compressionRatio
 
-  struct compressionCurve crv = { -12.0f, 0.0,           // margin, offset
-  //   {0.0f, -7.0f, -10.0f, -1000.0f, -1000.0f},           // kneeDB[]  
-       {0.0f, -7.0f, EEPROMData.currentMicThreshold, -1000.0f, -1000.0f},
-//     {  100.0, 100.0f, 1.0f, 1.0, 1.0} };   // compressionRatio     
-{  100.0, EEPROMData.currentMicCompRatio, 1.0f, 1.0, 1.0} };
+  micGain.setGain_dB(EEPROMData.currentMicGain);
+
+  struct compressionCurve crv = { -12.0f, 0.0,  // margin, offset
+                                                //   {0.0f, -7.0f, -10.0f, -1000.0f, -1000.0f},           // kneeDB[]
+                                  { 0.0f, -7.0f, EEPROMData.currentMicThreshold, -1000.0f, -1000.0f },
+                                  //     {  100.0, 100.0f, 1.0f, 1.0, 1.0} };   // compressionRatio
+                                  { 100.0, EEPROMData.currentMicCompRatio, 1.0f, 1.0, 1.0 } };
 
 
-int16_t delaySize = 256;     // Any power of 2, i.e., 256, 128, 64, etc.
-compressor1.setDelayBufferSize(delaySize);  // Improves transient response of compressor.
+  int16_t delaySize = 256;                    // Any power of 2, i.e., 256, 128, 64, etc.
+  compressor1.setDelayBufferSize(delaySize);  // Improves transient response of compressor.
 
   compressor1.setCompressionCurve(&crv);
   compressor1.begin();
-
 }
 
 /*****
@@ -46,8 +47,7 @@ compressor1.setDelayBufferSize(delaySize);  // Improves transient response of co
     7.  Output the data stream thruogh the DACs at 192KHz
 *****/
 //int16_t* sp_L2, sp_R2;
-void ExciterIQData()
-{
+void ExciterIQData() {
   uint32_t N_BLOCKS_EX = N_B_EX;
   float32_t powerScale;
 
@@ -60,25 +60,25 @@ void ExciterIQData()
         BUFFER_SIZE*N_BLOCKS = 2024 samples
      **********************************************************************************/
   // are there at least N_BLOCKS buffers in each channel available ?
-  if ( (uint32_t) Q_in_L_Ex.available() > N_BLOCKS_EX) {
+  if ((uint32_t)Q_in_L_Ex.available() > N_BLOCKS_EX) {
 
     // get audio samples from the audio  buffers and convert them to float
     // read in 32 blocks á 128 samples in I and Q
     for (unsigned i = 0; i < N_BLOCKS_EX; i++) {
-//      sp_L2 = Q_in_L_Ex.readBuffer();
-//      sp_R2 = Q_in_R_Ex.readBuffer();
+      //      sp_L2 = Q_in_L_Ex.readBuffer();
+      //      sp_R2 = Q_in_R_Ex.readBuffer();
 
       /**********************************************************************************  AFP 12-31-20
           Using arm_Math library, convert to float one buffer_size.
           Float_buffer samples are now standardized from > -1.0 to < 1.0
       **********************************************************************************/
-      arm_q15_to_float (Q_in_L_Ex.readBuffer(), &float_buffer_L_EX[BUFFER_SIZE * i], BUFFER_SIZE); // convert int_buffer to float 32bit
-      arm_q15_to_float (Q_in_R_Ex.readBuffer(), &float_buffer_R_EX[BUFFER_SIZE * i], BUFFER_SIZE); // Right channel not used.  KF5N March 11, 2024
+      arm_q15_to_float(Q_in_L_Ex.readBuffer(), &float_buffer_L_EX[BUFFER_SIZE * i], BUFFER_SIZE);  // convert int_buffer to float 32bit
+      arm_q15_to_float(Q_in_R_Ex.readBuffer(), &float_buffer_R_EX[BUFFER_SIZE * i], BUFFER_SIZE);  // Right channel not used.  KF5N March 11, 2024
       Q_in_L_Ex.freeBuffer();
-      Q_in_R_Ex.freeBuffer(); // Right channel not used.  KF5N March 11, 2024
+      Q_in_R_Ex.freeBuffer();  // Right channel not used.  KF5N March 11, 2024
     }
 
-//    float exciteMaxL = 0;
+    //    float exciteMaxL = 0;
 
     /**********************************************************************************  AFP 12-31-20
               Decimation is the process of downsampling the data stream and LP filtering
@@ -89,20 +89,20 @@ void ExciterIQData()
 
     // 192KHz effective sample rate here
     // decimation-by-4 in-place!
-//    arm_fir_decimate_f32(&FIR_dec1_EX_I, float_buffer_L_EX, float_buffer_L_EX, BUFFER_SIZE * N_BLOCKS_EX );
-//    arm_fir_decimate_f32(&FIR_dec1_EX_Q, float_buffer_R_EX, float_buffer_R_EX, BUFFER_SIZE * N_BLOCKS_EX ); // Right channel not used.  KF5N March 11, 2024
+    //    arm_fir_decimate_f32(&FIR_dec1_EX_I, float_buffer_L_EX, float_buffer_L_EX, BUFFER_SIZE * N_BLOCKS_EX );
+    //    arm_fir_decimate_f32(&FIR_dec1_EX_Q, float_buffer_R_EX, float_buffer_R_EX, BUFFER_SIZE * N_BLOCKS_EX ); // Right channel not used.  KF5N March 11, 2024
     // 48KHz effective sample rate here
     // decimation-by-2 in-place
-//arm_fir_decimate_f32(&FIR_dec2_EX_I, float_buffer_L_EX, float_buffer_L_EX, 512);
-//    arm_fir_decimate_f32(&FIR_dec2_EX_Q, float_buffer_R_EX, float_buffer_R_EX, 512); // Right channel not used.  KF5N March 11, 2024
+    //arm_fir_decimate_f32(&FIR_dec2_EX_I, float_buffer_L_EX, float_buffer_L_EX, 512);
+    //    arm_fir_decimate_f32(&FIR_dec2_EX_Q, float_buffer_R_EX, float_buffer_R_EX, 512); // Right channel not used.  KF5N March 11, 2024
 
     //============================  Transmit EQ  ========================  AFP 10-02-22
-//    if (EEPROMData.xmitEQFlag == ON ) {
-//      DoExciterEQ();  // The exciter equalizer works with left channel data only.
-//    }
+    //    if (EEPROMData.xmitEQFlag == ON ) {
+    //      DoExciterEQ();  // The exciter equalizer works with left channel data only.
+    //    }
 
     // Microphone audio has only 1 channel, so copy left to right.
-//    arm_copy_f32 (float_buffer_L_EX, float_buffer_R_EX, 256);
+    //    arm_copy_f32 (float_buffer_L_EX, float_buffer_R_EX, 256);
 
     // =========================    End CW Xmit
     //--------------  Hilbert Transformers
@@ -113,53 +113,52 @@ void ExciterIQData()
              create the SSB signals.
              Two Hilbert Transformers are used to preserve eliminate the relative time delays created during processing of the data
     **********************************************************************************/
-//    arm_fir_f32(&FIR_Hilbert_L, float_buffer_L_EX, float_buffer_L_EX, 256);
-//    arm_fir_f32(&FIR_Hilbert_R, float_buffer_R_EX, float_buffer_R_EX, 256);
+    //    arm_fir_f32(&FIR_Hilbert_L, float_buffer_L_EX, float_buffer_L_EX, 256);
+    //    arm_fir_f32(&FIR_Hilbert_R, float_buffer_R_EX, float_buffer_R_EX, 256);
 
     /**********************************************************************************
               Additional scaling, if nesessary to compensate for down-stream gain variations
      **********************************************************************************/
 
-    if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) { //AFP 12-27-21
+    if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {  //AFP 12-27-21
       //arm_scale_f32 (float_buffer_L_EX, -EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBandA], float_buffer_L_EX, 256);
-      arm_scale_f32 (float_buffer_L_EX, + EEPROMData.IQSSBAmpCorrectionFactor[EEPROMData.currentBandA], float_buffer_L_EX, 2048);     // Flip SSB sideband KF5N, minus sign was original
+      arm_scale_f32(float_buffer_L_EX, +EEPROMData.IQSSBAmpCorrectionFactor[EEPROMData.currentBandA], float_buffer_L_EX, 2048);  // Flip SSB sideband KF5N, minus sign was original
       IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, EEPROMData.IQSSBPhaseCorrectionFactor[EEPROMData.currentBandA], 2048);
-    }
-    else if (bands[EEPROMData.currentBand].mode == DEMOD_USB) { //AFP 12-27-21
+    } else if (bands[EEPROMData.currentBand].mode == DEMOD_USB) {  //AFP 12-27-21
       //arm_scale_f32 (float_buffer_L_EX, + EEPROMData.IQXAmpCorrectionFactor[EEPROMData.currentBandA], float_buffer_L_EX, 256);     // Flip SSB sideband KF5N, minus sign was original
-      arm_scale_f32 (float_buffer_L_EX, - EEPROMData.IQSSBAmpCorrectionFactor[EEPROMData.currentBandA], float_buffer_L_EX, 2048);    // Flip SSB sideband KF5N
+      arm_scale_f32(float_buffer_L_EX, -EEPROMData.IQSSBAmpCorrectionFactor[EEPROMData.currentBandA], float_buffer_L_EX, 2048);  // Flip SSB sideband KF5N
       IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, EEPROMData.IQSSBPhaseCorrectionFactor[EEPROMData.currentBandA], 2048);
     }
-//    arm_scale_f32 (float_buffer_R_EX, 1.00, float_buffer_R_EX, 256);
+    //    arm_scale_f32 (float_buffer_R_EX, 1.00, float_buffer_R_EX, 256);
 
-//    exciteMaxL = 0;
-//    for (int k = 0; k < 256; k++) {
-//      if (float_buffer_L_EX[k] > exciteMaxL) {
-//        exciteMaxL = float_buffer_L_EX[k];
-//      }
-//    }
+    //    exciteMaxL = 0;
+    //    for (int k = 0; k < 256; k++) {
+    //      if (float_buffer_L_EX[k] > exciteMaxL) {
+    //        exciteMaxL = float_buffer_L_EX[k];
+    //      }
+    //    }
 
     /**********************************************************************************
               Interpolate (upsample the data streams by 8X to create the 192KHx sample rate for output
               Requires a LPF FIR 48 tap 10KHz and 8KHz
      **********************************************************************************/
     //24KHz effective sample rate here
-//    arm_fir_interpolate_f32(&FIR_int1_EX_I, float_buffer_L_EX, float_buffer_LTemp, 256);
-//arm_fir_interpolate_f32(&FIR_int1_EX_Q, float_buffer_R_EX, float_buffer_RTemp, 256);
+    //    arm_fir_interpolate_f32(&FIR_int1_EX_I, float_buffer_L_EX, float_buffer_LTemp, 256);
+    //arm_fir_interpolate_f32(&FIR_int1_EX_Q, float_buffer_R_EX, float_buffer_RTemp, 256);
 
     // interpolation-by-4,  48KHz effective sample rate here
-//arm_fir_interpolate_f32(&FIR_int2_EX_I, float_buffer_LTemp, float_buffer_L_EX, 512);
-//    arm_fir_interpolate_f32(&FIR_int2_EX_Q, float_buffer_RTemp, float_buffer_R_EX, 512);
+    //arm_fir_interpolate_f32(&FIR_int2_EX_I, float_buffer_LTemp, float_buffer_L_EX, 512);
+    //    arm_fir_interpolate_f32(&FIR_int2_EX_Q, float_buffer_RTemp, float_buffer_R_EX, 512);
     //  192KHz effective sample rate here
-    
+
     //  This is the correct place in the data stream to inject the scaling for power.
 #ifdef QSE2
-powerScale = 40.0 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
+    powerScale = 40.0 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
 #else
-powerScale = 30.0 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
+    powerScale = 30.0 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
 #endif
 
-    arm_scale_f32(float_buffer_L_EX, powerScale, float_buffer_L_EX, 2048); //Scale to compensate for losses in Interpolation
+    arm_scale_f32(float_buffer_L_EX, powerScale, float_buffer_L_EX, 2048);  //Scale to compensate for losses in Interpolation
     arm_scale_f32(float_buffer_R_EX, powerScale, float_buffer_R_EX, 2048);
 
     /**********************************************************************************  AFP 12-31-20
@@ -167,15 +166,15 @@ powerScale = 30.0 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
     **********************************************************************************/
     q15_t q15_buffer_LTemp[2048];  // KF5N
     q15_t q15_buffer_RTemp[2048];  // KF5N
- 
-      arm_float_to_q15 (float_buffer_L_EX, q15_buffer_LTemp, 2048);
-      arm_float_to_q15 (float_buffer_R_EX, q15_buffer_RTemp, 2048);
-      #ifdef QSE2
-      arm_offset_q15(q15_buffer_LTemp, EEPROMData.iDCoffsetSSB[EEPROMData.currentBand] + EEPROMData.dacOffsetSSB, q15_buffer_LTemp, 2048);  // Carrier suppression offset.
-      arm_offset_q15(q15_buffer_RTemp, EEPROMData.qDCoffsetSSB[EEPROMData.currentBand] + EEPROMData.dacOffsetSSB, q15_buffer_RTemp, 2048);
-      #endif
-      Q_out_L_Ex.play(q15_buffer_LTemp, 2048); // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
-      Q_out_R_Ex.play(q15_buffer_RTemp, 2048); // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.
+
+    arm_float_to_q15(float_buffer_L_EX, q15_buffer_LTemp, 2048);
+    arm_float_to_q15(float_buffer_R_EX, q15_buffer_RTemp, 2048);
+#ifdef QSE2
+    arm_offset_q15(q15_buffer_LTemp, EEPROMData.iDCoffsetSSB[EEPROMData.currentBand] + EEPROMData.dacOffsetSSB, q15_buffer_LTemp, 2048);  // Carrier suppression offset.
+    arm_offset_q15(q15_buffer_RTemp, EEPROMData.qDCoffsetSSB[EEPROMData.currentBand] + EEPROMData.dacOffsetSSB, q15_buffer_RTemp, 2048);
+#endif
+    Q_out_L_Ex.play(q15_buffer_LTemp, 2048);  // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
+    Q_out_R_Ex.play(q15_buffer_RTemp, 2048);  // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.
 
     /*
     for (unsigned  i = 0; i < N_BLOCKS_EX; i++) {  //N_BLOCKS_EX=16  BUFFER_SIZE=128 16x128=2048
@@ -189,7 +188,6 @@ powerScale = 30.0 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
       Q_out_R_Ex.playBuffer(); // play it !
     }
     */
-
   }
 }
 
@@ -202,59 +200,54 @@ powerScale = 30.0 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
   Return value;
     void
 *****/
-void SetBandRelay(int state)
-{
+void SetBandRelay(int state) {
   // There are 4 physical relays.  Turn all of them off.
-  for(int i = 0; i < 4; i = i + 1) {
-  digitalWrite(bandswitchPins[i], LOW); // Set ALL band relays low.  KF5N July 21, 2023
+  for (int i = 0; i < 4; i = i + 1) {
+    digitalWrite(bandswitchPins[i], LOW);  // Set ALL band relays low.  KF5N July 21, 2023
   }
-// Set current band relay "on".  Ignore 12M and 10M.  15M and 17M use the same relay.  KF5N September 27, 2023.
-  if(EEPROMData.currentBand < 5) digitalWrite(bandswitchPins[EEPROMData.currentBand], state);  
+  // Set current band relay "on".  Ignore 12M and 10M.  15M and 17M use the same relay.  KF5N September 27, 2023.
+  if (EEPROMData.currentBand < 5) digitalWrite(bandswitchPins[EEPROMData.currentBand], state);
 }
 
 
 /*****
-  Purpose: Allow user to set the mic compression level
-
+  Purpose: Allow user to set the microphone compression level.
+           A typical value is -20 dB.
   Parameter list:
     void
 
   Return value;
     void
-*****
-void SetCompressionLevel()
-{
+*****/
+void SetCompressionThreshold() {
   int val;
-  //EEPROMData.currentMicThreshold = knee_dBFS; // AFP 09-22-22  Commented out.  KF5N October 31, 2023
 
-  tft.setFontScale( (enum RA8875tsize) 1);
-
+  tft.setFontScale((enum RA8875tsize)1);
   tft.fillRect(SECONDARY_MENU_X - 50, MENUS_Y, EACH_MENU_WIDTH + 50, CHAR_HEIGHT, RA8875_MAGENTA);
   tft.setTextColor(RA8875_WHITE);
-  tft.setCursor(SECONDARY_MENU_X  - 48, MENUS_Y + 1);
-  tft.print("Compression:");
-  tft.setCursor(SECONDARY_MENU_X + 180, MENUS_Y + 1);
-  tft.print(EEPROMData.currentMicThreshold);
+  tft.setCursor(SECONDARY_MENU_X - 48, MENUS_Y + 1);
+  tft.print("Comp Thresh dB:");
+  tft.setCursor(SECONDARY_MENU_X + 195, MENUS_Y + 1);
+  tft.print(EEPROMData.currentMicThreshold, 0);
 
   while (true) {
     if (filterEncoderMove != 0) {
-      EEPROMData.currentMicThreshold += ((float) filterEncoderMove);
+      EEPROMData.currentMicThreshold += ((float)filterEncoderMove);
       if (EEPROMData.currentMicThreshold < -60)
         EEPROMData.currentMicThreshold = -60;
-      else if (EEPROMData.currentMicThreshold > 0)                 // 100% max
+      else if (EEPROMData.currentMicThreshold > 0)  // 100% max
         EEPROMData.currentMicThreshold = 0;
 
-      tft.fillRect(SECONDARY_MENU_X + 180, MENUS_Y, 80, CHAR_HEIGHT, RA8875_MAGENTA);
-      tft.setCursor(SECONDARY_MENU_X + 180, MENUS_Y + 1);
-      tft.print(EEPROMData.currentMicThreshold);
+      tft.fillRect(SECONDARY_MENU_X + 195, MENUS_Y, 80, CHAR_HEIGHT, RA8875_MAGENTA);
+      tft.setCursor(SECONDARY_MENU_X + 195, MENUS_Y + 1);
+      tft.print(EEPROMData.currentMicThreshold, 0);
       filterEncoderMove = 0;
     }
-    val = ReadSelectedPushButton();                                  // Read pin that controls all switches
+    val = ReadSelectedPushButton();  // Read pin that controls all switches
     val = ProcessButtonPress(val);
     delay(150L);
-    if (val == MENU_OPTION_SELECT) {                             // Make a choice??
-      // micCompression = EEPROMData.currentMicThreshold;
-      //EEPROMData.EEPROMData.currentMicThreshold = EEPROMData.currentMicThreshold;
+    if (val == MENU_OPTION_SELECT) {  // Make a choice??
+      updateMic();
       EEPROMWrite();
       UpdateCompressionField();
       break;
@@ -262,53 +255,51 @@ void SetCompressionLevel()
   }
   EraseMenus();
 }
-*/
+
 
 /*****
-  Purpose: Allow user to set the mic compression ratio
-
+  Purpose: Allow user to set the microphone compression ratio.
+           A typical value is in the 10 to 100 range.
   Parameter list:
     void
 
   Return value;
     void
 *****/
-void SetCompressionRatio()
-{
+void SetCompressionRatio() {
   int val;
 
-  tft.setFontScale( (enum RA8875tsize) 1);
+  tft.setFontScale((enum RA8875tsize)1);
 
   tft.fillRect(SECONDARY_MENU_X - 50, MENUS_Y, EACH_MENU_WIDTH + 50, CHAR_HEIGHT, RA8875_MAGENTA);
   tft.setTextColor(RA8875_WHITE);
-  tft.setCursor(SECONDARY_MENU_X  - 48, MENUS_Y + 1);
+  tft.setCursor(SECONDARY_MENU_X - 48, MENUS_Y + 1);
   tft.print("Comp Ratio:");
   tft.setCursor(SECONDARY_MENU_X + 180, MENUS_Y + 1);
-  tft.print(EEPROMData.currentMicCompRatio, 1);
+  tft.print(EEPROMData.currentMicCompRatio, 0);
 
   while (true) {
     if (filterEncoderMove != 0) {
-      EEPROMData.currentMicCompRatio += ((float) filterEncoderMove * 1.0);
+      EEPROMData.currentMicCompRatio += ((float)filterEncoderMove * 1.0);
       if (EEPROMData.currentMicCompRatio > 1000)
         EEPROMData.currentMicCompRatio = 1000;
-      else if (EEPROMData.currentMicCompRatio < 1)                 // 100% max
+      else if (EEPROMData.currentMicCompRatio < 1)  // 100% max
         EEPROMData.currentMicCompRatio = 1;
 
       tft.fillRect(SECONDARY_MENU_X + 180, MENUS_Y, 80, CHAR_HEIGHT, RA8875_MAGENTA);
       tft.setCursor(SECONDARY_MENU_X + 180, MENUS_Y + 1);
-      tft.print(EEPROMData.currentMicCompRatio, 1);
+      tft.print(EEPROMData.currentMicCompRatio, 0);
       filterEncoderMove = 0;
     }
 
-    val = ReadSelectedPushButton();                                  // Read pin that controls all switches
+    val = ReadSelectedPushButton();  // Read pin that controls all switches
     val = ProcessButtonPress(val);
     delay(150L);
 
-    if (val == MENU_OPTION_SELECT) {                             // Make a choice??
-     // EEPROMData.EEPROMData.currentMicCompRatio = EEPROMData.currentMicCompRatio;
-     updateMic();  // This updates the compression ratio and the threshold.
+    if (val == MENU_OPTION_SELECT) {  // Make a choice??
+      // EEPROMData.EEPROMData.currentMicCompRatio = EEPROMData.currentMicCompRatio;
+      updateMic();  // This updates the compression ratio and the threshold.
       EEPROMWrite();
-
       break;
     }
   }
@@ -317,7 +308,7 @@ void SetCompressionRatio()
 
 
 /*****
-  Purpose: Set Mic level
+  Purpose: Set microphone gain.  The default is 0 dB.
 
   Parameter list:
     void
@@ -326,43 +317,36 @@ void SetCompressionRatio()
     int           an index into the band array
 *****/
 void MicGainSet() {
-  //=====
-  const char *micGainChoices[] = { "Set Mic Gain", "Cancel" };
-  micGainChoice = SubmenuSelect(micGainChoices, 2, micGainChoice);
-  switch (micGainChoice) {
-    case 0:
       int val;
       tft.setFontScale((enum RA8875tsize)1);
       tft.fillRect(SECONDARY_MENU_X - 50, MENUS_Y, EACH_MENU_WIDTH + 50, CHAR_HEIGHT, RA8875_MAGENTA);
       tft.setTextColor(RA8875_WHITE);
       tft.setCursor(SECONDARY_MENU_X - 48, MENUS_Y + 1);
-      tft.print("Mic Gain:");
+      tft.print("Mic Gain dB:");
       tft.setCursor(SECONDARY_MENU_X + 160, MENUS_Y + 1);
-      tft.print(EEPROMData.currentMicGain);
+      tft.print(EEPROMData.currentMicGain, 1);
       while (true) {
         if (filterEncoderMove != 0) {
           EEPROMData.currentMicGain += ((float)filterEncoderMove);
-          if (EEPROMData.currentMicGain < -60)
-            EEPROMData.currentMicGain = -60;
-          else if (EEPROMData.currentMicGain > 30)  // 100% max
-            EEPROMData.currentMicGain = 30;
+          if (EEPROMData.currentMicGain < -20)
+            EEPROMData.currentMicGain = -20;
+          else if (EEPROMData.currentMicGain > 20)  // 100% max
+            EEPROMData.currentMicGain = 20;
           tft.fillRect(SECONDARY_MENU_X + 160, MENUS_Y, 80, CHAR_HEIGHT, RA8875_MAGENTA);
           tft.setCursor(SECONDARY_MENU_X + 160, MENUS_Y + 1);
-          tft.print(EEPROMData.currentMicGain);
+          tft.print(EEPROMData.currentMicGain, 1);
           filterEncoderMove = 0;
         }
-        val = ReadSelectedPushButton();  // Read pin that controls all switches
+        val = ReadSelectedPushButton();
         val = ProcessButtonPress(val);
-        if (val == MENU_OPTION_SELECT) {  // Make a choice??
-          updateMic();  // Update the Open Audio compressor.
+        if (val == MENU_OPTION_SELECT) {
+          updateMic();                    // Update the Open Audio compressor.
           EEPROMWrite();
           break;
         }
       }
-    case 1:
-      break;
   }
-}
+
 
 
 /*****

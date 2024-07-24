@@ -196,7 +196,7 @@ struct band bands[NUMBER_OF_BANDS]{  //AFP Changed 1-30-21 // G0ORX Changed AGC 
 
 const char *topMenus[] = { "CW Options", "RF Set", "VFO Select",
                            "EEPROM", "AGC", "Spectrum Options",
-                           "Noise Floor", "Mic Gain", "Mic Comp",
+                           "Noise Floor", "SSB Options",
                            "EQ Rec Set", "Calibrate", "Bearing" };
 
 // Button array labels array is located in Utility.cpp.
@@ -204,7 +204,7 @@ const char *topMenus[] = { "CW Options", "RF Set", "VFO Select",
 // Pointers to functions which execute the menu options.  Do these functions used the returned integer???
 void (*functionPtr[])() = { &CWOptions, &RFOptions, &VFOSelect,
                             &EEPROMOptions, &AGCOptions, &SpectrumOptions,
-                            &ButtonSetNoiseFloor, &MicGainSet, &MicOptions,
+                            &ButtonSetNoiseFloor, &SSBOptions,
                             &EqualizerRecOptions, &CalibrateOptions, &BearingMaps };
 
 uint32_t FFT_length = FFT_LENGTH;

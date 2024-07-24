@@ -1,14 +1,18 @@
 // Teensy and Open Audio Signal Chains include file.
 
-// Common to Transmitter and Receiver.  Use Open Audio version to simplify transmitter?
+// Common to Transmitter and Receiver.
+
+const float sample_rate_Hz = 48000.0f;
+const int   audio_block_samples = 128;  // Always 128
+AudioSettings_F32 audio_settings(sample_rate_Hz, audio_block_samples);
+
 AudioInputI2SQuad i2s_quadIn;     // 4 inputs/outputs available only in Teensy audio not Open Audio library.
 AudioOutputI2SQuad i2s_quadOut;
 
 // Transmitter
 AudioControlSGTL5000_Extended sgtl5000_1;      // Controller for the Teensy Audio Board, transmitter only.
 AudioConvert_I16toF32 int2Float1;              // Converts Int16 to Float.  See class in AudioStream_F32.h
-//AudioEffectCompressor_F32 comp1;               // Compressor from OpenAudio library.  Used in microphone dataflow path.
-AudioEffectGain_F32 micGain;
+AudioEffectGain_F32 micGain(audio_settings);                   // Microphone gain control.
 AudioEffectCompressor2_F32  compressor1; // Open Audio Compressor
 AudioEffectCompressor2_F32 *pc1 = &compressor1;
 radioCESSB_Z_transmit_F32 cessb1;
@@ -34,18 +38,20 @@ AudioConnection patchCord16(Q_out_R_Ex, 0, i2s_quadOut, 1);  // Q channel to lin
 AudioRecordQueue Q_in_R_Ex;           // This 2nd channel is needed as we are bringing I and Q into the sketch instead of only microphone audio.
 
 //  Begin transmit signal chain.
-AudioConnection connect0(i2s_quadIn, 0, int2Float1, 0);    // Microphone audio channel.
+AudioConnection connect0(i2s_quadIn, 0, int2Float1, 0);    // Microphone audio channel.  Must use int2Float because Open Audio does not have quad input.
 
-AudioConnection connect11(int2Float1, 0, micGain, 0);
+AudioConnection_F32 connect9(int2Float1, 0, switch1, 0);
+//AudioConnection connect11(micGain, 0, switch1, 0);
 
-AudioConnection_F32 connect9(micGain, 0, switch1, 0);
 AudioConnection_F32 connect10(tone1kHz,  0, switch2, 0);
 
 // Need a mixer to switch in an audio tone during calibration.  Should be a nominal tone amplitude.
-AudioConnection_F32 connect1(switch1, 0, mixer1, 0);  // Connect microphone mixer1 output 0
+AudioConnection_F32 connect1(switch1, 0, mixer1, 0);  // Connect microphone mixer1 output 0 via gain control.
 AudioConnection_F32 connect2(switch2, 0, mixer1, 1);  // Connect tone for SSB calibration.
 
-AudioConnection_F32 connect3(mixer1, 0, compressor1, 0);  // Mixer output to input of Open Audio compressor.
+//AudioConnection_F32 connect3(mixer1, 0, compressor1, 0);  // Mixer output to input of Open Audio compressor.
+AudioConnection_F32 connect3(mixer1, 0, micGain, 0);
+AudioConnection_F32 connect11(micGain, 0, compressor1, 0);
 
 AudioConnection_F32 connect4(compressor1, 0, cessb1, 0);
 //AudioConnection_F32 connect4(mixer1, 0, cessb1, 0);
@@ -165,7 +171,7 @@ void SetAudioOperatingState(int operatingState) {
       SetI2SFreq(SR[SampleRate].rate);
 //      cessb1.setSampleRate_Hz(48000);
       tone1kHz.end();
-      micGain.setGain_dB(EEPROMData.currentMicGain);
+      updateMic();
       mixer1.gain(0, 1.0);   // Connect microphone audio to transmit chain.
       mixer1.gain(1, 0.0);   // Disconnect 1 kHz test tone. 
       switch1.setChannel(0);  // Connect microphone path.
@@ -201,8 +207,6 @@ void SetAudioOperatingState(int operatingState) {
       tone1kHz.amplitude(0.3);
       tone1kHz.frequency(750.0);
       tone1kHz.begin();
-//        tone1kHz.end();
-//      micGain.setGain_dB(EEPROMData.currentMicGain);
       mixer1.gain(0, 0);  // microphone audio off.
       mixer1.gain(1, 1);  // testTone on.
       switch1.setChannel(1);  // Disconnect microphone path.
@@ -227,7 +231,6 @@ void SetAudioOperatingState(int operatingState) {
       Q_in_R.clear();
 
       // Microphone input disabled and disconnected
-      //      patchCord1.disconnect();
       Q_in_L_Ex.end();  // Clear microphone queue.
       Q_in_L_Ex.clear();
 
@@ -241,7 +244,6 @@ void SetAudioOperatingState(int operatingState) {
     case CW_CALIBRATE_STATE:
       SampleRate = SAMPLE_RATE_192K;
       SetI2SFreq(SR[SampleRate].rate);
-//      cessb1.setSampleRate_Hz(0);  // Deactivate SSB signal chain.
       // QSD receiver enabled.  Calibrate is full duplex.
       patchCord9.connect();   // Receiver I channel
       patchCord10.connect();  // Receiver Q channel

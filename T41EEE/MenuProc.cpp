@@ -1,3 +1,13 @@
+// Calibrate Options
+// CW Options
+// Spectrum Options
+// AGC Options
+// Receive Equalizer Options
+// Mic Options
+// RF Options
+// EEPROM Options
+//
+
 
 #include "SDT.h"
 
@@ -28,7 +38,7 @@ void CalibrateOptions() {
   // Select the type of calibration, and then skip this during the loop() function.
   if (calibrateFlag == 0) {
     const char *IQOptions[18]{ "Freq Cal", "CW PA Cal", "Rec Cal", "CW Carrier Cal", "CW Xmit Cal", "SSB PA Cal", "SSB Carrier Cal", "SSB Transmit Cal", "CW Radio Cal", "CW Refine Cal", "SSB Radio Cal", "SSB Refine Cal", "CW Cal Tone", "DAC Offset CW", "DAC Offset SSB", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
-    IQChoice = SubmenuSelect(IQOptions, 18, 0);                                                                                                                                                        //AFP 10-21-22
+    IQChoice = SubmenuSelect(IQOptions, 18, 0);                                                                                                                                                                                                                                                                      //AFP 10-21-22
   }
   calibrateFlag = 1;
   switch (IQChoice) {
@@ -64,7 +74,7 @@ void CalibrateOptions() {
       }
       break;
 
-    case 2:                              // IQ Receive Cal - Gain and Phase
+    case 2:                                         // IQ Receive Cal - Gain and Phase
       calibrater.DoReceiveCalibrate(false, false);  // This function was significantly revised.  KF5N August 16, 2023
       break;
 
@@ -72,7 +82,7 @@ void CalibrateOptions() {
       calibrater.DoXmitCarrierCalibrate(EEPROMData.calFreq, false, false);
       break;
 
-    case 4:                                               // IQ Transmit Cal - Gain and Phase  //AFP 2-21-23
+    case 4:                                                          // IQ Transmit Cal - Gain and Phase  //AFP 2-21-23
       calibrater.DoXmitCalibrate(EEPROMData.calFreq, false, false);  // This function was significantly revised.  KF5N August 16, 2023
       break;
 
@@ -91,14 +101,14 @@ void CalibrateOptions() {
       }
       break;  // Missing break.  KF5N August 12, 2023
 
-      
-    case 6:  // SSB Carrier Cal
-          ssbcalibrater.DoXmitCarrierCalibrate(EEPROMData.calFreq, false, false);
-    break;
 
-    case 7:  // SSB Transmit cal
-          ssbcalibrater.DoXmitCalibrate(EEPROMData.calFreq, false, false);  // This function was significantly revised.  KF5N August 16, 2023
-    break;
+    case 6:  // SSB Carrier Cal
+      ssbcalibrater.DoXmitCarrierCalibrate(EEPROMData.calFreq, false, false);
+      break;
+
+    case 7:                                                             // SSB Transmit cal
+      ssbcalibrater.DoXmitCalibrate(EEPROMData.calFreq, false, false);  // This function was significantly revised.  KF5N August 16, 2023
+      break;
 
     case 8:  // Fully automatic radio calibration.
       calibrater.RadioCal(false);
@@ -138,7 +148,7 @@ void CalibrateOptions() {
       }
       break;
 
-          case 14:  // Set DAC offset for SSB carrier cancellation.
+    case 14:  // Set DAC offset for SSB carrier cancellation.
       EEPROMData.dacOffsetSSB = GetEncoderValueLiveQ15t(-5000, 5000, EEPROMData.dacOffsetSSB, 50, (char *)"DC Offset:", false);
       val = ReadSelectedPushButton();
       if (val != BOGUS_PIN_READ) {
@@ -233,11 +243,11 @@ void CalibrateOptions() {
         }
       }
       break;
-    case 2:                              // IQ Receive Cal - Gain and Phase
+    case 2:                                         // IQ Receive Cal - Gain and Phase
       calibrater.DoReceiveCalibrate(false, false);  // This function was significantly revised.  KF5N August 16, 2023
       break;
 
-    case 3:                                               // IQ Transmit Cal - Gain and Phase  //AFP 2-21-23
+    case 3:                                                          // IQ Transmit Cal - Gain and Phase  //AFP 2-21-23
       calibrater.DoXmitCalibrate(EEPROMData.calFreq, false, false);  // This function was significantly revised.  KF5N August 16, 2023
       break;
 
@@ -652,42 +662,38 @@ void EqualizerXmtOptions() {
   Return value
     int           an index into the band array
 *****/
-void MicOptions()  // AFP 09-22-22 All new
+void SSBOptions()  // AFP 09-22-22 All new
 {
-//  const char *micChoices[] = { "Mic Comp On", "Mic Comp Off", "Set Threshold", "Set Comp_Ratio", "Set Attack", "Set Decay", "Cancel" };
-  const char *micChoices[] = { "Set Threshold", "Cancel" };
+  //  const char *micChoices[] = { "Mic Comp On", "Mic Comp Off", "Set Threshold", "Set Comp_Ratio", "Set Attack", "Set Decay", "Cancel" };
+  const char *micChoices[] = { "Mic Gain", "Comp Threshold", "Comp Ratio", "Cancel" };
 
-  micChoice = SubmenuSelect(micChoices, 2, micChoice);
+  micChoice = SubmenuSelect(micChoices, 4, micChoice);
   switch (micChoice) {
-  /*
-    case 0:                           // On
-      EEPROMData.compressorFlag = 1;  // AFP 09-22-22
-      UpdateCompressionField();       // JJP 8/26/2023
+
+    case 0:  // Adjust mic gain in dB.  Default 0 db.
+      MicGainSet();
       break;
-    case 1:  // Off
-      EEPROMData.compressorFlag = 0;
-      UpdateCompressionField();  // JJP 8/26/2023
+
+    case 1:  // Set compression ratio.  Default -10 dB.
+      SetCompressionThreshold();
       break;
-  */
-    case 0:
-//      SetCompressionLevel();
-SetCompressionRatio();
-      break;
-  /*
-    case 3:
+
+    case 2:  // Set compressor threshold.  Default 100.0.
       SetCompressionRatio();
       break;
+      /*
     case 4:
       SetCompressionAttack();
       break;
     case 5:
       SetCompressionRelease();
       break;
-    case 6:
+      */
+    case 3:   // Cancel
+    return;
       break;
-  */
-    default:  // Cancelled choice
-      micChoice = -1;
+    default:
+      return;
       break;
   }
 }
@@ -737,21 +743,21 @@ void RFOptions() {
       EEPROMWrite();
       break;
 
-      case 4: // Auto-Spectrum On
+    case 4:  // Auto-Spectrum On
       EEPROMData.autoSpectrum = true;
       EEPROMData.autoGain = false;  // Make sure Auto-Gain is off.
       ShowAutoStatus();
       EEPROMWrite();
       break;
 
-      case 5: // Auto-Spectrum Off
+    case 5:  // Auto-Spectrum Off
       EEPROMData.autoSpectrum = false;
       fftOffset = 0;
       ShowAutoStatus();
       EEPROMWrite();
       break;
 
-      default:  // Cancel
+    default:  // Cancel
       break;
   }
 }
