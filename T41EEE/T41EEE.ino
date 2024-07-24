@@ -1220,7 +1220,7 @@ FLASHMEM void setup() {
 #else
   sgtl5000_1.lineOutLevel(20);  // Setting of 20 limits line-out level to 2.14 volts p-p.
 #endif
-sgtl5000_1.adcHighPassFilterEnable();  //reduces noise.  https://forum.pjrc.com/threads/27215-24-bit-audio-boards?p=78831&viewfull=1#post78831
+//sgtl5000_1.adcHighPassFilterDisable();  //reduces noise.  https://forum.pjrc.com/threads/27215-24-bit-audio-boards?p=78831&viewfull=1#post78831
 //sgtl5000_1.adcHighPassFilterFreeze();
   sgtl5000_2.setAddress(HIGH);            // T41 has only a single Audio Adaptor.  This is being used essentially as a 2nd I2S port.
   sgtl5000_2.enable();
@@ -1228,8 +1228,7 @@ sgtl5000_1.adcHighPassFilterEnable();  //reduces noise.  https://forum.pjrc.com/
   sgtl5000_2.muteHeadphone();                  // KF5N March 11, 2024
                                                //  sgtl5000_2.volume(0.5);   //  Headphone volume???  Not required as headphone is muted.
 
-int16_t delaySize = 256;     // Any power of 2, i.e., 256, 128, 64, etc.
-compressor1.setDelayBufferSize(delaySize);  // Improves transient response of compressor.
+
 
 // Original example
 //  struct compressionCurve crv = { -2.0f, 0.0f,           // margin, offset
@@ -1250,7 +1249,7 @@ compressor1.setDelayBufferSize(delaySize);  // Improves transient response of co
 //  limiterBegin(pc1, -3.0f, -15.0f);
 
    cessb1.setSampleRate_Hz(48000);
-   cessb1.setGains(1.5f, 1.4f, 1.0f);
+   cessb1.setGains(1.5f, 1.4f, 0.1f);
    cessb1.setSideband(false);
 
 // Turn off microphone and 1 kHz test tone.

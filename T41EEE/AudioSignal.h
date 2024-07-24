@@ -8,6 +8,7 @@ AudioOutputI2SQuad i2s_quadOut;
 AudioControlSGTL5000_Extended sgtl5000_1;      // Controller for the Teensy Audio Board, transmitter only.
 AudioConvert_I16toF32 int2Float1;              // Converts Int16 to Float.  See class in AudioStream_F32.h
 //AudioEffectCompressor_F32 comp1;               // Compressor from OpenAudio library.  Used in microphone dataflow path.
+AudioEffectGain_F32 micGain;
 AudioEffectCompressor2_F32  compressor1; // Open Audio Compressor
 AudioEffectCompressor2_F32 *pc1 = &compressor1;
 radioCESSB_Z_transmit_F32 cessb1;
@@ -35,7 +36,9 @@ AudioRecordQueue Q_in_R_Ex;           // This 2nd channel is needed as we are br
 //  Begin transmit signal chain.
 AudioConnection connect0(i2s_quadIn, 0, int2Float1, 0);    // Microphone audio channel.
 
-AudioConnection_F32 connect9(int2Float1, 0, switch1, 0);
+AudioConnection connect11(int2Float1, 0, micGain, 0);
+
+AudioConnection_F32 connect9(micGain, 0, switch1, 0);
 AudioConnection_F32 connect10(tone1kHz,  0, switch2, 0);
 
 // Need a mixer to switch in an audio tone during calibration.  Should be a nominal tone amplitude.
@@ -45,6 +48,10 @@ AudioConnection_F32 connect2(switch2, 0, mixer1, 1);  // Connect tone for SSB ca
 AudioConnection_F32 connect3(mixer1, 0, compressor1, 0);  // Mixer output to input of Open Audio compressor.
 
 AudioConnection_F32 connect4(compressor1, 0, cessb1, 0);
+//AudioConnection_F32 connect4(mixer1, 0, cessb1, 0);
+
+//AudioConnection_F32 connect4(compressor1, 0, float2Int1, 0);
+//AudioConnection_F32 connect5(compressor1, 0, float2Int2, 0);
 
 // Controlled envelope SSB from Open Audio library.
 AudioConnection_F32 connect5(cessb1, 0, float2Int1, 0);
@@ -56,6 +63,9 @@ AudioConnection connect8(float2Int2, 0, Q_in_R_Ex, 0);
 // Transmitter back-end.  This takes streaming data from the sketch and drives it into the I2S.
 AudioConnection patchCord15(Q_out_L_Ex, 0, i2s_quadOut, 0);  // I channel to line out
 AudioConnection patchCord16(Q_out_R_Ex, 0, i2s_quadOut, 1);  // Q channel to line out
+
+//AudioConnection patchCord15(float2Int1, 0, i2s_quadOut, 0);  // I channel to line out
+//AudioConnection patchCord16(float2Int2, 0, i2s_quadOut, 1);  // Q channel to line out
 
 // Receiver
 //AudioMixer4 modeSelectInR;    // AFP 09-01-22
@@ -155,6 +165,7 @@ void SetAudioOperatingState(int operatingState) {
       SetI2SFreq(SR[SampleRate].rate);
 //      cessb1.setSampleRate_Hz(48000);
       tone1kHz.end();
+      micGain.setGain_dB(EEPROMData.currentMicGain);
       mixer1.gain(0, 1.0);   // Connect microphone audio to transmit chain.
       mixer1.gain(1, 0.0);   // Disconnect 1 kHz test tone. 
       switch1.setChannel(0);  // Connect microphone path.
@@ -187,10 +198,11 @@ void SetAudioOperatingState(int operatingState) {
 
       // Test tone enabled and connected
       tone1kHz.setSampleRate_Hz(48000);
-      tone1kHz.amplitude(0.2);
+      tone1kHz.amplitude(0.3);
       tone1kHz.frequency(750.0);
       tone1kHz.begin();
 //        tone1kHz.end();
+//      micGain.setGain_dB(EEPROMData.currentMicGain);
       mixer1.gain(0, 0);  // microphone audio off.
       mixer1.gain(1, 1);  // testTone on.
       switch1.setChannel(1);  // Disconnect microphone path.

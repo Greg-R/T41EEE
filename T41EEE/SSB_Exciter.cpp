@@ -2,18 +2,24 @@
 #include "SDT.h"
 
 int micGainChoice;
-//  This is using the compression after the kneeDB[0] only.
-  struct compressionCurve crv = { -2.0f, -40.0f,           // margin, offset
-     {0.0f, -20.0f, -1000.0f, -1000.0f, -1000.0f},           // kneeDB[]  
-     {  EEPROMData.currentMicCompRatio, 1.0f, 1.0f, 1.0, 1.0} };   // compressionRatio
 
 
 void updateMic() {
 
 //  This is using the compression after the kneeDB[0] only.
-  struct compressionCurve crv = { -2.0f, EEPROMData.currentMicGain,           // margin, offset
-     {0.0f, -20.0f, -1000.0f, -1000.0f, -1000.0f},           // kneeDB[]  
-     {  EEPROMData.currentMicCompRatio, 1.0f, 1.0f, 1.0, 1.0} };   // compressionRatio
+//  struct compressionCurve crv = { -6.0f, EEPROMData.currentMicGain,           // margin, offset
+//     {0.0f, -20.0f, -1000.0f, -1000.0f, -1000.0f},           // kneeDB[]  
+//     {  EEPROMData.currentMicCompRatio, 1.0f, 1.0f, 1.0, 1.0} };   // compressionRatio
+
+  struct compressionCurve crv = { -12.0f, 0.0,           // margin, offset
+  //   {0.0f, -7.0f, -10.0f, -1000.0f, -1000.0f},           // kneeDB[]  
+       {0.0f, -7.0f, EEPROMData.currentMicThreshold, -1000.0f, -1000.0f},
+//     {  100.0, 100.0f, 1.0f, 1.0, 1.0} };   // compressionRatio     
+{  100.0, EEPROMData.currentMicCompRatio, 1.0f, 1.0, 1.0} };
+
+
+int16_t delaySize = 256;     // Any power of 2, i.e., 256, 128, 64, etc.
+compressor1.setDelayBufferSize(delaySize);  // Improves transient response of compressor.
 
   compressor1.setCompressionCurve(&crv);
   compressor1.begin();

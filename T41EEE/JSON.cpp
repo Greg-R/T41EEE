@@ -76,10 +76,13 @@ FLASHMEM void loadConfiguration(const char *filename, config_t &EEPROMData) {
   EEPROMData.powerOutSSB[0] = doc["powerOutSSB"][0];
   for (int i = 0; i < 7; i++) EEPROMData.CWPowerCalibrationFactor[i] = doc["CWPowerCalibrationFactor"][i];
   for (int i = 0; i < 7; i++) EEPROMData.SSBPowerCalibrationFactor[i] = doc["SSBPowerCalibrationFactor"][i];
-  for (int i = 0; i < 7; i++) EEPROMData.IQRXAmpCorrectionFactor[i] = doc["IQAmpCorrectionFactor"][i];
-  for (int i = 0; i < 7; i++) EEPROMData.IQRXPhaseCorrectionFactor[i] = doc["IQPhaseCorrectionFactor"][i];
-  for (int i = 0; i < 7; i++) EEPROMData.IQCWAmpCorrectionFactor[i] = doc["IQXAmpCorrectionFactor"][i];
-  for (int i = 0; i < 7; i++) EEPROMData.IQCWPhaseCorrectionFactor[i] = doc["IQXPhaseCorrectionFactor"][i];
+  for (int i = 0; i < 7; i++) EEPROMData.IQRXAmpCorrectionFactor[i] = doc["IQRXAmpCorrectionFactor"][i];
+  for (int i = 0; i < 7; i++) EEPROMData.IQRXPhaseCorrectionFactor[i] = doc["IQRXPhaseCorrectionFactor"][i];
+  for (int i = 0; i < 7; i++) EEPROMData.IQCWAmpCorrectionFactor[i] = doc["IQCWAmpCorrectionFactor"][i];
+  for (int i = 0; i < 7; i++) EEPROMData.IQCWPhaseCorrectionFactor[i] = doc["IQCWPhaseCorrectionFactor"][i];
+  for (int i = 0; i < 7; i++) EEPROMData.IQCWAmpCorrectionFactor[i] = doc["IQSSBAmpCorrectionFactor"][i];
+  for (int i = 0; i < 7; i++) EEPROMData.IQCWPhaseCorrectionFactor[i] = doc["IQSSBPhaseCorrectionFactor"][i];
+
   for (int i = 0; i < 13; i++) EEPROMData.favoriteFreqs[i] = doc["favoriteFreqs"][i];
   for (int i = 0; i < 7; i++) {
     for (int j = 0; j < 2; j++) EEPROMData.lastFrequencies[i][j] = doc["lastFrequencies"][i][j];
