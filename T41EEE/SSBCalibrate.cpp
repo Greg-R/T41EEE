@@ -63,11 +63,13 @@ void SSBCalibrate::plotCalGraphics(int calType) {
 void SSBCalibrate::warmUpCal() {
   // Run ProcessIQData2() a few times to load and settle out buffers.  Compute FFT.  KF5N May 19, 2024
   uint32_t index_of_max;  // Not used, but required by arm_max_q15 function.
-  for (int i = 0; i < 16; i = i + 1) {
+  delay(1000);
+  for (int i = 0; i < 32; i = i + 1) {
     updateDisplayFlag = true;  // Causes FFT to be calculated.
     SSBCalibrate::ProcessIQData2();
   }
   updateDisplayFlag = false;
+//  delay(10000);
   // Find peak of spectrum, which is 512 wide.  Use this to adjust spectrum peak to top of spectrum display.
   arm_max_q15(pixelnew, 512, &rawSpectrumPeak, &index_of_max);
 }
@@ -233,7 +235,7 @@ void SSBCalibrate::printCalType(int IQCalType, bool autoCal, bool autoCalDone) {
 void SSBCalibrate::CalibratePreamble(int setZoom) {
   radioState = SSB_CALIBRATE_STATE;
   SetAudioOperatingState(radioState);
-  cessb1.processorUsageMaxReset();
+//  cessb1.processorUsageMaxReset();
   calOnFlag = true;
   IQCalType = 0;
 //  radioState = CW_TRANSMIT_STRAIGHT_STATE;                 // KF5N
