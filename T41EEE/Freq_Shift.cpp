@@ -127,7 +127,7 @@ void FreqShift2()
       }
     }
   }
-  NCO_INC = 2.0 * PI * (NCOFreq + sideToneShift) / SR[SampleRate].rate; //192000 SPS is the actual sample rate used in the Receive ADC
+  NCO_INC = 2.0 * PI * (NCOFreq + sideToneShift) / SR[SampleRate].rate; // 192000 SPS is the actual sample rate used in the Receive ADC
 
   OSC_COS = cos (NCO_INC);
   OSC_SIN = sin (NCO_INC);

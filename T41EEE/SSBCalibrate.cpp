@@ -292,7 +292,8 @@ void SSBCalibrate::CalibratePreamble(int setZoom) {
       void
  *****/
 void SSBCalibrate::CalibratePrologue() {
-    Serial.printf("lastState=%d radioState=%d memory_used=%d memory_used_max=%d f32_memory_used=%d f32_memory_used_max=%d\n",
+  /*
+  Serial.printf("lastState=%d radioState=%d memory_used=%d memory_used_max=%d f32_memory_used=%d f32_memory_used_max=%d\n",
                 lastState,
                 radioState,
                 (int)AudioStream::memory_used,
@@ -302,12 +303,14 @@ void SSBCalibrate::CalibratePrologue() {
   AudioStream::memory_used_max = 0;
   AudioStream_F32::f32_memory_used_max = 0;
   Serial.printf("cessb1 max processor usage = %d\n", cessb1.processorUsageMax());
+  */
   digitalWrite(RXTX, LOW);  // Turn off the transmitter.
   updateDisplayFlag = false;
   xrState = RECEIVE_STATE;
   tone1kHz.end();
   SampleRate = SAMPLE_RATE_192K;  // Return to receiver sample rate.
   SetI2SFreq(SR[SampleRate].rate);
+  InitializeDataArrays();  // Re-initialize the filters back to 192ksps.
   ShowTransmitReceiveStatus();
   T41State = CW_RECEIVE;
   // Clear queues to reduce transient.
@@ -1221,9 +1224,9 @@ void SSBCalibrate::ProcessIQData2() {
     
     //  This is the correct place in the data stream to inject the scaling for power.
 #ifdef QSE2
-powerScale = 40.0 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
+powerScale = 10.0 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
 #else
-powerScale = 30.0 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
+powerScale = 7.0 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
 #endif
 
     arm_scale_f32(float_buffer_L_EX, powerScale, float_buffer_L_EX, dataWidth);

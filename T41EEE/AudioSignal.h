@@ -5,7 +5,6 @@
 const float sample_rate_Hz = 48000.0f;
 const int   audio_block_samples = 128;  // Always 128
 AudioSettings_F32 audio_settings(sample_rate_Hz, audio_block_samples);
-
 AudioInputI2SQuad i2s_quadIn;     // 4 inputs/outputs available only in Teensy audio not Open Audio library.
 AudioOutputI2SQuad i2s_quadOut;
 
@@ -32,32 +31,22 @@ AudioConnection patchCord7(float2Int1, 0, Q_in_L_Ex, 0);     // Microphone to Au
 AudioConnection patchCord15(Q_out_L_Ex, 0, i2s_quadOut, 0);  // I channel to line out
 AudioConnection patchCord16(Q_out_R_Ex, 0, i2s_quadOut, 1);  // Q channel to line out
 */
-//const float sample_rate_Hz = 48000.0f;
-//const int   audio_block_samples = 128;  // Always 128
-//AudioSettings_F32 audio_settings(sample_rate_Hz, audio_block_samples);
 AudioRecordQueue Q_in_R_Ex;           // This 2nd channel is needed as we are bringing I and Q into the sketch instead of only microphone audio.
 
 //  Begin transmit signal chain.
 AudioConnection connect0(i2s_quadIn, 0, int2Float1, 0);    // Microphone audio channel.  Must use int2Float because Open Audio does not have quad input.
 
 AudioConnection_F32 connect9(int2Float1, 0, switch1, 0);
-//AudioConnection connect11(micGain, 0, switch1, 0);
-
 AudioConnection_F32 connect10(tone1kHz,  0, switch2, 0);
 
 // Need a mixer to switch in an audio tone during calibration.  Should be a nominal tone amplitude.
 AudioConnection_F32 connect1(switch1, 0, mixer1, 0);  // Connect microphone mixer1 output 0 via gain control.
 AudioConnection_F32 connect2(switch2, 0, mixer1, 1);  // Connect tone for SSB calibration.
 
-//AudioConnection_F32 connect3(mixer1, 0, compressor1, 0);  // Mixer output to input of Open Audio compressor.
 AudioConnection_F32 connect3(mixer1, 0, micGain, 0);
 AudioConnection_F32 connect11(micGain, 0, compressor1, 0);
 
 AudioConnection_F32 connect4(compressor1, 0, cessb1, 0);
-//AudioConnection_F32 connect4(mixer1, 0, cessb1, 0);
-
-//AudioConnection_F32 connect4(compressor1, 0, float2Int1, 0);
-//AudioConnection_F32 connect5(compressor1, 0, float2Int2, 0);
 
 // Controlled envelope SSB from Open Audio library.
 AudioConnection_F32 connect5(cessb1, 0, float2Int1, 0);
@@ -69,9 +58,6 @@ AudioConnection connect8(float2Int2, 0, Q_in_R_Ex, 0);
 // Transmitter back-end.  This takes streaming data from the sketch and drives it into the I2S.
 AudioConnection patchCord15(Q_out_L_Ex, 0, i2s_quadOut, 0);  // I channel to line out
 AudioConnection patchCord16(Q_out_R_Ex, 0, i2s_quadOut, 1);  // Q channel to line out
-
-//AudioConnection patchCord15(float2Int1, 0, i2s_quadOut, 0);  // I channel to line out
-//AudioConnection patchCord16(float2Int2, 0, i2s_quadOut, 1);  // Q channel to line out
 
 // Receiver
 //AudioMixer4 modeSelectInR;    // AFP 09-01-22
@@ -135,7 +121,6 @@ void SetAudioOperatingState(int operatingState) {
     case CW_RECEIVE_STATE:
       SampleRate = SAMPLE_RATE_192K;
       SetI2SFreq(SR[SampleRate].rate);   
-//      cessb1.setSampleRate_Hz(0);
       // Deactivate microphone and 1 kHz test tone.
       mixer1.gain(0, 0.0);
       mixer1.gain(1, 0.0);
@@ -169,7 +154,6 @@ void SetAudioOperatingState(int operatingState) {
       Q_in_R.clear();
       SampleRate = SAMPLE_RATE_48K;
       SetI2SFreq(SR[SampleRate].rate);
-//      cessb1.setSampleRate_Hz(48000);
       tone1kHz.end();
       updateMic();
       mixer1.gain(0, 1.0);   // Connect microphone audio to transmit chain.
@@ -187,9 +171,7 @@ void SetAudioOperatingState(int operatingState) {
 
     case SSB_CALIBRATE_STATE:
       SampleRate = SAMPLE_RATE_48K;
-      InitializeDataArrays();
-//      SetI2SFreq(SR[SampleRate].rate);
-//      cessb1.setSampleRate_Hz(48000);
+      InitializeDataArrays();  // I2S sample rate set in this function.
       // QSD disabled and disconnected
       patchCord9.connect();   // Receiver I channel
       patchCord10.connect();  // Receiver Q channel
@@ -261,12 +243,7 @@ void SetAudioOperatingState(int operatingState) {
       Q_in_L.clear();
       Q_in_R.clear();
 
-      // Test tone enabled and connected
-//      tone1kHz.setSampleRate_Hz(48000);
-//      tone1kHz.amplitude(0.02);
-//      tone1kHz.frequency(750.0);
       tone1kHz.end();
-//        tone1kHz.end();
       mixer1.gain(0, 0);  // microphone audio off.
       mixer1.gain(1, 0);  // testTone off.
       switch1.setChannel(1);  // Disconnect microphone path.

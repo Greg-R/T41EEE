@@ -1,10 +1,10 @@
 /*
-### Version T41EEE.6 T41 Software Defined Transceiver Arduino Sketch
+### Version T41EEE.7 T41 Software Defined Transceiver Arduino Sketch
 
 This is the "T41 Extreme Experimenter's Edition" software for the 
 T41 Software Defined Transceiver.  The T41EEE was "forked" from the V049.2 version
 of the T41-EP software.  T41EEE is fundamentally different from the mainstream T41-EP
-code in that it adopts C++ rather than C style code.  C++ language features will be gradually
+code in that it adopts C++ rather than C.  C++ language features will be gradually
 introduced in the next releases.
 
 Purchase the book "Digital Signal Processing and Software Defined Radio" by
@@ -43,13 +43,13 @@ successful.
 
 ## How to Compile T41EEE
 
-T41EEE.6 was developed and compiled using Arduino IDE version 2.3.2 with the following
+T41EEE.7 was developed and compiled using Arduino IDE version 2.3.2 with the following
 configuration:
 
 1.  Optimize is set to "Smallest Code" (Tools menu).
 2.  CPU speed is set to 528 MHz (Tools menu).
 3.  TeensyDuino version is 1.59.0.
-4.  You will need to install ArduinoJson which is currently version 7.0.4.
+4.  You will need to install ArduinoJson which is currently version 7.1.0.
 
 Completing a FLASH erase of the Teensy is strongly recommended before uploading this new version. 
 Remember to save to the SD card via the EEPROM menu EEPROM->SD command prior to erasing.
@@ -59,37 +59,80 @@ The instructions for performing a FLASH erase of the Teensy are here:
 
 The bullet "Memory Wipe & LED Blink Restore" has the instructions.
 
-## Highlight of Changes included in T41EEE.6
+## Highlight of Changes included in T41EEE.7
 
- 1.  Fixed CW sidetone problem.
- 2.  Fixed ordering of button interrupt enabling and EEPROM startup function calls in setup().
- 3.  Added #define DEBUG_SWITCH_CAL and .ino code.
- 4.  Fixed version not updating in SD file.  CW filter shown rather than default in menu.
- 5.  Fixed switch matrix debug mode not saving to EEPROM.
- 6.  Inhibit transmit in AM demod modes.
- 7.  Changed Serial speed from 9600 to 115200, a modern speed.
- 8.  Boosted QSE2DC transmit gain, which increases power by about 3 dB.
- 9.  Corrected comment in the ResetFlipFlops() function.
-10.  Fixed strange filter band limit behavior and moved graphics to FilterSetSSB() function.
-11.  Updated README with new link to book and compile configuration.
-12.  Removed unused variables and code, formerly used for audio bandwidth delimiters.
-13.  Fixed bug in FilterSetSSB() which caused audio filter bandwidth to change inadvertently.
-14.  Smoother tuning in 16X Zoom.
-15.  Improved accuracy of location of blue tuning bar.
-16.  Higher dynamic range calibration display working.
-17.  AM modes tuning problem is resolved.
-18.  Automated calibration feature is available in the Calibration menu (details below).
-19.  Audio filter bandwidth selection is indicated by yellow delimiter bar.
-20.  Volume is equalized when adjusting audio bandwidth.
-21.  Noise reduction algorithms are equalized to the same gains.
-22.  MyConfiguration.h includes customizable coarse (center) and fine frequency increments.
-23.  Auto-Spectrum mode optimizes the position of the spectral display without affecting gain.
-     This is activated in the RF Set menu.  The gain setting reverts to manual control, also
-     in the RF Set menu.
+1.  Audio bandwidth equalized.  Noise reductions equalized.
+2.  Changed audio filter delimiter line color to red.
+3.  Reduced Spectral noise filter amplitude.
+4.  Fixed problem with audio delimiters and reset tuning, also was not saving AutoSpectrum to SD.
+5.  Added SSB calibration.
+6.  Added audio adapter equalizer to transmit signal chain.
+7.  CESSB modulation from Open Audio Library replaces conventional phasing SSB.
+8.  Added working SSB options menu specific to CESSB.  Mic gain and compression menu removed.
+
+## Controlled Envelope Single Side Band (CESSB)
+
+Controlled Envelope Single Side Band is employed in T41EEE.7.  This web page has an excellent description of
+CESSB technology:
+
+<https://www.janbob.com/electron/CESSB_Teensy/CESSB_Teensy.html>
+
+T41EEE.7 uses the Open Audio CESSB class as well as the type 2 Compressor class.
+
+<https://github.com/chipaudette/OpenAudio_ArduinoLibrary/blob/master/radioCESSB_Z_transmit_F32.h>
+
+<https://github.com/chipaudette/OpenAudio_ArduinoLibrary/blob/master/AudioEffectCompressor2_F32.h>
+
+The Audio Adapter's hardware-based equalization filter is included in the CESSB transmit chain to provide
+high-pass filtering of the microphone audio.
+
+### CESSB Automatic Calibration
+
+Automated calibration of the CESSB transmit signal chain is included in the Calibration menu.
+Similar to the previously deployed automatic calibration, SSB Radio Cal and SSB Radio Refine Cal
+commands will run the automatic calibration routines on all bands.  The automated calibrations can
+also be run on a per-band basis.
+
+Successful completion of either manual or automated calibration is required before proceeding with CESSB
+transmitter alignments.  It is recommended to calibrate with SSB PA Cal set as high as possible.
+If you have access to a spectrum analyzer, look at the transmitted spectrum from the output of the QSE
+filter.  You should see a minimum of spurious outputs close to the desired carrier.
+
+### CESSB Transmitter Alignment
+
+It will help to understand the CESSB transmit signal chain as deployed in this firmware.
+Nice block diagrams will be added to this in the near future.  For now, it is textual description.
+
+Transmit Signal Chain
+1.  Electret microphone biased via the Audio Adapter.  Assumed ~20 mV audio output from the electret.
+2.  Microphone amplifier/attenuator stage.  The default gain is 0 dB.  This gain is user-adjustable.
+3.  Open Audio Compressor 2.  Compression threshold and compression ratio is user adjustable.
+4.  CESSB processing.  The input is the compressed audio, and the output is I and Q to the QSE modulator.
+5.  QSE direct IQ modulator.  The I and Q channel amplitudes are user-adjustable via SSB PA Cal.
+
+So what does the user have to adjust?:
+
+1.  Microphone gain.
+2.  Compression threshold.
+3.  Compression ratio.
+4.  SSB PA Cal.
+
+OK, so now we will attempt to juggle the above four parameters to get a decent transmitted output.
+Of the above four items, it is probably best to leave the compression ratio set to default for now.
+Also, if you are using a typical electret microphone biased by the Audio Adapter, don't adjust the
+microphone gain at first.  Leave it alone, and then maybe come back to it later for further optimization.
+
+CESSB processes the voice audio in such a way that the peak-to-average power of the modulation is
+significantly reduced.  So we will use that fact and a single-tone signal to adjust the transmitter
+parameters.  The transmit signal chain is cascaded gain stages, and we don't won't overdrive to happen
+at any node of the chain.  Overdrive will result in a distorted output and will cause adjacent-channel
+splatter (increased bandwidth of the transmit energy).
+
+To be continued ...
 
 ## Automated Calibration
 
-Automated calibration is available starting with this version T41EEE.6.
+Automated calibration is available starting with version T41EEE.6.
 
 Automated calibration set-up is the same as for manual calibration.  A loop-back path from the
 output of the QSE to the input of the QSD must be connected.  An attenuator, in the value of 
@@ -149,7 +192,6 @@ A short movie showing the latest automatic calibration features in action:
 
 Please refer to the included file T41_Change_Log.txt which includes the description of changes made
 to prior versions.
-
 */
 
 // setup() and loop() at the bottom of this file
@@ -1027,7 +1069,7 @@ FLASHMEM void InitializeDataArrays() {
   initTempMon(temp_check_frequency, lowAlarmTemp, highAlarmTemp, panicAlarmTemp);
   // this starts the measurements
   TEMPMON_TEMPSENSE0 |= 0x2U;
-}
+}  // end InitializeDataArrays()
 
 
 /*****
@@ -1228,34 +1270,15 @@ FLASHMEM void setup() {
   sgtl5000_2.muteHeadphone();                  // KF5N March 11, 2024
                                                //  sgtl5000_2.volume(0.5);   //  Headphone volume???  Not required as headphone is muted.
 
-
-
-// Original example
-//  struct compressionCurve crv = { -2.0f, 0.0f,           // margin, offset
-//     {0.0f, -10.0f, -20.0f, -30.0f, -1000.0f},           // kneeDB[] 
-//{  100.0f,  2.5f,   1.5f,     1.0f,      1.0f} };    // compressionRatio
-
-//  This is using the compression after the kneeDB[0] only.
-//  struct compressionCurve crv = { -2.0f, -40.0f,           // margin, offset
-//     {0.0f, -20.0f, -1000.0f, -1000.0f, -1000.0f},           // kneeDB[]  
-//     {  EEPROMData.currentMicCompRatio, 1.0f, 1.0f, 1.0, 1.0} };   // compressionRatio     
-
-//  compressor1.setCompressionCurve(&crv);
-//  compressor1.begin();
-
-  updateMic();  // This updates the Open Audio compressor settings.
-
-// basicCompressorBegin(pc1, -25.0f, 2.0);
-//  limiterBegin(pc1, -3.0f, -15.0f);
+  updateMic();  // This updates the transmit signal chain settings.
 
    cessb1.setSampleRate_Hz(48000);
-   cessb1.setGains(1.5f, 1.4f, 0.1f);
+   cessb1.setGains(1.5f, 1.4f, 0.5f);
    cessb1.setSideband(false);
 
 // Turn off microphone and 1 kHz test tone.
    mixer1.gain(0, 0);
    mixer1.gain(1, 0);
-
 
   pinMode(FILTERPIN15M, OUTPUT);
   pinMode(FILTERPIN20M, OUTPUT);
@@ -1278,8 +1301,6 @@ FLASHMEM void setup() {
   pinMode(TFT_CS, OUTPUT);
   digitalWrite(TFT_CS, HIGH);
 
-//  arm_fir_init_f32(&FIR_Hilbert_L, 100, FIR_Hilbert_coeffs_45, FIR_Hilbert_state_L, 256);  //AFP01-16-22
-//  arm_fir_init_f32(&FIR_Hilbert_R, 100, FIR_Hilbert_coeffs_neg45, FIR_Hilbert_state_R, 256);
   arm_fir_init_f32(&FIR_CW_DecodeL, 64, CW_Filter_Coeffs2, FIR_CW_DecodeL_state, 256);  //AFP 10-25-22
   arm_fir_init_f32(&FIR_CW_DecodeR, 64, CW_Filter_Coeffs2, FIR_CW_DecodeR_state, 256);
   arm_fir_decimate_init_f32(&FIR_dec1_EX_I, 48, 4, coeffs192K_10K_LPF_FIR, FIR_dec1_EX_I_state, 2048);

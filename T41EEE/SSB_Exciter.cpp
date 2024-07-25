@@ -153,9 +153,9 @@ void ExciterIQData() {
 
     //  This is the correct place in the data stream to inject the scaling for power.
 #ifdef QSE2
-    powerScale = 40.0 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
+    powerScale = 10.0 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
 #else
-    powerScale = 30.0 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
+    powerScale = 7.0 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
 #endif
 
     arm_scale_f32(float_buffer_L_EX, powerScale, float_buffer_L_EX, 2048);  //Scale to compensate for losses in Interpolation
