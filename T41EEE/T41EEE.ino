@@ -1264,7 +1264,7 @@ FLASHMEM void setup() {
 #endif
 sgtl5000_1.adcHighPassFilterEnable();  
 //sgtl5000_1.adcHighPassFilterDisable();  //reduces noise.  https://forum.pjrc.com/threads/27215-24-bit-audio-boards?p=78831&viewfull=1#post78831
-sgtl5000_1.adcHighPassFilterFreeze();
+//sgtl5000_1.adcHighPassFilterFreeze();
   sgtl5000_2.setAddress(HIGH);            // T41 has only a single Audio Adaptor.  This is being used essentially as a 2nd I2S port.
   sgtl5000_2.enable();
   sgtl5000_2.inputSelect(AUDIO_INPUT_LINEIN);  // Why is a second sgtl5000 device used???  This is the receiver ADCs, PCM1808?
