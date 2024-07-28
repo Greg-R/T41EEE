@@ -626,7 +626,7 @@ void SSBCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortC
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorAmp[i] = (iOptimal - 10 * 0.001) + (0.001 * i);  // The next array to sweep.
             }
-            //            Serial.printf("Refine The optimal amplitude = %.3f at index %d with value %.1f\n", iOptimal, adjdBMinIndex, *result);
+            // Serial.printf("Refine The optimal amplitude = %.3f at index %d with value %.1f\n", iOptimal, adjdBMinIndex, *result);
             IQCalType = 1;
             index = 0;
             averageFlag = false;
@@ -675,7 +675,7 @@ void SSBCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortC
           break;
 
         case State::average:  // Stay in this state while averaging is in progress.
-          if (averageCount > 3) {
+          if (averageCount > 5) {
             if (avgState == averagingState::refineAmp) state = State::refineAmp;
             if (avgState == averagingState::refinePhase) state = State::refinePhase;
             averageCount = 0;
@@ -1054,7 +1054,7 @@ void SSBCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool
           break;
 
         case State::average:  // Stay in this state while averaging is in progress.
-          if (averageCount > 5) {
+          if (averageCount > 8) {
             if (avgState == averagingState::refineAmp) state = State::refineAmp;
             if (avgState == averagingState::refinePhase) state = State::refinePhase;
             averageCount = 0;
