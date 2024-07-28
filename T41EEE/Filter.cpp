@@ -321,13 +321,13 @@ void SetDecIntFilters()
   if (filter_BW_highest < - bands[EEPROMData.currentBand].FLoCut) {
     filter_BW_highest = - bands[EEPROMData.currentBand].FLoCut;
   }
- // LP_F_help = filter_BW_highest;
+ LP_F_help = filter_BW_highest;
 
-//if (LP_F_help > 10000) {
- //   LP_F_help = 10000;
- // }
+if (LP_F_help > 10000) {
+    LP_F_help = 10000;
+  }
 
-  LP_F_help = 10000;  // 
+//  LP_F_help = 10000;  // 
 
   CalcFIRCoeffs(FIR_dec1_coeffs, n_dec1_taps, (float32_t)(LP_F_help), n_att, 0, 0.0, (float32_t)(SR[SampleRate].rate));
   CalcFIRCoeffs(FIR_dec2_coeffs, n_dec2_taps, (float32_t)(LP_F_help), n_att, 0, 0.0, (float32_t)(SR[SampleRate].rate / DF1));

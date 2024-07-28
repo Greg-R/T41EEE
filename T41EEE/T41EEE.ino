@@ -1649,11 +1649,11 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
     // Compensate for audio filter setting.
     // Nominal bandwidth is 2.8kHz.  This will be the 0 dB reference.
     // The upper and lower frequency limits are bands[EEPROMData.currentBand].FLoCut and bands[EEPROMData.currentBand].FHiCut.
-//    audioBW = bands[EEPROMData.currentBand].FHiCut - bands[EEPROMData.currentBand].FLoCut;
+    audioBW = bands[EEPROMData.currentBand].FHiCut - bands[EEPROMData.currentBand].FLoCut;
     // How many dB between reference and current setting?  Round to integer.
-//    dBoffset = static_cast<int>(20.0 * log10f_fast(audioBW/2800.0));
-//    volumeAdjust.gain(volumeLog[(EEPROMData.audioVolume - dBoffset)]);
-    volumeAdjust.gain(volumeLog[(EEPROMData.audioVolume)]);
+    dBoffset = static_cast<int>(20.0 * log10f_fast(audioBW/2800.0));
+    volumeAdjust.gain(volumeLog[(EEPROMData.audioVolume - dBoffset)]);
+//    volumeAdjust.gain(volumeLog[(EEPROMData.audioVolume)]);
     volumeChangeFlag = false;
     UpdateVolumeField();
   }
