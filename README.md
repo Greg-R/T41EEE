@@ -95,7 +95,8 @@ also be run on a per-band basis.
 Successful completion of either manual or automated calibration is required before proceeding with CESSB
 transmitter alignments.  It is recommended to calibrate with SSB PA Cal set as high as possible.
 If you have access to a spectrum analyzer, look at the transmitted spectrum from the output of the QSE
-filter.  You should see a minimum of spurious outputs close to the desired carrier.
+filter.  You should see a minimum of spurious outputs close to the desired carrier when SSB PA Cal is
+set high, but not too high.
 
 ### CESSB Transmitter Alignment
 
@@ -105,9 +106,9 @@ Nice block diagrams will be added to this in the near future.  For now, it is te
 Transmit Signal Chain
 1.  Electret microphone biased via the Audio Adapter.  Assumed ~20 mV audio output from the electret.
 2.  Microphone amplifier/attenuator stage.  The default gain is 0 dB.  This gain is user-adjustable.
-3.  Open Audio Compressor 2.  Compression threshold and compression ratio is user adjustable.
+3.  Open Audio Compressor 2.  Compression threshold and compression ratio are user adjustable.
 4.  CESSB processing.  The input is the compressed audio, and the output is I and Q to the QSE modulator.
-5.  QSE direct IQ modulator.  The I and Q channel amplitudes are user-adjustable via SSB PA Cal.
+5.  QSE baseband-to-RF IQ modulator.  The I and Q channel amplitudes are user-adjustable via SSB PA Cal.
 
 So what does the user have to adjust?:
 
@@ -128,12 +129,12 @@ at any node of the chain.  Overdrive will result in a distorted output and will 
 splatter (increased bandwidth of the transmit energy).
 
 For starters, you will find more options in the Calibration sub-menu:
-
+```
 SSB Carrier
 SSB Transmit
 SSB Radio
 SSB Refine
-
+```
 The CW calibrations are now separate and are indicated as such.
 So in theory, the rest of the radio functions as before.  I hope, because one radical
 departure is using a different sample rate during SSB transmit, which is 48 kHz.
