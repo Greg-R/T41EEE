@@ -152,7 +152,7 @@ This is just a check to see if the spectrums are reasonably free of higher order
 There is going to be some garbage no matter what, but it better be suppressed 60 dB or better.
 If garbage levels are too high, try again with a lower SSB PA Cal number.
 
-Note that if you play to drive the Power Amplifier with CESSB, you need to have a filter after the QSE.  Be sure to run calibration with the filter in place!  I put an attenuator on the output of the QSE to help isolate it from the filter.  I'm currently using a 6 dB attenuator, which seems kind of high, but there is still enough drive to the Power Amplifier.  Also if you are using the QSE2DC, there is a resistive Pi attenuator on the output of about 2 dB.  This is another variable in this system which is kind of up for grabs, and depends on exactly what you've got.
+Note that if you plan to drive the Power Amplifier with CESSB, you need to have a filter after the QSE.  Be sure to run calibration with the filter in place!  I put an attenuator on the output of the QSE to help isolate it from the filter.  I'm currently using a 6 dB attenuator, which seems kind of high, but there is still enough drive to the Power Amplifier.  Also if you are using the QSE2DC, there is a resistive Pi attenuator on the output of about 2 dB.  This is another variable in this system which is kind of up for grabs, and it depends on exactly what you've got.  Fun with homebrew radios!
 
 Let me explain in detail SSB PA Cal.  This is nothing more than a constant linear multiplier of the I and Q channel amplitudes going into the QSE.  Thus you cannot allow the amplitude to go too high or you will cause distortion in the modulator.  SSB PA Cal setting is crucial and we will come back to this later in the process.  This step #1 is to make sure calibration happens at a level which is a bit below the saturation point of the modulator.  There is a balance point of good signal-to-noise ratio and keeping the signal below the level of generating intermodulation garbage.  So we are trying to find the sweet spot, calibrate there, and move onto the next step.
 
@@ -168,12 +168,12 @@ Hopefully the compressor behavior is observed, and you will not need to adjust t
 2.  Compression Threshold, with default of -20 dB.
 3.  Compression Ratio, with default of 100.
 
-3.  So if your microphone is more or less sensitive, adjust using #1.
+So if your microphone is more or less sensitive, adjust using #1.
 I hope #2 and #3 do not require adjustment.  The Compressor2 is set up in a very basic way.
 It is really more of a limiter than a compressor.  Much more sophisticated compression behavior
 is possible.  This is a good enough starting point.
 
-4.  Now remember I said to adjust SSB PA Cal to 0.8 during calibration?
+Now remember I said to adjust SSB PA Cal to 0.8 during calibration?
 Now it is time to dial that down, drop it to 0.5, maybe even 0.4.
 The reason for this is to prevent the CESSB output from overdriving the QSE during voice peaks.
 
@@ -182,9 +182,9 @@ Now monitor the spectrum while keyed up and speaking into the microphone.
 This should result in a very contained spectrum of approximately 3 kHz bandwidth.
 There may be occasional splatter, but it should be relatively rare.  You should be able to almost yell into the microphone without causing splatter.  Well, maybe more like loud talking.
 
-OK, if you got this far, the SSB transmitter is more or less adjusted, sans power amplifier, of course.  You can go ahead and connect the power amplifier, load and/or attenuator and see how that looks.  I see quite a bit of spectral spreading at the output of the K9HZ amplifier.
+OK, if you got this far, the SSB transmitter is more or less adjusted, sans power amplifier, of course.  You can go ahead and connect the power amplifier, load and/or attenuator and see how that looks.  I see quite a bit of spectral spreading at the output of the K9HZ amplifier, but thisis probably normal.
 
-There is another issue here.  After all of that, is the output high enough to drive up the amplifier???  Not sure what to do about that if it isn't.  Backing off the attenuator on the output of the QSE plus re-calibration is one possibility.
+There is another issue here.  After all of that, is the output high enough to drive up the amplifier???  I'm not sure what to do about that if it isn't.  Backing off the attenuator on the output of the QSE plus re-calibration is one possibility.
 
 
 ## Automated Calibration
