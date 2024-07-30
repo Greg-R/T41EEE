@@ -251,7 +251,7 @@ void ProcessIQData()
     arm_fir_decimate_f32(&FIR_dec2_Q, float_buffer_R, float_buffer_R, BUFFER_SIZE * N_BLOCKS / (uint32_t)DF1);
 
     /* =================  AFP 10-21-22 Level Adjust ===========
-    float freqKHzFcut;
+    float freqKHzFcut;  This code was removed and volume control compensated in .ino.  Greg KF5N, July 30, 2024.
     float volScaleFactor;
     if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
       freqKHzFcut = -(float32_t)bands[EEPROMData.currentBand].FLoCut * 0.001;
