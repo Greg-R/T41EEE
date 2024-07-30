@@ -2,25 +2,23 @@
 #include "SDT.h"
 
 /*****
-  Purpose: Create I and Q signals from Mic input
+  Purpose: The SSB exciter: Create I and Q signals from Mic input.
+  Parameter list: none
 
-  Parameter list:
-
-  Return value;
-    void
+  Return value; void
     Notes:
-    There are several actions in this function
-    1.  Read in the data from the ADC into the Left Channel at 192KHz
-    2.  Format the L data and Decimate (downsample and filter)the sampled data by x8
-          - the new effective sampling rate is now 24KHz
-    3.  Process the L data through the 7 EQ filters and combine to a single data stream
-    4.  Copy the L channel to the R channel
-    5.  Process the R and L through two Hilbert Transformers - L 0deg phase shift and R 90 deg ph shift
-          - This create the I (L) and Q(R) channels
-    6.  Interpolate 8x (upsample and filter) the data stream to 192KHz sample rate
-    7.  Output the data stream thruogh the DACs at 192KHz
+    There are several actions in this function:
+    1.  Read in the data from the ADC into the Left Channel at 192KHz.
+    2.  Format the left channel data and decimate (downsample and filter)the sampled data by x8.
+          - the new effective sampling rate is now 24KHz.
+    3.  Process the left channel data through the 7 EQ filters and combine to a single data stream.
+    4.  Copy the left (I) channel to the Q channel
+    5.  Process the I and Q channels through two Hilbert Transformers - I 45 deg phase shift and Q -45 deg phase shift.
+          - Now I and Q are phase-shifted by 90 degrees relative to each other.
+    6.  Interpolate 8x (upsample and filter) the data stream to 192KHz sample rate.
+    7.  Output the data stream through the DACs at 192KHz and into the modulator.
 *****/
-int16_t* sp_L2, sp_R2;
+
 void ExciterIQData()
 {
   uint32_t N_BLOCKS_EX = N_B_EX;
