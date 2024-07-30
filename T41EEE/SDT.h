@@ -41,7 +41,7 @@ extern struct maps myMapFiles[];
 #include <vector>
 #include <algorithm>
 
-#include "Calibrate.h"
+#include "CWCalibrate.h"
 #include "SSBCalibrate.h"
 
 //======================================== Symbolic Constants for the T41 ===================================================
@@ -405,7 +405,7 @@ struct config_t {
   int nrOptionSelect = 0;                              // 1 byte
   int currentScale = 1;
   long spectrum_zoom = SPECTRUM_ZOOM_2;
-  float spectrum_display_scale = 10.0;  // 4 bytes
+//  float spectrum_display_scale = 10.0;  // 4 bytes
   int CWFilterIndex = 5;                // Off
   int paddleDit = KEYER_DIT_INPUT_TIP;
   int paddleDah = KEYER_DAH_INPUT_RING;
@@ -499,7 +499,8 @@ struct config_t {
   q15_t dacOffsetCW = 1100;  // This must be "tuned" for each radio and/or Audio Adapter board.
   q15_t dacOffsetSSB = 1100;  // This must be "tuned" for each radio and/or Audio Adapter board.
 #endif
-  bool radioCalComplete = false;
+  bool CWradioCalComplete = false;
+  bool SSBradioCalComplete = false;
 };
 
 extern struct config_t EEPROMData;
@@ -611,7 +612,7 @@ extern Rotary fineTuneEncoder;  // (4,  5);
 
 extern Metro ms_500;
 
-extern Calibrate calibrater;         // CW mode calibration object.
+extern CWCalibrate calibrater;         // CW mode calibration object.
 extern SSBCalibrate ssbcalibrater;   // SSB mode calibration object.
 
 extern Si5351 si5351;
@@ -910,7 +911,7 @@ extern float32_t NR_long_tone_gain[];
 extern float32_t R_BufferOffset[];
 extern float32_t ring[];
 extern const float32_t volumeLog[101];
-extern float32_t spectrum_display_scale;  // 30.0
+//extern float32_t spectrum_display_scale;  // 30.0
 extern float32_t tmp;
 extern float32_t w;
 extern float angl;

@@ -11,7 +11,7 @@
 //#include <vector>
 #include <algorithm>
 
-class Calibrate {
+class CWCalibrate {
 public:
 
 int IQCalType;

@@ -12,7 +12,7 @@
    Return value:
       void
  *****/
-void Calibrate::loadCalToneBuffers() {
+void CWCalibrate::loadCalToneBuffers() {
   float theta;
   float32_t tones[2]{ 750.0, 3000.0 };
   // This loop creates the sinusoidal waveform for the tone.
@@ -33,7 +33,7 @@ void Calibrate::loadCalToneBuffers() {
   Return value:
     void
 *****/
-void Calibrate::plotCalGraphics(int calType) {
+void CWCalibrate::plotCalGraphics(int calType) {
   tft.writeTo(L2);
   if (calType == 0) {  // Receive Cal
     if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
@@ -79,12 +79,12 @@ void Calibrate::plotCalGraphics(int calType) {
   Return value:
     void
 *****/
-void Calibrate::warmUpCal() {
+void CWCalibrate::warmUpCal() {
   // Run ProcessIQData2() a few times to load and settle out buffers.  Compute FFT.  KF5N May 19, 2024
   uint32_t index_of_max;  // Not used, but required by arm_max_q15 function.
   for (int i = 0; i < 1024; i = i + 1) {
     updateDisplayFlag = true;  // Causes FFT to be calculated.
-    Calibrate::ProcessIQData2();
+    CWCalibrate::ProcessIQData2();
   }
   updateDisplayFlag = false;
   // Find peak of spectrum, which is 512 wide.  Use this to adjust spectrum peak to top of spectrum display.
@@ -101,7 +101,7 @@ void Calibrate::warmUpCal() {
   Return value:
     void
 *****/
-void Calibrate::printCalType(int IQCalType, bool autoCal, bool autoCalDone) {
+void CWCalibrate::printCalType(int IQCalType, bool autoCal, bool autoCalDone) {
   const char *calName;
   const char *IQName[4] = { "Receive", "Transmit CW", "Carrier CW", "Calibrate" };
   tft.writeTo(L1);
@@ -249,7 +249,7 @@ void Calibrate::printCalType(int IQCalType, bool autoCal, bool autoCalDone) {
    Return value:
       void
  *****/
-void Calibrate::CalibratePreamble(int setZoom) {
+void CWCalibrate::CalibratePreamble(int setZoom) {
   SetAudioOperatingState(CW_CALIBRATE_STATE);
   cessb1.processorUsageMaxReset();
   calOnFlag = true;
@@ -310,7 +310,7 @@ void Calibrate::CalibratePreamble(int setZoom) {
    Return value:
       void
  *****/
-void Calibrate::CalibratePrologue() {
+void CWCalibrate::CalibratePrologue() {
   /*
   Serial.printf("lastState=%d radioState=%d memory_used=%d memory_used_max=%d f32_memory_used=%d f32_memory_used_max=%d\n",
                 lastState,
@@ -372,7 +372,7 @@ void Calibrate::CalibratePrologue() {
    Return value:
       void
  *****/
-void Calibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
+void CWCalibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
   int task = -1;
   int lastUsedTask = -2;
   int calFreqShift;
@@ -733,7 +733,7 @@ void Calibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
     }
     if (IQChoice == 6) break;  //  Exit the while loop.
   }                            // end while
-  CalibratePrologue();
+  CWCalibrate::CalibratePrologue();
 }  // End Transmit calibration
 
 
@@ -746,13 +746,13 @@ void Calibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
    Return value:
       void
  *****/
-void Calibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal) {
+void CWCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal) {
   int task = -1;
   int lastUsedTask = -2;
   int freqOffset;
   //  bool corrChange = false;
   float correctionIncrement = 0.001;
-  State state = State::warmup;  // Start calibration state machine in warmup state.
+  CWCalibrate::State state = State::warmup;  // Start calibration state machine in warmup state.
   float maxSweepAmp = 0.35;
   float maxSweepPhase = 0.1;
   float increment = 0.002;
@@ -771,11 +771,11 @@ void Calibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal)
   // bool stopSweep = false;
 
   if (toneFreqIndex == 0) {           // 750 Hz
-    Calibrate::CalibratePreamble(4);  // Set zoom to 16X.
+    CWCalibrate::CalibratePreamble(4);  // Set zoom to 16X.
     freqOffset = 0;                   // Calibration tone same as regular modulation tone.
   }
   if (toneFreqIndex == 1) {           // 3 kHz
-    Calibrate::CalibratePreamble(2);  // Set zoom to 4X.
+    CWCalibrate::CalibratePreamble(2);  // Set zoom to 4X.
     freqOffset = 2250;                // Need 750 + 2250 = 3 kHz
   }
   calTypeFlag = 1;  // TX cal
@@ -1106,7 +1106,7 @@ void Calibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal)
     }
     if (IQChoice == 6) break;  //  Exit the while loop.
   }                            // end while
-  CalibratePrologue();
+  CWCalibrate::CalibratePrologue();
 }  // End Transmit calibration
 
 
@@ -1120,7 +1120,7 @@ void Calibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal)
       void
  *****/
 #ifdef QSE2
-void Calibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool shortCal) {
+void CWCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool shortCal) {
   int task = -1;
   int lastUsedTask = -2;
   int freqOffset;
@@ -1146,11 +1146,11 @@ void Calibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool sh
   // bool stopSweep = false;
 
   if (toneFreqIndex == 0) {  // 750 Hz
-    CalibratePreamble(4);    // Set zoom to 16X.
+    CWCalibrate::CalibratePreamble(4);    // Set zoom to 16X.
     freqOffset = 0;          // Calibration tone same as regular modulation tone.
   }
   if (toneFreqIndex == 1) {  // 3 kHz
-    CalibratePreamble(2);    // Set zoom to 4X.
+    CWCalibrate::CalibratePreamble(2);    // Set zoom to 4X.
     freqOffset = 2250;       // Need 750 + 2250 = 3 kHz
   }
   calTypeFlag = 2;  // Carrier cal
@@ -1480,15 +1480,15 @@ void Calibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool sh
     }
     if (IQChoice == 6) break;  //  Exit the while loop.
   }                            // end while
-  CalibratePrologue();
+  CWCalibrate::CalibratePrologue();
 }  // End carrier calibration
 #endif
 
 
 // Automatic calibration of all bands.  Greg KF5N June 4, 2024
-void Calibrate::RadioCal(bool refineCal) {
+void CWCalibrate::RadioCal(bool refineCal) {
   // Warn the user if the radio is not calibrated and refine cal is attempted.
-  if (refineCal && not EEPROMData.radioCalComplete) {
+  if (refineCal && not EEPROMData.CWradioCalComplete) {
     tft.setFontScale((enum RA8875tsize)2);
     tft.setTextColor(RA8875_RED);
     tft.setCursor(20, 300);
@@ -1498,48 +1498,48 @@ void Calibrate::RadioCal(bool refineCal) {
   IQChoice = 0;  // Global variable.
   BandSet(BAND_80M);
 #ifdef QSE2
-  Calibrate::DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
+  CWCalibrate::DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
 #endif
-  Calibrate::DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
-  Calibrate::DoReceiveCalibrate(true, refineCal);
+  CWCalibrate::DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
+  CWCalibrate::DoReceiveCalibrate(true, refineCal);
   BandSet(BAND_40M);
 #ifdef QSE2
-  Calibrate::DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
+  CWCalibrate::DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
 #endif
-  Calibrate::DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
-  Calibrate::DoReceiveCalibrate(true, refineCal);
+  CWCalibrate::DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
+  CWCalibrate::DoReceiveCalibrate(true, refineCal);
   BandSet(BAND_20M);
 #ifdef QSE2
-  Calibrate::DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
+  CWCalibrate::DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
 #endif
-  Calibrate::DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
-  Calibrate::DoReceiveCalibrate(true, refineCal);
+  CWCalibrate::DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
+  CWCalibrate::DoReceiveCalibrate(true, refineCal);
   BandSet(BAND_17M);
 #ifdef QSE2
-  Calibrate::DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
+  CWCalibrate::DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
 #endif
-  Calibrate::DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
-  Calibrate::DoReceiveCalibrate(true, refineCal);
+  CWCalibrate::DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
+  CWCalibrate::DoReceiveCalibrate(true, refineCal);
   BandSet(BAND_15M);
 #ifdef QSE2
-  Calibrate::DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
+  CWCalibrate::DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
 #endif
-  Calibrate::DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
-  Calibrate::DoReceiveCalibrate(true, refineCal);
+  CWCalibrate::DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
+  CWCalibrate::DoReceiveCalibrate(true, refineCal);
   BandSet(BAND_12M);
 #ifdef QSE2
-  Calibrate::DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
+  CWCalibrate::DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
 #endif
-  Calibrate::DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
-  Calibrate::DoReceiveCalibrate(true, refineCal);
+  CWCalibrate::DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
+  CWCalibrate::DoReceiveCalibrate(true, refineCal);
   BandSet(BAND_10M);
 #ifdef QSE2
-  Calibrate::DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
+  CWCalibrate::DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
 #endif
-  Calibrate::DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
-  Calibrate::DoReceiveCalibrate(true, refineCal);
+  CWCalibrate::DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
+  CWCalibrate::DoReceiveCalibrate(true, refineCal);
   // Set flag for initial calibration completed.
-  EEPROMData.radioCalComplete = true;
+  EEPROMData.CWradioCalComplete = true;
   EEPROMWrite();
   return;
 }
@@ -1554,7 +1554,7 @@ void Calibrate::RadioCal(bool refineCal) {
    Return value:
       void
  *****/
-void Calibrate::ProcessIQData2() {
+void CWCalibrate::ProcessIQData2() {
   float rfGainValue, powerScale;                                   // AFP 2-11-23.  Greg KF5N February 13, 2023
   float recBandFactor[7] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };  // AFP 2-11-23  KF5N uniform values
 
@@ -1682,7 +1682,7 @@ void Calibrate::ProcessIQData2() {
   Return value;
     void
 *****/
-void Calibrate::ShowSpectrum2()  //AFP 2-10-23
+void CWCalibrate::ShowSpectrum2()  //AFP 2-10-23
 {
   int x1 = 0;
   int capture_bins = 8;  // Sets the number of bins to scan for signal peak.
@@ -1759,7 +1759,7 @@ void Calibrate::ShowSpectrum2()  //AFP 2-10-23
   Return value;
     float, returns the adjusted value in dB
 *****/
-float Calibrate::PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
+float CWCalibrate::PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
   //  float adjdB = 0.0;
   int16_t adjAmplitude = 0;  // Was float; cast to float in dB calculation.  KF5N
   int16_t refAmplitude = 0;  // Was float; cast to float in dB calculation.  KF5N
@@ -1774,7 +1774,7 @@ float Calibrate::PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
     ShowBandwidth();                         // Without this call, the calibration value in dB will not be updated.  KF5N
   } else updateDisplayFlag = false;          //  Do not save the the display data for the remainder of the sweep.
 
-  Calibrate::ProcessIQData2();  // Call the Audio process from within the display routine to eliminate conflicts with drawing the spectrum.
+  CWCalibrate::ProcessIQData2();  // Call the Audio process from within the display routine to eliminate conflicts with drawing the spectrum.
 
   y_new = pixelnew[x1];
   y1_new = pixelnew[x1 - 1];
@@ -1850,7 +1850,7 @@ float Calibrate::PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
   Return value:
     void
 *****/
-void Calibrate::SelectCalFreq() {
+void CWCalibrate::SelectCalFreq() {
   const char *calFreqs[2]{ "750 Hz", "3.0 kHz" };
   EEPROMData.calFreq = SubmenuSelect(calFreqs, 2, EEPROMData.calFreq);  // Returns the index of the array.
   //  RedrawDisplayScreen();  Kills the bandwidth graphics in the audio display window, remove. KF5N July 30, 2023

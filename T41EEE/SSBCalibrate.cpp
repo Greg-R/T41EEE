@@ -1111,7 +1111,7 @@ if(exit) break;
 // Automatic calibration of all bands.  Greg KF5N June 4, 2024
 void SSBCalibrate::RadioCal(bool refineCal) {
   // Warn the user if the radio is not calibrated and refine cal is attempted.
-  if (refineCal && not EEPROMData.radioCalComplete) {
+  if (refineCal && not EEPROMData.SSBradioCalComplete) {
     tft.setFontScale((enum RA8875tsize)2);
     tft.setTextColor(RA8875_RED);
     tft.setCursor(20, 300);
@@ -1162,7 +1162,7 @@ void SSBCalibrate::RadioCal(bool refineCal) {
   SSBCalibrate::DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
 
   // Set flag for initial calibration completed.
-  EEPROMData.radioCalComplete = true;
+  EEPROMData.SSBradioCalComplete = true;
   EEPROMWrite();
   return;
 }

@@ -309,7 +309,7 @@ AudioControlSGTL5000 sgtl5000_2;  // This is not a 2nd Audio Adapter.  It is I2S
 */ 
 //End dataflow code
 
-Calibrate calibrater;  // Instantiate the calibration object.
+CWCalibrate calibrater;  // Instantiate the calibration object.
 SSBCalibrate ssbcalibrater;
 
 Rotary volumeEncoder = Rotary(VOLUME_ENCODER_A, VOLUME_ENCODER_B);        //( 2,  3)
