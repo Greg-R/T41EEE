@@ -391,10 +391,7 @@ const DEMOD_Descriptor DEMOD[3] = {
 dispSc displayScale[] =  //r *dbText,dBScale, pixelsPerDB, baseOffset, offsetIncrement
   {
     { "20 dB/", 10.0, 2, 24, 1.00 },
-    { "10 dB/", 20.0, 4, 10, 0.50 },  //  JJP 7/14/23
-    { "5 dB/", 40.0, 8, 58, 0.25 },
-    { "2 dB/", 100.0, 20, 120, 0.10 },
-    { "1 dB/", 200.0, 40, 200, 0.05 }
+    { "10 dB/", 20.0, 4, 10, 0.50 }  //  1,2, and 5 dB removed.  Greg KF5N July 30, 2024.
   };
 
 //======================================== Global variables declarations for Quad Oscillator 2 ===============================================
