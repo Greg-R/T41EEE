@@ -200,7 +200,9 @@ void ZoomFFTExe(uint32_t blockSize) {
     else
       for (int16_t x = 0; x < fftWidth; x++) {
         pixelnew[x] = displayScale[EEPROMData.currentScale].baseOffset + (int16_t)(displayScale[EEPROMData.currentScale].dBScale * log10f_fast(FFT_spec[x])) + fftOffset;
-        if (pixelnew[x] > 220) pixelnew[x] = 220;
+//       if(x == 256) Serial.printf("pixelnew[x] = %d\n", pixelnew[x]);
+        if(pixelnew[x] < 0) pixelnew[x] = 0;   // Unrestricted range can cause crash.  Greg KF5N July 31, 2024.
+        if (pixelnew[x] > 146) pixelnew[x] = 146;
       }
   }
 }
