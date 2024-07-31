@@ -348,10 +348,10 @@ void SpectrumOptions() { /*
     {"5 dB/",  40.0,   8,  58, 0.25},
   };
   */
-  const char *spectrumChoices[] = { "20 dB/unit", "10 dB/unit", "5 dB/unit", "Cancel" };
+  const char *spectrumChoices[] = { "20 dB/unit", "10 dB/unit", "Cancel" };
   int spectrumSet = EEPROMData.currentScale;  // JJP 7/14/23
 
-  spectrumSet = SubmenuSelect(spectrumChoices, 4, spectrumSet);
+  spectrumSet = SubmenuSelect(spectrumChoices, 3, spectrumSet);
   if (strcmp(spectrumChoices[spectrumSet], "Cancel") == 0) {
     return;
   }

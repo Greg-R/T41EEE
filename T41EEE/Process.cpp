@@ -250,7 +250,7 @@ void ProcessIQData()
     arm_fir_decimate_f32(&FIR_dec2_I, float_buffer_L, float_buffer_L, BUFFER_SIZE * N_BLOCKS / (uint32_t)DF1);
     arm_fir_decimate_f32(&FIR_dec2_Q, float_buffer_R, float_buffer_R, BUFFER_SIZE * N_BLOCKS / (uint32_t)DF1);
 
-    // =================  AFP 10-21-22 Level Adjust ===========
+    /* =================  AFP 10-21-22 Level Adjust ===========
     float freqKHzFcut;
     float volScaleFactor;
     if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
@@ -261,6 +261,7 @@ void ProcessIQData()
     volScaleFactor = 7.0874 * pow(freqKHzFcut, -1.232);
     arm_scale_f32(float_buffer_L, volScaleFactor, float_buffer_L, FFT_length / 2);
     arm_scale_f32(float_buffer_R, volScaleFactor, float_buffer_R, FFT_length / 2);
+    */
 
     /**********************************************************************************  AFP 12-31-20
         Digital FFT convolution
