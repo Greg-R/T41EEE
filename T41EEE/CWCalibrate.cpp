@@ -250,15 +250,15 @@ void CWCalibrate::printCalType(int IQCalType, bool autoCal, bool autoCalDone) {
       void
  *****/
 void CWCalibrate::CalibratePreamble(int setZoom) {
-  SetAudioOperatingState(CW_CALIBRATE_STATE);
+  SetAudioOperatingState(RadioState::CW_CALIBRATE_STATE);
   cessb1.processorUsageMaxReset();
   calOnFlag = true;
   IQCalType = 0;
-  radioState = CW_TRANSMIT_STRAIGHT_STATE;                 // KF5N
+//  radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;                 // KF5N
   transmitPowerLevelTemp = EEPROMData.transmitPowerLevel;  //AFP 05-11-23
   cwFreqOffsetTemp = EEPROMData.CWOffset;
   EEPROMData.CWOffset = 2;  // 750 Hz for TX calibration.  Prologue restores user selected offset.
-  userxmtMode = EEPROMData.xmtMode;          // Store the user's mode setting.  KF5N July 22, 2023
+//  userxmtMode = EEPROMData.xmtMode;          // Store the user's mode setting.  KF5N July 22, 2023
   userZoomIndex = EEPROMData.spectrum_zoom;  // Save the zoom index so it can be reset at the conclusion.  KF5N August 12, 2023
   zoomIndex = setZoom - 1;
   loadCalToneBuffers();  // Restore in the prologue.
@@ -288,11 +288,11 @@ void CWCalibrate::CalibratePreamble(int setZoom) {
   EEPROMData.currentScale = 1;          //  Set vertical scale to 10 dB during calibration.  KF5N
   updateDisplayFlag = false;
   digitalWrite(MUTE, LOW);  //turn off mute
-  xrState = RECEIVE_STATE;
-  T41State = CW_RECEIVE;
+//  xrState = RECEIVE_STATE;
+//  T41State = CW_RECEIVE;
   EEPROMData.centerFreq = TxRxFreq;
   NCOFreq = 0L;
-  xrState = TRANSMIT_STATE;
+//  xrState = TRANSMIT_STATE;
   digitalWrite(MUTE, HIGH);  //  Mute Audio  (HIGH=Mute)
   digitalWrite(RXTX, HIGH);  // Turn on transmitter.
   ShowTransmitReceiveStatus();
@@ -325,15 +325,15 @@ void CWCalibrate::CalibratePrologue() {
   */
   digitalWrite(RXTX, LOW);  // Turn off the transmitter.
   updateDisplayFlag = false;
-  xrState = RECEIVE_STATE;
+//  xrState = RECEIVE_STATE;
   ShowTransmitReceiveStatus();
-  T41State = CW_RECEIVE;
+//  T41State = RadioMode::CW_RECEIVE;
   // Clear queues to reduce transient.
   Q_in_L.clear();
   Q_in_R.clear();
   EEPROMData.centerFreq = TxRxFreq;
   NCOFreq = 0L;
-  xrState = RECEIVE_STATE;
+//  xrState = RECEIVE_STATE;
   calibrateFlag = 0;                       // KF5N
   EEPROMData.CWOffset = cwFreqOffsetTemp;  // Return user selected CW offset frequency.
   EEPROMData.calFreq = calFreqTemp;        // Return user selected calibration tone frequency.
@@ -341,7 +341,7 @@ void CWCalibrate::CalibratePrologue() {
   //calFreqShift = 0;
   EEPROMData.currentScale = userScale;  //  Restore vertical scale to user preference.  KF5N
   ShowSpectrumdBScale();
-  EEPROMData.xmtMode = userxmtMode;                        // Restore the user's floor setting.  KF5N July 27, 2023
+//  EEPROMData.xmtMode = userxmtMode;                        // Restore the user's floor setting.  KF5N July 27, 2023
   EEPROMData.transmitPowerLevel = transmitPowerLevelTemp;  // Restore the user's transmit power level setting.  KF5N August 15, 2023
   EEPROMWrite();                                           // Save calibration numbers and configuration.  KF5N August 12, 2023
   zoomIndex = userZoomIndex - 1;
@@ -353,11 +353,11 @@ void CWCalibrate::CalibratePrologue() {
   calOnFlag = false;
   RedrawDisplayScreen();
   IQChoice = 9;
-  radioState = CW_RECEIVE_STATE;  // KF5N
+//  radioState = RadioState::CW_RECEIVE_STATE;  // KF5N
   fftOffset = 0;  // Some reboots may be caused by large fftOffset values when Auto-Spectrum is on.
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreq();         // Return Si5351 to normal operation mode.  KF5N
-  lastState = 1111;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 16, 2023
+  lastState = RadioState::NOSTATE;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 16, 2023
 
   return;
 }
@@ -431,7 +431,7 @@ void CWCalibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
 
   // Transmit Calibration Loop
   while (true) {
-    ShowSpectrum2();
+    CWCalibrate::ShowSpectrum2();
     val = ReadSelectedPushButton();
     if (val != BOGUS_PIN_READ) {
       val = ProcessButtonPress(val);
@@ -806,7 +806,7 @@ void CWCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCa
 
   // Transmit Calibration Loop
   while (true) {
-    ShowSpectrum2();
+    CWCalibrate::ShowSpectrum2();
     val = ReadSelectedPushButton();
     if (val != BOGUS_PIN_READ) {
       val = ProcessButtonPress(val);
@@ -1181,7 +1181,7 @@ void CWCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool 
 
   // Transmit Calibration Loop
   while (true) {
-    ShowSpectrum2();
+    CWCalibrate::ShowSpectrum2();
     val = ReadSelectedPushButton();
     if (val != BOGUS_PIN_READ) {
       val = ProcessButtonPress(val);

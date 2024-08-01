@@ -233,16 +233,17 @@ void SSBCalibrate::printCalType(int IQCalType, bool autoCal, bool autoCalDone) {
       void
  *****/
 void SSBCalibrate::CalibratePreamble(int setZoom) {
-  radioState = SSB_CALIBRATE_STATE;
+  radioState = RadioState::SSB_CALIBRATE_STATE;
   SetAudioOperatingState(radioState);
 //  cessb1.processorUsageMaxReset();
   calOnFlag = true;
+  ZoomFFTPrep();
   IQCalType = 0;
 //  radioState = CW_TRANSMIT_STRAIGHT_STATE;                 // KF5N
   transmitPowerLevelTemp = EEPROMData.transmitPowerLevel;  //AFP 05-11-23
   cwFreqOffsetTemp = EEPROMData.CWOffset;
   EEPROMData.CWOffset = 2;  // 750 Hz for TX calibration.  Prologue restores user selected offset.
-  userxmtMode = EEPROMData.xmtMode;          // Store the user's mode setting.  KF5N July 22, 2023
+//  userxmtMode = EEPROMData.xmtMode;          // Store the user's mode setting.  KF5N July 22, 2023
   userZoomIndex = EEPROMData.spectrum_zoom;  // Save the zoom index so it can be reset at the conclusion.  KF5N August 12, 2023
   zoomIndex = setZoom - 1;
   ButtonZoom();
@@ -308,21 +309,21 @@ void SSBCalibrate::CalibratePrologue() {
   */
   digitalWrite(RXTX, LOW);  // Turn off the transmitter.
   updateDisplayFlag = false;
-  xrState = RECEIVE_STATE;
+  //xrState = RECEIVE_STATE;
   tone1kHz.end();
   SampleRate = SAMPLE_RATE_192K;  // Return to receiver sample rate.
   SetI2SFreq(SR[SampleRate].rate);
   InitializeDataArrays();  // Re-initialize the filters back to 192ksps.
   ShowTransmitReceiveStatus();
-  T41State = CW_RECEIVE;
+//  T41State = CW_RECEIVE;
   // Clear queues to reduce transient.
   Q_in_L.clear();
   Q_in_R.clear();
-  radioState = SSB_RECEIVE_STATE;
+  radioState = RadioState::SSB_RECEIVE_STATE;
   SetAudioOperatingState(radioState);
   EEPROMData.centerFreq = TxRxFreq;
   NCOFreq = 0L;
-  xrState = RECEIVE_STATE;
+//  xrState = RECEIVE_STATE;
   calibrateFlag = 0;                       // KF5N
   EEPROMData.CWOffset = cwFreqOffsetTemp;  // Return user selected CW offset frequency.
   EEPROMData.calFreq = calFreqTemp;        // Return user selected calibration tone frequency.
@@ -330,7 +331,7 @@ void SSBCalibrate::CalibratePrologue() {
   //calFreqShift = 0;
   EEPROMData.currentScale = userScale;  //  Restore vertical scale to user preference.  KF5N
   ShowSpectrumdBScale();
-  EEPROMData.xmtMode = userxmtMode;                        // Restore the user's floor setting.  KF5N July 27, 2023
+//  EEPROMData.xmtMode = userxmtMode;                        // Restore the user's floor setting.  KF5N July 27, 2023
   EEPROMData.transmitPowerLevel = transmitPowerLevelTemp;  // Restore the user's transmit power level setting.  KF5N August 15, 2023
   EEPROMWrite();                                           // Save calibration numbers and configuration.  KF5N August 12, 2023
   zoomIndex = userZoomIndex - 1;
@@ -342,11 +343,11 @@ void SSBCalibrate::CalibratePrologue() {
   calOnFlag = false;
   RedrawDisplayScreen();
 //  IQChoice = 9;
-  radioState = CW_RECEIVE_STATE;  // KF5N
+  radioState = RadioState::CW_RECEIVE_STATE;  // KF5N
   fftOffset = 0;  // Some reboots may be caused by large fftOffset values when Auto-Spectrum is on.
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreq();         // Return Si5351 to normal operation mode.  KF5N
-  lastState = 1111;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 16, 2023
+  lastState = RadioState::NOSTATE;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 16, 2023
   return;
 }
 
@@ -386,7 +387,7 @@ void SSBCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortC
   // bool stopSweep = false;
 
   if (toneFreqIndex == 0) {           // 750 Hz
-    SSBCalibrate::CalibratePreamble(2);  // Set zoom to 8X.
+    SSBCalibrate::CalibratePreamble(2);  // Set zoom to 4X.
     freqOffset = 0;                   // Calibration tone same as regular modulation tone.
   }
   if (toneFreqIndex == 1) {           // 3 kHz
@@ -400,7 +401,7 @@ void SSBCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortC
   tft.setCursor(405, 125);
   tft.print(correctionIncrement, 3);
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
-  radioState = SSB_TRANSMIT_STATE;
+  radioState = RadioState::SSB_TRANSMIT_STATE;
   SetFreqCal(freqOffset);
   printCalType(calTypeFlag, autoCal, false);
   // Run this so Phase shows from begining.
@@ -779,7 +780,7 @@ void SSBCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool
   tft.setCursor(405, 125);
   tft.print(correctionIncrement);
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
-  radioState = SSB_TRANSMIT_STATE;
+  radioState = RadioState::SSB_TRANSMIT_STATE;
   SetFreqCal(freqOffset);
   printCalType(calTypeFlag, autoCal, false);
   // Run this so Phase shows from begining.
@@ -1294,7 +1295,8 @@ powerScale = 7.0 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
     // ZoomFFTExe is being called too many times in Calibration.  Should be called ONLY at the start of each sweep.
 //    if (EEPROMData.spectrum_zoom != SPECTRUM_ZOOM_1) {
       //AFP  Used to process Zoom>1 for display
-      SSBCalibrate::ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
+//      ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
+      ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
 //    }
   }
 }
@@ -1471,126 +1473,5 @@ float SSBCalibrate::PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
 
   tft.writeTo(L1);
   return adjdB_avg;
-}
-
-
-
-void SSBCalibrate::ZoomFFTExe(uint32_t blockSize) {
-  // totally rebuilt 27.8.2020 DD4WH
-  // however, I did not manage to implement a correct routine for magnifications > 2048x
-  // maybe the next days
-  const int fftWidth = 512;  // Was 512
-  float32_t x_buffer[blockSize];  // can be 2048 (FFT length == 512), or 4096 [FFT length == 1024] or even 8192 [FFT length == 2048]
-  float32_t y_buffer[blockSize];
-  static float32_t FFT_ring_buffer_x[fftWidth * 2];
-  static float32_t FFT_ring_buffer_y[fftWidth * 2];
-//  static int32_t flag_2nd_decimation = 0;
-  //static uint32_t high_Zoom_buffer_ptr = 0;
-//  uint8_t high_Zoom = 0;
-  //uint32_t high_Zoom_2nd_dec_rounds = (1 << (EEPROMData.spectrum_zoom - 11));
-  //Serial.print("2nd dec rounds"); Serial.println(high_Zoom_2nd_dec_rounds);
-  int sample_no = 256;
-  // sample_no is 256, in high magnify modes it is smaller!
-  // but it must never be > 256
-
-  sample_no = BUFFER_SIZE * N_BLOCKS / (1 << EEPROMData.spectrum_zoom);
-
-  if (sample_no > fftWidth) {
-    sample_no = fftWidth;
-  }
-
-//  In SSB calibrate, the decimation should be the same as 4X
-
-  // decimation stage 1
-  arm_fir_decimate_f32(&Fir_Zoom_FFT_Decimate_I1, float_buffer_L, x_buffer, blockSize);
-  arm_fir_decimate_f32(&Fir_Zoom_FFT_Decimate_Q1, float_buffer_R, y_buffer, blockSize);
-//  if (high_Zoom == 1) flag_2nd_decimation++;
-  // decimation stage 2
-  arm_fir_decimate_f32(&Fir_Zoom_FFT_Decimate_I2, x_buffer, x_buffer, blockSize / Zoom_FFT_M1);
-  arm_fir_decimate_f32(&Fir_Zoom_FFT_Decimate_Q2, y_buffer, y_buffer, blockSize / Zoom_FFT_M1);
-
-  //this puts the sample_no samples into the ringbuffer -->
-  // the right order has to be thought about!
-  // we take all the samples from zoom_sample_ptr to 256 and
-  // then all samples from 0 to zoom_sampl_ptr - 1
-
-  // fill into ringbuffer
-  for (int i = 0; i < sample_no; i++) {  // interleave real and imaginary input values [real, imag, real, imag . . .]
-    FFT_ring_buffer_x[zoom_sample_ptr] = x_buffer[i];
-    FFT_ring_buffer_y[zoom_sample_ptr] = y_buffer[i];
-    zoom_sample_ptr++;
-    if (zoom_sample_ptr >= fftWidth) zoom_sample_ptr = 0;
-  }
-
-  // when do we want to display a new spectrum?
-  // if we wait for zoom_sample_ptr to be 255,
-  // it can last more than a few seconds in 4096x Zoom
-  // so we calculate an FFT and display the spectrum every time this function is called?
-
-  //    zoom_display = 1;
-
-  // copy from ringbuffer to FFT_buffer
-  // in the right order and
-  // apply FFT window here
-  // Nuttall window
-  // zoom_sample_ptr points to the oldest sample now
-
-  float32_t multiplier = (float32_t)EEPROMData.spectrum_zoom * (float32_t)EEPROMData.spectrum_zoom;
-
-  for (int idx = 0; idx < fftWidth; idx++) {
-    //   buffer_spec_FFT[idx * 2 + 0] =  multiplier * FFT_ring_buffer_x[zoom_sample_ptr] * nuttallWindow256[idx];
-    //   buffer_spec_FFT[idx * 2 + 1] =  multiplier * FFT_ring_buffer_y[zoom_sample_ptr] * nuttallWindow256[idx];
-    buffer_spec_FFT[idx * 2 + 0] = multiplier * FFT_ring_buffer_x[zoom_sample_ptr] * (0.5 - 0.5 * cos(6.28 * idx / SPECTRUM_RES));  //Hanning Window AFP 03-12-21
-    buffer_spec_FFT[idx * 2 + 1] = multiplier * FFT_ring_buffer_y[zoom_sample_ptr] * (0.5 - 0.5 * cos(6.28 * idx / SPECTRUM_RES));
-    zoom_sample_ptr++;
-    if (zoom_sample_ptr >= fftWidth) zoom_sample_ptr = 0;
-  }
-
-  //***************
-  // adjust lowpass filter coefficient, so that
-  // "spectrum display smoothness" is the same across the different sample rates
-  // and the same across different magnify modes . . .
-  //    float32_t LPFcoeff = LPF_spectrum * (AUDIO_SAMPLE_RATE_EXACT / SR[SampleRate].rate);
-  float32_t LPFcoeff = 0.6;
-  if (LPFcoeff > 1.0) LPFcoeff = 1.0;
-  if (LPFcoeff < 0.001) LPFcoeff = 0.001;
-  float32_t onem_LPFcoeff = 1.0 - LPFcoeff;
-
-  // The rest of the function is activated when the buffers are full and ready.
-  // Save old pixels for lowpass filter.
-  if (updateDisplayFlag == true) {
-    for (int i = 0; i < fftWidth; i++) {
-      pixelold[i] = pixelCurrent[i];
-    }
-//    Serial.printf("Call to FFT\n");
-    // perform complex FFT
-    // calculation is performed in-place the FFT_buffer [re, im, re, im, re, im . . .]
-    arm_cfft_f32(spec_FFT, buffer_spec_FFT, 0, 1);  // spec_FFT is width 512
-    // calculate mag = I*I + Q*Q,
-    // and simultaneously put them into the right order
-    for (int i = 0; i < fftWidth / 2; i++) {
-      FFT_spec[i + fftWidth / 2] = (buffer_spec_FFT[i * 2] * buffer_spec_FFT[i * 2] + buffer_spec_FFT[i * 2 + 1] * buffer_spec_FFT[i * 2 + 1]);
-      FFT_spec[i] = (buffer_spec_FFT[(i + fftWidth / 2) * 2] * buffer_spec_FFT[(i + fftWidth / 2) * 2] + buffer_spec_FFT[(i + fftWidth / 2) * 2 + 1] * buffer_spec_FFT[(i + fftWidth / 2) * 2 + 1]);
-    }
-    // apply low pass filter and scale the magnitude values and convert to int for spectrum display
-    // apply spectrum AGC
-    //
-    for (int16_t x = 0; x < fftWidth; x++) {
-      FFT_spec[x] = LPFcoeff * FFT_spec[x] + onem_LPFcoeff * FFT_spec_old[x];
-      FFT_spec_old[x] = FFT_spec[x];
-    }
-    // Write the FFT bins into the display buffer.
-    if (calOnFlag)  // Expanded dynamic range during calibration.
-      for (int16_t x = 0; x < fftWidth; x++) {
-//        pixelnew[x] = displayScale[EEPROMData.currentScale].baseOffset + bands[EEPROMData.currentBand].pixel_offset + (int16_t)(40.0 * log10f_fast(FFT_spec[x]));
-        pixelnew[x] = displayScale[EEPROMData.currentScale].baseOffset + (int16_t)(40.0 * log10f_fast(FFT_spec[x]));
-        //        if (pixelnew[x] > 220) pixelnew[x] = 220;
-      }
-    else
-      for (int16_t x = 0; x < fftWidth; x++) {
-        pixelnew[x] = displayScale[EEPROMData.currentScale].baseOffset + (int16_t)(displayScale[EEPROMData.currentScale].dBScale * log10f_fast(FFT_spec[x])) + fftOffset;
-        if (pixelnew[x] > 220) pixelnew[x] = 220;
-      }
-  }
 }
 

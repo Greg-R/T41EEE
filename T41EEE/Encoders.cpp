@@ -17,7 +17,7 @@ int32_t filter_change;
   if (filter_pos != last_filter_pos) {  // This decision is required as this function is required to be used in many locations.  KF5N April 21, 2024
     tft.writeTo(L2);  // Clear layer 2.  KF5N July 31, 2023
     tft.clearMemory();
-    if(EEPROMData.xmtMode == CW_MODE) BandInformation(); 
+    if(EEPROMData.xmtMode == RadioMode::CW_MODE) BandInformation(); 
     tft.fillRect((MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2 - filterWidth, SPECTRUM_TOP_Y + 17, filterWidth, SPECTRUM_HEIGHT - 20, RA8875_BLACK);  // Erase old filter background
     filter_change = (filter_pos - last_filter_pos);
     if (filter_change >= 1) {
@@ -134,7 +134,7 @@ void EncoderCenterTune() {
   if (result == 0)  // Nothing read
     return;
 
-  if (EEPROMData.xmtMode == CW_MODE && EEPROMData.decoderFlag) {  // No reason to reset if we're not doing decoded CW AFP 09-27-22
+  if (EEPROMData.xmtMode == RadioMode::CW_MODE && EEPROMData.decoderFlag) {  // No reason to reset if we're not doing decoded CW AFP 09-27-22
     ResetHistograms();
   }
 

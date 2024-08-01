@@ -472,7 +472,7 @@ void ProcessIQData()
       arm_copy_f32(float_buffer_R, float_buffer_L, FFT_length / 2);
     }
  
-    if (T41State == CW_RECEIVE) {
+    if (radioMode == RadioMode::CW_MODE) {
       DoCWReceiveProcessing(); //AFP 09-19-22
 
       // ----------------------  CW Narrow band filters  AFP 10-18-22 -------------------------

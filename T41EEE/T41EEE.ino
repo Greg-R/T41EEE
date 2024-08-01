@@ -321,7 +321,8 @@ Metro ms_500 = Metro(500);  // Set up a Metro
 
 Si5351 si5351;  // Instantiate the PLL device.
 
-int radioState, lastState;  // KF5N
+RadioState radioState, lastState;  // KF5N
+RadioMode radioMode;  // Greg KF5N August 1, 2024
 int resetTuningFlag = 0;
 #ifndef RA8875_DISPLAY
 ILI9488_t3 tft = ILI9488_t3(&SPI, TFT_CS, TFT_DC, TFT_RST);  // Instantiate the display.
@@ -483,7 +484,7 @@ uint8_t SampleRate = SAMPLE_RATE_192K;
 
 uint8_t sch = 0;
 uint8_t state = 0;
-uint8_t T41State = 1;
+//RadioMode T41State;
 uint8_t zoom_display = 1;
 const uint8_t NR_L_frames = 3;
 const uint8_t NR_N_frames = 15;
@@ -563,7 +564,7 @@ int x2 = 0;  //AFP
 int zoomIndex = 1;  //AFP 9-26-22
 bool updateDisplayFlag = false;
 int updateDisplayCounter = 0;
-int xrState;  // Is the T41 in xmit or rec state? 1 = rec, 0 = xmt
+//int xrState;  // Is the T41 in xmit or rec state? 1 = rec, 0 = xmt
 
 const int BW_indicator_y = SPECTRUM_TOP_Y + SPECTRUM_HEIGHT + 2;
 const int DEC2STATESIZE = n_dec2_taps + (BUFFER_SIZE * N_B / (uint32_t)DF1) - 1;
@@ -1392,7 +1393,7 @@ sgtl5000_1.adcHighPassFilterEnable();
   volumeChangeFlag = true;  // Adjust volume so saved value.
   filterEncoderMove = 0;
   fineTuneEncoderMove = 0L;
-  xrState = RECEIVE_STATE;  // Enter loop() in receive state.  KF5N July 22, 2023
+//  xrState = RECEIVE_STATE;  // Enter loop() in receive state.  KF5N July 22, 2023
   UpdateInfoWindow();
   DrawSpectrumDisplayContainer();
   RedrawDisplayScreen();
@@ -1412,7 +1413,9 @@ sgtl5000_1.adcHighPassFilterEnable();
 //  comp1.setPreGain_dB(-10);  // Set the gain of the microphone audio gain processor.
 
   EEPROMData.sdCardPresent = SDPresentCheck();  // JJP 7/18/23
-  lastState = 1111;                             // To make sure the receiver will be configured on the first pass through.  KF5N September 3, 2023
+  lastState = RadioState::NOSTATE;                             // To make sure the receiver will be configured on the first pass through.  KF5N September 3, 2023
+  if(EEPROMData.xmtMode == RadioMode::CW_MODE) radioState = RadioState::CW_RECEIVE_STATE;
+  if(EEPROMData.xmtMode == RadioMode::SSB_MODE) radioState = RadioState::SSB_RECEIVE_STATE;  
   UpdateDecoderField();                         // Adjust graphics for Morse decoder.
   FilterSetSSB();
   UpdateEqualizerField(EEPROMData.receiveEQFlag, EEPROMData.xmitEQFlag);
@@ -1435,6 +1438,7 @@ elapsedMicros usec = 0;  // Automatically increases as time passes; no ++ necess
 *****/
 float audioBW{0.0}; 
 int dBoffset{0};
+
 void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
 {
   int pushButtonSwitchIndex = -1;
@@ -1445,18 +1449,18 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   unsigned long cwBlockIndex;
 
   valPin = ReadSelectedPushButton();
-  if (valPin != BOGUS_PIN_READ && xrState != TRANSMIT_STATE) {
+  if (valPin != BOGUS_PIN_READ and (radioState != RadioState::SSB_TRANSMIT_STATE) and (radioState != RadioState::CW_TRANSMIT_STRAIGHT_STATE) and (radioState != RadioState::CW_TRANSMIT_KEYER_STATE)) {
     pushButtonSwitchIndex = ProcessButtonPress(valPin);
     ExecuteButtonPress(pushButtonSwitchIndex);
   }
   //  State detection
-  if (EEPROMData.xmtMode == SSB_MODE && digitalRead(PTT) == HIGH) radioState = SSB_RECEIVE_STATE;
-  if (EEPROMData.xmtMode == SSB_MODE && digitalRead(PTT) == LOW) radioState = SSB_TRANSMIT_STATE;
-  if (EEPROMData.xmtMode == CW_MODE && (digitalRead(EEPROMData.paddleDit) == HIGH && digitalRead(EEPROMData.paddleDah) == HIGH)) radioState = CW_RECEIVE_STATE;  // Was using symbolic constants. Also changed in code below.  KF5N August 8, 2023
-  if (EEPROMData.xmtMode == CW_MODE && (digitalRead(EEPROMData.paddleDit) == LOW && EEPROMData.xmtMode == CW_MODE && EEPROMData.keyType == 0)) radioState = CW_TRANSMIT_STRAIGHT_STATE;
-  if (EEPROMData.xmtMode == CW_MODE && (keyPressedOn == 1 && EEPROMData.xmtMode == CW_MODE && EEPROMData.keyType == 1)) radioState = CW_TRANSMIT_KEYER_STATE;
+  if (EEPROMData.xmtMode == RadioMode::SSB_MODE and digitalRead(PTT) == HIGH) radioState = RadioState::SSB_RECEIVE_STATE;
+  if (EEPROMData.xmtMode == RadioMode::SSB_MODE && digitalRead(PTT) == LOW) radioState = RadioState::SSB_TRANSMIT_STATE;
+  if (EEPROMData.xmtMode == RadioMode::CW_MODE && (digitalRead(EEPROMData.paddleDit) == HIGH && digitalRead(EEPROMData.paddleDah) == HIGH)) radioState = RadioState::CW_RECEIVE_STATE;  // Was using symbolic constants. Also changed in code below.  KF5N August 8, 2023
+  if (EEPROMData.xmtMode == RadioMode::CW_MODE && (digitalRead(EEPROMData.paddleDit) == LOW && EEPROMData.xmtMode == RadioMode::CW_MODE && EEPROMData.keyType == 0)) radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;
+  if (EEPROMData.xmtMode == RadioMode::CW_MODE && (keyPressedOn == 1 && EEPROMData.xmtMode == RadioMode::CW_MODE && EEPROMData.keyType == 1)) radioState = RadioState::CW_TRANSMIT_KEYER_STATE;
   if (bands[EEPROMData.currentBand].mode > 1) {
-  radioState = AM_RECEIVE_STATE;  // Inhibit transmit in AM demod modes.  KF5N March 21, 2024
+  radioState = RadioState::AM_RECEIVE_STATE;  // Inhibit transmit in AM demod modes.  KF5N March 21, 2024
   keyPressedOn = 0;
   }
 
@@ -1468,15 +1472,14 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   //  Begin radio state machines
 
   //  Begin SSB Mode state machine
-
   switch (radioState) {
-    case AM_RECEIVE_STATE:
-    case SSB_RECEIVE_STATE:
+    case RadioState::AM_RECEIVE_STATE:
+    case RadioState::SSB_RECEIVE_STATE:
       if (lastState != radioState) {  // G0ORX 01092023
         digitalWrite(MUTE, LOW);      // Audio Mute off
         digitalWrite(RXTX, LOW);      //xmit off
-        T41State = SSB_RECEIVE;
-        xrState = RECEIVE_STATE;
+//        T41State = RadioMode::SSB_RECEIVE;
+//        xrState = RECEIVE_STATE;
         if (keyPressedOn == 1) {
           return;
         }
@@ -1484,35 +1487,18 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       }
       ShowSpectrum();
       break;
-    case SSB_TRANSMIT_STATE:
-//    SampleRate = SAMPLE_RATE_48K;
-//    SetI2SFreq(SR[SampleRate].rate);
-// Start the audio dataflow.
-//      tone1kHz.end();
-//      mixer1.gain(0, 1.0);   // Connect microphone audio to transmit chain.
-//mixer1.gain(1, 0.0);   // Disconnect 1 kHz test tone. 
-//      Q_in_L_Ex.begin();  // I channel Microphone audio
-//      Q_in_R_Ex.begin();  // Q channel Microphone audio
-//      comp1.setPreGain_dB(EEPROMData.currentMicGain);
-      //      comp2.setPreGain_dB(EEPROMData.currentMicGain);
-//      if (EEPROMData.compressorFlag == 1) {
-//        SetupMyCompressors(use_HP_filter, (float)EEPROMData.currentMicThreshold, comp_ratio, attack_sec, release_sec);  // Cast EEPROMData.currentMicThreshold to float.  KF5N, October 31, 2023
-//      } else {
-//        if (EEPROMData.compressorFlag == 0) {
-//          SetupMyCompressors(use_HP_filter, 0.0, comp_ratio, 0.01, 0.01);
-//        }
-//      }
-      xrState = TRANSMIT_STATE;
+    case RadioState::SSB_TRANSMIT_STATE:
+//      xrState = TRANSMIT_STATE;
       digitalWrite(MUTE, HIGH);  //  Mute Audio  (HIGH=Mute)
       digitalWrite(RXTX, HIGH);  //xmit on
-      xrState = TRANSMIT_STATE;
+//      xrState = TRANSMIT_STATE;
 
       ShowTransmitReceiveStatus();
 
       while (digitalRead(PTT) == LOW) {
         ExciterIQData();
       }
-      xrState = RECEIVE_STATE;
+//      xrState = RECEIVE_STATE;
       break;
     default:
       break;
@@ -1523,18 +1509,18 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
 
   switch (radioState) {
 //    case AM_RECEIVE_STATE:
-    case CW_RECEIVE_STATE:
+    case RadioState::CW_RECEIVE_STATE:
       if (lastState != radioState) {  // G0ORX 01092023
         digitalWrite(MUTE, LOW);      //turn off mute
-        T41State = CW_RECEIVE;
+//        T41State = RadioMode::CW_RECEIVE;
         ShowTransmitReceiveStatus();
-        xrState = RECEIVE_STATE;
+//        xrState = RECEIVE_STATE;
         keyPressedOn = 0;
       }
       ShowSpectrum();  // if removed CW signal on is 2 mS
       break;
-    case CW_TRANSMIT_STRAIGHT_STATE:
-      xrState = TRANSMIT_STATE;
+    case RadioState::CW_TRANSMIT_STRAIGHT_STATE:
+//      xrState = TRANSMIT_STATE;
       ShowTransmitReceiveStatus();
       digitalWrite(MUTE, LOW);  // unmutes audio
       cwKeyDown = false;        // false initiates CW_SHAPING_RISE.
@@ -1563,8 +1549,8 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       digitalWrite(MUTE, HIGH);  // mutes audio
       digitalWrite(RXTX, LOW);   // End Straight Key Mode
       break;
-    case CW_TRANSMIT_KEYER_STATE:
-      xrState = TRANSMIT_STATE;
+    case RadioState::CW_TRANSMIT_KEYER_STATE:
+//      xrState = TRANSMIT_STATE;
       ShowTransmitReceiveStatus();
       digitalWrite(MUTE, LOW);  // unmutes audio
       cwTimer = millis();
@@ -1620,9 +1606,9 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       }                    //End Relay timer
 
       digitalWrite(MUTE, HIGH);  // mutes audio
-                                 //      patchCord15.disconnect();  // Disconnect the I and Q transmitter outputs.
-                                 //      patchCord16.disconnect();
       digitalWrite(RXTX, LOW);   // End Straight Key Mode
+      break;
+      case RadioState::NOSTATE:
       break;
     default:
       break;

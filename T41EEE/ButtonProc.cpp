@@ -124,7 +124,7 @@ void ButtonBandIncrease() {
   tft.writeTo(L2);
   tft.clearMemory();
   tft.writeTo(L1);
-  if (EEPROMData.xmtMode == CW_MODE) BandInformation();
+  if (EEPROMData.xmtMode == RadioMode::CW_MODE) BandInformation();
   DrawBandWidthIndicatorBar();
   DrawFrequencyBarValue();
   UpdateDecoderField();
@@ -222,7 +222,7 @@ void ButtonBandDecrease() {
   tft.writeTo(L2);
   tft.clearMemory();
   tft.writeTo(L1);
-  if (EEPROMData.xmtMode == CW_MODE) BandInformation();
+  if (EEPROMData.xmtMode == RadioMode::CW_MODE) BandInformation();
   DrawBandWidthIndicatorBar();
   DrawFrequencyBarValue();
   UpdateDecoderField();
@@ -312,7 +312,7 @@ void BandSet(int band) {
   tft.writeTo(L2);
   tft.clearMemory();
   tft.writeTo(L1);
-  if (EEPROMData.xmtMode == CW_MODE) BandInformation();
+  if (EEPROMData.xmtMode == RadioMode::CW_MODE) BandInformation();
   DrawBandWidthIndicatorBar();
   DrawFrequencyBarValue();
   UpdateDecoderField();
@@ -394,14 +394,14 @@ void ButtonDemodMode() {
   ControlFilterF();
   tft.writeTo(L2);  // Destroy the bandwidth indicator bar.  KF5N July 30, 2023
   tft.clearMemory();
-  if (EEPROMData.xmtMode == CW_MODE) BandInformation();
+  if (EEPROMData.xmtMode == RadioMode::CW_MODE) BandInformation();
   DrawBandWidthIndicatorBar();  // Restory the bandwidth indicator bar.  KF5N July 30, 2023
   FilterBandwidth();
   DrawSMeterContainer();
   //  ShowAnalogGain();
   AudioInterrupts();
   SetFreq();                                                                                   // Must update frequency, for example moving from SSB to CW, the RX LO is shifted.  KF5N
-  if ((EEPROMData.xmtMode == CW_MODE) && (EEPROMData.decoderFlag == 1)) UpdateDecoderField();  // KF5N December 28 2023.
+  if ((EEPROMData.xmtMode == RadioMode::CW_MODE) && (EEPROMData.decoderFlag == 1)) UpdateDecoderField();  // KF5N December 28 2023.
   FilterSetSSB();
 }
 
@@ -417,10 +417,12 @@ void ButtonDemodMode() {
 *****/
 void ButtonMode()  //====== Changed AFP 10-05-22  =================
 {
-  if (EEPROMData.xmtMode == CW_MODE) {  // Toggle the current mode
-    EEPROMData.xmtMode = SSB_MODE;
+  if (EEPROMData.xmtMode == RadioMode::CW_MODE) {  // Toggle the current mode
+    EEPROMData.xmtMode = RadioMode::SSB_MODE;
+    radioMode = RadioMode::SSB_MODE;
   } else {
-    EEPROMData.xmtMode = CW_MODE;
+    EEPROMData.xmtMode = RadioMode::CW_MODE;
+    radioMode = RadioMode::CW_MODE;
   }
   SetFreq();  // Required due to RX LO shift from CW to SSB modes.  KF5N
   DrawSpectrumDisplayContainer();
@@ -442,7 +444,7 @@ void ButtonMode()  //====== Changed AFP 10-05-22  =================
   ShowTransmitReceiveStatus();
   ShowFrequency();
   // Draw or not draw CW filter graphics to audio spectrum area.  KF5N July 30, 2023
-  if (EEPROMData.xmtMode == SSB_MODE) {
+  if (EEPROMData.xmtMode == RadioMode::SSB_MODE) {
     tft.writeTo(L2);
     tft.clearMemory();
   } else BandInformation();
@@ -857,7 +859,7 @@ void ButtonFrequencyEntry() {
   // Draw or not draw CW filter graphics to audio spectrum area.  KF5N July 30, 2023
   tft.writeTo(L2);
   tft.clearMemory();
-  if (EEPROMData.xmtMode == CW_MODE) BandInformation();
+  if (EEPROMData.xmtMode == RadioMode::CW_MODE) BandInformation();
   DrawBandWidthIndicatorBar();
   RedrawDisplayScreen();  // KD0RC
   FilterSetSSB();

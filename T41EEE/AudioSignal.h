@@ -103,7 +103,7 @@ AudioControlSGTL5000 sgtl5000_2;  // This is not a 2nd Audio Adapter.  It is I2S
     void
 
 *****/
-void SetAudioOperatingState(int operatingState) {
+void SetAudioOperatingState(RadioState operatingState) {
 #ifdef DEBUG
   Serial.printf("lastState=%d radioState=%d memory_used=%d memory_used_max=%d f32_memory_used=%d f32_memory_used_max=%d\n",
                 lastState,
@@ -116,9 +116,9 @@ void SetAudioOperatingState(int operatingState) {
   AudioStream_F32::f32_memory_used_max = 0;
 #endif
   switch (operatingState) {
-    case SSB_RECEIVE_STATE:
-    case AM_RECEIVE_STATE:
-    case CW_RECEIVE_STATE:
+    case RadioState::SSB_RECEIVE_STATE:
+    case RadioState::AM_RECEIVE_STATE:
+    case RadioState::CW_RECEIVE_STATE:
       SampleRate = SAMPLE_RATE_192K;
       SetI2SFreq(SR[SampleRate].rate);   
       // Deactivate microphone and 1 kHz test tone.
@@ -142,7 +142,7 @@ void SetAudioOperatingState(int operatingState) {
       patchCord18.connect();      
       volumeAdjust.gain(volumeLog[EEPROMData.audioVolume]);  // Set volume because sidetone may have changed it.
       break;
-    case SSB_TRANSMIT_STATE:
+    case RadioState::SSB_TRANSMIT_STATE:
       // QSD disabled and disconnected
       patchCord9.disconnect();   // Receiver I channel
       patchCord10.disconnect();  // Receiver Q channel
@@ -169,7 +169,7 @@ void SetAudioOperatingState(int operatingState) {
 
       break;
 
-    case SSB_CALIBRATE_STATE:
+    case RadioState::SSB_CALIBRATE_STATE:
       SampleRate = SAMPLE_RATE_48K;
       InitializeDataArrays();  // I2S sample rate set in this function.
       // QSD disabled and disconnected
@@ -202,8 +202,8 @@ void SetAudioOperatingState(int operatingState) {
 
       break;
 
-    case CW_TRANSMIT_STRAIGHT_STATE:
-    case CW_TRANSMIT_KEYER_STATE:
+    case RadioState::CW_TRANSMIT_STRAIGHT_STATE:
+    case RadioState::CW_TRANSMIT_KEYER_STATE:
       // QSD disabled and disconnected
       patchCord9.disconnect();
       patchCord10.disconnect();
@@ -223,7 +223,7 @@ void SetAudioOperatingState(int operatingState) {
 
       break;
 
-    case CW_CALIBRATE_STATE:
+    case RadioState::CW_CALIBRATE_STATE:
       SampleRate = SAMPLE_RATE_192K;
       SetI2SFreq(SR[SampleRate].rate);
       // QSD receiver enabled.  Calibrate is full duplex.
@@ -254,6 +254,8 @@ void SetAudioOperatingState(int operatingState) {
       patchCord15.connect();  // Transmitter I channel
       patchCord16.connect();  // Transmitter Q channel
 
+      break;
+      case RadioState::NOSTATE:
       break;
 
   }

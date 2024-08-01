@@ -146,7 +146,7 @@ void ShowSpectrum() {
     // Don't call this function unless the filter bandwidth has been adjusted.  This requires 2 global variables.
     if (filter_pos != last_filter_pos) FilterSetSSB();
 
-    if (T41State == SSB_RECEIVE || T41State == CW_RECEIVE) {  // AFP 08-24-22
+    if (radioMode == RadioMode::SSB_MODE or radioMode == RadioMode::CW_MODE) {  // AFP 08-24-22
       ProcessIQData();                                        // Call the Audio process from within the display routine to eliminate conflicts with drawing the spectrum and waterfall displays
     }
     EncoderCenterTune();  //Moved the tuning encoder to reduce lag times and interference during tuning.
@@ -640,7 +640,7 @@ void BandInformation()  // SSB or CW
   tft.setCursor(OPERATION_STATS_X + 90, FREQUENCY_Y + 30);  //AFP 10-18-22
 
   //================  AFP 10-19-22
-  if (EEPROMData.xmtMode == CW_MODE) {
+  if (EEPROMData.xmtMode == RadioMode::CW_MODE) {
     tft.fillRect(OPERATION_STATS_X + 85, FREQUENCY_Y + 30, 70, tft.getFontHeight(), RA8875_BLACK);
     tft.print("CW ");
     tft.setCursor(OPERATION_STATS_X + 115, FREQUENCY_Y + 30);  //AFP 10-18-22
@@ -1264,7 +1264,7 @@ FLASHMEM void UpdateDecoderField() {
     //    tft.fillRect(FIELD_OFFSET_X, DECODER_Y - 5, 140, 17, RA8875_BLACK);  // Erase
     tft.print("Off");
   }
-  if (EEPROMData.xmtMode == CW_MODE && EEPROMData.decoderFlag) {  // In CW mode with decoder on? AFP 09-27-22
+  if (EEPROMData.xmtMode == RadioMode::CW_MODE && EEPROMData.decoderFlag) {  // In CW mode with decoder on? AFP 09-27-22
     tft.writeTo(L2);
     // Draw delimiter bars for CW offset frequency.  This depends on the user selected offset.
     if (EEPROMData.CWOffset == 0) {
@@ -1617,7 +1617,7 @@ void EraseSecondaryMenu() {
 void ShowTransmitReceiveStatus() {
   tft.setFontScale((enum RA8875tsize)1);
   tft.setTextColor(RA8875_BLACK);
-  if (xrState == TRANSMIT_STATE) {
+  if (radioState == RadioState::SSB_TRANSMIT_STATE or radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE or radioState == RadioState::CW_TRANSMIT_KEYER_STATE) {
     tft.fillRect(X_R_STATUS_X, X_R_STATUS_Y, 55, 25, RA8875_RED);
     tft.setCursor(X_R_STATUS_X + 4, X_R_STATUS_Y - 5);
     tft.print("XMT");

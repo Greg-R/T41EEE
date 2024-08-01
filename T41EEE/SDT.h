@@ -264,26 +264,23 @@ extern struct maps myMapFiles[];
 #define FOURPI (2.0f * TWO_PI)
 #define SIXPI (3.0f * TWO_PI)
 #define Si_5351_crystal 25000000L
-#define SSB_MODE 0
-#define CW_MODE 1
-#define SSB_RECEIVE 0
-#define CW_RECEIVE 2
 
-//  This second set of states are for the loop() modal state machine.  This needs to be transformed to an enum.
-#define SSB_RECEIVE_STATE 0
-#define SSB_TRANSMIT_STATE 1
-#define CW_RECEIVE_STATE 2
-#define CW_TRANSMIT_STRAIGHT_STATE 3
-#define CW_TRANSMIT_KEYER_STATE 4
-#define AM_RECEIVE_STATE 5
-#define SSB_CALIBRATE_STATE 6
-#define CW_CALIBRATE_STATE 7
+//#define SSB_MODE 0
+//#define CW_MODE 1
+//#define SSB_RECEIVE 0
+//#define CW_RECEIVE 2
+
+enum class RadioMode{SSB_MODE, CW_MODE};  // Probably need only modes, not receive or transmit.
+
+//  States for the loop() modal state machine.
+enum class RadioState{SSB_RECEIVE_STATE, SSB_TRANSMIT_STATE, CW_RECEIVE_STATE, CW_TRANSMIT_STRAIGHT_STATE, CW_TRANSMIT_KEYER_STATE, AM_RECEIVE_STATE, SSB_CALIBRATE_STATE, CW_CALIBRATE_STATE, NOSTATE};
 
 #define SPECTRUM_ZOOM_1 0
 #define SPECTRUM_ZOOM_2 1
 #define SPECTRUM_ZOOM_4 2
 #define SPECTRUM_ZOOM_8 3
 #define SPECTRUM_ZOOM_16 4
+
 #define SAMPLE_RATE_8K 0
 #define SAMPLE_RATE_11K 1
 #define SAMPLE_RATE_16K 2
@@ -401,7 +398,7 @@ struct config_t {
   uint32_t centerTuneStep = CENTER_TUNE_DEFAULT;       // JJP 7-3-23
   uint32_t fineTuneStep = FINE_TUNE_DEFAULT;           // JJP 7-3-23
   float32_t transmitPowerLevel = DEFAULT_POWER_LEVEL;  // Changed from int to float; Greg KF5N February 12, 2024
-  int xmtMode = SSB_MODE;                              // AFP 09-26-22
+  RadioMode xmtMode = RadioMode::SSB_MODE;             //
   int nrOptionSelect = 0;                              // 1 byte
   int currentScale = 1;
   long spectrum_zoom = SPECTRUM_ZOOM_2;
@@ -603,7 +600,7 @@ extern AudioEffectCompressor2_F32  compressor1;   // Open Audio Compressor 2
 extern radioCESSB_Z_transmit_F32 cessb1;
 // end Teensy and OpenAudio objects
 
-extern void SetAudioOperatingState(int operatingState);  // Configures audio system for requested mode state.
+extern void SetAudioOperatingState(RadioState operatingState);  // Configures audio system for requested mode state.
 
 extern Rotary volumeEncoder;    // (2,  3)
 extern Rotary tuneEncoder;      // (16, 17)
@@ -720,7 +717,7 @@ extern uint8_t NR_Kim;
 extern uint8_t SampleRate;
 extern uint8_t sch;
 extern uint8_t state;
-extern uint8_t T41State;
+//extern RadioMode T41State;
 extern uint8_t zoom_display;
 extern const uint8_t NR_L_frames;
 extern const uint8_t NR_N_frames;
@@ -757,12 +754,13 @@ extern int newCursorPosition;
 extern int NR_Index;
 extern int oldCursorPosition;
 extern int paddleFlip;
-extern int radioState, lastState;  // Used by the loop to monitor current state.
+extern RadioMode radioMode;
+extern RadioState radioState, lastState;  // Used by the loop to monitor current state.
 extern int resetTuningFlag;        // Experimental flag for ResetTuning() due to possible timing issues.  KF5N July 31, 2023
 extern int selectedMapIndex;
 extern bool switchFilterSideband;  //AFP 1-28-21
 extern int x2;                     //AFP
-extern int xrState;
+//extern int xrState;
 extern int zeta_help;
 extern int zoomIndex;
 extern bool updateDisplayFlag;

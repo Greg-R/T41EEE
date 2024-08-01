@@ -896,7 +896,7 @@ void VFOSelect() {
   // Draw or not draw CW filter graphics to audio spectrum area.  KF5N July 30, 2023
   tft.writeTo(L2);
   tft.clearMemory();
-  if (EEPROMData.xmtMode == CW_MODE) BandInformation();
+  if (EEPROMData.xmtMode == RadioMode::CW_MODE) BandInformation();
   DrawBandWidthIndicatorBar();
   DrawFrequencyBarValue();
   UpdateDecoderField();

@@ -297,7 +297,7 @@ void SetSideToneVolume() {
   int val, sidetoneDisplay;
   bool keyDown;
 
- SetAudioOperatingState(CW_TRANSMIT_STRAIGHT_STATE);
+ SetAudioOperatingState(RadioState::CW_TRANSMIT_STRAIGHT_STATE);
   tft.setFontScale((enum RA8875tsize)1);
   tft.fillRect(SECONDARY_MENU_X - 50, MENUS_Y, EACH_MENU_WIDTH + 60, CHAR_HEIGHT, RA8875_MAGENTA);
   tft.setTextColor(RA8875_WHITE);
@@ -364,7 +364,7 @@ void SetSideToneVolume() {
     }
   }
   EraseMenus();
-  lastState = 1111;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 7, 2023
+  lastState = RadioState::NOSTATE;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 7, 2023
 }
 
 

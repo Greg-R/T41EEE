@@ -113,10 +113,10 @@ void FreqShift2()
   //  ShowFrequency();
   //  DrawBandWidthIndicatorBar();
   //}
-  if (EEPROMData.xmtMode == SSB_MODE ) {
+  if (EEPROMData.xmtMode == RadioMode::SSB_MODE ) {
     sideToneShift = 0;
   } else {
-    if (EEPROMData.xmtMode == CW_MODE ) {
+    if (EEPROMData.xmtMode == RadioMode::CW_MODE ) {
       cwFreqOffset = (EEPROMData.CWOffset + 6) * 24000 / 256;
       if (bands[EEPROMData.currentBand].mode == 1) {
         sideToneShift = cwFreqOffset;  // KF5N experiment

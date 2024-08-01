@@ -3,6 +3,22 @@
 
 // JSON format used to save and read from SD card.  This was derived from a JSON example from the ArduinoJSON library.
 
+// Custom converters are needed for the mode states.
+bool convertToJson(const RadioMode& src, JsonVariant dst) {
+int state;
+state = static_cast<int>(src);
+//  char buf[32];
+//  strftime(buf, sizeof(buf), "%FT%TZ", &src);
+
+  return dst.set(state);
+}
+
+RadioMode convertFromJson(JsonVariantConst src, RadioMode& dst) {
+int state;
+state = src.as<int>();
+return dst = static_cast<RadioMode>(state);
+}
+
 // Loads the EEPROMData configuration from a file
 FLASHMEM void loadConfiguration(const char *filename, config_t &EEPROMData) {
   // Open file for reading

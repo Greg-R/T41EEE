@@ -34,7 +34,7 @@ uint32_t adjdBMinIndex;
 bool corrChange = false;
 
 int Zoom_FFT_M1;
-int Zoom_FFT_M2;
+//int Zoom_FFT_M2;
 int zoom_sample_ptr = 0;
 float32_t LPF_spectrum = 0.82;
 
@@ -73,5 +73,4 @@ const char *calFreqs[2]{ "750 Hz", "3.0 kHz" };
 void ShowSpectrum2();
 float PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins);
 void RadioCal(bool refineCal);
-void ZoomFFTExe(uint32_t blockSize);
 };
