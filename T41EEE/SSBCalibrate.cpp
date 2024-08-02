@@ -272,11 +272,8 @@ void SSBCalibrate::CalibratePreamble(int setZoom) {
   EEPROMData.currentScale = 1;          //  Set vertical scale to 10 dB during calibration.  KF5N
   updateDisplayFlag = false;
   digitalWrite(MUTE, LOW);  //turn off mute
-//  xrState = RECEIVE_STATE;
-//  T41State = CW_RECEIVE;
   EEPROMData.centerFreq = TxRxFreq;
   NCOFreq = 0L;
-//  xrState = TRANSMIT_STATE;
   digitalWrite(MUTE, HIGH);  //  Mute Audio  (HIGH=Mute)
   digitalWrite(RXTX, HIGH);  // Turn on transmitter.
   ShowTransmitReceiveStatus();
@@ -309,21 +306,16 @@ void SSBCalibrate::CalibratePrologue() {
   */
   digitalWrite(RXTX, LOW);  // Turn off the transmitter.
   updateDisplayFlag = false;
-  //xrState = RECEIVE_STATE;
   tone1kHz.end();
   SampleRate = SAMPLE_RATE_192K;  // Return to receiver sample rate.
   SetI2SFreq(SR[SampleRate].rate);
   InitializeDataArrays();  // Re-initialize the filters back to 192ksps.
   ShowTransmitReceiveStatus();
-//  T41State = CW_RECEIVE;
   // Clear queues to reduce transient.
-  Q_in_L.clear();
-  Q_in_R.clear();
   radioState = RadioState::SSB_RECEIVE_STATE;
   SetAudioOperatingState(radioState);
   EEPROMData.centerFreq = TxRxFreq;
   NCOFreq = 0L;
-//  xrState = RECEIVE_STATE;
   calibrateFlag = 0;                       // KF5N
   EEPROMData.CWOffset = cwFreqOffsetTemp;  // Return user selected CW offset frequency.
   EEPROMData.calFreq = calFreqTemp;        // Return user selected calibration tone frequency.

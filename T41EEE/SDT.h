@@ -256,24 +256,18 @@ extern struct maps myMapFiles[];
 #define TMS0_POWER_DOWN_MASK (0x1U)
 #define TMS1_MEASURE_FREQ(x) (((uint32_t)(((uint32_t)(x)) << 0U)) & 0xFFFFU)
 #undef round
-#undef HALF_PI
+//#undef HALF_PI
 #undef TWO_PI
-#define HALF_PI 1.5707963267948966192313216916398f
+//#define HALF_PI 1.5707963267948966192313216916398f
 #define TWO_PI 6.283185307179586476925286766559f
-#define PIH HALF_PI
+#define PIH 1.5707963267948966192313216916398f
 #define FOURPI (2.0f * TWO_PI)
 #define SIXPI (3.0f * TWO_PI)
 #define Si_5351_crystal 25000000L
 
-//#define SSB_MODE 0
-//#define CW_MODE 1
-//#define SSB_RECEIVE 0
-//#define CW_RECEIVE 2
-
-enum class RadioMode{SSB_MODE, CW_MODE};  // Probably need only modes, not receive or transmit.
-
 //  States for the loop() modal state machine.
 enum class RadioState{SSB_RECEIVE_STATE, SSB_TRANSMIT_STATE, CW_RECEIVE_STATE, CW_TRANSMIT_STRAIGHT_STATE, CW_TRANSMIT_KEYER_STATE, AM_RECEIVE_STATE, SSB_CALIBRATE_STATE, CW_CALIBRATE_STATE, NOSTATE};
+enum class RadioMode{SSB_MODE, CW_MODE, AM_MODE};  // Probably need only modes, not receive or transmit.
 
 #define SPECTRUM_ZOOM_1 0
 #define SPECTRUM_ZOOM_2 1
@@ -717,7 +711,6 @@ extern uint8_t NR_Kim;
 extern uint8_t SampleRate;
 extern uint8_t sch;
 extern uint8_t state;
-//extern RadioMode T41State;
 extern uint8_t zoom_display;
 extern const uint8_t NR_L_frames;
 extern const uint8_t NR_N_frames;

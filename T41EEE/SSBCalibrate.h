@@ -17,7 +17,7 @@ public:
 int IQCalType;
 int val;
 float correctionIncrement;  //AFP 2-7-23
-int userScale, userZoomIndex, userxmtMode;
+int userScale, userZoomIndex;
 int transmitPowerLevelTemp, cwFreqOffsetTemp, calFreqTemp;
 uint16_t base_y = 460;  // 247
 int calTypeFlag = 0;

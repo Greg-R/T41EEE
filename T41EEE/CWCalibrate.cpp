@@ -288,11 +288,8 @@ void CWCalibrate::CalibratePreamble(int setZoom) {
   EEPROMData.currentScale = 1;          //  Set vertical scale to 10 dB during calibration.  KF5N
   updateDisplayFlag = false;
   digitalWrite(MUTE, LOW);  //turn off mute
-//  xrState = RECEIVE_STATE;
-//  T41State = CW_RECEIVE;
   EEPROMData.centerFreq = TxRxFreq;
   NCOFreq = 0L;
-//  xrState = TRANSMIT_STATE;
   digitalWrite(MUTE, HIGH);  //  Mute Audio  (HIGH=Mute)
   digitalWrite(RXTX, HIGH);  // Turn on transmitter.
   ShowTransmitReceiveStatus();
@@ -325,15 +322,12 @@ void CWCalibrate::CalibratePrologue() {
   */
   digitalWrite(RXTX, LOW);  // Turn off the transmitter.
   updateDisplayFlag = false;
-//  xrState = RECEIVE_STATE;
   ShowTransmitReceiveStatus();
-//  T41State = RadioMode::CW_RECEIVE;
   // Clear queues to reduce transient.
   Q_in_L.clear();
   Q_in_R.clear();
   EEPROMData.centerFreq = TxRxFreq;
   NCOFreq = 0L;
-//  xrState = RECEIVE_STATE;
   calibrateFlag = 0;                       // KF5N
   EEPROMData.CWOffset = cwFreqOffsetTemp;  // Return user selected CW offset frequency.
   EEPROMData.calFreq = calFreqTemp;        // Return user selected calibration tone frequency.
@@ -341,7 +335,7 @@ void CWCalibrate::CalibratePrologue() {
   //calFreqShift = 0;
   EEPROMData.currentScale = userScale;  //  Restore vertical scale to user preference.  KF5N
   ShowSpectrumdBScale();
-//  EEPROMData.xmtMode = userxmtMode;                        // Restore the user's floor setting.  KF5N July 27, 2023
+//  EEPROMData.xmtMode = userxmtMode;
   EEPROMData.transmitPowerLevel = transmitPowerLevelTemp;  // Restore the user's transmit power level setting.  KF5N August 15, 2023
   EEPROMWrite();                                           // Save calibration numbers and configuration.  KF5N August 12, 2023
   zoomIndex = userZoomIndex - 1;
@@ -358,7 +352,6 @@ void CWCalibrate::CalibratePrologue() {
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreq();         // Return Si5351 to normal operation mode.  KF5N
   lastState = RadioState::NOSTATE;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 16, 2023
-
   return;
 }
 
