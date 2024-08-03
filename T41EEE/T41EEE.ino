@@ -1458,7 +1458,7 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   if (EEPROMData.xmtMode == RadioMode::CW_MODE && (keyPressedOn == 1 && EEPROMData.xmtMode == RadioMode::CW_MODE && EEPROMData.keyType == 1)) radioState = RadioState::CW_TRANSMIT_KEYER_STATE;
   if (bands[EEPROMData.currentBand].mode > 1) {
   radioState = RadioState::AM_RECEIVE_STATE;  // Inhibit transmit in AM demod modes.  KF5N March 21, 2024
-  radioMode = RadioMode::AM_MODE;
+  radioMode = RadioMode::AM_MODE;             // AM is currently receive only.
   keyPressedOn = 0;
   }
 

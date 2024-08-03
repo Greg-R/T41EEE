@@ -753,7 +753,6 @@ extern int resetTuningFlag;        // Experimental flag for ResetTuning() due to
 extern int selectedMapIndex;
 extern bool switchFilterSideband;  //AFP 1-28-21
 extern int x2;                     //AFP
-//extern int xrState;
 extern int zeta_help;
 extern int zoomIndex;
 extern bool updateDisplayFlag;
