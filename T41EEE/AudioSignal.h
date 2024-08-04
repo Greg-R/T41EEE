@@ -21,6 +21,7 @@ AudioSwitch4_OA_F32 switch2;
 AudioMixer4_F32 mixer1;                        // Used to switch in tone during calibration.
 AudioSynthWaveformSine_F32  tone1kHz;          // Tone for SSB calibration.
 AudioRecordQueue Q_in_L_Ex;                    // AudioRecordQueue for input Microphone channel.
+AudioRecordQueue Q_in_R_Ex;           // This 2nd channel is needed as we are bringing I and Q into the sketch instead of only microphone audio.
 AudioPlayQueue Q_out_L_Ex;                     // AudioPlayQueue for driving the I channel (CW/SSB) to the QSE.
 AudioPlayQueue Q_out_R_Ex;                     // AudioPlayQueue for driving the Q channel (CW/SSB) to the QSE.
 /* Original transmitter
@@ -31,7 +32,7 @@ AudioConnection patchCord7(float2Int1, 0, Q_in_L_Ex, 0);     // Microphone to Au
 AudioConnection patchCord15(Q_out_L_Ex, 0, i2s_quadOut, 0);  // I channel to line out
 AudioConnection patchCord16(Q_out_R_Ex, 0, i2s_quadOut, 1);  // Q channel to line out
 */
-AudioRecordQueue Q_in_R_Ex;           // This 2nd channel is needed as we are bringing I and Q into the sketch instead of only microphone audio.
+
 
 //  Begin transmit signal chain.
 AudioConnection connect0(i2s_quadIn, 0, int2Float1, 0);    // Microphone audio channel.  Must use int2Float because Open Audio does not have quad input.
@@ -193,6 +194,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       mixer1.gain(1, 1);  // testTone on.
       switch1.setChannel(1);  // Disconnect microphone path.
       switch2.setChannel(0);  //  Disconnect 1 kHz test tone path.
+      Q_out_L_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);  // Need this as CW will put into wrong mode.  Greg KF5N August 4, 2024.
+      Q_out_R_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
       Q_in_L_Ex.begin();  // I channel Microphone audio
       Q_in_R_Ex.begin();  // Q channel Microphone audio
       Q_in_L.begin();     // Calibration is full duplex!
@@ -212,9 +215,11 @@ void SetAudioOperatingState(RadioState operatingState) {
       Q_in_R.end();
       Q_in_R.clear();
 
-      // Microphone input disabled and disconnected
-      Q_in_L_Ex.end();  // Clear microphone queue.
+      // Baseband CESSB data cleared and ended.
+      Q_in_L_Ex.end();  // Clear I channel.
       Q_in_L_Ex.clear();
+      Q_in_R_Ex.end();  // Clear Q channel.
+      Q_in_R_Ex.clear();
 
       patchCord15.connect();  // Connect I and Q transmitter output channels.
       patchCord16.connect();

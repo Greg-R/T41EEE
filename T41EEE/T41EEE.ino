@@ -1277,6 +1277,10 @@ sgtl5000_1.adcHighPassFilterEnable();
    mixer1.gain(0, 0);
    mixer1.gain(1, 0);
 
+//  Q_out_L_Ex.setMaxBuffers(32);       // Limits determined emperically.  These may need more adjustment.  Greg KF5N August 4, 2024.
+//  Q_out_R_Ex.setMaxBuffers(32);       // Going to leave these commented for now.
+//  Q_out_L.setMaxBuffers(64);
+
   pinMode(FILTERPIN15M, OUTPUT);
   pinMode(FILTERPIN20M, OUTPUT);
   pinMode(FILTERPIN40M, OUTPUT);

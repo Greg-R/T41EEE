@@ -181,17 +181,18 @@ void ShowSpectrum() {
     if (y_old2_plot > 247) y_old2_plot = 247;
 
     // Prevent spectrum from going above the top of the spectrum area.  KF5N
-    if (y_new_plot < 101) y_new_plot = 101;
-    if (y1_new_plot < 101) y1_new_plot = 101;
-    if (y_old_plot < 101) y_old_plot = 101;
-    if (y_old2_plot < 101) y_old2_plot = 101;
+    if (y_new_plot < 120) y_new_plot = 120;
+    if (y1_new_plot < 120) y1_new_plot = 120;
+    if (y_old_plot < 120) y_old_plot = 120;
+    if (y_old2_plot < 120) y_old2_plot = 120;
 
-    if (x1 > 188 && x1 < 330) {
-      if (y_new_plot < 120) y_new_plot = 120;
-      if (y1_new_plot < 120) y1_new_plot = 120;
-      if (y_old_plot < 120) y_old_plot = 120;
-      if (y_old2_plot < 120) y_old2_plot = 120;
-    }
+    //  Keep spectrum below text.  KF5N
+  //  if (x1 > 188 && x1 < 330) {
+  //    if (y_new_plot < 120) y_new_plot = 120;
+  //    if (y1_new_plot < 120) y1_new_plot = 120;
+  //    if (y_old_plot < 120) y_old_plot = 120;
+  //    if (y_old2_plot < 120) y_old2_plot = 120;
+ //   }
 
     // Erase the old spectrum, and draw the new spectrum.
     tft.drawLine(x1 + 1, y_old2_plot, x1 + 1, y_old_plot, RA8875_BLACK);   // Erase old...
