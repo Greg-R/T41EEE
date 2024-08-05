@@ -167,12 +167,12 @@ void ShowSpectrum() {
       k = j >> 2;                  // Divide by 4
       if ((k > -1) && (k < 32)) {  // The index of the bin array.
         frequ_hist[k] += 1;        // Add (accumulate) to the bin.
-      };
       if (frequ_hist[k] > FH_max) {  // FH_max starts at 0.
         FH_max = frequ_hist[k];      // Reset FH_max to the current bin value.
         FH_max_box = k;              // Index of FH_max.
       }
-    }  //  HB finish
+    }  
+    }//  HB finish
 
     // Prevent spectrum from going below the bottom of the spectrum area.  KF5N
     if (y_new_plot > 247) y_new_plot = 247;
@@ -185,13 +185,6 @@ void ShowSpectrum() {
     if (y1_new_plot < 120) y1_new_plot = 120;
     if (y_old_plot < 120) y_old_plot = 120;
     if (y_old2_plot < 120) y_old2_plot = 120;
-
-    //    if (x1 > 188 && x1 < 330) {
-    //      if (y_new_plot < 120) y_new_plot = 120;
-    //      if (y1_new_plot < 120) y1_new_plot = 120;
-    //      if (y_old_plot < 120) y_old_plot = 120;
-    //      if (y_old2_plot < 120) y_old2_plot = 120;
-    //   }
 
     // Erase the old spectrum, and draw the new spectrum.
     tft.drawLine(x1 + 1, y_old2_plot, x1 + 1, y_old_plot, RA8875_BLACK);   // Erase old...
