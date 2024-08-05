@@ -181,17 +181,17 @@ void ShowSpectrum() {
     if (y_old2_plot > 247) y_old2_plot = 247;
 
     // Prevent spectrum from going above the top of the spectrum area.  KF5N
-    if (y_new_plot < 101) y_new_plot = 101;
-    if (y1_new_plot < 101) y1_new_plot = 101;
-    if (y_old_plot < 101) y_old_plot = 101;
-    if (y_old2_plot < 101) y_old2_plot = 101;
+    if (y_new_plot < 120) y_new_plot = 120;
+    if (y1_new_plot < 120) y1_new_plot = 120;
+    if (y_old_plot < 120) y_old_plot = 120;
+    if (y_old2_plot < 120) y_old2_plot = 120;
 
-    if (x1 > 188 && x1 < 330) {
-      if (y_new_plot < 120) y_new_plot = 120;
-      if (y1_new_plot < 120) y1_new_plot = 120;
-      if (y_old_plot < 120) y_old_plot = 120;
-      if (y_old2_plot < 120) y_old2_plot = 120;
-    }
+    //    if (x1 > 188 && x1 < 330) {
+    //      if (y_new_plot < 120) y_new_plot = 120;
+    //      if (y1_new_plot < 120) y1_new_plot = 120;
+    //      if (y_old_plot < 120) y_old_plot = 120;
+    //      if (y_old2_plot < 120) y_old2_plot = 120;
+    //   }
 
     // Erase the old spectrum, and draw the new spectrum.
     tft.drawLine(x1 + 1, y_old2_plot, x1 + 1, y_old_plot, RA8875_BLACK);   // Erase old...
@@ -546,13 +546,12 @@ void ShowAutoStatus() {
   tft.fillRect(SPECTRUM_LEFT_X + 350, SPECTRUM_TOP_Y + 2, 130, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(SPECTRUM_LEFT_X + 350, SPECTRUM_TOP_Y + 2);
   tft.setTextColor(RA8875_WHITE);
-if(EEPROMData.autoGain) {
-  tft.print("Auto-Gain On");
-}
-else if(EEPROMData.autoSpectrum) {
-  tft.print("Auto-Spectrum On");
-} else
-  tft.fillRect(SPECTRUM_LEFT_X + 350, SPECTRUM_TOP_Y + 2, 130, tft.getFontHeight(), RA8875_BLACK);
+  if (EEPROMData.autoGain) {
+    tft.print("Auto-Gain On");
+  } else if (EEPROMData.autoSpectrum) {
+    tft.print("Auto-Spectrum On");
+  } else
+    tft.fillRect(SPECTRUM_LEFT_X + 350, SPECTRUM_TOP_Y + 2, 130, tft.getFontHeight(), RA8875_BLACK);
 }
 
 

@@ -343,7 +343,7 @@ void Calibrate::CalibratePrologue() {
   RedrawDisplayScreen();
   IQChoice = 9;
   radioState = CW_RECEIVE_STATE;  // KF5N
-  fftOffset = 0;  // Some reboots may be caused by large fftOffset values when Auto-Spectrum is on.
+  fftOffset = 0;                  // Some reboots may be caused by large fftOffset values when Auto-Spectrum is on.
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreq();         // Return Si5351 to normal operation mode.  KF5N
   lastState = 1111;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 16, 2023
@@ -380,7 +380,7 @@ void Calibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
   tft.setTextColor(RA8875_WHITE);
   tft.fillRect(405, 125, 50, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(405, 125);
-  tft.print(correctionIncrement,3);
+  tft.print(correctionIncrement, 3);
   printCalType(calTypeFlag, autoCal, false);
   warmUpCal();
   State state = State::warmup;  // Start calibration state machine in warmup state.
@@ -1803,6 +1803,13 @@ float Calibrate::PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
   y1_new_plot = 135 + (-y1_new + rawSpectrumPeak);
   y_new_plot = 135 + (-y_new + rawSpectrumPeak);
 
+  // Prevent spectrum from going above the top of the spectrum area.  KF5N
+  if (y_new_plot < 120) y_new_plot = 120;
+  if (y1_new_plot < 120) y1_new_plot = 120;
+  if (y_old_plot < 120) y_old_plot = 120;
+  if (y_old2_plot < 120) y_old2_plot = 120;
+
+  // Prevent spectrum from going below the bottom of the spectrum area.  KF5N
   if (y_new_plot > base_y) y_new_plot = base_y;
   if (y_old_plot > base_y) y_old_plot = base_y;
   if (y_old2_plot > base_y) y_old2_plot = base_y;
