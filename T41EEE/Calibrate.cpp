@@ -417,7 +417,7 @@ void Calibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
     state = State::warmup;
   }
 
-  // Transmit Calibration Loop
+  // Receive Calibration Loop
   while (true) {
     ShowSpectrum2();
     val = ReadSelectedPushButton();

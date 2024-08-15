@@ -1175,7 +1175,7 @@ FLASHMEM void setup() {
 
   sgtl5000_1.setAddress(LOW);  // This is not documented.  See QuadChannelOutput example.
   sgtl5000_1.enable();
-  AudioMemory(500);  //  Increased to 450 from 400.  Memory was hitting max.  KF5N August 31, 2023
+  AudioMemory(200);  //  Increased to 450 from 400.  Memory was hitting max.  KF5N August 31, 2023
   AudioMemory_F32(10);
   sgtl5000_1.inputSelect(AUDIO_INPUT_MIC);
   sgtl5000_1.muteHeadphone();  // KF5N March 11, 2024
@@ -1279,11 +1279,10 @@ FLASHMEM void setup() {
   EEPROMStartup();
 #endif
 
-  h = 135;
-  Q_in_L.begin();  //Initialize receive input buffers
-  Q_in_R.begin();
-
   // ========================  End set up of Parameters from EEPROM data ===============
+  Q_out_L_Ex.setMaxBuffers(32);  // Put a constraint on the number of blockss to decrease audio memory.  Greg KF5N August 15, 2024
+  Q_out_R_Ex.setMaxBuffers(32);
+  h = 135;
   NCOFreq = 0;
 
   /****************************************************************************************
