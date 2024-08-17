@@ -266,7 +266,9 @@ extern struct maps myMapFiles[];
 #define Si_5351_crystal 25000000L
 
 //  States for the loop() modal state machine.
-enum class RadioState{SSB_RECEIVE_STATE, SSB_TRANSMIT_STATE, CW_RECEIVE_STATE, CW_TRANSMIT_STRAIGHT_STATE, CW_TRANSMIT_KEYER_STATE, AM_RECEIVE_STATE, SSB_CALIBRATE_STATE, CW_CALIBRATE_STATE, NOSTATE};
+enum class RadioState{SSB_RECEIVE_STATE, SSB_TRANSMIT_STATE, CW_RECEIVE_STATE, CW_TRANSMIT_STRAIGHT_STATE, 
+                      CW_TRANSMIT_KEYER_STATE, AM_RECEIVE_STATE, SSB_CALIBRATE_STATE, CW_CALIBRATE_STATE, 
+                      SET_CW_SIDETONE, NOSTATE};
 enum class RadioMode{SSB_MODE, CW_MODE, AM_MODE};  // Probably need only modes, not receive or transmit.
 
 #define SPECTRUM_ZOOM_1 0
@@ -492,6 +494,7 @@ struct config_t {
 #endif
   bool CWradioCalComplete = false;
   bool SSBradioCalComplete = false;
+  bool cessb = true;
 };
 
 extern struct config_t EEPROMData;

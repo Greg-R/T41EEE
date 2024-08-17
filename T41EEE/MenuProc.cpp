@@ -6,7 +6,6 @@
 // Mic Options
 // RF Options
 // EEPROM Options
-//
 
 
 #include "SDT.h"
@@ -678,34 +677,51 @@ void EqualizerXmtOptions() {
 *****/
 void SSBOptions()  // AFP 09-22-22 All new
 {
+  int micChoice = 0;
   //  const char *micChoices[] = { "Mic Comp On", "Mic Comp Off", "Set Threshold", "Set Comp_Ratio", "Set Attack", "Set Decay", "Cancel" };
-  const char *micChoices[] = { "Mic Gain", "Comp Threshold", "Comp Ratio", "Cancel" };
+  const char *micChoices[] = { "CESSB", "SSB Data", "Comp On", "Comp Off", "Mic Gain", "Comp Threshold", "Comp Ratio", "Cancel" };
 
-  micChoice = SubmenuSelect(micChoices, 4, micChoice);
+  micChoice = SubmenuSelect(micChoices, 8, micChoice);
   switch (micChoice) {
 
-    case 0:  // Adjust mic gain in dB.  Default 0 db.
+    case 0:  // CESSB on
+    EEPROMData.cessb = true;
+    cessb1.setProcessing(EEPROMData.cessb);
+    Serial.printf("processing = %d", cessb1.getProcessing());
+    BandInformation();
+      break;
+
+    case 1:  // SSB Data on
+    EEPROMData.cessb = false;
+    cessb1.setProcessing(EEPROMData.cessb);
+    Serial.printf("processing = %d", cessb1.getProcessing());
+    BandInformation();
+      break;
+
+    case 2:  // Compressor On
+
+    break;
+
+    case 3:  // Compressor Off
+
+    break;
+
+    case 4:  // Adjust mic gain in dB.  Default 0 db.
       MicGainSet();
       break;
 
-    case 1:  // Set compression ratio.  Default -10 dB.
+    case 5:  // Set compression ratio.  Default -10 dB.
       SetCompressionThreshold();
       break;
 
-    case 2:  // Set compressor threshold.  Default 100.0.
+    case 6:  // Set compressor threshold.  Default 100.0.
       SetCompressionRatio();
       break;
-      /*
-    case 4:
-      SetCompressionAttack();
+
+    case 7:  // Cancel
+      return;
       break;
-    case 5:
-      SetCompressionRelease();
-      break;
-      */
-    case 3:   // Cancel
-    return;
-      break;
+
     default:
       return;
       break;

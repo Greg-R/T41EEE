@@ -2,70 +2,60 @@
 
 // Common to Transmitter and Receiver.
 
-const float sample_rate_Hz = 48000.0f;
-const int   audio_block_samples = 128;  // Always 128
-AudioSettings_F32 audio_settings(sample_rate_Hz, audio_block_samples);
+//const float sample_rate_Hz = 48000.0f;
+//const int   audio_block_samples = 128;  // Always 128
+//AudioSettings_F32 audio_settings(sample_rate_Hz, audio_block_samples);
 AudioInputI2SQuad i2s_quadIn;     // 4 inputs/outputs available only in Teensy audio not Open Audio library.
 AudioOutputI2SQuad i2s_quadOut;
 
 // Transmitter
 AudioControlSGTL5000_Extended sgtl5000_1;      // Controller for the Teensy Audio Board, transmitter only.
 AudioConvert_I16toF32 int2Float1;              // Converts Int16 to Float.  See class in AudioStream_F32.h
-AudioEffectGain_F32 micGain(audio_settings);                   // Microphone gain control.
+//AudioEffectGain_F32 micGain(audio_settings);                   // Microphone gain control.
+AudioEffectGain_F32 micGain;                   // Microphone gain control.
 AudioEffectCompressor2_F32  compressor1; // Open Audio Compressor
 AudioEffectCompressor2_F32 *pc1 = &compressor1;
 radioCESSB_Z_transmit_F32 cessb1;
 AudioConvert_F32toI16 float2Int1, float2Int2;  // Converts Float to Int16.  See class in AudioStream_F32.h
-AudioSwitch4_OA_F32 switch1;
-AudioSwitch4_OA_F32 switch2;
-AudioMixer4_F32 mixer1;                        // Used to switch in tone during calibration.
+AudioSwitch4_OA_F32 switch1, switch2, switch3;
+AudioMixer4_F32 mixer1, mixer2;                        // Used to switch in tone during calibration.
 AudioSynthWaveformSine_F32  tone1kHz;          // Tone for SSB calibration.
 AudioRecordQueue Q_in_L_Ex;                    // AudioRecordQueue for input Microphone channel.
 AudioRecordQueue Q_in_R_Ex;           // This 2nd channel is needed as we are bringing I and Q into the sketch instead of only microphone audio.
 AudioPlayQueue Q_out_L_Ex;                     // AudioPlayQueue for driving the I channel (CW/SSB) to the QSE.
 AudioPlayQueue Q_out_R_Ex;                     // AudioPlayQueue for driving the Q channel (CW/SSB) to the QSE.
-/* Original transmitter
-AudioConnection patchCord1(i2s_quadIn, 0, int2Float1, 0);    // Microphone channel.
-AudioConnection_F32 patchCord3(int2Float1, 0, comp1, 0);     // Microphone to compressor.
-AudioConnection_F32 patchCord5(comp1, 0, float2Int1, 0);     // Compressor output.
-AudioConnection patchCord7(float2Int1, 0, Q_in_L_Ex, 0);     // Microphone to AudioRecordQueue.
-AudioConnection patchCord15(Q_out_L_Ex, 0, i2s_quadOut, 0);  // I channel to line out
-AudioConnection patchCord16(Q_out_R_Ex, 0, i2s_quadOut, 1);  // Q channel to line out
-*/
-
 
 //  Begin transmit signal chain.
 AudioConnection connect0(i2s_quadIn, 0, int2Float1, 0);    // Microphone audio channel.  Must use int2Float because Open Audio does not have quad input.
 
-AudioConnection_F32 connect9(int2Float1, 0, switch1, 0);
-AudioConnection_F32 connect10(tone1kHz,  0, switch2, 0);
+AudioConnection_F32 connect1(int2Float1, 0, switch1, 0);
+AudioConnection_F32 connect2(tone1kHz,  0, switch2, 0);
 
 // Need a mixer to switch in an audio tone during calibration.  Should be a nominal tone amplitude.
-AudioConnection_F32 connect1(switch1, 0, mixer1, 0);  // Connect microphone mixer1 output 0 via gain control.
-AudioConnection_F32 connect2(switch2, 0, mixer1, 1);  // Connect tone for SSB calibration.
+AudioConnection_F32 connect3(switch1, 0, mixer1, 0);  // Connect microphone mixer1 output 0 via gain control.
+AudioConnection_F32 connect4(switch2, 0, mixer1, 1);  // Connect tone for SSB calibration.
 
-AudioConnection_F32 connect3(mixer1, 0, micGain, 0);
-AudioConnection_F32 connect11(micGain, 0, compressor1, 0);
+AudioConnection_F32 connect5(mixer1, 0, micGain, 0);
+AudioConnection_F32 connect6(micGain, 0, switch3, 0);
 
-AudioConnection_F32 connect4(compressor1, 0, cessb1, 0);
+AudioConnection_F32 connect7(switch3, 0, compressor1, 0);
+
+AudioConnection_F32 connect8(compressor1, 0, mixer2, 0);
+
+AudioConnection_F32 connect9(mixer2, 0, cessb1, 0);
 
 // Controlled envelope SSB from Open Audio library.
-AudioConnection_F32 connect5(cessb1, 0, float2Int1, 0);
-AudioConnection_F32 connect6(cessb1, 1, float2Int2, 0);
+AudioConnection_F32 connect10(cessb1, 0, float2Int1, 0);
+AudioConnection_F32 connect11(cessb1, 1, float2Int2, 0);
 
-AudioConnection connect7(float2Int1, 0, Q_in_L_Ex, 0);
-AudioConnection connect8(float2Int2, 0, Q_in_R_Ex, 0);
+AudioConnection connect12(float2Int1, 0, Q_in_L_Ex, 0);
+AudioConnection connect13(float2Int2, 0, Q_in_R_Ex, 0);
 
 // Transmitter back-end.  This takes streaming data from the sketch and drives it into the I2S.
 AudioConnection patchCord15(Q_out_L_Ex, 0, i2s_quadOut, 0);  // I channel to line out
 AudioConnection patchCord16(Q_out_R_Ex, 0, i2s_quadOut, 1);  // Q channel to line out
 
 // Receiver
-//AudioMixer4 modeSelectInR;    // AFP 09-01-22
-//AudioMixer4 modeSelectInL;    // AFP 09-01-22
-
-//AudioMixer4 modeSelectOutL;    // AFP 09-01-22
-//AudioMixer4 modeSelectOutR;    // AFP 09-01-22
 
 AudioRecordQueue Q_in_L;
 AudioRecordQueue Q_in_R;
@@ -76,14 +66,6 @@ AudioPlayQueue Q_out_L;
 AudioConnection patchCord9(i2s_quadIn, 2, Q_in_L, 0);  // Receiver I and Q channel data stream.
 AudioConnection patchCord10(i2s_quadIn, 3, Q_in_R, 0);
 
-//AudioConnection patchCord13(modeSelectInR, 0, Q_in_R, 0);  // Rec in Queue
-//AudioConnection patchCord14(modeSelectInL, 0, Q_in_L, 0);
-
-//AudioConnection patchCord17(Q_out_L, 0, i2s_quadOut, 2);  // Rec out Queue
-//AudioConnection patchCord18(Q_out_R, 0, i2s_quadOut, 3);  2nd audio channel not used.  KF5N March 11, 2024
-
-//AudioConnection patchCord21(modeSelectOutL, 0, i2s_quadOut, 2);  //Rec out
-//AudioConnection patchCord22(modeSelectOutR, 0, i2s_quadOut, 3);
 AudioAmplifier volumeAdjust;
 AudioConnection patchCord17(Q_out_L, 0, volumeAdjust, 0);
 AudioConnection patchCord18(volumeAdjust, 0, i2s_quadOut, 2);
@@ -260,6 +242,26 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord16.connect();  // Transmitter Q channel
 
       break;
+
+      case RadioState::SET_CW_SIDETONE:
+      SampleRate = SAMPLE_RATE_192K;
+      SetI2SFreq(SR[SampleRate].rate);
+      patchCord9.disconnect();
+      patchCord10.disconnect();
+      // Baseband CESSB data cleared and ended.
+      Q_in_L.end();
+      Q_in_L.clear();
+      Q_in_R.end();
+      Q_in_R.clear();
+      Q_in_L_Ex.end();  // Clear I channel.
+      Q_in_L_Ex.clear();
+      Q_in_R_Ex.end();  // Clear Q channel.
+      Q_in_R_Ex.clear();
+
+      patchCord17.connect();                                    // Sidetone goes into receiver audio path.
+      volumeAdjust.gain(volumeLog[EEPROMData.sidetoneVolume]);  // Adjust sidetone volume.
+      break;
+
       case RadioState::NOSTATE:
       break;
 

@@ -297,7 +297,7 @@ void SetSideToneVolume() {
   int val, sidetoneDisplay;
   bool keyDown;
 
- SetAudioOperatingState(RadioState::CW_TRANSMIT_STRAIGHT_STATE);
+ SetAudioOperatingState(RadioState::SET_CW_SIDETONE);
   tft.setFontScale((enum RA8875tsize)1);
   tft.fillRect(SECONDARY_MENU_X - 50, MENUS_Y, EACH_MENU_WIDTH + 60, CHAR_HEIGHT, RA8875_MAGENTA);
   tft.setTextColor(RA8875_WHITE);
@@ -307,14 +307,9 @@ void SetSideToneVolume() {
   sidetoneDisplay = EEPROMData.sidetoneVolume;
   keyDown = false;
   tft.print(sidetoneDisplay);  // Display in range of 0 to 100.
-//  modeSelectInR.gain(0, 0);
-//  modeSelectInL.gain(0, 0);
-//  modeSelectInExR.gain(0, 0); 2nd microphone channel not required.  KF5N March 11, 2024
-//  modeSelectOutL.gain(0, 0);
-//  modeSelectOutR.gain(0, 0);
 
-  patchCord15.disconnect();  // Disconnect the I and Q AudioPlayQueues.
-  patchCord16.disconnect();
+//  patchCord15.disconnect();  // Disconnect the I and Q AudioPlayQueues.
+//  patchCord16.disconnect();
 
   //modeSelectOutExL.gain(0, 0);
   //modeSelectOutExR.gain(0, 0);

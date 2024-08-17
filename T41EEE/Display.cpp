@@ -667,7 +667,8 @@ void BandInformation()  // SSB or CW
     //================  AFP 10-19-22 =========
   } else {
     tft.fillRect(OPERATION_STATS_X + 90, FREQUENCY_Y + 30, 70, tft.getFontHeight(), RA8875_BLACK);
-    tft.print("SSB");  // Which mode
+    if(EEPROMData.cessb) tft.print("CESSB");  // Which mode
+    if(not EEPROMData.cessb) tft.print("SSB Data");
   }
 
   tft.fillRect(OPERATION_STATS_X + 160, FREQUENCY_Y + 30, tft.getFontWidth() * 11, tft.getFontHeight(), RA8875_BLACK);  // AFP 11-01-22 Clear top-left menu area
