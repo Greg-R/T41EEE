@@ -398,7 +398,6 @@ struct config_t {
   int nrOptionSelect = 0;                              // 1 byte
   int currentScale = 1;
   long spectrum_zoom = SPECTRUM_ZOOM_2;
-//  float spectrum_display_scale = 10.0;  // 4 bytes
   int CWFilterIndex = 5;                // Off
   int paddleDit = KEYER_DIT_INPUT_TIP;
   int paddleDah = KEYER_DAH_INPUT_RING;
@@ -902,7 +901,6 @@ extern float32_t NR_long_tone_gain[];
 extern float32_t R_BufferOffset[];
 extern float32_t ring[];
 extern const float32_t volumeLog[101];
-//extern float32_t spectrum_display_scale;  // 30.0
 extern float32_t tmp;
 extern float32_t w;
 extern float angl;

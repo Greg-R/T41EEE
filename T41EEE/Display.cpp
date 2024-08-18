@@ -1205,7 +1205,7 @@ void UpdateZoomField() {
 
 
 /*****
-  Purpose: Updates the compression setting in Info Window
+  Purpose: Updates the compression setting in the info window.
 
   Parameter list:
     void
@@ -1215,16 +1215,16 @@ void UpdateZoomField() {
 *****/
 void UpdateCompressionField()  // JJP 8/26/2023
 {
-  tft.fillRect(COMPRESSION_X, COMPRESSION_Y, 200, 15, RA8875_BLACK);
+  tft.fillRect(COMPRESSION_X, COMPRESSION_Y - 2, 175, 15, RA8875_BLACK);
   tft.setFontScale((enum RA8875tsize)0);
   tft.setTextColor(RA8875_WHITE);  // Display zoom factor
   tft.setCursor(COMPRESSION_X + 5, COMPRESSION_Y - 5);
   tft.print("Compress:");
   tft.setCursor(FIELD_OFFSET_X, COMPRESSION_Y - 5);
   tft.setTextColor(RA8875_GREEN);
-  if (EEPROMData.compressorFlag == 1) {  // JJP 8/26/2023
+  if (EEPROMData.compressorFlag == true) {  // JJP 8/26/2023
     tft.print("On  ");
-    tft.print(EEPROMData.currentMicCompRatio);   // This is the compression ratio of the Open Audio compressor.  Greg KF5N July 22, 2024
+    tft.print(EEPROMData.currentMicCompRatio, 0);   // This is the compression ratio of the Open Audio compressor.  Greg KF5N July 22, 2024
   } else {
     tft.setCursor(FIELD_OFFSET_X, COMPRESSION_Y - 5);
     tft.print("Off");

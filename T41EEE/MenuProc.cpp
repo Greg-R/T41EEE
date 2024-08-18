@@ -688,6 +688,7 @@ void SSBOptions()  // AFP 09-22-22 All new
     EEPROMData.cessb = true;
     cessb1.setProcessing(EEPROMData.cessb);
     Serial.printf("processing = %d", cessb1.getProcessing());
+    EEPROMWrite();
     BandInformation();
       break;
 
@@ -695,15 +696,20 @@ void SSBOptions()  // AFP 09-22-22 All new
     EEPROMData.cessb = false;
     cessb1.setProcessing(EEPROMData.cessb);
     Serial.printf("processing = %d", cessb1.getProcessing());
+    EEPROMWrite();
     BandInformation();
       break;
 
     case 2:  // Compressor On
-
+    EEPROMData.compressorFlag = true;
+    UpdateCompressionField();
+    EEPROMWrite();
     break;
 
     case 3:  // Compressor Off
-
+    EEPROMData.compressorFlag = false;
+    UpdateCompressionField();
+    EEPROMWrite();
     break;
 
     case 4:  // Adjust mic gain in dB.  Default 0 db.

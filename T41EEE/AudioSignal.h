@@ -39,17 +39,18 @@ AudioConnection_F32 connect5(mixer1, 0, micGain, 0);
 AudioConnection_F32 connect6(micGain, 0, switch3, 0);
 
 AudioConnection_F32 connect7(switch3, 0, compressor1, 0);
-
 AudioConnection_F32 connect8(compressor1, 0, mixer2, 0);
 
-AudioConnection_F32 connect9(mixer2, 0, cessb1, 0);
+AudioConnection_F32 connect9(switch3, 1, mixer2, 1);  // Compressor bypass path.
+
+AudioConnection_F32 connect10(mixer2, 0, cessb1, 0);
 
 // Controlled envelope SSB from Open Audio library.
-AudioConnection_F32 connect10(cessb1, 0, float2Int1, 0);
-AudioConnection_F32 connect11(cessb1, 1, float2Int2, 0);
+AudioConnection_F32 connect11(cessb1, 0, float2Int1, 0);
+AudioConnection_F32 connect12(cessb1, 1, float2Int2, 0);
 
-AudioConnection connect12(float2Int1, 0, Q_in_L_Ex, 0);
-AudioConnection connect13(float2Int2, 0, Q_in_R_Ex, 0);
+AudioConnection connect13(float2Int1, 0, Q_in_L_Ex, 0);
+AudioConnection connect14(float2Int2, 0, Q_in_R_Ex, 0);
 
 // Transmitter back-end.  This takes streaming data from the sketch and drives it into the I2S.
 AudioConnection patchCord15(Q_out_L_Ex, 0, i2s_quadOut, 0);  // I channel to line out
@@ -143,6 +144,15 @@ void SetAudioOperatingState(RadioState operatingState) {
       mixer1.gain(1, 0.0);   // Disconnect 1 kHz test tone. 
       switch1.setChannel(0);  // Connect microphone path.
       switch2.setChannel(1);  //  Disconnect 1 kHz test tone path.
+
+      if(EEPROMData.compressorFlag) {
+            switch3.setChannel(0);
+            mixer2.gain(0, 1.0);
+      } else {
+            switch3.setChannel(1);  // Bypass compressor.
+            mixer2.gain(0, 0.0);
+            mixer2.gain(1, 1.0);
+      }
 
       Q_in_L_Ex.begin();  // I channel Microphone audio
       Q_in_R_Ex.begin();  // Q channel Microphone audio

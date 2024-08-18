@@ -38,8 +38,6 @@ FLASHMEM void loadConfiguration(const char *filename, config_t &EEPROMData) {
   }
 
   // Copy values from the JsonDocument to the EEPROMData
-  // How to copy numbers:
-  //  EEPROMData.versionSettings = doc["versionSettings"];
   strlcpy(EEPROMData.versionSettings, doc["versionSettings"] | "t41pp.0", 10);
   EEPROMData.AGCMode = doc["AGCMode"];
   EEPROMData.audioVolume = doc["audioVolume"];
@@ -55,7 +53,6 @@ FLASHMEM void loadConfiguration(const char *filename, config_t &EEPROMData) {
   EEPROMData.nrOptionSelect = doc["nrOptionSelect"];
   EEPROMData.currentScale = doc["currentScale"];
   EEPROMData.spectrum_zoom = doc["spectrum_zoom"];
-//  EEPROMData.spectrum_display_scale = doc["spectrum_display_scale"];
   EEPROMData.CWFilterIndex = doc["CWFilterIndex"];
   EEPROMData.paddleDit = doc["paddleDit"];
   EEPROMData.paddleDah = doc["paddleDah"];
@@ -66,7 +63,6 @@ FLASHMEM void loadConfiguration(const char *filename, config_t &EEPROMData) {
   EEPROMData.sidetoneVolume = doc["sidetoneVolume"];
   EEPROMData.cwTransmitDelay = doc["cwTransmitDelay"];
   EEPROMData.activeVFO = doc["activeVFO"];
-//  EEPROMData.freqIncrement = doc["freqIncrement"];
   EEPROMData.currentBand = doc["currentBand"];
   EEPROMData.currentBandA = doc["currentBandA"];
   EEPROMData.currentBandB = doc["currentBandB"];
@@ -169,7 +165,6 @@ FLASHMEM void saveConfiguration(const char *filename, const config_t &EEPROMData
   doc["nrOptionSelect"] = EEPROMData.nrOptionSelect;
   doc["currentScale"] = EEPROMData.currentScale;
   doc["spectrum_zoom"] = EEPROMData.spectrum_zoom;
-//  doc["spectrum_display_scale"] = EEPROMData.spectrum_display_scale;
   doc["CWFilterIndex"] = EEPROMData.CWFilterIndex;
   doc["paddleDit"] = EEPROMData.paddleDit;
   doc["paddleDah"] = EEPROMData.paddleDah;
@@ -180,7 +175,6 @@ FLASHMEM void saveConfiguration(const char *filename, const config_t &EEPROMData
   doc["sidetoneVolume"] = EEPROMData.sidetoneVolume;
   doc["cwTransmitDelay"] = EEPROMData.cwTransmitDelay;
   doc["activeVFO"] = EEPROMData.activeVFO;
-//  doc["freqIncrement"] = EEPROMData.freqIncrement;
   doc["currentBand"] = EEPROMData.currentBand;
   doc["currentBandA"] = EEPROMData.currentBandA;
   doc["currentBandB"] = EEPROMData.currentBandB;
