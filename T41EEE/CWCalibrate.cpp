@@ -82,8 +82,11 @@ void CWCalibrate::plotCalGraphics(int calType) {
 void CWCalibrate::warmUpCal() {
   // Run ProcessIQData2() a few times to load and settle out buffers.  Compute FFT.  KF5N May 19, 2024
   uint32_t index_of_max;  // Not used, but required by arm_max_q15 function.
-  for (int i = 0; i < 1024; i = i + 1) {
+  for (int i = 0; i < 16; i = i + 1) {
     updateDisplayFlag = true;  // Causes FFT to be calculated.
+    while(static_cast<uint32_t>(Q_in_R.available()) < 32 and static_cast<uint32_t>(Q_in_L.available()) < 32) {
+      delay(1);
+        }
     CWCalibrate::ProcessIQData2();
   }
   updateDisplayFlag = false;
@@ -324,7 +327,9 @@ void CWCalibrate::CalibratePrologue() {
   updateDisplayFlag = false;
   ShowTransmitReceiveStatus();
   // Clear queues to reduce transient.
+  Q_in_L.end();
   Q_in_L.clear();
+  Q_in_R.end();
   Q_in_R.clear();
   EEPROMData.centerFreq = TxRxFreq;
   NCOFreq = 0L;
@@ -335,7 +340,6 @@ void CWCalibrate::CalibratePrologue() {
   //calFreqShift = 0;
   EEPROMData.currentScale = userScale;  //  Restore vertical scale to user preference.  KF5N
   ShowSpectrumdBScale();
-  //  EEPROMData.xmtMode = userxmtMode;
   EEPROMData.transmitPowerLevel = transmitPowerLevelTemp;  // Restore the user's transmit power level setting.  KF5N August 15, 2023
   EEPROMWrite();                                           // Save calibration numbers and configuration.  KF5N August 12, 2023
   zoomIndex = userZoomIndex - 1;
@@ -347,7 +351,7 @@ void CWCalibrate::CalibratePrologue() {
   calOnFlag = false;
   RedrawDisplayScreen();
   IQChoice = 9;
-  //  radioState = RadioState::CW_RECEIVE_STATE;  // KF5N
+  radioState = RadioState::CW_RECEIVE_STATE;  // KF5N
   fftOffset = 0;  // Some reboots may be caused by large fftOffset values when Auto-Spectrum is on.
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreq();                        // Return Si5351 to normal operation mode.  KF5N
@@ -1592,10 +1596,8 @@ void CWCalibrate::ProcessIQData2() {
   arm_scale_f32(float_buffer_R_EX, powerScale, float_buffer_R_EX, 2048);
 
   // This code block was introduced after TeensyDuino 1.58 appeared.  It doesn't use a for loop, but processes the entire 2048 buffer in one pass.
-  // Are there at least N_BLOCKS buffers in each channel available ?
-  if ((uint32_t)Q_in_L.available() > N_BLOCKS && (uint32_t)Q_in_R.available() > N_BLOCKS) {  // Audio Record Queues!!!
-
-    // Revised I and Q calibration signal generation using large buffers.  Greg KF5N June 4 2023
+  // Revised I and Q calibration signal generation using large buffers.  Greg KF5N June 4 2023
+if (static_cast<uint32_t>(Q_in_L.available()) > 16 && static_cast<uint32_t>(Q_in_R.available()) > 16) {  // Audio Record Queues!!!
     q15_t q15_buffer_LTemp[2048];  //KF5N
     q15_t q15_buffer_RTemp[2048];  //KF5N
     Q_out_L_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
@@ -1613,11 +1615,12 @@ void CWCalibrate::ProcessIQData2() {
     Q_out_L_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
     Q_out_R_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
 
-    // End of transmit code.  Begin receive code.
+   // End of transmit code.  Begin receive code.
 
     // get audio samples from the audio  buffers and convert them to float
-    // read in 32 blocks á 128 samples in I and Q
-    for (unsigned i = 0; i < N_BLOCKS; i++) {
+    // read in 32 blocks á 128 samples in I and Q if available.
+
+    for (unsigned i = 0; i < 16; i++) {
       /**********************************************************************************  AFP 12-31-20
           Using arm_Math library, convert to float one buffer_size.
           Float_buffer samples are now standardized from > -1.0 to < 1.0
@@ -1660,7 +1663,7 @@ void CWCalibrate::ProcessIQData2() {
       //AFP  Used to process Zoom>1 for display
       ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
     }
-  }
+  }  // End of receive code.
 }
 
 

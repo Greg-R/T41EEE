@@ -63,13 +63,14 @@ void SSBCalibrate::plotCalGraphics(int calType) {
 void SSBCalibrate::warmUpCal() {
   // Run ProcessIQData2() a few times to load and settle out buffers.  Compute FFT.  KF5N May 19, 2024
   uint32_t index_of_max;  // Not used, but required by arm_max_q15 function.
-                          //  delay(1000);
   for (int i = 0; i < 16; i = i + 1) {
-    if (i == 15) updateDisplayFlag = true;  // Causes FFT to be calculated.
-    SSBCalibrate::ProcessIQData2();
+    updateDisplayFlag = true;  // Causes FFT to be calculated.
+        while(static_cast<uint32_t>(Q_in_L_Ex.available()) < 32 and static_cast<uint32_t>(Q_in_L.available()) < 32) {
+      delay(1);
+        }
+    SSBCalibrate::ProcessIQData2();  // Note, FFT not called if buffers not sufficiently filled.
   }
   updateDisplayFlag = false;
-  //  delay(10000);
   // Find peak of spectrum, which is 512 wide.  Use this to adjust spectrum peak to top of spectrum display.
   arm_max_q15(pixelnew, 512, &rawSpectrumPeak, &index_of_max);
 }
@@ -292,7 +293,7 @@ void SSBCalibrate::CalibratePreamble(int setZoom) {
       void
  *****/
 void SSBCalibrate::CalibratePrologue() {
-  /*
+  
   Serial.printf("lastState=%d radioState=%d memory_used=%d memory_used_max=%d f32_memory_used=%d f32_memory_used_max=%d\n",
                 lastState,
                 radioState,
@@ -303,7 +304,7 @@ void SSBCalibrate::CalibratePrologue() {
   AudioStream::memory_used_max = 0;
   AudioStream_F32::f32_memory_used_max = 0;
   Serial.printf("cessb1 max processor usage = %d\n", cessb1.processorUsageMax());
- */
+ 
   digitalWrite(RXTX, LOW);  // Turn off the transmitter.
   updateDisplayFlag = false;
   tone1kHz.end();
@@ -320,10 +321,8 @@ void SSBCalibrate::CalibratePrologue() {
   EEPROMData.CWOffset = cwFreqOffsetTemp;  // Return user selected CW offset frequency.
   EEPROMData.calFreq = calFreqTemp;        // Return user selected calibration tone frequency.
   sineTone(EEPROMData.CWOffset + 6);       // This function takes "number of cycles" which is the offset + 6.
-  //calFreqShift = 0;
   EEPROMData.currentScale = userScale;  //  Restore vertical scale to user preference.  KF5N
   ShowSpectrumdBScale();
-  //  EEPROMData.xmtMode = userxmtMode;                        // Restore the user's floor setting.  KF5N July 27, 2023
   EEPROMData.transmitPowerLevel = transmitPowerLevelTemp;  // Restore the user's transmit power level setting.  KF5N August 15, 2023
   EEPROMWrite();                                           // Save calibration numbers and configuration.  KF5N August 12, 2023
   zoomIndex = userZoomIndex - 1;
@@ -334,8 +333,7 @@ void SSBCalibrate::CalibratePrologue() {
   tft.writeTo(L1);  // Exit function in layer 1.  KF5N August 3, 2023
   calOnFlag = false;
   RedrawDisplayScreen();
-  //  IQChoice = 9;
-  radioState = RadioState::CW_RECEIVE_STATE;  // KF5N
+//  radioState = RadioState::CW_RECEIVE_STATE;  // KF5N
   fftOffset = 0;                              // Some reboots may be caused by large fftOffset values when Auto-Spectrum is on.
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreq();                        // Return Si5351 to normal operation mode.  KF5N
@@ -393,13 +391,12 @@ void SSBCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortC
   tft.setCursor(405, 125);
   tft.print(correctionIncrement, 3);
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
-  radioState = RadioState::SSB_TRANSMIT_STATE;
+//  radioState = RadioState::SSB_TRANSMIT_STATE;
   SetFreqCal(freqOffset);
   printCalType(calTypeFlag, autoCal, false);
   // Run this so Phase shows from begining.
   GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQSSBPhaseCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
   warmUpCal();
-  //  delay(5000);
 
   if (radioCal) {
     autoCal = true;
@@ -1192,7 +1189,7 @@ void SSBCalibrate::ProcessIQData2() {
      **********************************************************************************/
   //     Serial.printf("Q_in_L_Ex.available = %d\n", Q_in_L_Ex.available());
   // Are there at least N_BLOCKS buffers in each channel available ?
-  if ((uint32_t)Q_in_L_Ex.available() > N_BLOCKS_EX) {
+  if (static_cast<uint32_t>(Q_in_L_Ex.available()) > N_BLOCKS_EX and static_cast<uint32_t>(Q_in_R_Ex.available()) > N_BLOCKS_EX) {
     //     Serial.printf("Q_in_L_Ex.available = %d\n", Q_in_L_Ex.available());
     // get audio samples from the audio  buffers and convert them to float
     // read in 16 blocks of 128 samples in I and Q
@@ -1241,10 +1238,11 @@ void SSBCalibrate::ProcessIQData2() {
     Q_out_L_Ex.play(q15_buffer_LTemp, dataWidth);  // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
     Q_out_R_Ex.play(q15_buffer_RTemp, dataWidth);  // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.
 
-    // End of transmit code.  Begin receive code.
+//}    // End of transmit code.  Begin receive code.
 
     // Get audio samples from the audio  buffers and convert them to float.
-    // Read in 16 blocks of 128 samples in I and Q.
+    // Read in 16 blocks of 128 samples in I and Q if available.
+  if (static_cast<uint32_t>(Q_in_L.available()) > N_BLOCKS_EX and static_cast<uint32_t>(Q_in_R.available()) > N_BLOCKS_EX) {
     for (unsigned i = 0; i < N_BLOCKS; i++) {
       /**********************************************************************************  AFP 12-31-20
           Using arm_Math library, convert to float one buffer_size.
@@ -1288,8 +1286,8 @@ void SSBCalibrate::ProcessIQData2() {
     //AFP  Used to process Zoom>1 for display
     //      ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
     ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
-    //    }
-  }
+  }  // End of receive code
+}
 }
 
 

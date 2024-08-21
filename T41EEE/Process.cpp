@@ -59,7 +59,7 @@ void ProcessIQData()
 //  uint32_t dataMaxIndex;
 
   // Are there at least N_BLOCKS buffers in each channel available ?  N_BLOCKS should be 16.  Fill float_buffer_L/R[2048].
-  if ( (uint32_t) Q_in_L.available() > N_BLOCKS && (uint32_t) Q_in_R.available() > N_BLOCKS ) {     // Removed addition of 0 to N_BLOCKS.
+  if (static_cast<uint32_t>(Q_in_L.available()) > N_BLOCKS && static_cast<uint32_t>(Q_in_R.available()) > N_BLOCKS ) {     // Removed addition of 0 to N_BLOCKS.
     usec = 0;
     // Get audio samples from the audio  buffers and convert them to float.
     // Read in 16 blocks and 128 samples in I and Q.  16 * 128 = 2048  (N_BLOCKS = 16)

@@ -1,7 +1,7 @@
 
 #include "SDT.h"
 
-int micGainChoice;
+//int micGainChoice;
 
 
 void updateMic() {

@@ -174,7 +174,9 @@ void SetAudioOperatingState(RadioState operatingState) {
       switch1.setChannel(1);
       switch2.setChannel(0);
 
+      Q_in_L.end();
       Q_in_L.clear();
+      Q_in_R.end();
       Q_in_R.clear();
 
       // Test tone enabled and connected
@@ -228,23 +230,24 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord10.connect();  // Receiver Q channel
       patchCord17.disconnect();  // CW sidetone
       patchCord18.disconnect();
-      switch1.setChannel(1);
-      switch2.setChannel(1);
+      switch1.setChannel(1);  // Disconnect microphone path.
+      switch2.setChannel(1);  //  Disconnect 1 kHz test tone path.
 
       // CW does not use the transmitter front-end.
-      Q_in_L_Ex.clear();
       Q_in_L_Ex.end();  // Transmit I channel path.
-      Q_in_R_Ex.clear();
+      Q_in_L_Ex.clear();
       Q_in_R_Ex.end();  // Transmit Q channel path.
+      Q_in_R_Ex.clear();
 
+      Q_in_L.end();
       Q_in_L.clear();
+      Q_in_R.end();
       Q_in_R.clear();
 
       tone1kHz.end();
       mixer1.gain(0, 0);  // microphone audio off.
       mixer1.gain(1, 0);  // testTone off.
-      switch1.setChannel(1);  // Disconnect microphone path.
-      switch2.setChannel(1);  //  Disconnect 1 kHz test tone path.
+
       Q_in_L.begin();     // Calibration is full duplex!
       Q_in_R.begin();
       //  Transmitter back-end needs to be active during CW calibration.

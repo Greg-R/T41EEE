@@ -1083,28 +1083,6 @@ FLASHMEM void setup() {
   Teensy3Clock.set(now());  // set the RTC
   T4_rtc_set(Teensy3Clock.get());
 
-/*
-  sgtl5000_1.setAddress(LOW);  // This is not documented.  See QuadChannelOutput example.
-  sgtl5000_1.enable();
-  AudioMemory(500);  //  Increased to 450 from 400.  Memory was hitting max.  KF5N August 31, 2023
-  AudioMemory_F32(10);
-  sgtl5000_1.inputSelect(AUDIO_INPUT_MIC);
-  sgtl5000_1.muteHeadphone();  // KF5N March 11, 2024
-  sgtl5000_1.micGain(20);
-  sgtl5000_1.lineInLevel(0);
-#ifdef QSE2
-  sgtl5000_1.lineOutLevel(13);  // Setting of 13 limits line-out level to 3.15 volts p-p (maximum).
-#else
-  sgtl5000_1.lineOutLevel(20);  // Setting of 20 limits line-out level to 2.14 volts p-p.
-#endif
-  sgtl5000_1.adcHighPassFilterDisable();  //reduces noise.  https://forum.pjrc.com/threads/27215-24-bit-audio-boards?p=78831&viewfull=1#post78831
-  sgtl5000_2.setAddress(HIGH);            // T41 has only a single Audio Adaptor.  This is being used essentially as a 2nd I2S port.
-  sgtl5000_2.enable();
-  sgtl5000_2.inputSelect(AUDIO_INPUT_LINEIN);  // Why is a second sgtl5000 device used???  This is the receiver ADCs, PCM1808?
-  sgtl5000_2.muteHeadphone();                  // KF5N March 11, 2024
-                                               //  sgtl5000_2.volume(0.5);   //  Headphone volume???  Not required as headphone is muted.
-*/
-
   sgtl5000_1.setAddress(LOW);  // This is not documented.  See QuadChannelOutput example.
   sgtl5000_1.enable();
 //  sgtl5000_1.audioPreProcessorEnable();
@@ -1140,16 +1118,12 @@ sgtl5000_1.adcHighPassFilterEnable();
    cessb1.setProcessing(EEPROMData.cessb);  // Set to CESSB or SSB Data.  Greg KF5N August 17 2024
 
 // Turn off microphone and 1 kHz test tone.
-   mixer1.gain(0, 0);
-   mixer1.gain(1, 0);
+//   mixer1.gain(0, 0);
+//   mixer1.gain(1, 0);
 
   Q_out_L_Ex.setMaxBuffers(32);       // Limits determined emperically.  These may need more adjustment.  Greg KF5N August 4, 2024.
   Q_out_R_Ex.setMaxBuffers(32);       // Going to leave these commented for now.
 //  Q_out_L.setMaxBuffers(32);
-
-//  Q_out_L_Ex.setMaxBuffers(32);       // Limits determined emperically.  These may need more adjustment.  Greg KF5N August 4, 2024.
-//  Q_out_R_Ex.setMaxBuffers(32);       // Going to leave these commented for now.
-//  Q_out_L.setMaxBuffers(64);
 
   pinMode(FILTERPIN15M, OUTPUT);
   pinMode(FILTERPIN20M, OUTPUT);
@@ -1235,12 +1209,9 @@ sgtl5000_1.adcHighPassFilterEnable();
   EEPROMStartup();
 #endif
 
-  h = 135;
-//  Q_in_L.begin();  //Initialize receive input buffers
-//  Q_in_R.begin();
-
   // ========================  End set up of Parameters from EEPROM data ===============
   NCOFreq = 0;
+  h = 135;
 
   /****************************************************************************************
      start local oscillator Si5351
@@ -1278,10 +1249,6 @@ sgtl5000_1.adcHighPassFilterEnable();
   ShowAutoStatus();
   zoomIndex = EEPROMData.spectrum_zoom - 1;  // ButtonZoom() increments zoomIndex, so this cancels it so the read from EEPROM is accurately restored.  KF5N August 3, 2023
   ButtonZoom();                              // Restore zoom settings.  KF5N August 3, 2023
-  comp_ratio = 5.0;
-  attack_sec = .1;
-  release_sec = 2.0;
-//  comp1.setPreGain_dB(-10);  // Set the gain of the microphone audio gain processor.
 
   EEPROMData.sdCardPresent = SDPresentCheck();  // JJP 7/18/23
   lastState = RadioState::NOSTATE;                             // To make sure the receiver will be configured on the first pass through.  KF5N September 3, 2023
