@@ -110,6 +110,12 @@ void SetAudioOperatingState(RadioState operatingState) {
       mixer1.gain(1, 0.0);
       switch1.setChannel(1);  // Disconnect microphone path.
       switch2.setChannel(1);  //  Disconnect 1 kHz test tone path.
+      // Stop and clear the data buffers.     
+      Q_in_L.end();                                        // Receiver I channel
+      Q_in_R.end();                                        // Receiver I channel
+      Q_in_L.clear();                                        // Receiver I channel
+      Q_in_R.clear();                                        // Receiver I channel      
+      Q_in_R.begin();                                        // Receiver Q channel
       Q_in_L_Ex.end();  // Transmit I channel path.
       Q_in_L_Ex.clear();
       Q_in_R_Ex.end();  // Transmit Q channel path.
@@ -168,11 +174,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       // QSD disabled and disconnected
       patchCord9.connect();   // Receiver I channel
       patchCord10.connect();  // Receiver Q channel
-      patchCord17.disconnect();  // CW sidetone
+      patchCord17.disconnect();  // Receiver audio and CW sidetone
       patchCord18.disconnect();
-
-      switch1.setChannel(1);
-      switch2.setChannel(0);
 
       Q_in_L.end();
       Q_in_L.clear();
@@ -192,7 +195,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       Q_out_R_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
       Q_in_L_Ex.begin();  // I channel Microphone audio
       Q_in_R_Ex.begin();  // Q channel Microphone audio
-      Q_in_L.begin();     // Calibration is full duplex!
+      Q_in_L.begin();     // Calibration is full duplex!  Activate receiver.
       Q_in_R.begin();
       patchCord15.connect();  // Transmitter I channel
       patchCord16.connect();  // Transmitter Q channel
@@ -276,6 +279,9 @@ void SetAudioOperatingState(RadioState operatingState) {
       break;
 
       case RadioState::NOSTATE:
+      break;
+      
+      default:
       break;
 
   }

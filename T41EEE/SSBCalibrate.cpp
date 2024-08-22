@@ -234,8 +234,6 @@ void SSBCalibrate::printCalType(int IQCalType, bool autoCal, bool autoCalDone) {
       void
  *****/
 void SSBCalibrate::CalibratePreamble(int setZoom) {
-  radioState = RadioState::SSB_CALIBRATE_STATE;
-  SetAudioOperatingState(radioState);
   cessb1.processorUsageMaxReset();
   calOnFlag = true;
   ZoomFFTPrep();
@@ -280,6 +278,8 @@ void SSBCalibrate::CalibratePreamble(int setZoom) {
   ShowTransmitReceiveStatus();
   ShowSpectrumdBScale();
   rawSpectrumPeak = 0;
+  radioState = RadioState::SSB_CALIBRATE_STATE;
+  SetAudioOperatingState(radioState);  // Do this last!  This turns the queues on.
 }
 
 
@@ -303,7 +303,6 @@ void SSBCalibrate::CalibratePrologue() {
                 (int)AudioStream_F32::f32_memory_used_max);
   AudioStream::memory_used_max = 0;
   AudioStream_F32::f32_memory_used_max = 0;
-  Serial.printf("cessb1 max processor usage = %d\n", cessb1.processorUsageMax());
  
   digitalWrite(RXTX, LOW);  // Turn off the transmitter.
   updateDisplayFlag = false;
@@ -397,6 +396,9 @@ void SSBCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortC
   // Run this so Phase shows from begining.
   GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQSSBPhaseCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
   warmUpCal();
+
+//  SSBCalibrate::CalibratePrologue();
+//  return;
 
   if (radioCal) {
     autoCal = true;

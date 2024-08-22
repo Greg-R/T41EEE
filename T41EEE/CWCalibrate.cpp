@@ -82,9 +82,9 @@ void CWCalibrate::plotCalGraphics(int calType) {
 void CWCalibrate::warmUpCal() {
   // Run ProcessIQData2() a few times to load and settle out buffers.  Compute FFT.  KF5N May 19, 2024
   uint32_t index_of_max;  // Not used, but required by arm_max_q15 function.
-  for (int i = 0; i < 16; i = i + 1) {
+  for (int i = 0; i < 128; i = i + 1) {
     updateDisplayFlag = true;  // Causes FFT to be calculated.
-    while(static_cast<uint32_t>(Q_in_R.available()) < 32 and static_cast<uint32_t>(Q_in_L.available()) < 32) {
+    while(static_cast<uint32_t>(Q_in_R.available()) < 16 and static_cast<uint32_t>(Q_in_L.available()) < 16) {
       delay(1);
         }
     CWCalibrate::ProcessIQData2();
@@ -253,7 +253,6 @@ void CWCalibrate::printCalType(int IQCalType, bool autoCal, bool autoCalDone) {
       void
  *****/
 void CWCalibrate::CalibratePreamble(int setZoom) {
-  SetAudioOperatingState(RadioState::CW_CALIBRATE_STATE);
   cessb1.processorUsageMaxReset();
   calOnFlag = true;
   IQCalType = 0;
@@ -298,6 +297,7 @@ void CWCalibrate::CalibratePreamble(int setZoom) {
   ShowTransmitReceiveStatus();
   ShowSpectrumdBScale();
   rawSpectrumPeak = 0;
+  SetAudioOperatingState(RadioState::CW_CALIBRATE_STATE);  // Do this last!  This clears the queues.
 }
 
 
@@ -311,7 +311,6 @@ void CWCalibrate::CalibratePreamble(int setZoom) {
       void
  *****/
 void CWCalibrate::CalibratePrologue() {
-  /*
   Serial.printf("lastState=%d radioState=%d memory_used=%d memory_used_max=%d f32_memory_used=%d f32_memory_used_max=%d\n",
                 lastState,
                 radioState,
@@ -321,8 +320,8 @@ void CWCalibrate::CalibratePrologue() {
                 (int)AudioStream_F32::f32_memory_used_max);
   AudioStream::memory_used_max = 0;
   AudioStream_F32::f32_memory_used_max = 0;
-  Serial.printf("cessb1 max processor usage = %d\n", cessb1.processorUsageMax());
-  */
+//  Serial.printf("cessb1 max processor usage = %d\n", cessb1.processorUsageMax());
+
   digitalWrite(RXTX, LOW);  // Turn off the transmitter.
   updateDisplayFlag = false;
   ShowTransmitReceiveStatus();

@@ -1085,7 +1085,6 @@ FLASHMEM void setup() {
 
   sgtl5000_1.setAddress(LOW);  // This is not documented.  See QuadChannelOutput example.
   sgtl5000_1.enable();
-//  sgtl5000_1.audioPreProcessorEnable();
 //  sgtl5000_1.audioPostProcessorEnable();
   sgtl5000_1.audioPreProcessorEnable();  // Need to use one of the equalizers.
   sgtl5000_1.eqSelect(3);
@@ -1109,9 +1108,9 @@ sgtl5000_1.adcHighPassFilterEnable();
   sgtl5000_2.inputSelect(AUDIO_INPUT_LINEIN);  // Why is a second sgtl5000 device used???  This is the receiver ADCs, PCM1808?
   sgtl5000_2.muteHeadphone();                  // KF5N March 11, 2024
                                                //  sgtl5000_2.volume(0.5);   //  Headphone volume???  Not required as headphone is muted.
-
   updateMic();  // This updates the transmit signal chain settings.
 
+// Set up "Controlled Envelope Single Side Band" from the Open Audio Library.
    cessb1.setSampleRate_Hz(48000);
    cessb1.setGains(1.5f, 1.4f, 0.5f);
    cessb1.setSideband(false);
@@ -1122,8 +1121,8 @@ sgtl5000_1.adcHighPassFilterEnable();
 //   mixer1.gain(1, 0);
 
   Q_out_L_Ex.setMaxBuffers(32);       // Limits determined emperically.  These may need more adjustment.  Greg KF5N August 4, 2024.
-  Q_out_R_Ex.setMaxBuffers(32);       // Going to leave these commented for now.
-//  Q_out_L.setMaxBuffers(32);
+  Q_out_R_Ex.setMaxBuffers(32);
+  Q_out_L.setMaxBuffers(64);          // Receiver audio buffer limit.
 
   pinMode(FILTERPIN15M, OUTPUT);
   pinMode(FILTERPIN20M, OUTPUT);
