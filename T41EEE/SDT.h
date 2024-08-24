@@ -725,7 +725,7 @@ extern const uint32_t IIR_biquad_Zoom_FFT_N_stages;
 extern const uint32_t N_stages_biquad_lowpass1;
 extern const uint16_t n_dec1_taps;
 extern const uint16_t n_dec2_taps;
-extern int mute;
+//extern int mute;
 extern bool agc_action;
 extern int attenuator;
 extern int audioYPixel[];

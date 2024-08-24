@@ -482,7 +482,6 @@ const float32_t n_att = 90.0;  // need here for later def's
 const uint16_t n_dec1_taps = (1 + (uint16_t)(n_att / (22.0 * (n_fstop1 - n_fpass1))));
 const uint16_t n_dec2_taps = (1 + (uint16_t)(n_att / (22.0 * (n_fstop2 - n_fpass2))));
 
-int mute = 0;
 int attenuator = 0;
 
 int audioYPixel[256]{ 0 };  // Will int16_t save memory here???  DMAMEM not working here.  Causes audio spectrum glitch.  KF5N February 26, 2024.
@@ -1130,7 +1129,7 @@ sgtl5000_1.adcHighPassFilterEnable();
   pinMode(FILTERPIN80M, OUTPUT);
   pinMode(RXTX, OUTPUT);
   pinMode(MUTE, OUTPUT);
-  digitalWrite(MUTE, LOW);
+  digitalWrite(MUTE, MUTEAUDIO);
   pinMode(PTT, INPUT_PULLUP);
   pinMode(BUSY_ANALOG_PIN, INPUT);
   pinMode(FILTER_ENCODER_A, INPUT);
@@ -1314,7 +1313,7 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
     case RadioState::AM_RECEIVE_STATE:
     case RadioState::SSB_RECEIVE_STATE:
       if (lastState != radioState) {  // G0ORX 01092023
-        digitalWrite(MUTE, LOW);      // Audio Mute off
+        digitalWrite(MUTE, UNMUTEAUDIO);      // Audio Mute off
         digitalWrite(RXTX, LOW);      //xmit off
         if (keyPressedOn == 1) {
           return;
@@ -1324,7 +1323,7 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       ShowSpectrum();
       break;
     case RadioState::SSB_TRANSMIT_STATE:
-      digitalWrite(MUTE, HIGH);  //  Mute Audio  (HIGH=Mute)
+      digitalWrite(MUTE, MUTEAUDIO);  //  Mute Audio  (HIGH=Mute)
       digitalWrite(RXTX, HIGH);  //xmit on
 
       ShowTransmitReceiveStatus();
@@ -1343,7 +1342,7 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   switch (radioState) {
     case RadioState::CW_RECEIVE_STATE:
       if (lastState != radioState) {  // G0ORX 01092023
-        digitalWrite(MUTE, LOW);      //turn off mute
+        digitalWrite(MUTE, UNMUTEAUDIO);      //turn off mute
         ShowTransmitReceiveStatus();
         keyPressedOn = 0;
       }
@@ -1351,7 +1350,7 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       break;
     case RadioState::CW_TRANSMIT_STRAIGHT_STATE:
       ShowTransmitReceiveStatus();
-      digitalWrite(MUTE, LOW);  // unmutes audio
+      digitalWrite(MUTE, UNMUTEAUDIO);  // unmutes audio for sidetone
       cwKeyDown = false;        // false initiates CW_SHAPING_RISE.
       cwTimer = millis();
       while (millis() - cwTimer <= EEPROMData.cwTransmitDelay) {  //Start CW transmit timer on
@@ -1375,12 +1374,12 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
           }
         }
       }
-      digitalWrite(MUTE, HIGH);  // mutes audio
+      digitalWrite(MUTE, MUTEAUDIO);  // mutes audio
       digitalWrite(RXTX, LOW);   // End Straight Key Mode
       break;
     case RadioState::CW_TRANSMIT_KEYER_STATE:
       ShowTransmitReceiveStatus();
-      digitalWrite(MUTE, LOW);  // unmutes audio
+      digitalWrite(MUTE, UNMUTEAUDIO);  // unmutes audio for sidetone
       cwTimer = millis();
       while (millis() - cwTimer <= EEPROMData.cwTransmitDelay) {
         digitalWrite(RXTX, HIGH);
@@ -1433,7 +1432,7 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
         keyPressedOn = 0;  // Fix for keyer click-clack.  KF5N August 16, 2023
       }                    //End Relay timer
 
-      digitalWrite(MUTE, HIGH);  // mutes audio
+      digitalWrite(MUTE, MUTEAUDIO);  // mutes audio
       digitalWrite(RXTX, LOW);   // End Straight Key Mode
       break;
       case RadioState::NOSTATE:

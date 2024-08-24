@@ -289,10 +289,9 @@ void CWCalibrate::CalibratePreamble(int setZoom) {
   userScale = EEPROMData.currentScale;  //  Remember user preference so it can be reset when done.  KF5N
   EEPROMData.currentScale = 1;          //  Set vertical scale to 10 dB during calibration.  KF5N
   updateDisplayFlag = false;
-  digitalWrite(MUTE, LOW);  //turn off mute
   EEPROMData.centerFreq = TxRxFreq;
   NCOFreq = 0L;
-  digitalWrite(MUTE, HIGH);  //  Mute Audio  (HIGH=Mute)
+  digitalWrite(MUTE, MUTEAUDIO);  //  Mute Audio  (HIGH=Mute)
   digitalWrite(RXTX, HIGH);  // Turn on transmitter.
   ShowTransmitReceiveStatus();
   ShowSpectrumdBScale();

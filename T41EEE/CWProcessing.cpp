@@ -315,7 +315,7 @@ void SetSideToneVolume() {
   //modeSelectOutExR.gain(0, 0);
 //  patchCord17.connect();  // Sidetone goes into receiver audio path.
 //  Q_in_L.begin();         // Activate sidetone audio stream.
-  digitalWrite(MUTE, LOW);      // unmutes audio
+  digitalWrite(MUTE, UNMUTEAUDIO);      // unmutes audio
 //  modeSelectOutL.gain(1, 0.0);  // Sidetone  AFP 10-01-22
 //  modeSelectOutR.gain(1, 0.0);  // Sidetone  AFP 10-01-22
 

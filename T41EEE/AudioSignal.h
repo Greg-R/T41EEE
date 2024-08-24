@@ -112,10 +112,9 @@ void SetAudioOperatingState(RadioState operatingState) {
       switch2.setChannel(1);  //  Disconnect 1 kHz test tone path.
       // Stop and clear the data buffers.     
       Q_in_L.end();                                        // Receiver I channel
-      Q_in_R.end();                                        // Receiver I channel
+      Q_in_R.end();                                        // Receiver Q channel
       Q_in_L.clear();                                        // Receiver I channel
-      Q_in_R.clear();                                        // Receiver I channel      
-      Q_in_R.begin();                                        // Receiver Q channel
+      Q_in_R.clear();                                        // Receiver Q channel      
       Q_in_L_Ex.end();  // Transmit I channel path.
       Q_in_L_Ex.clear();
       Q_in_R_Ex.end();  // Transmit Q channel path.

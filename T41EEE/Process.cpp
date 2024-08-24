@@ -522,13 +522,13 @@ void ProcessIQData()
       Digital Volume Control
     **********************************************************************************/
 
-    if (mute == 1) {
-      arm_scale_f32(float_buffer_L, 0.0, float_buffer_L, BUFFER_SIZE * N_BLOCKS);
+//    if (mute == 1) {
+//      arm_scale_f32(float_buffer_L, 0.0, float_buffer_L, BUFFER_SIZE * N_BLOCKS);
 //      arm_scale_f32(float_buffer_R, 0.0, float_buffer_R, BUFFER_SIZE * N_BLOCKS);
-    } else if (mute == 0) {
-      arm_scale_f32(float_buffer_L, 20.0, float_buffer_L, BUFFER_SIZE * N_BLOCKS);  // Set scaling constant to optimize volume control range.
+//    } else if (mute == 0) {
+      arm_scale_f32(float_buffer_L, AUDIOSCALE, float_buffer_L, BUFFER_SIZE * N_BLOCKS);  // Set scaling constant to optimize volume control range.
 //      arm_scale_f32(float_buffer_R, DF * volumeLog[EEPROMData.audioVolume] * 4, float_buffer_R, BUFFER_SIZE * N_BLOCKS);
-    }
+//    }
     /**********************************************************************************  AFP 12-31-20
       CONVERT TO INTEGER AND PLAY AUDIO
     **********************************************************************************/
