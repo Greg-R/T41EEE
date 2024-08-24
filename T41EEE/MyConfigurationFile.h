@@ -73,7 +73,7 @@
 //#define MUTEAUDIO   LOW
 
 // If using an external amplifier, the gain may need to be adjusted for the best volume range.
-#define AUDIOSCALE  20    // A typical value is 20.
+#define AUDIOSCALE  20    // A typical value is 20.  Increase or decrease this value depending on your amplifier gain.
 
 
 
