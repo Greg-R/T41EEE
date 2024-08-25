@@ -58,24 +58,6 @@ float32_t tau_hang_decay;
 float32_t var_gain;
 float32_t volts = 0.0;
 
-/*****
-  Purpose: Setup Teensy Mic Compressor
-  Parameter list:
-    void
-  Return value;
-    void
-*****
-void SetupMyCompressors(bool use_HP_filter1, float knee_dBFS1, float comp_ratio1, float attack_sec1, float release_sec1) {
-  comp1.enableHPFilter(use_HP_filter1);   // comp2.enableHPFilter(use_HP_filter1);  Compressor2 not required as there is only 1 microphone channel.  KF5N March 11, 2024
-  comp1.setThresh_dBFS(knee_dBFS1);       // comp2.setThresh_dBFS(knee_dBFS1);
-  comp1.setCompressionRatio(comp_ratio1); // comp2.setCompressionRatio(comp_ratio1);
-
-  float fs_Hz = AUDIO_SAMPLE_RATE;
-  comp1.setAttack_sec(attack_sec1, fs_Hz);     //  comp2.setAttack_sec(attack_sec1, fs_Hz);
-  comp1.setRelease_sec(release_sec1, fs_Hz);   //  comp2.setRelease_sec(release_sec1, fs_Hz);
-}
-*/
-
 
 /*****
   Purpose: void noiseblanker

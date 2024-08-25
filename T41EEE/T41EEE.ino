@@ -194,7 +194,7 @@ Please refer to the included file T41_Change_Log.txt which includes the descript
 to prior versions.
 */
 
-// setup() and loop() at the bottom of this file
+// setup() and loop() are at the bottom of this file.
 
 #include "SDT.h"
 
@@ -251,8 +251,6 @@ void (*functionPtr[])() = { &CWOptions, &RFOptions, &VFOSelect,
 
 uint32_t FFT_length = FFT_LENGTH;
 
-//extern "C" uint32_t set_arm_clock(uint32_t frequency);
-
 //======================================== Global object definitions ==================================================
 // ===========================  AFP 08-22-22
 bool agc_action = false;
@@ -260,7 +258,7 @@ bool agc_action = false;
 #include "AudioSignal.h"
 //End dataflow code
 
-CWCalibrate calibrater;  // Instantiate the calibration object.
+CWCalibrate calibrater;  // Instantiate the calibration objects.
 SSBCalibrate ssbcalibrater;
 
 Rotary volumeEncoder = Rotary(VOLUME_ENCODER_A, VOLUME_ENCODER_B);        //( 2,  3)
@@ -292,11 +290,6 @@ float32_t HP_DC_Butter_state[6] = { 0, 0, 0, 0, 0, 0 };
 float32_t HP_DC_Butter_state2[2] = { 0, 0 };                                                          // AFP 11-04-11
 arm_biquad_cascade_df2T_instance_f32 s1_Receive = { 3, HP_DC_Butter_state, HP_DC_Filter_Coeffs };     //AFP 09-23-22
 arm_biquad_cascade_df2T_instance_f32 s1_Receive2 = { 1, HP_DC_Butter_state2, HP_DC_Filter_Coeffs2 };  //AFP 11-04-22
-//Hilbert FIR Filters
-//float32_t DMAMEM FIR_Hilbert_state_L[100 + 256 - 1];
-// DMAMEM FIR_Hilbert_state_R[100 + 256 - 1];
-//arm_fir_instance_f32 FIR_Hilbert_L;
-//arm_fir_instance_f32 FIR_Hilbert_R;
 
 // CW decode Filters
 arm_fir_instance_f32 FIR_CW_DecodeL;  //AFP 10-25-22
@@ -305,23 +298,23 @@ float32_t DMAMEM FIR_CW_DecodeL_state[64 + 256 - 1];
 float32_t DMAMEM FIR_CW_DecodeR_state[64 + 256 - 1];
 
 //Decimation and Interpolation Filters
-arm_fir_decimate_instance_f32 FIR_dec1_EX_I;
-arm_fir_decimate_instance_f32 FIR_dec1_EX_Q;
-arm_fir_decimate_instance_f32 FIR_dec2_EX_I;
-arm_fir_decimate_instance_f32 FIR_dec2_EX_Q;
+//arm_fir_decimate_instance_f32 FIR_dec1_EX_I;
+//arm_fir_decimate_instance_f32 FIR_dec1_EX_Q;
+//arm_fir_decimate_instance_f32 FIR_dec2_EX_I;
+//arm_fir_decimate_instance_f32 FIR_dec2_EX_Q;
 
 arm_fir_interpolate_instance_f32 FIR_int1_EX_I;
 arm_fir_interpolate_instance_f32 FIR_int1_EX_Q;
 arm_fir_interpolate_instance_f32 FIR_int2_EX_I;
 arm_fir_interpolate_instance_f32 FIR_int2_EX_Q;
 
-float32_t DMAMEM FIR_dec1_EX_I_state[2095];
-float32_t DMAMEM FIR_dec1_EX_Q_state[2095];
+//float32_t DMAMEM FIR_dec1_EX_I_state[2095];
+//float32_t DMAMEM FIR_dec1_EX_Q_state[2095];
 
 float32_t audioMaxSquaredAve;
 
-float32_t DMAMEM FIR_dec2_EX_I_state[535];
-float32_t DMAMEM FIR_dec2_EX_Q_state[535];
+//float32_t DMAMEM FIR_dec2_EX_I_state[535];
+//float32_t DMAMEM FIR_dec2_EX_Q_state[535];
 float32_t DMAMEM FIR_int2_EX_I_state[519];
 float32_t DMAMEM FIR_int2_EX_Q_state[519];
 float32_t DMAMEM FIR_int1_EX_I_state[279];
@@ -397,16 +390,8 @@ int32_t NCOFreq;
 //================== Global CW Correlation and FFT Variables =================
 float32_t *cosBuffer = new float32_t[256];  // Was cosBuffer2; Greg KF5N February 7, 2024
 float32_t *sinBuffer = new float32_t[256];  // This can't be DMAMEM.  It will cause problems with the CW decoder.
-//float32_t DMAMEM sinBuffer2[256];
 float32_t DMAMEM cwRiseBuffer[256];
 float32_t DMAMEM cwFallBuffer[256];
-
-// === Compressor patameters AFP 11-01-22
-
-bool use_HP_filter = true;  //enable the software HP filter to get rid of DC?
-float comp_ratio;
-float attack_sec;
-float release_sec;
 // ===========
 
 char keyboardBuffer[10];  // Set for call prefixes. May be increased later
@@ -485,7 +470,6 @@ const uint16_t n_dec2_taps = (1 + (uint16_t)(n_att / (22.0 * (n_fstop2 - n_fpass
 int attenuator = 0;
 
 int audioYPixel[256]{ 0 };  // Will int16_t save memory here???  DMAMEM not working here.  Causes audio spectrum glitch.  KF5N February 26, 2024.
-//int* audioYPixel = new int[256]{0};
 
 int bandswitchPins[] = {
   30,  // 80M
@@ -560,7 +544,7 @@ float32_t DMAMEM FFT_buffer[FFT_LENGTH * 2] __attribute__((aligned(4))) = { 0 };
 float32_t DMAMEM FFT_spec[1024] = { 0 };
 float32_t DMAMEM FFT_spec_old[1024] = { 0 };
 
-// decimation with FIR lowpass for Zoom FFT
+// Decimation with FIR lowpass for Zoom FFT
 arm_fir_decimate_instance_f32 Fir_Zoom_FFT_Decimate_I1;
 arm_fir_decimate_instance_f32 Fir_Zoom_FFT_Decimate_Q1;
 float32_t DMAMEM Fir_Zoom_FFT_Decimate_I1_state[12 + BUFFER_SIZE * N_B - 1];
@@ -662,58 +646,6 @@ double elapsed_micros_sum;
 time_t getTeensy3Time() {
   return Teensy3Clock.get();
 }
-
-
-/*****
-  Purpose: To set the codec gain
-
-  Parameter list:
-    void
-
-  Return value:
-    void
-
-*****
-void Codec_gain() {
-  uint8_t half_clip = 0;
-  uint8_t quarter_clip = 0;
-  static uint32_t timer = 0;
-  timer++;
-  if (timer > 10000) timer = 10000;
-  if (half_clip == 1)  // did clipping almost occur?
-  {
-    if (timer >= 20)  // 100  // has enough time passed since the last gain decrease?
-    {
-      if (bands[EEPROMData.currentBand].RFgain != 0)  // yes - is this NOT zero?
-      {
-        bands[EEPROMData.currentBand].RFgain -= 1;  // decrease gain one step, 1.5dB
-        if (bands[EEPROMData.currentBand].RFgain < 0) {
-          bands[EEPROMData.currentBand].RFgain = 0;
-        }
-        timer = 0;  // reset the adjustment timer
-        AudioNoInterrupts();
-        AudioInterrupts();
-      }
-    }
-  } else if (quarter_clip == 0)  // no clipping occurred
-  {
-    if (timer >= 50)  // 500   // has it been long enough since the last increase?
-    {
-      bands[EEPROMData.currentBand].RFgain += 1;  // increase gain by one step, 1.5dB
-      timer = 0;                                  // reset the timer to prevent this from executing too often
-      if (bands[EEPROMData.currentBand].RFgain > 15) {
-        bands[EEPROMData.currentBand].RFgain = 15;
-      }
-      AudioNoInterrupts();
-      AudioInterrupts();
-      Serial.printf("bands[EEPROMData.currentBand].RFgain = %d\n", bands[EEPROMData.currentBand].RFgain);
-    }
-  }
-  half_clip = 0;     // clear "half clip" indicator that tells us that we should decrease gain
-  quarter_clip = 0;  // clear indicator that, if not triggered, indicates that we can increase gain
-}
-*/
-
 
 // is added in Teensyduino 1.52 beta-4, so this can be deleted !?
 
@@ -943,8 +875,6 @@ FLASHMEM void InitializeDataArrays() {
     biquad_lowpass1_coeffs[i] = coefficient_set[i];
   }
 
-//  ShowBandwidth();
-
   /****************************************************************************************
      Initiate decimation and interpolation FIR filters
   ****************************************************************************************/
@@ -1115,10 +1045,6 @@ sgtl5000_1.adcHighPassFilterEnable();
    cessb1.setSideband(false);
    cessb1.setProcessing(EEPROMData.cessb);  // Set to CESSB or SSB Data.  Greg KF5N August 17 2024
 
-// Turn off microphone and 1 kHz test tone.
-//   mixer1.gain(0, 0);
-//   mixer1.gain(1, 0);
-
   Q_out_L_Ex.setMaxBuffers(32);       // Limits determined emperically.  These may need more adjustment.  Greg KF5N August 4, 2024.
   Q_out_R_Ex.setMaxBuffers(32);
   Q_out_L.setMaxBuffers(64);          // Receiver audio buffer limit.
@@ -1146,10 +1072,10 @@ sgtl5000_1.adcHighPassFilterEnable();
 
   arm_fir_init_f32(&FIR_CW_DecodeL, 64, CW_Filter_Coeffs2, FIR_CW_DecodeL_state, 256);  //AFP 10-25-22
   arm_fir_init_f32(&FIR_CW_DecodeR, 64, CW_Filter_Coeffs2, FIR_CW_DecodeR_state, 256);
-  arm_fir_decimate_init_f32(&FIR_dec1_EX_I, 48, 4, coeffs192K_10K_LPF_FIR, FIR_dec1_EX_I_state, 2048);
-  arm_fir_decimate_init_f32(&FIR_dec1_EX_Q, 48, 4, coeffs192K_10K_LPF_FIR, FIR_dec1_EX_Q_state, 2048);
-  arm_fir_decimate_init_f32(&FIR_dec2_EX_I, 24, 2, coeffs48K_8K_LPF_FIR, FIR_dec2_EX_I_state, 512);
-  arm_fir_decimate_init_f32(&FIR_dec2_EX_Q, 24, 2, coeffs48K_8K_LPF_FIR, FIR_dec2_EX_Q_state, 512);
+//  arm_fir_decimate_init_f32(&FIR_dec1_EX_I, 48, 4, coeffs192K_10K_LPF_FIR, FIR_dec1_EX_I_state, 2048);
+//  arm_fir_decimate_init_f32(&FIR_dec1_EX_Q, 48, 4, coeffs192K_10K_LPF_FIR, FIR_dec1_EX_Q_state, 2048);
+//  arm_fir_decimate_init_f32(&FIR_dec2_EX_I, 24, 2, coeffs48K_8K_LPF_FIR, FIR_dec2_EX_I_state, 512);
+//  arm_fir_decimate_init_f32(&FIR_dec2_EX_Q, 24, 2, coeffs48K_8K_LPF_FIR, FIR_dec2_EX_Q_state, 512);
   arm_fir_interpolate_init_f32(&FIR_int1_EX_I, 2, 48, coeffs48K_8K_LPF_FIR, FIR_int1_EX_I_state, 256);
   arm_fir_interpolate_init_f32(&FIR_int1_EX_Q, 2, 48, coeffs48K_8K_LPF_FIR, FIR_int1_EX_Q_state, 256);
   arm_fir_interpolate_init_f32(&FIR_int2_EX_I, 4, 32, coeffs192K_10K_LPF_FIR, FIR_int2_EX_I_state, 512);
@@ -1387,7 +1313,7 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
         if (digitalRead(EEPROMData.paddleDit) == LOW) {  // Keyer Dit
           ditTimerOn = millis();
           // Queue audio blocks--execution time of this loop will be between 0-20ms shorter
-          // than the desired dit time, due to audio buffering
+          // than the desired dit time, due to audio buffering.
           CW_ExciterIQData(CW_SHAPING_RISE);
           for (cwBlockIndex = 0; cwBlockIndex < transmitDitUnshapedBlocks; cwBlockIndex++) {
             CW_ExciterIQData(CW_SHAPING_NONE);

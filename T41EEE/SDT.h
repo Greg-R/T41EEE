@@ -365,7 +365,6 @@ extern float32_t *sinBuffer;  // Buffers commonized.  Greg KF5N, February 7, 202
 extern float32_t cwRiseBuffer[];
 extern float32_t cwFallBuffer[];
 extern int filterWidth;
-extern boolean use_HP_filter;  //enable the software HP filter to get rid of DC?
 
 //===== New histogram stuff
 extern float32_t pixel_per_khz;  //AFP
@@ -539,8 +538,8 @@ extern arm_fir_instance_f32 FIR_CW_DecodeR;  //AFP 10-25-22
 extern float32_t FIR_CW_DecodeL_state[];     //AFP 10-25-22
 extern float32_t FIR_CW_DecodeR_state[];     //AFP 10-25-22
 
-extern arm_fir_decimate_instance_f32 FIR_dec1_EX_I;
-extern arm_fir_decimate_instance_f32 FIR_dec1_EX_Q;
+//extern arm_fir_decimate_instance_f32 FIR_dec1_EX_I;
+//extern arm_fir_decimate_instance_f32 FIR_dec1_EX_Q;
 extern arm_fir_decimate_instance_f32 FIR_dec2_EX_I;
 extern arm_fir_decimate_instance_f32 FIR_dec2_EX_Q;
 
@@ -549,10 +548,10 @@ extern arm_fir_interpolate_instance_f32 FIR_int1_EX_Q;
 extern arm_fir_interpolate_instance_f32 FIR_int2_EX_I;
 extern arm_fir_interpolate_instance_f32 FIR_int2_EX_Q;
 
-extern float32_t FIR_dec1_EX_I_state[];  //48 + (uint16_t) BUFFER_SIZE * (uint32_t) N_B - 1
-extern float32_t FIR_dec1_EX_Q_state[];
-extern float32_t FIR_dec2_EX_I_state[];  //DEC2STATESIZE
-extern float32_t FIR_dec2_EX_Q_state[];
+//extern float32_t FIR_dec1_EX_I_state[];  //48 + (uint16_t) BUFFER_SIZE * (uint32_t) N_B - 1
+//extern float32_t FIR_dec1_EX_Q_state[];
+//extern float32_t FIR_dec2_EX_I_state[];  //DEC2STATESIZE
+//extern float32_t FIR_dec2_EX_Q_state[];
 extern float32_t FIR_int2_EX_I_state[];
 extern float32_t FIR_int2_EX_Q_state[];
 extern float32_t FIR_int1_EX_I_state[];
@@ -725,7 +724,6 @@ extern const uint32_t IIR_biquad_Zoom_FFT_N_stages;
 extern const uint32_t N_stages_biquad_lowpass1;
 extern const uint16_t n_dec1_taps;
 extern const uint16_t n_dec2_taps;
-//extern int mute;
 extern bool agc_action;
 extern int attenuator;
 extern int audioYPixel[];
@@ -1088,7 +1086,6 @@ void SetSideToneVolume();  // This function uses encoder to set sidetone volume.
 long SetTransmitDelay();
 void SetTransmitDitLength(int wpm);  // JJP 8/19/23
 void SetupMode(int sideBand);
-//void SetupMyCompressors(bool use_HP_filter, float knee_dBFS, float comp_ratio, float attack_sec, float release_sec);  //AFP 11-01-22 in DSP.cpp
 int SetWPM();
 void ShowAutoStatus();
 void ShowBandwidth();
