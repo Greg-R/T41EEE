@@ -1047,7 +1047,7 @@ sgtl5000_1.adcHighPassFilterEnable();
   pinMode(MUTE, OUTPUT);
   digitalWrite(MUTE, MUTEAUDIO);
   pinMode(PTT, INPUT_PULLUP);
-  pinMode(BUSY_ANALOG_PIN, INPUT);
+  pinMode(BUSY_ANALOG_PIN, INPUT);  // Pin 39.  Switch matrix output connects to this pin.
   pinMode(FILTER_ENCODER_A, INPUT);
   pinMode(FILTER_ENCODER_B, INPUT);
   pinMode(OPTO_OUTPUT, OUTPUT);
@@ -1057,7 +1057,7 @@ sgtl5000_1.adcHighPassFilterEnable();
   digitalWrite(TFT_MOSI, HIGH);
   pinMode(TFT_SCLK, OUTPUT);
   digitalWrite(TFT_SCLK, HIGH);
-  pinMode(TFT_CS, OUTPUT);
+  pinMode(TFT_CS, OUTPUT);  // The Main board has a pull-up resistor on an output???
   digitalWrite(TFT_CS, HIGH);
 
   arm_fir_init_f32(&FIR_CW_DecodeL, 64, CW_Filter_Coeffs2, FIR_CW_DecodeL_state, 256);  //AFP 10-25-22

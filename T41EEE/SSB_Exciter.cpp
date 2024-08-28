@@ -74,15 +74,12 @@ void ExciterIQData() {
       Q_in_R_Ex.freeBuffer();  // Right channel not used.  KF5N March 11, 2024
     }
 
-    // Calibration factors are applied here.
+// Set the sideband.
+if(bands[EEPROMData.currentBand].mode == DEMOD_LSB) cessb1.setSideband(false);
+if(bands[EEPROMData.currentBand].mode == DEMOD_USB) cessb1.setSideband(true);
 
-    if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {  //AFP 12-27-21
-      arm_scale_f32(float_buffer_L_EX, +EEPROMData.IQSSBAmpCorrectionFactor[EEPROMData.currentBandA], float_buffer_L_EX, 2048);  // Flip SSB sideband KF5N, minus sign was original
-      IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, EEPROMData.IQSSBPhaseCorrectionFactor[EEPROMData.currentBandA], 2048);
-    } else if (bands[EEPROMData.currentBand].mode == DEMOD_USB) {  //AFP 12-27-21
-      arm_scale_f32(float_buffer_L_EX, -EEPROMData.IQSSBAmpCorrectionFactor[EEPROMData.currentBandA], float_buffer_L_EX, 2048);  // Flip SSB sideband KF5N
-      IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, EEPROMData.IQSSBPhaseCorrectionFactor[EEPROMData.currentBandA], 2048);
-    }
+// Apply amplitude and phase corrections.
+cessb1.setIQCorrections(true, EEPROMData.IQSSBAmpCorrectionFactor[EEPROMData.currentBandA], EEPROMData.IQSSBPhaseCorrectionFactor[EEPROMData.currentBandA], 0.0);
 
     //  This is the correct place in the data flow to inject the scaling for power.
 #ifdef QSE2
