@@ -361,7 +361,7 @@ void ExecuteButtonPress(int val) {
   Return value:
     void
 *****/
-std::vector<uint32_t>::iterator result;  // This is also used by fine tuning.  Greg KF5N June 29, 2024
+std::vector<uint32_t>::iterator result;                   // This is also used by fine tuning.  Greg KF5N June 29, 2024
 std::vector<uint32_t> centerTuneArray CENTER_TUNE_ARRAY;  // k3pto
 void ButtonCenterFreqIncrement() {
   uint32_t index = 0;
@@ -400,21 +400,3 @@ void ButtonFineFreqIncrement() {
   EEPROMData.fineTuneStep = fineTuneArray[index];
   DisplayIncrementField();
 }
-
-
-/*****
-  Purpose: Error message if Select button pressed with no Menu active
-
-  Parameter list:
-    void
-
-  Return value;
-    void
-*****
-void NoActiveMenu() {
-  tft.setFontScale((enum RA8875tsize)1);
-  tft.setTextColor(RA8875_RED);
-  tft.setCursor(10, 0);
-  tft.print("No menu selected");
-}
-*/

@@ -298,23 +298,13 @@ float32_t DMAMEM FIR_CW_DecodeL_state[64 + 256 - 1];
 float32_t DMAMEM FIR_CW_DecodeR_state[64 + 256 - 1];
 
 //Decimation and Interpolation Filters
-//arm_fir_decimate_instance_f32 FIR_dec1_EX_I;
-//arm_fir_decimate_instance_f32 FIR_dec1_EX_Q;
-//arm_fir_decimate_instance_f32 FIR_dec2_EX_I;
-//arm_fir_decimate_instance_f32 FIR_dec2_EX_Q;
-
 arm_fir_interpolate_instance_f32 FIR_int1_EX_I;
 arm_fir_interpolate_instance_f32 FIR_int1_EX_Q;
 arm_fir_interpolate_instance_f32 FIR_int2_EX_I;
 arm_fir_interpolate_instance_f32 FIR_int2_EX_Q;
 
-//float32_t DMAMEM FIR_dec1_EX_I_state[2095];
-//float32_t DMAMEM FIR_dec1_EX_Q_state[2095];
-
 float32_t audioMaxSquaredAve;
 
-//float32_t DMAMEM FIR_dec2_EX_I_state[535];
-//float32_t DMAMEM FIR_dec2_EX_Q_state[535];
 float32_t DMAMEM FIR_int2_EX_I_state[519];
 float32_t DMAMEM FIR_int2_EX_Q_state[519];
 float32_t DMAMEM FIR_int1_EX_I_state[279];
@@ -1072,10 +1062,6 @@ sgtl5000_1.adcHighPassFilterEnable();
 
   arm_fir_init_f32(&FIR_CW_DecodeL, 64, CW_Filter_Coeffs2, FIR_CW_DecodeL_state, 256);  //AFP 10-25-22
   arm_fir_init_f32(&FIR_CW_DecodeR, 64, CW_Filter_Coeffs2, FIR_CW_DecodeR_state, 256);
-//  arm_fir_decimate_init_f32(&FIR_dec1_EX_I, 48, 4, coeffs192K_10K_LPF_FIR, FIR_dec1_EX_I_state, 2048);
-//  arm_fir_decimate_init_f32(&FIR_dec1_EX_Q, 48, 4, coeffs192K_10K_LPF_FIR, FIR_dec1_EX_Q_state, 2048);
-//  arm_fir_decimate_init_f32(&FIR_dec2_EX_I, 24, 2, coeffs48K_8K_LPF_FIR, FIR_dec2_EX_I_state, 512);
-//  arm_fir_decimate_init_f32(&FIR_dec2_EX_Q, 24, 2, coeffs48K_8K_LPF_FIR, FIR_dec2_EX_Q_state, 512);
   arm_fir_interpolate_init_f32(&FIR_int1_EX_I, 2, 48, coeffs48K_8K_LPF_FIR, FIR_int1_EX_I_state, 256);
   arm_fir_interpolate_init_f32(&FIR_int1_EX_Q, 2, 48, coeffs48K_8K_LPF_FIR, FIR_int1_EX_Q_state, 256);
   arm_fir_interpolate_init_f32(&FIR_int2_EX_I, 4, 32, coeffs192K_10K_LPF_FIR, FIR_int2_EX_I_state, 512);
@@ -1380,8 +1366,7 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   }
 #endif
 
-  if (volumeChangeFlag == true) {
-  
+  if (volumeChangeFlag == true) { 
     // Compensate for audio filter setting.
     // Nominal bandwidth is 2.8kHz.  This will be the 0 dB reference.
     // The upper and lower frequency limits are bands[EEPROMData.currentBand].FLoCut and bands[EEPROMData.currentBand].FHiCut.

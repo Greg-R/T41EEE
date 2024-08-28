@@ -21,7 +21,7 @@ extern struct maps myMapFiles[];
 #include <Audio.h>                     //https://github.com/chipaudette/OpenAudio_ArduinoLibrary
 #include <OpenAudio_ArduinoLibrary.h>  // AFP 11-01-22
 #include <TimeLib.h>                   // Part of Teensy Time library
-#include <Wire.h>
+//#include <Wire.h>    // Not required?
 #include <SPI.h>
 #include <SD.h>
 #include <Metro.h>
@@ -730,7 +730,6 @@ extern int audioYPixel[];
 extern int bandswitchPins[];
 extern bool calibrateFlag;
 extern int chipSelect;
-extern int decoderFlag;
 extern int fLoCutOld;
 extern int fHiCutOld;
 extern volatile int filterEncoderMove;

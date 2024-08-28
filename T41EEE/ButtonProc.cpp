@@ -1,6 +1,16 @@
+// ButtonMenuIncrease
+// ButtonMenuDecrease
+// ButtonBandIncrease
+// ButtonBandDecrease
+// BandSet
+// ButtonZoom
+// ButtonFilter
+// ButtonDemodMode
+// ButtonMode
+
 #include "SDT.h"
 
-#define TOP_MENU_COUNT 11      // Menus to process AFP 09-27-22, JJP 7-8-23
+#define TOP_MENU_COUNT 11  // Menus to process AFP 09-27-22, JJP 7-8-23
 
 bool save_last_frequency = false;
 int directFreqFlag = 0;
@@ -398,9 +408,8 @@ void ButtonDemodMode() {
   DrawBandWidthIndicatorBar();  // Restory the bandwidth indicator bar.  KF5N July 30, 2023
   FilterBandwidth();
   DrawSMeterContainer();
-  //  ShowAnalogGain();
   AudioInterrupts();
-  SetFreq();                                                                                   // Must update frequency, for example moving from SSB to CW, the RX LO is shifted.  KF5N
+  SetFreq();                                                                                              // Must update frequency, for example moving from SSB to CW, the RX LO is shifted.  KF5N
   if ((EEPROMData.xmtMode == RadioMode::CW_MODE) && (EEPROMData.decoderFlag == 1)) UpdateDecoderField();  // KF5N December 28 2023.
   FilterSetSSB();
 }
@@ -574,27 +583,6 @@ int DrawNewFloor(int floor) {
   tft.drawFastHLine(SPECTRUM_LEFT_X + 30, oldY - floor - 1, 100, RA8875_RED);
   oldY = SPECTRUM_BOTTOM - floor;
   return floor;
-}
-
-
-/*****
-  Purpose: The next 3 functions are "empty" user-defined function stubs that can be filled in by the user with
-           "real" code.
-
-  Parameter list:
-    void
-
-  Return value;
-    int           the current noise floor value
-*****/
-int Unused1() {
-  return -1;
-}
-int Unused2() {
-  return -1;
-}
-int Unused3() {
-  return -1;
 }
 
 
