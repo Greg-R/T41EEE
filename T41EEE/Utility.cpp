@@ -142,7 +142,7 @@ const float32_t atanTable[68] = {
 
 
 /*****
-  Purpose: Correct Phase angle between I and Q channels
+  Purpose: Correct Phase angle between I and Q channels.  Not used with SSB.
   Parameter list:
     float32_t *I_buffer, float32_t *Q_buffer, float32_t factor, uint32_t blocksize
   Return value;

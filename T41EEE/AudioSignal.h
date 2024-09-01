@@ -113,11 +113,11 @@ void SetAudioOperatingState(RadioState operatingState) {
       // Stop and clear the data buffers.     
       Q_in_L.end();                                        // Receiver I channel
       Q_in_R.end();                                        // Receiver Q channel
-      Q_in_L.clear();                                        // Receiver I channel
-      Q_in_R.clear();                                        // Receiver Q channel      
+      Q_in_L.clear();                                      // Receiver I channel
+      Q_in_R.clear();                                      // Receiver Q channel      
       Q_in_L_Ex.end();  // Transmit I channel path.
-      Q_in_L_Ex.clear();
       Q_in_R_Ex.end();  // Transmit Q channel path.
+      Q_in_L_Ex.clear();
       Q_in_R_Ex.clear();
       // Deactivate TX audio output path.
       patchCord15.disconnect();  // Disconnect transmitter I and Q channel outputs.
@@ -159,11 +159,12 @@ void SetAudioOperatingState(RadioState operatingState) {
             mixer2.gain(1, 1.0);
       }
 
-      Q_in_L_Ex.begin();  // I channel Microphone audio
-      Q_in_R_Ex.begin();  // Q channel Microphone audio
-
+      cessb1.getLevels(0);  // Initialize the CESSB information struct.
       patchCord15.connect();  // Transmitter I channel
       patchCord16.connect();  // Transmitter Q channel
+
+      Q_in_L_Ex.begin();  // I channel Microphone audio
+      Q_in_R_Ex.begin();  // Q channel Microphone audio
 
       break;
 

@@ -74,12 +74,12 @@ void ExciterIQData() {
       Q_in_R_Ex.freeBuffer();  // Right channel not used.  KF5N March 11, 2024
     }
 
-// Set the sideband.
-if(bands[EEPROMData.currentBand].mode == DEMOD_LSB) cessb1.setSideband(false);
-if(bands[EEPROMData.currentBand].mode == DEMOD_USB) cessb1.setSideband(true);
+    // Set the sideband.
+    if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) cessb1.setSideband(false);
+    if (bands[EEPROMData.currentBand].mode == DEMOD_USB) cessb1.setSideband(true);
 
-// Apply amplitude and phase corrections.
-cessb1.setIQCorrections(true, EEPROMData.IQSSBAmpCorrectionFactor[EEPROMData.currentBandA], EEPROMData.IQSSBPhaseCorrectionFactor[EEPROMData.currentBandA], 0.0);
+    // Apply amplitude and phase corrections.
+    cessb1.setIQCorrections(true, EEPROMData.IQSSBAmpCorrectionFactor[EEPROMData.currentBandA], EEPROMData.IQSSBPhaseCorrectionFactor[EEPROMData.currentBandA], 0.0);
 
     //  This is the correct place in the data flow to inject the scaling for power.
 #ifdef QSE2
@@ -105,7 +105,6 @@ cessb1.setIQCorrections(true, EEPROMData.IQSSBAmpCorrectionFactor[EEPROMData.cur
 #endif
     Q_out_L_Ex.play(q15_buffer_LTemp, 2048);  // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
     Q_out_R_Ex.play(q15_buffer_RTemp, 2048);  // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.
-
   }
 }
 
@@ -235,35 +234,35 @@ void SetCompressionRatio() {
     int           an index into the band array
 *****/
 void MicGainSet() {
-      int val;
-      tft.setFontScale((enum RA8875tsize)1);
-      tft.fillRect(SECONDARY_MENU_X - 50, MENUS_Y, EACH_MENU_WIDTH + 50, CHAR_HEIGHT, RA8875_MAGENTA);
-      tft.setTextColor(RA8875_WHITE);
-      tft.setCursor(SECONDARY_MENU_X - 48, MENUS_Y + 1);
-      tft.print("Mic Gain dB:");
+  int val;
+  tft.setFontScale((enum RA8875tsize)1);
+  tft.fillRect(SECONDARY_MENU_X - 50, MENUS_Y, EACH_MENU_WIDTH + 50, CHAR_HEIGHT, RA8875_MAGENTA);
+  tft.setTextColor(RA8875_WHITE);
+  tft.setCursor(SECONDARY_MENU_X - 48, MENUS_Y + 1);
+  tft.print("Mic Gain dB:");
+  tft.setCursor(SECONDARY_MENU_X + 160, MENUS_Y + 1);
+  tft.print(EEPROMData.currentMicGain, 1);
+  while (true) {
+    if (filterEncoderMove != 0) {
+      EEPROMData.currentMicGain += ((float)filterEncoderMove);
+      if (EEPROMData.currentMicGain < -20)
+        EEPROMData.currentMicGain = -20;
+      else if (EEPROMData.currentMicGain > 20)  // 100% max
+        EEPROMData.currentMicGain = 20;
+      tft.fillRect(SECONDARY_MENU_X + 160, MENUS_Y, 80, CHAR_HEIGHT, RA8875_MAGENTA);
       tft.setCursor(SECONDARY_MENU_X + 160, MENUS_Y + 1);
       tft.print(EEPROMData.currentMicGain, 1);
-      while (true) {
-        if (filterEncoderMove != 0) {
-          EEPROMData.currentMicGain += ((float)filterEncoderMove);
-          if (EEPROMData.currentMicGain < -20)
-            EEPROMData.currentMicGain = -20;
-          else if (EEPROMData.currentMicGain > 20)  // 100% max
-            EEPROMData.currentMicGain = 20;
-          tft.fillRect(SECONDARY_MENU_X + 160, MENUS_Y, 80, CHAR_HEIGHT, RA8875_MAGENTA);
-          tft.setCursor(SECONDARY_MENU_X + 160, MENUS_Y + 1);
-          tft.print(EEPROMData.currentMicGain, 1);
-          filterEncoderMove = 0;
-        }
-        val = ReadSelectedPushButton();
-        val = ProcessButtonPress(val);
-        if (val == MENU_OPTION_SELECT) {
-          updateMic();                    // Update the Open Audio compressor.
-          EEPROMWrite();
-          break;
-        }
-      }
+      filterEncoderMove = 0;
+    }
+    val = ReadSelectedPushButton();
+    val = ProcessButtonPress(val);
+    if (val == MENU_OPTION_SELECT) {
+      updateMic();  // Update the Open Audio compressor.
+      EEPROMWrite();
+      break;
+    }
   }
+}
 
 
 

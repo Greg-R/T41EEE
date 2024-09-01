@@ -231,7 +231,7 @@ extern struct maps myMapFiles[];
 #define VOLUME_ENCODER_A 2
 #define VOLUME_ENCODER_B 3
 #define FILTER_ENCODER_A 15
-#define FILTER_ENCODER_B 14
+#define FILTER_ENCODER_B 14  // 14.  Change this to 41 when using SPDIF.
 #define FINETUNE_ENCODER_A 4
 #define FINETUNE_ENCODER_B 5
 #define TUNE_ENCODER_A 16
@@ -247,18 +247,13 @@ extern struct maps myMapFiles[];
 #define PTT 37           // Transmit/Receive
 #define MUTE 38          // Mute Audio,  HIGH = "On" Audio available from Audio PA, LOW = Mute audio
 //========================================= Keyer pins
-#define KEYER_DAH_INPUT_RING 35  // Ring connection for keyer  -- default for righthanded user
+#define KEYER_DAH_INPUT_RING 35  // Ring connection for keyer.  Default for righthanded user.  Also straight key.
 #define KEYER_DIT_INPUT_TIP 36   // Tip connection for keyer
-#define OPTO_OUTPUT 24           // To optoisolator and keyed circuit
-#define STRAIGHT_KEY 0
 #define KEYER 1
 //========================================================= End Pin Assignments =================================
 #define TMS0_POWER_DOWN_MASK (0x1U)
 #define TMS1_MEASURE_FREQ(x) (((uint32_t)(((uint32_t)(x)) << 0U)) & 0xFFFFU)
-#undef round
-//#undef HALF_PI
 #undef TWO_PI
-//#define HALF_PI 1.5707963267948966192313216916398f
 #define TWO_PI 6.283185307179586476925286766559f
 #define PIH 1.5707963267948966192313216916398f
 #define FOURPI (2.0f * TWO_PI)

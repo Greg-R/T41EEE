@@ -197,6 +197,7 @@ to prior versions.
 // setup() and loop() are at the bottom of this file.
 
 #include "SDT.h"
+#include <charconv>
 
 const char *filename = "/config.txt";  // <- SD library uses 8.3 filenames
 
@@ -1048,9 +1049,8 @@ sgtl5000_1.adcHighPassFilterEnable();
   digitalWrite(MUTE, MUTEAUDIO);
   pinMode(PTT, INPUT_PULLUP);
   pinMode(BUSY_ANALOG_PIN, INPUT);  // Pin 39.  Switch matrix output connects to this pin.
-  pinMode(FILTER_ENCODER_A, INPUT);
-  pinMode(FILTER_ENCODER_B, INPUT);
-  pinMode(OPTO_OUTPUT, OUTPUT);
+//  pinMode(FILTER_ENCODER_A, INPUT);
+//  pinMode(FILTER_ENCODER_B, INPUT);
   pinMode(KEYER_DIT_INPUT_TIP, INPUT_PULLUP);
   pinMode(KEYER_DAH_INPUT_RING, INPUT_PULLUP);
   pinMode(TFT_MOSI, OUTPUT);
@@ -1059,19 +1059,6 @@ sgtl5000_1.adcHighPassFilterEnable();
   digitalWrite(TFT_SCLK, HIGH);
   pinMode(TFT_CS, OUTPUT);  // The Main board has a pull-up resistor on an output???
   digitalWrite(TFT_CS, HIGH);
-
-  arm_fir_init_f32(&FIR_CW_DecodeL, 64, CW_Filter_Coeffs2, FIR_CW_DecodeL_state, 256);  //AFP 10-25-22
-  arm_fir_init_f32(&FIR_CW_DecodeR, 64, CW_Filter_Coeffs2, FIR_CW_DecodeR_state, 256);
-  arm_fir_interpolate_init_f32(&FIR_int1_EX_I, 2, 48, coeffs48K_8K_LPF_FIR, FIR_int1_EX_I_state, 256);
-  arm_fir_interpolate_init_f32(&FIR_int1_EX_Q, 2, 48, coeffs48K_8K_LPF_FIR, FIR_int1_EX_Q_state, 256);
-  arm_fir_interpolate_init_f32(&FIR_int2_EX_I, 4, 32, coeffs192K_10K_LPF_FIR, FIR_int2_EX_I_state, 512);
-  arm_fir_interpolate_init_f32(&FIR_int2_EX_Q, 4, 32, coeffs192K_10K_LPF_FIR, FIR_int2_EX_Q_state, 512);
-
-  //***********************  EQ Gain Settings ************
-  uint32_t iospeed_display = IOMUXC_PAD_DSE(3) | IOMUXC_PAD_SPEED(1);
-  *(digital_pin_to_info_PGM + 13)->pad = iospeed_display;  //clk
-  *(digital_pin_to_info_PGM + 11)->pad = iospeed_display;  //MOSI
-  *(digital_pin_to_info_PGM + TFT_CS)->pad = iospeed_display;
 
   tuneEncoder.begin(true);
   volumeEncoder.begin(true);
@@ -1085,6 +1072,20 @@ sgtl5000_1.adcHighPassFilterEnable();
   attachInterrupt(digitalPinToInterrupt(FINETUNE_ENCODER_B), EncoderFineTune, CHANGE);
   attachInterrupt(digitalPinToInterrupt(KEYER_DIT_INPUT_TIP), KeyTipOn, CHANGE);  // Changed to keyTipOn from KeyOn everywhere JJP 8/31/22
   attachInterrupt(digitalPinToInterrupt(KEYER_DAH_INPUT_RING), KeyRingOn, CHANGE);
+
+// Move these to the initialization function?
+  arm_fir_init_f32(&FIR_CW_DecodeL, 64, CW_Filter_Coeffs2, FIR_CW_DecodeL_state, 256);  //AFP 10-25-22
+  arm_fir_init_f32(&FIR_CW_DecodeR, 64, CW_Filter_Coeffs2, FIR_CW_DecodeR_state, 256);
+  arm_fir_interpolate_init_f32(&FIR_int1_EX_I, 2, 48, coeffs48K_8K_LPF_FIR, FIR_int1_EX_I_state, 256);
+  arm_fir_interpolate_init_f32(&FIR_int1_EX_Q, 2, 48, coeffs48K_8K_LPF_FIR, FIR_int1_EX_Q_state, 256);
+  arm_fir_interpolate_init_f32(&FIR_int2_EX_I, 4, 32, coeffs192K_10K_LPF_FIR, FIR_int2_EX_I_state, 512);
+  arm_fir_interpolate_init_f32(&FIR_int2_EX_Q, 4, 32, coeffs192K_10K_LPF_FIR, FIR_int2_EX_Q_state, 512);
+
+  //***********************  Display interface settings ************
+  uint32_t iospeed_display = IOMUXC_PAD_DSE(3) | IOMUXC_PAD_SPEED(1);
+  *(digital_pin_to_info_PGM + 13)->pad = iospeed_display;  //clk
+  *(digital_pin_to_info_PGM + 11)->pad = iospeed_display;  //MOSI
+  *(digital_pin_to_info_PGM + TFT_CS)->pad = iospeed_display;
 
   tft.begin(RA8875_800x480, 8, 20000000UL, 4000000UL);  // parameter list from library code
   tft.setRotation(0);
@@ -1195,6 +1196,7 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   long dahTimerOn;
   bool cwKeyDown;
   unsigned long cwBlockIndex;
+  struct levelsZ* cessbData;
 
   valPin = ReadSelectedPushButton();
   if (valPin != BOGUS_PIN_READ and (radioState != RadioState::SSB_TRANSMIT_STATE) and (radioState != RadioState::CW_TRANSMIT_STRAIGHT_STATE) and (radioState != RadioState::CW_TRANSMIT_KEYER_STATE)) {
@@ -1218,6 +1220,25 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
     SetFreq();  // Update frequencies if the radio state has changed.
   }
 
+  if(lastState == RadioState::SSB_TRANSMIT_STATE and radioState == RadioState::SSB_RECEIVE_STATE) {
+  cessbData = cessb1.getLevels(1);  // Update the CESSB information struct.  Write the data to serial.
+          // Detailed Report
+        Serial.print(10.0f*log10f(cessbData->pwr0));
+        Serial.print(" In Ave Pwr Out ");
+        Serial.println(10.0f*log10f(cessbData->pwr1));
+        Serial.print(20.0f*log10f(cessbData->peak0));
+        Serial.print(" In  Peak   Out ");
+        Serial.println(20.0f*log10f(cessbData->peak1));
+        Serial.print(cessbData->peak0, 6);
+        Serial.print(" In  Peak Volts   Out ");
+        Serial.println(cessbData->peak1, 6);
+        Serial.print("Enhancement = ");
+        float32_t enhance = (10.0f*log10f(cessbData->pwr1) - 20.0f*log10f(cessbData->peak1)) -
+                            (10.0f*log10f(cessbData->pwr0) - 20.0f*log10f(cessbData->peak0));
+        if(enhance<1.0f) enhance = 1.0f;
+        Serial.print(enhance); Serial.println(" dB");
+  }
+
   //  Begin radio state machines
 
   //  Begin SSB Mode state machine
@@ -1239,11 +1260,11 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       digitalWrite(RXTX, HIGH);  //xmit on
 
       ShowTransmitReceiveStatus();
-
       while (digitalRead(PTT) == LOW) {
         ExciterIQData();
       }
       break;
+
     default:
       break;
   }
