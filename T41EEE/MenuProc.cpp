@@ -3,14 +3,13 @@
 // Spectrum Options
 // AGC Options
 // Receive Equalizer Options
-// Mic Options
+// SSB Options
 // RF Options
 // EEPROM Options
 
-
 #include "SDT.h"
 
-int micChoice;
+int micChoice = 0;
 int splitOn = 0;
 
 
@@ -695,11 +694,8 @@ void EqualizerXmtOptions() {
 */
 
 
-
-
-
 /*****
-  Purpose: Turn mic compression on and set the level
+  Purpose: Set options for the SSB exciter.
 
   Parameter list:
     void
@@ -750,10 +746,12 @@ void SSBOptions()  // AFP 09-22-22 All new
 
     case 5:  // Set compression ratio.  Default -10 dB.
       SetCompressionThreshold();
+      UpdateCompressionField();
       break;
 
     case 6:  // Set compressor threshold.  Default 100.0.
       SetCompressionRatio();
+      UpdateCompressionField();
       break;
 
     case 7:  // Cancel

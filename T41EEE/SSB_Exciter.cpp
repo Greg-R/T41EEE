@@ -11,7 +11,7 @@ void updateMic() {
   //     {0.0f, -20.0f, -1000.0f, -1000.0f, -1000.0f},           // kneeDB[]
   //     {  EEPROMData.currentMicCompRatio, 1.0f, 1.0f, 1.0, 1.0} };   // compressionRatio
 
-  micGain.setGain_dB(EEPROMData.currentMicGain);
+  micGain.setGain_dB(EEPROMData.currentMicGain);  // Set the microphone gain.
 
   struct compressionCurve crv = { -12.0f, 0.0,  // margin, offset
                                                 //   {0.0f, -7.0f, -10.0f, -1000.0f, -1000.0f},           // kneeDB[]
@@ -257,7 +257,7 @@ void MicGainSet() {
     val = ReadSelectedPushButton();
     val = ProcessButtonPress(val);
     if (val == MENU_OPTION_SELECT) {
-      updateMic();  // Update the Open Audio compressor.
+      updateMic();  // Update the Open Audio compressor and microphone gain.
       EEPROMWrite();
       break;
     }

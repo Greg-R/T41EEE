@@ -920,10 +920,8 @@ FLASHMEM void InitializeDataArrays() {
       ;
   }
 
-  SetDecIntFilters();  // here, the correct bandwidths are calculated and set accordingly
-
+  SetDecIntFilters();  // The correct bandwidths are calculated and set accordingly.
   ZoomFFTPrep();
-
   SpectralNoiseReductionInit();
   InitLMSNoiseReduction();
 
@@ -1032,7 +1030,7 @@ sgtl5000_1.adcHighPassFilterEnable();
 
 // Set up "Controlled Envelope Single Side Band" from the Open Audio Library.
    cessb1.setSampleRate_Hz(48000);
-   cessb1.setGains(1.5f, 1.4f, 0.5f);
+   cessb1.setGains(3.0f, 1.4f, 0.5f);  // gainIn, gainCompensate, gainOut
    cessb1.setSideband(false);
    cessb1.setProcessing(EEPROMData.cessb);  // Set to CESSB or SSB Data.  Greg KF5N August 17 2024
 
@@ -1040,6 +1038,7 @@ sgtl5000_1.adcHighPassFilterEnable();
   Q_out_R_Ex.setMaxBuffers(32);
   Q_out_L.setMaxBuffers(64);          // Receiver audio buffer limit.
 
+  // GPOs used to control hardware.
   pinMode(FILTERPIN15M, OUTPUT);
   pinMode(FILTERPIN20M, OUTPUT);
   pinMode(FILTERPIN40M, OUTPUT);
@@ -1049,10 +1048,10 @@ sgtl5000_1.adcHighPassFilterEnable();
   digitalWrite(MUTE, MUTEAUDIO);
   pinMode(PTT, INPUT_PULLUP);
   pinMode(BUSY_ANALOG_PIN, INPUT);  // Pin 39.  Switch matrix output connects to this pin.
-//  pinMode(FILTER_ENCODER_A, INPUT);
-//  pinMode(FILTER_ENCODER_B, INPUT);
   pinMode(KEYER_DIT_INPUT_TIP, INPUT_PULLUP);
   pinMode(KEYER_DAH_INPUT_RING, INPUT_PULLUP);
+
+  // SPI bus to display.
   pinMode(TFT_MOSI, OUTPUT);
   digitalWrite(TFT_MOSI, HIGH);
   pinMode(TFT_SCLK, OUTPUT);
@@ -1060,6 +1059,7 @@ sgtl5000_1.adcHighPassFilterEnable();
   pinMode(TFT_CS, OUTPUT);  // The Main board has a pull-up resistor on an output???
   digitalWrite(TFT_CS, HIGH);
 
+  // Rotary encoders.
   tuneEncoder.begin(true);
   volumeEncoder.begin(true);
   attachInterrupt(digitalPinToInterrupt(VOLUME_ENCODER_A), EncoderVolume, CHANGE);
@@ -1220,9 +1220,12 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
     SetFreq();  // Update frequencies if the radio state has changed.
   }
 
+/*
   if(lastState == RadioState::SSB_TRANSMIT_STATE and radioState == RadioState::SSB_RECEIVE_STATE) {
   cessbData = cessb1.getLevels(1);  // Update the CESSB information struct.  Write the data to serial.
           // Detailed Report
+        Serial.print("levelDataCount = ");
+        Serial.println(cessb1.levelDataCount());
         Serial.print(10.0f*log10f(cessbData->pwr0));
         Serial.print(" In Ave Pwr Out ");
         Serial.println(10.0f*log10f(cessbData->pwr1));
@@ -1235,9 +1238,10 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
         Serial.print("Enhancement = ");
         float32_t enhance = (10.0f*log10f(cessbData->pwr1) - 20.0f*log10f(cessbData->peak1)) -
                             (10.0f*log10f(cessbData->pwr0) - 20.0f*log10f(cessbData->peak0));
-        if(enhance<1.0f) enhance = 1.0f;
+      //  if(enhance < 1.0f) enhance = 1.0f;
         Serial.print(enhance); Serial.println(" dB");
   }
+*/
 
   //  Begin radio state machines
 
@@ -1262,6 +1266,30 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       ShowTransmitReceiveStatus();
       while (digitalRead(PTT) == LOW) {
         ExciterIQData();
+
+
+if(cessb1.levelDataCount() > 2000) {
+        Serial.print("levelDataCount = ");  // Before getLevels(1), because it resets counts to 0.
+        Serial.println(cessb1.levelDataCount());
+  cessbData = cessb1.getLevels(1);  // Update the CESSB information struct.  Write the data to serial.
+          // Detailed Report
+        Serial.print(10.0f*log10f(cessbData->pwr0));
+        Serial.print(" In Ave Pwr Out ");
+        Serial.println(10.0f*log10f(cessbData->pwr1));
+        Serial.print(20.0f*log10f(cessbData->peak0));
+        Serial.print(" In  Peak   Out ");
+        Serial.println(20.0f*log10f(cessbData->peak1));
+        Serial.print(cessbData->peak0, 6);
+        Serial.print(" In  Peak Volts   Out ");
+        Serial.println(cessbData->peak1, 6);
+        Serial.print("Enhancement = ");
+        float32_t enhance = (10.0f*log10f(cessbData->pwr1) - 20.0f*log10f(cessbData->peak1)) -
+                            (10.0f*log10f(cessbData->pwr0) - 20.0f*log10f(cessbData->peak0));
+      //  if(enhance < 1.0f) enhance = 1.0f;
+        Serial.print(enhance); Serial.println(" dB");
+}
+
+
       }
       break;
 

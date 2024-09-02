@@ -428,7 +428,7 @@ struct config_t {
   float currentMicCompRatio = 100.0;
 //  float currentMicAttack = 0.1;
 //  float currentMicRelease = 0.1;
-  float currentMicGain = 0.0;  // This is actually the Open Audio compressor threshold.
+  float currentMicGain = 0.0;  // Open Audio gain element.  Gain is in dB.
   int switchValues[18] = { 924, 870, 817,
                            769, 713, 669,
                            616, 565, 513,
