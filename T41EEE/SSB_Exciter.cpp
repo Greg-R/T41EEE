@@ -13,11 +13,11 @@ void updateMic() {
 
   micGain.setGain_dB(EEPROMData.currentMicGain);  // Set the microphone gain.
 
-  struct compressionCurve crv = { -12.0f, 0.0,  // margin, offset
+  struct compressionCurve crv = { -1.0, 0.0,  // margin, offset
                                                 //   {0.0f, -7.0f, -10.0f, -1000.0f, -1000.0f},           // kneeDB[]
-                                  { 0.0f, -7.0f, EEPROMData.currentMicThreshold, -1000.0f, -1000.0f },
+                                  { 0.0, -10.0, EEPROMData.currentMicThreshold, -1000.0f, -1000.0f },
                                   //     {  100.0, 100.0f, 1.0f, 1.0, 1.0} };   // compressionRatio
-                                  { 100.0, EEPROMData.currentMicCompRatio, 1.0f, 1.0, 1.0 } };
+                                  { 10.0, EEPROMData.currentMicCompRatio, 1.0f, 1.0, 1.0 } };
 
   int16_t delaySize = 256;                    // Any power of 2, i.e., 256, 128, 64, etc.
   compressor1.setDelayBufferSize(delaySize);  // Improves transient response of compressor.
@@ -83,9 +83,9 @@ void ExciterIQData() {
 
     //  This is the correct place in the data flow to inject the scaling for power.
 #ifdef QSE2
-    powerScale = 10.0 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
+    powerScale = 2.0 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
 #else
-    powerScale = 7.0 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
+    powerScale = 1.4 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
 #endif
 
     arm_scale_f32(float_buffer_L_EX, powerScale, float_buffer_L_EX, 2048);  //Scale to compensate for losses in Interpolation

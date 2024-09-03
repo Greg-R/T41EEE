@@ -1215,9 +1215,9 @@ cessb1.setIQCorrections(true, EEPROMData.IQSSBAmpCorrectionFactor[EEPROMData.cur
 
     //  This is the correct place in the data stream to inject the scaling for power.
 #ifdef QSE2
-    powerScale = 10.0 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
+    powerScale = 2.0 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
 #else
-    powerScale = 7.0 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
+    powerScale = 1.4 * EEPROMData.powerOutSSB[EEPROMData.currentBand];
 #endif
 
     arm_scale_f32(float_buffer_L_EX, powerScale, float_buffer_L_EX, dataWidth);

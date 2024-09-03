@@ -424,8 +424,8 @@ struct config_t {
 
   int equalizerRec[EQUALIZER_CELL_COUNT] = { 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100 };
   int equalizerXmt[EQUALIZER_CELL_COUNT] = { 0, 0, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 0, 0 };  // Provide equalizer optimized for SSB voice based on Neville's tests.  KF5N November 2, 2023
-  float currentMicThreshold = -10;                                                                              // 4 bytes       AFP 09-22-22
-  float currentMicCompRatio = 100.0;
+  float currentMicThreshold = -10.0;                                                                              // 4 bytes       AFP 09-22-22
+  float currentMicCompRatio = 10.0;
 //  float currentMicAttack = 0.1;
 //  float currentMicRelease = 0.1;
   float currentMicGain = 0.0;  // Open Audio gain element.  Gain is in dB.

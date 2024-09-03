@@ -1196,7 +1196,6 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   long dahTimerOn;
   bool cwKeyDown;
   unsigned long cwBlockIndex;
-  struct levelsZ* cessbData;
 
   valPin = ReadSelectedPushButton();
   if (valPin != BOGUS_PIN_READ and (radioState != RadioState::SSB_TRANSMIT_STATE) and (radioState != RadioState::CW_TRANSMIT_STRAIGHT_STATE) and (radioState != RadioState::CW_TRANSMIT_KEYER_STATE)) {
@@ -1219,29 +1218,6 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
     SetAudioOperatingState(radioState);
     SetFreq();  // Update frequencies if the radio state has changed.
   }
-
-/*
-  if(lastState == RadioState::SSB_TRANSMIT_STATE and radioState == RadioState::SSB_RECEIVE_STATE) {
-  cessbData = cessb1.getLevels(1);  // Update the CESSB information struct.  Write the data to serial.
-          // Detailed Report
-        Serial.print("levelDataCount = ");
-        Serial.println(cessb1.levelDataCount());
-        Serial.print(10.0f*log10f(cessbData->pwr0));
-        Serial.print(" In Ave Pwr Out ");
-        Serial.println(10.0f*log10f(cessbData->pwr1));
-        Serial.print(20.0f*log10f(cessbData->peak0));
-        Serial.print(" In  Peak   Out ");
-        Serial.println(20.0f*log10f(cessbData->peak1));
-        Serial.print(cessbData->peak0, 6);
-        Serial.print(" In  Peak Volts   Out ");
-        Serial.println(cessbData->peak1, 6);
-        Serial.print("Enhancement = ");
-        float32_t enhance = (10.0f*log10f(cessbData->pwr1) - 20.0f*log10f(cessbData->peak1)) -
-                            (10.0f*log10f(cessbData->pwr0) - 20.0f*log10f(cessbData->peak0));
-      //  if(enhance < 1.0f) enhance = 1.0f;
-        Serial.print(enhance); Serial.println(" dB");
-  }
-*/
 
   //  Begin radio state machines
 
@@ -1267,7 +1243,8 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       while (digitalRead(PTT) == LOW) {
         ExciterIQData();
 
-
+#ifdef DEBUG_CESSB
+  struct levelsZ* cessbData;
 if(cessb1.levelDataCount() > 2000) {
         Serial.print("levelDataCount = ");  // Before getLevels(1), because it resets counts to 0.
         Serial.println(cessb1.levelDataCount());
@@ -1285,9 +1262,9 @@ if(cessb1.levelDataCount() > 2000) {
         Serial.print("Enhancement = ");
         float32_t enhance = (10.0f*log10f(cessbData->pwr1) - 20.0f*log10f(cessbData->peak1)) -
                             (10.0f*log10f(cessbData->pwr0) - 20.0f*log10f(cessbData->peak0));
-      //  if(enhance < 1.0f) enhance = 1.0f;
         Serial.print(enhance); Serial.println(" dB");
 }
+#endif
 
 
       }
