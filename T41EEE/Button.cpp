@@ -29,17 +29,17 @@ Filter bandwidth is dependent on the sample rate and the "k" parameter, as follo
 Thus, the default values below create a filter with 10000 * 0.0217 = 217 Hz bandwidth
 */
 
-#define BUTTON_FILTER_SAMPLERATE 10000  // Hz
-#define BUTTON_FILTER_SHIFT 3           // Filter parameter k
-#define BUTTON_DEBOUNCE_DELAY 5000      // uSec
+const auto BUTTON_FILTER_SAMPLERATE = 10000;  // Hz
+const auto BUTTON_FILTER_SHIFT = 3;           // Filter parameter k
+const auto BUTTON_DEBOUNCE_DELAY = 5000;      // uSec
 
-#define BUTTON_STATE_UP 0
-#define BUTTON_STATE_DEBOUNCE 1
-#define BUTTON_STATE_PRESSED 2
+const auto BUTTON_STATE_UP = 0;
+const auto BUTTON_STATE_DEBOUNCE = 1;
+const auto BUTTON_STATE_PRESSED = 2;
 
-#define BUTTON_USEC_PER_ISR (1000000 / BUTTON_FILTER_SAMPLERATE)
+const auto BUTTON_USEC_PER_ISR = (1000000 / BUTTON_FILTER_SAMPLERATE);
 
-#define BUTTON_OUTPUT_UP 1023  // Value to be output when in the UP state
+const auto BUTTON_OUTPUT_UP = 1023;  // Value to be output when in the UP state
 
 IntervalTimer buttonInterrupts;
 bool buttonInterruptsEnabled = false;
@@ -249,7 +249,6 @@ void ExecuteButtonPress(int val) {
       BandInformation();
       NCOFreq = 0L;
       DrawBandWidthIndicatorBar();  //AFP 10-20-22
-                                    //      EEPROMData.rfGainCurrent = 0;
       ShowAutoStatus();
       break;
 
@@ -288,6 +287,9 @@ void ExecuteButtonPress(int val) {
 
     case DECODER_TOGGLE:  // 13
       EEPROMData.decoderFlag = !EEPROMData.decoderFlag;
+      if ((EEPROMData.xmtMode == RadioMode::CW_MODE) && (EEPROMData.decoderFlag == 1)) {
+        radioMode = RadioMode::CW_MODE;
+      }
       UpdateDecoderField();
       break;
 

@@ -14,8 +14,8 @@
 
 bool save_last_frequency = false;
 int directFreqFlag = 0;
-int32_t subMenuMaxOptions;  // Holds the number of submenu options.
-long TxRxFreqOld;
+auto subMenuMaxOptions = 0;  // Holds the number of submenu options.
+auto TxRxFreqOld = 0;
 
 
 /*****
@@ -410,13 +410,16 @@ void ButtonDemodMode() {
   DrawSMeterContainer();
   AudioInterrupts();
   SetFreq();                                                                                              // Must update frequency, for example moving from SSB to CW, the RX LO is shifted.  KF5N
-  if ((EEPROMData.xmtMode == RadioMode::CW_MODE) && (EEPROMData.decoderFlag == 1)) UpdateDecoderField();  // KF5N December 28 2023.
+  if ((EEPROMData.xmtMode == RadioMode::CW_MODE) && (EEPROMData.decoderFlag == 1)) {
+  radioMode = RadioMode::CW_MODE;
+  UpdateDecoderField();  // KF5N December 28 2023.
+}
   FilterSetSSB();
 }
 
 
 /*****
-  Purpose: Set transmission mode for SSB or CW.
+  Purpose: Set radio mode for SSB or CW.
 
   Parameter list:
     void
