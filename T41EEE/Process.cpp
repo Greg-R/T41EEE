@@ -346,7 +346,6 @@ void ProcessIQData() {
     arm_cfft_f32(iS, iFFT_buffer, 1, 1);
 
     // Adjust for level alteration because of filters.
-
     /**********************************************************************************  AFP 12-31-20
         AGC - automatic gain control
 

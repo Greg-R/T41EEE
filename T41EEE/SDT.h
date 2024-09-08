@@ -308,12 +308,6 @@ enum class RadioMode{SSB_MODE, CW_MODE, AM_MODE};  // Probably need only modes, 
 #define MENU_RF_GAIN 15
 #define MENU_F_LO_CUT 40
 
-// AGC
-#define MAX_SAMPLE_RATE (24000.0)
-#define MAX_N_TAU (8)
-#define MAX_TAU_ATTACK (0.01)
-#define RB_SIZE (int)(MAX_SAMPLE_RATE * MAX_N_TAU * MAX_TAU_ATTACK + 1)
-
 #define CW_TEXT_START_X 5
 #define CW_TEXT_START_Y 449                   // 480 * 0.97 = 465 - height = 465 - 16 = 449
 #define CW_MESSAGE_WIDTH MAX_WATERFALL_WIDTH  // 512
@@ -402,7 +396,6 @@ struct config_t {
   int sidetoneVolume = 40;                // 4 bytes
   uint32_t cwTransmitDelay = 1000;
   int activeVFO = 0;                // 2 bytes
-                                    //  uint32_t freqIncrement = 10000;        // 4 bytes
   int currentBand = STARTUP_BAND;   // 4 bytes   JJP 7-3-23
   int currentBandA = STARTUP_BAND;  // 4 bytes   JJP 7-3-23
   int currentBandB = STARTUP_BAND;  // 4 bytes   JJP 7-3-23
@@ -518,23 +511,12 @@ extern float32_t EQ_Band14Coeffs[];
 // ================= end  AFP 10-02-22 ===========
 //Hilbert FIR Filter
 
-//extern float32_t FIR_Hilbert_state_L[];
-//extern float32_t FIR_Hilbert_state_R[];
-
-//extern float32_t FIR_Hilbert_coeffs_45[];     //AFP 01-16-22
-//extern float32_t FIR_Hilbert_coeffs_neg45[];  //AFP 01-16-22
-
-//extern arm_fir_instance_f32 FIR_Hilbert_L;
-//extern arm_fir_instance_f32 FIR_Hilbert_R;
-
 extern float32_t CW_Filter_Coeffs2[];        //AFP 10-25-22
 extern arm_fir_instance_f32 FIR_CW_DecodeL;  //AFP 10-25-22
 extern arm_fir_instance_f32 FIR_CW_DecodeR;  //AFP 10-25-22
 extern float32_t FIR_CW_DecodeL_state[];     //AFP 10-25-22
 extern float32_t FIR_CW_DecodeR_state[];     //AFP 10-25-22
 
-//extern arm_fir_decimate_instance_f32 FIR_dec1_EX_I;
-//extern arm_fir_decimate_instance_f32 FIR_dec1_EX_Q;
 extern arm_fir_decimate_instance_f32 FIR_dec2_EX_I;
 extern arm_fir_decimate_instance_f32 FIR_dec2_EX_Q;
 
@@ -704,10 +686,9 @@ extern uint8_t display_S_meter_or_spectrum_state;
 extern uint8_t keyPressedOn;  //AFP 09-01-22
 extern uint8_t NR_first_time;
 extern uint8_t NR_Kim;
-extern uint8_t SampleRate;
-extern uint8_t sch;
-extern uint8_t state;
-extern uint8_t zoom_display;
+extern uint32_t SampleRate;
+extern uint32_t sch;
+extern uint32_t zoom_display;
 extern const uint8_t NR_L_frames;
 extern const uint8_t NR_N_frames;
 extern int16_t pixelnew[];
@@ -755,7 +736,7 @@ extern int updateDisplayCounter;
 extern const int DEC2STATESIZE;
 extern const int INT1_STATE_SIZE;
 extern const int INT2_STATE_SIZE;
-extern unsigned ring_buffsize;
+//extern unsigned ring_buffsize;
 extern long long freqCorrectionFactor;
 extern long long freqCorrectionFactorOld;  //AFP 09-21-22
 extern int32_t mainMenuIndex;
@@ -1090,10 +1071,6 @@ void initCWShaping();
 void SpectrumOptions();
 void UpdateInfoWindow();
 void SetFreqCal(int calFreqShift);
-//extern "C" {
-//  void sincosf(float err, float *s, float *c);
-//  void sincos(double err, double *s, double *c);
-//}
 void ShowFrequency();
 void ShowMenu(const char *menu[], int where);
 void ShowName();

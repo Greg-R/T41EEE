@@ -407,11 +407,10 @@ uint8_t keyPressedOn = 0;
 uint8_t NR_first_time = 1;
 uint8_t NR_Kim;
 
-uint8_t SampleRate = SAMPLE_RATE_192K;
+uint32_t SampleRate = SAMPLE_RATE_192K;
 
-uint8_t sch = 0;
-uint8_t state = 0;
-uint8_t zoom_display = 1;
+uint32_t sch = 0;
+uint32_t zoom_display = 1;
 const uint8_t NR_L_frames = 3;
 const uint8_t NR_N_frames = 15;
 
@@ -493,7 +492,6 @@ const int BW_indicator_y = SPECTRUM_TOP_Y + SPECTRUM_HEIGHT + 2;
 const int DEC2STATESIZE = n_dec2_taps + (BUFFER_SIZE * N_B / (uint32_t)DF1) - 1;
 const int INT1_STATE_SIZE = 24 + BUFFER_SIZE * N_B / (uint32_t)DF - 1;
 const int INT2_STATE_SIZE = 8 + BUFFER_SIZE * N_B / (uint32_t)DF1 - 1;
-unsigned ring_buffsize = RB_SIZE;
 
 int32_t mainMenuIndex = START_MENU;  // Done so we show menu[0] at startup
 
@@ -600,7 +598,6 @@ float32_t DMAMEM NR_Hk_old[NR_FFT_L / 2];
 float32_t DMAMEM NR_long_tone[NR_FFT_L / 2][2];
 float32_t DMAMEM NR_long_tone_gain[NR_FFT_L / 2];
 float32_t DMAMEM R_BufferOffset[BUFFER_SIZE * N_B];
-float32_t ring[RB_SIZE * 2];
 float32_t tmp;
 float32_t w;
 float angl;
@@ -1030,7 +1027,7 @@ sgtl5000_1.adcHighPassFilterEnable();
 
 // Set up "Controlled Envelope Single Side Band" from the Open Audio Library.
    cessb1.setSampleRate_Hz(48000);
-   cessb1.setGains(3.0f, 1.4f, 0.5f);  // gainIn, gainCompensate, gainOut
+   cessb1.setGains(3.5f, 1.4f, 0.5f);  // gainIn, gainCompensate, gainOut
    cessb1.setSideband(false);
    cessb1.setProcessing(EEPROMData.cessb);  // Set to CESSB or SSB Data.  Greg KF5N August 17 2024
 
