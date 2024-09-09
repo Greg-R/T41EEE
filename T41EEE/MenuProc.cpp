@@ -1,3 +1,6 @@
+// CalibrateOptions
+// CWOptions
+
 
 #include "SDT.h"
 
@@ -278,13 +281,13 @@ void CalibrateOptions() {
 
 // ==============  AFP 10-22-22 ==================
 /*****
-  Purpose: Present the CW options available and return the selection
+  Purpose: Present the CW options available to the user.  Change and store to EEPROM.
 
   Parameter list:
     void
 
   Return value
-    int           an index into the band array
+    void
 *****/
 void CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
 {
@@ -300,7 +303,7 @@ void CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
       break;
 
     case 1:          // Type of key:
-      SetKeyType();  // Straight key or keyer? Stored in EEPROMData.EEPROMData.keyType; no heap/stack variable
+      SetKeyType();  // Straight key or keyer?
       SetKeyPowerUp();
       UpdateWPMField();
       break;
@@ -310,7 +313,7 @@ void CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
       break;             // AFP 10-18-22
 
     case 3:            // Flip paddles
-      DoPaddleFlip();  // Stored in EEPROM; variables EEPROMData.paddleDit and EEPROMData.paddleDah
+      DoPaddleFlip();
       break;
 
     case 4:              // Select a preferred CW offset frequency.
@@ -806,7 +809,7 @@ void DoPaddleFlip() {
         }
         EraseMenus();
         UpdateWPMField();  // KD0RC
-        return;
+//        return;   Causing paddle flip to not be saved.  Greg KF5N September 9 2024.
       }
     }
   }
