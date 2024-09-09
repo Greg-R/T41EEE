@@ -231,7 +231,7 @@ extern struct maps myMapFiles[];
 #define VOLUME_ENCODER_A 2
 #define VOLUME_ENCODER_B 3
 #define FILTER_ENCODER_A 15
-#define FILTER_ENCODER_B 14  // 14.  Change this to 41 when using SPDIF.
+#define FILTER_ENCODER_B 41  // 14.  Change this to 41 when using SPDIF with T41-2 Main board.
 #define FINETUNE_ENCODER_A 4
 #define FINETUNE_ENCODER_B 5
 #define TUNE_ENCODER_A 16
