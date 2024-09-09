@@ -876,7 +876,7 @@ void DoPaddleFlip() {
         }
         EraseMenus();
         UpdateWPMField();  // KD0RC
-        return;
+        break;
       }
     }
   }
