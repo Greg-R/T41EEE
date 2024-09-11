@@ -247,9 +247,11 @@ extern struct maps myMapFiles[];
 #define PTT 37           // Transmit/Receive
 #define MUTE 38          // Mute Audio,  HIGH = "On" Audio available from Audio PA, LOW = Mute audio
 //========================================= Keyer pins
-#define KEYER_DAH_INPUT_RING 35  // Ring connection for keyer.  Default for righthanded user.  Also straight key.
-#define KEYER_DIT_INPUT_TIP 36   // Tip connection for keyer
-#define KEYER 1
+#define KEYER_DAH_INPUT_RING 36  // Ring connection for keyer.  Default for righthanded user.  Also straight key.
+#define KEYER_DIT_INPUT_TIP 35   // Tip connection for keyer
+//#define KEYER 
+// QSD2/QSE2 reset pin
+const int RESET = 0;
 //========================================================= End Pin Assignments =================================
 #define TMS0_POWER_DOWN_MASK (0x1U)
 #define TMS1_MEASURE_FREQ(x) (((uint32_t)(((uint32_t)(x)) << 0U)) & 0xFFFFU)

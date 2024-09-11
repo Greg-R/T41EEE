@@ -1357,9 +1357,7 @@ void UpdateWPMField() {
   tft.setTextColor(RA8875_GREEN);
   tft.fillRect(WPM_X + 59, WPM_Y - 4, tft.getFontWidth() * 15, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(FIELD_OFFSET_X, WPM_Y - 5);
-  //EEPROMData.EEPROMData.currentWPM = EEPROMData.currentWPM;
-  if (EEPROMData.keyType == KEYER) {
-    //tft.print("Paddles -- "); // KD0RC
+  if (EEPROMData.keyType == 1) {    // 1 is keyer.
     // KD0RC start
     tft.print("Paddles ");
     if (EEPROMData.paddleFlip == 0) {

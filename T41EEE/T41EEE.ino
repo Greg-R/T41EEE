@@ -1047,6 +1047,10 @@ sgtl5000_1.adcHighPassFilterEnable();
   pinMode(BUSY_ANALOG_PIN, INPUT);  // Pin 39.  Switch matrix output connects to this pin.
   pinMode(KEYER_DIT_INPUT_TIP, INPUT_PULLUP);
   pinMode(KEYER_DAH_INPUT_RING, INPUT_PULLUP);
+  if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) {
+    pinMode(RESET, OUTPUT);  // Reset pulse to QSD2/QSE2.
+    digitalWrite(RESET, HIGH);
+  }
 
   // SPI bus to display.
   pinMode(TFT_MOSI, OUTPUT);
