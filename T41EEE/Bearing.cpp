@@ -1,6 +1,10 @@
 
 #include "SDT.h"
 
+#define BUFFPIXEL 20  // Use buffer to read image rather than 1 pixel at a time
+#define DEGREES2RADIANS 0.01745329
+#define RADIANS2DEGREES 57.29578
+#define PI_BY_180 0.01745329
 const char DEGREE_SYMBOL[] = { 0xB0, '\0' };
 int countryIndex = -1;
 
@@ -529,6 +533,47 @@ PROGMEM struct cities dxCities[] = {
 };
 
 
+/*****
+  Purpose: The next two functions read 16- and 32-bit image data from the SD card file.
+           BMP data is stored little-endian, Arduino is little-endian too.
+
+  Parameter list:
+    File &f            the lvalue of the image file handle
+
+  Return value;
+    uint16_t           the image data in proper format
+
+  CAUTION: Other systems may not be little-endian so you may have to reverse subscripting
+*****/
+uint16_t read16(File &f) {
+  uint16_t result;
+  ((uint8_t *)&result)[0] = f.read();  // LSB
+  ((uint8_t *)&result)[1] = f.read();  // MSB
+  return result;
+}
+
+
+/*****
+  Purpose: Read 32-bit image data from the SD card file.
+           BMP data is stored little-endian, Arduino is little-endian too.
+
+  Parameter list:
+    File &f            the lvalue of the image file handle
+
+  Return value;
+    uint16_t           the image data in proper format
+
+  CAUTION: Other systems may not be little-endian so you may have to reverse subscripting
+*****/
+uint32_t read32(File &f) {
+  uint32_t result;
+  ((uint8_t *)&result)[0] = f.read();  // LSB
+  ((uint8_t *)&result)[1] = f.read();
+  ((uint8_t *)&result)[2] = f.read();
+  ((uint8_t *)&result)[3] = f.read();  // MSB
+  return result;
+}
+
 
 /*****
   Purpose: To draw the onscreen keyboard and prompts
@@ -646,9 +691,8 @@ FLASHMEM void CaptureKeystrokes() {
   int row;
   int xOffset;
   int keyCell;  // Where to place the cell in the X axis
-  int valPin;
   int whichLetterIndex;
-  int pushButtonSwitchIndex;
+  MenuSelect pushButtonSwitchIndex;
 
   // Start at letter N
 
@@ -660,12 +704,12 @@ FLASHMEM void CaptureKeystrokes() {
   tft.setTextColor(RA8875_WHITE, RA8875_BLUE);
   DrawActiveLetter(row, spacing[keyCell], whichLetterIndex, keyWidth, keyHeight);
   while (true) {
-    valPin = ReadSelectedPushButton();  // Poll UI push buttons
-    delay(150L);
-    if (valPin != BOGUS_PIN_READ) {                        // If a button was pushed...
-      pushButtonSwitchIndex = ProcessButtonPress(valPin);  // Winner, winner...chicken dinner!
+//    valPin = ReadSelectedPushButton();  // Poll UI push buttons.  Returns an int.
+//    delay(150L);
+//    if (valPin != BOGUS_PIN_READ) {                        // If a button was pushed...
+      pushButtonSwitchIndex = readButton();  // Winner, winner...chicken dinner!
       switch (pushButtonSwitchIndex) {
-        case MENU_OPTION_SELECT:  // They selected a letter
+        case MenuSelect::MENU_OPTION_SELECT:  // They selected a letter
           delay(150L);
           if (row < 240) {
             keyboardBuffer[bufferIndex] = whichLetterIndex;
@@ -678,7 +722,7 @@ FLASHMEM void CaptureKeystrokes() {
           tft.print(keyboardBuffer);
           break;
 
-        case MAIN_MENU_UP:  // Go up a row
+        case MenuSelect::MAIN_MENU_UP:  // Go up a row
           if (row <= 155)   // Trying to go up above numerics
             break;
           DrawNormalLetter(row, spacing[keyCell], whichLetterIndex, keyWidth, keyHeight);
@@ -701,7 +745,7 @@ FLASHMEM void CaptureKeystrokes() {
           }
           break;
 
-        case ZOOM:                       // Go left a column
+        case MenuSelect::ZOOM:                       // Go left a column
           if (whichLetterIndex == 27) {  // For apace character
             tft.fillRect(spacing[keyCell], row + 5, keyWidth, keyHeight, RA8875_BLACK);
             tft.drawRect(spacing[keyCell], row + 5, keyWidth, keyHeight, RA8875_YELLOW);
@@ -739,7 +783,7 @@ FLASHMEM void CaptureKeystrokes() {
           }
           break;
 
-        case BAND_DN:                    // Go right one column
+        case MenuSelect::BAND_DN:                    // Go right one column
           if (whichLetterIndex == 27) {  // The space key
             tft.fillRect(spacing[keyCell], row + 5, keyWidth, keyHeight, RA8875_BLACK);
             tft.drawRect(spacing[keyCell], row + 5, keyWidth, keyHeight, RA8875_YELLOW);
@@ -774,7 +818,7 @@ FLASHMEM void CaptureKeystrokes() {
           DrawActiveLetter(row, xOffset + spacing[keyCell], whichLetterIndex, keyWidth, keyHeight);
           break;
 
-        case DEMODULATION:  // Go down a row
+        case MenuSelect::DEMODULATION:  // Go down a row
           if (row >= 360)
             break;
           if (row < 240) {
@@ -797,7 +841,7 @@ FLASHMEM void CaptureKeystrokes() {
           }
           break;
 
-        case UNUSED_1:  // Erase last entry
+        case MenuSelect::UNUSED_1:  // Erase last entry
           delay(200L);
           bufferIndex--;                       // Move back in the buffer
           keyboardBuffer[bufferIndex] = '\0';  // Make it a string
@@ -807,14 +851,13 @@ FLASHMEM void CaptureKeystrokes() {
           tft.print(keyboardBuffer);
           break;
 
-        case BEARING:  // They are all finished
+        case MenuSelect::BEARING:  // They are all finished
           return;
 
         default:
           //          DrawActiveLetter(row, spacing[whichLetterIndex], whichLetterIndex, keyWidth, keyHeight);
           break;
       }
-    }
   }
 }
 
@@ -1196,44 +1239,6 @@ FLASHMEM void bmpDraw(const char *filename, int x, int y) {
   }
 }
 
-/*****
-  Purpose: The next two functions read 16- and 32-bit image data from the SD card file.
-           BMP data is stored little-endian, Arduino is little-endian too.
-
-  Parameter list:
-    File &f            the lvalue of the image file handle
-
-  Return value;
-    uint16_t           the image data in proper format
-
-  CAUTION: Other systems may not be little-endian so you may have to reverse subscripting
-*****/
-uint16_t read16(File &f) {
-  uint16_t result;
-  ((uint8_t *)&result)[0] = f.read();  // LSB
-  ((uint8_t *)&result)[1] = f.read();  // MSB
-  return result;
-}
-/*****
-  Purpose: Read 32-bit image data from the SD card file.
-           BMP data is stored little-endian, Arduino is little-endian too.
-
-  Parameter list:
-    File &f            the lvalue of the image file handle
-
-  Return value;
-    uint16_t           the image data in proper format
-
-  CAUTION: Other systems may not be little-endian so you may have to reverse subscripting
-*****/
-uint32_t read32(File &f) {
-  uint32_t result;
-  ((uint8_t *)&result)[0] = f.read();  // LSB
-  ((uint8_t *)&result)[1] = f.read();
-  ((uint8_t *)&result)[2] = f.read();
-  ((uint8_t *)&result)[3] = f.read();  // MSB
-  return result;
-}
 
 /*****
   Purpose: Function takes the RBG color values and converts them for their BCD format to the
@@ -1528,7 +1533,7 @@ FLASHMEM int CreateMapList(char ptrMaps[][50], int *count) {
 int WhichOneToUse(char ptrMaps[][50], int count) {
   int temp = 0;
   int i;
-  int val;
+  MenuSelect menu;
 
   delay(100L);
   for (i = 0; i < count; i++) {  // Yep.
@@ -1558,10 +1563,11 @@ int WhichOneToUse(char ptrMaps[][50], int count) {
       tft.print(ptrMaps[temp]);
       filterEncoderMove = 0;
     }
-    val = ReadSelectedPushButton();  // Read pin that controls all switches
-    val = ProcessButtonPress(val);
-    delay(100L);
-    if (val == MENU_OPTION_SELECT) {  // Make a choice??
+//    val = ReadSelectedPushButton();  // Read pin that controls all switches
+//    menu = ProcessButtonPress(val);
+//    delay(100L);
+    menu = readButton();
+    if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
       break;                          // Yep.
     }
   }

@@ -63,6 +63,7 @@ void CalibrateOptions() {
   int val;
   int freqCorrectionFactorOld = 0;
   int32_t increment = 100L;
+  MenuSelect menu;
   tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 30, CHAR_HEIGHT, RA8875_BLACK);
 
   // Select the type of calibration, and then skip this during the loop() function.
@@ -81,8 +82,8 @@ void CalibrateOptions() {
       }
       val = ReadSelectedPushButton();
       if (val != BOGUS_PIN_READ) {        // Any button press??
-        val = ProcessButtonPress(val);    // Use ladder value to get menu choice
-        if (val == MENU_OPTION_SELECT) {  // Yep. Make a choice??
+        menu = ProcessButtonPress(val);    // Use ladder value to get menu choice
+        if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
           EEPROMWrite();
           calibrateFlag = 0;
@@ -95,8 +96,8 @@ void CalibrateOptions() {
       EEPROMData.powerOutCW[EEPROMData.currentBand] = sqrt(EEPROMData.transmitPowerLevel / 20.0) * EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];
       val = ReadSelectedPushButton();
       if (val != BOGUS_PIN_READ) {        // Any button press??
-        val = ProcessButtonPress(val);    // Use ladder value to get menu choice
-        if (val == MENU_OPTION_SELECT) {  // Yep. Make a choice??
+        menu = ProcessButtonPress(val);    // Use ladder value to get menu choice
+        if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
           EEPROMWrite();
           calibrateFlag = 0;
@@ -121,10 +122,10 @@ void CalibrateOptions() {
       EEPROMData.powerOutSSB[EEPROMData.currentBand] = sqrt(EEPROMData.transmitPowerLevel / 20.0) * EEPROMData.SSBPowerCalibrationFactor[EEPROMData.currentBand];
       val = ReadSelectedPushButton();
       if (val != BOGUS_PIN_READ) {        // Any button press??
-        val = ProcessButtonPress(val);    // Use ladder value to get menu choice
-        if (val == MENU_OPTION_SELECT) {  // Yep. Make a choice??
+        menu = ProcessButtonPress(val);    // Use ladder value to get menu choice
+        if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-          val = ReadSelectedPushButton();
+     //     val = ReadSelectedPushButton();
           EEPROMWrite();
           calibrateFlag = 0;
         }
@@ -169,8 +170,8 @@ void CalibrateOptions() {
       EEPROMData.dacOffsetCW = GetEncoderValueLiveQ15t(-5000, 5000, EEPROMData.dacOffsetCW, 50, (char *)"DC Offset:", false);
       val = ReadSelectedPushButton();
       if (val != BOGUS_PIN_READ) {
-        val = ProcessButtonPress(val);
-        if (val == MENU_OPTION_SELECT) {
+        menu = ProcessButtonPress(val);
+        if (menu == MenuSelect::MENU_OPTION_SELECT) {
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
           EEPROMWrite();
           calibrateFlag = 0;
@@ -182,8 +183,8 @@ void CalibrateOptions() {
       EEPROMData.dacOffsetSSB = GetEncoderValueLiveQ15t(-5000, 5000, EEPROMData.dacOffsetSSB, 50, (char *)"DC Offset:", false);
       val = ReadSelectedPushButton();
       if (val != BOGUS_PIN_READ) {
-        val = ProcessButtonPress(val);
-        if (val == MENU_OPTION_SELECT) {
+        menu = ProcessButtonPress(val);
+        if (menu == MenuSelect::MENU_OPTION_SELECT) {
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
           EEPROMWrite();
           calibrateFlag = 0;
@@ -203,8 +204,8 @@ void CalibrateOptions() {
       EEPROMData.buttonRepeatDelay = 1000 * GetEncoderValueLive(0, 5000, EEPROMData.buttonRepeatDelay / 1000, 1, (char *)"Btn Repeat:  ", false);
       val = ReadSelectedPushButton();
       if (val != BOGUS_PIN_READ) {
-        val = ProcessButtonPress(val);
-        if (val == MENU_OPTION_SELECT) {
+        menu = ProcessButtonPress(val);
+        if (menu == MenuSelect::MENU_OPTION_SELECT) {
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
           EEPROMWrite();
           calibrateFlag = 0;
@@ -390,7 +391,7 @@ void CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
       break;
 
     case 1:          // Type of key:
-      SetKeyType();  // Straight key or keyer? Stored in EEPROMData.EEPROMData.keyType; no heap/stack variable
+      SetKeyType();  // Straight key or keyer? Stored in EEPROMData.EEPROMData.keyType.
       SetKeyPowerUp();
       UpdateWPMField();
       break;
@@ -501,7 +502,7 @@ void ProcessEqualizerChoices(int EQType, char *title) {
   int barWidth = 46;
   int barTopY;
   int barBottomY;
-  int val;
+  MenuSelect menu = MenuSelect::DEFAULT;
 
   for (iFreq = 0; iFreq < EQUALIZER_CELL_COUNT; iFreq++) {
     if (EQType == 0) {
@@ -590,13 +591,13 @@ void ProcessEqualizerChoices(int EQType, char *title) {
         }
       }
       filterEncoderMove = 0;
-      delay(200L);
+//      delay(200L);
 
-      val = ReadSelectedPushButton();  // Read the ladder value
+//      val = ReadSelectedPushButton();  // Read the ladder value
 
-      if (val != -1 && val < (EEPROMData.switchValues[0] + WIGGLE_ROOM)) {
-        val = ProcessButtonPress(val);  // Use ladder value to get menu choice
-        delay(100L);
+ //     if (val != -1 && val < (EEPROMData.switchValues[0] + WIGGLE_ROOM)) {
+        menu = readButton();  // Use ladder value to get menu choice
+//        delay(100L);
 
         tft.fillRect(xOffset,                // Indent to proper bar...
                      barBottomY - newValue,  // Start at red line
@@ -615,7 +616,7 @@ void ProcessEqualizerChoices(int EQType, char *title) {
         filterEncoderMove = 0;
         columnIndex++;
         break;
-      }
+    //  }
     }  // end inner while
   }    // end outer while
 
@@ -841,7 +842,7 @@ void RFOptions() {
 void DoPaddleFlip() {
   const char *paddleState[] = { "Right paddle = dah", "Right paddle = dit" };
   int choice, lastChoice;
-  int pushButtonSwitchIndex;
+  MenuSelect pushButtonSwitchIndex;
   int valPin;
 
   EEPROMData.paddleDah = KEYER_DAH_INPUT_RING;  // Defaults
@@ -858,13 +859,13 @@ void DoPaddleFlip() {
     valPin = ReadSelectedPushButton();                     // Poll buttons
     if (valPin != -1) {                                    // button was pushed
       pushButtonSwitchIndex = ProcessButtonPress(valPin);  // Winner, winner...chicken dinner!
-      if (pushButtonSwitchIndex == MAIN_MENU_UP || pushButtonSwitchIndex == MAIN_MENU_DN) {
+      if (pushButtonSwitchIndex == MenuSelect::MAIN_MENU_UP || pushButtonSwitchIndex == MenuSelect::MAIN_MENU_DN) {
         choice = !choice;  // Reverse the last choice
         tft.fillRect(SECONDARY_MENU_X - 100, MENUS_Y, EACH_MENU_WIDTH + 100, CHAR_HEIGHT, RA8875_GREEN);
         tft.setCursor(SECONDARY_MENU_X - 93, MENUS_Y + 1);
         tft.print(paddleState[choice]);
       }
-      if (pushButtonSwitchIndex == MENU_OPTION_SELECT) {  // Made a choice??
+      if (pushButtonSwitchIndex == MenuSelect::MENU_OPTION_SELECT) {  // Made a choice??
         if (choice) {                                     // Means right-paddle dit
           EEPROMData.paddleDit = KEYER_DAH_INPUT_RING;
           EEPROMData.paddleDah = KEYER_DIT_INPUT_TIP;
@@ -1053,6 +1054,7 @@ void EEPROMOptions() {  // 0               1                2               3   
 int SubmenuSelect(const char *options[], int numberOfChoices, int defaultStart) {
   int refreshFlag = 0;
   int val;
+  MenuSelect menu;
   int encoderReturnValue;
 
   tft.setTextColor(RA8875_BLACK);
@@ -1071,22 +1073,22 @@ int SubmenuSelect(const char *options[], int numberOfChoices, int defaultStart) 
     val = ReadSelectedPushButton();  // Read the ladder value
     delay(150L);
     if (val != -1 && val < (EEPROMData.switchValues[0] + WIGGLE_ROOM)) {
-      val = ProcessButtonPress(val);  // Use ladder value to get menu choice
-      if (val > -1) {                 // Valid choice?
-        switch (val) {
-          case MENU_OPTION_SELECT:  // They made a choice
+      menu = ProcessButtonPress(val);  // Use ladder value to get menu choice
+//      if (val > -1) {                 // Valid choice?
+        switch (menu) {
+          case MenuSelect::MENU_OPTION_SELECT:  // They made a choice
             tft.setTextColor(RA8875_WHITE);
             EraseMenus();
             return encoderReturnValue;
             break;
 
-          case MAIN_MENU_UP:
+          case MenuSelect::MAIN_MENU_UP:
             encoderReturnValue++;
             if (encoderReturnValue >= numberOfChoices)
               encoderReturnValue = 0;
             break;
 
-          case MAIN_MENU_DN:
+          case MenuSelect::MAIN_MENU_DN:
             encoderReturnValue--;
             if (encoderReturnValue < 0)
               encoderReturnValue = numberOfChoices - 1;
@@ -1107,4 +1109,4 @@ int SubmenuSelect(const char *options[], int numberOfChoices, int defaultStart) 
       }
     }
   }
-}
+//}

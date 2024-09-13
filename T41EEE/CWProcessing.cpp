@@ -267,6 +267,7 @@ FLASHMEM void SetKeyPowerUp() {
 void SetSideToneVolume() {
   int val, sidetoneDisplay;
   bool keyDown;
+  MenuSelect menu;
 
   SetAudioOperatingState(RadioState::SET_CW_SIDETONE);
   tft.setFontScale((enum RA8875tsize)1);
@@ -313,8 +314,8 @@ void SetSideToneVolume() {
     volumeAdjust.gain(volumeLog[EEPROMData.sidetoneVolume]);  // Sidetone  AFP 10-01-22
                                                               //    modeSelectOutR.gain(1, volumeLog[(int)EEPROMData.sidetoneVolume]);  // Right side not used.  KF5N September 1, 2023
     val = ReadSelectedPushButton();                           // Read pin that controls all switches
-    val = ProcessButtonPress(val);
-    if (val == MENU_OPTION_SELECT) {  // Make a choice??
+    menu = ProcessButtonPress(val);
+    if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
                                       // EEPROMData.EEPROMData.sidetoneVolume = EEPROMData.sidetoneVolume;
       EEPROMWrite();
       break;

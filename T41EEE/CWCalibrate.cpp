@@ -368,8 +368,8 @@ void CWCalibrate::CalibratePrologue() {
       void
  *****/
 void CWCalibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
-  int task = -1;
-  int lastUsedTask = -2;
+  MenuSelect task, lastUsedTask = MenuSelect::DEFAULT;
+//  int lastUsedTask = -2;
   int calFreqShift;
   float correctionIncrement = 0.001;
   bool autoCal = false;
@@ -427,16 +427,19 @@ void CWCalibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
   // Transmit Calibration Loop
   while (true) {
     CWCalibrate::ShowSpectrum2();
+    /*
     val = ReadSelectedPushButton();
     if (val != BOGUS_PIN_READ) {
-      val = ProcessButtonPress(val);
-      if (val != lastUsedTask && task == -100) task = val;
-      else task = BOGUS_PIN_READ;
+      menu = ProcessButtonPress(val);
+      if (menu != lastUsedTask && task == MenuSelect::DEFAULT) task = menu;
+      else task = MenuSelect::BOGUS_PIN_READ;
     }
-    if (shortCal) task = FILTER;
+    */
+    task = readButton(lastUsedTask);
+    if (shortCal) task = MenuSelect::FILTER;
     switch (task) {
       // Activate automatic calibration.
-      case ZOOM:  // 2nd row, 1st column button
+      case MenuSelect::ZOOM:  // 2nd row, 1st column button
         autoCal = true;
         printCalType(calTypeFlag, autoCal, false);
         count = 0;
@@ -452,7 +455,7 @@ void CWCalibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
         averageFlag = false;
         break;
       // Automatic calibration using previously stored values.
-      case FILTER:  // 3rd row, 1st column button
+      case MenuSelect::FILTER:  // 3rd row, 1st column button
         shortCal = false;
         autoCal = true;
         printCalType(calTypeFlag, autoCal, false);
@@ -470,11 +473,11 @@ void CWCalibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
         refineCal = true;
         break;
       // Toggle gain and phase
-      case UNUSED_1:
+      case MenuSelect::UNUSED_1:
         IQCalType = !IQCalType;
         break;
       // Toggle increment value
-      case BEARING:  // UNUSED_2 is now called BEARING
+      case MenuSelect::BEARING:  // UNUSED_2 is now called BEARING
         corrChange = not corrChange;
         if (corrChange == true) {       // Toggle increment value
           correctionIncrement = 0.001;  // AFP 2-11-23
@@ -486,7 +489,7 @@ void CWCalibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
         tft.setCursor(405, 125);
         tft.print(correctionIncrement, 3);
         break;
-      case MENU_OPTION_SELECT:  // Save values and exit calibration.
+      case MenuSelect::MENU_OPTION_SELECT:  // Save values and exit calibration.
         tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
         IQChoice = 6;  // AFP 2-11-23
         break;
@@ -718,8 +721,8 @@ void CWCalibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
       }
     }  // end automatic calibration state machine
 
-    if (task != -1) lastUsedTask = task;  //  Save the last used task.
-    task = -100;                          // Reset task after it is used.
+    if (task != MenuSelect::DEFAULT) lastUsedTask = task;  //  Save the last used task.
+    task = MenuSelect::DEFAULT;                          // Reset task after it is used.
     //  Read encoder and update values.
     if (IQCalType == 0) {
       EEPROMData.IQRXAmpCorrectionFactor[EEPROMData.currentBand] = GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQRXAmpCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Gain", true);
@@ -742,8 +745,8 @@ void CWCalibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
       void
  *****/
 void CWCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal) {
-  int task = -1;
-  int lastUsedTask = -2;
+//  int task = -1;
+//  int lastUsedTask = -2;
   int freqOffset;
   //  bool corrChange = false;
   float correctionIncrement = 0.001;
@@ -763,6 +766,7 @@ void CWCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCa
   bool refineCal = false;
   bool averageFlag = false;
   std::vector<float>::iterator result;
+  MenuSelect task, lastUsedTask = MenuSelect::DEFAULT;
   // bool stopSweep = false;
 
   if (toneFreqIndex == 0) {             // 750 Hz
@@ -802,16 +806,19 @@ void CWCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCa
   // Transmit Calibration Loop
   while (true) {
     CWCalibrate::ShowSpectrum2();
+    /*
     val = ReadSelectedPushButton();
     if (val != BOGUS_PIN_READ) {
-      val = ProcessButtonPress(val);
-      if (val != lastUsedTask && task == -100) task = val;
-      else task = BOGUS_PIN_READ;
+      menu = ProcessButtonPress(val);
+      if (menu != lastUsedTask && task == MenuSelect::DEFAULT) task = menu;
+      else task = MenuSelect::BOGUS_PIN_READ;
     }
-    if (shortCal) task = FILTER;
+    */
+    task = readButton(lastUsedTask);
+    if (shortCal) task = MenuSelect::FILTER;
     switch (task) {
       // Activate automatic calibration.
-      case ZOOM:  // 2nd row, 1st column button
+      case MenuSelect::ZOOM:  // 2nd row, 1st column button
         autoCal = true;
         printCalType(calTypeFlag, autoCal, false);
         count = 0;
@@ -828,7 +835,7 @@ void CWCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCa
         state = State::warmup;
         break;
       // Automatic calibration using previously stored values.
-      case FILTER:  // 3rd row, 1st column button
+      case MenuSelect::FILTER:  // 3rd row, 1st column button
         shortCal = false;
         autoCal = true;
         printCalType(calTypeFlag, autoCal, false);
@@ -846,11 +853,11 @@ void CWCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCa
         refineCal = true;
         break;
       // Toggle gain and phase
-      case UNUSED_1:
+      case MenuSelect::UNUSED_1:
         IQCalType = !IQCalType;
         break;
       // Toggle increment value
-      case BEARING:  // UNUSED_2 is now called BEARING
+      case MenuSelect::BEARING:  // UNUSED_2 is now called BEARING
         corrChange = !corrChange;
         if (corrChange == true) {       // Toggle increment value
           correctionIncrement = 0.001;  // AFP 2-11-23
@@ -862,7 +869,7 @@ void CWCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCa
         tft.setCursor(405, 125);
         tft.print(correctionIncrement, 3);
         break;
-      case MENU_OPTION_SELECT:  // Save values and exit calibration.
+      case MenuSelect::MENU_OPTION_SELECT:  // Save values and exit calibration.
         tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
         IQChoice = 6;  // AFP 2-11-23
         break;
@@ -1091,8 +1098,8 @@ void CWCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCa
       }
     }  // end automatic calibration state machine
 
-    if (task != -1) lastUsedTask = task;  //  Save the last used task.
-    task = -100;                          // Reset task after it is used.
+    if (task != MenuSelect::DEFAULT) lastUsedTask = task;  //  Save the last used task.
+    task = MenuSelect::DEFAULT;                         // Reset task after it is used.
     //  Read encoder and update values.
     if (IQCalType == 0) {
       EEPROMData.IQCWAmpCorrectionFactor[EEPROMData.currentBand] = GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQCWAmpCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Gain", true);
@@ -1116,15 +1123,13 @@ void CWCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCa
  *****/
 #ifdef QSE2
 void CWCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool shortCal) {
-  int task = -1;
-  int lastUsedTask = -2;
+  MenuSelect task, lastUsedTask = MenuSelect::DEFAULT;
   int freqOffset;
   int correctionIncrement = 10;
   State state = State::warmup;  // Start calibration state machine in warmup state.
   int maxSweepAmp = 450;
   int maxSweepPhase = 450;
   int increment = 5;
-  //  uint32_t adjdBMinIndex;
   int averageCount = 0;
   int iOptimal = 0;
   int qOptimal = 0;
@@ -1177,16 +1182,19 @@ void CWCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool 
   // Transmit Calibration Loop
   while (true) {
     CWCalibrate::ShowSpectrum2();
+    /*
     val = ReadSelectedPushButton();
     if (val != BOGUS_PIN_READ) {
-      val = ProcessButtonPress(val);
-      if (val != lastUsedTask && task == -100) task = val;
-      else task = BOGUS_PIN_READ;
+      menu = ProcessButtonPress(val);
+      if (menu != lastUsedTask && task == MenuSelect::DEFAULT) task = menu;
+      else task = MenuSelect::DEFAULT;
     }
-    if (shortCal) task = FILTER;  // Jump to refineCal.
+    */
+    task = readButton(lastUsedTask);
+    if (shortCal) task = MenuSelect::FILTER;  // Jump to refineCal.
     switch (task) {
       // Activate automatic calibration.
-      case ZOOM:  // 2nd row, 1st column button
+      case MenuSelect::ZOOM:  // 2nd row, 1st column button
         autoCal = true;
         printCalType(calTypeFlag, autoCal, false);
         count = 0;
@@ -1203,7 +1211,7 @@ void CWCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool 
         state = State::warmup;
         break;
       // Automatic calibration using previously stored values.
-      case FILTER:  // 3rd row, 1st column button
+      case MenuSelect::FILTER:  // 3rd row, 1st column button
         shortCal = false;
         autoCal = true;
         printCalType(calTypeFlag, autoCal, false);
@@ -1221,11 +1229,11 @@ void CWCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool 
         refineCal = true;
         break;
       // Toggle gain and phase
-      case UNUSED_1:
+      case MenuSelect::UNUSED_1:
         IQCalType = !IQCalType;
         break;
       // Toggle increment value
-      case BEARING:  // UNUSED_2 is now called BEARING
+      case MenuSelect::BEARING:  // UNUSED_2 is now called BEARING
         corrChange = !corrChange;
         if (corrChange == true) {    // Toggle increment value
           correctionIncrement = 10;  // AFP 2-11-23
@@ -1237,7 +1245,7 @@ void CWCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool 
         tft.setCursor(405, 125);
         tft.print(correctionIncrement);
         break;
-      case MENU_OPTION_SELECT:  // Save values and exit calibration.
+      case MenuSelect::MENU_OPTION_SELECT:  // Save values and exit calibration.
         tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
         IQChoice = 6;  // AFP 2-11-23
         break;
@@ -1465,8 +1473,8 @@ void CWCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool 
       }
     }  // end automatic calibration state machine
 
-    if (task != -1) lastUsedTask = task;  //  Save the last used task.
-    task = -100;                          // Reset task after it is used.
+    if (task != MenuSelect::DEFAULT) lastUsedTask = task;  //  Save the last used task.
+    task = MenuSelect::DEFAULT;                          // Reset task after it is used.
     //  Read encoder and update values.
     if (IQCalType == 0) {
       EEPROMData.iDCoffsetCW[EEPROMData.currentBand] = GetEncoderValueLiveQ15t(-1000, 1000, EEPROMData.iDCoffsetCW[EEPROMData.currentBand], correctionIncrement, (char *)"I Offset", true);

@@ -75,7 +75,7 @@ void ShowName() {
 #else
   tft.setTextColor(RA8875_RED);  // Make it red
 #endif
-  tft.print(VERSION);
+  tft.print(EEPROMData.versionSettings);
 }
 
 

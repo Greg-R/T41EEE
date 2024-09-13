@@ -517,6 +517,7 @@ void ButtonNotchFilter() {
 void ButtonSetNoiseFloor() {
   int floor = EEPROMData.currentNoiseFloor[EEPROMData.currentBand];  // KF5N
   int val;
+  MenuSelect menu;
 
   tft.setFontScale((enum RA8875tsize)1);
   ErasePrimaryMenu();
@@ -541,8 +542,8 @@ void ButtonSetNoiseFloor() {
 
     val = ReadSelectedPushButton();  // Get ADC value
     delay(100L);
-    val = ProcessButtonPress(val);
-    if (val == MENU_OPTION_SELECT)  // If they made a choice...
+    menu = ProcessButtonPress(val);
+    if (menu == MenuSelect::MENU_OPTION_SELECT)  // If they made a choice...
     {
       EEPROMData.currentNoiseFloor[EEPROMData.currentBand] = floor;
       EEPROMWrite();
@@ -757,7 +758,7 @@ void ButtonFrequencyEntry() {
 
   while (doneFE == false) {
     valPin = ReadSelectedPushButton();
-    pushButtonSwitchIndex = ProcessButtonPress(valPin);
+    pushButtonSwitchIndex = static_cast<int>(ProcessButtonPress(valPin));
     if (pushButtonSwitchIndex != -1) {
       key = numKeys[pushButtonSwitchIndex];
       switch (key) {

@@ -1,6 +1,8 @@
 
 #include "SDT.h"
 
+#define IIR_ORDER 8
+#define IIR_NUMSTAGES (IIR_ORDER / 2)
 uint32_t m_NumTaps = (FFT_LENGTH / 2) + 1;
 float32_t xmtEqScaleFactor = 150.0;
 

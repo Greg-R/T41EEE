@@ -955,7 +955,7 @@ FLASHMEM void Splash() {
   tft.setFontScale(2);
   tft.print("EXTREME EXPERIMENTER'S EDITION");
   tft.setCursor(310, 125);
-  tft.print(VERSION);
+  tft.print(EEPROMData.versionSettings);
   tft.setFontScale(1);
   tft.setTextColor(RA8875_YELLOW);
   tft.setCursor(380, 175);
@@ -980,6 +980,31 @@ FLASHMEM void Splash() {
   delay(SPLASH_DELAY);
   tft.fillWindow(RA8875_BLACK);
 }
+
+
+MenuSelect readButton(MenuSelect lastUsedTask) {
+  int val = 0;
+  MenuSelect menu, task = MenuSelect::DEFAULT;
+    val = ReadSelectedPushButton();
+    if (val != -1) {  // -1 is returned by ReadSelectedPushButton in the case of an invalid read.
+      menu = ProcessButtonPress(val);
+      if (menu != lastUsedTask && task == MenuSelect::DEFAULT) task = menu;
+      else task = MenuSelect::DEFAULT;
+    }
+    return task;
+}
+
+
+MenuSelect readButton() {
+  int val = 0;
+  MenuSelect menu = MenuSelect::DEFAULT;
+    val = ReadSelectedPushButton();
+    if (val != -1) {  // -1 is returned by ReadSelectedPushButton in the case of an invalid read.
+      menu = ProcessButtonPress(val);
+    }  else menu = MenuSelect::DEFAULT;
+    return menu;
+}
+
 
 /*****
   Purpose: program entry point that sets the environment for program
@@ -1191,8 +1216,9 @@ int dBoffset{0};
 
 void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
 {
-  int pushButtonSwitchIndex = -1;
+  MenuSelect pushButtonSwitchIndex;
   int valPin;
+//  MenuSelect menu;
   long ditTimerOff;  //AFP 09-22-22
   long dahTimerOn;
   bool cwKeyDown;

@@ -55,6 +55,7 @@ void FreqShift1()
   // this is for -Fs/4 [moves receive frequency to the right in the spectrumdisplay]
 }
 
+
 /*****
   Purpose: Shift Receive frequency by an arbitrary amount
 
@@ -93,7 +94,6 @@ void FreqShift2()
    // SetFreq();           //AFP 10-04-22
    // ShowFrequency();
    // DrawBandWidthIndicatorBar();
-
     // ); //AFP 10-04-22
     // EncoderFineTune();      //AFP 10-04-22
 

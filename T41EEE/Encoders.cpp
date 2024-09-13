@@ -312,6 +312,7 @@ q15_t GetEncoderValueLiveQ15t(int minValue, int maxValue, int startValue, int in
 int GetEncoderValue(int minValue, int maxValue, int startValue, int increment, char prompt[]) {
   int currentValue = startValue;
   int val;
+  MenuSelect menu;
 
   tft.setFontScale((enum RA8875tsize)1);
 
@@ -339,8 +340,8 @@ int GetEncoderValue(int minValue, int maxValue, int startValue, int increment, c
     val = ReadSelectedPushButton();  // Read the ladder value
     //MyDelay(100L); //AFP 09-22-22
     if (val != -1 && val < (EEPROMData.switchValues[0] + WIGGLE_ROOM)) {
-      val = ProcessButtonPress(val);    // Use ladder value to get menu choice
-      if (val == MENU_OPTION_SELECT) {  // Make a choice??
+      menu = ProcessButtonPress(val);    // Use ladder value to get menu choice
+      if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
         return currentValue;
       }
     }
@@ -359,6 +360,7 @@ int GetEncoderValue(int minValue, int maxValue, int startValue, int increment, c
 *****/
 int SetWPM() {
   int val;
+  MenuSelect menu;
   long lastWPM = EEPROMData.currentWPM;
 
   tft.setFontScale((enum RA8875tsize)1);
@@ -386,8 +388,8 @@ int SetWPM() {
     }
 
     val = ReadSelectedPushButton();  // Read pin that controls all switches
-    val = ProcessButtonPress(val);
-    if (val == MENU_OPTION_SELECT) {  // Make a choice??
+    menu = ProcessButtonPress(val);
+    if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
       EEPROMData.currentWPM = lastWPM;
       //EEPROMData.EEPROMData.currentWPM = EEPROMData.currentWPM;
       UpdateWPMField();
@@ -413,6 +415,7 @@ int SetWPM() {
 long SetTransmitDelay()  // new function JJP 9/1/22
 {
   int val;
+  MenuSelect menu;
   long lastDelay = EEPROMData.cwTransmitDelay;
   long increment = 250;  // Means a quarter second change per detent
 
@@ -438,11 +441,10 @@ long SetTransmitDelay()  // new function JJP 9/1/22
     }
 
     val = ReadSelectedPushButton();  // Read pin that controls all switches
-    val = ProcessButtonPress(val);
+    menu = ProcessButtonPress(val);
     //MyDelay(150L);  //ALF 09-22-22
-    if (val == MENU_OPTION_SELECT) {  // Make a choice??
+    if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
       EEPROMData.cwTransmitDelay = lastDelay;
-      //EEPROMData.EEPROMData.cwTransmitDelay = EEPROMData.cwTransmitDelay;
       EEPROMWrite();
       break;
     }

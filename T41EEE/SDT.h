@@ -2,7 +2,7 @@
 
 //======================================== User section that might need to be changed ===================================
 #include "MyConfigurationFile.h"  // This file name should remain unchanged
-#define VERSION "T41EEE.7"        // Change this for updates. If you make this longer than 9 characters, brace yourself for surprises.  Use quotes!
+
 
 struct maps {
   char mapNames[50];
@@ -43,64 +43,47 @@ extern struct maps myMapFiles[];
 
 #include "CWCalibrate.h"
 #include "SSBCalibrate.h"
+//#include<string>
+//auto VERSION = "T41EEE.7";
 
 //======================================== Symbolic Constants for the T41 ===================================================
-#define RIGNAME "T41-EP SDT"
-#define NUMBER_OF_SWITCHES 18  // Number of push button switches. 16 on older boards
+const char RIGNAME[] = "T41-EP SDT";
+const int NUMBER_OF_SWITCHES = 18;  // Number of push button switches. 16 on older boards
 
-#define RIGNAME_X_OFFSET 570   // Pixel count to rig name field
+const int RIGNAME_X_OFFSET = 570;   // Pixel count to rig name field
 #define RA8875_DISPLAY 1       // Comment out if not using RA8875 display
-#define TEMPMON_ROOMTEMP 25.0f
+const int TEMPMON_ROOMTEMP = 25.0;
 #define SD_CS BUILTIN_SDCARD  // Works on T_3.6 and T_4.1 ...
-#define OFF 0
-#define ON 1
-
-//================================ mapping globals and Symbolic constants ================
-#define BUFFPIXEL 20  // Use buffer to read image rather than 1 pixel at a time
-#define DEGREES2RADIANS 0.01745329
-#define RADIANS2DEGREES 57.29578
-#define PI_BY_180 0.01745329
-#define NEW_SI5351_FREQ_MULT 1UL
 
 //======================================== Symbolic constants ==========================================================
 
 // These constants are used by the voltage divider network so only 1 analog pin is used for the 16 option switches. These may need
 // to be changed for the exact value for your system. They are initialized in the INO file.
-#define BUSY_ANALOG_PIN 39       // This is the analog pin that controls the 18 switches
-#define NOTHING_TO_SEE_HERE 950  // If the analog pin is greater than this value, nothing's going on
-#define BOGUS_PIN_READ -1        // If no push button read
-#define WIGGLE_ROOM 20           // This is the maximum value that can added to a BUSY_ANALOG_PIN pin read value of a push
+const int BUSY_ANALOG_PIN = 39;       // This is the analog pin that controls the 18 switches
+const int NOTHING_TO_SEE_HERE = 950;  // If the analog pin is greater than this value, nothing's going on
+const int BOGUS_PIN_READ = -1;        // If no push button read. GET RID OF THIS!!!
+const int WIGGLE_ROOM = 20;           // This is the maximum value that can added to a BUSY_ANALOG_PIN pin read value of a push
 //                         button and still have the switch value be associated with the correct push button.
-#define MAX_FAVORITES 13  // Max number of favorite frequencies stored in EEPROM
-#define PRIMARY_MENU 0
-#define SECONDARY_MENU 1
-#define PRIMARY_MENU_X 0
-#define SECONDARY_MENU_X 250
-#define MENUS_Y 0
-#define EACH_MENU_WIDTH 260
-#define BOTH_MENU_WIDTHS (EACH_MENU_WIDTH * 2 + 30)
-#define MENU_OPTION_SELECT 0  // These are the expected values from the switch ladder
-#define MAIN_MENU_UP 1
-#define BAND_UP 2
-#define ZOOM 3
-#define MAIN_MENU_DN 4
-#define BAND_DN 5
-#define FILTER 6
-#define DEMODULATION 7
-#define SET_MODE 8
-#define NOISE_REDUCTION 9
-#define NOTCH_FILTER 10
-#define NOISE_FLOOR 11
-#define FINE_TUNE_INCREMENT 12
-#define DECODER_TOGGLE 13
-#define MAIN_TUNE_INCREMENT 14
-#define RESET_TUNING 15  // AFP 10-11-22
-#define UNUSED_1 16      // AFP 10-11-22
-#define BEARING 17       // AFP 10-11-22
+
+const int PRIMARY_MENU = 0;
+const int SECONDARY_MENU = 1;
+const int PRIMARY_MENU_X = 0;
+const int SECONDARY_MENU_X = 250;
+const int MENUS_Y = 0;
+const int EACH_MENU_WIDTH = 260;
+const int  BOTH_MENU_WIDTHS = (EACH_MENU_WIDTH * 2 + 30);
+const int MENU_OPTION_SELECT = 0;  // These are the expected values from the switch ladder
+ 
+// Make this into an enum.
+enum class MenuSelect{MENU_OPTION_SELECT, MAIN_MENU_UP, BAND_UP, ZOOM, MAIN_MENU_DN, BAND_DN, FILTER, DEMODULATION, SET_MODE,
+                      NOISE_REDUCTION, NOTCH_FILTER, NOISE_FLOOR, FINE_TUNE_INCREMENT, DECODER_TOGGLE,
+                      MAIN_TUNE_INCREMENT, RESET_TUNING, UNUSED_1, BEARING, BOGUS_PIN_READ, DEFAULT
+};
+
 //=======================================================
-#define XPIXELS 800  // This is for the 5.0" display
-#define YPIXELS 480
-#define CHAR_HEIGHT 32
+const int XPIXELS = 800;  // This is for the 5.0" display
+const int YPIXELS = 480;
+const int CHAR_HEIGHT = 32;
 #define PIXELS_PER_EQUALIZER_DELTA 10  // Number of pixeks per detent of encoder for equalizer changes
 #define SPECTRUM_LEFT_X 3              // Used to plot left edge of spectrum display  AFP 12-14-21
 #define WATERFALL_LEFT_X SPECTRUM_LEFT_X
@@ -180,9 +163,8 @@ extern struct maps myMapFiles[];
 #define FLOAT_PRECISION 6                                     // Assumed precision for a float
 #define EQUALIZER_CELL_COUNT 14
 #define USE_LOG10FAST
-#define TEMPMON_ROOMTEMP 25.0f
 //--------------------- decoding stuff
-#define FFT_LENGTH 512
+const int FFT_LENGTH = 512;
 #define BLACK 0x0000             /*   0,   0,   0 */
 #define RA8875_BLUE 0x000F       /*   0,   0, 128 */
 #define MAROON 0x7800            /* 128,   0,   0 */
@@ -200,7 +182,6 @@ extern struct maps myMapFiles[];
 #define FILTER_WIN 0x10        // Color of SSB filter width
 #include <utility/imxrt_hw.h>  // for setting I2S freq, Thanks, FrankB!
 
-#define TEMPMON_ROOMTEMP 25.0f
 #define MAX_WPM 60
 #define ENCODER_FACTOR 0.25F  // Use 0.25f with cheap encoders that have 4 detents per step.
                               // For other encoders or libs we use 1.0f.
@@ -212,46 +193,44 @@ extern struct maps myMapFiles[];
 //============== Vin are "covered up" by the Audio board. However, not all of those pins are
 //============== actually used by the board. See: https://www.pjrc.com/store/teensy3_audio.html
 //========================================= Display pins
-#define TFT_DC 9
-#define TFT_CS 10
-#define TFT_MOSI 11
-#define TFT_SCLK 13
-#define TFT_RST 255
+const int TFT_DC = 9;
+const int TFT_CS = 10;
+const int TFT_MOSI = 11;
+const int TFT_SCLK = 13;
+const int TFT_RST = 255;
 //========================================= Encoder pins  Jack Purdum W8TEE September 25, 2023
 #ifdef FOURSQRP
-#define VOLUME_ENCODER_A 2
-#define VOLUME_ENCODER_B 3
-#define FILTER_ENCODER_A 16
-#define FILTER_ENCODER_B 15
-#define FINETUNE_ENCODER_A 4
-#define FINETUNE_ENCODER_B 5
-#define TUNE_ENCODER_A 14
-#define TUNE_ENCODER_B 17
+const int VOLUME_ENCODER_A = 2;
+const int VOLUME_ENCODER_B = 3;
+const int FILTER_ENCODER_A = 16;
+const int FILTER_ENCODER_B = 15;
+const int FINETUNE_ENCODER_A = 4;
+const int FINETUNE_ENCODER_B = 5;
+const int TUNE_ENCODER_A = 14;
+const int TUNE_ENCODER_B = 17;
 #else
-#define VOLUME_ENCODER_A 2
-#define VOLUME_ENCODER_B 3
-#define FILTER_ENCODER_A 15
-#define FILTER_ENCODER_B 41  // 14.  Change this to 41 when using SPDIF with T41-2 Main board.
-#define FINETUNE_ENCODER_A 4
-#define FINETUNE_ENCODER_B 5
-#define TUNE_ENCODER_A 16
-#define TUNE_ENCODER_B 17
+const int VOLUME_ENCODER_A = 2;
+const int VOLUME_ENCODER_B = 3;
+const int FILTER_ENCODER_A = 15;
+const int FILTER_ENCODER_B = 41;  // 14.  Change this to 41 when using SPDIF with T41-2 Main board.
+const int FINETUNE_ENCODER_A = 4;
+const int FINETUNE_ENCODER_B = 5;
+const int TUNE_ENCODER_A = 16;
+const int TUNE_ENCODER_B = 17;
 #endif
 
 //========================================= Filter Board pins
-#define FILTERPIN80M 30  // 80M filter relay
-#define FILTERPIN40M 31  // 40M filter relay
-#define FILTERPIN20M 28  // 20M filter relay
-#define FILTERPIN15M 29  // 15M filter relay
-#define RXTX 22          // Transmit/Receive
-#define PTT 37           // Transmit/Receive
-#define MUTE 38          // Mute Audio,  HIGH = "On" Audio available from Audio PA, LOW = Mute audio
-//========================================= Keyer pins
-#define KEYER_DAH_INPUT_RING 36  // Ring connection for keyer.  Default for righthanded user.  Also straight key.
-#define KEYER_DIT_INPUT_TIP 35   // Tip connection for keyer
-//#define KEYER 
-// QSD2/QSE2 reset pin
-const int RESET = 0;
+const int FILTERPIN80M = 30;  // 80M filter relay
+const int FILTERPIN40M = 31;  // 40M filter relay
+const int FILTERPIN20M = 28;  // 20M filter relay
+const int FILTERPIN15M = 29;  // 15M filter relay
+const int RXTX = 22;          // Transmit/Receive
+const int PTT = 37;           // Transmit/Receive
+const int MUTE = 38;          // Mute Audio,  HIGH = "On" Audio available from Audio PA, LOW = Mute audio
+//========================================= Key/Keyer pins
+const int KEYER_DAH_INPUT_RING = 35;  // Ring connection for keyer.  Default for righthanded user.  
+const int KEYER_DIT_INPUT_TIP = 36;   // Tip connection for keyer.  Also straight key.
+const int RESET = 0;  // QSD2/QSE2 reset pin
 //========================================================= End Pin Assignments =================================
 #define TMS0_POWER_DOWN_MASK (0x1U)
 #define TMS1_MEASURE_FREQ(x) (((uint32_t)(((uint32_t)(x)) << 0U)) & 0xFFFFU)
@@ -292,8 +271,6 @@ enum class RadioMode{SSB_MODE, CW_MODE, AM_MODE};  // Probably need only modes, 
 #define SAMPLE_RATE_256K 15
 #define SAMPLE_RATE_281K 16  // ??
 #define SAMPLE_RATE_353K 17
-
-#define TEMPMON_ROOMTEMP 25.0f
 
 #define DEMOD_MIN 0
 #define DEMOD_USB 0
@@ -368,12 +345,9 @@ extern int centerTuneFlag;
 
 //================== Global Excite Variables =================
 
-#define IIR_ORDER 8
-#define IIR_NUMSTAGES (IIR_ORDER / 2)
-
 struct config_t {
 
-  char versionSettings[10] = VERSION;  // This is required to be the first!  See EEPROMRead() function.
+  char versionSettings[10] = "T41EEE.7";  // This is required to be the first!  See EEPROMRead() function.
   int AGCMode = 1;
   int audioVolume = 30;  // 4 bytes
   int rfGainCurrent = 0;
@@ -551,7 +525,6 @@ extern int32_t NCOFreq;  // AFP 04-16-22
 
 //======================================== Global object declarations ==================================================
 // Teensy and OpenAudio objects.  Revised by KF5N July 24, 2024
-//extern AudioConnection patchCord1;   // This patchcord is used to disconnect the microphone input datastream.
 extern AudioConnection patchCord15;  // Patch cords 15 and 16 are used to connect/disconnect the I and Q datastreams.
 extern AudioConnection patchCord16;
 
@@ -738,7 +711,6 @@ extern int updateDisplayCounter;
 extern const int DEC2STATESIZE;
 extern const int INT1_STATE_SIZE;
 extern const int INT2_STATE_SIZE;
-//extern unsigned ring_buffsize;
 extern long long freqCorrectionFactor;
 extern long long freqCorrectionFactorOld;  //AFP 09-21-22
 extern int32_t mainMenuIndex;
@@ -987,7 +959,7 @@ void EraseMenus();
 void ErasePrimaryMenu();
 void EraseSpectrumDisplayContainer();
 void EraseSpectrumWindow();
-void ExecuteButtonPress(int val);
+void ExecuteButtonPress(MenuSelect val);
 void FilterBandwidth();
 void FilterOverlay();
 void FilterSetSSB();
@@ -1028,11 +1000,13 @@ void NROptions();
 void printFile(const char *filename);
 void EnableButtonInterrupts();
 void playTransmitData();  // KF5N February 23, 2024
-int ProcessButtonPress(int valPin);
+MenuSelect ProcessButtonPress(int valPin);
 void ProcessEqualizerChoices(int EQType, char *title);
 void ProcessIQData();
-uint16_t read16(File &f);
-uint32_t read32(File &f);
+//uint16_t read16(File &f);
+//uint32_t read32(File &f);
+MenuSelect readButton(MenuSelect lastUsedTask);
+MenuSelect readButton();
 int ReadSelectedPushButton();
 void RedrawDisplayScreen();
 void ResetFlipFlops();

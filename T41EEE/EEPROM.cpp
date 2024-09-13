@@ -1,6 +1,7 @@
 
 #include "SDT.h"
 
+const int MAX_FAVORITES = 13;  // Max number of favorite frequencies stored in EEPROM
 PROGMEM int16_t currentMode;
 
 /*****
@@ -95,6 +96,7 @@ FLASHMEM void EEPROMStuffFavorites(unsigned long current[]) {
 FLASHMEM void SetFavoriteFrequency() {
   int index;
   int val;
+  MenuSelect menu;
   tft.setFontScale((enum RA8875tsize)1);
   index = 0;
   tft.setTextColor(RA8875_WHITE);
@@ -117,9 +119,9 @@ FLASHMEM void SetFavoriteFrequency() {
     }
 
     val = ReadSelectedPushButton();  // Read pin that controls all switches
-    val = ProcessButtonPress(val);
+    menu = ProcessButtonPress(val);
     delay(150L);
-    if (val == MENU_OPTION_SELECT) {  // Make a choice??
+    if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
       EraseMenus();
       EEPROMData.favoriteFreqs[index] = TxRxFreq;
       //UpdateEEPROMSyncIndicator(0);       //  JJP 7/25/23
@@ -152,6 +154,7 @@ FLASHMEM void GetFavoriteFrequency() {
   int index = 0;
   int val;
   int currentBand2 = 0;
+  MenuSelect menu;
   tft.setFontScale((enum RA8875tsize)1);
   tft.setTextColor(RA8875_WHITE);
   tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH, CHAR_HEIGHT, RA8875_MAGENTA);
@@ -173,7 +176,7 @@ FLASHMEM void GetFavoriteFrequency() {
     }
 
     val = ReadSelectedPushButton();  // Read pin that controls all switches
-    val = ProcessButtonPress(val);
+    menu = ProcessButtonPress(val);
     delay(150L);
 
     if (EEPROMData.centerFreq >= bands[BAND_80M].fBandLow && EEPROMData.centerFreq <= bands[BAND_80M].fBandHigh) {
@@ -199,7 +202,7 @@ FLASHMEM void GetFavoriteFrequency() {
     }
     EEPROMData.currentBand = currentBand2;
 
-    if (val == MENU_OPTION_SELECT) {  // Make a choice??
+    if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
       switch (EEPROMData.activeVFO) {
         case VFO_A:
           if (EEPROMData.currentBandA == NUMBER_OF_BANDS) {  // Incremented too far?
@@ -220,7 +223,7 @@ FLASHMEM void GetFavoriteFrequency() {
           break;
       }
     }
-    if (val == MENU_OPTION_SELECT) {
+    if (menu == MenuSelect::MENU_OPTION_SELECT) {
       EraseSpectrumDisplayContainer();
       currentMode = bands[EEPROMData.currentBand].mode;
       DrawSpectrumDisplayContainer();

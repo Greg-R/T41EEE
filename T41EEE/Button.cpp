@@ -126,21 +126,21 @@ void EnableButtonInterrupts() {
   Return value;
     int                   -1 if not valid push button, index of push button if valid
 *****/
-int ProcessButtonPress(int valPin) {
+MenuSelect ProcessButtonPress(int valPin) {
   int switchIndex;
 
   if (valPin == BOGUS_PIN_READ) {  // Not valid press
-    return -1;
+    return MenuSelect::BOGUS_PIN_READ;
   }
 
   for (switchIndex = 0; switchIndex < NUMBER_OF_SWITCHES; switchIndex++) {
     if (abs(valPin - EEPROMData.switchValues[switchIndex]) < WIGGLE_ROOM)  // ...because ADC does return exact values every time
     {
-      return switchIndex;
+      return static_cast<MenuSelect>(switchIndex);
     }
   }
 
-  return -1;  // Really should never do this
+  return MenuSelect::DEFAULT;
 }
 
 
@@ -199,24 +199,24 @@ int ReadSelectedPushButton() {
   Return value;
     void
 *****/
-void ExecuteButtonPress(int val) {
+void ExecuteButtonPress(MenuSelect val) {
 
   switch (val) {
-    case MENU_OPTION_SELECT:  // 0
+    case MenuSelect::MENU_OPTION_SELECT:  // 0
 
       ShowMenu(&topMenus[mainMenuIndex], PRIMARY_MENU);
       functionPtr[mainMenuIndex]();  // These are processed in MenuProcessing.cpp
       EraseMenus();
       break;
 
-    case MAIN_MENU_UP:       // 1
+    case MenuSelect::MAIN_MENU_UP:       // 1
       ButtonMenuIncrease();  // This makes sure the increment does go outta range
                              //      if (menuStatus != NO_MENUS_ACTIVE) {  // Doing primary menu
       ShowMenu(&topMenus[mainMenuIndex], PRIMARY_MENU);
       //      }
       break;
 
-    case BAND_UP:  // 2 Now calls ProcessIQData and Encoders calls
+    case MenuSelect::BAND_UP:  // 2 Now calls ProcessIQData and Encoders calls
       EraseMenus();
       if (EEPROMData.currentBand < 5) digitalWrite(bandswitchPins[EEPROMData.currentBand], LOW);  // Added if so unused GPOs will not be touched.  KF5N October 16, 2023.
       ButtonBandIncrease();
@@ -230,17 +230,17 @@ void ExecuteButtonPress(int val) {
       ShowAutoStatus();
       break;
 
-    case ZOOM:  // 3
+    case MenuSelect::ZOOM:  // 3
       EraseMenus();
       ButtonZoom();
       break;
 
-    case MAIN_MENU_DN:  // 4
+    case MenuSelect::MAIN_MENU_DN:  // 4
       ButtonMenuDecrease();
       ShowMenu(&topMenus[mainMenuIndex], PRIMARY_MENU);
       break;
 
-    case BAND_DN:  // 5
+    case MenuSelect::BAND_DN:  // 5
       EraseMenus();
       ShowSpectrum();  //Now calls ProcessIQData and Encoders calls
       if (EEPROMData.currentBand < 5) digitalWrite(bandswitchPins[EEPROMData.currentBand], LOW);
@@ -252,40 +252,40 @@ void ExecuteButtonPress(int val) {
       ShowAutoStatus();
       break;
 
-    case FILTER:  // 6
+    case MenuSelect::FILTER:  // 6
       EraseMenus();
       ButtonFilter();
       break;
 
-    case DEMODULATION:  // 7
+    case MenuSelect::DEMODULATION:  // 7
       EraseMenus();
       ButtonDemodMode();
       break;
 
-    case SET_MODE:  // 8
+    case MenuSelect::SET_MODE:  // 8
       ButtonMode();
       ShowSpectrumdBScale();
       break;
 
-    case NOISE_REDUCTION:  // 9
+    case MenuSelect::NOISE_REDUCTION:  // 9
       ButtonNR();
       UpdateNotchField();  // This is required because LMS NR must turn off AutoNotch.
       break;
 
-    case NOTCH_FILTER:  // 10
+    case MenuSelect::NOTCH_FILTER:  // 10
       ButtonNotchFilter();
       UpdateNotchField();
       break;
 
-    case NOISE_FLOOR:  // 11
+    case MenuSelect::NOISE_FLOOR:  // 11
       ButtonSetNoiseFloor();
       break;
 
-    case FINE_TUNE_INCREMENT:  // 12
+    case MenuSelect::FINE_TUNE_INCREMENT:  // 12
       ButtonFineFreqIncrement();
       break;
 
-    case DECODER_TOGGLE:  // 13
+    case MenuSelect::DECODER_TOGGLE:  // 13
       EEPROMData.decoderFlag = !EEPROMData.decoderFlag;
       if ((EEPROMData.xmtMode == RadioMode::CW_MODE) && (EEPROMData.decoderFlag == 1)) {
         radioMode = RadioMode::CW_MODE;
@@ -293,23 +293,24 @@ void ExecuteButtonPress(int val) {
       UpdateDecoderField();
       break;
 
-    case MAIN_TUNE_INCREMENT:  // 14
+    case MenuSelect::MAIN_TUNE_INCREMENT:  // 14
       ButtonCenterFreqIncrement();
       break;
 
-    case RESET_TUNING:  // 15   AFP 10-11-22
+    case MenuSelect::RESET_TUNING:  // 15   AFP 10-11-22
       ResetTuning();    // AFP 10-11-22
       break;            // AFP 10-11-22
 
-    case UNUSED_1:  // 16
+    case MenuSelect::UNUSED_1:  // 16
       if (calOnFlag == 0) {
         ButtonFrequencyEntry();
       }
       break;
 
-    case BEARING:  // 17  // AFP 10-11-22
-      int buttonIndex, doneViewing, valPin;
+    case MenuSelect::BEARING:  // 17  // AFP 10-11-22
+      int doneViewing, valPin;
       float retVal;
+      MenuSelect menu;
 
       tft.clearScreen(RA8875_BLACK);
 
@@ -331,9 +332,9 @@ void ExecuteButtonPress(int val) {
         valPin = ReadSelectedPushButton();  // Poll UI push buttons
         delay(100L);
         if (valPin != BOGUS_PIN_READ) {              // If a button was pushed...
-          buttonIndex = ProcessButtonPress(valPin);  // Winner, winner...chicken dinner!
-          switch (buttonIndex) {
-            case BEARING:  // Pressed puchbutton 18
+          menu = ProcessButtonPress(valPin);  // Winner, winner...chicken dinner!
+          switch (menu) {
+            case MenuSelect::BEARING:  // Pressed puchbutton 18
               doneViewing = true;
               break;
             default:

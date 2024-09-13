@@ -150,7 +150,7 @@ FLASHMEM void saveConfiguration(const char *filename, const config_t &EEPROMData
   JsonDocument doc;  // This uses the heap.
 
   // Set the values in the document
-  doc["versionSettings"] = VERSION;    // Fix for version not updating in JSON file.  KF5N March 18, 2024.
+  doc["versionSettings"] = EEPROMData.versionSettings;    // Fix for version not updating in JSON file.  KF5N March 18, 2024.
   doc["AGCMode"] = EEPROMData.AGCMode;
   doc["audioVolume"] = EEPROMData.audioVolume;
   doc["rfGainCurrent"] = EEPROMData.rfGainCurrent;

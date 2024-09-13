@@ -137,7 +137,7 @@ void SetBandRelay(int state) {
     void
 *****/
 void SetCompressionThreshold() {
-  int val;
+  MenuSelect menu, lastUsedTask = MenuSelect::DEFAULT;
 
   tft.setFontScale((enum RA8875tsize)1);
   tft.fillRect(SECONDARY_MENU_X - 50, MENUS_Y, EACH_MENU_WIDTH + 50, CHAR_HEIGHT, RA8875_MAGENTA);
@@ -160,10 +160,13 @@ void SetCompressionThreshold() {
       tft.print(EEPROMData.currentMicThreshold, 0);
       filterEncoderMove = 0;
     }
+    /*
     val = ReadSelectedPushButton();  // Read pin that controls all switches
-    val = ProcessButtonPress(val);
+    menu = ProcessButtonPress(val);
     delay(150L);
-    if (val == MENU_OPTION_SELECT) {  // Make a choice??
+    */
+    menu = readButton(lastUsedTask);
+    if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
       updateMic();
       EEPROMWrite();
       UpdateCompressionField();
@@ -184,7 +187,7 @@ void SetCompressionThreshold() {
     void
 *****/
 void SetCompressionRatio() {
-  int val;
+  MenuSelect menu, lastUsedTask = MenuSelect::DEFAULT;
 
   tft.setFontScale((enum RA8875tsize)1);
 
@@ -208,12 +211,14 @@ void SetCompressionRatio() {
       tft.print(EEPROMData.currentMicCompRatio, 0);
       filterEncoderMove = 0;
     }
-
+menu = readButton(lastUsedTask);
+/*
     val = ReadSelectedPushButton();  // Read pin that controls all switches
-    val = ProcessButtonPress(val);
+    menu = ProcessButtonPress(val);
     delay(150L);
+    */
 
-    if (val == MENU_OPTION_SELECT) {  // Make a choice??
+    if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
       // EEPROMData.EEPROMData.currentMicCompRatio = EEPROMData.currentMicCompRatio;
       updateMic();  // This updates the compression ratio and the threshold.
       EEPROMWrite();
@@ -234,7 +239,7 @@ void SetCompressionRatio() {
     int           an index into the band array
 *****/
 void MicGainSet() {
-  int val;
+  MenuSelect menu, lastUsedTask = MenuSelect::DEFAULT;
   tft.setFontScale((enum RA8875tsize)1);
   tft.fillRect(SECONDARY_MENU_X - 50, MENUS_Y, EACH_MENU_WIDTH + 50, CHAR_HEIGHT, RA8875_MAGENTA);
   tft.setTextColor(RA8875_WHITE);
@@ -254,9 +259,12 @@ void MicGainSet() {
       tft.print(EEPROMData.currentMicGain, 1);
       filterEncoderMove = 0;
     }
+    /*
     val = ReadSelectedPushButton();
-    val = ProcessButtonPress(val);
-    if (val == MENU_OPTION_SELECT) {
+    menu = ProcessButtonPress(val);
+    */
+    menu = readButton(lastUsedTask);
+    if (menu == MenuSelect::MENU_OPTION_SELECT) {
       updateMic();  // Update the Open Audio compressor and microphone gain.
       EEPROMWrite();
       break;
