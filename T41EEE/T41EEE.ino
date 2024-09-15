@@ -199,6 +199,12 @@ to prior versions.
 #include "SDT.h"
 #include <charconv>
 
+//  States for the loop() modal state machine.
+enum class RadioState{SSB_RECEIVE_STATE, SSB_TRANSMIT_STATE, CW_RECEIVE_STATE, CW_TRANSMIT_STRAIGHT_STATE, 
+                      CW_TRANSMIT_KEYER_STATE, AM_RECEIVE_STATE, SSB_CALIBRATE_STATE, CW_CALIBRATE_STATE, 
+                      SET_CW_SIDETONE, NOSTATE};
+enum class RadioMode{SSB_MODE, CW_MODE, AM_MODE};  // Probably need only modes, not receive or transmit.
+
 const char *filename = "/config.txt";  // <- SD library uses 8.3 filenames
 
 struct maps myMapFiles[10] = {
@@ -258,7 +264,8 @@ bool agc_action = false;
 // Teensy and OpenAudio dataflow code.
 #include "AudioSignal.h"
 //End dataflow code
-
+#include "EEPROMMemory.h"
+EEPROMMemory eeprom;     // Instantiate the EEPROMMemory object.
 CWCalibrate calibrater;  // Instantiate the calibration objects.
 SSBCalibrate ssbcalibrater;
 
@@ -1216,18 +1223,15 @@ int dBoffset{0};
 
 void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
 {
-  MenuSelect pushButtonSwitchIndex;
-  int valPin;
-//  MenuSelect menu;
+  MenuSelect menu;
   long ditTimerOff;  //AFP 09-22-22
   long dahTimerOn;
   bool cwKeyDown;
   unsigned long cwBlockIndex;
 
-  valPin = ReadSelectedPushButton();
-  if (valPin != BOGUS_PIN_READ and (radioState != RadioState::SSB_TRANSMIT_STATE) and (radioState != RadioState::CW_TRANSMIT_STRAIGHT_STATE) and (radioState != RadioState::CW_TRANSMIT_KEYER_STATE)) {
-    pushButtonSwitchIndex = ProcessButtonPress(valPin);
-    ExecuteButtonPress(pushButtonSwitchIndex);
+  menu = readButton();
+  if (menu != MenuSelect::BOGUS_PIN_READ and (radioState != RadioState::SSB_TRANSMIT_STATE) and (radioState != RadioState::CW_TRANSMIT_STRAIGHT_STATE) and (radioState != RadioState::CW_TRANSMIT_KEYER_STATE)) {
+    ExecuteButtonPress(menu);
   }
   //  State detection
   if (EEPROMData.xmtMode == RadioMode::SSB_MODE and digitalRead(PTT) == HIGH) radioState = RadioState::SSB_RECEIVE_STATE;

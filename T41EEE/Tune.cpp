@@ -223,7 +223,7 @@ void CenterFastTune() {
 *****/
 int DoSplitVFO() {
   char freqBuffer[15];
-  int val;
+//  int val;
   MenuSelect menu;
   long chunk = SPLIT_INCREMENT;
   long splitOffset;
@@ -250,9 +250,9 @@ int DoSplitVFO() {
     }
     filterEncoderMove = 0L;
 
-    val = ReadSelectedPushButton();  // Read pin that controls all switches
-    menu = ProcessButtonPress(val);
-    delay(150L);
+//    val = ReadSelectedPushButton();  // Read pin that controls all switches
+    menu = readButton();
+//    delay(150L);
     if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
       Clk1SetFreq += splitOffset;     // New transmit frequency // AFP 09-27-22
       UpdateInfoWindow();

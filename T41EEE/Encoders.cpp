@@ -311,7 +311,7 @@ q15_t GetEncoderValueLiveQ15t(int minValue, int maxValue, int startValue, int in
 *****/
 int GetEncoderValue(int minValue, int maxValue, int startValue, int increment, char prompt[]) {
   int currentValue = startValue;
-  int val;
+//  int val;
   MenuSelect menu;
 
   tft.setFontScale((enum RA8875tsize)1);
@@ -337,16 +337,16 @@ int GetEncoderValue(int minValue, int maxValue, int startValue, int increment, c
       filterEncoderMove = 0;
     }
 
-    val = ReadSelectedPushButton();  // Read the ladder value
+//    val = ReadSelectedPushButton();  // Read the ladder value
     //MyDelay(100L); //AFP 09-22-22
-    if (val != -1 && val < (EEPROMData.switchValues[0] + WIGGLE_ROOM)) {
-      menu = ProcessButtonPress(val);    // Use ladder value to get menu choice
+//    if (val != -1 && val < (EEPROMData.switchValues[0] + WIGGLE_ROOM)) {
+      menu = readButton();    // Use ladder value to get menu choice
       if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
         return currentValue;
       }
     }
   }
-}
+
 
 
 /*****
@@ -359,7 +359,7 @@ int GetEncoderValue(int minValue, int maxValue, int startValue, int increment, c
     int           the current WPM
 *****/
 int SetWPM() {
-  int val;
+//  int val;
   MenuSelect menu;
   long lastWPM = EEPROMData.currentWPM;
 
@@ -387,8 +387,8 @@ int SetWPM() {
       filterEncoderMove = 0;
     }
 
-    val = ReadSelectedPushButton();  // Read pin that controls all switches
-    menu = ProcessButtonPress(val);
+//    val = ReadSelectedPushButton();  // Read pin that controls all switches
+    menu = readButton();
     if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
       EEPROMData.currentWPM = lastWPM;
       //EEPROMData.EEPROMData.currentWPM = EEPROMData.currentWPM;
@@ -414,7 +414,7 @@ int SetWPM() {
 *****/
 long SetTransmitDelay()  // new function JJP 9/1/22
 {
-  int val;
+//  int val;
   MenuSelect menu;
   long lastDelay = EEPROMData.cwTransmitDelay;
   long increment = 250;  // Means a quarter second change per detent
@@ -440,8 +440,8 @@ long SetTransmitDelay()  // new function JJP 9/1/22
       filterEncoderMove = 0;
     }
 
-    val = ReadSelectedPushButton();  // Read pin that controls all switches
-    menu = ProcessButtonPress(val);
+//    val = ReadSelectedPushButton();  // Read pin that controls all switches
+    menu = readButton();
     //MyDelay(150L);  //ALF 09-22-22
     if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
       EEPROMData.cwTransmitDelay = lastDelay;

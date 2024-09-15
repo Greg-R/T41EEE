@@ -209,9 +209,9 @@ void ExecuteButtonPress(MenuSelect val) {
       EraseMenus();
       break;
 
-    case MenuSelect::MAIN_MENU_UP:       // 1
-      ButtonMenuIncrease();  // This makes sure the increment does go outta range
-                             //      if (menuStatus != NO_MENUS_ACTIVE) {  // Doing primary menu
+    case MenuSelect::MAIN_MENU_UP:  // 1
+      ButtonMenuIncrease();         // This makes sure the increment does go outta range
+                                    //      if (menuStatus != NO_MENUS_ACTIVE) {  // Doing primary menu
       ShowMenu(&topMenus[mainMenuIndex], PRIMARY_MENU);
       //      }
       break;
@@ -298,8 +298,8 @@ void ExecuteButtonPress(MenuSelect val) {
       break;
 
     case MenuSelect::RESET_TUNING:  // 15   AFP 10-11-22
-      ResetTuning();    // AFP 10-11-22
-      break;            // AFP 10-11-22
+      ResetTuning();                // AFP 10-11-22
+      break;                        // AFP 10-11-22
 
     case MenuSelect::UNUSED_1:  // 16
       if (calOnFlag == 0) {
@@ -308,7 +308,7 @@ void ExecuteButtonPress(MenuSelect val) {
       break;
 
     case MenuSelect::BEARING:  // 17  // AFP 10-11-22
-      int doneViewing, valPin;
+      int doneViewing;
       float retVal;
       MenuSelect menu;
 
@@ -329,10 +329,10 @@ void ExecuteButtonPress(MenuSelect val) {
         tft.setTextColor(RA8875_WHITE);
       }
       while (true) {
-        valPin = ReadSelectedPushButton();  // Poll UI push buttons
-        delay(100L);
-        if (valPin != BOGUS_PIN_READ) {              // If a button was pushed...
-          menu = ProcessButtonPress(valPin);  // Winner, winner...chicken dinner!
+        menu = readButton();                       // Poll UI push buttons
+                                                   //        delay(100L);
+        if (menu != MenuSelect::BOGUS_PIN_READ) {  // If a button was pushed...
+                                                   //          menu = ProcessButtonPress(valPin);  // Winner, winner...chicken dinner!
           switch (menu) {
             case MenuSelect::BEARING:  // Pressed puchbutton 18
               doneViewing = true;
@@ -349,6 +349,14 @@ void ExecuteButtonPress(MenuSelect val) {
       RedrawDisplayScreen();
       ShowFrequency();
       DrawFrequencyBarValue();
+
+      break;
+
+    case MenuSelect::BOGUS_PIN_READ:   // 18
+
+    break;
+
+    default:                           // 19
 
       break;
   }

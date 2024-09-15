@@ -60,7 +60,7 @@ void ShowMenu(const char *menu[], int where)
 *****/
 #ifdef QSE2
 void CalibrateOptions() {
-  int val;
+//  int val;
   int freqCorrectionFactorOld = 0;
   int32_t increment = 100L;
   MenuSelect menu;
@@ -80,9 +80,9 @@ void CalibrateOptions() {
         si5351.set_correction(EEPROMData.freqCorrectionFactor, SI5351_PLL_INPUT_XO);
         freqCorrectionFactorOld = EEPROMData.freqCorrectionFactor;
       }
-      val = ReadSelectedPushButton();
-      if (val != BOGUS_PIN_READ) {        // Any button press??
-        menu = ProcessButtonPress(val);    // Use ladder value to get menu choice
+      menu = readButton();
+      if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
+//        menu = ProcessButtonPress(val);    // Use ladder value to get menu choice
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
           EEPROMWrite();
@@ -94,9 +94,9 @@ void CalibrateOptions() {
     case 1:  // CW PA Cal
       EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand] = GetEncoderValueLive(0.0, 1.0, EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand], 0.01, (char *)"CW PA Cal: ", false);
       EEPROMData.powerOutCW[EEPROMData.currentBand] = sqrt(EEPROMData.transmitPowerLevel / 20.0) * EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];
-      val = ReadSelectedPushButton();
-      if (val != BOGUS_PIN_READ) {        // Any button press??
-        menu = ProcessButtonPress(val);    // Use ladder value to get menu choice
+      menu = readButton();
+      if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
+//        menu = ProcessButtonPress(val);    // Use ladder value to get menu choice
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
           EEPROMWrite();
@@ -120,9 +120,9 @@ void CalibrateOptions() {
     case 5:  // SSB PA Cal
       EEPROMData.SSBPowerCalibrationFactor[EEPROMData.currentBand] = GetEncoderValueLive(0.0, 1.0, EEPROMData.SSBPowerCalibrationFactor[EEPROMData.currentBand], 0.01, (char *)"SSB PA Cal: ", false);
       EEPROMData.powerOutSSB[EEPROMData.currentBand] = sqrt(EEPROMData.transmitPowerLevel / 20.0) * EEPROMData.SSBPowerCalibrationFactor[EEPROMData.currentBand];
-      val = ReadSelectedPushButton();
-      if (val != BOGUS_PIN_READ) {        // Any button press??
-        menu = ProcessButtonPress(val);    // Use ladder value to get menu choice
+      menu = readButton();
+      if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
+//        menu = ProcessButtonPress(val);    // Use ladder value to get menu choice
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
      //     val = ReadSelectedPushButton();
@@ -168,9 +168,9 @@ void CalibrateOptions() {
 
     case 13:  // Set DAC offset for CW carrier cancellation.
       EEPROMData.dacOffsetCW = GetEncoderValueLiveQ15t(-5000, 5000, EEPROMData.dacOffsetCW, 50, (char *)"DC Offset:", false);
-      val = ReadSelectedPushButton();
-      if (val != BOGUS_PIN_READ) {
-        menu = ProcessButtonPress(val);
+      menu = readButton();
+      if (menu != MenuSelect::BOGUS_PIN_READ) {
+//        menu = ProcessButtonPress(val);
         if (menu == MenuSelect::MENU_OPTION_SELECT) {
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
           EEPROMWrite();
@@ -181,9 +181,9 @@ void CalibrateOptions() {
 
     case 14:  // Set DAC offset for SSB carrier cancellation.
       EEPROMData.dacOffsetSSB = GetEncoderValueLiveQ15t(-5000, 5000, EEPROMData.dacOffsetSSB, 50, (char *)"DC Offset:", false);
-      val = ReadSelectedPushButton();
-      if (val != BOGUS_PIN_READ) {
-        menu = ProcessButtonPress(val);
+      menu = readButton();
+      if (menu != MenuSelect::BOGUS_PIN_READ) {
+//        menu = ProcessButtonPress(val);
         if (menu == MenuSelect::MENU_OPTION_SELECT) {
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
           EEPROMWrite();
@@ -202,9 +202,9 @@ void CalibrateOptions() {
 
     case 16:  // Set button repeat rate
       EEPROMData.buttonRepeatDelay = 1000 * GetEncoderValueLive(0, 5000, EEPROMData.buttonRepeatDelay / 1000, 1, (char *)"Btn Repeat:  ", false);
-      val = ReadSelectedPushButton();
-      if (val != BOGUS_PIN_READ) {
-        menu = ProcessButtonPress(val);
+      menu = readButton();
+      if (menu != MenuSelect::BOGUS_PIN_READ) {
+ //       menu = ProcessButtonPress(val);
         if (menu == MenuSelect::MENU_OPTION_SELECT) {
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
           EEPROMWrite();
@@ -231,7 +231,7 @@ void CalibrateOptions() {
 }
 #else  // Not using QSE2 (No carrier calibration)
 void CalibrateOptions() {
-  int val;
+//  int val;
   int freqCorrectionFactorOld = 0;
   int32_t increment = 100L;
   tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 30, CHAR_HEIGHT, RA8875_BLACK);
@@ -250,10 +250,10 @@ void CalibrateOptions() {
         si5351.set_correction(EEPROMData.freqCorrectionFactor, SI5351_PLL_INPUT_XO);
         freqCorrectionFactorOld = EEPROMData.freqCorrectionFactor;
       }
-      val = ReadSelectedPushButton();
-      if (val != BOGUS_PIN_READ) {        // Any button press??
-        val = ProcessButtonPress(val);    // Use ladder value to get menu choice
-        if (val == MENU_OPTION_SELECT) {  // Yep. Make a choice??
+      menu = readButton();
+      if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
+//        val = ProcessButtonPress(val);    // Use ladder value to get menu choice
+        if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
           EEPROMWrite();
           calibrateFlag = 0;
@@ -264,8 +264,8 @@ void CalibrateOptions() {
     case 1:  // CW PA Cal
       EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand] = GetEncoderValueLive(0.0, 1.0, EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand], 0.01, (char *)"CW PA Cal: ", false);
       EEPROMData.powerOutCW[EEPROMData.currentBand] = sqrt(EEPROMData.transmitPowerLevel / 20.0) * EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];
-      val = ReadSelectedPushButton();
-      if (val != BOGUS_PIN_READ) {        // Any button press??
+      menu = readButton();
+      if (val != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
         val = ProcessButtonPress(val);    // Use ladder value to get menu choice
         if (val == MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
@@ -286,12 +286,12 @@ void CalibrateOptions() {
     case 4:  // SSB PA Cal
       EEPROMData.SSBPowerCalibrationFactor[EEPROMData.currentBand] = GetEncoderValueLive(0.0, 1.0, EEPROMData.SSBPowerCalibrationFactor[EEPROMData.currentBand], 0.01, (char *)"SSB PA Cal: ", false);
       EEPROMData.powerOutSSB[EEPROMData.currentBand] = sqrt(EEPROMData.transmitPowerLevel / 20.0) * EEPROMData.SSBPowerCalibrationFactor[EEPROMData.currentBand];
-      val = ReadSelectedPushButton();
-      if (val != BOGUS_PIN_READ) {        // Any button press??
-        val = ProcessButtonPress(val);    // Use ladder value to get menu choice
-        if (val == MENU_OPTION_SELECT) {  // Yep. Make a choice??
+      menu = readButton();
+      if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
+//        val = ProcessButtonPress(val);    // Use ladder value to get menu choice
+        if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-          val = ReadSelectedPushButton();
+//          val = ReadSelectedPushButton();
           EEPROMWrite();
           calibrateFlag = 0;
         }
@@ -337,10 +337,11 @@ void CalibrateOptions() {
 
     case 12:  // Set button repeat rate
       EEPROMData.buttonRepeatDelay = 1000 * GetEncoderValueLive(0, 5000, EEPROMData.buttonRepeatDelay / 1000, 1, (char *)"Btn Repeat:  ", false);
-      val = ReadSelectedPushButton();
-      if (val != BOGUS_PIN_READ) {
-        val = ProcessButtonPress(val);
-        if (val == MENU_OPTION_SELECT) {
+//      val = ReadSelectedPushButton();
+      menu = readButton();
+      if (menu != MenuSelect::BOGUS_PIN_READ) {
+//        val = ProcessButtonPress(val);
+        if (menu == MenuSelect::MENU_OPTION_SELECT) {
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
           EEPROMWrite();
           calibrateFlag = 0;
@@ -502,7 +503,6 @@ void ProcessEqualizerChoices(int EQType, char *title) {
   int barWidth = 46;
   int barTopY;
   int barBottomY;
-  MenuSelect menu = MenuSelect::DEFAULT;
 
   for (iFreq = 0; iFreq < EQUALIZER_CELL_COUNT; iFreq++) {
     if (EQType == 0) {
@@ -592,11 +592,10 @@ void ProcessEqualizerChoices(int EQType, char *title) {
       }
       filterEncoderMove = 0;
 //      delay(200L);
-
 //      val = ReadSelectedPushButton();  // Read the ladder value
-
  //     if (val != -1 && val < (EEPROMData.switchValues[0] + WIGGLE_ROOM)) {
-        menu = readButton();  // Use ladder value to get menu choice
+//    MenuSelect menu = MenuSelect::DEFAULT;
+//        menu = readButton();  // Use ladder value to get menu choice
 //        delay(100L);
 
         tft.fillRect(xOffset,                // Indent to proper bar...
@@ -843,7 +842,7 @@ void DoPaddleFlip() {
   const char *paddleState[] = { "Right paddle = dah", "Right paddle = dit" };
   int choice, lastChoice;
   MenuSelect pushButtonSwitchIndex;
-  int valPin;
+//  int valPin;
 
   EEPROMData.paddleDah = KEYER_DAH_INPUT_RING;  // Defaults
   EEPROMData.paddleDit = KEYER_DIT_INPUT_TIP;
@@ -856,9 +855,9 @@ void DoPaddleFlip() {
 
   while (true) {
     delay(150L);
-    valPin = ReadSelectedPushButton();                     // Poll buttons
-    if (valPin != -1) {                                    // button was pushed
-      pushButtonSwitchIndex = ProcessButtonPress(valPin);  // Winner, winner...chicken dinner!
+//    valPin = ReadSelectedPushButton();                     // Poll buttons
+//    if (valPin != -1) {                                    // button was pushed
+      pushButtonSwitchIndex = readButton();  // Winner, winner...chicken dinner!
       if (pushButtonSwitchIndex == MenuSelect::MAIN_MENU_UP || pushButtonSwitchIndex == MenuSelect::MAIN_MENU_DN) {
         choice = !choice;  // Reverse the last choice
         tft.fillRect(SECONDARY_MENU_X - 100, MENUS_Y, EACH_MENU_WIDTH + 100, CHAR_HEIGHT, RA8875_GREEN);
@@ -879,7 +878,7 @@ void DoPaddleFlip() {
         UpdateWPMField();  // KD0RC
         break;
       }
-    }
+//    }
   }
   EEPROMWrite();
 }
@@ -1053,7 +1052,7 @@ void EEPROMOptions() {  // 0               1                2               3   
 *****/
 int SubmenuSelect(const char *options[], int numberOfChoices, int defaultStart) {
   int refreshFlag = 0;
-  int val;
+//  int val;
   MenuSelect menu;
   int encoderReturnValue;
 
@@ -1070,10 +1069,10 @@ int SubmenuSelect(const char *options[], int numberOfChoices, int defaultStart) 
   delay(150L);
 
   while (true) {
-    val = ReadSelectedPushButton();  // Read the ladder value
-    delay(150L);
-    if (val != -1 && val < (EEPROMData.switchValues[0] + WIGGLE_ROOM)) {
-      menu = ProcessButtonPress(val);  // Use ladder value to get menu choice
+    menu = readButton();  // Read the ladder value
+//    delay(150L);
+//    if (val != -1 && val < (EEPROMData.switchValues[0] + WIGGLE_ROOM)) {
+//      menu = ProcessButtonPress(val);  // Use ladder value to get menu choice
 //      if (val > -1) {                 // Valid choice?
         switch (menu) {
           case MenuSelect::MENU_OPTION_SELECT:  // They made a choice
@@ -1108,5 +1107,5 @@ int SubmenuSelect(const char *options[], int numberOfChoices, int defaultStart) 
         }
       }
     }
-  }
+//  }
 //}

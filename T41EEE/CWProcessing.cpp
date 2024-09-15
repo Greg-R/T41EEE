@@ -265,7 +265,7 @@ FLASHMEM void SetKeyPowerUp() {
     void
 *****/
 void SetSideToneVolume() {
-  int val, sidetoneDisplay;
+  int sidetoneDisplay;
   bool keyDown;
   MenuSelect menu;
 
@@ -313,8 +313,8 @@ void SetSideToneVolume() {
     }
     volumeAdjust.gain(volumeLog[EEPROMData.sidetoneVolume]);  // Sidetone  AFP 10-01-22
                                                               //    modeSelectOutR.gain(1, volumeLog[(int)EEPROMData.sidetoneVolume]);  // Right side not used.  KF5N September 1, 2023
-    val = ReadSelectedPushButton();                           // Read pin that controls all switches
-    menu = ProcessButtonPress(val);
+//    val = ReadSelectedPushButton();                           // Read pin that controls all switches
+    menu = readButton();
     if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
                                       // EEPROMData.EEPROMData.sidetoneVolume = EEPROMData.sidetoneVolume;
       EEPROMWrite();

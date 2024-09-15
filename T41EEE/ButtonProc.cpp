@@ -8,6 +8,9 @@
 // ButtonDemodMode
 // ButtonMode
 
+// ResetZoom
+// ButtonFrequencyEntry
+
 #include "SDT.h"
 
 #define TOP_MENU_COUNT 11  // Menus to process AFP 09-27-22, JJP 7-8-23
@@ -516,7 +519,7 @@ void ButtonNotchFilter() {
 *****/
 void ButtonSetNoiseFloor() {
   int floor = EEPROMData.currentNoiseFloor[EEPROMData.currentBand];  // KF5N
-  int val;
+//  int val;
   MenuSelect menu;
 
   tft.setFontScale((enum RA8875tsize)1);
@@ -540,9 +543,9 @@ void ButtonSetNoiseFloor() {
       filterEncoderMove = 0;
     }
 
-    val = ReadSelectedPushButton();  // Get ADC value
-    delay(100L);
-    menu = ProcessButtonPress(val);
+//    val = ReadSelectedPushButton();  // Get ADC value
+//    delay(100L);
+    menu = readButton();
     if (menu == MenuSelect::MENU_OPTION_SELECT)  // If they made a choice...
     {
       EEPROMData.currentNoiseFloor[EEPROMData.currentBand] = floor;
@@ -636,7 +639,8 @@ void ButtonFrequencyEntry() {
   long enteredF = 0L;                          // desired frequency
   char strF[6] = { ' ', ' ', ' ', ' ', ' ' };  // container for frequency string during entry
   String stringF;
-  int valPin;
+//  int valPin;
+MenuSelect menu = MenuSelect::DEFAULT;
   int key;
   int numdigits = 0;  // number of digits entered
   int pushButtonSwitchIndex;
@@ -757,9 +761,10 @@ void ButtonFrequencyEntry() {
   }
 
   while (doneFE == false) {
-    valPin = ReadSelectedPushButton();
-    pushButtonSwitchIndex = static_cast<int>(ProcessButtonPress(valPin));
-    if (pushButtonSwitchIndex != -1) {
+    menu = readButton();
+    pushButtonSwitchIndex = static_cast<int>(menu);
+//    Serial.printf("pushButtonSwitchIndex = %d\n", pushButtonSwitchIndex);
+    if (pushButtonSwitchIndex != 19) {
       key = numKeys[pushButtonSwitchIndex];
       switch (key) {
         case 0x7F:  // erase last digit =127

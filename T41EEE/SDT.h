@@ -41,10 +41,10 @@ extern struct maps myMapFiles[];
 #include <vector>
 #include <algorithm>
 
+
 #include "CWCalibrate.h"
 #include "SSBCalibrate.h"
-//#include<string>
-//auto VERSION = "T41EEE.7";
+
 
 //======================================== Symbolic Constants for the T41 ===================================================
 const char RIGNAME[] = "T41-EP SDT";
@@ -242,10 +242,10 @@ const int RESET = 0;  // QSD2/QSE2 reset pin
 #define Si_5351_crystal 25000000L
 
 //  States for the loop() modal state machine.
-enum class RadioState{SSB_RECEIVE_STATE, SSB_TRANSMIT_STATE, CW_RECEIVE_STATE, CW_TRANSMIT_STRAIGHT_STATE, 
-                      CW_TRANSMIT_KEYER_STATE, AM_RECEIVE_STATE, SSB_CALIBRATE_STATE, CW_CALIBRATE_STATE, 
-                      SET_CW_SIDETONE, NOSTATE};
-enum class RadioMode{SSB_MODE, CW_MODE, AM_MODE};  // Probably need only modes, not receive or transmit.
+//enum class RadioState{SSB_RECEIVE_STATE, SSB_TRANSMIT_STATE, CW_RECEIVE_STATE, CW_TRANSMIT_STRAIGHT_STATE, 
+//                      CW_TRANSMIT_KEYER_STATE, AM_RECEIVE_STATE, SSB_CALIBRATE_STATE, CW_CALIBRATE_STATE, 
+//                      SET_CW_SIDETONE, NOSTATE};
+//enum class RadioMode{SSB_MODE, CW_MODE, AM_MODE};  // Probably need only modes, not receive or transmit.
 
 #define SPECTRUM_ZOOM_1 0
 #define SPECTRUM_ZOOM_2 1
