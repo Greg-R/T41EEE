@@ -1,12 +1,11 @@
 
 #include "SDT.h"
-//#include <ArduinoJson.h>
 
 class JSON {
 public:
 
-bool convertToJson(const RadioMode& src, JsonVariant dst);
-RadioMode convertFromJson(JsonVariantConst src, RadioMode& dst);
+//bool convertToJson(const RadioMode& src, JsonVariant dst);
+//RadioMode convertFromJson(JsonVariantConst src, RadioMode& dst);
 
 //RadioMode JSON::convertFromJson(JsonVariantConst src, RadioMode& dst)
 

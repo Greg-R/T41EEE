@@ -989,11 +989,11 @@ void EEPROMOptions() {  // 0               1                2               3   
 
     case 4:                                             // Copy EEPROM->SD.
       EEPROM.get(EEPROM_BASE_ADDRESS + 4, tempConfig);  // Read as one large chunk
-      saveConfiguration(filename, tempConfig, true);    // Save EEPROM struct to SD
+      json.saveConfiguration(filename, tempConfig, true);    // Save EEPROM struct to SD
       break;
 
     case 5:                                     // Copy SD->EEPROM
-      loadConfiguration(filename, EEPROMData);  // Copy from SD to struct in active memory (on the stack) EEPROMData.
+      json.loadConfiguration(filename, EEPROMData);  // Copy from SD to struct in active memory (on the stack) EEPROMData.
       eeprom.EEPROMWrite();                            // Write to EEPROM non-volatile memory.
       initUserDefinedStuff();                   // Various things must be initialized.  This is normally done in setup().  KF5N February 21, 2024
       tft.writeTo(L2);                          // This is specifically to clear the bandwidth indicator bar.  KF5N August 7, 2023
@@ -1008,26 +1008,26 @@ void EEPROMOptions() {  // 0               1                2               3   
         // Don't want to overwrite the stack.  Need a temporary struct, read the EEPROM data into that.
         config_t EEPROMData_temp;
         EEPROM.get(EEPROM_BASE_ADDRESS + 4, EEPROMData_temp);
-        saveConfiguration(filename, EEPROMData_temp, false);  // Write the temporary struct to the serial monitor.
+        json.saveConfiguration(filename, EEPROMData_temp, false);  // Write the temporary struct to the serial monitor.
         Serial.println(F("\nEnd EEPROMData from EEPROM\n"));
       }
       break;
 
     case 7:  // Defaults->Serial
       Serial.println(F("\nBegin EEPROMData defaults"));
-      saveConfiguration(filename, defaultConfig, false);  // Write default EEPROMData struct to the Serial monitor.
+      json.saveConfiguration(filename, defaultConfig, false);  // Write default EEPROMData struct to the Serial monitor.
       Serial.println(F("\nEnd EEPROMData defaults\n"));
       break;
 
     case 8:  // Current->Serial
       Serial.println(F("Begin EEPROMData on the stack"));
-      saveConfiguration(filename, EEPROMData, false);  // Write current EEPROMData struct to the Serial monitor.
+      json.saveConfiguration(filename, EEPROMData, false);  // Write current EEPROMData struct to the Serial monitor.
       Serial.println(F("\nEnd EEPROMData on the stack\n"));
       break;
 
     case 9:  // SDEEPROMData->Serial
       Serial.println(F("Begin EEPROMData on the SD card"));
-      printFile(filename);  // Write SD card EEPROMData struct to the Serial monitor.
+      json.printFile(filename);  // Write SD card EEPROMData struct to the Serial monitor.
       Serial.println(F("End EEPROMData on the SD card\n"));
       break;
 

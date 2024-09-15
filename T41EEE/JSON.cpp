@@ -4,7 +4,7 @@
 // JSON format used to save and read from SD card.  This was derived from a JSON example from the ArduinoJSON library.
 
 // Custom converters are needed for the mode states.
-bool JSON::convertToJson(const RadioMode& src, JsonVariant dst) {
+bool convertToJson(const RadioMode& src, JsonVariant dst) {
 int state;
 state = static_cast<int>(src);
 //  char buf[32];
@@ -14,14 +14,15 @@ state = static_cast<int>(src);
 }
 
 
-RadioMode JSON::convertFromJson(JsonVariantConst src, RadioMode& dst) {
+RadioMode convertFromJson(JsonVariantConst src, RadioMode& dst) {
 int state;
 state = src.as<int>();
 return dst = static_cast<RadioMode>(state);
 }
 
+
 // Loads the EEPROMData configuration from a file
-void JSON::loadConfiguration(const char *filename, config_t &EEPROMData) {
+FLASHMEM void JSON::loadConfiguration(const char *filename, config_t &EEPROMData) {
   // Open file for reading
   File file = SD.open(filename);
 
@@ -141,8 +142,9 @@ void JSON::loadConfiguration(const char *filename, config_t &EEPROMData) {
   file.close();
 }
 
+
 // Saves the configuration EEPROMData to a file or writes to serial.  toFile == true for file, false for serial.
-void JSON::saveConfiguration(const char *filename, const config_t &EEPROMData, bool toFile) {
+FLASHMEM void JSON::saveConfiguration(const char *filename, const config_t &EEPROMData, bool toFile) {
 
   // Allocate a temporary JsonDocument
   // Don't forget to change the capacity to match your requirements.
@@ -263,6 +265,7 @@ void JSON::saveConfiguration(const char *filename, const config_t &EEPROMData, b
 
   }
 }
+
 
 // Prints the content of a file to the Serial
 void JSON::printFile(const char *filename) {
