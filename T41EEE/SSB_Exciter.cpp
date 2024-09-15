@@ -168,7 +168,7 @@ void SetCompressionThreshold() {
     menu = readButton(lastUsedTask);
     if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
       updateMic();
-      EEPROMWrite();
+      eeprom.EEPROMWrite();
       UpdateCompressionField();
       break;
     }
@@ -221,7 +221,7 @@ menu = readButton(lastUsedTask);
     if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
       // EEPROMData.EEPROMData.currentMicCompRatio = EEPROMData.currentMicCompRatio;
       updateMic();  // This updates the compression ratio and the threshold.
-      EEPROMWrite();
+      eeprom.EEPROMWrite();
       break;
     }
   }
@@ -266,7 +266,7 @@ void MicGainSet() {
     menu = readButton(lastUsedTask);
     if (menu == MenuSelect::MENU_OPTION_SELECT) {
       updateMic();  // Update the Open Audio compressor and microphone gain.
-      EEPROMWrite();
+      eeprom.EEPROMWrite();
       break;
     }
   }

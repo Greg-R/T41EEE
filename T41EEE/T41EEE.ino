@@ -199,12 +199,6 @@ to prior versions.
 #include "SDT.h"
 #include <charconv>
 
-//  States for the loop() modal state machine.
-enum class RadioState{SSB_RECEIVE_STATE, SSB_TRANSMIT_STATE, CW_RECEIVE_STATE, CW_TRANSMIT_STRAIGHT_STATE, 
-                      CW_TRANSMIT_KEYER_STATE, AM_RECEIVE_STATE, SSB_CALIBRATE_STATE, CW_CALIBRATE_STATE, 
-                      SET_CW_SIDETONE, NOSTATE};
-enum class RadioMode{SSB_MODE, CW_MODE, AM_MODE};  // Probably need only modes, not receive or transmit.
-
 const char *filename = "/config.txt";  // <- SD library uses 8.3 filenames
 
 struct maps myMapFiles[10] = {
@@ -264,10 +258,11 @@ bool agc_action = false;
 // Teensy and OpenAudio dataflow code.
 #include "AudioSignal.h"
 //End dataflow code
-#include "EEPROMMemory.h"
-EEPROMMemory eeprom;     // Instantiate the EEPROMMemory object.
+
 CWCalibrate calibrater;  // Instantiate the calibration objects.
 SSBCalibrate ssbcalibrater;
+JSON json;
+Eeprom eeprom;           // Eeprom object.
 
 Rotary volumeEncoder = Rotary(VOLUME_ENCODER_A, VOLUME_ENCODER_B);        //( 2,  3)
 Rotary tuneEncoder = Rotary(TUNE_ENCODER_A, TUNE_ENCODER_B);              //(16, 17)
@@ -648,7 +643,7 @@ time_t getTeensy3Time() {
   Purpose: To set the real time clock
 
   Parameter list:
-    void
+    unsigned long t
 
   Return value:
     void
@@ -1150,7 +1145,7 @@ sgtl5000_1.adcHighPassFilterEnable();
   }                // KD0RC end
 #else
   EnableButtonInterrupts();
-  EEPROMStartup();
+  eeprom.EEPROMStartup();
 #endif
 
   // ========================  End set up of Parameters from EEPROM data ===============

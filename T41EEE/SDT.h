@@ -3,15 +3,9 @@
 //======================================== User section that might need to be changed ===================================
 #include "MyConfigurationFile.h"  // This file name should remain unchanged
 
-
-struct maps {
-  char mapNames[50];
-  float lat;
-  float lon;
-};
-extern struct maps myMapFiles[];
-
 //======================================== Library include files ========================================================
+#include <stdio.h>
+#include <stdlib.h>
 #include <Adafruit_GFX.h>
 #include <ArduinoJson.h>
 #include "Fonts/FreeMonoBold24pt7b.h"
@@ -21,7 +15,6 @@ extern struct maps myMapFiles[];
 #include <Audio.h>                     //https://github.com/chipaudette/OpenAudio_ArduinoLibrary
 #include <OpenAudio_ArduinoLibrary.h>  // AFP 11-01-22
 #include <TimeLib.h>                   // Part of Teensy Time library
-//#include <Wire.h>    // Not required?
 #include <SPI.h>
 #include <SD.h>
 #include <Metro.h>
@@ -31,8 +24,7 @@ extern struct maps myMapFiles[];
 #include <si5351.h>  // https://github.com/etherkit/Si5351Arduino
 #include <RA8875.h>  // https://github.com/mjs513/RA8875/tree/RA8875_t4
 #include <Rotary.h>  // https://github.com/brianlow/Rotary
-#include <stdio.h>
-#include <stdlib.h>
+
 #include <string.h>
 #include <string_view>
 #include <util/crc16.h>        // mdrhere
@@ -40,15 +32,12 @@ extern struct maps myMapFiles[];
 #include <EEPROM.h>
 #include <vector>
 #include <algorithm>
+#include <utility/imxrt_hw.h>  // for setting I2S freq, Thanks, FrankB!
 
-
-#include "CWCalibrate.h"
-#include "SSBCalibrate.h"
-
-
+// Constants and #defines first:
 //======================================== Symbolic Constants for the T41 ===================================================
 const char RIGNAME[] = "T41-EP SDT";
-const int NUMBER_OF_SWITCHES = 18;  // Number of push button switches. 16 on older boards
+const int NUMBER_OF_SWITCHES = 18;  // Number of push button switches.
 
 const int RIGNAME_X_OFFSET = 570;   // Pixel count to rig name field
 #define RA8875_DISPLAY 1       // Comment out if not using RA8875 display
@@ -74,12 +63,6 @@ const int EACH_MENU_WIDTH = 260;
 const int  BOTH_MENU_WIDTHS = (EACH_MENU_WIDTH * 2 + 30);
 const int MENU_OPTION_SELECT = 0;  // These are the expected values from the switch ladder
  
-// Make this into an enum.
-enum class MenuSelect{MENU_OPTION_SELECT, MAIN_MENU_UP, BAND_UP, ZOOM, MAIN_MENU_DN, BAND_DN, FILTER, DEMODULATION, SET_MODE,
-                      NOISE_REDUCTION, NOTCH_FILTER, NOISE_FLOOR, FINE_TUNE_INCREMENT, DECODER_TOGGLE,
-                      MAIN_TUNE_INCREMENT, RESET_TUNING, UNUSED_1, BEARING, BOGUS_PIN_READ, DEFAULT
-};
-
 //=======================================================
 const int XPIXELS = 800;  // This is for the 5.0" display
 const int YPIXELS = 480;
@@ -180,7 +163,7 @@ const int FFT_LENGTH = 512;
 #define WHITE 0xFFFF           /* 255, 255, 255 */
 #define ORANGE 0xFD20          /* 255, 165,   0 */
 #define FILTER_WIN 0x10        // Color of SSB filter width
-#include <utility/imxrt_hw.h>  // for setting I2S freq, Thanks, FrankB!
+
 
 #define MAX_WPM 60
 #define ENCODER_FACTOR 0.25F  // Use 0.25f with cheap encoders that have 4 detents per step.
@@ -234,18 +217,13 @@ const int RESET = 0;  // QSD2/QSE2 reset pin
 //========================================================= End Pin Assignments =================================
 #define TMS0_POWER_DOWN_MASK (0x1U)
 #define TMS1_MEASURE_FREQ(x) (((uint32_t)(((uint32_t)(x)) << 0U)) & 0xFFFFU)
-#undef TWO_PI
-#define TWO_PI 6.283185307179586476925286766559f
+//#undef TWO_PI
+//#define TWO_PI 6.283185307179586476925286766559f
 #define PIH 1.5707963267948966192313216916398f
 #define FOURPI (2.0f * TWO_PI)
 #define SIXPI (3.0f * TWO_PI)
 #define Si_5351_crystal 25000000L
 
-//  States for the loop() modal state machine.
-//enum class RadioState{SSB_RECEIVE_STATE, SSB_TRANSMIT_STATE, CW_RECEIVE_STATE, CW_TRANSMIT_STRAIGHT_STATE, 
-//                      CW_TRANSMIT_KEYER_STATE, AM_RECEIVE_STATE, SSB_CALIBRATE_STATE, CW_CALIBRATE_STATE, 
-//                      SET_CW_SIDETONE, NOSTATE};
-//enum class RadioMode{SSB_MODE, CW_MODE, AM_MODE};  // Probably need only modes, not receive or transmit.
 
 #define SPECTRUM_ZOOM_1 0
 #define SPECTRUM_ZOOM_2 1
@@ -301,49 +279,25 @@ const int RESET = 0;  // QSD2/QSE2 reset pin
 #define BAND_10M 6
 #define NUMBER_OF_BANDS 7  //AFP 1-28-21
 
-//------------------------- Global CW Filter declarations ----------
+// End constants
 
-extern float32_t CW_AudioFilterCoeffs1[];  //AFP 10-18-22
-extern float32_t CW_AudioFilterCoeffs2[];  //AFP 10-18-22
-extern float32_t CW_AudioFilterCoeffs3[];  //AFP 10-18-22
-extern float32_t CW_AudioFilterCoeffs4[];  //AFP 10-18-22
-extern float32_t CW_AudioFilterCoeffs5[];  //AFP 10-18-22
+//  States for the loop() modal state machine.
+enum class RadioState{SSB_RECEIVE_STATE, SSB_TRANSMIT_STATE, CW_RECEIVE_STATE, CW_TRANSMIT_STRAIGHT_STATE, 
+                      CW_TRANSMIT_KEYER_STATE, AM_RECEIVE_STATE, SSB_CALIBRATE_STATE, CW_CALIBRATE_STATE, 
+                      SET_CW_SIDETONE, NOSTATE};
+enum class RadioMode{SSB_MODE, CW_MODE, AM_MODE};  // Probably need only modes, not receive or transmit.
+//  Primary menu selections.
+enum class MenuSelect{MENU_OPTION_SELECT, MAIN_MENU_UP, BAND_UP, ZOOM, MAIN_MENU_DN, BAND_DN, FILTER, DEMODULATION, SET_MODE,
+                      NOISE_REDUCTION, NOTCH_FILTER, NOISE_FLOOR, FINE_TUNE_INCREMENT, DECODER_TOGGLE,
+                      MAIN_TUNE_INCREMENT, RESET_TUNING, UNUSED_1, BEARING, BOGUS_PIN_READ, DEFAULT
+};
 
-#define IIR_CW_NUMSTAGES 4
-extern float32_t CW_Filter_Coeffs[];
-extern float32_t HP_DC_Filter_Coeffs[];
-extern float32_t HP_DC_Filter_Coeffs2[];  // AFP 11-02-22
-//=== end CW Filter ===
-
-#define DISPLAY_S_METER_DBM 0
-#define DISPLAY_S_METER_DBMHZ 1
-#define N2 100
-
-#define ANR_DLINE_SIZE 512  //funktioniert nicht, 128 & 256 OK
-#define MAX_LMS_TAPS 96
-#define MAX_LMS_DELAY 256
-#define NR_FFT_L 256
-#define NB_FFT_SIZE FFT_LENGTH / 2
-#define TABLE_SIZE_64 64
-#define EEPROM_BASE_ADDRESS 0U
-
-//================== Global CW Correlation and FFT Variables =================
-extern float32_t audioMaxSquaredAve;
-extern float32_t *sinBuffer;  // Buffers commonized.  Greg KF5N, February 7, 2024.
-extern float32_t cwRiseBuffer[];
-extern float32_t cwFallBuffer[];
-extern int filterWidth;
-
-//===== New histogram stuff
-extern float32_t pixel_per_khz;  //AFP
-extern int pos_left;
-extern int centerLine;
-extern int h;
-extern int centerTuneFlag;
-
-// ============ end new stuff =======
-
-//================== Global Excite Variables =================
+struct maps {
+  char mapNames[50];
+  float lat;
+  float lon;
+};
+extern struct maps myMapFiles[];
 
 struct config_t {
 
@@ -462,6 +416,59 @@ struct config_t {
 extern struct config_t EEPROMData;
 extern config_t defaultConfig;
 extern config_t EEPROMData_temp;
+
+// Custom classes in the sketch.
+#include "CWCalibrate.h"
+#include "SSBCalibrate.h"
+#include "JSON.h"
+#include "Eeprom.h"
+
+
+//------------------------- Global CW Filter declarations ----------
+
+extern float32_t CW_AudioFilterCoeffs1[];  //AFP 10-18-22
+extern float32_t CW_AudioFilterCoeffs2[];  //AFP 10-18-22
+extern float32_t CW_AudioFilterCoeffs3[];  //AFP 10-18-22
+extern float32_t CW_AudioFilterCoeffs4[];  //AFP 10-18-22
+extern float32_t CW_AudioFilterCoeffs5[];  //AFP 10-18-22
+
+#define IIR_CW_NUMSTAGES 4
+extern float32_t CW_Filter_Coeffs[];
+extern float32_t HP_DC_Filter_Coeffs[];
+extern float32_t HP_DC_Filter_Coeffs2[];  // AFP 11-02-22
+//=== end CW Filter ===
+
+#define DISPLAY_S_METER_DBM 0
+#define DISPLAY_S_METER_DBMHZ 1
+#define N2 100
+
+#define ANR_DLINE_SIZE 512  //funktioniert nicht, 128 & 256 OK
+#define MAX_LMS_TAPS 96
+#define MAX_LMS_DELAY 256
+#define NR_FFT_L 256
+#define NB_FFT_SIZE FFT_LENGTH / 2
+#define TABLE_SIZE_64 64
+
+//================== Global CW Correlation and FFT Variables =================
+extern float32_t audioMaxSquaredAve;
+extern float32_t *sinBuffer;  // Buffers commonized.  Greg KF5N, February 7, 2024.
+extern float32_t cwRiseBuffer[];
+extern float32_t cwFallBuffer[];
+extern int filterWidth;
+
+//===== New histogram stuff
+extern float32_t pixel_per_khz;  //AFP
+extern int pos_left;
+extern int centerLine;
+extern int h;
+extern int centerTuneFlag;
+
+// ============ end new stuff =======
+
+//================== Global Excite Variables =================
+
+
+
 extern float32_t HP_DC_Butter_state2[2];                  //AFP 11-04-22
 extern float32_t HP_DC_Butter_state[6];                   //AFP 09-23-22
 extern arm_biquad_cascade_df2T_instance_f32 s1_Receive;   //AFP 09-23-22
@@ -556,6 +563,8 @@ extern Rotary fineTuneEncoder;  // (4,  5);
 
 extern Metro ms_500;
 
+extern Eeprom eeprom;                // EEPROM memory object.
+extern JSON json;
 extern CWCalibrate calibrater;         // CW mode calibration object.
 extern SSBCalibrate ssbcalibrater;   // SSB mode calibration object.
 
@@ -939,16 +948,10 @@ void DrawFrequencyBarValue();
 void DrawInfoWindowFrame();
 void DrawKeyboard();
 int DrawNewFloor(int floor);
-void DrawNormalLetter(int row, int horizontalSpacer, int whichLetterIndex, int keyWidth, int keyHeight);
 void DrawSMeterContainer();
 void DrawSpectrumDisplayContainer();
 void DrawAudioSpectContainer();
-void EEPROMOptions();
-void EEPROMRead();
-void EEPROMDataDefaults();
-void EEPROMStartup();
-void EEPROMStuffFavorites(unsigned long current[]);
-void EEPROMWrite();
+void EEPROMOptions();  // Resides in MenuProc.cpp.
 void EncoderFineTune();
 void EncoderFilter();
 void EncoderCenterTune();
@@ -1003,8 +1006,6 @@ void playTransmitData();  // KF5N February 23, 2024
 MenuSelect ProcessButtonPress(int valPin);
 void ProcessEqualizerChoices(int EQType, char *title);
 void ProcessIQData();
-//uint16_t read16(File &f);
-//uint32_t read32(File &f);
 MenuSelect readButton(MenuSelect lastUsedTask);
 MenuSelect readButton();
 int ReadSelectedPushButton();

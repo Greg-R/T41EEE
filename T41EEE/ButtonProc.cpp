@@ -132,7 +132,7 @@ void ButtonBandIncrease() {
   ShowFrequency();
   ShowSpectrumdBScale();
   AudioInterrupts();
-  EEPROMWrite();
+  eeprom.EEPROMWrite();
   // Draw or not draw CW filter graphics to audio spectrum area.  KF5N July 30, 2023
   tft.writeTo(L2);
   tft.clearMemory();
@@ -230,7 +230,7 @@ void ButtonBandDecrease() {
   ShowFrequency();
   ShowSpectrumdBScale();
   AudioInterrupts();
-  EEPROMWrite();
+  eeprom.EEPROMWrite();
   // Draw or not draw CW filter graphics to audio spectrum area.  KF5N July 30, 2023
   tft.writeTo(L2);
   tft.clearMemory();
@@ -320,7 +320,7 @@ void BandSet(int band) {
   ShowFrequency();
   ShowSpectrumdBScale();
   AudioInterrupts();
-  EEPROMWrite();
+  eeprom.EEPROMWrite();
   // Draw or not draw CW filter graphics to audio spectrum area.  KF5N July 30, 2023
   tft.writeTo(L2);
   tft.clearMemory();
@@ -549,7 +549,7 @@ void ButtonSetNoiseFloor() {
     if (menu == MenuSelect::MENU_OPTION_SELECT)  // If they made a choice...
     {
       EEPROMData.currentNoiseFloor[EEPROMData.currentBand] = floor;
-      EEPROMWrite();
+      eeprom.EEPROMWrite();
       break;
     }
   }
@@ -852,7 +852,7 @@ MenuSelect menu = MenuSelect::DEFAULT;
   ShowFrequency();
   ShowSpectrumdBScale();
   AudioInterrupts();
-  EEPROMWrite();
+  eeprom.EEPROMWrite();
   // Draw or not draw CW filter graphics to audio spectrum area.  KF5N July 30, 2023
   tft.writeTo(L2);
   tft.clearMemory();

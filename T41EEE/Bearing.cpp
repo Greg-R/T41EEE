@@ -7,6 +7,7 @@
 #define PI_BY_180 0.01745329
 const char DEGREE_SYMBOL[] = { 0xB0, '\0' };
 int countryIndex = -1;
+void DrawNormalLetter(int row, int horizontalSpacer, int whichLetterIndex, int keyWidth, int keyHeight);
 
 enum { SCL_HALF = 0,
        SCL_QUARTER,

@@ -4,7 +4,7 @@
 // JSON format used to save and read from SD card.  This was derived from a JSON example from the ArduinoJSON library.
 
 // Custom converters are needed for the mode states.
-bool convertToJson(const RadioMode& src, JsonVariant dst) {
+bool JSON::convertToJson(const RadioMode& src, JsonVariant dst) {
 int state;
 state = static_cast<int>(src);
 //  char buf[32];
@@ -13,14 +13,15 @@ state = static_cast<int>(src);
   return dst.set(state);
 }
 
-RadioMode convertFromJson(JsonVariantConst src, RadioMode& dst) {
+
+RadioMode JSON::convertFromJson(JsonVariantConst src, RadioMode& dst) {
 int state;
 state = src.as<int>();
 return dst = static_cast<RadioMode>(state);
 }
 
 // Loads the EEPROMData configuration from a file
-FLASHMEM void loadConfiguration(const char *filename, config_t &EEPROMData) {
+void JSON::loadConfiguration(const char *filename, config_t &EEPROMData) {
   // Open file for reading
   File file = SD.open(filename);
 
@@ -141,7 +142,7 @@ FLASHMEM void loadConfiguration(const char *filename, config_t &EEPROMData) {
 }
 
 // Saves the configuration EEPROMData to a file or writes to serial.  toFile == true for file, false for serial.
-FLASHMEM void saveConfiguration(const char *filename, const config_t &EEPROMData, bool toFile) {
+void JSON::saveConfiguration(const char *filename, const config_t &EEPROMData, bool toFile) {
 
   // Allocate a temporary JsonDocument
   // Don't forget to change the capacity to match your requirements.
@@ -264,7 +265,7 @@ FLASHMEM void saveConfiguration(const char *filename, const config_t &EEPROMData
 }
 
 // Prints the content of a file to the Serial
-FLASHMEM void printFile(const char *filename) {
+void JSON::printFile(const char *filename) {
   // Open file for reading
   File file = SD.open(filename);
   if (!file) {
@@ -281,3 +282,5 @@ FLASHMEM void printFile(const char *filename) {
   // Close the file
   file.close();
 }
+
+

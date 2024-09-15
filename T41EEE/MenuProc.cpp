@@ -85,7 +85,7 @@ void CalibrateOptions() {
 //        menu = ProcessButtonPress(val);    // Use ladder value to get menu choice
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-          EEPROMWrite();
+          eeprom.EEPROMWrite();
           calibrateFlag = 0;
         }
       }
@@ -99,7 +99,7 @@ void CalibrateOptions() {
 //        menu = ProcessButtonPress(val);    // Use ladder value to get menu choice
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-          EEPROMWrite();
+          eeprom.EEPROMWrite();
           calibrateFlag = 0;
         }
       }
@@ -126,7 +126,7 @@ void CalibrateOptions() {
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
      //     val = ReadSelectedPushButton();
-          EEPROMWrite();
+          eeprom.EEPROMWrite();
           calibrateFlag = 0;
         }
       }
@@ -173,7 +173,7 @@ void CalibrateOptions() {
 //        menu = ProcessButtonPress(val);
         if (menu == MenuSelect::MENU_OPTION_SELECT) {
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-          EEPROMWrite();
+          eeprom.EEPROMWrite();
           calibrateFlag = 0;
         }
       }
@@ -186,7 +186,7 @@ void CalibrateOptions() {
 //        menu = ProcessButtonPress(val);
         if (menu == MenuSelect::MENU_OPTION_SELECT) {
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-          EEPROMWrite();
+          eeprom.EEPROMWrite();
           calibrateFlag = 0;
         }
       }
@@ -207,7 +207,7 @@ void CalibrateOptions() {
  //       menu = ProcessButtonPress(val);
         if (menu == MenuSelect::MENU_OPTION_SELECT) {
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-          EEPROMWrite();
+          eeprom.EEPROMWrite();
           calibrateFlag = 0;
         }
       }
@@ -255,7 +255,7 @@ void CalibrateOptions() {
 //        val = ProcessButtonPress(val);    // Use ladder value to get menu choice
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-          EEPROMWrite();
+          eeprom.EEPROMWrite();
           calibrateFlag = 0;
         }
       }
@@ -269,7 +269,7 @@ void CalibrateOptions() {
         val = ProcessButtonPress(val);    // Use ladder value to get menu choice
         if (val == MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-          EEPROMWrite();
+          eeprom.EEPROMWrite();
           calibrateFlag = 0;
         }
       }
@@ -292,7 +292,7 @@ void CalibrateOptions() {
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
 //          val = ReadSelectedPushButton();
-          EEPROMWrite();
+          eeprom.EEPROMWrite();
           calibrateFlag = 0;
         }
       }
@@ -343,7 +343,7 @@ void CalibrateOptions() {
 //        val = ProcessButtonPress(val);
         if (menu == MenuSelect::MENU_OPTION_SELECT) {
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-          EEPROMWrite();
+          eeprom.EEPROMWrite();
           calibrateFlag = 0;
         }
       }
@@ -447,7 +447,7 @@ void SpectrumOptions() { /*
     return;
   }
   EEPROMData.currentScale = spectrumSet;  // Yep...
-  EEPROMWrite();
+  eeprom.EEPROMWrite();
   RedrawDisplayScreen();
   ShowSpectrumdBScale();
 }
@@ -471,7 +471,7 @@ void AGCOptions() {
   }
 
   AGCLoadValues();  // G0ORX September 5, 2023
-  EEPROMWrite();    // ...save it
+  eeprom.EEPROMWrite();    // ...save it
   UpdateAGCField();
 }
 
@@ -619,7 +619,7 @@ void ProcessEqualizerChoices(int EQType, char *title) {
     }  // end inner while
   }    // end outer while
 
-  EEPROMWrite();
+  eeprom.EEPROMWrite();
 }
 
 
@@ -651,7 +651,7 @@ void EqualizerRecOptions() {
     case 3:
       break;
   }
-  EEPROMWrite();
+  eeprom.EEPROMWrite();
   RedrawDisplayScreen();
   UpdateEqualizerField(EEPROMData.receiveEQFlag, EEPROMData.xmitEQFlag);
   //  return 0;
@@ -716,7 +716,7 @@ void SSBOptions()  // AFP 09-22-22 All new
     EEPROMData.cessb = true;
     cessb1.setProcessing(EEPROMData.cessb);
     Serial.printf("processing = %d", cessb1.getProcessing());
-    EEPROMWrite();
+    eeprom.EEPROMWrite();
     BandInformation();
       break;
 
@@ -724,20 +724,20 @@ void SSBOptions()  // AFP 09-22-22 All new
     EEPROMData.cessb = false;
     cessb1.setProcessing(EEPROMData.cessb);
     Serial.printf("processing = %d", cessb1.getProcessing());
-    EEPROMWrite();
+    eeprom.EEPROMWrite();
     BandInformation();
       break;
 
     case 2:  // Compressor On
     EEPROMData.compressorFlag = true;
     UpdateCompressionField();
-    EEPROMWrite();
+    eeprom.EEPROMWrite();
     break;
 
     case 3:  // Compressor Off
     EEPROMData.compressorFlag = false;
     UpdateCompressionField();
-    EEPROMWrite();
+    eeprom.EEPROMWrite();
     break;
 
     case 4:  // Adjust mic gain in dB.  Default 0 db.
@@ -786,13 +786,13 @@ void RFOptions() {
       // When the transmit power level is set, this means ALL of the power coefficients must be revised!
       // powerOutCW and powerOutSSB must be updated.
       initPowerCoefficients();
-      EEPROMWrite();  //AFP 10-21-22
+      eeprom.EEPROMWrite();  //AFP 10-21-22
       BandInformation();
       break;
 
     case 1:  // Manual gain set.
       EEPROMData.rfGain[EEPROMData.currentBand] = GetEncoderValue(-60, 20, EEPROMData.rfGain[EEPROMData.currentBand], 5, (char *)"RF Gain dB: ");
-      EEPROMWrite();
+      eeprom.EEPROMWrite();
       break;
 
     case 2:  // Auto-Gain On
@@ -800,27 +800,27 @@ void RFOptions() {
       EEPROMData.autoSpectrum = false;  // Make sure Auto-Spectrum is off.
       fftOffset = 0;
       ShowAutoStatus();
-      EEPROMWrite();
+      eeprom.EEPROMWrite();
       break;
 
     case 3:  // Auto-Gain Off
       EEPROMData.autoGain = false;
       ShowAutoStatus();
-      EEPROMWrite();
+      eeprom.EEPROMWrite();
       break;
 
     case 4:  // Auto-Spectrum On
       EEPROMData.autoSpectrum = true;
       EEPROMData.autoGain = false;  // Make sure Auto-Gain is off.
       ShowAutoStatus();
-      EEPROMWrite();
+      eeprom.EEPROMWrite();
       break;
 
     case 5:  // Auto-Spectrum Off
       EEPROMData.autoSpectrum = false;
       fftOffset = 0;
       ShowAutoStatus();
-      EEPROMWrite();
+      eeprom.EEPROMWrite();
       break;
 
     default:  // Cancel
@@ -880,7 +880,7 @@ void DoPaddleFlip() {
       }
 //    }
   }
-  EEPROMWrite();
+  eeprom.EEPROMWrite();
 }
 
 
@@ -972,19 +972,19 @@ void EEPROMOptions() {  // 0               1                2               3   
   defaultOpt = SubmenuSelect(EEPROMOpts, 11, defaultOpt);
   switch (defaultOpt) {
     case 0:  // Save current EEPROMData struct to EEPROM non-volatile memory.
-      EEPROMWrite();
+      eeprom.EEPROMWrite();
       break;
 
     case 1:
-      EEPROMDataDefaults();  // Restore defaults to EEPROMData struct and refresh display.
+      eeprom.EEPROMDataDefaults();  // Restore defaults to EEPROMData struct and refresh display.
       break;
 
     case 2:
-      GetFavoriteFrequency();  // Get a stored frequency and store in active VFO
+      eeprom.GetFavoriteFrequency();  // Get a stored frequency and store in active VFO
       break;
 
     case 3:
-      SetFavoriteFrequency();  // Set favorites
+      eeprom.SetFavoriteFrequency();  // Set favorites
       break;
 
     case 4:                                             // Copy EEPROM->SD.
@@ -994,7 +994,7 @@ void EEPROMOptions() {  // 0               1                2               3   
 
     case 5:                                     // Copy SD->EEPROM
       loadConfiguration(filename, EEPROMData);  // Copy from SD to struct in active memory (on the stack) EEPROMData.
-      EEPROMWrite();                            // Write to EEPROM non-volatile memory.
+      eeprom.EEPROMWrite();                            // Write to EEPROM non-volatile memory.
       initUserDefinedStuff();                   // Various things must be initialized.  This is normally done in setup().  KF5N February 21, 2024
       tft.writeTo(L2);                          // This is specifically to clear the bandwidth indicator bar.  KF5N August 7, 2023
       tft.clearMemory();

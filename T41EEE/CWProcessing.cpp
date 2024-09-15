@@ -91,7 +91,7 @@ FLASHMEM void SelectCWOffset() {
   EEPROMData.CWOffset = SubmenuSelect(CWOffsets, 5, EEPROMData.CWOffset);  // CWFilter is an array of strings.
   // Now generate the values for the buffer which is used to create the CW tone.  The values are discrete because there must be whole cycles.
   if (EEPROMData.CWOffset < 4) sineTone(numCycles[EEPROMData.CWOffset]);
-  EEPROMWrite();  // Save to EEPROM.
+  eeprom.EEPROMWrite();  // Save to EEPROM.
   // Clear the current CW filter graphics and then restore the bandwidth indicator bar.  KF5N July 30, 2023
   tft.writeTo(L2);
   tft.clearMemory();
@@ -226,7 +226,7 @@ void SetKeyType() {
     EEPROMData.paddleDit = KEYER_DIT_INPUT_TIP;
     EEPROMData.paddleDah = KEYER_DAH_INPUT_RING;
   }
-  EEPROMWrite();
+  eeprom.EEPROMWrite();
 }
 
 
@@ -317,7 +317,7 @@ void SetSideToneVolume() {
     menu = readButton();
     if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
                                       // EEPROMData.EEPROMData.sidetoneVolume = EEPROMData.sidetoneVolume;
-      EEPROMWrite();
+      eeprom.EEPROMWrite();
       break;
     }
   }

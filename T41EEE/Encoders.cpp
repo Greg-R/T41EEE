@@ -396,7 +396,7 @@ int SetWPM() {
       break;
     }
   }
-  EEPROMWrite();
+  eeprom.EEPROMWrite();
   tft.setTextColor(RA8875_WHITE);
   EraseMenus();
   return EEPROMData.currentWPM;
@@ -445,7 +445,7 @@ long SetTransmitDelay()  // new function JJP 9/1/22
     //MyDelay(150L);  //ALF 09-22-22
     if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
       EEPROMData.cwTransmitDelay = lastDelay;
-      EEPROMWrite();
+      eeprom.EEPROMWrite();
       break;
     }
   }
