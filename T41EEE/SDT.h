@@ -1068,7 +1068,7 @@ float TGetTemp();
 void UpdateAGCField();
 void UpdateCompressionField();
 void UpdateDecoderField();
-void UpdateEqualizerField(bool rxEqState, bool txEqState);
+void UpdateEqualizerField(bool rxEqState);
 void updateMic();  // This updates the Open Audio compressor.
 void UpdateNoiseField();
 void UpdateNotchField();

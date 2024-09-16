@@ -991,7 +991,7 @@ MenuSelect readButton(MenuSelect lastUsedTask) {
     if (val != -1) {  // -1 is returned by ReadSelectedPushButton in the case of an invalid read.
       menu = ProcessButtonPress(val);
       if (menu != lastUsedTask && task == MenuSelect::DEFAULT) task = menu;
-      else task = MenuSelect::DEFAULT;
+      else task = MenuSelect::BOGUS_PIN_READ;
     }
     return task;
 }
@@ -1003,7 +1003,7 @@ MenuSelect readButton() {
     val = ReadSelectedPushButton();
     if (val != -1) {  // -1 is returned by ReadSelectedPushButton in the case of an invalid read.
       menu = ProcessButtonPress(val);
-    }  else menu = MenuSelect::DEFAULT;
+    }  else menu = MenuSelect::BOGUS_PIN_READ;
     return menu;
 }
 
@@ -1195,7 +1195,7 @@ sgtl5000_1.adcHighPassFilterEnable();
   if(EEPROMData.xmtMode == RadioMode::SSB_MODE) {radioState = RadioState::SSB_RECEIVE_STATE; radioMode = RadioMode::SSB_MODE;}
   UpdateDecoderField();                         // Adjust graphics for Morse decoder.
   FilterSetSSB();
-  UpdateEqualizerField(EEPROMData.receiveEQFlag, EEPROMData.xmitEQFlag);
+  UpdateEqualizerField(EEPROMData.receiveEQFlag);
   EEPROMData.rfGainCurrent = 0;  // Start with lower gain so you don't get blasted.
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();  // Required only for QSD2/QSE2.
 }

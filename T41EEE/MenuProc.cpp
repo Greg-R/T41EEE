@@ -1,3 +1,4 @@
+// ShowMenu
 // Calibrate Options
 // CW Options
 // Spectrum Options
@@ -12,8 +13,8 @@
 int micChoice = 0;
 int splitOn = 0;
 
-
 #include "SDT.h"
+
 
 /*****
   Purpose: void ShowMenu()
@@ -227,7 +228,7 @@ void CalibrateOptions() {
     default:
       break;
   }
-  UpdateEqualizerField(EEPROMData.receiveEQFlag, EEPROMData.xmitEQFlag);
+  UpdateEqualizerField(EEPROMData.receiveEQFlag);
 }
 #else  // Not using QSE2 (No carrier calibration)
 void CalibrateOptions() {
@@ -486,8 +487,8 @@ void AGCOptions() {
     void
 *****/
 void ProcessEqualizerChoices(int EQType, char *title) {
-  for (int i = 0; i < EQUALIZER_CELL_COUNT; i++) {
-  }
+//  for (int i = 0; i < EQUALIZER_CELL_COUNT; i++) {
+//  }
   const char *eqFreq[] = { " 200", " 250", " 315", " 400", " 500", " 630", " 800",
                            "1000", "1250", "1600", "2000", "2500", "3150", "4000" };
   int yLevel[EQUALIZER_CELL_COUNT];  // EQUALIZER_CELL_COUNT 14
@@ -503,6 +504,7 @@ void ProcessEqualizerChoices(int EQType, char *title) {
   int barWidth = 46;
   int barTopY;
   int barBottomY;
+  MenuSelect menu = MenuSelect::DEFAULT;
 
   for (iFreq = 0; iFreq < EQUALIZER_CELL_COUNT; iFreq++) {
     if (EQType == 0) {
@@ -592,8 +594,8 @@ void ProcessEqualizerChoices(int EQType, char *title) {
       }
       filterEncoderMove = 0;
 //      delay(200L);
-//      val = ReadSelectedPushButton();  // Read the ladder value
- //     if (val != -1 && val < (EEPROMData.switchValues[0] + WIGGLE_ROOM)) {
+      menu = readButton();  // Read the ladder value
+     if (menu != MenuSelect::BOGUS_PIN_READ) {
 //    MenuSelect menu = MenuSelect::DEFAULT;
 //        menu = readButton();  // Use ladder value to get menu choice
 //        delay(100L);
@@ -618,10 +620,9 @@ void ProcessEqualizerChoices(int EQType, char *title) {
     //  }
     }  // end inner while
   }    // end outer while
-
   eeprom.EEPROMWrite();
 }
-
+}
 
 /*****
   Purpose: Receive EQ set
@@ -653,7 +654,7 @@ void EqualizerRecOptions() {
   }
   eeprom.EEPROMWrite();
   RedrawDisplayScreen();
-  UpdateEqualizerField(EEPROMData.receiveEQFlag, EEPROMData.xmitEQFlag);
+  UpdateEqualizerField(EEPROMData.receiveEQFlag);
   //  return 0;
 }
 
@@ -1052,7 +1053,6 @@ void EEPROMOptions() {  // 0               1                2               3   
 *****/
 int SubmenuSelect(const char *options[], int numberOfChoices, int defaultStart) {
   int refreshFlag = 0;
-//  int val;
   MenuSelect menu;
   int encoderReturnValue;
 
@@ -1066,14 +1066,14 @@ int SubmenuSelect(const char *options[], int numberOfChoices, int defaultStart) 
     tft.print(options[encoderReturnValue]);  // Secondary Menu
     refreshFlag = 1;
   }
-  delay(150L);
+//  delay(150L);
 
   while (true) {
     menu = readButton();  // Read the ladder value
 //    delay(150L);
 //    if (val != -1 && val < (EEPROMData.switchValues[0] + WIGGLE_ROOM)) {
 //      menu = ProcessButtonPress(val);  // Use ladder value to get menu choice
-//      if (val > -1) {                 // Valid choice?
+      if (menu != MenuSelect::BOGUS_PIN_READ) {                 // Valid choice?
         switch (menu) {
           case MenuSelect::MENU_OPTION_SELECT:  // They made a choice
             tft.setTextColor(RA8875_WHITE);
@@ -1102,10 +1102,9 @@ int SubmenuSelect(const char *options[], int numberOfChoices, int defaultStart) 
           tft.setTextColor(RA8875_BLACK);
           tft.setCursor(SECONDARY_MENU_X + 1, MENUS_Y + 1);
           tft.print(options[encoderReturnValue]);
-          delay(50L);
+//          delay(50L);
           refreshFlag = 0;
         }
       }
     }
-//  }
-//}
+}

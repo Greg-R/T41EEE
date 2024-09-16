@@ -1030,7 +1030,7 @@ void UpdateInfoWindow() {
   UpdateSDIndicator(EEPROMData.sdCardPresent);
   UpdateWPMField();
   UpdateZoomField();
-  UpdateEqualizerField(EEPROMData.receiveEQFlag, EEPROMData.xmitEQFlag);
+  UpdateEqualizerField(EEPROMData.receiveEQFlag);
 }
 
 /*****
@@ -1302,11 +1302,11 @@ FLASHMEM void UpdateDecoderField() {
   Return value;
     void
 *****/
-FLASHMEM void UpdateEqualizerField(bool rxEqState, bool txEqState) {
+FLASHMEM void UpdateEqualizerField(bool rxEqState) {
   tft.setFontScale((enum RA8875tsize)0);
   tft.setTextColor(RA8875_WHITE);  // Display zoom factor
-  tft.setCursor(540, DECODER_Y + 15);
-  tft.print("Equalizers:");
+  tft.setCursor(547, DECODER_Y + 15);
+  tft.print("Equalizer:");
   tft.setTextColor(RA8875_GREEN);
   tft.setCursor(FIELD_OFFSET_X, DECODER_Y + 15);
   if (rxEqState) {
@@ -1322,6 +1322,7 @@ FLASHMEM void UpdateEqualizerField(bool rxEqState, bool txEqState) {
     tft.setTextColor(RA8875_WHITE);
     tft.print("Off");
   }
+  /*     TX equalizer replaced by Audio Adapter hardware equalizer.
   tft.setCursor(FIELD_OFFSET_X + 55, DECODER_Y + 15);
   if (txEqState) {
     tft.setTextColor(RA8875_RED);
@@ -1336,6 +1337,7 @@ FLASHMEM void UpdateEqualizerField(bool rxEqState, bool txEqState) {
     tft.setCursor(FIELD_OFFSET_X + 80, DECODER_Y + 15);
     tft.print("Off");
   }
+  */
 }
 
 
