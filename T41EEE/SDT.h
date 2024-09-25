@@ -195,7 +195,7 @@ const int TUNE_ENCODER_B = 17;
 const int VOLUME_ENCODER_A = 2;
 const int VOLUME_ENCODER_B = 3;
 const int FILTER_ENCODER_A = 15;
-const int FILTER_ENCODER_B = 41;  // 14.  Change this to 41 when using SPDIF with T41-2 Main board.
+const int FILTER_ENCODER_B = 14;
 const int FINETUNE_ENCODER_A = 4;
 const int FINETUNE_ENCODER_B = 5;
 const int TUNE_ENCODER_A = 16;
@@ -627,7 +627,7 @@ struct band {
   uint32_t band_type;
   float32_t gainCorrection;  // is hardware dependent and has to be calibrated ONCE and hardcoded in the table below
   int AGC_thresh;
-  int32_t pixel_offset;
+//  int32_t pixel_offset;
 };
 extern struct band bands[];
 

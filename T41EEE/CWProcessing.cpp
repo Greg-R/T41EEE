@@ -73,6 +73,7 @@ FLASHMEM void SelectCWFilter() {
   BandInformation();
   DrawBandWidthIndicatorBar();
   UpdateDecoderField();
+  eeprom.EEPROMWrite();
 }
 
 

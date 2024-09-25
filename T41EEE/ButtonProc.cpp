@@ -640,7 +640,7 @@ void ButtonFrequencyEntry() {
   char strF[6] = { ' ', ' ', ' ', ' ', ' ' };  // container for frequency string during entry
   String stringF;
 //  int valPin;
-MenuSelect menu = MenuSelect::DEFAULT;
+  MenuSelect menu = MenuSelect::DEFAULT;
   int key;
   int numdigits = 0;  // number of digits entered
   int pushButtonSwitchIndex;
@@ -763,8 +763,7 @@ MenuSelect menu = MenuSelect::DEFAULT;
   while (doneFE == false) {
     menu = readButton();
     pushButtonSwitchIndex = static_cast<int>(menu);
-//    Serial.printf("pushButtonSwitchIndex = %d\n", pushButtonSwitchIndex);
-    if (pushButtonSwitchIndex != 19) {
+    if (pushButtonSwitchIndex != 18) {
       key = numKeys[pushButtonSwitchIndex];
       switch (key) {
         case 0x7F:  // erase last digit =127

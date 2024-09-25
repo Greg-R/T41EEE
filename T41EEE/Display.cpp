@@ -672,9 +672,8 @@ void BandInformation()  // SSB or CW
   }
 
   tft.fillRect(OPERATION_STATS_X + 160, FREQUENCY_Y + 30, tft.getFontWidth() * 11, tft.getFontHeight(), RA8875_BLACK);  // AFP 11-01-22 Clear top-left menu area
-  tft.setCursor(OPERATION_STATS_X + 160, FREQUENCY_Y + 30);                                                             // AFP 11-01-22
+  tft.setCursor(OPERATION_STATS_X + 165, FREQUENCY_Y + 30);                                                             // AFP 11-01-22
   tft.setTextColor(RA8875_WHITE);
-
 
   switch (bands[EEPROMData.currentBand].mode) {
     case DEMOD_LSB:
@@ -684,7 +683,6 @@ void BandInformation()  // SSB or CW
         tft.print(DEMOD[bands[EEPROMData.currentBandB].mode].text);  // Which sideband //AFP 09-22-22
       }
       break;
-      ;
 
     case DEMOD_USB:
       if (EEPROMData.activeVFO == VFO_A) {
@@ -1280,10 +1278,7 @@ FLASHMEM void UpdateDecoderField() {
     tft.writeTo(L1);
     tft.setFontScale((enum RA8875tsize)0);
     tft.setTextColor(RA8875_LIGHT_GREY);
-    //    tft.setCursor(FIELD_OFFSET_X, DECODER_Y + 15);
-    //    tft.print("CW Fine Adjust");
   } else {
-    //    tft.fillRect(FIELD_OFFSET_X, DECODER_Y + 15, tft.getFontWidth() * 15, tft.getFontHeight(), RA8875_BLUE);
     tft.writeTo(L2);
     tft.drawFastVLine(BAND_INDICATOR_X - 8 + 30, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_BLACK);  //CW lower freq indicator
     tft.drawFastVLine(BAND_INDICATOR_X - 8 + 38, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_BLACK);  //CW upper freq indicator

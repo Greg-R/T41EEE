@@ -227,6 +227,7 @@ void ExecuteButtonPress(MenuSelect val) {
       DrawBandWidthIndicatorBar();  // AFP 10-20-22
       SetFreq();
       ShowSpectrum();
+      UpdateDecoderField();
       ShowAutoStatus();
       break;
 
@@ -249,6 +250,7 @@ void ExecuteButtonPress(MenuSelect val) {
       BandInformation();
       NCOFreq = 0L;
       DrawBandWidthIndicatorBar();  //AFP 10-20-22
+      UpdateDecoderField();
       ShowAutoStatus();
       break;
 
