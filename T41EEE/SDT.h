@@ -24,7 +24,6 @@
 #include <si5351.h>  // https://github.com/etherkit/Si5351Arduino
 #include <RA8875.h>  // https://github.com/mjs513/RA8875/tree/RA8875_t4
 #include <Rotary.h>  // https://github.com/brianlow/Rotary
-
 #include <string.h>
 #include <string_view>
 #include <util/crc16.h>        // mdrhere
@@ -52,25 +51,23 @@ const int BUSY_ANALOG_PIN = 39;       // This is the analog pin that controls th
 const int NOTHING_TO_SEE_HERE = 950;  // If the analog pin is greater than this value, nothing's going on
 const int BOGUS_PIN_READ = -1;        // If no push button read. GET RID OF THIS!!!
 const int WIGGLE_ROOM = 20;           // This is the maximum value that can added to a BUSY_ANALOG_PIN pin read value of a push
-//                         button and still have the switch value be associated with the correct push button.
-
+                                      // button and still have the switch value be associated with the correct push button.
 const int PRIMARY_MENU = 0;
 const int SECONDARY_MENU = 1;
 const int PRIMARY_MENU_X = 0;
 const int SECONDARY_MENU_X = 250;
 const int MENUS_Y = 0;
 const int EACH_MENU_WIDTH = 260;
-const int  BOTH_MENU_WIDTHS = (EACH_MENU_WIDTH * 2 + 30);
+const int BOTH_MENU_WIDTHS = (EACH_MENU_WIDTH * 2 + 30);
 const int MENU_OPTION_SELECT = 0;  // These are the expected values from the switch ladder
  
 //=======================================================
 const int XPIXELS = 800;  // This is for the 5.0" display
 const int YPIXELS = 480;
 const int CHAR_HEIGHT = 32;
-#define PIXELS_PER_EQUALIZER_DELTA 10  // Number of pixeks per detent of encoder for equalizer changes
+#define PIXELS_PER_EQUALIZER_DELTA 10  // Number of pixels per detent of encoder for equalizer changes
 #define SPECTRUM_LEFT_X 3              // Used to plot left edge of spectrum display  AFP 12-14-21
 #define WATERFALL_LEFT_X SPECTRUM_LEFT_X
-#define CLIP_AUDIO_PEAK 115                                     // The pixel value where audio peak overwrites S-meter
 #define SPECTRUM_RES 512                                        // The value used in the original open-source code is 256.  Al uses 512.
 #define SPECTRUM_TOP_Y 100                                      // Start of spectrum plot space
 #define SPECTRUM_HEIGHT 150                                     // This is the pixel height of spectrum plot area without disturbing the axes
@@ -87,8 +84,6 @@ const int CHAR_HEIGHT = 32;
 #define TEMP_Y_OFFSET 465  // 480 * 0.97 = 465
 #define AGC_Y_OFFSET 292
 #define AGC_X_OFFSET 680
-#define INCREMENT_X WATERFALL_RIGHT_X + 25
-#define INCREMENT_Y WATERFALL_TOP_Y + 70
 #define INFORMATION_WINDOW_X WATERFALL_RIGHT_X + 25  // 512 + 25 = 537
 #define INFORMATION_WINDOW_Y WATERFALL_TOP_Y + 37    // 255 + 37 = 292
 #define BAND_INDICATOR_X WATERFALL_RIGHT_X + 25
@@ -96,15 +91,9 @@ const int CHAR_HEIGHT = 32;
 #define OPERATION_STATS_X 130
 #define X_R_STATUS_X 730
 #define X_R_STATUS_Y 70
-#define RECEIVE_STATE 1
-#define TRANSMIT_STATE 0
-#define SMETER_X WATERFALL_RIGHT_X + 16
-#define SMETER_Y YPIXELS * 0.22  // 480 * 0.22 = 106
 #define SMETER_BAR_HEIGHT 18
 #define SMETER_BAR_LENGTH 180
 #define SPECTRUM_NOISE_FLOOR (SPECTRUM_TOP_Y + SPECTRUM_HEIGHT - 3)  // 100 + 150 - 3 = 247
-#define TIME_X (XPIXELS * 0.73)                                      // Upper-left corner for time
-#define TIME_Y (YPIXELS * 0.07)
 #define FILTER_PARAMETERS_X (XPIXELS * 0.22)
 #define FILTER_PARAMETERS_Y (YPIXELS * 0.213)
 #define DEFAULT_EQUALIZER_BAR 100  // Default equalizer bar height
@@ -135,8 +124,6 @@ const int CHAR_HEIGHT = 32;
 #define WPM_X WATERFALL_RIGHT_X + 58
 #define WPM_Y WATERFALL_TOP_Y + 170
 #define SAM_PLL_HILBERT_STAGES 7  // AFP 11-02-22
-#define MAX_DECODE_CHARS 32       // Max chars that can appear on decoder line.  Increased to 32.  KF5N October 29, 2023
-#define DECODER_BUFFER_SIZE 128   // Max chars in binary search string with , . ?
 
 #define LOWEST_ATOM_TIME 20                                   // 60WPM has an atom of 20ms
 #define ADAPTIVE_SCALE_FACTOR 0.8                             // The amount of old histogram values are presesrved
@@ -663,18 +650,13 @@ extern bool volumeChangeFlag;
 extern char keyboardBuffer[];
 extern const char *topMenus[];
 extern const char *zoomOptions[];
-extern byte currentDashJump;
-extern byte currentDecoderIndex;
 extern bool ANR_notch;  // KF5N March 2, 2024
 extern uint8_t display_S_meter_or_spectrum_state;
 extern uint8_t keyPressedOn;  //AFP 09-01-22
 extern uint8_t NR_first_time;
 extern uint8_t NR_Kim;
 extern uint32_t SampleRate;
-extern uint32_t sch;
 extern uint32_t zoom_display;
-extern const uint8_t NR_L_frames;
-extern const uint8_t NR_N_frames;
 extern int16_t pixelnew[];
 extern int16_t pixelold[];
 extern int16_t pixelCurrent[];
@@ -818,8 +800,6 @@ extern float32_t float_buffer_R[];
 extern float32_t float_buffer_L_CW[];       //AFP 09-01-22
 extern float32_t float_buffer_R_CW[];       //AFP 09-01-22
 extern float32_t float_buffer_R_AudioCW[];  //AFP 10-18-22
-extern float32_t float_buffer_L2[];
-extern float32_t float_buffer_R2[];
 extern float32_t float_buffer_R_AudioCW[];  //AFP 10-18-22
 extern float32_t float_buffer_L_AudioCW[];  //AFP 10-18-22
 extern float32_t /*DMAMEM*/ iFFT_buffer[];
@@ -867,8 +847,6 @@ extern float temp;
 extern float x;
 extern const float32_t nuttallWindow256[];
 extern float32_t FFT_buffer[] __attribute__((aligned(4)));
-extern float32_t float_buffer_L_3[];
-extern float32_t float_buffer_R_3[];
 extern const float32_t atanTable[];
 extern const float32_t DF1;           // decimation factor
 extern const float32_t DF;            // decimation factor
@@ -992,7 +970,6 @@ void KeyRingOn();
 void KeyTipOn();
 void LMSNoiseReduction(int16_t blockSize, float32_t *nrbuffer);
 float32_t log10f_fast(float32_t X);
-//void MicOptions();
 int ModeOptions();
 //DB2OO, 29-AUG-23: added
 void MorseCharacterDisplay(char currentLetter);

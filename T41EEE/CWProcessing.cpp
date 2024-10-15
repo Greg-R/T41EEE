@@ -2,6 +2,11 @@
 #include "SDT.h"
 
 #define HISTOGRAM_ELEMENTS 750
+#define MAX_DECODE_CHARS 32       // Max chars that can appear on decoder line.  Increased to 32.  KF5N October 29, 2023
+#define DECODER_BUFFER_SIZE 128   // Max chars in binary search string with , . ?
+
+byte currentDashJump = DECODER_BUFFER_SIZE;
+byte currentDecoderIndex = 0;
 
 float32_t aveCorrResultR;  // Used in running averages; must not be inside function.
 float32_t aveCorrResultL;

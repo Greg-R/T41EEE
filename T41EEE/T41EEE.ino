@@ -391,8 +391,6 @@ char keyboardBuffer[10];  // Set for call prefixes. May be increased later
 const char *tune_text = "Fast Tune";
 const char *zoomOptions[] = { "1x ", "2x ", "4x ", "8x ", "16x" };
 
-byte currentDashJump = DECODER_BUFFER_SIZE;
-byte currentDecoderIndex = 0;
 float32_t pixel_per_khz = ((1 << EEPROMData.spectrum_zoom) * SPECTRUM_RES * 1000.0 / SR[SampleRate].rate);
 int pos_left = centerLine - (int)(bands[EEPROMData.currentBand].FLoCut / 1000.0 * pixel_per_khz);
 
@@ -411,10 +409,7 @@ uint8_t NR_Kim;
 
 uint32_t SampleRate = SAMPLE_RATE_192K;
 
-uint32_t sch = 0;
 uint32_t zoom_display = 1;
-const uint8_t NR_L_frames = 3;
-const uint8_t NR_N_frames = 15;
 
 int16_t pixelCurrent[SPECTRUM_RES];
 int16_t pixelnew[SPECTRUM_RES];
@@ -568,10 +563,8 @@ float32_t DMAMEM Fir_Zoom_FFT_Decimate_Q_state[4 + BUFFER_SIZE * N_B - 1];
 float32_t DMAMEM Fir_Zoom_FFT_Decimate_coeffs[4];
 float32_t DMAMEM float_buffer_L[BUFFER_SIZE * N_B];
 float32_t DMAMEM float_buffer_R[BUFFER_SIZE * N_B];
-float32_t DMAMEM float_buffer_L2[BUFFER_SIZE * N_B];
-float32_t DMAMEM float_buffer_R2[BUFFER_SIZE * N_B];
-float32_t DMAMEM float_buffer_L_3[BUFFER_SIZE * N_B];
-float32_t DMAMEM float_buffer_R_3[BUFFER_SIZE * N_B];
+//float32_t DMAMEM float_buffer_L2[BUFFER_SIZE * N_B];
+//float32_t DMAMEM float_buffer_R2[BUFFER_SIZE * N_B];
 float32_t DMAMEM float_buffer_L_CW[256];       //AFP 09-01-22
 float32_t DMAMEM float_buffer_R_CW[256];       //AFP 09-01-22
 float32_t DMAMEM float_buffer_R_AudioCW[256];  //AFP 10-18-22

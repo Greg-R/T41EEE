@@ -1,6 +1,9 @@
 
 #include "SDT.h"
 
+float32_t DMAMEM float_buffer_L_3[2048];
+float32_t DMAMEM float_buffer_R_3[2048];
+
 float32_t NCO_INC;
 double OSC_COS;
 double OSC_SIN;

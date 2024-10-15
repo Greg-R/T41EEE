@@ -1,6 +1,12 @@
 
 #include "SDT.h"
 
+#define CLIP_AUDIO_PEAK 115            // The pixel value where audio peak overwrites S-meter
+#define INCREMENT_X WATERFALL_RIGHT_X + 25
+#define INCREMENT_Y WATERFALL_TOP_Y + 70
+#define SMETER_X WATERFALL_RIGHT_X + 16
+#define SMETER_Y YPIXELS * 0.22  // 480 * 0.22 = 106
+
 const uint16_t gradient[] = {  // Color array for waterfall background
   0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9,
   0x10, 0x1F, 0x11F, 0x19F, 0x23F, 0x2BF, 0x33F, 0x3BF, 0x43F, 0x4BF,
@@ -1003,7 +1009,7 @@ void MyDrawFloat(float val, int decimals, int x, int y, char *buff) {
 
 
 /*****
-  Purpose: Shows the startup settings for the information displayed int he lower-right box.
+  Purpose: Shows the startup settings for the information displayed int the lower-right box.
 
   Parameter list:
     void

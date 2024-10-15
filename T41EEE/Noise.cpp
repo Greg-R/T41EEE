@@ -28,6 +28,8 @@ float32_t NR_KIM_K = 1.0;
 float32_t NR_onemalpha = (1.0 - EEPROMData.NR_alpha);
 float32_t NR_onemtwobeta = (1.0 - (2.0 * EEPROMData.NR_beta));
 float32_t NR_T;
+const uint8_t NR_L_frames = 3;
+const uint8_t NR_N_frames = 15;
 
 float32_t DMAMEM ANR_d[ANR_DLINE_SIZE] = {0};
 float32_t DMAMEM ANR_w[ANR_DLINE_SIZE] = {0};

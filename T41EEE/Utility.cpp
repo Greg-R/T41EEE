@@ -3,6 +3,9 @@
 
 #include "SDT.h"
 
+#define TIME_X (XPIXELS * 0.73)                                      // Upper-left corner for time
+#define TIME_Y (YPIXELS * 0.07)
+
 uint8_t display_dbm = DISPLAY_S_METER_DBM;
 int16_t pos_y_frequency = 48;
 int old_demod_mode = -99;
