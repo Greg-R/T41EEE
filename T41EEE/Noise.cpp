@@ -1,6 +1,8 @@
 
 #include "SDT.h"
 
+#define ANR_DLINE_SIZE 512  //funktioniert nicht, 128 & 256 OK
+
 uint8_t NR_use_X = 0;
 int ANR_buff_size = FFT_length / 2.0;
 int ANR_delay = 16;
@@ -73,43 +75,6 @@ const float32_t sqrtHann[256] = {
   0.122888291, 0.110652682, 0.098400278, 0.086132939, 0.073852527, 0.061560906, 0.049259941, 0.036951499,
   0.024637449, 0.01231966, 0
 };
-
-
-/*****
-  Purpose: Present the noise reduction options
-
-  Parameter list:
-    void
-
-  Return value
-    int           an index into the band array, 0 for off, -1 for cancel
-*****/
-void NROptions() //AFP 09-19-22 Moved here from Menu Proc Revised
-{
-  switch (EEPROMData.nrOptionSelect) {
-    case 0:                                 // Off
-      NR_Index = 0;
-      break;
-    case 1:                                 // Kim
-      NR_Index = 1;
-      break;
-
-    case 2:                                 // Spectral
-      NR_Index = 2;
-      break;
-
-    case 3:                                 // LMS.
-      NR_Index = 3;
-//      ANR_notchOn = 0;  //  LMS noise reduction conflicts with AutoNotch.  Turn off AutoNotch when this is selected.
-      break;
-
-    default:
-      Serial.print("Error in NROptions");
-      NR_Index = -1;                        // Force hard error
-      break;
-  } 
-//  return NR_Index;  Changed function to void.  KF5N March 2, 2024.
-}  //AFP 09-19-22
 
 
 /*****

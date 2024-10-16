@@ -429,12 +429,10 @@ extern float32_t HP_DC_Filter_Coeffs2[];  // AFP 11-02-22
 #define DISPLAY_S_METER_DBMHZ 1
 #define N2 100
 
-#define ANR_DLINE_SIZE 512  //funktioniert nicht, 128 & 256 OK
 #define MAX_LMS_TAPS 96
 #define MAX_LMS_DELAY 256
 #define NR_FFT_L 256
-#define NB_FFT_SIZE FFT_LENGTH / 2
-#define TABLE_SIZE_64 64
+//#define NB_FFT_SIZE FFT_LENGTH / 2
 
 //================== Global CW Correlation and FFT Variables =================
 extern float32_t audioMaxSquaredAve;
@@ -867,7 +865,7 @@ void AGCLoadValues();  // AGC fix.  G0ORX September 5, 2023
 void AGCOptions();
 void AGCPrep();
 float32_t AlphaBetaMag(float32_t inphase, float32_t quadrature);
-void AltNoiseBlanking(float *insamp, int Nsam, float *E);
+//void AltNoiseBlanking(float *insamp, int Nsam, float *E);
 void AMDecodeSAM();  // AFP 11-03-22
 void arm_clip_f32(const float32_t *pSrc,
                   float32_t *pDst,
@@ -975,8 +973,6 @@ int ModeOptions();
 void MorseCharacterDisplay(char currentLetter);
 void MyDrawFloat(float val, int decimals, int x, int y, char *buff);
 float MSinc(int m, float fc);
-void NoiseBlanker(float32_t *inputsamples, float32_t *outputsamples);
-void NROptions();
 void printFile(const char *filename);
 void EnableButtonInterrupts();
 void playTransmitData();  // KF5N February 23, 2024

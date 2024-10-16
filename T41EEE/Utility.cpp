@@ -5,6 +5,7 @@
 
 #define TIME_X (XPIXELS * 0.73)                                      // Upper-left corner for time
 #define TIME_Y (YPIXELS * 0.07)
+#define TABLE_SIZE_64 64
 
 uint8_t display_dbm = DISPLAY_S_METER_DBM;
 int16_t pos_y_frequency = 48;

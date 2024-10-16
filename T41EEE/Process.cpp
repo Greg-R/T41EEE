@@ -3,7 +3,7 @@
 
 char atom, currentAtom;
 int8_t first_block = 1;
-uint8_t NB_on = 0;
+//uint8_t NB_on = 0;
 uint8_t wait_flag;
 float32_t audiotmp = 0.0f;
 float32_t audioSpectBuffer[1024]{ 0 };  // This can't be DMAMEM.  It will break the S-Meter.  KF5N October 10, 2023
@@ -413,7 +413,7 @@ void ProcessIQData() {
       Spectral NR
       LMS variable leak NR
     **********************************************************************************/
-    switch (NR_Index) {
+    switch (EEPROMData.nrOptionSelect) {
       case 0:  // NR Off
         break;
       case 1:  // Kim NR
@@ -443,12 +443,12 @@ void ProcessIQData() {
     /**********************************************************************************
       EXPERIMENTAL: noise blanker
       by Michael Wild
-    **********************************************************************************/
-
+    **********************************************************************************
     if (NB_on != 0) {
       NoiseBlanker(float_buffer_L, float_buffer_R);
       arm_copy_f32(float_buffer_R, float_buffer_L, FFT_length / 2);
     }
+*/
 
     if (radioMode == RadioMode::CW_MODE) {
       DoCWReceiveProcessing();  //AFP 09-19-22

@@ -15,7 +15,7 @@
 
 #define TOP_MENU_COUNT 11  // Menus to process AFP 09-27-22, JJP 7-8-23
 
-bool save_last_frequency = false;
+bool save_last_frequency = true;  // Make this the default behavior.  Greg KF5N October 16, 2024.
 int directFreqFlag = 0;
 auto subMenuMaxOptions = 0;  // Holds the number of submenu options.
 auto TxRxFreqOld = 0;
@@ -484,7 +484,6 @@ void ButtonNR()  //AFP 09-19-22 update
     EEPROMData.nrOptionSelect = 0;
   }
   if (EEPROMData.nrOptionSelect == 3) ANR_notch = false;  // Turn off AutoNotch if LMS NR is selected.
-  NROptions();                                            //AFP 09-19-22
   UpdateNoiseField();
 }
 
@@ -632,6 +631,7 @@ void ResetZoom(int zoomIndex1) {
     Base Code courtesy of Harry  GM3RVL
 *****/
 void ButtonFrequencyEntry() {
+  bool valid_frequency = false;
   TxRxFreqOld = TxRxFreq;
 
 #define show_FEHelp
@@ -644,7 +644,7 @@ void ButtonFrequencyEntry() {
   int key;
   int numdigits = 0;  // number of digits entered
   int pushButtonSwitchIndex;
-  EEPROMData.lastFrequencies[EEPROMData.currentBand][EEPROMData.activeVFO] = TxRxFreq;
+//  EEPROMData.lastFrequencies[EEPROMData.currentBand][EEPROMData.activeVFO] = TxRxFreq;
   // Arrays for allocating values associated with keys and switches - choose whether USB keypad or analogue switch matrix
   // USB keypad and analogue switch matrix
   const char *DE_Band[] = { "80m", "40m", "20m", "17m", "15m", "12m", "10m" };
@@ -774,40 +774,40 @@ void ButtonFrequencyEntry() {
           break;
         case 0x58:  // Exit without updating frequency =88
           doneFE = true;
+          valid_frequency = false;
           break;
         case 0x0D:  // Apply the entered frequency (if valid) =13
           stringF = String(strF);
           enteredF = stringF.toInt();
           if ((numdigits == 1) || (numdigits == 2)) {
             enteredF = enteredF * 1000000;
+            valid_frequency = true;
           }
           if ((numdigits == 4) || (numdigits == 5)) {
             enteredF = enteredF * 1000;
+            valid_frequency = true;
           }
           if ((enteredF > 30000000) || (enteredF < 1250000)) {
             stringF = "     ";  // 5 spaces
             stringF.toCharArray(strF, stringF.length());
             numdigits = 0;
+            valid_frequency = false;
           } else {
             doneFE = true;
           }
           break;
-        case 0x99:
-          save_last_frequency = !save_last_frequency;
+        case 0x99:  // Toggle "Save Direct to Last Freq".
+          save_last_frequency = not save_last_frequency;
           tft.setFontScale((enum RA8875tsize)0);
           tft.fillRect(WATERFALL_LEFT_X + 269, SPECTRUM_TOP_Y + 190, 50, CHAR_HEIGHT, RA8875_BLACK);
           tft.setCursor(WATERFALL_LEFT_X + 260, SPECTRUM_TOP_Y + 190);
-          if (save_last_frequency == 0) {
+          if (save_last_frequency == false) {
             tft.setTextColor(RA8875_MAGENTA);
             tft.print("Off");
-            save_last_frequency = 0;
             break;
           } else {
-            if (save_last_frequency == 1) {
               tft.setTextColor(RA8875_GREEN);
               tft.print("On");
-              save_last_frequency = 1;
-            }
           }
           break;
         default:
@@ -834,7 +834,7 @@ void ButtonFrequencyEntry() {
   EEPROMData.centerFreq = TxRxFreq;
   centerTuneFlag = 1;  // Put back in so tuning bar is refreshed.  KF5N July 31, 2023
   SetFreq();           // Used here instead of centerTuneFlag.  KF5N July 22, 2023
-  if (save_last_frequency == 1) {
+  if (save_last_frequency == true and valid_frequency == true) {
     EEPROMData.lastFrequencies[EEPROMData.currentBand][EEPROMData.activeVFO] = enteredF;
   } else {
     if (save_last_frequency == 0) {

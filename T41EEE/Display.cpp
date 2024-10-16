@@ -1386,9 +1386,7 @@ void UpdateWPMField() {
 *****/
 void UpdateNoiseField() {
   const char *filter[] = { "Off", "Kim", "Spectral", "LMS" };  //AFP 09-19-22
-
   tft.setFontScale((enum RA8875tsize)0);
-
   tft.fillRect(FIELD_OFFSET_X, NOISE_REDUCE_Y, 70, tft.getFontHeight(), RA8875_BLACK);
   tft.setTextColor(RA8875_WHITE);  // Noise reduction
   tft.setCursor(NOISE_REDUCE_X + 5, NOISE_REDUCE_Y - 3);
