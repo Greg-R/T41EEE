@@ -1,4 +1,4 @@
-### Version T41EEE.6 T41 Software Defined Transceiver Arduino Sketch
+### Version T41EEE.7 T41 Software Defined Transceiver Arduino Sketch
 
 This is the "T41 Extreme Experimenter's Edition" software for the 
 T41 Software Defined Transceiver.  The T41EEE was "forked" from the V049.2 version
@@ -31,7 +31,7 @@ and feature enhancements become available.  You will be able to update and FLASH
 with the revised software quickly.
 
 Please note that the configuration structure is different than the predecessor V049.2
-It is recommended to perform a full FLASH erase before loading T41EEE.6.
+It is recommended to perform a full FLASH erase before loading T41EEE.7.
 
 You will need to install the ArduinoJson library by Benoit Blanchon.  Using the IDE:
 Tools -> Manage Libraries ...
@@ -42,13 +42,13 @@ successful.
 
 ## How to Compile T41EEE
 
-T41EEE.6 was developed and compiled using Arduino IDE version 2.3.2 with the following
+T41EEE.7 was developed and compiled using Arduino IDE version 2.3.2 with the following
 configuration:
 
 1.  Optimize is set to "Smallest Code" (Tools menu).
 2.  CPU speed is set to 528 MHz (Tools menu).
 3.  TeensyDuino version is 1.59.0.
-4.  You will need to install ArduinoJson which is currently version 7.0.4.
+4.  You will need to install ArduinoJson which is currently version 7.1.0.
 
 Completing a FLASH erase of the Teensy is strongly recommended before uploading this new version. 
 Remember to save to the SD card via the EEPROM menu EEPROM->SD command prior to erasing.
@@ -58,37 +58,138 @@ The instructions for performing a FLASH erase of the Teensy are here:
 
 The bullet "Memory Wipe & LED Blink Restore" has the instructions.
 
-## Highlight of Changes included in T41EEE.6
+## Highlight of Changes included in T41EEE.7
 
- 1.  Fixed CW sidetone problem.
- 2.  Fixed ordering of button interrupt enabling and EEPROM startup function calls in setup().
- 3.  Added #define DEBUG_SWITCH_CAL and .ino code.
- 4.  Fixed version not updating in SD file.  CW filter shown rather than default in menu.
- 5.  Fixed switch matrix debug mode not saving to EEPROM.
- 6.  Inhibit transmit in AM demod modes.
- 7.  Changed Serial speed from 9600 to 115200, a modern speed.
- 8.  Boosted QSE2DC transmit gain, which increases power by about 3 dB.
- 9.  Corrected comment in the ResetFlipFlops() function.
-10.  Fixed strange filter band limit behavior and moved graphics to FilterSetSSB() function.
-11.  Updated README with new link to book and compile configuration.
-12.  Removed unused variables and code, formerly used for audio bandwidth delimiters.
-13.  Fixed bug in FilterSetSSB() which caused audio filter bandwidth to change inadvertently.
-14.  Smoother tuning in 16X Zoom.
-15.  Improved accuracy of location of blue tuning bar.
-16.  Higher dynamic range calibration display working.
-17.  AM modes tuning problem is resolved.
-18.  Automated calibration feature is available in the Calibration menu (details below).
-19.  Audio filter bandwidth selection is indicated by yellow delimiter bar.
-20.  Volume is equalized when adjusting audio bandwidth.
-21.  Noise reduction algorithms are equalized to the same gains.
-22.  MyConfiguration.h includes customizable coarse (center) and fine frequency increments.
-23.  Auto-Spectrum mode optimizes the position of the spectral display without affecting gain.
-     This is activated in the RF Set menu.  The gain setting reverts to manual control, also
-     in the RF Set menu.
+1.  Audio bandwidth equalized.  Noise reductions equalized.
+2.  Changed audio filter delimiter line color to red.
+3.  Reduced Spectral noise filter amplitude.
+4.  Fixed problem with audio delimiters and reset tuning, also was not saving AutoSpectrum to SD.
+5.  Added SSB calibration.
+6.  Added audio adapter equalizer to transmit signal chain.
+7.  CESSB modulation from Open Audio Library replaces conventional phasing SSB.
+8.  Added working SSB options menu specific to CESSB.  Mic gain and compression menu removed.
+
+## Controlled Envelope Single Side Band (CESSB)
+
+Controlled Envelope Single Side Band is employed in T41EEE.7.  This web page has an excellent description of
+CESSB technology:
+
+<https://www.janbob.com/electron/CESSB_Teensy/CESSB_Teensy.html>
+
+T41EEE.7 uses the Open Audio CESSB class as well as the type 2 Compressor class.
+
+<https://github.com/chipaudette/OpenAudio_ArduinoLibrary/blob/master/radioCESSB_Z_transmit_F32.h>
+
+<https://github.com/chipaudette/OpenAudio_ArduinoLibrary/blob/master/AudioEffectCompressor2_F32.h>
+
+The Audio Adapter's hardware-based equalization filter is included in the CESSB transmit chain to provide
+high-pass filtering of the microphone audio.
+
+### CESSB Automatic Calibration
+
+Automated calibration of the CESSB transmit signal chain is included in the Calibration menu.
+Similar to the previously deployed automatic calibration, SSB Radio Cal and SSB Radio Refine Cal
+commands will run the automatic calibration routines on all bands.  The automated calibrations can
+also be run on a per-band basis.
+
+Successful completion of either manual or automated calibration is required before proceeding with CESSB
+transmitter alignments.  It is recommended to calibrate with SSB PA Cal set as high as possible.
+If you have access to a spectrum analyzer, look at the transmitted spectrum from the output of the QSE
+filter.  You should see a minimum of spurious outputs close to the desired carrier when SSB PA Cal is
+set high, but not too high.
+
+### CESSB Transmitter Alignment
+
+It will help to understand the CESSB transmit signal chain as deployed in this firmware.
+Nice block diagrams will be added to this in the near future.  For now, it is textual description.
+
+Transmit Signal Chain
+1.  Electret microphone biased via the Audio Adapter.  Assumed ~20 mV audio output from the electret.
+2.  Microphone amplifier/attenuator stage.  The default gain is 0 dB.  This gain is user-adjustable.
+3.  Open Audio Compressor 2.  Compression threshold and compression ratio are user adjustable.
+4.  CESSB processing.  The input is the compressed audio, and the output is I and Q to the QSE modulator.
+5.  QSE baseband-to-RF IQ modulator.  The I and Q channel amplitudes are user-adjustable via SSB PA Cal.
+
+So what does the user have to adjust?:
+
+1.  Microphone gain.
+2.  Compression threshold.
+3.  Compression ratio.
+4.  SSB PA Cal.
+
+OK, so now we will attempt to juggle the above four parameters to get a decent transmitted output.
+Of the above four items, it is probably best to leave the compression ratio set to default for now.
+Also, if you are using a typical electret microphone biased by the Audio Adapter, don't adjust the
+microphone gain at first.  Leave it alone, and then maybe come back to it later for further optimization.
+
+CESSB processes the voice audio in such a way that the peak-to-average power of the modulation is
+significantly reduced.  So we will use that fact and a single-tone signal to adjust the transmitter
+parameters.  The transmit signal chain is cascaded gain stages, and we don't won't overdrive to happen
+at any node of the chain.  Overdrive will result in a distorted output and will cause adjacent-channel
+splatter (increased bandwidth of the transmit energy).
+
+For starters, you will find more options in the Calibration sub-menu:
+```
+SSB Carrier
+SSB Transmit
+SSB Radio
+SSB Refine
+```
+The CW calibrations are now separate and are indicated as such.
+So in theory, the rest of the radio functions as before.  I hope, because one radical
+departure is using a different sample rate during SSB transmit, which is 48 kHz.
+This must be restored to 192 kHz when returning to receive, which I think is happening.
+A few critical areas of the code changed to allow different sample rates.
+
+So if you are adventurous, and want to try CESSB, I recommend this process which is a wild guess based on
+many hours of playing around with the technology.  The reason it is a wild guess is that your hardware is
+different.  So the signal amplitudes here will be different from the signal amplitudes there.  Good luck.
+
+1.  Try to get SSB Carrier and SSB Transmit automatic calibration to work.  I recommend
+setting SSB PA Cal to 0.8.  If this looks like it works, then connect the output of the QSE
+to a spectrum analyzer, and run either SSB Carrier or Transmit cal, it doesn't matter.
+This is just a check to see if the spectrums are reasonably free of higher order garbage.
+There is going to be some garbage no matter what, but it better be suppressed 60 dB or better.
+If garbage levels are too high, try again with a lower SSB PA Cal number.
+
+Note that if you plan to drive the Power Amplifier with CESSB, you need to have a filter after the QSE.  Be sure to run calibration with the filter in place!  I put an attenuator on the output of the QSE to help isolate it from the filter.  I'm currently using a 6 dB attenuator, which seems kind of high, but there is still enough drive to the Power Amplifier.  Also if you are using the QSE2DC, there is a resistive Pi attenuator on the output of about 2 dB.  This is another variable in this system which is kind of up for grabs, and it depends on exactly what you've got.  Fun with homebrew radios!
+
+Let me explain in detail SSB PA Cal.  This is nothing more than a constant linear multiplier of the I and Q channel amplitudes going into the QSE.  Thus you cannot allow the amplitude to go too high or you will cause distortion in the modulator.  SSB PA Cal setting is crucial and we will come back to this later in the process.  This step #1 is to make sure calibration happens at a level which is a bit below the saturation point of the modulator.  There is a balance point of good signal-to-noise ratio and keeping the signal below the level of generating intermodulation garbage.  So we are trying to find the sweet spot, calibrate there, and move onto the next step.
+
+I should also comment that without having a spectrum analyzer capable of resolving the offset tone frequency 750Hz, that adjusting this thing will be dang near impossible.  I have a TinySA Ultra and that is probably the bare minimum that will suffice.
+
+2.  Inject a 1 kHz tone, about 20 millivolts, into the microphone connector.  You will need to be able to short the PTT to ground to key the transmitter.  I use a cheap Amazon cable which terminates in RCA type connectors, which are plugged into RCA to BNC adapters.  This is sleazy but it works.  I use an alligator clip lead to short the PTT to ground.
+
+While monitoring with a spectrum analyzer (output of the QSE filter), show that the input compression is working.  Gradually increase the amplitude of the 1 kHz tone, and at some level, you should notice it is no longer a 1:1 increase.  Keep going and it will hit an upper limit, and will not go higher in amplitude.
+
+Hopefully the compressor behavior is observed, and you will not need to adjust the compressor variables.  But first, does the output level of your microphone make sense with the observed compression behavior?  This takes us to the SSB Options, which is a selection in the main menu.  In the SSB Options:
+
+1.  Microphone gain, with default of 0 dB.
+2.  Compression Threshold, with default of -20 dB.
+3.  Compression Ratio, with default of 100.
+
+So if your microphone is more or less sensitive, adjust using #1.
+I hope #2 and #3 do not require adjustment.  The Compressor2 is set up in a very basic way.
+It is really more of a limiter than a compressor.  Much more sophisticated compression behavior
+is possible.  This is a good enough starting point.
+
+Now remember I said to adjust SSB PA Cal to 0.8 during calibration?
+Now it is time to dial that down, drop it to 0.5, maybe even 0.4.
+The reason for this is to prevent the CESSB output from overdriving the QSE during voice peaks.
+
+Disconnect the 1 kHz tone source and plug in the microphone.
+Now monitor the spectrum while keyed up and speaking into the microphone.
+This should result in a very contained spectrum of approximately 3 kHz bandwidth.
+There may be occasional splatter, but it should be relatively rare.  You should be able to almost yell into the microphone without causing splatter.  Well, maybe more like loud talking.
+
+OK, if you got this far, the SSB transmitter is more or less adjusted, sans power amplifier, of course.  You can go ahead and connect the power amplifier, load and/or attenuator and see how that looks.  I see quite a bit of spectral spreading at the output of the K9HZ amplifier, but thisis probably normal.
+
+There is another issue here.  After all of that, is the output high enough to drive up the amplifier???  I'm not sure what to do about that if it isn't.  Backing off the attenuator on the output of the QSE plus re-calibration is one possibility.
+
 
 ## Automated Calibration
 
-Automated calibration is available starting with this version T41EEE.6.
+Automated calibration is available starting with version T41EEE.6.
 
 Automated calibration set-up is the same as for manual calibration.  A loop-back path from the
 output of the QSE to the input of the QSD must be connected.  An attenuator, in the value of 
@@ -99,7 +200,7 @@ is adequately suppressed.
 
 After the loop-back path is inserted, use the following command from the main function buttons (2 and 5):
 
-Calibrate (select) Radio Cal (select)
+Calibrate (select) CW Radio Cal (select)
 
 The radio will move to the 80 meter band and begin the calibration process.  The process will pause
 for 5 seconds at the conclusion of each individual calibration process.  The process will continue
@@ -114,9 +215,12 @@ calibrate a single band from the individual menu using button 4 (2nd row, 1st co
 the automatic calibration process completes, manual tuning again becomes available.
 
 A faster, more precise process is possible.  This is also in the Calibrate menu, and is called
-"Refine Cal".  This will calibrate all bands except it will use the current numbers as a starting
+"CW Refine Cal".  This will calibrate all bands except it will use the current numbers as a starting
 point.  Refine Cal will not proceed until Radio Cal has been completed.  Refine Cal will also work
 in individual bands using button 7 (3rd row, 1st column).
+
+There are also equivalent functions for SSB calibration.  SSB calibration factors are separated
+from CW starting in version T41EEE.7.
 
 Here are a few tips on using automated calibration modes:
 

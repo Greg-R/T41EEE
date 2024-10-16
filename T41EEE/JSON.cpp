@@ -3,8 +3,26 @@
 
 // JSON format used to save and read from SD card.  This was derived from a JSON example from the ArduinoJSON library.
 
+// Custom converters are needed for the mode states.
+bool convertToJson(const RadioMode& src, JsonVariant dst) {
+int state;
+state = static_cast<int>(src);
+//  char buf[32];
+//  strftime(buf, sizeof(buf), "%FT%TZ", &src);
+
+  return dst.set(state);
+}
+
+
+RadioMode convertFromJson(JsonVariantConst src, RadioMode& dst) {
+int state;
+state = src.as<int>();
+return dst = static_cast<RadioMode>(state);
+}
+
+
 // Loads the EEPROMData configuration from a file
-FLASHMEM void loadConfiguration(const char *filename, config_t &EEPROMData) {
+FLASHMEM void JSON::loadConfiguration(const char *filename, config_t &EEPROMData) {
   // Open file for reading
   File file = SD.open(filename);
 
@@ -22,8 +40,6 @@ FLASHMEM void loadConfiguration(const char *filename, config_t &EEPROMData) {
   }
 
   // Copy values from the JsonDocument to the EEPROMData
-  // How to copy numbers:
-  //  EEPROMData.versionSettings = doc["versionSettings"];
   strlcpy(EEPROMData.versionSettings, doc["versionSettings"] | "t41pp.0", 10);
   EEPROMData.AGCMode = doc["AGCMode"];
   EEPROMData.audioVolume = doc["audioVolume"];
@@ -39,7 +55,6 @@ FLASHMEM void loadConfiguration(const char *filename, config_t &EEPROMData) {
   EEPROMData.nrOptionSelect = doc["nrOptionSelect"];
   EEPROMData.currentScale = doc["currentScale"];
   EEPROMData.spectrum_zoom = doc["spectrum_zoom"];
-  EEPROMData.spectrum_display_scale = doc["spectrum_display_scale"];
   EEPROMData.CWFilterIndex = doc["CWFilterIndex"];
   EEPROMData.paddleDit = doc["paddleDit"];
   EEPROMData.paddleDah = doc["paddleDah"];
@@ -50,7 +65,6 @@ FLASHMEM void loadConfiguration(const char *filename, config_t &EEPROMData) {
   EEPROMData.sidetoneVolume = doc["sidetoneVolume"];
   EEPROMData.cwTransmitDelay = doc["cwTransmitDelay"];
   EEPROMData.activeVFO = doc["activeVFO"];
-//  EEPROMData.freqIncrement = doc["freqIncrement"];
   EEPROMData.currentBand = doc["currentBand"];
   EEPROMData.currentBandA = doc["currentBandA"];
   EEPROMData.currentBandB = doc["currentBandB"];
@@ -62,8 +76,8 @@ FLASHMEM void loadConfiguration(const char *filename, config_t &EEPROMData) {
   EEPROMData.equalizerXmt[0] = doc["equalizerXmt"][0];
   EEPROMData.currentMicThreshold = doc["currentMicThreshold"];
   EEPROMData.currentMicCompRatio = doc["currentMicCompRatio"];
-  EEPROMData.currentMicAttack = doc["currentMicAttack"];
-  EEPROMData.currentMicRelease = doc["currentMicRelease"];
+  //EEPROMData.currentMicAttack = doc["currentMicAttack"];
+  //EEPROMData.currentMicRelease = doc["currentMicRelease"];
   EEPROMData.currentMicGain = doc["currentMicGain"];
   for (int i = 0; i < 18; i++) EEPROMData.switchValues[i] = doc["switchValues"][i];
   EEPROMData.LPFcoeff = doc["LPFcoeff"];
@@ -76,10 +90,13 @@ FLASHMEM void loadConfiguration(const char *filename, config_t &EEPROMData) {
   EEPROMData.powerOutSSB[0] = doc["powerOutSSB"][0];
   for (int i = 0; i < 7; i++) EEPROMData.CWPowerCalibrationFactor[i] = doc["CWPowerCalibrationFactor"][i];
   for (int i = 0; i < 7; i++) EEPROMData.SSBPowerCalibrationFactor[i] = doc["SSBPowerCalibrationFactor"][i];
-  for (int i = 0; i < 7; i++) EEPROMData.IQAmpCorrectionFactor[i] = doc["IQAmpCorrectionFactor"][i];
-  for (int i = 0; i < 7; i++) EEPROMData.IQPhaseCorrectionFactor[i] = doc["IQPhaseCorrectionFactor"][i];
-  for (int i = 0; i < 7; i++) EEPROMData.IQXAmpCorrectionFactor[i] = doc["IQXAmpCorrectionFactor"][i];
-  for (int i = 0; i < 7; i++) EEPROMData.IQXPhaseCorrectionFactor[i] = doc["IQXPhaseCorrectionFactor"][i];
+  for (int i = 0; i < 7; i++) EEPROMData.IQRXAmpCorrectionFactor[i] = doc["IQRXAmpCorrectionFactor"][i];
+  for (int i = 0; i < 7; i++) EEPROMData.IQRXPhaseCorrectionFactor[i] = doc["IQRXPhaseCorrectionFactor"][i];
+  for (int i = 0; i < 7; i++) EEPROMData.IQCWAmpCorrectionFactor[i] = doc["IQCWAmpCorrectionFactor"][i];
+  for (int i = 0; i < 7; i++) EEPROMData.IQCWPhaseCorrectionFactor[i] = doc["IQCWPhaseCorrectionFactor"][i];
+  for (int i = 0; i < 7; i++) EEPROMData.IQSSBAmpCorrectionFactor[i] = doc["IQSSBAmpCorrectionFactor"][i];
+  for (int i = 0; i < 7; i++) EEPROMData.IQSSBPhaseCorrectionFactor[i] = doc["IQSSBPhaseCorrectionFactor"][i];
+
   for (int i = 0; i < 13; i++) EEPROMData.favoriteFreqs[i] = doc["favoriteFreqs"][i];
   for (int i = 0; i < 7; i++) {
     for (int j = 0; j < 2; j++) EEPROMData.lastFrequencies[i][j] = doc["lastFrequencies"][i][j];
@@ -106,11 +123,15 @@ FLASHMEM void loadConfiguration(const char *filename, config_t &EEPROMData) {
   EEPROMData.buttonRepeatDelay = doc["buttonRepeatDelay"] | 300000;
   EEPROMData.autoGain = doc["autoGain"] | true;
   #ifdef QSE2
-  for (int i = 0; i < 7; i++) EEPROMData.iDCoffset[i] = doc["iDCoffset"][i];
-  for (int i = 0; i < 7; i++) EEPROMData.qDCoffset[i] = doc["qDCoffset"][i];
-  EEPROMData.dacOffset = doc["dacOffset"] | 0;
+  for (int i = 0; i < 7; i++) EEPROMData.iDCoffsetCW[i] = doc["iDCoffsetCW"][i];
+  for (int i = 0; i < 7; i++) EEPROMData.qDCoffsetCW[i] = doc["qDCoffsetCW"][i];
+  for (int i = 0; i < 7; i++) EEPROMData.iDCoffsetSSB[i] = doc["iDCoffsetSSB"][i];
+  for (int i = 0; i < 7; i++) EEPROMData.qDCoffsetSSB[i] = doc["qDCoffsetSSB"][i];  
+  EEPROMData.dacOffsetCW = doc["dacOffsetCW"] | 0;
+  EEPROMData.dacOffsetSSB = doc["dacOffsetSSB"] | 0; 
   #endif
-  EEPROMData.radioCalComplete = doc["radioCalComplete"] | false;
+  EEPROMData.CWradioCalComplete = doc["CWradioCalComplete"] | false;
+  EEPROMData.SSBradioCalComplete = doc["SSBradioCalComplete"] | false;
 
   // How to copy strings:
   //  strlcpy(EEPROMData.myCall,                  // <- destination
@@ -121,8 +142,9 @@ FLASHMEM void loadConfiguration(const char *filename, config_t &EEPROMData) {
   file.close();
 }
 
+
 // Saves the configuration EEPROMData to a file or writes to serial.  toFile == true for file, false for serial.
-FLASHMEM void saveConfiguration(const char *filename, const config_t &EEPROMData, bool toFile) {
+FLASHMEM void JSON::saveConfiguration(const char *filename, const config_t &EEPROMData, bool toFile) {
 
   // Allocate a temporary JsonDocument
   // Don't forget to change the capacity to match your requirements.
@@ -131,7 +153,7 @@ FLASHMEM void saveConfiguration(const char *filename, const config_t &EEPROMData
   JsonDocument doc;  // This uses the heap.
 
   // Set the values in the document
-  doc["versionSettings"] = VERSION;    // Fix for version not updating in JSON file.  KF5N March 18, 2024.
+  doc["versionSettings"] = EEPROMData.versionSettings;    // Fix for version not updating in JSON file.  KF5N March 18, 2024.
   doc["AGCMode"] = EEPROMData.AGCMode;
   doc["audioVolume"] = EEPROMData.audioVolume;
   doc["rfGainCurrent"] = EEPROMData.rfGainCurrent;
@@ -146,7 +168,6 @@ FLASHMEM void saveConfiguration(const char *filename, const config_t &EEPROMData
   doc["nrOptionSelect"] = EEPROMData.nrOptionSelect;
   doc["currentScale"] = EEPROMData.currentScale;
   doc["spectrum_zoom"] = EEPROMData.spectrum_zoom;
-  doc["spectrum_display_scale"] = EEPROMData.spectrum_display_scale;
   doc["CWFilterIndex"] = EEPROMData.CWFilterIndex;
   doc["paddleDit"] = EEPROMData.paddleDit;
   doc["paddleDah"] = EEPROMData.paddleDah;
@@ -157,7 +178,6 @@ FLASHMEM void saveConfiguration(const char *filename, const config_t &EEPROMData
   doc["sidetoneVolume"] = EEPROMData.sidetoneVolume;
   doc["cwTransmitDelay"] = EEPROMData.cwTransmitDelay;
   doc["activeVFO"] = EEPROMData.activeVFO;
-//  doc["freqIncrement"] = EEPROMData.freqIncrement;
   doc["currentBand"] = EEPROMData.currentBand;
   doc["currentBandA"] = EEPROMData.currentBandA;
   doc["currentBandB"] = EEPROMData.currentBandB;
@@ -168,8 +188,8 @@ FLASHMEM void saveConfiguration(const char *filename, const config_t &EEPROMData
   for (int i = 0; i < 14; i++) doc["equalizerXmt"][i] = EEPROMData.equalizerXmt[i];
   doc["currentMicThreshold"] = EEPROMData.currentMicThreshold;
   doc["currentMicCompRatio"] = EEPROMData.currentMicCompRatio;
-  doc["currentMicAttack"] = EEPROMData.currentMicAttack;
-  doc["currentMicRelease"] = EEPROMData.currentMicRelease;
+//  doc["currentMicAttack"] = EEPROMData.currentMicAttack;
+//  doc["currentMicRelease"] = EEPROMData.currentMicRelease;
   doc["currentMicGain"] = EEPROMData.currentMicGain;
   for (int i = 0; i < 18; i++) doc["switchValues"][i] = EEPROMData.switchValues[i];
   doc["LPFcoeff"] = EEPROMData.LPFcoeff;
@@ -184,10 +204,12 @@ FLASHMEM void saveConfiguration(const char *filename, const config_t &EEPROMData
     doc["CWPowerCalibrationFactor"][i] = EEPROMData.CWPowerCalibrationFactor[i];
   }
   for (int i = 0; i < 7; i++) doc["SSBPowerCalibrationFactor"][i] = EEPROMData.SSBPowerCalibrationFactor[i];
-  for (int i = 0; i < 7; i++) doc["IQAmpCorrectionFactor"][i] = EEPROMData.IQAmpCorrectionFactor[i];
-  for (int i = 0; i < 7; i++) doc["IQPhaseCorrectionFactor"][i] = EEPROMData.IQPhaseCorrectionFactor[i];
-  for (int i = 0; i < 7; i++) doc["IQXAmpCorrectionFactor"][i] = EEPROMData.IQXAmpCorrectionFactor[i];
-  for (int i = 0; i < 7; i++) doc["IQXPhaseCorrectionFactor"][i] = EEPROMData.IQXPhaseCorrectionFactor[i];
+  for (int i = 0; i < 7; i++) doc["IQRXAmpCorrectionFactor"][i] =   EEPROMData.IQRXAmpCorrectionFactor[i];
+  for (int i = 0; i < 7; i++) doc["IQRXPhaseCorrectionFactor"][i] = EEPROMData.IQRXPhaseCorrectionFactor[i];
+  for (int i = 0; i < 7; i++) doc["IQCWAmpCorrectionFactor"][i] =   EEPROMData.IQCWAmpCorrectionFactor[i];
+  for (int i = 0; i < 7; i++) doc["IQCWPhaseCorrectionFactor"][i] = EEPROMData.IQCWPhaseCorrectionFactor[i];
+  for (int i = 0; i < 7; i++) doc["IQSSBAmpCorrectionFactor"][i] =   EEPROMData.IQSSBAmpCorrectionFactor[i];
+  for (int i = 0; i < 7; i++) doc["IQSSBPhaseCorrectionFactor"][i] = EEPROMData.IQSSBPhaseCorrectionFactor[i];  
   for (int i = 0; i < 13; i++) doc["favoriteFreqs"][i] = EEPROMData.favoriteFreqs[i];
   for (int i = 0; i < 7; i++) {
     for (int j = 0; j < 2; j++) doc["lastFrequencies"][i][j] = EEPROMData.lastFrequencies[i][j];
@@ -211,11 +233,15 @@ FLASHMEM void saveConfiguration(const char *filename, const config_t &EEPROMData
   doc["buttonRepeatDelay"] = EEPROMData.buttonRepeatDelay;
   doc["autoGain"] = EEPROMData.autoGain;
   #ifdef QSE2
-  for (int i = 0; i < 7; i++) doc["iDCoffset"][i] = EEPROMData.iDCoffset[i];
-  for (int i = 0; i < 7; i++) doc["qDCoffset"][i] = EEPROMData.qDCoffset[i];
-  doc["dacOffset"] = EEPROMData.dacOffset;
+  for (int i = 0; i < 7; i++) doc["iDCoffsetCW"][i] = EEPROMData.iDCoffsetCW[i];
+  for (int i = 0; i < 7; i++) doc["qDCoffsetCW"][i] = EEPROMData.qDCoffsetCW[i];
+  for (int i = 0; i < 7; i++) doc["iDCoffsetSSB"][i] = EEPROMData.iDCoffsetSSB[i];
+  for (int i = 0; i < 7; i++) doc["qDCoffsetSSB"][i] = EEPROMData.qDCoffsetSSB[i];
+  doc["dacOffsetCW"] = EEPROMData.dacOffsetCW;
+  doc["dacOffsetSSB"] = EEPROMData.dacOffsetSSB;
   #endif
-  doc["radioCalComplete"] = EEPROMData.radioCalComplete;
+  doc["CWradioCalComplete"] = EEPROMData.CWradioCalComplete;
+  doc["SSBradioCalComplete"] = EEPROMData.SSBradioCalComplete;
 
   if (toFile) {
     // Delete existing file, otherwise EEPROMData is appended to the file
@@ -240,8 +266,9 @@ FLASHMEM void saveConfiguration(const char *filename, const config_t &EEPROMData
   }
 }
 
+
 // Prints the content of a file to the Serial
-FLASHMEM void printFile(const char *filename) {
+void JSON::printFile(const char *filename) {
   // Open file for reading
   File file = SD.open(filename);
   if (!file) {
@@ -258,3 +285,5 @@ FLASHMEM void printFile(const char *filename) {
   // Close the file
   file.close();
 }
+
+

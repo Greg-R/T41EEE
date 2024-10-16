@@ -1,9 +1,24 @@
+// ButtonMenuIncrease
+// ButtonMenuDecrease
+// ButtonBandIncrease
+// ButtonBandDecrease
+// BandSet
+// ButtonZoom
+// ButtonFilter
+// ButtonDemodMode
+// ButtonMode
+
+// ResetZoom
+// ButtonFrequencyEntry
+
 #include "SDT.h"
+
+#define TOP_MENU_COUNT 11  // Menus to process AFP 09-27-22, JJP 7-8-23
 
 bool save_last_frequency = false;
 int directFreqFlag = 0;
-int32_t subMenuMaxOptions;  // Holds the number of submenu options.
-long TxRxFreqOld;
+auto subMenuMaxOptions = 0;  // Holds the number of submenu options.
+auto TxRxFreqOld = 0;
 
 
 /*****
@@ -16,10 +31,10 @@ long TxRxFreqOld;
     void
 *****/
 void ButtonMenuIncrease() {
-    mainMenuIndex++;
-    if (mainMenuIndex == TOP_MENU_COUNT) {  // At last menu option, so...
-      mainMenuIndex = 0;                    // ...wrap around to first menu option
-    }
+  mainMenuIndex++;
+  if (mainMenuIndex == TOP_MENU_COUNT) {  // At last menu option, so...
+    mainMenuIndex = 0;                    // ...wrap around to first menu option
+  }
 }
 
 
@@ -33,10 +48,10 @@ void ButtonMenuIncrease() {
     void
 *****/
 void ButtonMenuDecrease() {
-   mainMenuIndex--;
-    if (mainMenuIndex < 0) {               // At last menu option, so...
-      mainMenuIndex = TOP_MENU_COUNT - 1;  // ...wrap around to first menu option
-    }
+  mainMenuIndex--;
+  if (mainMenuIndex < 0) {               // At last menu option, so...
+    mainMenuIndex = TOP_MENU_COUNT - 1;  // ...wrap around to first menu option
+  }
 }
 
 
@@ -117,12 +132,12 @@ void ButtonBandIncrease() {
   ShowFrequency();
   ShowSpectrumdBScale();
   AudioInterrupts();
-  EEPROMWrite();
+  eeprom.EEPROMWrite();
   // Draw or not draw CW filter graphics to audio spectrum area.  KF5N July 30, 2023
   tft.writeTo(L2);
   tft.clearMemory();
   tft.writeTo(L1);
-  if (EEPROMData.xmtMode == CW_MODE) BandInformation();
+  if (EEPROMData.xmtMode == RadioMode::CW_MODE) BandInformation();
   DrawBandWidthIndicatorBar();
   DrawFrequencyBarValue();
   UpdateDecoderField();
@@ -215,12 +230,12 @@ void ButtonBandDecrease() {
   ShowFrequency();
   ShowSpectrumdBScale();
   AudioInterrupts();
-  EEPROMWrite();
+  eeprom.EEPROMWrite();
   // Draw or not draw CW filter graphics to audio spectrum area.  KF5N July 30, 2023
   tft.writeTo(L2);
   tft.clearMemory();
   tft.writeTo(L1);
-  if (EEPROMData.xmtMode == CW_MODE) BandInformation();
+  if (EEPROMData.xmtMode == RadioMode::CW_MODE) BandInformation();
   DrawBandWidthIndicatorBar();
   DrawFrequencyBarValue();
   UpdateDecoderField();
@@ -305,12 +320,12 @@ void BandSet(int band) {
   ShowFrequency();
   ShowSpectrumdBScale();
   AudioInterrupts();
-  EEPROMWrite();
+  eeprom.EEPROMWrite();
   // Draw or not draw CW filter graphics to audio spectrum area.  KF5N July 30, 2023
   tft.writeTo(L2);
   tft.clearMemory();
   tft.writeTo(L1);
-  if (EEPROMData.xmtMode == CW_MODE) BandInformation();
+  if (EEPROMData.xmtMode == RadioMode::CW_MODE) BandInformation();
   DrawBandWidthIndicatorBar();
   DrawFrequencyBarValue();
   UpdateDecoderField();
@@ -364,7 +379,7 @@ void ButtonZoom() {
     void
 *****/
 void ButtonFilter() {
-  switchFilterSideband =  not switchFilterSideband;
+  switchFilterSideband = not switchFilterSideband;
   FilterSetSSB();  // Call this so the delimiter is set to the correct color.
   ControlFilterF();
   FilterBandwidth();
@@ -392,20 +407,22 @@ void ButtonDemodMode() {
   ControlFilterF();
   tft.writeTo(L2);  // Destroy the bandwidth indicator bar.  KF5N July 30, 2023
   tft.clearMemory();
-  if (EEPROMData.xmtMode == CW_MODE) BandInformation();
+  if (EEPROMData.xmtMode == RadioMode::CW_MODE) BandInformation();
   DrawBandWidthIndicatorBar();  // Restory the bandwidth indicator bar.  KF5N July 30, 2023
   FilterBandwidth();
   DrawSMeterContainer();
-//  ShowAnalogGain();
   AudioInterrupts();
-  SetFreq();                                                                                   // Must update frequency, for example moving from SSB to CW, the RX LO is shifted.  KF5N
-  if ((EEPROMData.xmtMode == CW_MODE) && (EEPROMData.decoderFlag == 1)) UpdateDecoderField();  // KF5N December 28 2023.
+  SetFreq();                                                                                              // Must update frequency, for example moving from SSB to CW, the RX LO is shifted.  KF5N
+  if ((EEPROMData.xmtMode == RadioMode::CW_MODE) && (EEPROMData.decoderFlag == 1)) {
+  radioMode = RadioMode::CW_MODE;
+  UpdateDecoderField();  // KF5N December 28 2023.
+}
   FilterSetSSB();
 }
 
 
 /*****
-  Purpose: Set transmission mode for SSB or CW.
+  Purpose: Set radio mode for SSB or CW.
 
   Parameter list:
     void
@@ -415,10 +432,12 @@ void ButtonDemodMode() {
 *****/
 void ButtonMode()  //====== Changed AFP 10-05-22  =================
 {
-  if (EEPROMData.xmtMode == CW_MODE) {  // Toggle the current mode
-    EEPROMData.xmtMode = SSB_MODE;
+  if (EEPROMData.xmtMode == RadioMode::CW_MODE) {  // Toggle the current mode
+    EEPROMData.xmtMode = RadioMode::SSB_MODE;
+    radioMode = RadioMode::SSB_MODE;
   } else {
-    EEPROMData.xmtMode = CW_MODE;
+    EEPROMData.xmtMode = RadioMode::CW_MODE;
+    radioMode = RadioMode::CW_MODE;
   }
   SetFreq();  // Required due to RX LO shift from CW to SSB modes.  KF5N
   DrawSpectrumDisplayContainer();
@@ -440,7 +459,7 @@ void ButtonMode()  //====== Changed AFP 10-05-22  =================
   ShowTransmitReceiveStatus();
   ShowFrequency();
   // Draw or not draw CW filter graphics to audio spectrum area.  KF5N July 30, 2023
-  if (EEPROMData.xmtMode == SSB_MODE) {
+  if (EEPROMData.xmtMode == RadioMode::SSB_MODE) {
     tft.writeTo(L2);
     tft.clearMemory();
   } else BandInformation();
@@ -465,7 +484,7 @@ void ButtonNR()  //AFP 09-19-22 update
     EEPROMData.nrOptionSelect = 0;
   }
   if (EEPROMData.nrOptionSelect == 3) ANR_notch = false;  // Turn off AutoNotch if LMS NR is selected.
-  NROptions();                                        //AFP 09-19-22
+  NROptions();                                            //AFP 09-19-22
   UpdateNoiseField();
 }
 
@@ -500,7 +519,8 @@ void ButtonNotchFilter() {
 *****/
 void ButtonSetNoiseFloor() {
   int floor = EEPROMData.currentNoiseFloor[EEPROMData.currentBand];  // KF5N
-  int val;
+//  int val;
+  MenuSelect menu;
 
   tft.setFontScale((enum RA8875tsize)1);
   ErasePrimaryMenu();
@@ -523,13 +543,13 @@ void ButtonSetNoiseFloor() {
       filterEncoderMove = 0;
     }
 
-    val = ReadSelectedPushButton();  // Get ADC value
-    delay(100L);
-    val = ProcessButtonPress(val);
-    if (val == MENU_OPTION_SELECT)  // If they made a choice...
+//    val = ReadSelectedPushButton();  // Get ADC value
+//    delay(100L);
+    menu = readButton();
+    if (menu == MenuSelect::MENU_OPTION_SELECT)  // If they made a choice...
     {
       EEPROMData.currentNoiseFloor[EEPROMData.currentBand] = floor;
-      EEPROMWrite();
+      eeprom.EEPROMWrite();
       break;
     }
   }
@@ -570,27 +590,6 @@ int DrawNewFloor(int floor) {
   tft.drawFastHLine(SPECTRUM_LEFT_X + 30, oldY - floor - 1, 100, RA8875_RED);
   oldY = SPECTRUM_BOTTOM - floor;
   return floor;
-}
-
-
-/*****
-  Purpose: The next 3 functions are "empty" user-defined function stubs that can be filled in by the user with
-           "real" code.
-
-  Parameter list:
-    void
-
-  Return value;
-    int           the current noise floor value
-*****/
-int Unused1() {
-  return -1;
-}
-int Unused2() {
-  return -1;
-}
-int Unused3() {
-  return -1;
 }
 
 
@@ -640,7 +639,8 @@ void ButtonFrequencyEntry() {
   long enteredF = 0L;                          // desired frequency
   char strF[6] = { ' ', ' ', ' ', ' ', ' ' };  // container for frequency string during entry
   String stringF;
-  int valPin;
+//  int valPin;
+  MenuSelect menu = MenuSelect::DEFAULT;
   int key;
   int numdigits = 0;  // number of digits entered
   int pushButtonSwitchIndex;
@@ -761,9 +761,9 @@ void ButtonFrequencyEntry() {
   }
 
   while (doneFE == false) {
-    valPin = ReadSelectedPushButton();
-    pushButtonSwitchIndex = ProcessButtonPress(valPin);
-    if (pushButtonSwitchIndex != -1) {
+    menu = readButton();
+    pushButtonSwitchIndex = static_cast<int>(menu);
+    if (pushButtonSwitchIndex != 18) {
       key = numKeys[pushButtonSwitchIndex];
       switch (key) {
         case 0x7F:  // erase last digit =127
@@ -851,11 +851,11 @@ void ButtonFrequencyEntry() {
   ShowFrequency();
   ShowSpectrumdBScale();
   AudioInterrupts();
-  EEPROMWrite();
+  eeprom.EEPROMWrite();
   // Draw or not draw CW filter graphics to audio spectrum area.  KF5N July 30, 2023
   tft.writeTo(L2);
   tft.clearMemory();
-  if (EEPROMData.xmtMode == CW_MODE) BandInformation();
+  if (EEPROMData.xmtMode == RadioMode::CW_MODE) BandInformation();
   DrawBandWidthIndicatorBar();
   RedrawDisplayScreen();  // KD0RC
   FilterSetSSB();

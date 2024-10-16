@@ -17,7 +17,7 @@ int32_t filter_change;
   if (filter_pos != last_filter_pos) {  // This decision is required as this function is required to be used in many locations.  KF5N April 21, 2024
     tft.writeTo(L2);  // Clear layer 2.  KF5N July 31, 2023
     tft.clearMemory();
-    if(EEPROMData.xmtMode == CW_MODE) BandInformation(); 
+    if(EEPROMData.xmtMode == RadioMode::CW_MODE) BandInformation(); 
     tft.fillRect((MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2 - filterWidth, SPECTRUM_TOP_Y + 17, filterWidth, SPECTRUM_HEIGHT - 20, RA8875_BLACK);  // Erase old filter background
     filter_change = (filter_pos - last_filter_pos);
     if (filter_change >= 1) {
@@ -134,7 +134,7 @@ void EncoderCenterTune() {
   if (result == 0)  // Nothing read
     return;
 
-  if (EEPROMData.xmtMode == CW_MODE && EEPROMData.decoderFlag) {  // No reason to reset if we're not doing decoded CW AFP 09-27-22
+  if (EEPROMData.xmtMode == RadioMode::CW_MODE && EEPROMData.decoderFlag) {  // No reason to reset if we're not doing decoded CW AFP 09-27-22
     ResetHistograms();
   }
 
@@ -311,7 +311,8 @@ q15_t GetEncoderValueLiveQ15t(int minValue, int maxValue, int startValue, int in
 *****/
 int GetEncoderValue(int minValue, int maxValue, int startValue, int increment, char prompt[]) {
   int currentValue = startValue;
-  int val;
+//  int val;
+  MenuSelect menu;
 
   tft.setFontScale((enum RA8875tsize)1);
 
@@ -336,16 +337,16 @@ int GetEncoderValue(int minValue, int maxValue, int startValue, int increment, c
       filterEncoderMove = 0;
     }
 
-    val = ReadSelectedPushButton();  // Read the ladder value
+//    val = ReadSelectedPushButton();  // Read the ladder value
     //MyDelay(100L); //AFP 09-22-22
-    if (val != -1 && val < (EEPROMData.switchValues[0] + WIGGLE_ROOM)) {
-      val = ProcessButtonPress(val);    // Use ladder value to get menu choice
-      if (val == MENU_OPTION_SELECT) {  // Make a choice??
+//    if (val != -1 && val < (EEPROMData.switchValues[0] + WIGGLE_ROOM)) {
+      menu = readButton();    // Use ladder value to get menu choice
+      if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
         return currentValue;
       }
     }
   }
-}
+
 
 
 /*****
@@ -358,7 +359,8 @@ int GetEncoderValue(int minValue, int maxValue, int startValue, int increment, c
     int           the current WPM
 *****/
 int SetWPM() {
-  int val;
+//  int val;
+  MenuSelect menu;
   long lastWPM = EEPROMData.currentWPM;
 
   tft.setFontScale((enum RA8875tsize)1);
@@ -385,16 +387,16 @@ int SetWPM() {
       filterEncoderMove = 0;
     }
 
-    val = ReadSelectedPushButton();  // Read pin that controls all switches
-    val = ProcessButtonPress(val);
-    if (val == MENU_OPTION_SELECT) {  // Make a choice??
+//    val = ReadSelectedPushButton();  // Read pin that controls all switches
+    menu = readButton();
+    if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
       EEPROMData.currentWPM = lastWPM;
       //EEPROMData.EEPROMData.currentWPM = EEPROMData.currentWPM;
       UpdateWPMField();
       break;
     }
   }
-  EEPROMWrite();
+  eeprom.EEPROMWrite();
   tft.setTextColor(RA8875_WHITE);
   EraseMenus();
   return EEPROMData.currentWPM;
@@ -412,7 +414,8 @@ int SetWPM() {
 *****/
 long SetTransmitDelay()  // new function JJP 9/1/22
 {
-  int val;
+//  int val;
+  MenuSelect menu;
   long lastDelay = EEPROMData.cwTransmitDelay;
   long increment = 250;  // Means a quarter second change per detent
 
@@ -437,13 +440,12 @@ long SetTransmitDelay()  // new function JJP 9/1/22
       filterEncoderMove = 0;
     }
 
-    val = ReadSelectedPushButton();  // Read pin that controls all switches
-    val = ProcessButtonPress(val);
+//    val = ReadSelectedPushButton();  // Read pin that controls all switches
+    menu = readButton();
     //MyDelay(150L);  //ALF 09-22-22
-    if (val == MENU_OPTION_SELECT) {  // Make a choice??
+    if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
       EEPROMData.cwTransmitDelay = lastDelay;
-      //EEPROMData.EEPROMData.cwTransmitDelay = EEPROMData.cwTransmitDelay;
-      EEPROMWrite();
+      eeprom.EEPROMWrite();
       break;
     }
   }

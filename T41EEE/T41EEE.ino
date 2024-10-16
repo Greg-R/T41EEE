@@ -1,10 +1,10 @@
 /*
-### Version T41EEE.6 T41 Software Defined Transceiver Arduino Sketch
+### Version T41EEE.7 T41 Software Defined Transceiver Arduino Sketch
 
 This is the "T41 Extreme Experimenter's Edition" software for the 
 T41 Software Defined Transceiver.  The T41EEE was "forked" from the V049.2 version
 of the T41-EP software.  T41EEE is fundamentally different from the mainstream T41-EP
-code in that it adopts C++ rather than C style code.  C++ language features will be gradually
+code in that it adopts C++ rather than C.  C++ language features will be gradually
 introduced in the next releases.
 
 Purchase the book "Digital Signal Processing and Software Defined Radio" by
@@ -43,13 +43,13 @@ successful.
 
 ## How to Compile T41EEE
 
-T41EEE.6 was developed and compiled using Arduino IDE version 2.3.2 with the following
+T41EEE.7 was developed and compiled using Arduino IDE version 2.3.2 with the following
 configuration:
 
 1.  Optimize is set to "Smallest Code" (Tools menu).
 2.  CPU speed is set to 528 MHz (Tools menu).
 3.  TeensyDuino version is 1.59.0.
-4.  You will need to install ArduinoJson which is currently version 7.0.4.
+4.  You will need to install ArduinoJson which is currently version 7.1.0.
 
 Completing a FLASH erase of the Teensy is strongly recommended before uploading this new version. 
 Remember to save to the SD card via the EEPROM menu EEPROM->SD command prior to erasing.
@@ -59,37 +59,80 @@ The instructions for performing a FLASH erase of the Teensy are here:
 
 The bullet "Memory Wipe & LED Blink Restore" has the instructions.
 
-## Highlight of Changes included in T41EEE.6
+## Highlight of Changes included in T41EEE.7
 
- 1.  Fixed CW sidetone problem.
- 2.  Fixed ordering of button interrupt enabling and EEPROM startup function calls in setup().
- 3.  Added #define DEBUG_SWITCH_CAL and .ino code.
- 4.  Fixed version not updating in SD file.  CW filter shown rather than default in menu.
- 5.  Fixed switch matrix debug mode not saving to EEPROM.
- 6.  Inhibit transmit in AM demod modes.
- 7.  Changed Serial speed from 9600 to 115200, a modern speed.
- 8.  Boosted QSE2DC transmit gain, which increases power by about 3 dB.
- 9.  Corrected comment in the ResetFlipFlops() function.
-10.  Fixed strange filter band limit behavior and moved graphics to FilterSetSSB() function.
-11.  Updated README with new link to book and compile configuration.
-12.  Removed unused variables and code, formerly used for audio bandwidth delimiters.
-13.  Fixed bug in FilterSetSSB() which caused audio filter bandwidth to change inadvertently.
-14.  Smoother tuning in 16X Zoom.
-15.  Improved accuracy of location of blue tuning bar.
-16.  Higher dynamic range calibration display working.
-17.  AM modes tuning problem is resolved.
-18.  Automated calibration feature is available in the Calibration menu (details below).
-19.  Audio filter bandwidth selection is indicated by yellow delimiter bar.
-20.  Volume is equalized when adjusting audio bandwidth.
-21.  Noise reduction algorithms are equalized to the same gains.
-22.  MyConfiguration.h includes customizable coarse (center) and fine frequency increments.
-23.  Auto-Spectrum mode optimizes the position of the spectral display without affecting gain.
-     This is activated in the RF Set menu.  The gain setting reverts to manual control, also
-     in the RF Set menu.
+1.  Audio bandwidth equalized.  Noise reductions equalized.
+2.  Changed audio filter delimiter line color to red.
+3.  Reduced Spectral noise filter amplitude.
+4.  Fixed problem with audio delimiters and reset tuning, also was not saving AutoSpectrum to SD.
+5.  Added SSB calibration.
+6.  Added audio adapter equalizer to transmit signal chain.
+7.  CESSB modulation from Open Audio Library replaces conventional phasing SSB.
+8.  Added working SSB options menu specific to CESSB.  Mic gain and compression menu removed.
+
+## Controlled Envelope Single Side Band (CESSB)
+
+Controlled Envelope Single Side Band is employed in T41EEE.7.  This web page has an excellent description of
+CESSB technology:
+
+<https://www.janbob.com/electron/CESSB_Teensy/CESSB_Teensy.html>
+
+T41EEE.7 uses the Open Audio CESSB class as well as the type 2 Compressor class.
+
+<https://github.com/chipaudette/OpenAudio_ArduinoLibrary/blob/master/radioCESSB_Z_transmit_F32.h>
+
+<https://github.com/chipaudette/OpenAudio_ArduinoLibrary/blob/master/AudioEffectCompressor2_F32.h>
+
+The Audio Adapter's hardware-based equalization filter is included in the CESSB transmit chain to provide
+high-pass filtering of the microphone audio.
+
+### CESSB Automatic Calibration
+
+Automated calibration of the CESSB transmit signal chain is included in the Calibration menu.
+Similar to the previously deployed automatic calibration, SSB Radio Cal and SSB Radio Refine Cal
+commands will run the automatic calibration routines on all bands.  The automated calibrations can
+also be run on a per-band basis.
+
+Successful completion of either manual or automated calibration is required before proceeding with CESSB
+transmitter alignments.  It is recommended to calibrate with SSB PA Cal set as high as possible.
+If you have access to a spectrum analyzer, look at the transmitted spectrum from the output of the QSE
+filter.  You should see a minimum of spurious outputs close to the desired carrier.
+
+### CESSB Transmitter Alignment
+
+It will help to understand the CESSB transmit signal chain as deployed in this firmware.
+Nice block diagrams will be added to this in the near future.  For now, it is textual description.
+
+Transmit Signal Chain
+1.  Electret microphone biased via the Audio Adapter.  Assumed ~20 mV audio output from the electret.
+2.  Microphone amplifier/attenuator stage.  The default gain is 0 dB.  This gain is user-adjustable.
+3.  Open Audio Compressor 2.  Compression threshold and compression ratio is user adjustable.
+4.  CESSB processing.  The input is the compressed audio, and the output is I and Q to the QSE modulator.
+5.  QSE direct IQ modulator.  The I and Q channel amplitudes are user-adjustable via SSB PA Cal.
+
+So what does the user have to adjust?:
+
+1.  Microphone gain.
+2.  Compression threshold.
+3.  Compression ratio.
+4.  SSB PA Cal.
+
+OK, so now we will attempt to juggle the above four parameters to get a decent transmitted output.
+Of the above four items, it is probably best to leave the compression ratio set to default for now.
+Also, if you are using a typical electret microphone biased by the Audio Adapter, don't adjust the
+microphone gain at first.  Leave it alone, and then maybe come back to it later for further optimization.
+
+CESSB processes the voice audio in such a way that the peak-to-average power of the modulation is
+significantly reduced.  So we will use that fact and a single-tone signal to adjust the transmitter
+parameters.  The transmit signal chain is cascaded gain stages, and we don't won't overdrive to happen
+at any node of the chain.  Overdrive will result in a distorted output and will cause adjacent-channel
+splatter (increased bandwidth of the transmit energy).
+
+To be continued ...
 
 ## Automated Calibration
 
-Automated calibration is available starting with this version T41EEE.6.
+Automated calibration is available starting with version T41EEE.6.
 
 Automated calibration set-up is the same as for manual calibration.  A loop-back path from the
 output of the QSE to the input of the QSD must be connected.  An attenuator, in the value of 
@@ -149,12 +192,12 @@ A short movie showing the latest automatic calibration features in action:
 
 Please refer to the included file T41_Change_Log.txt which includes the description of changes made
 to prior versions.
-
 */
 
-// setup() and loop() at the bottom of this file
+// setup() and loop() are at the bottom of this file.
 
 #include "SDT.h"
+#include <charconv>
 
 const char *filename = "/config.txt";  // <- SD library uses 8.3 filenames
 
@@ -178,95 +221,48 @@ struct band bands[NUMBER_OF_BANDS]{  //AFP Changed 1-30-21 // G0ORX Changed AGC 
 // Calibration done with TinySA as signal generator with -73dBm levels (S9) at the FT8 frequencies
 // with V010 QSD with the 12V mod of the pre-amp
 #if defined(ITU_REGION) && ITU_REGION == 1
- { 3700000UL, 3500000, 3800000, "80M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20, 20},
- { 7150000, 7000000, 7200000, "40M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20, 20},
+ { 3700000UL, 3500000, 3800000, "80M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20},
+ { 7150000, 7000000, 7200000, "40M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20},
 #elif defined(ITU_REGION) && ITU_REGION == 2
- {  3700000UL, 3500000, 4000000, "80M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20, 20},
- {  7150000, 7000000, 7300000, "40M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20, 20},
+ {  3700000UL, 3500000, 4000000, "80M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20},
+ {  7150000, 7000000, 7300000, "40M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20},
 #elif defined(ITU_REGION) && ITU_REGION == 3
- {  3700000UL, 3500000, 3900000, "80M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20, 20},
- {  7150000, 7000000, 7200000, "40M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20, 20},
+ {  3700000UL, 3500000, 3900000, "80M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20},
+ {  7150000, 7000000, 7200000, "40M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20},
 #endif
- {  14200000, 14000000, 14350000, "20M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20, 20},
- {  18100000, 18068000, 18168000, "17M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20, 20},
- {  21200000, 21000000, 21450000, "15M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20, 20},
- {  24920000, 24890000, 24990000, "12M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20, 20},
- {  28350000, 28000000, 29700000, "10M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20, 20}
+ {  14200000, 14000000, 14350000, "20M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20},
+ {  18100000, 18068000, 18168000, "17M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20},
+ {  21200000, 21000000, 21450000, "15M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20},
+ {  24920000, 24890000, 24990000, "12M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20},
+ {  28350000, 28000000, 29700000, "10M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20}
 };
 
 const char *topMenus[] = { "CW Options", "RF Set", "VFO Select",
                            "EEPROM", "AGC", "Spectrum Options",
-                           "Noise Floor", "Mic Gain", "Mic Comp",
-                           "EQ Rec Set", "EQ Xmt Set", "Calibrate", "Bearing" };
+                           "Noise Floor", "SSB Options",
+                           "EQ Rec Set", "Calibrate", "Bearing" };
 
 // Button array labels array is located in Utility.cpp.
 
 // Pointers to functions which execute the menu options.  Do these functions used the returned integer???
 void (*functionPtr[])() = { &CWOptions, &RFOptions, &VFOSelect,
                             &EEPROMOptions, &AGCOptions, &SpectrumOptions,
-                            &ButtonSetNoiseFloor, &MicGainSet, &MicOptions,
-                            &EqualizerRecOptions, &EqualizerXmtOptions, &CalibrateOptions, &BearingMaps };
+                            &ButtonSetNoiseFloor, &SSBOptions,
+                            &EqualizerRecOptions, &CalibrateOptions, &BearingMaps };
 
 uint32_t FFT_length = FFT_LENGTH;
-
-//extern "C" uint32_t set_arm_clock(uint32_t frequency);
 
 //======================================== Global object definitions ==================================================
 // ===========================  AFP 08-22-22
 bool agc_action = false;
 // Teensy and OpenAudio dataflow code.
+#include "AudioSignal.h"
+//End dataflow code
 
-// Common to Transmitter and Receiver
-AudioInputI2SQuad i2s_quadIn;
-AudioOutputI2SQuad i2s_quadOut;
-
-// Transmitter
-AudioControlSGTL5000_Extended sgtl5000_1;                    // Controller for the Teensy Audio Board, transmitter only.
-AudioConvert_I16toF32 int2Float1;                            // Converts Int16 to Float.  See class in AudioStream_F32.h
-AudioEffectCompressor_F32 comp1;                             // Compressor from OpenAudio library.  Used in microphone dataflow path.
-AudioConvert_F32toI16 float2Int1;                            // Converts Float to Int16.  See class in AudioStream_F32.h
-AudioRecordQueue Q_in_L_Ex;                                  // AudioRecordQueue for input Microphone channel.
-AudioPlayQueue Q_out_L_Ex;                                   // AudioPlayQueue for driving the I channel (CW/SSB) to the QSE.
-AudioPlayQueue Q_out_R_Ex;                                   // AudioPlayQueue for driving the Q channel (CW/SSB) to the QSE.
-AudioConnection patchCord1(i2s_quadIn, 0, int2Float1, 0);    // Microphone channel.
-AudioConnection_F32 patchCord3(int2Float1, 0, comp1, 0);     // Microphone to compressor.
-AudioConnection_F32 patchCord5(comp1, 0, float2Int1, 0);     // Compressor output.
-AudioConnection patchCord7(float2Int1, 0, Q_in_L_Ex, 0);     // Microphone to AudioRecordQueue.
-AudioConnection patchCord15(Q_out_L_Ex, 0, i2s_quadOut, 0);  // I channel to line out
-AudioConnection patchCord16(Q_out_R_Ex, 0, i2s_quadOut, 1);  // Q channel to line out
-
-// Receiver
-//AudioMixer4 modeSelectInR;    // AFP 09-01-22
-//AudioMixer4 modeSelectInL;    // AFP 09-01-22
-
-//AudioMixer4 modeSelectOutL;    // AFP 09-01-22
-//AudioMixer4 modeSelectOutR;    // AFP 09-01-22
-
-AudioRecordQueue Q_in_L;
-AudioRecordQueue Q_in_R;
-
-AudioPlayQueue Q_out_L;
-//AudioPlayQueue Q_out_R;  2nd audio channel not used.  KF5N March 11, 2024
-
-AudioConnection patchCord9(i2s_quadIn, 2, Q_in_L, 0);  //Input Rec
-AudioConnection patchCord10(i2s_quadIn, 3, Q_in_R, 0);
-
-//AudioConnection patchCord13(modeSelectInR, 0, Q_in_R, 0);  // Rec in Queue
-//AudioConnection patchCord14(modeSelectInL, 0, Q_in_L, 0);
-
-//AudioConnection patchCord17(Q_out_L, 0, i2s_quadOut, 2);  // Rec out Queue
-//AudioConnection patchCord18(Q_out_R, 0, i2s_quadOut, 3);  2nd audio channel not used.  KF5N March 11, 2024
-
-//AudioConnection patchCord21(modeSelectOutL, 0, i2s_quadOut, 2);  //Rec out
-//AudioConnection patchCord22(modeSelectOutR, 0, i2s_quadOut, 3);
-AudioAmplifier volumeAdjust;
-AudioConnection patchCord17(Q_out_L, 0, volumeAdjust, 0);
-AudioConnection patchCord18(volumeAdjust, 0, i2s_quadOut, 2);
-
-AudioControlSGTL5000 sgtl5000_2;  // This is not a 2nd Audio Adapter.  It is I2S to the PCM1808 (ADC I and Q receiver in) and PCM5102 (DAC audio out).
-// End dataflow code
-
-Calibrate calibrater;  // Instantiate the calibration object.
+CWCalibrate calibrater;  // Instantiate the calibration objects.
+SSBCalibrate ssbcalibrater;
+JSON json;
+Eeprom eeprom;           // Eeprom object.
 
 Rotary volumeEncoder = Rotary(VOLUME_ENCODER_A, VOLUME_ENCODER_B);        //( 2,  3)
 Rotary tuneEncoder = Rotary(TUNE_ENCODER_A, TUNE_ENCODER_B);              //(16, 17)
@@ -277,7 +273,8 @@ Metro ms_500 = Metro(500);  // Set up a Metro
 
 Si5351 si5351;  // Instantiate the PLL device.
 
-int radioState, lastState;  // KF5N
+RadioState radioState, lastState;  // KF5N
+RadioMode radioMode;  // Greg KF5N August 1, 2024
 int resetTuningFlag = 0;
 #ifndef RA8875_DISPLAY
 ILI9488_t3 tft = ILI9488_t3(&SPI, TFT_CS, TFT_DC, TFT_RST);  // Instantiate the display.
@@ -296,11 +293,6 @@ float32_t HP_DC_Butter_state[6] = { 0, 0, 0, 0, 0, 0 };
 float32_t HP_DC_Butter_state2[2] = { 0, 0 };                                                          // AFP 11-04-11
 arm_biquad_cascade_df2T_instance_f32 s1_Receive = { 3, HP_DC_Butter_state, HP_DC_Filter_Coeffs };     //AFP 09-23-22
 arm_biquad_cascade_df2T_instance_f32 s1_Receive2 = { 1, HP_DC_Butter_state2, HP_DC_Filter_Coeffs2 };  //AFP 11-04-22
-//Hilbert FIR Filters
-float32_t DMAMEM FIR_Hilbert_state_L[100 + 256 - 1];
-float32_t DMAMEM FIR_Hilbert_state_R[100 + 256 - 1];
-arm_fir_instance_f32 FIR_Hilbert_L;
-arm_fir_instance_f32 FIR_Hilbert_R;
 
 // CW decode Filters
 arm_fir_instance_f32 FIR_CW_DecodeL;  //AFP 10-25-22
@@ -309,23 +301,13 @@ float32_t DMAMEM FIR_CW_DecodeL_state[64 + 256 - 1];
 float32_t DMAMEM FIR_CW_DecodeR_state[64 + 256 - 1];
 
 //Decimation and Interpolation Filters
-arm_fir_decimate_instance_f32 FIR_dec1_EX_I;
-arm_fir_decimate_instance_f32 FIR_dec1_EX_Q;
-arm_fir_decimate_instance_f32 FIR_dec2_EX_I;
-arm_fir_decimate_instance_f32 FIR_dec2_EX_Q;
-
 arm_fir_interpolate_instance_f32 FIR_int1_EX_I;
 arm_fir_interpolate_instance_f32 FIR_int1_EX_Q;
 arm_fir_interpolate_instance_f32 FIR_int2_EX_I;
 arm_fir_interpolate_instance_f32 FIR_int2_EX_Q;
 
-float32_t DMAMEM FIR_dec1_EX_I_state[2095];
-float32_t DMAMEM FIR_dec1_EX_Q_state[2095];
-
 float32_t audioMaxSquaredAve;
 
-float32_t DMAMEM FIR_dec2_EX_I_state[535];
-float32_t DMAMEM FIR_dec2_EX_Q_state[535];
 float32_t DMAMEM FIR_int2_EX_I_state[519];
 float32_t DMAMEM FIR_int2_EX_Q_state[519];
 float32_t DMAMEM FIR_int1_EX_I_state[279];
@@ -388,10 +370,17 @@ const DEMOD_Descriptor DEMOD[3] = {
   { DEMOD_AM, "(AM)" },  //AFP09-22-22
 };
 
+<<<<<<< HEAD
 dispSc displayScale[] =  //r *dbText,dBScale, baseOffset
   {
     { "20 dB/", 10.0, 24},
     { "10 dB/", 20.0, 10}  //  1,2, and 5 dB removed.  Greg KF5N July 30, 2024.
+=======
+dispSc displayScale[] =  // dbText, dBScale, baseOffset
+  {
+    { "20 dB/", 10.0, 24 },
+    { "10 dB/", 20.0, 10 }  //  1, 2, and 5 dB options removed.  Greg KF5N July 30, 2024.
+>>>>>>> mainboard2
   };
 
 //======================================== Global variables declarations for Quad Oscillator 2 ===============================================
@@ -401,24 +390,14 @@ int32_t NCOFreq;
 //================== Global CW Correlation and FFT Variables =================
 float32_t *cosBuffer = new float32_t[256];  // Was cosBuffer2; Greg KF5N February 7, 2024
 float32_t *sinBuffer = new float32_t[256];  // This can't be DMAMEM.  It will cause problems with the CW decoder.
-//float32_t DMAMEM sinBuffer2[256];
 float32_t DMAMEM cwRiseBuffer[256];
 float32_t DMAMEM cwFallBuffer[256];
-
-// === Compressor patameters AFP 11-01-22
-
-bool use_HP_filter = true;  //enable the software HP filter to get rid of DC?
-float comp_ratio;
-float attack_sec;
-float release_sec;
 // ===========
 
 char keyboardBuffer[10];  // Set for call prefixes. May be increased later
 const char *tune_text = "Fast Tune";
 const char *zoomOptions[] = { "1x ", "2x ", "4x ", "8x ", "16x" };
 
-byte currentDashJump = DECODER_BUFFER_SIZE;
-byte currentDecoderIndex = 0;
 float32_t pixel_per_khz = ((1 << EEPROMData.spectrum_zoom) * SPECTRUM_RES * 1000.0 / SR[SampleRate].rate);
 int pos_left = centerLine - (int)(bands[EEPROMData.currentBand].FLoCut / 1000.0 * pixel_per_khz);
 
@@ -434,13 +413,10 @@ uint8_t display_S_meter_or_spectrum_state = 0;
 uint8_t keyPressedOn = 0;
 uint8_t NR_first_time = 1;
 uint8_t NR_Kim;
-uint8_t SampleRate = SAMPLE_RATE_192K;
-uint8_t sch = 0;
-uint8_t state = 0;
-uint8_t T41State = 1;
-uint8_t zoom_display = 1;
-const uint8_t NR_L_frames = 3;
-const uint8_t NR_N_frames = 15;
+
+uint32_t SampleRate = SAMPLE_RATE_192K;
+
+uint32_t zoom_display = 1;
 
 int16_t pixelCurrent[SPECTRUM_RES];
 int16_t pixelnew[SPECTRUM_RES];
@@ -485,11 +461,9 @@ const float32_t n_att = 90.0;  // need here for later def's
 const uint16_t n_dec1_taps = (1 + (uint16_t)(n_att / (22.0 * (n_fstop1 - n_fpass1))));
 const uint16_t n_dec2_taps = (1 + (uint16_t)(n_att / (22.0 * (n_fstop2 - n_fpass2))));
 
-int mute = 0;
 int attenuator = 0;
 
 int audioYPixel[256]{ 0 };  // Will int16_t save memory here???  DMAMEM not working here.  Causes audio spectrum glitch.  KF5N February 26, 2024.
-//int* audioYPixel = new int[256]{0};
 
 int bandswitchPins[] = {
   30,  // 80M
@@ -517,13 +491,11 @@ int x2 = 0;  //AFP
 int zoomIndex = 1;  //AFP 9-26-22
 bool updateDisplayFlag = false;
 int updateDisplayCounter = 0;
-int xrState;  // Is the T41 in xmit or rec state? 1 = rec, 0 = xmt
 
 const int BW_indicator_y = SPECTRUM_TOP_Y + SPECTRUM_HEIGHT + 2;
 const int DEC2STATESIZE = n_dec2_taps + (BUFFER_SIZE * N_B / (uint32_t)DF1) - 1;
 const int INT1_STATE_SIZE = 24 + BUFFER_SIZE * N_B / (uint32_t)DF - 1;
 const int INT2_STATE_SIZE = 8 + BUFFER_SIZE * N_B / (uint32_t)DF1 - 1;
-unsigned ring_buffsize = RB_SIZE;
 
 int32_t mainMenuIndex = START_MENU;  // Done so we show menu[0] at startup
 
@@ -565,7 +537,7 @@ float32_t DMAMEM FFT_buffer[FFT_LENGTH * 2] __attribute__((aligned(4))) = { 0 };
 float32_t DMAMEM FFT_spec[1024] = { 0 };
 float32_t DMAMEM FFT_spec_old[1024] = { 0 };
 
-// decimation with FIR lowpass for Zoom FFT
+// Decimation with FIR lowpass for Zoom FFT
 arm_fir_decimate_instance_f32 Fir_Zoom_FFT_Decimate_I1;
 arm_fir_decimate_instance_f32 Fir_Zoom_FFT_Decimate_Q1;
 float32_t DMAMEM Fir_Zoom_FFT_Decimate_I1_state[12 + BUFFER_SIZE * N_B - 1];
@@ -598,10 +570,8 @@ float32_t DMAMEM Fir_Zoom_FFT_Decimate_Q_state[4 + BUFFER_SIZE * N_B - 1];
 float32_t DMAMEM Fir_Zoom_FFT_Decimate_coeffs[4];
 float32_t DMAMEM float_buffer_L[BUFFER_SIZE * N_B];
 float32_t DMAMEM float_buffer_R[BUFFER_SIZE * N_B];
-float32_t DMAMEM float_buffer_L2[BUFFER_SIZE * N_B];
-float32_t DMAMEM float_buffer_R2[BUFFER_SIZE * N_B];
-float32_t DMAMEM float_buffer_L_3[BUFFER_SIZE * N_B];
-float32_t DMAMEM float_buffer_R_3[BUFFER_SIZE * N_B];
+//float32_t DMAMEM float_buffer_L2[BUFFER_SIZE * N_B];
+//float32_t DMAMEM float_buffer_R2[BUFFER_SIZE * N_B];
 float32_t DMAMEM float_buffer_L_CW[256];       //AFP 09-01-22
 float32_t DMAMEM float_buffer_R_CW[256];       //AFP 09-01-22
 float32_t DMAMEM float_buffer_R_AudioCW[256];  //AFP 10-18-22
@@ -630,7 +600,6 @@ float32_t DMAMEM NR_Hk_old[NR_FFT_L / 2];
 float32_t DMAMEM NR_long_tone[NR_FFT_L / 2][2];
 float32_t DMAMEM NR_long_tone_gain[NR_FFT_L / 2];
 float32_t DMAMEM R_BufferOffset[BUFFER_SIZE * N_B];
-float32_t ring[RB_SIZE * 2];
 float32_t tmp;
 float32_t w;
 float angl;
@@ -668,65 +637,13 @@ time_t getTeensy3Time() {
   return Teensy3Clock.get();
 }
 
-
-/*****
-  Purpose: To set the codec gain
-
-  Parameter list:
-    void
-
-  Return value:
-    void
-
-*****
-void Codec_gain() {
-  uint8_t half_clip = 0;
-  uint8_t quarter_clip = 0;
-  static uint32_t timer = 0;
-  timer++;
-  if (timer > 10000) timer = 10000;
-  if (half_clip == 1)  // did clipping almost occur?
-  {
-    if (timer >= 20)  // 100  // has enough time passed since the last gain decrease?
-    {
-      if (bands[EEPROMData.currentBand].RFgain != 0)  // yes - is this NOT zero?
-      {
-        bands[EEPROMData.currentBand].RFgain -= 1;  // decrease gain one step, 1.5dB
-        if (bands[EEPROMData.currentBand].RFgain < 0) {
-          bands[EEPROMData.currentBand].RFgain = 0;
-        }
-        timer = 0;  // reset the adjustment timer
-        AudioNoInterrupts();
-        AudioInterrupts();
-      }
-    }
-  } else if (quarter_clip == 0)  // no clipping occurred
-  {
-    if (timer >= 50)  // 500   // has it been long enough since the last increase?
-    {
-      bands[EEPROMData.currentBand].RFgain += 1;  // increase gain by one step, 1.5dB
-      timer = 0;                                  // reset the timer to prevent this from executing too often
-      if (bands[EEPROMData.currentBand].RFgain > 15) {
-        bands[EEPROMData.currentBand].RFgain = 15;
-      }
-      AudioNoInterrupts();
-      AudioInterrupts();
-      Serial.printf("bands[EEPROMData.currentBand].RFgain = %d\n", bands[EEPROMData.currentBand].RFgain);
-    }
-  }
-  half_clip = 0;     // clear "half clip" indicator that tells us that we should decrease gain
-  quarter_clip = 0;  // clear indicator that, if not triggered, indicates that we can increase gain
-}
-*/
-
-
 // is added in Teensyduino 1.52 beta-4, so this can be deleted !?
 
 /*****
   Purpose: To set the real time clock
 
   Parameter list:
-    void
+    unsigned long t
 
   Return value:
     void
@@ -948,8 +865,6 @@ FLASHMEM void InitializeDataArrays() {
     biquad_lowpass1_coeffs[i] = coefficient_set[i];
   }
 
-//  ShowBandwidth();
-
   /****************************************************************************************
      Initiate decimation and interpolation FIR filters
   ****************************************************************************************/
@@ -1004,10 +919,8 @@ FLASHMEM void InitializeDataArrays() {
       ;
   }
 
-  SetDecIntFilters();  // here, the correct bandwidths are calculated and set accordingly
-
+  SetDecIntFilters();  // The correct bandwidths are calculated and set accordingly.
   ZoomFFTPrep();
-
   SpectralNoiseReductionInit();
   InitLMSNoiseReduction();
 
@@ -1020,93 +933,7 @@ FLASHMEM void InitializeDataArrays() {
   initTempMon(temp_check_frequency, lowAlarmTemp, highAlarmTemp, panicAlarmTemp);
   // this starts the measurements
   TEMPMON_TEMPSENSE0 |= 0x2U;
-}
-
-
-/*****
-  Purpose: Manage AudioRecordQueue objects and patchCord connections based on
-           the radio's operating mode in a way that minimizes unnecessary
-           AudioMemory usage.
-
-  Parameter list:
-    int operatingState    radioState/lastState constant indicating desired state
-
-  Return value:
-    void
-
-*****/
-void SetAudioOperatingState(int operatingState) {
-#ifdef DEBUG
-  Serial.printf("lastState=%d radioState=%d memory_used=%d memory_used_max=%d f32_memory_used=%d f32_memory_used_max=%d\n",
-                lastState,
-                radioState,
-                (int)AudioStream::memory_used,
-                (int)AudioStream::memory_used_max,
-                (int)AudioStream_F32::f32_memory_used,
-                (int)AudioStream_F32::f32_memory_used_max);
-  AudioStream::memory_used_max = 0;
-  AudioStream_F32::f32_memory_used_max = 0;
-#endif
-  switch (operatingState) {
-    case SSB_RECEIVE_STATE:
-    case AM_RECEIVE_STATE:
-    case CW_RECEIVE_STATE:
-      // Disconnect and deactivate microphone audio.
-      patchCord1.disconnect();
-      Q_in_L_Ex.end();  // Microphone audio path.
-      Q_in_L_Ex.clear();
-      // Deactivate TX audio output path.
-      patchCord15.disconnect();  // Disconnect transmitter I and Q channel outputs.
-      patchCord16.disconnect();
-      // QSD connected and enabled
-      Q_in_L.begin();                                        // Receiver I channel
-      Q_in_R.begin();                                        // Receiver Q channel
-      patchCord9.connect();                                  // Receiver I channel
-      patchCord10.connect();                                 // Receiver Q channel
-      patchCord17.connect();                                 // Receiver audio channel
-      volumeAdjust.gain(volumeLog[EEPROMData.audioVolume]);  // Set volume because sidetone may have changed it.
-      break;
-    case SSB_TRANSMIT_STATE:
-      // QSD disabled and disconnected
-      patchCord9.disconnect();   // Receiver I channel
-      patchCord10.disconnect();  // Receiver Q channel
-      patchCord17.disconnect();  // CW sidetone
-      Q_in_L.end();
-      Q_in_L.clear();
-      Q_in_R.end();
-      Q_in_R.clear();
-
-      // Microphone input enabled and connected
-      patchCord1.connect();  // Microphone audio
-      Q_in_L_Ex.begin();     // Microphone audio
-
-      patchCord15.connect();  // Transmitter I channel
-      patchCord16.connect();  // Transmitter Q channel
-
-      break;
-    case CW_TRANSMIT_STRAIGHT_STATE:
-    case CW_TRANSMIT_KEYER_STATE:
-      // QSD disabled and disconnected
-      patchCord9.disconnect();
-      patchCord10.disconnect();
-      Q_in_L.end();
-      Q_in_L.clear();
-      Q_in_R.end();
-      Q_in_R.clear();
-
-      // Microphone input disabled and disconnected
-      patchCord1.disconnect();
-      Q_in_L_Ex.end();  // Clear microphone queue.
-      Q_in_L_Ex.clear();
-
-      patchCord15.connect();  // Connect I and Q transmitter output channels.
-      patchCord16.connect();
-      patchCord17.connect();                                    // Sidetone goes into receiver audio path.
-      volumeAdjust.gain(volumeLog[EEPROMData.sidetoneVolume]);  // Adjust sidetone volume.
-
-      break;
-  }
-}
+}  // end InitializeDataArrays()
 
 
 /*****
@@ -1130,7 +957,7 @@ FLASHMEM void Splash() {
   tft.setFontScale(2);
   tft.print("EXTREME EXPERIMENTER'S EDITION");
   tft.setCursor(310, 125);
-  tft.print(VERSION);
+  tft.print(EEPROMData.versionSettings);
   tft.setFontScale(1);
   tft.setTextColor(RA8875_YELLOW);
   tft.setCursor(380, 175);
@@ -1156,6 +983,31 @@ FLASHMEM void Splash() {
   tft.fillWindow(RA8875_BLACK);
 }
 
+
+MenuSelect readButton(MenuSelect lastUsedTask) {
+  int val = 0;
+  MenuSelect menu, task = MenuSelect::DEFAULT;
+    val = ReadSelectedPushButton();
+    if (val != -1) {  // -1 is returned by ReadSelectedPushButton in the case of an invalid read.
+      menu = ProcessButtonPress(val);
+      if (menu != lastUsedTask && task == MenuSelect::DEFAULT) task = menu;
+      else task = MenuSelect::BOGUS_PIN_READ;
+    }
+    return task;
+}
+
+
+MenuSelect readButton() {
+  int val = 0;
+  MenuSelect menu = MenuSelect::DEFAULT;
+    val = ReadSelectedPushButton();
+    if (val != -1) {  // -1 is returned by ReadSelectedPushButton in the case of an invalid read.
+      menu = ProcessButtonPress(val);
+    }  else menu = MenuSelect::BOGUS_PIN_READ;
+    return menu;
+}
+
+
 /*****
   Purpose: program entry point that sets the environment for program
 
@@ -1175,64 +1027,70 @@ FLASHMEM void setup() {
 
   sgtl5000_1.setAddress(LOW);  // This is not documented.  See QuadChannelOutput example.
   sgtl5000_1.enable();
+<<<<<<< HEAD
+=======
+//  sgtl5000_1.audioPostProcessorEnable();
+  sgtl5000_1.audioPreProcessorEnable();  // Need to use one of the equalizers.
+  sgtl5000_1.eqSelect(3);
+  sgtl5000_1.eqBands(-1.0, 0.0, 1.0, 1.0, -1.0);
+>>>>>>> mainboard2
   AudioMemory(200);  //  Increased to 450 from 400.  Memory was hitting max.  KF5N August 31, 2023
   AudioMemory_F32(10);
   sgtl5000_1.inputSelect(AUDIO_INPUT_MIC);
   sgtl5000_1.muteHeadphone();  // KF5N March 11, 2024
-  sgtl5000_1.micGain(20);
+  sgtl5000_1.micGain(0);
   sgtl5000_1.lineInLevel(0);
 #ifdef QSE2
   sgtl5000_1.lineOutLevel(13);  // Setting of 13 limits line-out level to 3.15 volts p-p (maximum).
 #else
   sgtl5000_1.lineOutLevel(20);  // Setting of 20 limits line-out level to 2.14 volts p-p.
 #endif
-  sgtl5000_1.adcHighPassFilterDisable();  //reduces noise.  https://forum.pjrc.com/threads/27215-24-bit-audio-boards?p=78831&viewfull=1#post78831
+sgtl5000_1.adcHighPassFilterEnable();  
+//sgtl5000_1.adcHighPassFilterDisable();  //reduces noise.  https://forum.pjrc.com/threads/27215-24-bit-audio-boards?p=78831&viewfull=1#post78831
+//sgtl5000_1.adcHighPassFilterFreeze();
   sgtl5000_2.setAddress(HIGH);            // T41 has only a single Audio Adaptor.  This is being used essentially as a 2nd I2S port.
   sgtl5000_2.enable();
   sgtl5000_2.inputSelect(AUDIO_INPUT_LINEIN);  // Why is a second sgtl5000 device used???  This is the receiver ADCs, PCM1808?
   sgtl5000_2.muteHeadphone();                  // KF5N March 11, 2024
                                                //  sgtl5000_2.volume(0.5);   //  Headphone volume???  Not required as headphone is muted.
+  updateMic();  // This updates the transmit signal chain settings.
 
+// Set up "Controlled Envelope Single Side Band" from the Open Audio Library.
+   cessb1.setSampleRate_Hz(48000);
+   cessb1.setGains(3.5f, 1.4f, 0.5f);  // gainIn, gainCompensate, gainOut
+   cessb1.setSideband(false);
+   cessb1.setProcessing(EEPROMData.cessb);  // Set to CESSB or SSB Data.  Greg KF5N August 17 2024
+
+  Q_out_L_Ex.setMaxBuffers(32);       // Limits determined emperically.  These may need more adjustment.  Greg KF5N August 4, 2024.
+  Q_out_R_Ex.setMaxBuffers(32);
+  Q_out_L.setMaxBuffers(64);          // Receiver audio buffer limit.
+
+  // GPOs used to control hardware.
   pinMode(FILTERPIN15M, OUTPUT);
   pinMode(FILTERPIN20M, OUTPUT);
   pinMode(FILTERPIN40M, OUTPUT);
   pinMode(FILTERPIN80M, OUTPUT);
   pinMode(RXTX, OUTPUT);
   pinMode(MUTE, OUTPUT);
-  digitalWrite(MUTE, LOW);
+  digitalWrite(MUTE, MUTEAUDIO);
   pinMode(PTT, INPUT_PULLUP);
-  pinMode(BUSY_ANALOG_PIN, INPUT);
-  pinMode(FILTER_ENCODER_A, INPUT);
-  pinMode(FILTER_ENCODER_B, INPUT);
-  pinMode(OPTO_OUTPUT, OUTPUT);
+  pinMode(BUSY_ANALOG_PIN, INPUT);  // Pin 39.  Switch matrix output connects to this pin.
   pinMode(KEYER_DIT_INPUT_TIP, INPUT_PULLUP);
   pinMode(KEYER_DAH_INPUT_RING, INPUT_PULLUP);
+  if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) {
+    pinMode(RESET, OUTPUT);  // Reset pulse to QSD2/QSE2.
+    digitalWrite(RESET, HIGH);
+  }
+
+  // SPI bus to display.
   pinMode(TFT_MOSI, OUTPUT);
   digitalWrite(TFT_MOSI, HIGH);
   pinMode(TFT_SCLK, OUTPUT);
   digitalWrite(TFT_SCLK, HIGH);
-  pinMode(TFT_CS, OUTPUT);
+  pinMode(TFT_CS, OUTPUT);  // The Main board has a pull-up resistor on an output???
   digitalWrite(TFT_CS, HIGH);
 
-  arm_fir_init_f32(&FIR_Hilbert_L, 100, FIR_Hilbert_coeffs_45, FIR_Hilbert_state_L, 256);  //AFP01-16-22
-  arm_fir_init_f32(&FIR_Hilbert_R, 100, FIR_Hilbert_coeffs_neg45, FIR_Hilbert_state_R, 256);
-  arm_fir_init_f32(&FIR_CW_DecodeL, 64, CW_Filter_Coeffs2, FIR_CW_DecodeL_state, 256);  //AFP 10-25-22
-  arm_fir_init_f32(&FIR_CW_DecodeR, 64, CW_Filter_Coeffs2, FIR_CW_DecodeR_state, 256);
-  arm_fir_decimate_init_f32(&FIR_dec1_EX_I, 48, 4, coeffs192K_10K_LPF_FIR, FIR_dec1_EX_I_state, 2048);
-  arm_fir_decimate_init_f32(&FIR_dec1_EX_Q, 48, 4, coeffs192K_10K_LPF_FIR, FIR_dec1_EX_Q_state, 2048);
-  arm_fir_decimate_init_f32(&FIR_dec2_EX_I, 24, 2, coeffs48K_8K_LPF_FIR, FIR_dec2_EX_I_state, 512);
-  arm_fir_decimate_init_f32(&FIR_dec2_EX_Q, 24, 2, coeffs48K_8K_LPF_FIR, FIR_dec2_EX_Q_state, 512);
-  arm_fir_interpolate_init_f32(&FIR_int1_EX_I, 2, 48, coeffs48K_8K_LPF_FIR, FIR_int1_EX_I_state, 256);
-  arm_fir_interpolate_init_f32(&FIR_int1_EX_Q, 2, 48, coeffs48K_8K_LPF_FIR, FIR_int1_EX_Q_state, 256);
-  arm_fir_interpolate_init_f32(&FIR_int2_EX_I, 4, 32, coeffs192K_10K_LPF_FIR, FIR_int2_EX_I_state, 512);
-  arm_fir_interpolate_init_f32(&FIR_int2_EX_Q, 4, 32, coeffs192K_10K_LPF_FIR, FIR_int2_EX_Q_state, 512);
-
-  //***********************  EQ Gain Settings ************
-  uint32_t iospeed_display = IOMUXC_PAD_DSE(3) | IOMUXC_PAD_SPEED(1);
-  *(digital_pin_to_info_PGM + 13)->pad = iospeed_display;  //clk
-  *(digital_pin_to_info_PGM + 11)->pad = iospeed_display;  //MOSI
-  *(digital_pin_to_info_PGM + TFT_CS)->pad = iospeed_display;
-
+  // Rotary encoders.
   tuneEncoder.begin(true);
   volumeEncoder.begin(true);
   attachInterrupt(digitalPinToInterrupt(VOLUME_ENCODER_A), EncoderVolume, CHANGE);
@@ -1245,6 +1103,20 @@ FLASHMEM void setup() {
   attachInterrupt(digitalPinToInterrupt(FINETUNE_ENCODER_B), EncoderFineTune, CHANGE);
   attachInterrupt(digitalPinToInterrupt(KEYER_DIT_INPUT_TIP), KeyTipOn, CHANGE);  // Changed to keyTipOn from KeyOn everywhere JJP 8/31/22
   attachInterrupt(digitalPinToInterrupt(KEYER_DAH_INPUT_RING), KeyRingOn, CHANGE);
+
+// Move these to the initialization function?
+  arm_fir_init_f32(&FIR_CW_DecodeL, 64, CW_Filter_Coeffs2, FIR_CW_DecodeL_state, 256);  //AFP 10-25-22
+  arm_fir_init_f32(&FIR_CW_DecodeR, 64, CW_Filter_Coeffs2, FIR_CW_DecodeR_state, 256);
+  arm_fir_interpolate_init_f32(&FIR_int1_EX_I, 2, 48, coeffs48K_8K_LPF_FIR, FIR_int1_EX_I_state, 256);  // Used in CW exciter.
+  arm_fir_interpolate_init_f32(&FIR_int1_EX_Q, 2, 48, coeffs48K_8K_LPF_FIR, FIR_int1_EX_Q_state, 256);
+  arm_fir_interpolate_init_f32(&FIR_int2_EX_I, 4, 32, coeffs192K_10K_LPF_FIR, FIR_int2_EX_I_state, 512);
+  arm_fir_interpolate_init_f32(&FIR_int2_EX_Q, 4, 32, coeffs192K_10K_LPF_FIR, FIR_int2_EX_Q_state, 512);
+
+  //***********************  Display interface settings ************
+  uint32_t iospeed_display = IOMUXC_PAD_DSE(3) | IOMUXC_PAD_SPEED(1);
+  *(digital_pin_to_info_PGM + 13)->pad = iospeed_display;  //clk
+  *(digital_pin_to_info_PGM + 11)->pad = iospeed_display;  //MOSI
+  *(digital_pin_to_info_PGM + TFT_CS)->pad = iospeed_display;
 
   tft.begin(RA8875_800x480, 8, 20000000UL, 4000000UL);  // parameter list from library code
   tft.setRotation(0);
@@ -1276,7 +1148,7 @@ FLASHMEM void setup() {
   }                // KD0RC end
 #else
   EnableButtonInterrupts();
-  EEPROMStartup();
+  eeprom.EEPROMStartup();
 #endif
 
   // ========================  End set up of Parameters from EEPROM data ===============
@@ -1284,6 +1156,7 @@ FLASHMEM void setup() {
   Q_out_R_Ex.setMaxBuffers(32);
   h = 135;
   NCOFreq = 0;
+  h = 135;
 
   /****************************************************************************************
      start local oscillator Si5351
@@ -1308,7 +1181,6 @@ FLASHMEM void setup() {
   volumeChangeFlag = true;  // Adjust volume so saved value.
   filterEncoderMove = 0;
   fineTuneEncoderMove = 0L;
-  xrState = RECEIVE_STATE;  // Enter loop() in receive state.  KF5N July 22, 2023
   UpdateInfoWindow();
   DrawSpectrumDisplayContainer();
   RedrawDisplayScreen();
@@ -1322,16 +1194,14 @@ FLASHMEM void setup() {
   ShowAutoStatus();
   zoomIndex = EEPROMData.spectrum_zoom - 1;  // ButtonZoom() increments zoomIndex, so this cancels it so the read from EEPROM is accurately restored.  KF5N August 3, 2023
   ButtonZoom();                              // Restore zoom settings.  KF5N August 3, 2023
-  comp_ratio = 5.0;
-  attack_sec = .1;
-  release_sec = 2.0;
-  comp1.setPreGain_dB(-10);  // Set the gain of the microphone audio gain processor.
 
   EEPROMData.sdCardPresent = SDPresentCheck();  // JJP 7/18/23
-  lastState = 1111;                             // To make sure the receiver will be configured on the first pass through.  KF5N September 3, 2023
+  lastState = RadioState::NOSTATE;                             // To make sure the receiver will be configured on the first pass through.  KF5N September 3, 2023
+  if(EEPROMData.xmtMode == RadioMode::CW_MODE) {radioState = RadioState::CW_RECEIVE_STATE; radioMode = RadioMode::CW_MODE;}
+  if(EEPROMData.xmtMode == RadioMode::SSB_MODE) {radioState = RadioState::SSB_RECEIVE_STATE; radioMode = RadioMode::SSB_MODE;}
   UpdateDecoderField();                         // Adjust graphics for Morse decoder.
   FilterSetSSB();
-  UpdateEqualizerField(EEPROMData.receiveEQFlag, EEPROMData.xmitEQFlag);
+  UpdateEqualizerField(EEPROMData.receiveEQFlag);
   EEPROMData.rfGainCurrent = 0;  // Start with lower gain so you don't get blasted.
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();  // Required only for QSD2/QSE2.
 }
@@ -1351,48 +1221,45 @@ elapsedMicros usec = 0;  // Automatically increases as time passes; no ++ necess
 *****/
 float audioBW{0.0}; 
 int dBoffset{0};
+
 void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
 {
-  int pushButtonSwitchIndex = -1;
-  int valPin;
+  MenuSelect menu;
   long ditTimerOff;  //AFP 09-22-22
   long dahTimerOn;
   bool cwKeyDown;
   unsigned long cwBlockIndex;
 
-  valPin = ReadSelectedPushButton();
-  if (valPin != BOGUS_PIN_READ && xrState != TRANSMIT_STATE) {
-    pushButtonSwitchIndex = ProcessButtonPress(valPin);
-    ExecuteButtonPress(pushButtonSwitchIndex);
+  menu = readButton();
+  if (menu != MenuSelect::BOGUS_PIN_READ and (radioState != RadioState::SSB_TRANSMIT_STATE) and (radioState != RadioState::CW_TRANSMIT_STRAIGHT_STATE) and (radioState != RadioState::CW_TRANSMIT_KEYER_STATE)) {
+    ExecuteButtonPress(menu);
   }
   //  State detection
-  if (EEPROMData.xmtMode == SSB_MODE && digitalRead(PTT) == HIGH) radioState = SSB_RECEIVE_STATE;
-  if (EEPROMData.xmtMode == SSB_MODE && digitalRead(PTT) == LOW) radioState = SSB_TRANSMIT_STATE;
-  if (EEPROMData.xmtMode == CW_MODE && (digitalRead(EEPROMData.paddleDit) == HIGH && digitalRead(EEPROMData.paddleDah) == HIGH)) radioState = CW_RECEIVE_STATE;  // Was using symbolic constants. Also changed in code below.  KF5N August 8, 2023
-  if (EEPROMData.xmtMode == CW_MODE && (digitalRead(EEPROMData.paddleDit) == LOW && EEPROMData.xmtMode == CW_MODE && EEPROMData.keyType == 0)) radioState = CW_TRANSMIT_STRAIGHT_STATE;
-  if (EEPROMData.xmtMode == CW_MODE && (keyPressedOn == 1 && EEPROMData.xmtMode == CW_MODE && EEPROMData.keyType == 1)) radioState = CW_TRANSMIT_KEYER_STATE;
+  if (EEPROMData.xmtMode == RadioMode::SSB_MODE and digitalRead(PTT) == HIGH) radioState = RadioState::SSB_RECEIVE_STATE;
+  if (EEPROMData.xmtMode == RadioMode::SSB_MODE && digitalRead(PTT) == LOW) radioState = RadioState::SSB_TRANSMIT_STATE;
+  if (EEPROMData.xmtMode == RadioMode::CW_MODE && (digitalRead(EEPROMData.paddleDit) == HIGH && digitalRead(EEPROMData.paddleDah) == HIGH)) radioState = RadioState::CW_RECEIVE_STATE;  // Was using symbolic constants. Also changed in code below.  KF5N August 8, 2023
+  if (EEPROMData.xmtMode == RadioMode::CW_MODE && (digitalRead(EEPROMData.paddleDit) == LOW && EEPROMData.xmtMode == RadioMode::CW_MODE && EEPROMData.keyType == 0)) radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;
+  if (EEPROMData.xmtMode == RadioMode::CW_MODE && (keyPressedOn == 1 && EEPROMData.xmtMode == RadioMode::CW_MODE && EEPROMData.keyType == 1)) radioState = RadioState::CW_TRANSMIT_KEYER_STATE;
   if (bands[EEPROMData.currentBand].mode > 1) {
-  radioState = AM_RECEIVE_STATE;  // Inhibit transmit in AM demod modes.  KF5N March 21, 2024
+  radioState = RadioState::AM_RECEIVE_STATE;  // Inhibit transmit in AM demod modes.  KF5N March 21, 2024
+  radioMode = RadioMode::AM_MODE;             // AM is currently receive only.
   keyPressedOn = 0;
   }
 
   if (lastState != radioState) {
-    SetFreq();  // Update frequencies if the radio state has changed.
     SetAudioOperatingState(radioState);
+    SetFreq();  // Update frequencies if the radio state has changed.
   }
 
   //  Begin radio state machines
 
   //  Begin SSB Mode state machine
-
   switch (radioState) {
-    case AM_RECEIVE_STATE:
-    case SSB_RECEIVE_STATE:
+    case RadioState::AM_RECEIVE_STATE:
+    case RadioState::SSB_RECEIVE_STATE:
       if (lastState != radioState) {  // G0ORX 01092023
-        digitalWrite(MUTE, LOW);      // Audio Mute off
+        digitalWrite(MUTE, UNMUTEAUDIO);      // Audio Mute off
         digitalWrite(RXTX, LOW);      //xmit off
-        T41State = SSB_RECEIVE;
-        xrState = RECEIVE_STATE;
         if (keyPressedOn == 1) {
           return;
         }
@@ -1400,28 +1267,41 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       }
       ShowSpectrum();
       break;
-    case SSB_TRANSMIT_STATE:
-      comp1.setPreGain_dB(EEPROMData.currentMicGain);
-      //      comp2.setPreGain_dB(EEPROMData.currentMicGain);
-      if (EEPROMData.compressorFlag == 1) {
-        SetupMyCompressors(use_HP_filter, (float)EEPROMData.currentMicThreshold, comp_ratio, attack_sec, release_sec);  // Cast EEPROMData.currentMicThreshold to float.  KF5N, October 31, 2023
-      } else {
-        if (EEPROMData.compressorFlag == 0) {
-          SetupMyCompressors(use_HP_filter, 0.0, comp_ratio, 0.01, 0.01);
-        }
-      }
-      xrState = TRANSMIT_STATE;
-      digitalWrite(MUTE, HIGH);  //  Mute Audio  (HIGH=Mute)
+    case RadioState::SSB_TRANSMIT_STATE:
+      digitalWrite(MUTE, MUTEAUDIO);  //  Mute Audio  (HIGH=Mute)
       digitalWrite(RXTX, HIGH);  //xmit on
-      xrState = TRANSMIT_STATE;
 
       ShowTransmitReceiveStatus();
-
       while (digitalRead(PTT) == LOW) {
         ExciterIQData();
+
+#ifdef DEBUG_CESSB
+  struct levelsZ* cessbData;
+if(cessb1.levelDataCount() > 2000) {
+        Serial.print("levelDataCount = ");  // Before getLevels(1), because it resets counts to 0.
+        Serial.println(cessb1.levelDataCount());
+  cessbData = cessb1.getLevels(1);  // Update the CESSB information struct.  Write the data to serial.
+          // Detailed Report
+        Serial.print(10.0f*log10f(cessbData->pwr0));
+        Serial.print(" In Ave Pwr Out ");
+        Serial.println(10.0f*log10f(cessbData->pwr1));
+        Serial.print(20.0f*log10f(cessbData->peak0));
+        Serial.print(" In  Peak   Out ");
+        Serial.println(20.0f*log10f(cessbData->peak1));
+        Serial.print(cessbData->peak0, 6);
+        Serial.print(" In  Peak Volts   Out ");
+        Serial.println(cessbData->peak1, 6);
+        Serial.print("Enhancement = ");
+        float32_t enhance = (10.0f*log10f(cessbData->pwr1) - 20.0f*log10f(cessbData->peak1)) -
+                            (10.0f*log10f(cessbData->pwr0) - 20.0f*log10f(cessbData->peak0));
+        Serial.print(enhance); Serial.println(" dB");
+}
+#endif
+
+
       }
-      xrState = RECEIVE_STATE;
       break;
+
     default:
       break;
   }
@@ -1430,21 +1310,17 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   // Begin CW Mode state machine
 
   switch (radioState) {
-//    case AM_RECEIVE_STATE:
-    case CW_RECEIVE_STATE:
+    case RadioState::CW_RECEIVE_STATE:
       if (lastState != radioState) {  // G0ORX 01092023
-        digitalWrite(MUTE, LOW);      //turn off mute
-        T41State = CW_RECEIVE;
+        digitalWrite(MUTE, UNMUTEAUDIO);      //turn off mute
         ShowTransmitReceiveStatus();
-        xrState = RECEIVE_STATE;
         keyPressedOn = 0;
       }
       ShowSpectrum();  // if removed CW signal on is 2 mS
       break;
-    case CW_TRANSMIT_STRAIGHT_STATE:
-      xrState = TRANSMIT_STATE;
+    case RadioState::CW_TRANSMIT_STRAIGHT_STATE:
       ShowTransmitReceiveStatus();
-      digitalWrite(MUTE, LOW);  // unmutes audio
+      digitalWrite(MUTE, UNMUTEAUDIO);  // unmutes audio for sidetone
       cwKeyDown = false;        // false initiates CW_SHAPING_RISE.
       cwTimer = millis();
       while (millis() - cwTimer <= EEPROMData.cwTransmitDelay) {  //Start CW transmit timer on
@@ -1468,13 +1344,12 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
           }
         }
       }
-      digitalWrite(MUTE, HIGH);  // mutes audio
+      digitalWrite(MUTE, MUTEAUDIO);  // mutes audio
       digitalWrite(RXTX, LOW);   // End Straight Key Mode
       break;
-    case CW_TRANSMIT_KEYER_STATE:
-      xrState = TRANSMIT_STATE;
+    case RadioState::CW_TRANSMIT_KEYER_STATE:
       ShowTransmitReceiveStatus();
-      digitalWrite(MUTE, LOW);  // unmutes audio
+      digitalWrite(MUTE, UNMUTEAUDIO);  // unmutes audio for sidetone
       cwTimer = millis();
       while (millis() - cwTimer <= EEPROMData.cwTransmitDelay) {
         digitalWrite(RXTX, HIGH);
@@ -1482,7 +1357,7 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
         if (digitalRead(EEPROMData.paddleDit) == LOW) {  // Keyer Dit
           ditTimerOn = millis();
           // Queue audio blocks--execution time of this loop will be between 0-20ms shorter
-          // than the desired dit time, due to audio buffering
+          // than the desired dit time, due to audio buffering.
           CW_ExciterIQData(CW_SHAPING_RISE);
           for (cwBlockIndex = 0; cwBlockIndex < transmitDitUnshapedBlocks; cwBlockIndex++) {
             CW_ExciterIQData(CW_SHAPING_NONE);
@@ -1527,10 +1402,10 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
         keyPressedOn = 0;  // Fix for keyer click-clack.  KF5N August 16, 2023
       }                    //End Relay timer
 
-      digitalWrite(MUTE, HIGH);  // mutes audio
-                                 //      patchCord15.disconnect();  // Disconnect the I and Q transmitter outputs.
-                                 //      patchCord16.disconnect();
+      digitalWrite(MUTE, MUTEAUDIO);  // mutes audio
       digitalWrite(RXTX, LOW);   // End Straight Key Mode
+      break;
+      case RadioState::NOSTATE:
       break;
     default:
       break;
@@ -1549,8 +1424,7 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   }
 #endif
 
-  if (volumeChangeFlag == true) {
-  
+  if (volumeChangeFlag == true) { 
     // Compensate for audio filter setting.
     // Nominal bandwidth is 2.8kHz.  This will be the 0 dB reference.
     // The upper and lower frequency limits are bands[EEPROMData.currentBand].FLoCut and bands[EEPROMData.currentBand].FHiCut.

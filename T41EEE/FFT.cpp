@@ -11,7 +11,7 @@ void ZoomFFTPrep() {  // take value of spectrum_zoom and initialize FIR decimati
   /****************************************************************************************
      Zoom FFT: Initiate decimation FIR filters
   ****************************************************************************************/
-  // two-stage decimation
+  // Two-stage decimation.  These are decimation factors.
   switch (EEPROMData.spectrum_zoom) {
     case SPECTRUM_ZOOM_1:
       Zoom_FFT_M1 = 1;
@@ -92,11 +92,14 @@ void ZoomFFTExe(uint32_t blockSize) {
   // maybe the next days
   float32_t x_buffer[blockSize];  // can be 2048 (FFT length == 512), or 4096 [FFT length == 1024] or even 8192 [FFT length == 2048]
   float32_t y_buffer[blockSize];
+
+  //  NOTE THESE ARE STATIC
   static float32_t FFT_ring_buffer_x[fftWidth * 2];
   static float32_t FFT_ring_buffer_y[fftWidth * 2];
-  static int32_t flag_2nd_decimation = 0;
+
+//  static int32_t flag_2nd_decimation = 0;
   //static uint32_t high_Zoom_buffer_ptr = 0;
-  uint8_t high_Zoom = 0;
+//  uint8_t high_Zoom = 0;
   //uint32_t high_Zoom_2nd_dec_rounds = (1 << (EEPROMData.spectrum_zoom - 11));
   //Serial.print("2nd dec rounds"); Serial.println(high_Zoom_2nd_dec_rounds);
   int sample_no = 256;
@@ -112,7 +115,7 @@ void ZoomFFTExe(uint32_t blockSize) {
   // decimation stage 1
   arm_fir_decimate_f32(&Fir_Zoom_FFT_Decimate_I1, float_buffer_L, x_buffer, blockSize);
   arm_fir_decimate_f32(&Fir_Zoom_FFT_Decimate_Q1, float_buffer_R, y_buffer, blockSize);
-  if (high_Zoom == 1) flag_2nd_decimation++;
+//  if (high_Zoom == 1) flag_2nd_decimation++;
   // decimation stage 2
   arm_fir_decimate_f32(&Fir_Zoom_FFT_Decimate_I2, x_buffer, x_buffer, blockSize / Zoom_FFT_M1);
   arm_fir_decimate_f32(&Fir_Zoom_FFT_Decimate_Q2, y_buffer, y_buffer, blockSize / Zoom_FFT_M1);
@@ -172,7 +175,7 @@ void ZoomFFTExe(uint32_t blockSize) {
     }
     // perform complex FFT
     // calculation is performed in-place the FFT_buffer [re, im, re, im, re, im . . .]
-    arm_cfft_f32(spec_FFT, buffer_spec_FFT, 0, 1);
+    arm_cfft_f32(spec_FFT, buffer_spec_FFT, 0, 1);  // spec_FFT is width 512
     // calculate mag = I*I + Q*Q,
     // and simultaneously put them into the right order
     for (int i = 0; i < fftWidth / 2; i++) {
@@ -189,7 +192,6 @@ void ZoomFFTExe(uint32_t blockSize) {
     // Write the FFT bins into the display buffer.
     if (calOnFlag)  // Expanded dynamic range during calibration.
       for (int16_t x = 0; x < fftWidth; x++) {
-//        pixelnew[x] = displayScale[EEPROMData.currentScale].baseOffset + bands[EEPROMData.currentBand].pixel_offset + (int16_t)(40.0 * log10f_fast(FFT_spec[x]));
         pixelnew[x] = displayScale[EEPROMData.currentScale].baseOffset + (int16_t)(40.0 * log10f_fast(FFT_spec[x]));
       }
     else

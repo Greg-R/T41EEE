@@ -2,24 +2,29 @@
 #include "SDT.h"
 
 #define HISTOGRAM_ELEMENTS 750
+#define MAX_DECODE_CHARS 32       // Max chars that can appear on decoder line.  Increased to 32.  KF5N October 29, 2023
+#define DECODER_BUFFER_SIZE 128   // Max chars in binary search string with , . ?
+
+byte currentDashJump = DECODER_BUFFER_SIZE;
+byte currentDecoderIndex = 0;
 
 float32_t aveCorrResultR;  // Used in running averages; must not be inside function.
 float32_t aveCorrResultL;
 //float32_t float_Corr_BufferR[511] = {0};  // DMAMEM may cause problems with these two buffers and CW decode.
 //float32_t float_Corr_BufferL[511] = {0};
-float32_t* float_Corr_BufferR = new float32_t[511];
-float32_t* float_Corr_BufferL = new float32_t[511];
+float32_t *float_Corr_BufferR = new float32_t[511];
+float32_t *float_Corr_BufferL = new float32_t[511];
 float CWLevelTimer;
 float CWLevelTimerOld;
 float goertzelMagnitude;
-char decodeBuffer[33] = {0};  // The buffer for holding the decoded characters.  Increased to 33.  KF5N October 29, 2023
+char decodeBuffer[33] = { 0 };  // The buffer for holding the decoded characters.  Increased to 33.  KF5N October 29, 2023
 int endGapFlag = 0;
 int topGapIndex;
 int topGapIndexOld;
 //int32_t gapHistogram[HISTOGRAM_ELEMENTS];  // DMAMEM???
 //int32_t signalHistogram[HISTOGRAM_ELEMENTS];
-int32_t* gapHistogram = new int32_t[HISTOGRAM_ELEMENTS];
-int32_t* signalHistogram = new int32_t[HISTOGRAM_ELEMENTS];
+int32_t *gapHistogram = new int32_t[HISTOGRAM_ELEMENTS];
+int32_t *signalHistogram = new int32_t[HISTOGRAM_ELEMENTS];
 long valRef1;
 long valRef2;
 long gapRef1;
@@ -73,6 +78,7 @@ FLASHMEM void SelectCWFilter() {
   BandInformation();
   DrawBandWidthIndicatorBar();
   UpdateDecoderField();
+  eeprom.EEPROMWrite();
 }
 
 
@@ -91,7 +97,7 @@ FLASHMEM void SelectCWOffset() {
   EEPROMData.CWOffset = SubmenuSelect(CWOffsets, 5, EEPROMData.CWOffset);  // CWFilter is an array of strings.
   // Now generate the values for the buffer which is used to create the CW tone.  The values are discrete because there must be whole cycles.
   if (EEPROMData.CWOffset < 4) sineTone(numCycles[EEPROMData.CWOffset]);
-  EEPROMWrite();  // Save to EEPROM.
+  eeprom.EEPROMWrite();  // Save to EEPROM.
   // Clear the current CW filter graphics and then restore the bandwidth indicator bar.  KF5N July 30, 2023
   tft.writeTo(L2);
   tft.clearMemory();
@@ -118,14 +124,13 @@ void DoCWReceiveProcessing() {  // All New AFP 09-19-22
   uint32_t corrResultIndexR;
   float32_t corrResultL;
   uint32_t corrResultIndexL;
-  float32_t combinedCoeff;                          //AFP 02-06-22
-  int audioTemp;                                    // KF5N
-//  float freq[4] = { 562.5, 656.5, 750.0, 843.75 };  // User selectable CW offset frequencies.
+  float32_t combinedCoeff;  //AFP 02-06-22
+  int audioTemp;            // KF5N
+
+  if (EEPROMData.decoderFlag) {  // JJP 7/20/23
 
   arm_fir_f32(&FIR_CW_DecodeL, float_buffer_L, float_buffer_L_CW, 256);  // AFP 10-25-22  Park McClellan FIR filter const Group delay
   arm_fir_f32(&FIR_CW_DecodeR, float_buffer_R, float_buffer_R_CW, 256);  // AFP 10-25-22
-
-  if (EEPROMData.decoderFlag) {  // JJP 7/20/23
 
     // ----------------------  Correlation calculation  AFP 02-04-22 -------------------------
     //Calculate correlation between calc sine and incoming signal
@@ -146,7 +151,7 @@ void DoCWReceiveProcessing() {  // All New AFP 09-19-22
     goertzelMagnitude = (goertzelMagnitude1 + goertzelMagnitude2) / 2;
     //Combine Correlation and Gowetzel Coefficients
     combinedCoeff = 200 * aveCorrResult * goertzelMagnitude;
-//    Serial.printf("combinedCoeff = %f\n", combinedCoeff);  // Use this to tune decoder.
+    //    Serial.printf("combinedCoeff = %f\n", combinedCoeff);  // Use this to tune decoder.
     // ==========  Changed CW decode "lock" indicator
     if (combinedCoeff > 50) {  // AFP 10-26-22
       tft.fillRect(700, 442, 15, 15, RA8875_GREEN);
@@ -166,35 +171,6 @@ void DoCWReceiveProcessing() {  // All New AFP 09-19-22
     DoCWDecoding(audioTemp);
   }
 }
-
-/*****
-  Purpose: to provide spacing between letters
-
-  Parameter list:
-  void
-
-  Return value:
-  void
-
-  CAUTION: Assumes that a global named ditLength holds the value for dit spacing
-*****/
-//void LetterSpace() {
-//  MyDelay(3UL * ditLength);
-//}
-/*****
-  Purpose: to provide spacing between words
-
-  Parameter list:
-  void
-
-  Return value:
-  void
-
-  CAUTION: Assumes that a global named ditLength holds the value for dit spacing
-*****/
-//void WordSpace() {
-//  MyDelay(7UL * ditLength);
-//}
 
 
 /*****
@@ -236,6 +212,7 @@ void SetTransmitDitLength(int wpm) {
   }
 }
 
+
 /*****
   Purpose: Select straight key or keyer
 
@@ -255,7 +232,7 @@ void SetKeyType() {
     EEPROMData.paddleDit = KEYER_DIT_INPUT_TIP;
     EEPROMData.paddleDah = KEYER_DAH_INPUT_RING;
   }
-  EEPROMWrite();
+  eeprom.EEPROMWrite();
 }
 
 
@@ -294,10 +271,11 @@ FLASHMEM void SetKeyPowerUp() {
     void
 *****/
 void SetSideToneVolume() {
-  int val, sidetoneDisplay;
+  int sidetoneDisplay;
   bool keyDown;
+  MenuSelect menu;
 
- SetAudioOperatingState(CW_TRANSMIT_STRAIGHT_STATE);
+  SetAudioOperatingState(RadioState::SET_CW_SIDETONE);
   tft.setFontScale((enum RA8875tsize)1);
   tft.fillRect(SECONDARY_MENU_X - 50, MENUS_Y, EACH_MENU_WIDTH + 60, CHAR_HEIGHT, RA8875_MAGENTA);
   tft.setTextColor(RA8875_WHITE);
@@ -307,22 +285,8 @@ void SetSideToneVolume() {
   sidetoneDisplay = EEPROMData.sidetoneVolume;
   keyDown = false;
   tft.print(sidetoneDisplay);  // Display in range of 0 to 100.
-//  modeSelectInR.gain(0, 0);
-//  modeSelectInL.gain(0, 0);
-//  modeSelectInExR.gain(0, 0); 2nd microphone channel not required.  KF5N March 11, 2024
-//  modeSelectOutL.gain(0, 0);
-//  modeSelectOutR.gain(0, 0);
 
-  patchCord15.disconnect();  // Disconnect the I and Q AudioPlayQueues.
-  patchCord16.disconnect();
-
-  //modeSelectOutExL.gain(0, 0);
-  //modeSelectOutExR.gain(0, 0);
-//  patchCord17.connect();  // Sidetone goes into receiver audio path.
-//  Q_in_L.begin();         // Activate sidetone audio stream.
-  digitalWrite(MUTE, LOW);      // unmutes audio
-//  modeSelectOutL.gain(1, 0.0);  // Sidetone  AFP 10-01-22
-//  modeSelectOutR.gain(1, 0.0);  // Sidetone  AFP 10-01-22
+  digitalWrite(MUTE, UNMUTEAUDIO);  // unmutes audio
 
   while (true) {
     if (digitalRead(EEPROMData.paddleDit) == LOW || digitalRead(EEPROMData.paddleDah) == LOW) {
@@ -354,17 +318,17 @@ void SetSideToneVolume() {
       filterEncoderMove = 0;
     }
     volumeAdjust.gain(volumeLog[EEPROMData.sidetoneVolume]);  // Sidetone  AFP 10-01-22
-                                                                        //    modeSelectOutR.gain(1, volumeLog[(int)EEPROMData.sidetoneVolume]);  // Right side not used.  KF5N September 1, 2023
-    val = ReadSelectedPushButton();                                     // Read pin that controls all switches
-    val = ProcessButtonPress(val);
-    if (val == MENU_OPTION_SELECT) {  // Make a choice??
+                                                              //    modeSelectOutR.gain(1, volumeLog[(int)EEPROMData.sidetoneVolume]);  // Right side not used.  KF5N September 1, 2023
+//    val = ReadSelectedPushButton();                           // Read pin that controls all switches
+    menu = readButton();
+    if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
                                       // EEPROMData.EEPROMData.sidetoneVolume = EEPROMData.sidetoneVolume;
-      EEPROMWrite();
+      eeprom.EEPROMWrite();
       break;
     }
   }
   EraseMenus();
-  lastState = 1111;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 7, 2023
+  lastState = RadioState::NOSTATE;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 7, 2023
 }
 
 
@@ -542,11 +506,11 @@ FASTRUN void DoCWDecoding(int audioValue) {
         tft.setTextColor(RA8875_GREEN);
         tft.fillRect(DECODER_X + 75, DECODER_Y - 5, tft.getFontWidth() * 3, tft.getFontHeight(), RA8875_BLACK);  // Erase old WPM.
         tft.setCursor(DECODER_X + 75, DECODER_Y - 5);
-//        tft.print("(");
+        //        tft.print("(");
         tft.writeTo(L1);
         tft.print(1200L / (dahLength / 3));
         tft.writeTo(L1);
-//        tft.print(" WPM)");
+        //        tft.print(" WPM)");
         tft.setTextColor(RA8875_WHITE);
         tft.setFontScale((enum RA8875tsize)3);
         //Serial.printf("gapLength = %d thresholdGeometricMean = %f interElementGap = %d\n", gapLength, thresholdGeometricMean, interElementGap);
@@ -665,6 +629,8 @@ void JackClusteredArrayMax(int32_t *array, int32_t elements, int32_t *maxCount, 
     *maxIndex = clusteredIndex;
   }
 }
+
+
 /*****
   Purpose: This function creates a distribution of the dit and dahs lengths, expressed in
   milliseconds. The result is a bi-modal distribution around those two timings. The
@@ -735,6 +701,7 @@ FASTRUN void DoSignalHistogram(long val) {
     }
   }
 }
+
 
 /*****
   Purpose: Calculate Goertzel Algorithn to enable decoding CW

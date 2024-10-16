@@ -6,7 +6,7 @@ int8_t first_block = 1;
 uint8_t NB_on = 0;
 uint8_t wait_flag;
 float32_t audiotmp = 0.0f;
-float32_t audioSpectBuffer[1024]{0};  // This can't be DMAMEM.  It will break the S-Meter.  KF5N October 10, 2023
+float32_t audioSpectBuffer[1024]{ 0 };  // This can't be DMAMEM.  It will break the S-Meter.  KF5N October 10, 2023
 //float32_t* audioSpectBuffer = new float32_t[1024]{0};  // Assign to the heap.  Possibly breaking the S-meter?
 float32_t sample_meanL = 0.0;
 float32_t sample_meanR = 0.0;
@@ -38,9 +38,8 @@ arm_biquad_cascade_df2T_instance_f32 S1_CW_AudioFilter5 = { 6, CW_AudioFilter5_s
    Return value:
       void
  *****/
-void ProcessIQData()
-{
-  if (keyPressedOn == 1) { //AFP 09-01-22
+void ProcessIQData() {
+  if (keyPressedOn == 1) {  //AFP 09-01-22
     return;
   }
   /**********************************************************************************  AFP 12-31-20
@@ -55,54 +54,50 @@ void ProcessIQData()
   uint32_t AudioMaxIndex;
   float rfGainValue;
   int rfGain;
-//  float dataMax; 
-//  uint32_t dataMaxIndex;
 
   // Are there at least N_BLOCKS buffers in each channel available ?  N_BLOCKS should be 16.  Fill float_buffer_L/R[2048].
-  if ( (uint32_t) Q_in_L.available() > N_BLOCKS && (uint32_t) Q_in_R.available() > N_BLOCKS ) {     // Removed addition of 0 to N_BLOCKS.
+  if (static_cast<uint32_t>(Q_in_L.available()) > N_BLOCKS && static_cast<uint32_t>(Q_in_R.available()) > N_BLOCKS) {  // Removed addition of 0 to N_BLOCKS.
     usec = 0;
     // Get audio samples from the audio  buffers and convert them to float.
     // Read in 16 blocks and 128 samples in I and Q.  16 * 128 = 2048  (N_BLOCKS = 16)
     for (unsigned i = 0; i < N_BLOCKS; i++) {
-//      sp_L1 = Q_in_R.readBuffer();      // Teensy Audio component:  AudioRecordQueue, part of receiver.
-//      sp_R1 = Q_in_L.readBuffer();      // Why does R go into L and L go into R???
       // Find the maximum value and record.
-    //  void arm_absmax_q15	(	const q15_t * 	pSrc, uint32_t 	blockSize, q15_t * 	pResult, uint32_t * 	pIndex);
+      //  void arm_absmax_q15	(	const q15_t * 	pSrc, uint32_t 	blockSize, q15_t * 	pResult, uint32_t * 	pIndex);
       /**********************************************************************************  AFP 12-31-20
           Using arm_Math library, convert to float one buffer_size.
           Float_buffer samples are now standardized from > -1.0 to < 1.0
       **********************************************************************************/
-      arm_q15_to_float(Q_in_R.readBuffer(), &float_buffer_L[BUFFER_SIZE * i], BUFFER_SIZE); // convert int_buffer to float 32bit.  BUFFER_SIZE = 128.
-      arm_q15_to_float(Q_in_L.readBuffer(), &float_buffer_R[BUFFER_SIZE * i], BUFFER_SIZE); // convert int_buffer to float 32bit
+      arm_q15_to_float(Q_in_R.readBuffer(), &float_buffer_L[BUFFER_SIZE * i], BUFFER_SIZE);  // convert int_buffer to float 32bit.  BUFFER_SIZE = 128.
+      arm_q15_to_float(Q_in_L.readBuffer(), &float_buffer_R[BUFFER_SIZE * i], BUFFER_SIZE);  // convert int_buffer to float 32bit
       Q_in_L.freeBuffer();
       Q_in_R.freeBuffer();
     }  // end for loop
 
-    if (keyPressedOn == 1) { //AFP 09-01-22.  Bail out if transmitting but ignore in AM mode.
+    if (keyPressedOn == 1) {  //AFP 09-01-22.  Bail out if transmitting but ignore in AM mode.
       return;
     }
     // Set frequency here only to minimize interruption to signal stream during tuning.
     // This code was unnecessary in the revised tuning scheme.  KF5N July 22, 2023
-    if (centerTuneFlag == 1) { //AFP 10-04-22
+    if (centerTuneFlag == 1) {  //AFP 10-04-22
       DrawBandWidthIndicatorBar();
       ShowFrequency();
-    }                       //AFP 10-04-22
-    centerTuneFlag = 0;     //AFP 10-04-22
+    }                    //AFP 10-04-22
+    centerTuneFlag = 0;  //AFP 10-04-22
     if (resetTuningFlag == 1) {
       ResetTuning();
     }
     resetTuningFlag = 0;
 
     //  Set RFGain for all bands.
-    if(EEPROMData.autoGain) rfGain = EEPROMData.rfGainCurrent;   // Auto-gain
-       else rfGain = EEPROMData.rfGain[EEPROMData.currentBand];  // Manual gain adjust.
-    rfGainValue = pow(10, (float)rfGain / 20) * 4.0;  // KF5N January 16 2024
-    arm_scale_f32 (float_buffer_L, rfGainValue, float_buffer_L, BUFFER_SIZE * N_BLOCKS); //AFP 09-27-22
-    arm_scale_f32 (float_buffer_R, rfGainValue, float_buffer_R, BUFFER_SIZE * N_BLOCKS); //AFP 09-27-22
-    arm_clip_f32	(float_buffer_L, float_buffer_L, -1.0, 1.0, 2048);
-    arm_clip_f32	(float_buffer_R, float_buffer_R, -1.0, 1.0, 2048);
-//    arm_max_f32(float_buffer_L, 2048, &dataMax, &dataMaxIndex);
-//    Serial.printf("dataMax = %f\n", dataMax);
+    if (EEPROMData.autoGain) rfGain = EEPROMData.rfGainCurrent;                          // Auto-gain
+    else rfGain = EEPROMData.rfGain[EEPROMData.currentBand];                             // Manual gain adjust.
+    rfGainValue = pow(10, (float)rfGain / 20) * 4.0;                                     // KF5N January 16 2024
+    arm_scale_f32(float_buffer_L, rfGainValue, float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 09-27-22
+    arm_scale_f32(float_buffer_R, rfGainValue, float_buffer_R, BUFFER_SIZE * N_BLOCKS);  //AFP 09-27-22
+    arm_clip_f32(float_buffer_L, float_buffer_L, -1.0, 1.0, 2048);
+    arm_clip_f32(float_buffer_R, float_buffer_R, -1.0, 1.0, 2048);
+    //    arm_max_f32(float_buffer_L, 2048, &dataMax, &dataMaxIndex);
+    //    Serial.printf("dataMax = %f\n", dataMax);
     /**********************************************************************************  AFP 12-31-20
         Remove DC offset to reduce central spike.  First read the Mean value of
         left and right channels.  Then fill L and R correction arrays with those Means
@@ -122,15 +117,15 @@ void ProcessIQData()
 
     arm_biquad_cascade_df2T_f32(&s1_Receive, float_buffer_L, float_buffer_L, 2048); //AFP 09-23-22
     arm_biquad_cascade_df2T_f32(&s1_Receive, float_buffer_R, float_buffer_R, 2048); //AFP 09-23-22*/
-    arm_biquad_cascade_df2T_f32(&s1_Receive2, float_buffer_L, float_buffer_L, 2048); //AFP 11-03-22
-    arm_biquad_cascade_df2T_f32(&s1_Receive2, float_buffer_R, float_buffer_R, 2048); //AFP 11-03-22
+    arm_biquad_cascade_df2T_f32(&s1_Receive2, float_buffer_L, float_buffer_L, 2048);  //AFP 11-03-22
+    arm_biquad_cascade_df2T_f32(&s1_Receive2, float_buffer_R, float_buffer_R, 2048);  //AFP 11-03-22
 
     /**********************************************************************************  AFP 12-31-20
         Scale the data buffers by the RFgain value defined in bands[EEPROMData.currentBand] structure
     **********************************************************************************/
     // This gain scaling is not necessary.  It is assumed that Auto-gain and AGC will appropriately scale the incoming signal data.
-//    arm_scale_f32 (float_buffer_L, bands[EEPROMData.currentBand].RFgain, float_buffer_L, BUFFER_SIZE * N_BLOCKS); //AFP 09-23-22
-//    arm_scale_f32 (float_buffer_R, bands[EEPROMData.currentBand].RFgain, float_buffer_R, BUFFER_SIZE * N_BLOCKS); //AFP 09-23-22
+    //    arm_scale_f32 (float_buffer_L, bands[EEPROMData.currentBand].RFgain, float_buffer_L, BUFFER_SIZE * N_BLOCKS); //AFP 09-23-22
+    //    arm_scale_f32 (float_buffer_R, bands[EEPROMData.currentBand].RFgain, float_buffer_R, BUFFER_SIZE * N_BLOCKS); //AFP 09-23-22
 
     /**********************************************************************************  AFP 12-31-20
       Clear Buffers
@@ -141,12 +136,12 @@ void ProcessIQData()
       **********************************************************************************/
     if (Q_in_L.available() > 25) {
       Q_in_L.clear();
-    //  n_clear++; // just for debugging to check how often this occurs
+      //  n_clear++; // just for debugging to check how often this occurs
       AudioInterrupts();
     }
     if (Q_in_R.available() > 25) {
       Q_in_R.clear();
-    //  n_clear++; // just for debugging to check how often this occurs
+      //  n_clear++; // just for debugging to check how often this occurs
       AudioInterrupts();
     }
     /**********************************************************************************  AFP 12-31-20
@@ -156,19 +151,18 @@ void ProcessIQData()
     ***********************************************************************************************/
 
     // Manual IQ amplitude correction
-    // to be honest: we only correct the amplitude of the I channel ;-)
     if (bands[EEPROMData.currentBand].mode == DEMOD_LSB || bands[EEPROMData.currentBand].mode == DEMOD_AM || bands[EEPROMData.currentBand].mode == DEMOD_SAM) {
-      arm_scale_f32 (float_buffer_L, -EEPROMData.IQAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS); //AFP 04-14-22
-      IQPhaseCorrection(float_buffer_L, float_buffer_R, EEPROMData.IQPhaseCorrectionFactor[EEPROMData.currentBand], BUFFER_SIZE * N_BLOCKS);
+      arm_scale_f32(float_buffer_L, -EEPROMData.IQRXAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
+      IQPhaseCorrection(float_buffer_L, float_buffer_R, EEPROMData.IQRXPhaseCorrectionFactor[EEPROMData.currentBand], BUFFER_SIZE * N_BLOCKS);
     } else {
       if (bands[EEPROMData.currentBand].mode == DEMOD_USB || bands[EEPROMData.currentBand].mode == DEMOD_AM || bands[EEPROMData.currentBand].mode == DEMOD_SAM) {
-        arm_scale_f32 (float_buffer_L, -EEPROMData.IQAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS); //AFP 04-14-22
-        IQPhaseCorrection(float_buffer_L, float_buffer_R, EEPROMData.IQPhaseCorrectionFactor[EEPROMData.currentBand], BUFFER_SIZE * N_BLOCKS);
+        arm_scale_f32(float_buffer_L, -EEPROMData.IQRXAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
+        IQPhaseCorrection(float_buffer_L, float_buffer_R, EEPROMData.IQRXPhaseCorrectionFactor[EEPROMData.currentBand], BUFFER_SIZE * N_BLOCKS);
       }
     }
 
     display_S_meter_or_spectrum_state++;
-    if ( keyPressedOn == 1) { ////AFP 09-01-22.  Is this a duplicate here???
+    if (keyPressedOn == 1) {  ////AFP 09-01-22.  Is this a duplicate here???
       return;
     }
 
@@ -201,10 +195,10 @@ void ProcessIQData()
         Spectrum Zoom uses the shifted spectrum, so the center "hump" around DC is shifted by fs/4
     **********************************************************************************/
 
-    if((EEPROMData.spectrum_zoom == 1) && (updateDisplayCounter == 1))  ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
-    if((EEPROMData.spectrum_zoom == 2) && (updateDisplayCounter < 2))  ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
-    if((EEPROMData.spectrum_zoom == 3) && (updateDisplayCounter < 4))  ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
-    if((EEPROMData.spectrum_zoom == 4) && (updateDisplayCounter < 8))  ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
+    if ((EEPROMData.spectrum_zoom == 1) && (updateDisplayCounter == 1)) ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
+    if ((EEPROMData.spectrum_zoom == 2) && (updateDisplayCounter < 2)) ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
+    if ((EEPROMData.spectrum_zoom == 3) && (updateDisplayCounter < 4)) ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
+    if ((EEPROMData.spectrum_zoom == 4) && (updateDisplayCounter < 8)) ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
 
     /**********************************************************************************  AFP 12-31-20
         S-Meter & dBm-display ?? not usually called
@@ -250,6 +244,7 @@ void ProcessIQData()
     arm_fir_decimate_f32(&FIR_dec2_I, float_buffer_L, float_buffer_L, BUFFER_SIZE * N_BLOCKS / (uint32_t)DF1);
     arm_fir_decimate_f32(&FIR_dec2_Q, float_buffer_R, float_buffer_R, BUFFER_SIZE * N_BLOCKS / (uint32_t)DF1);
 
+<<<<<<< HEAD
     /* =================  AFP 10-21-22 Level Adjust ===========
     float freqKHzFcut;
     float volScaleFactor;
@@ -263,6 +258,8 @@ void ProcessIQData()
     arm_scale_f32(float_buffer_R, volScaleFactor, float_buffer_R, FFT_length / 2);
     */
 
+=======
+>>>>>>> mainboard2
     /**********************************************************************************  AFP 12-31-20
         Digital FFT convolution
         Filtering is accomplished by combining (multiplying) spectra in the frequency domain.
@@ -277,7 +274,7 @@ void ProcessIQData()
     // Prepare the audio signal buffers:
     // ONLY FOR the VERY FIRST FFT: fill first samples with zeros
 
-    if (first_block) { // Fill real & imaginaries with zeros for the first BLOCKSIZE samples.
+    if (first_block) {  // Fill real & imaginaries with zeros for the first BLOCKSIZE samples.
       for (unsigned i = 0; i < BUFFER_SIZE * N_BLOCKS / (uint32_t)(DF / 2.0); i++) {
         FFT_buffer[i] = 0.0;
       }
@@ -286,19 +283,19 @@ void ProcessIQData()
 
       // Fill FFT_buffer with last events audio samples for all other FFT instances.
       for (unsigned i = 0; i < BUFFER_SIZE * N_BLOCKS / (uint32_t)(DF); i++) {
-        FFT_buffer[i * 2] = last_sample_buffer_L[i]; // real
-        FFT_buffer[i * 2 + 1] = last_sample_buffer_R[i]; // imaginary
+        FFT_buffer[i * 2] = last_sample_buffer_L[i];      // real
+        FFT_buffer[i * 2 + 1] = last_sample_buffer_R[i];  // imaginary
       }
 
-    for (unsigned i = 0; i < BUFFER_SIZE * N_BLOCKS / (uint32_t)(DF); i++) {   // Copy recent samples to last_sample_buffer for next time!
-      last_sample_buffer_L [i] = float_buffer_L[i];
-      last_sample_buffer_R [i] = float_buffer_R[i];
+    for (unsigned i = 0; i < BUFFER_SIZE * N_BLOCKS / (uint32_t)(DF); i++) {  // Copy recent samples to last_sample_buffer for next time!
+      last_sample_buffer_L[i] = float_buffer_L[i];
+      last_sample_buffer_R[i] = float_buffer_R[i];
     }
 
     //------------------------------ now fill recent audio samples into FFT_buffer (left channel: re, right channel: im)
     for (unsigned i = 0; i < BUFFER_SIZE * N_BLOCKS / (uint32_t)(DF); i++) {
-      FFT_buffer[FFT_length + i * 2] = float_buffer_L[i]; // real
-      FFT_buffer[FFT_length + i * 2 + 1] = float_buffer_R[i]; // imaginary
+      FFT_buffer[FFT_length + i * 2] = float_buffer_L[i];      // real
+      FFT_buffer[FFT_length + i * 2 + 1] = float_buffer_R[i];  // imaginary
     }
 
     /**********************************************************************************  AFP 12-31-20
@@ -317,25 +314,24 @@ void ProcessIQData()
           FIR_filter_mask[]
      **********************************************************************************/
 
-    arm_cmplx_mult_cmplx_f32 (FFT_buffer, FIR_filter_mask, iFFT_buffer, FFT_length);
+    arm_cmplx_mult_cmplx_f32(FFT_buffer, FIR_filter_mask, iFFT_buffer, FFT_length);
     if (updateDisplayFlag == 1) {
       for (int k = 0; k < 1024; k++) {
         audioSpectBuffer[1024 - k] = (iFFT_buffer[k] * iFFT_buffer[k]);
       }
       for (int k = 3; k < 256; k++) {
-        if (bands[EEPROMData.currentBand].mode == 0  || bands[EEPROMData.currentBand].mode == DEMOD_AM || bands[EEPROMData.currentBand].mode == DEMOD_SAM) {  //AFP 10-26-22
+        if (bands[EEPROMData.currentBand].mode == 0 || bands[EEPROMData.currentBand].mode == DEMOD_AM || bands[EEPROMData.currentBand].mode == DEMOD_SAM) {  //AFP 10-26-22
           //audioYPixel[k] = 20+  map((int)displayScale[EEPROMData.currentScale].dBScale * log10f((audioSpectBuffer[1024 - k] + audioSpectBuffer[1024 - k + 1] + audioSpectBuffer[1024 - k + 2]) / 3), 0, 100, 0, 120);
-          audioYPixel[k] = 50 +  map(15 * log10f((audioSpectBuffer[1024 - k] + audioSpectBuffer[1024 - k + 1] + audioSpectBuffer[1024 - k + 2]) / 3), 0, 100, 0, 120);
-        }
-        else if (bands[EEPROMData.currentBand].mode == 1) {//AFP 10-26-22
+          audioYPixel[k] = 50 + map(15 * log10f((audioSpectBuffer[1024 - k] + audioSpectBuffer[1024 - k + 1] + audioSpectBuffer[1024 - k + 2]) / 3), 0, 100, 0, 120);
+        } else if (bands[EEPROMData.currentBand].mode == 1) {  //AFP 10-26-22
           //audioYPixel[k] = 20+   map((int)displayScale[EEPROMData.currentScale].dBScale * log10f((audioSpectBuffer[k] + audioSpectBuffer[k + 1] + audioSpectBuffer[k + 2]) / 3), 0, 100, 0, 120);
-          audioYPixel[k] = 50 +   map(15 * log10f((audioSpectBuffer[k] + audioSpectBuffer[k + 1] + audioSpectBuffer[k + 2]) / 3), 0, 100, 0, 120);
+          audioYPixel[k] = 50 + map(15 * log10f((audioSpectBuffer[k] + audioSpectBuffer[k + 1] + audioSpectBuffer[k + 2]) / 3), 0, 100, 0, 120);
         }
         if (audioYPixel[k] < 0)
           audioYPixel[k] = 0;
       }
-      arm_max_f32 (audioSpectBuffer, 1024, &audioMaxSquared, &AudioMaxIndex);  // AFP 09-18-22 Max value of squared abin magnitued in audio
-      audioMaxSquaredAve = .5 * audioMaxSquared + .5 * audioMaxSquaredAve;  //AFP 09-18-22Running averaged values
+      arm_max_f32(audioSpectBuffer, 1024, &audioMaxSquared, &AudioMaxIndex);  // AFP 09-18-22 Max value of squared abin magnitued in audio
+      audioMaxSquaredAve = .5 * audioMaxSquared + .5 * audioMaxSquaredAve;    //AFP 09-18-22Running averaged values
       DisplaydbM();
       DisplayAGC();
     }
@@ -366,7 +362,6 @@ void ProcessIQData()
     arm_cfft_f32(iS, iFFT_buffer, 1, 1);
 
     // Adjust for level alteration because of filters.
-
     /**********************************************************************************  AFP 12-31-20
         AGC - automatic gain control
 
@@ -383,7 +378,7 @@ void ProcessIQData()
     //===================== AFP 10-27-22  =========
 
     switch (bands[EEPROMData.currentBand].mode) {
-      case DEMOD_LSB :
+      case DEMOD_LSB:
         for (unsigned i = 0; i < FFT_length / 2; i++) {
           //if (bands[EEPROMData.currentBand].mode == DEMOD_USB || bands[EEPROMData.currentBand].mode == DEMOD_LSB ) {  // for SSB copy real part in both outputs
           float_buffer_L[i] = iFFT_buffer[FFT_length + (i * 2)];
@@ -392,7 +387,7 @@ void ProcessIQData()
           //}
         }
         break;
-      case DEMOD_USB :
+      case DEMOD_USB:
         for (unsigned i = 0; i < FFT_length / 2; i++) {
           // if (bands[EEPROMData.currentBand].mode == DEMOD_USB || bands[EEPROMData.currentBand].mode == DEMOD_LSB ) {  // for SSB copy real part in both outputs
           float_buffer_L[i] = iFFT_buffer[FFT_length + (i * 2)];
@@ -403,25 +398,25 @@ void ProcessIQData()
         }
 
         break;
-      case DEMOD_AM :
-        for (unsigned i = 0; i < FFT_length / 2; i++) {     // Magnitude estimation Lyons (2011): page 652 / libcsdr
+      case DEMOD_AM:
+        for (unsigned i = 0; i < FFT_length / 2; i++) {  // Magnitude estimation Lyons (2011): page 652 / libcsdr
           audiotmp = AlphaBetaMag(iFFT_buffer[FFT_length + (i * 2)], iFFT_buffer[FFT_length + (i * 2) + 1]);
           // DC removal filter -----------------------
-          w = audiotmp + wold * 0.99f; // Response to below 200Hz AFP 10-30-22
+          w = audiotmp + wold * 0.99f;  // Response to below 200Hz AFP 10-30-22
           float_buffer_L[i] = w - wold;
           wold = w;
         }
-        arm_biquad_cascade_df1_f32 (&biquad_lowpass1, float_buffer_L, float_buffer_R, FFT_length / 2);
+        arm_biquad_cascade_df1_f32(&biquad_lowpass1, float_buffer_L, float_buffer_R, FFT_length / 2);
         arm_copy_f32(float_buffer_R, float_buffer_L, FFT_length / 2);
         break;
-        case DEMOD_SAM : //AFP 11-03-22
+      case DEMOD_SAM:  //AFP 11-03-22
         AMDecodeSAM();
-        break;       
+        break;
     }
-    
+
 
     //============================  Receive EQ  ========================  AFP 08-08-22
-    if (EEPROMData.receiveEQFlag == ON ) {
+    if (EEPROMData.receiveEQFlag) {
       DoReceiveEQ();
       arm_copy_f32(float_buffer_L, float_buffer_R, FFT_length / 2);
     }
@@ -435,29 +430,28 @@ void ProcessIQData()
       LMS variable leak NR
     **********************************************************************************/
     switch (NR_Index) {
-      case 0:                               // NR Off
+      case 0:  // NR Off
         break;
-      case 1:                               // Kim NR
+      case 1:  // Kim NR
         Kim1_NR();
-        arm_scale_f32 (float_buffer_L, 2.0, float_buffer_L, FFT_length / 2);  // Scaling factor reduced; was blasting speaker.  KF5N February 20, 2024.
-        arm_scale_f32 (float_buffer_R, 2.0, float_buffer_R, FFT_length / 2);
+        arm_scale_f32(float_buffer_L, 2.0, float_buffer_L, FFT_length / 2);  // Scaling factor reduced; was blasting speaker.  KF5N February 20, 2024.
+        arm_scale_f32(float_buffer_R, 2.0, float_buffer_R, FFT_length / 2);
         break;
-      case 2:                               // Spectral NR
+      case 2:  // Spectral NR
         SpectralNoiseReduction();
-        arm_scale_f32 (float_buffer_L, 2.0, float_buffer_L, FFT_length / 2);  // Scaling factor reduced; was blasting speaker.  KF5N February 20, 2024.
-        arm_scale_f32 (float_buffer_R, 2.0, float_buffer_R, FFT_length / 2);
+        arm_scale_f32(float_buffer_L, 2.0, float_buffer_L, FFT_length / 2);  // Scaling factor reduced; was blasting speaker.  KF5N February 20, 2024.
+        arm_scale_f32(float_buffer_R, 2.0, float_buffer_R, FFT_length / 2);
         break;
-      case 3:                               // LMS NR.  KF5N March 2, 2024.
+      case 3:  // LMS NR.  KF5N March 2, 2024.
         Xanr();
-//        arm_scale_f32 (float_buffer_L, 1.5, float_buffer_L, FFT_length / 2);  // Why is scaling different???
-          arm_scale_f32 (float_buffer_R, 4.0, float_buffer_R, FFT_length / 2);  // Attempt to equalize gains for all NR algorithms.  Greg KF5N June 24, 2024.
-          arm_copy_f32(float_buffer_R, float_buffer_L, FFT_length / 2);  //  This is apparently required by the algorithm; it works on right channel only.
+        //        arm_scale_f32 (float_buffer_L, 1.5, float_buffer_L, FFT_length / 2);  // Why is scaling different???
+        arm_scale_f32(float_buffer_R, 4.0, float_buffer_R, FFT_length / 2);  // Attempt to equalize gains for all NR algorithms.  Greg KF5N June 24, 2024.
+        arm_copy_f32(float_buffer_R, float_buffer_L, FFT_length / 2);        //  This is apparently required by the algorithm; it works on right channel only.
         break;
-
     }
     //==================  End NR ============================
     // ===========================Automatic Notch ==================
-    if (ANR_notch) {    // KF5N March 2, 2024.
+    if (ANR_notch) {  // KF5N March 2, 2024.
       Xanr();
       arm_copy_f32(float_buffer_R, float_buffer_L, FFT_length / 2);  //  This is apparently required by the algorithm; it works on right channel only.
     }
@@ -467,40 +461,40 @@ void ProcessIQData()
       by Michael Wild
     **********************************************************************************/
 
-    if (NB_on != 0) {     
-     NoiseBlanker(float_buffer_L, float_buffer_R);
+    if (NB_on != 0) {
+      NoiseBlanker(float_buffer_L, float_buffer_R);
       arm_copy_f32(float_buffer_R, float_buffer_L, FFT_length / 2);
     }
- 
-    if (T41State == CW_RECEIVE) {
-      DoCWReceiveProcessing(); //AFP 09-19-22
+
+    if (radioMode == RadioMode::CW_MODE) {
+      DoCWReceiveProcessing();  //AFP 09-19-22
 
       // ----------------------  CW Narrow band filters  AFP 10-18-22 -------------------------
       if (EEPROMData.CWFilterIndex != 5) {
         switch (EEPROMData.CWFilterIndex) {
-          case 0:  // 0.8 KHz
-            arm_biquad_cascade_df2T_f32(&S1_CW_AudioFilter1, float_buffer_L, float_buffer_L_AudioCW, 256);//AFP 10-18-22
-            arm_copy_f32(float_buffer_L_AudioCW, float_buffer_L, FFT_length / 2);                         //AFP 10-18-22
+          case 0:                                                                                           // 0.8 KHz
+            arm_biquad_cascade_df2T_f32(&S1_CW_AudioFilter1, float_buffer_L, float_buffer_L_AudioCW, 256);  //AFP 10-18-22
+            arm_copy_f32(float_buffer_L_AudioCW, float_buffer_L, FFT_length / 2);                           //AFP 10-18-22
             arm_copy_f32(float_buffer_L_AudioCW, float_buffer_R, FFT_length / 2);
             break;
-          case 1: // 1.0 KHz
-            arm_biquad_cascade_df2T_f32(&S1_CW_AudioFilter2, float_buffer_L, float_buffer_L_AudioCW, 256);//AFP 10-18-22
-            arm_copy_f32(float_buffer_L_AudioCW, float_buffer_L, FFT_length / 2);                         //AFP 10-18-22
+          case 1:                                                                                           // 1.0 KHz
+            arm_biquad_cascade_df2T_f32(&S1_CW_AudioFilter2, float_buffer_L, float_buffer_L_AudioCW, 256);  //AFP 10-18-22
+            arm_copy_f32(float_buffer_L_AudioCW, float_buffer_L, FFT_length / 2);                           //AFP 10-18-22
             arm_copy_f32(float_buffer_L_AudioCW, float_buffer_R, FFT_length / 2);
             break;
-          case 2: // 1.3 KHz
-            arm_biquad_cascade_df2T_f32(&S1_CW_AudioFilter3, float_buffer_L, float_buffer_L_AudioCW, 256);//AFP 10-18-22
-            arm_copy_f32(float_buffer_L_AudioCW, float_buffer_L, FFT_length / 2);                         //AFP 10-18-22
+          case 2:                                                                                           // 1.3 KHz
+            arm_biquad_cascade_df2T_f32(&S1_CW_AudioFilter3, float_buffer_L, float_buffer_L_AudioCW, 256);  //AFP 10-18-22
+            arm_copy_f32(float_buffer_L_AudioCW, float_buffer_L, FFT_length / 2);                           //AFP 10-18-22
             arm_copy_f32(float_buffer_L_AudioCW, float_buffer_R, FFT_length / 2);
             break;
-          case 3: // 1.8 KHz
-            arm_biquad_cascade_df2T_f32(&S1_CW_AudioFilter4, float_buffer_L, float_buffer_L_AudioCW, 256);//AFP 10-18-22
-            arm_copy_f32(float_buffer_L_AudioCW, float_buffer_L, FFT_length / 2);                         //AFP 10-18-22
+          case 3:                                                                                           // 1.8 KHz
+            arm_biquad_cascade_df2T_f32(&S1_CW_AudioFilter4, float_buffer_L, float_buffer_L_AudioCW, 256);  //AFP 10-18-22
+            arm_copy_f32(float_buffer_L_AudioCW, float_buffer_L, FFT_length / 2);                           //AFP 10-18-22
             arm_copy_f32(float_buffer_L_AudioCW, float_buffer_R, FFT_length / 2);
             break;
-          case 4:  // 2.0 KHz
-            arm_biquad_cascade_df2T_f32(&S1_CW_AudioFilter5, float_buffer_L, float_buffer_L_AudioCW, 256);//AFP 10-18-22
-            arm_copy_f32(float_buffer_L_AudioCW, float_buffer_L, FFT_length / 2);                         //AFP 10-18-22
+          case 4:                                                                                           // 2.0 KHz
+            arm_biquad_cascade_df2T_f32(&S1_CW_AudioFilter5, float_buffer_L, float_buffer_L_AudioCW, 256);  //AFP 10-18-22
+            arm_copy_f32(float_buffer_L_AudioCW, float_buffer_L, FFT_length / 2);                           //AFP 10-18-22
             arm_copy_f32(float_buffer_L_AudioCW, float_buffer_R, FFT_length / 2);
             break;
           case 5:  //Off
@@ -510,61 +504,41 @@ void ProcessIQData()
     }
 
     // ======================================Interpolation  ================
-//  Right channel audio deactivated.  KF5N March 11, 2024
-    arm_fir_interpolate_f32(&FIR_int1_I, float_buffer_L, iFFT_buffer, BUFFER_SIZE * N_BLOCKS / (uint32_t)(DF));   // Interpolatikon
-//    arm_fir_interpolate_f32(&FIR_int1_Q, float_buffer_R, FFT_buffer, BUFFER_SIZE * N_BLOCKS / (uint32_t)(DF));
+    //  Right channel audio deactivated.  KF5N March 11, 2024
+    arm_fir_interpolate_f32(&FIR_int1_I, float_buffer_L, iFFT_buffer, BUFFER_SIZE * N_BLOCKS / (uint32_t)(DF));  // Interpolatikon
 
     // interpolation-by-4
     arm_fir_interpolate_f32(&FIR_int2_I, iFFT_buffer, float_buffer_L, BUFFER_SIZE * N_BLOCKS / (uint32_t)(DF1));
-//    arm_fir_interpolate_f32(&FIR_int2_Q, FFT_buffer, float_buffer_R, BUFFER_SIZE * N_BLOCKS / (uint32_t)(DF1));
 
     /**********************************************************************************  AFP 12-31-20
       Digital Volume Control
     **********************************************************************************/
 
-    if (mute == 1) {
-      arm_scale_f32(float_buffer_L, 0.0, float_buffer_L, BUFFER_SIZE * N_BLOCKS);
-//      arm_scale_f32(float_buffer_R, 0.0, float_buffer_R, BUFFER_SIZE * N_BLOCKS);
-    } else if (mute == 0) {
-      arm_scale_f32(float_buffer_L, 20.0, float_buffer_L, BUFFER_SIZE * N_BLOCKS);  // Set scaling constant to optimize volume control range.
-//      arm_scale_f32(float_buffer_R, DF * volumeLog[EEPROMData.audioVolume] * 4, float_buffer_R, BUFFER_SIZE * N_BLOCKS);
-    }
+    //    if (mute == 1) {
+    //      arm_scale_f32(float_buffer_L, 0.0, float_buffer_L, BUFFER_SIZE * N_BLOCKS);
+    //      arm_scale_f32(float_buffer_R, 0.0, float_buffer_R, BUFFER_SIZE * N_BLOCKS);
+    //    } else if (mute == 0) {
+    arm_scale_f32(float_buffer_L, AUDIOSCALE, float_buffer_L, BUFFER_SIZE * N_BLOCKS);  // Set scaling constant to optimize volume control range.
+                                                                                        //      arm_scale_f32(float_buffer_R, DF * volumeLog[EEPROMData.audioVolume] * 4, float_buffer_R, BUFFER_SIZE * N_BLOCKS);
+                                                                                        //    }
     /**********************************************************************************  AFP 12-31-20
       CONVERT TO INTEGER AND PLAY AUDIO
     **********************************************************************************/
-    
+
     q15_t q15_buffer_LTemp[2048];  //KF5N
-//    q15_t q15_buffer_RTemp[2048];  // KF5N  Unused audio channel deactivated.
-//    Q_out_L.setBehaviour(AudioPlayQueue::NON_STALLING);
-//    Q_out_R.setBehaviour(AudioPlayQueue::NON_STALLING);
-    arm_float_to_q15 (float_buffer_L, q15_buffer_LTemp, 2048);
-//    arm_float_to_q15 (float_buffer_R, q15_buffer_RTemp, 2048);  Unused audio channel deactivated.
+                                   //    q15_t q15_buffer_RTemp[2048];  // KF5N  Unused audio channel deactivated.
+                                   //    Q_out_L.setBehaviour(AudioPlayQueue::NON_STALLING);
+                                   //    Q_out_R.setBehaviour(AudioPlayQueue::NON_STALLING);
+    arm_float_to_q15(float_buffer_L, q15_buffer_LTemp, 2048);
+    //    arm_float_to_q15 (float_buffer_R, q15_buffer_RTemp, 2048);  Unused audio channel deactivated.
     Q_out_L.play(q15_buffer_LTemp, 2048);
-//    Q_out_R.play(q15_buffer_RTemp, 2048);  Unused audio channel deactivated.
-
-//    Q_out_L.setBehaviour(AudioPlayQueue::ORIGINAL);
-//    Q_out_R.setBehaviour(AudioPlayQueue::ORIGINAL);
-/*
-    for (unsigned  i = 0; i < N_BLOCKS; i++) {
-//      sp_L1 = Q_out_L.getBuffer();
-//      sp_R1 = Q_out_R.getBuffer();
-      arm_float_to_q15 (&float_buffer_L[BUFFER_SIZE * i], Q_out_L.getBuffer(), BUFFER_SIZE);
-      arm_float_to_q15 (&float_buffer_R[BUFFER_SIZE * i], Q_out_R.getBuffer(), BUFFER_SIZE);
-      Q_out_L.playBuffer(); // play it !
-      Q_out_R.playBuffer(); // play it !
-    }
-    */
-
-
-//      Codec_gain();
 
     elapsed_micros_sum = elapsed_micros_sum + usec;
     elapsed_micros_idx_t++;
-  } // end of if(audio blocks available)
-  if (ms_500.check() == 1)                                  // For clock updates AFP 10-26-22
+  }                         // end of if(audio blocks available)
+  if (ms_500.check() == 1)  // For clock updates AFP 10-26-22
   {
     //wait_flag = 0;
     DisplayClock();
   }
-    
 }

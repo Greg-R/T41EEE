@@ -1,8 +1,6 @@
 
 #include "SDT.h"
 
-PROGMEM int16_t currentMode;
-
 /*****
   Purpose: To save the configuration data (working variables) to EEPROM.
            Skip 4 bytes to allow for the struct size variable.
@@ -13,7 +11,7 @@ PROGMEM int16_t currentMode;
   Return value;
     void
 *****/
-FLASHMEM void EEPROMWrite() {
+void Eeprom::EEPROMWrite() {
   EEPROM.put(EEPROM_BASE_ADDRESS + 4, EEPROMData);
 }
 
@@ -27,7 +25,7 @@ FLASHMEM void EEPROMWrite() {
   Return value;
     void
 *****/
-FLASHMEM void EEPROMRead() {
+void Eeprom::EEPROMRead() {
   EEPROM.get(EEPROM_BASE_ADDRESS + 4, EEPROMData);  // Read as one large chunk
 }
 
@@ -41,7 +39,7 @@ FLASHMEM void EEPROMRead() {
   Return value;
     void
 *****/
-FLASHMEM void EEPROMWriteSize(int structSize) {
+void Eeprom::EEPROMWriteSize(int structSize) {
   EEPROM.put(EEPROM_BASE_ADDRESS, structSize);  // Read as one large chunk
 }
 
@@ -55,7 +53,7 @@ FLASHMEM void EEPROMWriteSize(int structSize) {
   Return value;
     void
 *****/
-FLASHMEM int EEPROMReadSize() {
+int Eeprom::EEPROMReadSize() {
   int structSize;
   EEPROM.get(EEPROM_BASE_ADDRESS, structSize);  // Read as one large chunk
   return structSize;
@@ -71,12 +69,13 @@ FLASHMEM int EEPROMReadSize() {
   Return value;
     void
 *****/
-FLASHMEM void EEPROMStuffFavorites(unsigned long current[]) {
+void Eeprom::EEPROMStuffFavorites(unsigned long current[]) {
   int i;
   for (i = 0; i < MAX_FAVORITES; i++) {
     current[i] = EEPROMData.favoriteFreqs[i];
   }
 }
+
 
 /*****
   Purpose: Used to save a favortie frequency to EEPROM
@@ -92,9 +91,9 @@ FLASHMEM void EEPROMStuffFavorites(unsigned long current[]) {
            replace and press Select to save in EEPROM. The currently active VFO frequency
            is then stored to EEPROM.
 *****/
-FLASHMEM void SetFavoriteFrequency() {
+void Eeprom::SetFavoriteFrequency() {
   int index;
-  int val;
+  MenuSelect menu = MenuSelect::DEFAULT;
   tft.setFontScale((enum RA8875tsize)1);
   index = 0;
   tft.setTextColor(RA8875_WHITE);
@@ -116,10 +115,11 @@ FLASHMEM void SetFavoriteFrequency() {
       filterEncoderMove = 0;
     }
 
-    val = ReadSelectedPushButton();  // Read pin that controls all switches
-    val = ProcessButtonPress(val);
+//    val = ReadSelectedPushButton();  // Read pin that controls all switches
+//    val = ProcessButtonPress(val);
+menu = readButton();
     delay(150L);
-    if (val == MENU_OPTION_SELECT) {  // Make a choice??
+    if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
       EraseMenus();
       EEPROMData.favoriteFreqs[index] = TxRxFreq;
       //UpdateEEPROMSyncIndicator(0);       //  JJP 7/25/23
@@ -139,6 +139,7 @@ FLASHMEM void SetFavoriteFrequency() {
   }
 }
 
+
 /*****
   Purpose: Used to fetch a favortie frequency as stored in EEPROM. It then copies that
            frequency to the currently active VFO
@@ -148,9 +149,10 @@ FLASHMEM void SetFavoriteFrequency() {
   Return value;
     void
 *****/
-FLASHMEM void GetFavoriteFrequency() {
+void Eeprom::GetFavoriteFrequency() {
   int index = 0;
-  int val;
+//  int val;
+MenuSelect menu = MenuSelect::DEFAULT;
   int currentBand2 = 0;
   tft.setFontScale((enum RA8875tsize)1);
   tft.setTextColor(RA8875_WHITE);
@@ -172,9 +174,10 @@ FLASHMEM void GetFavoriteFrequency() {
       filterEncoderMove = 0;
     }
 
-    val = ReadSelectedPushButton();  // Read pin that controls all switches
-    val = ProcessButtonPress(val);
-    delay(150L);
+//    val = ReadSelectedPushButton();  // Read pin that controls all switches
+//    val = ProcessButtonPress(val);
+//    delay(150L);
+    menu = readButton();
 
     if (EEPROMData.centerFreq >= bands[BAND_80M].fBandLow && EEPROMData.centerFreq <= bands[BAND_80M].fBandHigh) {
       currentBand2 = BAND_80M;
@@ -199,7 +202,7 @@ FLASHMEM void GetFavoriteFrequency() {
     }
     EEPROMData.currentBand = currentBand2;
 
-    if (val == MENU_OPTION_SELECT) {  // Make a choice??
+    if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
       switch (EEPROMData.activeVFO) {
         case VFO_A:
           if (EEPROMData.currentBandA == NUMBER_OF_BANDS) {  // Incremented too far?
@@ -220,9 +223,9 @@ FLASHMEM void GetFavoriteFrequency() {
           break;
       }
     }
-    if (val == MENU_OPTION_SELECT) {
+    if (menu == MenuSelect::MENU_OPTION_SELECT) {
       EraseSpectrumDisplayContainer();
-      currentMode = bands[EEPROMData.currentBand].mode;
+//      currentMode = bands[EEPROMData.currentBand].mode;
       DrawSpectrumDisplayContainer();
       DrawFrequencyBarValue();
       SetBand();
@@ -250,13 +253,13 @@ FLASHMEM void GetFavoriteFrequency() {
   Purpose: To load into active memory the default settings for EEPROM variables.
 
   Parameter list:
-    struct defaultConfig       pointer to the default EEPROMData structure
+    none
 
   Return value;
     void
 *****/
 
-FLASHMEM void EEPROMDataDefaults() {
+void Eeprom::EEPROMDataDefaults() {
   struct config_t* defaultConfig = new config_t;  // Create a copy of the default configuration.
   EEPROMData = *defaultConfig;                    // Copy the defaults to EEPROMData struct.
   // Initialize the frequency setting based on the last used frequency stored to EEPROM.
@@ -274,7 +277,7 @@ FLASHMEM void EEPROMDataDefaults() {
   Return value;
     void
 *****/
-FLASHMEM void EEPROMStartup() {
+void Eeprom::EEPROMStartup() {
   int eepromStructSize;
   int stackStructSize;
   //  Determine if the struct EEPROMData is compatible (same size) with the one stored in EEPROM.

@@ -1,6 +1,9 @@
 
 #include "SDT.h"
 
+float32_t DMAMEM float_buffer_L_3[2048];
+float32_t DMAMEM float_buffer_R_3[2048];
+
 float32_t NCO_INC;
 double OSC_COS;
 double OSC_SIN;
@@ -55,6 +58,7 @@ void FreqShift1()
   // this is for -Fs/4 [moves receive frequency to the right in the spectrumdisplay]
 }
 
+
 /*****
   Purpose: Shift Receive frequency by an arbitrary amount
 
@@ -93,7 +97,6 @@ void FreqShift2()
    // SetFreq();           //AFP 10-04-22
    // ShowFrequency();
    // DrawBandWidthIndicatorBar();
-
     // ); //AFP 10-04-22
     // EncoderFineTune();      //AFP 10-04-22
 
@@ -113,10 +116,10 @@ void FreqShift2()
   //  ShowFrequency();
   //  DrawBandWidthIndicatorBar();
   //}
-  if (EEPROMData.xmtMode == SSB_MODE ) {
+  if (EEPROMData.xmtMode == RadioMode::SSB_MODE ) {
     sideToneShift = 0;
   } else {
-    if (EEPROMData.xmtMode == CW_MODE ) {
+    if (EEPROMData.xmtMode == RadioMode::CW_MODE ) {
       cwFreqOffset = (EEPROMData.CWOffset + 6) * 24000 / 256;
       if (bands[EEPROMData.currentBand].mode == 1) {
         sideToneShift = cwFreqOffset;  // KF5N experiment
@@ -127,7 +130,7 @@ void FreqShift2()
       }
     }
   }
-  NCO_INC = 2.0 * PI * (NCOFreq + sideToneShift) / 192000.0; //192000 SPS is the actual sample rate used in the Receive ADC
+  NCO_INC = 2.0 * PI * (NCOFreq + sideToneShift) / SR[SampleRate].rate; // 192000 SPS is the actual sample rate used in the Receive ADC
 
   OSC_COS = cos (NCO_INC);
   OSC_SIN = sin (NCO_INC);
