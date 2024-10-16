@@ -8,11 +8,7 @@
 // Updated PlotCalSpectrum() function to clean up graphics.  KF5N August 3, 2023
 // Major clean-up of calibration.  KF5N August 16, 2023
 
-//#include <vector>
-//#include <algorithm>
-
 const int MAX_FAVORITES = 13;  // Max number of favorite frequencies stored in EEPROM
-//int16_t currentMode;
 #define EEPROM_BASE_ADDRESS 0U
 
 class Eeprom {
