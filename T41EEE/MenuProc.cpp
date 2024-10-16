@@ -1,8 +1,6 @@
-<<<<<<< HEAD
+
 // CalibrateOptions
 // CWOptions
-
-=======
 // ShowMenu
 // Calibrate Options
 // CW Options
@@ -12,7 +10,6 @@
 // SSB Options
 // RF Options
 // EEPROM Options
->>>>>>> mainboard2
 
 #include "SDT.h"
 
@@ -399,11 +396,7 @@ void CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
       break;
 
     case 1:          // Type of key:
-<<<<<<< HEAD
-      SetKeyType();  // Straight key or keyer?
-=======
-      SetKeyType();  // Straight key or keyer? Stored in EEPROMData.EEPROMData.keyType.
->>>>>>> mainboard2
+      SetKeyType();  // Straight key or keyer? Stored in EEPROMData.keyType.
       SetKeyPowerUp();
       UpdateWPMField();
       break;
@@ -447,11 +440,7 @@ void SpectrumOptions() { /*
   dispSc displayScale[] =  //r *dbText,dBScale, baseOffset
   {
     {"20 dB/", 10.0, 24},
-<<<<<<< HEAD
-    {"10 dB/", 20.0, 10}
-=======
     {"10 dB/", 20.0, 10},  // JJP 7/14/23
->>>>>>> mainboard2
   };
   */
   const char *spectrumChoices[] = { "20 dB/unit", "10 dB/unit", "Cancel" };
@@ -891,13 +880,8 @@ void DoPaddleFlip() {
         }
         EraseMenus();
         UpdateWPMField();  // KD0RC
-<<<<<<< HEAD
-//        return;   Causing paddle flip to not be saved.  Greg KF5N September 9 2024.
-=======
         break;
->>>>>>> mainboard2
       }
-//    }
   }
   eeprom.EEPROMWrite();
 }

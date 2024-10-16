@@ -178,11 +178,7 @@ void ShowSpectrum() {
         FH_max_box = k;              // Index of FH_max.
       }
     }  
-<<<<<<< HEAD
-    }//  HB finish
-=======
     } //  HB finish
->>>>>>> mainboard2
 
     // Prevent spectrum from going below the bottom of the spectrum area.  KF5N
     if (y_new_plot > 247) y_new_plot = 247;

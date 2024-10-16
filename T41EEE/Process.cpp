@@ -244,22 +244,6 @@ void ProcessIQData() {
     arm_fir_decimate_f32(&FIR_dec2_I, float_buffer_L, float_buffer_L, BUFFER_SIZE * N_BLOCKS / (uint32_t)DF1);
     arm_fir_decimate_f32(&FIR_dec2_Q, float_buffer_R, float_buffer_R, BUFFER_SIZE * N_BLOCKS / (uint32_t)DF1);
 
-<<<<<<< HEAD
-    /* =================  AFP 10-21-22 Level Adjust ===========
-    float freqKHzFcut;
-    float volScaleFactor;
-    if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
-      freqKHzFcut = -(float32_t)bands[EEPROMData.currentBand].FLoCut * 0.001;
-    } else {
-      freqKHzFcut = (float32_t)bands[EEPROMData.currentBand].FHiCut * 0.001;
-    }
-    volScaleFactor = 7.0874 * pow(freqKHzFcut, -1.232);
-    arm_scale_f32(float_buffer_L, volScaleFactor, float_buffer_L, FFT_length / 2);
-    arm_scale_f32(float_buffer_R, volScaleFactor, float_buffer_R, FFT_length / 2);
-    */
-
-=======
->>>>>>> mainboard2
     /**********************************************************************************  AFP 12-31-20
         Digital FFT convolution
         Filtering is accomplished by combining (multiplying) spectra in the frequency domain.
