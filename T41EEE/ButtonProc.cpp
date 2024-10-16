@@ -499,7 +499,7 @@ void ButtonNR()  //AFP 09-19-22 update
     void
 *****/
 void ButtonNotchFilter() {
-  ANR_notch = !ANR_notch;
+  ANR_notch =  not ANR_notch;
   //  If the notch is activated and LMS NR is also active, turn off NR and update display.
   if (ANR_notch && EEPROMData.nrOptionSelect == 3) {
     EEPROMData.nrOptionSelect = 0;  // Turn off noise reduction.  Other NR selections will be valid.
