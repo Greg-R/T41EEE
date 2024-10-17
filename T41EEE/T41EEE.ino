@@ -51,6 +51,7 @@ configuration:
 3.  TeensyDuino version is 1.59.0.
 4.  You will need to install ArduinoJson which is currently version 7.1.0.
 
+
 Completing a FLASH erase of the Teensy is strongly recommended before uploading this new version. 
 Remember to save to the SD card via the EEPROM menu EEPROM->SD command prior to erasing.
 The instructions for performing a FLASH erase of the Teensy are here:
@@ -69,6 +70,13 @@ The bullet "Memory Wipe & LED Blink Restore" has the instructions.
 6.  Added audio adapter equalizer to transmit signal chain.
 7.  CESSB modulation from Open Audio Library replaces conventional phasing SSB.
 8.  Added working SSB options menu specific to CESSB.  Mic gain and compression menu removed.
+9.  Removed 1, 2, and 5 dB from displayScale array.
+10. Finished volume/bandwidth compensation.
+11. Added user options for audio amplifier which enable polarity and audio scaling factor.
+12. Fixed CW decode bugs.
+13. Paddle flip was not saved to EEPROM.
+14. Fixed several minor CW related bugs.
+15. Changed direct frequency default to save last frequency On.
 
 ## Controlled Envelope Single Side Band (CESSB)
 
