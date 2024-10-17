@@ -310,6 +310,7 @@ void CWCalibrate::CalibratePreamble(int setZoom) {
       void
  *****/
 void CWCalibrate::CalibratePrologue() {
+  /*
   Serial.printf("lastState=%d radioState=%d memory_used=%d memory_used_max=%d f32_memory_used=%d f32_memory_used_max=%d\n",
                 lastState,
                 radioState,
@@ -319,7 +320,8 @@ void CWCalibrate::CalibratePrologue() {
                 (int)AudioStream_F32::f32_memory_used_max);
   AudioStream::memory_used_max = 0;
   AudioStream_F32::f32_memory_used_max = 0;
-//  Serial.printf("cessb1 max processor usage = %d\n", cessb1.processorUsageMax());
+  Serial.printf("cessb1 max processor usage = %d\n", cessb1.processorUsageMax());
+  */
 
   digitalWrite(RXTX, LOW);  // Turn off the transmitter.
   updateDisplayFlag = false;

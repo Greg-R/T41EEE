@@ -32,7 +32,6 @@ int splitOn = 0;
 void ShowMenu(const char *menu[], int where)
 {
   tft.setFontScale( (enum RA8875tsize) 1);  
-//     NoActiveMenu();  // Does this erase only?
      
   if (where == PRIMARY_MENU) {                                              // Should print on left edge of top line
     tft.fillRect(PRIMARY_MENU_X, MENUS_Y, 300, CHAR_HEIGHT, RA8875_BLUE);   // Top-left of display
@@ -64,7 +63,6 @@ void ShowMenu(const char *menu[], int where)
 *****/
 #ifdef QSE2
 void CalibrateOptions() {
-//  int val;
   int freqCorrectionFactorOld = 0;
   int32_t increment = 100L;
   MenuSelect menu;
@@ -86,7 +84,6 @@ void CalibrateOptions() {
       }
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
-//        menu = ProcessButtonPress(val);    // Use ladder value to get menu choice
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
           eeprom.EEPROMWrite();
@@ -100,7 +97,6 @@ void CalibrateOptions() {
       EEPROMData.powerOutCW[EEPROMData.currentBand] = sqrt(EEPROMData.transmitPowerLevel / 20.0) * EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
-//        menu = ProcessButtonPress(val);    // Use ladder value to get menu choice
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
           eeprom.EEPROMWrite();
@@ -126,10 +122,8 @@ void CalibrateOptions() {
       EEPROMData.powerOutSSB[EEPROMData.currentBand] = sqrt(EEPROMData.transmitPowerLevel / 20.0) * EEPROMData.SSBPowerCalibrationFactor[EEPROMData.currentBand];
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
-//        menu = ProcessButtonPress(val);    // Use ladder value to get menu choice
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-     //     val = ReadSelectedPushButton();
           eeprom.EEPROMWrite();
           calibrateFlag = 0;
         }
@@ -174,7 +168,6 @@ void CalibrateOptions() {
       EEPROMData.dacOffsetCW = GetEncoderValueLiveQ15t(-5000, 5000, EEPROMData.dacOffsetCW, 50, (char *)"DC Offset:", false);
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {
-//        menu = ProcessButtonPress(val);
         if (menu == MenuSelect::MENU_OPTION_SELECT) {
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
           eeprom.EEPROMWrite();
@@ -187,7 +180,6 @@ void CalibrateOptions() {
       EEPROMData.dacOffsetSSB = GetEncoderValueLiveQ15t(-5000, 5000, EEPROMData.dacOffsetSSB, 50, (char *)"DC Offset:", false);
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {
-//        menu = ProcessButtonPress(val);
         if (menu == MenuSelect::MENU_OPTION_SELECT) {
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
           eeprom.EEPROMWrite();
@@ -208,7 +200,6 @@ void CalibrateOptions() {
       EEPROMData.buttonRepeatDelay = 1000 * GetEncoderValueLive(0, 5000, EEPROMData.buttonRepeatDelay / 1000, 1, (char *)"Btn Repeat:  ", false);
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {
- //       menu = ProcessButtonPress(val);
         if (menu == MenuSelect::MENU_OPTION_SELECT) {
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
           eeprom.EEPROMWrite();
@@ -224,8 +215,6 @@ void CalibrateOptions() {
       ShowFrequency();
       BandInformation();
       calibrateFlag = 0;
-      //      modeSelectOutExL.gain(0, 0);
-      //      modeSelectOutExR.gain(0, 0);
       break;
 
     default:
@@ -235,9 +224,10 @@ void CalibrateOptions() {
 }
 #else  // Not using QSE2 (No carrier calibration)
 void CalibrateOptions() {
-//  int val;
   int freqCorrectionFactorOld = 0;
   int32_t increment = 100L;
+  MenuSelect menu;
+
   tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 30, CHAR_HEIGHT, RA8875_BLACK);
 
   // Select the type of calibration, and then skip this during the loop() function.
@@ -256,7 +246,6 @@ void CalibrateOptions() {
       }
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
-//        val = ProcessButtonPress(val);    // Use ladder value to get menu choice
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
           eeprom.EEPROMWrite();
@@ -269,9 +258,8 @@ void CalibrateOptions() {
       EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand] = GetEncoderValueLive(0.0, 1.0, EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand], 0.01, (char *)"CW PA Cal: ", false);
       EEPROMData.powerOutCW[EEPROMData.currentBand] = sqrt(EEPROMData.transmitPowerLevel / 20.0) * EEPROMData.CWPowerCalibrationFactor[EEPROMData.currentBand];
       menu = readButton();
-      if (val != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
-        val = ProcessButtonPress(val);    // Use ladder value to get menu choice
-        if (val == MENU_OPTION_SELECT) {  // Yep. Make a choice??
+      if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
+        if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
           eeprom.EEPROMWrite();
           calibrateFlag = 0;
@@ -292,10 +280,8 @@ void CalibrateOptions() {
       EEPROMData.powerOutSSB[EEPROMData.currentBand] = sqrt(EEPROMData.transmitPowerLevel / 20.0) * EEPROMData.SSBPowerCalibrationFactor[EEPROMData.currentBand];
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
-//        val = ProcessButtonPress(val);    // Use ladder value to get menu choice
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-//          val = ReadSelectedPushButton();
           eeprom.EEPROMWrite();
           calibrateFlag = 0;
         }
@@ -341,10 +327,8 @@ void CalibrateOptions() {
 
     case 12:  // Set button repeat rate
       EEPROMData.buttonRepeatDelay = 1000 * GetEncoderValueLive(0, 5000, EEPROMData.buttonRepeatDelay / 1000, 1, (char *)"Btn Repeat:  ", false);
-//      val = ReadSelectedPushButton();
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {
-//        val = ProcessButtonPress(val);
         if (menu == MenuSelect::MENU_OPTION_SELECT) {
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
           eeprom.EEPROMWrite();
@@ -360,14 +344,12 @@ void CalibrateOptions() {
       ShowFrequency();
       BandInformation();
       calibrateFlag = 0;
-      //      modeSelectOutExL.gain(0, 0);
-      //      modeSelectOutExR.gain(0, 0);
       break;
 
     default:
       break;
   }
-  UpdateEqualizerField(EEPROMData.receiveEQFlag, EEPROMData.xmitEQFlag);
+  UpdateEqualizerField(EEPROMData.receiveEQFlag);
 }
 #endif
 
@@ -709,7 +691,7 @@ void EqualizerXmtOptions() {
 *****/
 void SSBOptions()  // AFP 09-22-22 All new
 {
-  int micChoice = 0;
+static int micChoice = 0;
   //  const char *micChoices[] = { "Mic Comp On", "Mic Comp Off", "Set Threshold", "Set Comp_Ratio", "Set Attack", "Set Decay", "Cancel" };
   const char *micChoices[] = { "CESSB", "SSB Data", "Comp On", "Comp Off", "Mic Gain", "Comp Threshold", "Comp Ratio", "Cancel" };
 
