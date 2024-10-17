@@ -678,14 +678,12 @@ extern int freqIncrement;
 extern void (*functionPtr[])();
 extern int idx;
 extern int IQChoice;
-extern int keyType;
 extern bool buttonInterruptsEnabled;
 extern int n_L;
 extern int n_R;
 extern int newCursorPosition;
 extern int NR_Index;
 extern int oldCursorPosition;
-extern int paddleFlip;
 extern RadioMode radioMode;
 extern RadioState radioState, lastState;  // Used by the loop to monitor current state.
 extern int resetTuningFlag;        // Experimental flag for ResetTuning() due to possible timing issues.  KF5N July 31, 2023
