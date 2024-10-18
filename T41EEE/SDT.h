@@ -397,7 +397,7 @@ struct config_t {
 #endif
   bool CWradioCalComplete = false;
   bool SSBradioCalComplete = false;
-  bool cessb = true;
+  bool cessb = false;
 };
 
 extern struct config_t EEPROMData;
