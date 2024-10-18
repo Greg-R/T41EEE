@@ -15,7 +15,7 @@
 
 #define TOP_MENU_COUNT 11  // Menus to process AFP 09-27-22, JJP 7-8-23
 
-bool save_last_frequency = true;  // Make this the default behavior.  Greg KF5N October 16, 2024.
+bool save_last_frequency = false;  // Make this the default behavior.  Greg KF5N October 16, 2024.
 int directFreqFlag = 0;
 auto subMenuMaxOptions = 0;  // Holds the number of submenu options.
 auto TxRxFreqOld = 0;
