@@ -38,8 +38,9 @@ AudioConnection_F32 connect4(switch2, 0, mixer1, 1);  // Connect tone for SSB ca
 AudioConnection_F32 connect5(mixer1, 0, micGain, 0);
 AudioConnection_F32 connect6(micGain, 0, switch3, 0);
 
-AudioConnection_F32 connect7(switch3, 0, compressor1, 0);
-AudioConnection_F32 connect8(compressor1, 0, mixer2, 0);
+// The compressor is temporarily disabled.
+//AudioConnection_F32 connect7(switch3, 0, compressor1, 0);
+//AudioConnection_F32 connect8(compressor1, 0, mixer2, 0);
 
 AudioConnection_F32 connect9(switch3, 1, mixer2, 1);  // Compressor bypass path.
 
