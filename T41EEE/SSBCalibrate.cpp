@@ -65,9 +65,9 @@ void SSBCalibrate::warmUpCal() {
   uint32_t index_of_max;  // Not used, but required by arm_max_q15 function.
   for (int i = 0; i < 16; i = i + 1) {
     updateDisplayFlag = true;  // Causes FFT to be calculated.
-        while(static_cast<uint32_t>(Q_in_L_Ex.available()) < 32 and static_cast<uint32_t>(Q_in_L.available()) < 32) {
+    while (static_cast<uint32_t>(Q_in_L_Ex.available()) < 32 and static_cast<uint32_t>(Q_in_L.available()) < 32) {
       delay(1);
-        }
+    }
     SSBCalibrate::ProcessIQData2();  // Note, FFT not called if buffers not sufficiently filled.
   }
   updateDisplayFlag = false;
@@ -273,7 +273,7 @@ void SSBCalibrate::CalibratePreamble(int setZoom) {
   EEPROMData.centerFreq = TxRxFreq;
   NCOFreq = 0L;
   digitalWrite(MUTE, MUTEAUDIO);  //  Mute Audio  (HIGH=Mute)
-  digitalWrite(RXTX, HIGH);  // Turn on transmitter.
+  digitalWrite(RXTX, HIGH);       // Turn on transmitter.
   ShowTransmitReceiveStatus();
   ShowSpectrumdBScale();
   rawSpectrumPeak = 0;
@@ -303,7 +303,7 @@ void SSBCalibrate::CalibratePrologue() {
   AudioStream::memory_used_max = 0;
   AudioStream_F32::f32_memory_used_max = 0;
  */
- 
+
   digitalWrite(RXTX, LOW);  // Turn off the transmitter.
   updateDisplayFlag = false;
   tone1kHz.end();
@@ -320,20 +320,20 @@ void SSBCalibrate::CalibratePrologue() {
   EEPROMData.CWOffset = cwFreqOffsetTemp;  // Return user selected CW offset frequency.
   EEPROMData.calFreq = calFreqTemp;        // Return user selected calibration tone frequency.
   sineTone(EEPROMData.CWOffset + 6);       // This function takes "number of cycles" which is the offset + 6.
-  EEPROMData.currentScale = userScale;  //  Restore vertical scale to user preference.  KF5N
+  EEPROMData.currentScale = userScale;     //  Restore vertical scale to user preference.  KF5N
   ShowSpectrumdBScale();
   EEPROMData.transmitPowerLevel = transmitPowerLevelTemp;  // Restore the user's transmit power level setting.  KF5N August 15, 2023
-  eeprom.EEPROMWrite();                                           // Save calibration numbers and configuration.  KF5N August 12, 2023
+  eeprom.EEPROMWrite();                                    // Save calibration numbers and configuration.  KF5N August 12, 2023
   zoomIndex = userZoomIndex - 1;
-  ButtonZoom();     // Restore the user's zoom setting.  Note that this function also modifies EEPROMData.spectrum_zoom.
-  eeprom.EEPROMWrite();    // Save calibration numbers and configuration.  KF5N August 12, 2023
-  tft.writeTo(L2);  // Clear layer 2.  KF5N July 31, 2023
+  ButtonZoom();          // Restore the user's zoom setting.  Note that this function also modifies EEPROMData.spectrum_zoom.
+  eeprom.EEPROMWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
+  tft.writeTo(L2);       // Clear layer 2.  KF5N July 31, 2023
   tft.clearMemory();
   tft.writeTo(L1);  // Exit function in layer 1.  KF5N August 3, 2023
   calOnFlag = false;
   RedrawDisplayScreen();
-//  radioState = RadioState::CW_RECEIVE_STATE;  // KF5N
-  fftOffset = 0;                              // Some reboots may be caused by large fftOffset values when Auto-Spectrum is on.
+  //  radioState = RadioState::CW_RECEIVE_STATE;  // KF5N
+  fftOffset = 0;  // Some reboots may be caused by large fftOffset values when Auto-Spectrum is on.
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreq();                        // Return Si5351 to normal operation mode.  KF5N
   lastState = RadioState::NOSTATE;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 16, 2023
@@ -388,16 +388,19 @@ void SSBCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortC
   tft.fillRect(405, 125, 50, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(405, 125);
   tft.print(correctionIncrement, 3);
-  if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
-//  radioState = RadioState::SSB_TRANSMIT_STATE;
+  if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) {
+    ResetFlipFlops();
+  } else {
+    delay(1000);
+  }
   SetFreqCal(freqOffset);
   printCalType(calTypeFlag, autoCal, false);
   // Run this so Phase shows from begining.
   GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQSSBPhaseCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
   warmUpCal();
 
-//  SSBCalibrate::CalibratePrologue();
-//  return;
+  //  SSBCalibrate::CalibratePrologue();
+  //  return;
 
   if (radioCal) {
     autoCal = true;
@@ -709,7 +712,7 @@ void SSBCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortC
     }  // end automatic calibration state machine
 
     if (task != MenuSelect::DEFAULT) lastUsedTask = task;  //  Save the last used task.
-    task = MenuSelect::DEFAULT;                          // Reset task after it is used.
+    task = MenuSelect::DEFAULT;                            // Reset task after it is used.
     //  Read encoder and update values.
     if (IQCalType == 0) {
       EEPROMData.IQSSBAmpCorrectionFactor[EEPROMData.currentBand] = GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQSSBAmpCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Gain", true);
@@ -733,8 +736,8 @@ void SSBCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortC
  *****/
 #ifdef QSE2
 void SSBCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool shortCal) {
-//  int task = -1;
-//  int lastUsedTask = -2;
+  //  int task = -1;
+  //  int lastUsedTask = -2;
   MenuSelect task, lastUsedTask = MenuSelect::DEFAULT;
   bool exit = false;
   int freqOffset;
@@ -806,7 +809,7 @@ void SSBCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool
       else task = MenuSelect::BOGUS_PIN_READ;
     }
     */
-    task = readButton(lastUsedTask);  //  Return the button push.
+    task = readButton(lastUsedTask);          //  Return the button push.
     if (shortCal) task = MenuSelect::FILTER;  // Jump to refineCal.
     switch (task) {
       // Activate automatic calibration.
@@ -1091,7 +1094,7 @@ void SSBCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool
     }  // end automatic calibration state machine
 
     if (task != MenuSelect::DEFAULT) lastUsedTask = task;  //  Save the last used task.
-    task = MenuSelect::DEFAULT;                          // Reset task after it is used.
+    task = MenuSelect::DEFAULT;                            // Reset task after it is used.
     //  Read encoder and update values.
     if (IQCalType == 0) {
       EEPROMData.iDCoffsetSSB[EEPROMData.currentBand] = GetEncoderValueLiveQ15t(-1000, 1000, EEPROMData.iDCoffsetSSB[EEPROMData.currentBand], correctionIncrement, (char *)"I Offset", true);
@@ -1213,12 +1216,12 @@ void SSBCalibrate::ProcessIQData2() {
       Q_in_R_Ex.freeBuffer();
     }
 
-// Set the sideband.
-if(bands[EEPROMData.currentBand].mode == DEMOD_LSB) cessb1.setSideband(false);
-if(bands[EEPROMData.currentBand].mode == DEMOD_USB) cessb1.setSideband(true);
+    // Set the sideband.
+    if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) cessb1.setSideband(false);
+    if (bands[EEPROMData.currentBand].mode == DEMOD_USB) cessb1.setSideband(true);
 
-// Apply amplitude and phase corrections.
-cessb1.setIQCorrections(true, EEPROMData.IQSSBAmpCorrectionFactor[EEPROMData.currentBandA], EEPROMData.IQSSBPhaseCorrectionFactor[EEPROMData.currentBandA], 0.0);
+    // Apply amplitude and phase corrections.
+    cessb1.setIQCorrections(true, EEPROMData.IQSSBAmpCorrectionFactor[EEPROMData.currentBandA], EEPROMData.IQSSBPhaseCorrectionFactor[EEPROMData.currentBandA], 0.0);
 
     //  This is the correct place in the data stream to inject the scaling for power.
 #ifdef QSE2
@@ -1245,56 +1248,56 @@ cessb1.setIQCorrections(true, EEPROMData.IQSSBAmpCorrectionFactor[EEPROMData.cur
     Q_out_L_Ex.play(q15_buffer_LTemp, dataWidth);  // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
     Q_out_R_Ex.play(q15_buffer_RTemp, dataWidth);  // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.
 
-//}    // End of transmit code.  Begin receive code.
+    //}    // End of transmit code.  Begin receive code.
 
     // Get audio samples from the audio  buffers and convert them to float.
     // Read in 16 blocks of 128 samples in I and Q if available.
-  if (static_cast<uint32_t>(Q_in_L.available()) > N_BLOCKS_EX and static_cast<uint32_t>(Q_in_R.available()) > N_BLOCKS_EX) {
-    for (unsigned i = 0; i < N_BLOCKS; i++) {
-      /**********************************************************************************  AFP 12-31-20
+    if (static_cast<uint32_t>(Q_in_L.available()) > N_BLOCKS_EX and static_cast<uint32_t>(Q_in_R.available()) > N_BLOCKS_EX) {
+      for (unsigned i = 0; i < N_BLOCKS; i++) {
+        /**********************************************************************************  AFP 12-31-20
           Using arm_Math library, convert to float one buffer_size.
           Float_buffer samples are now standardized from > -1.0 to < 1.0
       **********************************************************************************/
-      arm_q15_to_float(Q_in_R.readBuffer(), &float_buffer_L[BUFFER_SIZE * i], BUFFER_SIZE);  // convert int_buffer to float 32bit
-      arm_q15_to_float(Q_in_L.readBuffer(), &float_buffer_R[BUFFER_SIZE * i], BUFFER_SIZE);  // convert int_buffer to float 32bit
-      Q_in_L.freeBuffer();
-      Q_in_R.freeBuffer();
-    }
+        arm_q15_to_float(Q_in_R.readBuffer(), &float_buffer_L[BUFFER_SIZE * i], BUFFER_SIZE);  // convert int_buffer to float 32bit
+        arm_q15_to_float(Q_in_L.readBuffer(), &float_buffer_R[BUFFER_SIZE * i], BUFFER_SIZE);  // convert int_buffer to float 32bit
+        Q_in_L.freeBuffer();
+        Q_in_R.freeBuffer();
+      }
 
-    rfGainValue = pow(10, (float)EEPROMData.rfGain[EEPROMData.currentBand] / 20);        //AFP 2-11-23
-    arm_scale_f32(float_buffer_L, rfGainValue, float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 2-11-23
-    arm_scale_f32(float_buffer_R, rfGainValue, float_buffer_R, BUFFER_SIZE * N_BLOCKS);  //AFP 2-11-23
+      rfGainValue = pow(10, (float)EEPROMData.rfGain[EEPROMData.currentBand] / 20);        //AFP 2-11-23
+      arm_scale_f32(float_buffer_L, rfGainValue, float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 2-11-23
+      arm_scale_f32(float_buffer_R, rfGainValue, float_buffer_R, BUFFER_SIZE * N_BLOCKS);  //AFP 2-11-23
 
-    /**********************************************************************************  AFP 12-31-20
+      /**********************************************************************************  AFP 12-31-20
       Scale the data buffers by the RFgain value defined in bands[EEPROMData.currentBand] structure
     **********************************************************************************/
-    arm_scale_f32(float_buffer_L, recBandFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 2-11-23
-    arm_scale_f32(float_buffer_R, recBandFactor[EEPROMData.currentBand], float_buffer_R, BUFFER_SIZE * N_BLOCKS);  //AFP 2-11-23
+      arm_scale_f32(float_buffer_L, recBandFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 2-11-23
+      arm_scale_f32(float_buffer_R, recBandFactor[EEPROMData.currentBand], float_buffer_R, BUFFER_SIZE * N_BLOCKS);  //AFP 2-11-23
 
-    // Manual IQ amplitude correction
-    if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
-      arm_scale_f32(float_buffer_L, -EEPROMData.IQRXAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
-      IQPhaseCorrection(float_buffer_L, float_buffer_R, EEPROMData.IQRXPhaseCorrectionFactor[EEPROMData.currentBand], BUFFER_SIZE * N_BLOCKS);
-    } else {
-      if (bands[EEPROMData.currentBand].mode == DEMOD_USB) {
-        arm_scale_f32(float_buffer_L, -EEPROMData.IQRXAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22 KF5N changed sign
+      // Manual IQ amplitude correction
+      if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
+        arm_scale_f32(float_buffer_L, -EEPROMData.IQRXAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
         IQPhaseCorrection(float_buffer_L, float_buffer_R, EEPROMData.IQRXPhaseCorrectionFactor[EEPROMData.currentBand], BUFFER_SIZE * N_BLOCKS);
+      } else {
+        if (bands[EEPROMData.currentBand].mode == DEMOD_USB) {
+          arm_scale_f32(float_buffer_L, -EEPROMData.IQRXAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22 KF5N changed sign
+          IQPhaseCorrection(float_buffer_L, float_buffer_R, EEPROMData.IQRXPhaseCorrectionFactor[EEPROMData.currentBand], BUFFER_SIZE * N_BLOCKS);
+        }
       }
-    }
-    FreqShift1();  // Why done here? KF5N
+      FreqShift1();  // Why done here? KF5N
 
-    //    if (EEPROMData.spectrum_zoom == SPECTRUM_ZOOM_1) {  // && display_S_meter_or_spectrum_state == 1)
-    //      zoom_display = 1;
-    //CalcZoom1Magn();  //AFP Moved to display function
-    //    }
+      //    if (EEPROMData.spectrum_zoom == SPECTRUM_ZOOM_1) {  // && display_S_meter_or_spectrum_state == 1)
+      //      zoom_display = 1;
+      //CalcZoom1Magn();  //AFP Moved to display function
+      //    }
 
-    // ZoomFFTExe is being called too many times in Calibration.  Should be called ONLY at the start of each sweep.
-    //    if (EEPROMData.spectrum_zoom != SPECTRUM_ZOOM_1) {
-    //AFP  Used to process Zoom>1 for display
-    //      ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
-    ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
-  }  // End of receive code
-}
+      // ZoomFFTExe is being called too many times in Calibration.  Should be called ONLY at the start of each sweep.
+      //    if (EEPROMData.spectrum_zoom != SPECTRUM_ZOOM_1) {
+      //AFP  Used to process Zoom>1 for display
+      //      ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
+      ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
+    }  // End of receive code
+  }
 }
 
 
