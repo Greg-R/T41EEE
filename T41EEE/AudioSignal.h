@@ -154,6 +154,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       if(EEPROMData.compressorFlag) {
             switch3.setChannel(0);
             mixer2.gain(0, 1.0);
+            mixer2.gain(1, 0.0);
       } else {
             switch3.setChannel(1);  // Bypass compressor.
             mixer2.gain(0, 0.0);
@@ -192,6 +193,17 @@ void SetAudioOperatingState(RadioState operatingState) {
       mixer1.gain(1, 1);  // testTone on.
       switch1.setChannel(1);  // Disconnect microphone path.
       switch2.setChannel(0);  //  Disconnect 1 kHz test tone path.
+
+      if(EEPROMData.compressorFlag) {
+            switch3.setChannel(0);
+            mixer2.gain(0, 1.0);
+            mixer2.gain(1, 0.0);
+      } else {
+            switch3.setChannel(1);  // Bypass compressor.
+            mixer2.gain(0, 0.0);
+            mixer2.gain(1, 1.0);
+      }
+
       Q_out_L_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);  // Need this as CW will put into wrong mode.  Greg KF5N August 4, 2024.
       Q_out_R_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
       Q_in_L_Ex.begin();  // I channel Microphone audio
