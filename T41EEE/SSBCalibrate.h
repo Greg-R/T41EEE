@@ -64,7 +64,7 @@ void ProcessIQData2();
 void warmUpCal();
 void printCalType(int IQCalType, bool autoCal, bool autoCalDone);
 void CalibratePreamble(int setZoom);
-void CalibratePrologue();
+void CalibrateEpilogue();
 //void DoReceiveCalibrate(bool radioCal, bool shortCal);
 void DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal);
 void DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool shortCal);

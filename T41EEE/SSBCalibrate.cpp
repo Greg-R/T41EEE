@@ -223,7 +223,7 @@ void SSBCalibrate::printCalType(int IQCalType, bool autoCal, bool autoCalDone) {
 
 /*****
   Purpose: Set up prior to IQ calibrations.  New function.  KF5N August 14, 2023
-  These things need to be saved here and restored in the prologue function:
+  These things need to be saved here and restored in the epilogue function:
   Vertical scale in dB  (set to 10 dB during calibration)
   Zoom, set to 1X in receive and 4X in transmit calibrations.
   Transmitter power, set to 5W during both calibrations.
@@ -241,7 +241,7 @@ void SSBCalibrate::CalibratePreamble(int setZoom) {
   //  radioState = CW_TRANSMIT_STRAIGHT_STATE;                 // KF5N
   transmitPowerLevelTemp = EEPROMData.transmitPowerLevel;  //AFP 05-11-23
   cwFreqOffsetTemp = EEPROMData.CWOffset;
-  EEPROMData.CWOffset = 2;                   // 750 Hz for TX calibration.  Prologue restores user selected offset.
+  EEPROMData.CWOffset = 2;                   // 750 Hz for TX calibration.  Epilogue restores user selected offset.
                                              //  userxmtMode = EEPROMData.xmtMode;          // Store the user's mode setting.  KF5N July 22, 2023
   userZoomIndex = EEPROMData.spectrum_zoom;  // Save the zoom index so it can be reset at the conclusion.  KF5N August 12, 2023
   zoomIndex = setZoom - 1;
@@ -291,7 +291,7 @@ void SSBCalibrate::CalibratePreamble(int setZoom) {
    Return value:
       void
  *****/
-void SSBCalibrate::CalibratePrologue() {
+void SSBCalibrate::CalibrateEpilogue() {
   /*
   Serial.printf("lastState=%d radioState=%d memory_used=%d memory_used_max=%d f32_memory_used=%d f32_memory_used_max=%d\n",
                 lastState,
@@ -398,9 +398,6 @@ void SSBCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortC
   // Run this so Phase shows from begining.
   GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQSSBPhaseCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
   warmUpCal();
-
-  //  SSBCalibrate::CalibratePrologue();
-  //  return;
 
   if (radioCal) {
     autoCal = true;
@@ -700,7 +697,7 @@ void SSBCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortC
               state = State::exit;
               break;
             } else {
-              CalibratePrologue();
+              CalibrateEpilogue();
               return;
             }
           }
@@ -721,7 +718,7 @@ void SSBCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortC
     }
     if (exit) break;  //  Exit the while loop.
   }                   // end while
-  SSBCalibrate::CalibratePrologue();
+  SSBCalibrate::CalibrateEpilogue();
 }  // End Transmit calibration
 
 
@@ -1082,7 +1079,7 @@ void SSBCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool
               state = State::exit;
               break;
             } else {
-              SSBCalibrate::CalibratePrologue();
+              SSBCalibrate::CalibrateEpilogue();
               return;
             }
           }
@@ -1104,7 +1101,7 @@ void SSBCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool
     //    if (IQChoice == 6) break;  //  Exit the while loop.
     if (exit) break;
   }  // end while
-  SSBCalibrate::CalibratePrologue();
+  SSBCalibrate::CalibrateEpilogue();
 }  // End carrier calibration
 #endif
 

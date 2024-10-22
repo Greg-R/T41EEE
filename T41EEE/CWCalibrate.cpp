@@ -4,7 +4,7 @@
 
 /*****
   Purpose: Load buffers used to modulate the transmitter during calibration.
-          The prologue must restore the buffers for normal operation!
+          The epilogue must restore the buffers for normal operation!
 
    Parameter List:
       void
@@ -84,9 +84,9 @@ void CWCalibrate::warmUpCal() {
   uint32_t index_of_max;  // Not used, but required by arm_max_q15 function.
   for (int i = 0; i < 128; i = i + 1) {
     updateDisplayFlag = true;  // Causes FFT to be calculated.
-    while(static_cast<uint32_t>(Q_in_R.available()) < 16 and static_cast<uint32_t>(Q_in_L.available()) < 16) {
+    while (static_cast<uint32_t>(Q_in_R.available()) < 16 and static_cast<uint32_t>(Q_in_L.available()) < 16) {
       delay(1);
-        }
+    }
     CWCalibrate::ProcessIQData2();
   }
   updateDisplayFlag = false;
@@ -242,7 +242,7 @@ void CWCalibrate::printCalType(int IQCalType, bool autoCal, bool autoCalDone) {
 
 /*****
   Purpose: Set up prior to IQ calibrations.  New function.  KF5N August 14, 2023
-  These things need to be saved here and restored in the prologue function:
+  These things need to be saved here and restored in the epilogue function:
   Vertical scale in dB  (set to 10 dB during calibration)
   Zoom, set to 1X in receive and 4X in transmit calibrations.
   Transmitter power, set to 5W during both calibrations.
@@ -259,11 +259,11 @@ void CWCalibrate::CalibratePreamble(int setZoom) {
   //  radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;                 // KF5N
   transmitPowerLevelTemp = EEPROMData.transmitPowerLevel;  //AFP 05-11-23
   cwFreqOffsetTemp = EEPROMData.CWOffset;
-  EEPROMData.CWOffset = 2;                   // 750 Hz for TX calibration.  Prologue restores user selected offset.
+  EEPROMData.CWOffset = 2;                   // 750 Hz for TX calibration.  Epilogue restores user selected offset.
                                              //  userxmtMode = EEPROMData.xmtMode;          // Store the user's mode setting.  KF5N July 22, 2023
   userZoomIndex = EEPROMData.spectrum_zoom;  // Save the zoom index so it can be reset at the conclusion.  KF5N August 12, 2023
   zoomIndex = setZoom - 1;
-  loadCalToneBuffers();  // Restore in the prologue.
+  loadCalToneBuffers();  // Restore in the epilogue.
   ButtonZoom();
   tft.fillRect(0, 272, 517, 399, RA8875_BLACK);  // Erase waterfall.  KF5N August 14, 2023
   RedrawDisplayScreen();                         // Erase any existing spectrum trace data.
@@ -292,7 +292,7 @@ void CWCalibrate::CalibratePreamble(int setZoom) {
   EEPROMData.centerFreq = TxRxFreq;
   NCOFreq = 0L;
   digitalWrite(MUTE, MUTEAUDIO);  //  Mute Audio  (HIGH=Mute)
-  digitalWrite(RXTX, HIGH);  // Turn on transmitter.
+  digitalWrite(RXTX, HIGH);       // Turn on transmitter.
   ShowTransmitReceiveStatus();
   ShowSpectrumdBScale();
   rawSpectrumPeak = 0;
@@ -309,7 +309,7 @@ void CWCalibrate::CalibratePreamble(int setZoom) {
    Return value:
       void
  *****/
-void CWCalibrate::CalibratePrologue() {
+void CWCalibrate::CalibrateEpilogue() {
   /*
   Serial.printf("lastState=%d radioState=%d memory_used=%d memory_used_max=%d f32_memory_used=%d f32_memory_used_max=%d\n",
                 lastState,
@@ -343,16 +343,16 @@ void CWCalibrate::CalibratePrologue() {
   EEPROMData.transmitPowerLevel = transmitPowerLevelTemp;  // Restore the user's transmit power level setting.  KF5N August 15, 2023
   //EEPROMWrite();                                           // Save calibration numbers and configuration.  KF5N August 12, 2023
   zoomIndex = userZoomIndex - 1;
-  ButtonZoom();     // Restore the user's zoom setting.  Note that this function also modifies EEPROMData.spectrum_zoom.
-  eeprom.EEPROMWrite();    // Save calibration numbers and configuration.  KF5N August 12, 2023
-  tft.writeTo(L2);  // Clear layer 2.  KF5N July 31, 2023
+  ButtonZoom();          // Restore the user's zoom setting.  Note that this function also modifies EEPROMData.spectrum_zoom.
+  eeprom.EEPROMWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
+  tft.writeTo(L2);       // Clear layer 2.  KF5N July 31, 2023
   tft.clearMemory();
   tft.writeTo(L1);  // Exit function in layer 1.  KF5N August 3, 2023
   calOnFlag = false;
   RedrawDisplayScreen();
   IQChoice = 9;
   radioState = RadioState::CW_RECEIVE_STATE;  // KF5N
-  fftOffset = 0;  // Some reboots may be caused by large fftOffset values when Auto-Spectrum is on.
+  fftOffset = 0;                              // Some reboots may be caused by large fftOffset values when Auto-Spectrum is on.
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreq();                        // Return Si5351 to normal operation mode.  KF5N
   lastState = RadioState::NOSTATE;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 16, 2023
@@ -371,7 +371,7 @@ void CWCalibrate::CalibratePrologue() {
  *****/
 void CWCalibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
   MenuSelect task, lastUsedTask = MenuSelect::DEFAULT;
-//  int lastUsedTask = -2;
+  //  int lastUsedTask = -2;
   int calFreqShift;
   float correctionIncrement = 0.001;
   bool autoCal = false;
@@ -712,7 +712,7 @@ void CWCalibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
               state = State::exit;
               break;
             } else {
-              CalibratePrologue();
+              CalibrateEpilogue();
               return;
             }
           }
@@ -724,7 +724,7 @@ void CWCalibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
     }  // end automatic calibration state machine
 
     if (task != MenuSelect::DEFAULT) lastUsedTask = task;  //  Save the last used task.
-    task = MenuSelect::DEFAULT;                          // Reset task after it is used.
+    task = MenuSelect::DEFAULT;                            // Reset task after it is used.
     //  Read encoder and update values.
     if (IQCalType == 0) {
       EEPROMData.IQRXAmpCorrectionFactor[EEPROMData.currentBand] = GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQRXAmpCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Gain", true);
@@ -733,7 +733,7 @@ void CWCalibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
     }
     if (IQChoice == 6) break;  //  Exit the while loop.
   }                            // end while
-  CWCalibrate::CalibratePrologue();
+  CWCalibrate::CalibrateEpilogue();
 }  // End Transmit calibration
 
 
@@ -747,8 +747,8 @@ void CWCalibrate::DoReceiveCalibrate(bool radioCal, bool shortCal) {
       void
  *****/
 void CWCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal) {
-//  int task = -1;
-//  int lastUsedTask = -2;
+  //  int task = -1;
+  //  int lastUsedTask = -2;
   int freqOffset;
   //  bool corrChange = false;
   float correctionIncrement = 0.001;
@@ -785,7 +785,11 @@ void CWCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCa
   tft.fillRect(405, 125, 50, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(405, 125);
   tft.print(correctionIncrement, 3);
-  if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
+  if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) {
+    ResetFlipFlops();
+  } else {
+    delay(1000);
+  }
   SetFreqCal(freqOffset);
   printCalType(calTypeFlag, autoCal, false);
   // Run this so Phase shows from begining.
@@ -1089,7 +1093,7 @@ void CWCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCa
               state = State::exit;
               break;
             } else {
-              CalibratePrologue();
+              CalibrateEpilogue();
               return;
             }
           }
@@ -1101,7 +1105,7 @@ void CWCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCa
     }  // end automatic calibration state machine
 
     if (task != MenuSelect::DEFAULT) lastUsedTask = task;  //  Save the last used task.
-    task = MenuSelect::DEFAULT;                         // Reset task after it is used.
+    task = MenuSelect::DEFAULT;                            // Reset task after it is used.
     //  Read encoder and update values.
     if (IQCalType == 0) {
       EEPROMData.IQCWAmpCorrectionFactor[EEPROMData.currentBand] = GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQCWAmpCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Gain", true);
@@ -1110,7 +1114,7 @@ void CWCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCa
     }
     if (IQChoice == 6) break;  //  Exit the while loop.
   }                            // end while
-  CWCalibrate::CalibratePrologue();
+  CWCalibrate::CalibrateEpilogue();
 }  // End Transmit calibration
 
 
@@ -1464,7 +1468,7 @@ void CWCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool 
               state = State::exit;
               break;
             } else {
-              CalibratePrologue();
+              CalibrateEpilogue();
               return;
             }
           }
@@ -1476,7 +1480,7 @@ void CWCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool 
     }  // end automatic calibration state machine
 
     if (task != MenuSelect::DEFAULT) lastUsedTask = task;  //  Save the last used task.
-    task = MenuSelect::DEFAULT;                          // Reset task after it is used.
+    task = MenuSelect::DEFAULT;                            // Reset task after it is used.
     //  Read encoder and update values.
     if (IQCalType == 0) {
       EEPROMData.iDCoffsetCW[EEPROMData.currentBand] = GetEncoderValueLiveQ15t(-1000, 1000, EEPROMData.iDCoffsetCW[EEPROMData.currentBand], correctionIncrement, (char *)"I Offset", true);
@@ -1485,7 +1489,7 @@ void CWCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool 
     }
     if (IQChoice == 6) break;  //  Exit the while loop.
   }                            // end while
-  CWCalibrate::CalibratePrologue();
+  CWCalibrate::CalibrateEpilogue();
 }  // End carrier calibration
 #endif
 
@@ -1605,9 +1609,9 @@ void CWCalibrate::ProcessIQData2() {
 
   // This code block was introduced after TeensyDuino 1.58 appeared.  It doesn't use a for loop, but processes the entire 2048 buffer in one pass.
   // Revised I and Q calibration signal generation using large buffers.  Greg KF5N June 4 2023
-if (static_cast<uint32_t>(Q_in_L.available()) > 16 && static_cast<uint32_t>(Q_in_R.available()) > 16) {  // Audio Record Queues!!!
-    q15_t q15_buffer_LTemp[2048];  //KF5N
-    q15_t q15_buffer_RTemp[2048];  //KF5N
+  if (static_cast<uint32_t>(Q_in_L.available()) > 16 && static_cast<uint32_t>(Q_in_R.available()) > 16) {  // Audio Record Queues!!!
+    q15_t q15_buffer_LTemp[2048];                                                                          //KF5N
+    q15_t q15_buffer_RTemp[2048];                                                                          //KF5N
     Q_out_L_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
     Q_out_R_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
     arm_float_to_q15(float_buffer_L_EX, q15_buffer_LTemp, 2048);
@@ -1623,7 +1627,7 @@ if (static_cast<uint32_t>(Q_in_L.available()) > 16 && static_cast<uint32_t>(Q_in
     Q_out_L_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
     Q_out_R_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
 
-   // End of transmit code.  Begin receive code.
+    // End of transmit code.  Begin receive code.
 
     // get audio samples from the audio  buffers and convert them to float
     // read in 32 blocks á 128 samples in I and Q if available.
