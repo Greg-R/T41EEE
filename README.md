@@ -20,7 +20,7 @@ This software is licensed according to:
 GNU GENERAL PUBLIC LICENSE  
 Version 3, 29 June 2007  
 Please refer to the included LICENSE file.  
-Greg Raven, March 12 2024
+Greg Raven, October 22 2024
 
 T41EEE will be hosted at this public Github repository:
 
@@ -77,6 +77,7 @@ The bullet "Memory Wipe & LED Blink Restore" has the instructions.
 13. Paddle flip was not saved to EEPROM.
 14. Fixed several minor CW related bugs.
 15. Changed direct frequency default to save last frequency On.
+16. The SSB compressor is temporarily disabled.
 
 ## Controlled Envelope Single Side Band (CESSB)
 
@@ -93,6 +94,12 @@ T41EEE.7 uses the Open Audio CESSB class as well as the type 2 Compressor class.
 
 The Audio Adapter's hardware-based equalization filter is included in the CESSB transmit chain to provide
 high-pass filtering of the microphone audio.
+
+### "SSB Data" Mode
+
+"SSB Data" mode is selectable in the SSB Options menu.  This mode uses the same underlying modulator, however,
+it bypasses the CESSB processing.  This mode can be used for conventional voice SSB if desired.  It can also
+be used with data (for example FT8) which is normally fed into the SSB microphone input.
 
 ### CESSB Automatic Calibration
 
@@ -115,19 +122,15 @@ Nice block diagrams will be added to this in the near future.  For now, it is te
 Transmit Signal Chain
 1.  Electret microphone biased via the Audio Adapter.  Assumed ~20 mV audio output from the electret.
 2.  Microphone amplifier/attenuator stage.  The default gain is 0 dB.  This gain is user-adjustable.
-3.  Open Audio Compressor 2.  Compression threshold and compression ratio are user adjustable.
-4.  CESSB processing.  The input is the compressed audio, and the output is I and Q to the QSE modulator.
-5.  QSE baseband-to-RF IQ modulator.  The I and Q channel amplitudes are user-adjustable via SSB PA Cal.
+3.  CESSB processing.  The input is the compressed audio, and the output is I and Q to the QSE modulator.
+4.  QSE baseband-to-RF IQ modulator.  The I and Q channel amplitudes are user-adjustable via SSB PA Cal.
 
 So what does the user have to adjust?:
 
 1.  Microphone gain.
-2.  Compression threshold.
-3.  Compression ratio.
-4.  SSB PA Cal.
+2.  SSB PA Cal.
 
-OK, so now we will attempt to juggle the above four parameters to get a decent transmitted output.
-Of the above four items, it is probably best to leave the compression ratio set to default for now.
+OK, so now we will attempt to juggle the above parameters to get a decent transmitted output.
 Also, if you are using a typical electret microphone biased by the Audio Adapter, don't adjust the
 microphone gain at first.  Leave it alone, and then maybe come back to it later for further optimization.
 
@@ -169,18 +172,7 @@ I should also comment that without having a spectrum analyzer capable of resolvi
 
 2.  Inject a 1 kHz tone, about 20 millivolts, into the microphone connector.  You will need to be able to short the PTT to ground to key the transmitter.  I use a cheap Amazon cable which terminates in RCA type connectors, which are plugged into RCA to BNC adapters.  This is sleazy but it works.  I use an alligator clip lead to short the PTT to ground.
 
-While monitoring with a spectrum analyzer (output of the QSE filter), show that the input compression is working.  Gradually increase the amplitude of the 1 kHz tone, and at some level, you should notice it is no longer a 1:1 increase.  Keep going and it will hit an upper limit, and will not go higher in amplitude.
-
-Hopefully the compressor behavior is observed, and you will not need to adjust the compressor variables.  But first, does the output level of your microphone make sense with the observed compression behavior?  This takes us to the SSB Options, which is a selection in the main menu.  In the SSB Options:
-
-1.  Microphone gain, with default of 0 dB.
-2.  Compression Threshold, with default of -20 dB.
-3.  Compression Ratio, with default of 100.
-
-So if your microphone is more or less sensitive, adjust using #1.
-I hope #2 and #3 do not require adjustment.  The Compressor2 is set up in a very basic way.
-It is really more of a limiter than a compressor.  Much more sophisticated compression behavior
-is possible.  This is a good enough starting point.
+While monitoring with a spectrum analyzer (output of the QSE filter), gradually increase the amplitude of the 1 kHz tone, and at some level, you should notice it is no longer a 1:1 increase.  Keep going and it will hit an upper limit, and will not go higher in amplitude.  You should see spurious sidebands increasing.
 
 Now remember I said to adjust SSB PA Cal to 0.8 during calibration?
 Now it is time to dial that down, drop it to 0.5, maybe even 0.4.
