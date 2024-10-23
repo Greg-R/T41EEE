@@ -353,8 +353,8 @@ struct config_t {
   float pll_fmax = 4000.0;                                                                  // 4 bytes
   float powerOutCW[NUMBER_OF_BANDS] = { 0.035, 0.035, 0.035, 0.035, 0.035, 0.035, 0.035 };  // powerOutCW and powerOutSSB are derived from the TX power setting and calibration factors.
   float powerOutSSB[NUMBER_OF_BANDS] = { 0.035, 0.035, 0.035, 0.035, 0.035, 0.035, 0.035 };
-  float CWPowerCalibrationFactor[NUMBER_OF_BANDS] =  { 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 };        // Increased to 0.04, was 0.019; KF5N February 20, 2024
-  float SSBPowerCalibrationFactor[NUMBER_OF_BANDS] = { 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 };  // Increased to 0.04, was 0.008; KF5N February 21, 2024
+  float CWPowerCalibrationFactor[NUMBER_OF_BANDS] =  { 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };        // Increased to 0.04, was 0.019; KF5N February 20, 2024
+  float SSBPowerCalibrationFactor[NUMBER_OF_BANDS] = { 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };  // Increased to 0.04, was 0.008; KF5N February 21, 2024
   float IQRXAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
   float IQRXPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
   float IQCWAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
