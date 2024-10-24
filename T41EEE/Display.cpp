@@ -1244,8 +1244,8 @@ void UpdateCompressionField()  // JJP 8/26/2023
     void
 *****/
 FLASHMEM void UpdateDecoderField() {
+  // Update text
   tft.setFontScale((enum RA8875tsize)0);
-
   tft.setTextColor(RA8875_WHITE);  // Display zoom factor
   tft.setCursor(DECODER_X + 5, DECODER_Y - 5);
   tft.print("Decoder:");
@@ -1260,6 +1260,7 @@ FLASHMEM void UpdateDecoderField() {
     //    tft.fillRect(FIELD_OFFSET_X, DECODER_Y - 5, 140, 17, RA8875_BLACK);  // Erase
     tft.print("Off");
   }
+  // Update graphics
   if (EEPROMData.xmtMode == RadioMode::CW_MODE && EEPROMData.decoderFlag) {  // In CW mode with decoder on? AFP 09-27-22
     tft.writeTo(L2);
     // Draw delimiter bars for CW offset frequency.  This depends on the user selected offset.
@@ -1279,6 +1280,8 @@ FLASHMEM void UpdateDecoderField() {
       tft.drawFastVLine(BAND_INDICATOR_X + 26, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_GREEN);  //CW lower freq indicator
       tft.drawFastVLine(BAND_INDICATOR_X + 32, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_GREEN);  //CW upper freq indicator
     }
+  }
+/*
     tft.writeTo(L1);
     tft.setFontScale((enum RA8875tsize)0);
     tft.setTextColor(RA8875_LIGHT_GREY);
@@ -1288,6 +1291,29 @@ FLASHMEM void UpdateDecoderField() {
     tft.drawFastVLine(BAND_INDICATOR_X - 8 + 38, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_BLACK);  //CW upper freq indicator
     tft.writeTo(L1);
   }
+*/
+// Erase graphics when decoder is off.
+  if ((EEPROMData.xmtMode == RadioMode::CW_MODE && not EEPROMData.decoderFlag) || EEPROMData.xmtMode == RadioMode::SSB_MODE) {  // In CW mode with decoder off.
+    tft.writeTo(L2);                                                                                                             // or SSB mode.
+    // Draw delimiter bars for CW offset frequency.  This depends on the user selected offset.
+    if (EEPROMData.CWOffset == 0) {
+      tft.drawFastVLine(BAND_INDICATOR_X + 15, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_BLACK);  //CW lower freq indicator
+      tft.drawFastVLine(BAND_INDICATOR_X + 21, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_BLACK);  //CW upper freq indicator
+    }
+    if (EEPROMData.CWOffset == 1) {
+      tft.drawFastVLine(BAND_INDICATOR_X + 18, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_BLACK);  //CW lower freq indicator
+      tft.drawFastVLine(BAND_INDICATOR_X + 24, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_BLACK);  //CW upper freq indicator
+    }
+    if (EEPROMData.CWOffset == 2) {
+      tft.drawFastVLine(BAND_INDICATOR_X + 23, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_BLACK);  //CW lower freq indicator
+      tft.drawFastVLine(BAND_INDICATOR_X + 29, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_BLACK);  //CW upper freq indicator
+    }
+    if (EEPROMData.CWOffset == 3) {
+      tft.drawFastVLine(BAND_INDICATOR_X + 26, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_BLACK);  //CW lower freq indicator
+      tft.drawFastVLine(BAND_INDICATOR_X + 32, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_BLACK);  //CW upper freq indicator
+    }
+  }
+      tft.writeTo(L1);
 }
 
 
@@ -1435,7 +1461,6 @@ void RedrawDisplayScreen() {
   SetBandRelay(HIGH);
   SpectralNoiseReductionInit();
   UpdateNoiseField();
-  // SetI2SFreq(SR[SampleRate].rate);
   DrawBandWidthIndicatorBar();
   ShowName();
   ShowTransmitReceiveStatus();
@@ -1555,6 +1580,8 @@ void EraseSpectrumDisplayContainer() {
 void EraseSpectrumWindow() {
   tft.fillRect(SPECTRUM_LEFT_X, SPECTRUM_TOP_Y, MAX_WATERFALL_WIDTH, SPECTRUM_HEIGHT, RA8875_BLACK);  // Spectrum box
 }
+
+
 /*****
   Purpose: To erase both primary and secondary menus from display
 
@@ -1565,7 +1592,6 @@ void EraseSpectrumWindow() {
 *****/
 void EraseMenus() {
   tft.fillRect(PRIMARY_MENU_X, MENUS_Y, BOTH_MENU_WIDTHS, CHAR_HEIGHT + 1, RA8875_BLACK);  // Erase menu choices
-  //  menuStatus = NO_MENUS_ACTIVE;                                                            // Change menu state
 }
 
 
