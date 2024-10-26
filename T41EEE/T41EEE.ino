@@ -1195,7 +1195,7 @@ sgtl5000_1.adcHighPassFilterEnable();
     delay(2000);
     EnableButtonInterrupts();
     SaveAnalogSwitchValues();
-    EEPROMWrite();  // Call to reset switch matrix values
+    eeprom.EEPROMWrite();  // Call to reset switch matrix values
   }                // KD0RC end
 #else
   EnableButtonInterrupts();
