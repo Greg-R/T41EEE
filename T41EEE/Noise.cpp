@@ -33,12 +33,11 @@ float32_t NR_T;
 const uint8_t NR_L_frames = 3;
 const uint8_t NR_N_frames = 15;
 
-float32_t DMAMEM ANR_d[ANR_DLINE_SIZE] = {0};
-float32_t DMAMEM ANR_w[ANR_DLINE_SIZE] = {0};
-float32_t DMAMEM LMS_StateF32[MAX_LMS_TAPS + MAX_LMS_DELAY] = {0};
-float32_t DMAMEM LMS_NormCoeff_f32[MAX_LMS_TAPS + MAX_LMS_DELAY] = {0};
-float32_t DMAMEM LMS_nr_delay[512 + MAX_LMS_DELAY] = {0};
-
+float32_t ANR_d[ANR_DLINE_SIZE] = {0};
+float32_t ANR_w[ANR_DLINE_SIZE] = {0};
+float32_t LMS_StateF32[MAX_LMS_TAPS + MAX_LMS_DELAY] = {0};
+float32_t LMS_NormCoeff_f32[MAX_LMS_TAPS + MAX_LMS_DELAY] = {0};
+float32_t LMS_nr_delay[512 + MAX_LMS_DELAY] = {0};
 
 const float32_t sqrtHann[256] = {
   0, 0.01231966, 0.024637449, 0.036951499, 0.049259941, 0.061560906,
