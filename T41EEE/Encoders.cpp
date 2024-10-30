@@ -3,6 +3,18 @@
 
 float adjustVolEncoder;
 
+#ifdef FAST_TUNE
+bool FastTune = true;    //  HMB
+uint32_t FT_last_time;   // millis() of last fine tune step   HMB
+bool FT_ON = false;      // In fast tunung mode HMB
+int FT_step_counter = 0; // how many fast steps have there been continuously HMB
+int last_FT_step_size = 1; // so can go back HMB
+const unsigned long FT_on_ms = 30;  // time between FTsteps below which increases the step size
+const unsigned long FT_cancel_ms = 400;  // time between steps above which FT is cancelled
+const int FT_trig = 4;  // number of short steps to trigger fast tune,
+const int FT_step = 500;  // Hz step in Fast Tune
+#endif
+
 /*****
   Purpose: Audio filter adjust with encoder.  This function is called from ShowSpectrum() in Display.cpp.
            This function runs only if the encoder has been rotated.
@@ -454,7 +466,82 @@ long SetTransmitDelay()  // new function JJP 9/1/22
   return EEPROMData.cwTransmitDelay;
 }
 
+#ifdef FAST_TUNE
+/*****
+  Purpose: Fine frequency tune control with variable speed by Harry Brash GM3RVL.  October 30, 2024
 
+  Parameter list:
+    void
+
+  Return value;
+    void
+*****/
+  void EncoderFineTune() { 
+  char result;
+  unsigned long MS_temp;    // HMB
+  unsigned long FT_delay;   // HMB
+
+  result = fineTuneEncoder.process();  // Read the encoder
+  if (result == 0) {                   // Nothing read
+    fineTuneEncoderMove = 0L;
+    return;
+  } 
+  if (result == DIR_CW) {  // 16 = CW, 32 = CCW
+    fineTuneEncoderMove = 1L;
+  } else {
+    fineTuneEncoderMove = -1L;
+  }
+  MS_temp = millis();   // HMB...
+
+  FT_delay = MS_temp - FT_last_time;
+  FT_last_time = MS_temp;
+
+if (FT_ON) {           // Check if FT should be cancelled (FT_delay>=FT_cancel_ms)
+  if (FT_delay>=FT_cancel_ms) {
+    FT_ON = false;
+    EEPROMData.fineTuneStep = last_FT_step_size;
+  } 
+}
+else {      //  FT is off so check for short delays
+  if (FT_delay<=FT_on_ms) {
+    FT_step_counter +=1;
+  }
+  if (FT_step_counter>=FT_trig) {
+    last_FT_step_size = EEPROMData.fineTuneStep;
+    EEPROMData.fineTuneStep = FT_step;      // Set in SDT.h 
+    FT_step_counter = 0;
+    FT_ON = true;
+  }
+}
+
+  NCOFreq = NCOFreq + EEPROMData.fineTuneStep * fineTuneEncoderMove;  // Increment NCOFreq per encoder movement.
+  centerTuneFlag = 1;   // This is used in Process.cpp.  Greg KF5N May 16, 2024
+  // ============  AFP 10-28-22
+  if (EEPROMData.activeVFO == VFO_A) {
+    EEPROMData.currentFreqA = EEPROMData.centerFreq + NCOFreq;  //AFP 10-05-22
+    EEPROMData.lastFrequencies[EEPROMData.currentBand][0] = EEPROMData.currentFreqA;
+  } else {
+    EEPROMData.currentFreqB = EEPROMData.centerFreq + NCOFreq;  //AFP 10-05-22
+    EEPROMData.lastFrequencies[EEPROMData.currentBand][1] = EEPROMData.currentFreqB;
+  }
+  // ===============  Recentering at band edges ==========
+  if (EEPROMData.spectrum_zoom != 0) {
+    if (NCOFreq >= static_cast<int32_t>((95000 / (1 << EEPROMData.spectrum_zoom))) || NCOFreq < static_cast<int32_t>((-93000 / (1 << EEPROMData.spectrum_zoom)))) {  // 47500 with 2x zoom.
+      centerTuneFlag = 0;
+      resetTuningFlag = 1;
+      return;
+    }
+  } else {
+    if (NCOFreq > 142000 || NCOFreq < -43000) {  // Offset tuning window in zoom 1x
+      centerTuneFlag = 0;
+      resetTuningFlag = 1;
+      return;
+    }
+  }
+  fineTuneEncoderMove = 0L;
+  TxRxFreq = EEPROMData.centerFreq + NCOFreq;  // KF5N
+}
+#else
 /*****
   Purpose: Fine frequency tune control.
 
@@ -505,7 +592,7 @@ long SetTransmitDelay()  // new function JJP 9/1/22
   fineTuneEncoderMove = 0L;
   TxRxFreq = EEPROMData.centerFreq + NCOFreq;  // KF5N
 }
-
+#endif
 
 // This function is attached to interrupts (in the .ino file).
   void EncoderFilter() {
