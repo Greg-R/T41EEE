@@ -564,10 +564,8 @@ struct secondaryMenuConfiguration {
   int numberOfOptions;  // Number of submenu topions
 };
 
-// JSON file configuration related variables:
+// SD file name:
 extern const char *filename;
-extern void loadConfiguration(const char *filename, config_t &config);
-extern void saveConfiguration(const char *filename, const config_t &config, bool toFile);
 
 typedef struct SR_Descriptor {
   const uint8_t SR_n;
