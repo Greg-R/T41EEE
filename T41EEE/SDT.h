@@ -380,7 +380,7 @@ struct config_t {
   float myLong = MY_LON;
   float myLat = MY_LAT;
   int currentNoiseFloor[NUMBER_OF_BANDS]{ 0 };
-  int compressorFlag = 0;  // CESSB compressor is always on!
+  int compressorFlag = 0;  // Compressor is currently deactivated.
   bool xmitEQFlag = false;
   bool receiveEQFlag = false;
   int calFreq = 0;                    // This is an index into an array of tone frequencies, for example:  {750, 3000}.  Default to 750 Hz. KF5N March 12, 2024
