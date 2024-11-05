@@ -153,7 +153,7 @@ void ShowSpectrum() {
     if (filter_pos != last_filter_pos) FilterSetSSB();
 
     if (radioMode == RadioMode::SSB_MODE or radioMode == RadioMode::CW_MODE or radioMode == RadioMode::AM_MODE) {  // AFP 08-24-22
-      ProcessIQData();                                        // Call the Audio process from within the display routine to eliminate conflicts with drawing the spectrum and waterfall displays
+      process.ProcessIQData();                                        // Call the Audio process from within the display routine to eliminate conflicts with drawing the spectrum and waterfall displays
     }
     EncoderCenterTune();  //Moved the tuning encoder to reduce lag times and interference during tuning.
     y_new = pixelnew[x1];
@@ -1052,7 +1052,7 @@ void UpdateVolumeField() {
   tft.setTextColor(RA8875_WHITE);
   tft.print("Vol:");
   tft.setTextColor(RA8875_GREEN);
-  tft.fillRect(BAND_INDICATOR_X + 90, BAND_INDICATOR_Y, tft.getFontWidth() * 3 - 3, tft.getFontHeight(), RA8875_BLACK);
+  tft.fillRect(BAND_INDICATOR_X + 90, BAND_INDICATOR_Y, tft.getFontWidth() * 3 + 2, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(FIELD_OFFSET_X, BAND_INDICATOR_Y);
   tft.print(EEPROMData.audioVolume);
 }
@@ -1070,7 +1070,7 @@ void UpdateVolumeField() {
 void UpdateAGCField() {
   tft.setFontScale((enum RA8875tsize)1);
   tft.fillRect(AGC_X_OFFSET, AGC_Y_OFFSET, tft.getFontWidth() * 7 - 3, tft.getFontHeight(), RA8875_BLACK);
-  tft.setCursor(BAND_INDICATOR_X + 135, BAND_INDICATOR_Y);
+  tft.setCursor(BAND_INDICATOR_X + 143, BAND_INDICATOR_Y);
   switch (EEPROMData.AGCMode) {  // The option for AGC
     case 0:                      // Off
                                  //    tft.setCursor(BAND_INDICATOR_X + 140, BAND_INDICATOR_Y);

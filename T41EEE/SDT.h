@@ -211,7 +211,6 @@ const int RESET = 0;  // QSD2/QSE2 reset pin
 #define SIXPI (3.0f * TWO_PI)
 #define Si_5351_crystal 25000000L
 
-
 #define SPECTRUM_ZOOM_1 0
 #define SPECTRUM_ZOOM_2 1
 #define SPECTRUM_ZOOM_4 2
@@ -404,20 +403,22 @@ extern struct config_t EEPROMData;
 extern config_t defaultConfig;
 extern config_t EEPROMData_temp;
 
+
+
 // Custom classes in the sketch.
 #include "CWCalibrate.h"
 #include "SSBCalibrate.h"
 #include "JSON.h"
 #include "Eeprom.h"
-
+#include "Process.h"
 
 //------------------------- Global CW Filter declarations ----------
 
-extern float32_t CW_AudioFilterCoeffs1[];  //AFP 10-18-22
-extern float32_t CW_AudioFilterCoeffs2[];  //AFP 10-18-22
-extern float32_t CW_AudioFilterCoeffs3[];  //AFP 10-18-22
-extern float32_t CW_AudioFilterCoeffs4[];  //AFP 10-18-22
-extern float32_t CW_AudioFilterCoeffs5[];  //AFP 10-18-22
+//extern float32_t CW_AudioFilterCoeffs1[];  //AFP 10-18-22
+//extern float32_t CW_AudioFilterCoeffs2[];  //AFP 10-18-22
+//extern float32_t CW_AudioFilterCoeffs3[];  //AFP 10-18-22
+//extern float32_t CW_AudioFilterCoeffs4[];  //AFP 10-18-22
+//extern float32_t CW_AudioFilterCoeffs5[];  //AFP 10-18-22
 
 #define IIR_CW_NUMSTAGES 4
 extern float32_t CW_Filter_Coeffs[];
@@ -548,6 +549,7 @@ extern Rotary fineTuneEncoder;  // (4,  5);
 
 extern Metro ms_500;
 
+extern Process process;              // Receiver DSP object.
 extern Eeprom eeprom;                // EEPROM memory object.
 extern JSON json;
 extern CWCalibrate calibrater;         // CW mode calibration object.
@@ -974,7 +976,7 @@ void EnableButtonInterrupts();
 void playTransmitData();  // KF5N February 23, 2024
 MenuSelect ProcessButtonPress(int valPin);
 void ProcessEqualizerChoices(int EQType, char *title);
-void ProcessIQData();
+//void ProcessIQData();
 MenuSelect readButton(MenuSelect lastUsedTask);
 MenuSelect readButton();
 int ReadSelectedPushButton();

@@ -319,12 +319,17 @@ uint32_t FFT_length = FFT_LENGTH;
 bool agc_action = false;
 // Teensy and OpenAudio dataflow code.
 #include "AudioSignal.h"
-//End dataflow code
+//End dataflow 
 
+#include "Process.h"
+
+Process process;         // Receiver process object.
 CWCalibrate calibrater;  // Instantiate the calibration objects.
 SSBCalibrate ssbcalibrater;
 JSON json;
 Eeprom eeprom;           // Eeprom object.
+
+
 
 Rotary volumeEncoder = Rotary(VOLUME_ENCODER_A, VOLUME_ENCODER_B);        //( 2,  3)
 Rotary tuneEncoder = Rotary(TUNE_ENCODER_A, TUNE_ENCODER_B);              //(16, 17)
@@ -1270,8 +1275,7 @@ elapsedMicros usec = 0;  // Automatically increases as time passes; no ++ necess
   Return value:
     void
 *****/
-float audioBW{0.0}; 
-int dBoffset{0};
+float audioBW{0.0};
 
 void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
 {
@@ -1481,10 +1485,14 @@ if(cessb1.levelDataCount() > 2000) {
     // The upper and lower frequency limits are bands[EEPROMData.currentBand].FLoCut and bands[EEPROMData.currentBand].FHiCut.
     audioBW = bands[EEPROMData.currentBand].FHiCut - bands[EEPROMData.currentBand].FLoCut;
     // How many dB between reference and current setting?  Round to integer.
-    dBoffset = static_cast<int>(40.0 * log10f_fast(audioBW/2800.0));
-    volumeAdjust.gain(volumeLog[(EEPROMData.audioVolume - dBoffset)]);
+//    dBoffset = static_cast<int>(40.0 * log10f_fast(audioBW/2800.0));
+    process.audioGainCompensate = 4 * 2800.0/audioBW;
+    volumeAdjust.gain(volumeLog[EEPROMData.audioVolume]);
+//    int gainAdjust = EEPROMData.audioVolume - dBoffset;
     volumeChangeFlag = false;
     UpdateVolumeField();
+//    Serial.printf("audioBW = %d\n", static_cast<int>(audioBW));
+//    Serial.printf("EEPROMData.audioVolume = %d\n", EEPROMData.audioVolume);
   }
 
 }  // end loop()

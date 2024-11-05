@@ -1,31 +1,6 @@
 
 #include "SDT.h"
 
-char atom, currentAtom;
-int8_t first_block = 1;
-//uint8_t NB_on = 0;
-uint8_t wait_flag;
-float32_t audiotmp = 0.0f;
-float32_t audioSpectBuffer[1024]{ 0 };  // This can't be DMAMEM.  It will break the S-Meter.  KF5N October 10, 2023
-//float32_t* audioSpectBuffer = new float32_t[1024]{0};  // Assign to the heap.  Possibly breaking the S-meter?
-float32_t sample_meanL = 0.0;
-float32_t sample_meanR = 0.0;
-float32_t wold = 0.0f;
-
-//=== CW Filter ===
-float32_t CW_AudioFilter1_state[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };  // AFP 10-18-22
-float32_t CW_AudioFilter2_state[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };  // AFP 10-18-22
-float32_t CW_AudioFilter3_state[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };  // AFP 10-18-22
-float32_t CW_AudioFilter4_state[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };  // AFP 10-18-22
-float32_t CW_AudioFilter5_state[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };  // AFP 10-18-22
-//---------  Code Filter instance -----
-arm_biquad_cascade_df2T_instance_f32 S1_CW_AudioFilter1 = { 6, CW_AudioFilter1_state, CW_AudioFilterCoeffs1 };  // AFP 10-18-22
-arm_biquad_cascade_df2T_instance_f32 S1_CW_AudioFilter2 = { 6, CW_AudioFilter2_state, CW_AudioFilterCoeffs2 };  // AFP 10-18-22
-arm_biquad_cascade_df2T_instance_f32 S1_CW_AudioFilter3 = { 6, CW_AudioFilter3_state, CW_AudioFilterCoeffs3 };  // AFP 10-18-22
-arm_biquad_cascade_df2T_instance_f32 S1_CW_AudioFilter4 = { 6, CW_AudioFilter4_state, CW_AudioFilterCoeffs4 };  // AFP 10-18-22
-arm_biquad_cascade_df2T_instance_f32 S1_CW_AudioFilter5 = { 6, CW_AudioFilter5_state, CW_AudioFilterCoeffs5 };  // AFP 10-18-22
-//=== end CW Filter ===
-
 /*****
   Purpose: Read audio from Teensy Audio Library
              Calculate FFT for display
@@ -38,7 +13,7 @@ arm_biquad_cascade_df2T_instance_f32 S1_CW_AudioFilter5 = { 6, CW_AudioFilter5_s
    Return value:
       void
  *****/
-void ProcessIQData() {
+void Process::ProcessIQData() {
   if (keyPressedOn == 1) {  //AFP 09-01-22
     return;
   }
@@ -497,12 +472,8 @@ void ProcessIQData() {
     /**********************************************************************************  AFP 12-31-20
       Digital Volume Control
     **********************************************************************************/
-
-    //    if (mute == 1) {
-    //      arm_scale_f32(float_buffer_L, 0.0, float_buffer_L, BUFFER_SIZE * N_BLOCKS);
-    //      arm_scale_f32(float_buffer_R, 0.0, float_buffer_R, BUFFER_SIZE * N_BLOCKS);
-    //    } else if (mute == 0) {
-    arm_scale_f32(float_buffer_L, AUDIOSCALE, float_buffer_L, BUFFER_SIZE * N_BLOCKS);  // Set scaling constant to optimize volume control range.
+  
+    arm_scale_f32(float_buffer_L, AUDIOSCALE * audioGainCompensate, float_buffer_L, BUFFER_SIZE * N_BLOCKS);  // Set scaling constant to optimize volume control range.
                                                                                         //      arm_scale_f32(float_buffer_R, DF * volumeLog[EEPROMData.audioVolume] * 4, float_buffer_R, BUFFER_SIZE * N_BLOCKS);
                                                                                         //    }
     /**********************************************************************************  AFP 12-31-20
