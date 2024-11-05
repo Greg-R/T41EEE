@@ -61,10 +61,12 @@ void printCalType(int IQCalType, bool autoCal, bool autoCalDone);
 void CalibratePreamble(int setZoom);
 void CalibrateEpilogue();
 void DoReceiveCalibrate(bool radioCal, bool shortCal);
-void DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal);
-void DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool shortCal);
+void DoXmitCalibrate(bool radioCal, bool shortCal);
+#ifdef QSE2
+void DoXmitCarrierCalibrate(bool radioCal, bool shortCal);
+#endif
 const char *calFreqs[2]{ "750 Hz", "3.0 kHz" };
-void SelectCalFreq();
+//void SelectCalFreq();
 void ShowSpectrum2();
 float PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins);
 void RadioCal(bool refineCal);

@@ -318,7 +318,7 @@ void SSBCalibrate::CalibrateEpilogue() {
   NCOFreq = 0L;
   calibrateFlag = 0;                       // KF5N
   EEPROMData.CWOffset = cwFreqOffsetTemp;  // Return user selected CW offset frequency.
-  EEPROMData.calFreq = calFreqTemp;        // Return user selected calibration tone frequency.
+//  EEPROMData.calFreq = calFreqTemp;        // Return user selected calibration tone frequency.
   sineTone(EEPROMData.CWOffset + 6);       // This function takes "number of cycles" which is the offset + 6.
   EEPROMData.currentScale = userScale;     //  Restore vertical scale to user preference.  KF5N
   ShowSpectrumdBScale();
@@ -350,7 +350,7 @@ void SSBCalibrate::CalibrateEpilogue() {
    Return value:
       void
  *****/
-void SSBCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal) {
+void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal) {
   bool exit = false;
   int freqOffset;
   //  bool corrChange = false;
@@ -374,14 +374,14 @@ void SSBCalibrate::DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortC
   MenuSelect task, lastUsedTask = MenuSelect::DEFAULT;
   // bool stopSweep = false;
 
-  if (toneFreqIndex == 0) {              // 750 Hz
+//  if (toneFreqIndex == 0) {              // 750 Hz
     SSBCalibrate::CalibratePreamble(2);  // Set zoom to 4X.
     freqOffset = 0;                      // Calibration tone same as regular modulation tone.
-  }
-  if (toneFreqIndex == 1) {              // 3 kHz
-    SSBCalibrate::CalibratePreamble(2);  // Set zoom to 4X.
-    freqOffset = 2250;                   // Need 750 + 2250 = 3 kHz
-  }
+//  }
+//  if (toneFreqIndex == 1) {              // 3 kHz
+//    SSBCalibrate::CalibratePreamble(2);  // Set zoom to 4X.
+//    freqOffset = 2250;                   // Need 750 + 2250 = 3 kHz
+//  }
   calTypeFlag = 1;  // TX cal
   plotCalGraphics(calTypeFlag);
   tft.setFontScale((enum RA8875tsize)0);
@@ -1121,43 +1121,43 @@ void SSBCalibrate::RadioCal(bool refineCal) {
 #ifdef QSE2
   SSBCalibrate::DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
 #endif
-  SSBCalibrate::DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
+  SSBCalibrate::DoXmitCalibrate(true, refineCal);
 
   BandSet(BAND_40M);
 #ifdef QSE2
-  SSBCalibrate::DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
+  SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
 #endif
-  SSBCalibrate::DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
+  SSBCalibrate::DoXmitCalibrate(true, refineCal);
 
   BandSet(BAND_20M);
 #ifdef QSE2
-  SSBCalibrate::DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
+  SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
 #endif
-  SSBCalibrate::DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
+  SSBCalibrate::DoXmitCalibrate(true, refineCal);
 
   BandSet(BAND_17M);
 #ifdef QSE2
-  SSBCalibrate::DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
+  SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
 #endif
-  SSBCalibrate::DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
+  SSBCalibrate::DoXmitCalibrate(true, refineCal);
 
   BandSet(BAND_15M);
 #ifdef QSE2
-  SSBCalibrate::DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
+  SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
 #endif
-  SSBCalibrate::DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
+  SSBCalibrate::DoXmitCalibrate(true, refineCal);
 
   BandSet(BAND_12M);
 #ifdef QSE2
-  SSBCalibrate::DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
+  SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
 #endif
-  SSBCalibrate::DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
+  SSBCalibrate::DoXmitCalibrate(true, refineCal);
 
   BandSet(BAND_10M);
 #ifdef QSE2
-  SSBCalibrate::DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
+  SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
 #endif
-  SSBCalibrate::DoXmitCalibrate(EEPROMData.calFreq, true, refineCal);
+  SSBCalibrate::DoXmitCalibrate(true, refineCal);
 
   // Set flag for initial calibration completed.
   EEPROMData.SSBradioCalComplete = true;
@@ -1273,12 +1273,12 @@ void SSBCalibrate::ProcessIQData2() {
 
       // Manual IQ amplitude correction
       if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
-        arm_scale_f32(float_buffer_L, -EEPROMData.IQRXAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
-        IQPhaseCorrection(float_buffer_L, float_buffer_R, EEPROMData.IQRXPhaseCorrectionFactor[EEPROMData.currentBand], BUFFER_SIZE * N_BLOCKS);
+        arm_scale_f32(float_buffer_L, -EEPROMData.IQSSBRXAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
+        IQPhaseCorrection(float_buffer_L, float_buffer_R, EEPROMData.IQSSBRXPhaseCorrectionFactor[EEPROMData.currentBand], BUFFER_SIZE * N_BLOCKS);
       } else {
         if (bands[EEPROMData.currentBand].mode == DEMOD_USB) {
-          arm_scale_f32(float_buffer_L, -EEPROMData.IQRXAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22 KF5N changed sign
-          IQPhaseCorrection(float_buffer_L, float_buffer_R, EEPROMData.IQRXPhaseCorrectionFactor[EEPROMData.currentBand], BUFFER_SIZE * N_BLOCKS);
+          arm_scale_f32(float_buffer_L, -EEPROMData.IQSSBRXAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22 KF5N changed sign
+          IQPhaseCorrection(float_buffer_L, float_buffer_R, EEPROMData.IQSSBRXPhaseCorrectionFactor[EEPROMData.currentBand], BUFFER_SIZE * N_BLOCKS);
         }
       }
       FreqShift1();  // Why done here? KF5N

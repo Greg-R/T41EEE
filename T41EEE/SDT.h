@@ -328,7 +328,7 @@ struct config_t {
   int freqCorrectionFactor = 0;  //68000;
 #else
   //Conventional crystal with freq offset needs a correction factor
-  int freqCorrectionFactor = 130000;
+  int freqCorrectionFactor = 100000;
 #endif
 
   int equalizerRec[EQUALIZER_CELL_COUNT] = { 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100 };
@@ -354,10 +354,12 @@ struct config_t {
   float powerOutSSB[NUMBER_OF_BANDS] = { 0.035, 0.035, 0.035, 0.035, 0.035, 0.035, 0.035 };
   float CWPowerCalibrationFactor[NUMBER_OF_BANDS] =  { 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };        // Increased to 0.04, was 0.019; KF5N February 20, 2024
   float SSBPowerCalibrationFactor[NUMBER_OF_BANDS] = { 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };  // Increased to 0.04, was 0.008; KF5N February 21, 2024
-  float IQRXAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
-  float IQRXPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+  float IQCWRXAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+  float IQCWRXPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
   float IQCWAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
   float IQCWPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+  float IQSSBRXAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+  float IQSSBRXPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };  
   float IQSSBAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
   float IQSSBPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
   uint32_t favoriteFreqs[13] = { 3560000, 3690000, 7030000, 7200000, 14060000, 14200000, 21060000, 21285000, 28060000, 28365000, 5000000, 10000000, 15000000 };
@@ -382,7 +384,7 @@ struct config_t {
   int compressorFlag = 0;  // Compressor is currently deactivated.
   bool xmitEQFlag = false;
   bool receiveEQFlag = false;
-  int calFreq = 0;                    // This is an index into an array of tone frequencies, for example:  {750, 3000}.  Default to 750 Hz. KF5N March 12, 2024
+//  int calFreq = 0;                    // This is an index into an array of tone frequencies, for example:  {750, 3000}.  Default to 750 Hz. KF5N March 12, 2024
   int buttonThresholdPressed = 944;   // switchValues[0] + WIGGLE_ROOM
   int buttonThresholdReleased = 964;  // buttonThresholdPressed + WIGGLE_ROOM
   int buttonRepeatDelay = 300000;     // Increased to 300000 from 200000 to better handle cheap, wornout buttons.
@@ -397,6 +399,7 @@ struct config_t {
   bool CWradioCalComplete = false;
   bool SSBradioCalComplete = false;
   bool cessb = false;
+  float32_t dBm_calibration = 22.0;  // This parameter is adjusted in the calibration menu.
 };
 
 extern struct config_t EEPROMData;
@@ -748,7 +751,7 @@ extern float32_t corr[];
 extern float32_t *cosBuffer;  // Was cosBuffer2[]; this is a pointer to an array. Greg KF5N February 7, 2024
 extern float32_t d[];
 extern float32_t dbm;
-extern float32_t dbm_calibration;
+//extern float32_t dbm_calibration;
 extern float32_t /*DMAMEM*/ FFT_buffer[];
 extern float32_t /*DMAMEM*/ FFT_spec[];
 extern float32_t /*DMAMEM*/ FFT_spec_old[];

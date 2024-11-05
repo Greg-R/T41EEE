@@ -591,7 +591,6 @@ float32_t coefficient_set[5] = { 0, 0, 0, 0, 0 };
 float32_t corr[2];
 
 float32_t dbm = -145.0;
-float32_t dbm_calibration = 22.0;
 
 float32_t DMAMEM FFT_buffer[FFT_LENGTH * 2] __attribute__((aligned(4))) = { 0 };
 float32_t DMAMEM FFT_spec[1024] = { 0 };

@@ -880,7 +880,7 @@ void DisplaydbM() {
   // attenuator is 0 and could be set in a future HW revision; RFgain is initialized to 1 in the bands[] init in SDT.ino; cons=-92; slope=10
   if (EEPROMData.autoGain) rfGain = EEPROMData.rfGainCurrent;
   else rfGain = EEPROMData.rfGain[EEPROMData.currentBand];
-  dbm = dbm_calibration + bands[EEPROMData.currentBand].gainCorrection + (float32_t)attenuator + slope * log10f_fast(audioMaxSquaredAve) + cons - (float32_t)bands[EEPROMData.currentBand].RFgain * 1.5 - rfGain;  //DB2OO, 08-OCT-23; added EEPROMData.rfGainAllBands
+  dbm = EEPROMData.dBm_calibration + bands[EEPROMData.currentBand].gainCorrection + (float32_t)attenuator + slope * log10f_fast(audioMaxSquaredAve) + cons - (float32_t)bands[EEPROMData.currentBand].RFgain * 1.5 - rfGain;  //DB2OO, 08-OCT-23; added EEPROMData.rfGainAllBands
 #else
   //DB2OO, 9-OCT-23: audioMaxSquaredAve is proportional to the input power. With EEPROMData.rfGainAllBands=0 it is approx. 40 for -73dBm @ 14074kHz with the V010 boards and the pre-Amp fed by 12V
   // for audioMaxSquaredAve=40 audioLogAveSq will be 26

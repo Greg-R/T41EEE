@@ -310,11 +310,11 @@ void Calculatedbm() {
     //#ifdef USE_LOG10FAST
     switch (display_dbm) {
       case DISPLAY_S_METER_DBM:
-        dbm = dbm_calibration + bands[EEPROMData.currentBand].gainCorrection + (float32_t)attenuator + slope * log10f_fast(sum_db) + cons - (float32_t)bands[EEPROMData.currentBand].RFgain * 1.5;
+        dbm = EEPROMData.dBm_calibration + bands[EEPROMData.currentBand].gainCorrection + static_cast<float32_t>(attenuator) + slope * log10f_fast(sum_db) + cons - static_cast<float32_t>(bands[EEPROMData.currentBand].RFgain) * 1.5;
         dbmhz = 0;
         break;
       case DISPLAY_S_METER_DBMHZ:
-        dbmhz = dbm - 10.0 * log10f_fast((float32_t)(((int)Ubin - (int)Lbin) * bin_BW));
+        dbmhz = dbm - 10.0 * log10f_fast(static_cast<float32_t>((static_cast<int>(Ubin) - static_cast<int>(Lbin)) * bin_BW));
         dbm = 0;
         break;
     }
