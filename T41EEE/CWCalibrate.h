@@ -55,19 +55,19 @@ averagingState avgState = averagingState::refineAmp;
 
 void loadCalToneBuffers();
 void plotCalGraphics(int calType);
-void ProcessIQData2();
-void warmUpCal();
+void ProcessIQData2(int mode);
+void warmUpCal(int mode);
 void printCalType(int IQCalType, bool autoCal, bool autoCalDone);
 void CalibratePreamble(int setZoom);
 void CalibrateEpilogue();
-void DoReceiveCalibrate(bool radioCal, bool shortCal);
-void DoXmitCalibrate(bool radioCal, bool shortCal);
+void DoReceiveCalibrate(int mode, bool radioCal, bool shortCal);
+void DoXmitCalibrate(int mode, bool radioCal, bool shortCal);
 #ifdef QSE2
-void DoXmitCarrierCalibrate(bool radioCal, bool shortCal);
+void DoXmitCarrierCalibrate(int mode, bool radioCal, bool shortCal);
 #endif
-const char *calFreqs[2]{ "750 Hz", "3.0 kHz" };
+//const char *calFreqs[2]{ "750 Hz", "3.0 kHz" };
 //void SelectCalFreq();
-void ShowSpectrum2();
-float PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins);
+void ShowSpectrum2(int mode);
+float PlotCalSpectrum(int mode, int x1, int cal_bins[3], int capture_bins);
 void RadioCal(bool refineCal);
 };
