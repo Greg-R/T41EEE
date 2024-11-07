@@ -285,11 +285,11 @@ void CalibrateOptions() {
       break;
 
     case 2:                                         // CW IQ Receive Cal - Gain and Phase
-      calibrater.DoReceiveCalibrate(0, false, false);  // This function was significantly revised.  KF5N August 16, 2023
+      cwcalibrater.DoReceiveCalibrate(0, false, false);  // This function was significantly revised.  KF5N August 16, 2023
       break;
 
     case 3:                                         // CW IQ Transmit Cal - Gain and Phase  //AFP 2-21-23
-      calibrater.DoXmitCalibrate(0, false, false);  // This function was significantly revised.  KF5N August 16, 2023
+      cwcalibrater.DoXmitCalibrate(0, false, false);  // This function was significantly revised.  KF5N August 16, 2023
       break;
 
     case 4:  // SSB PA Cal
@@ -306,29 +306,29 @@ void CalibrateOptions() {
       break;  // Missing break.  KF5N August 12, 2023
 
     case 5:                                         // SSB IQ Receive Cal - Gain and Phase
-            calibrater.DoReceiveCalibrate(1, false, false);  // This function was significantly revised.  KF5N August 16, 2023
+            cwcalibrater.DoReceiveCalibrate(1, false, false);  // This function was significantly revised.  KF5N August 16, 2023
       break; 
 
     case 6:
       ssbcalibrater.DoXmitCalibrate(false, false);  // SSB Transmit cal
       break;
 
-    case 7:  // Fully automatic radio calibration.
-      calibrater.RadioCal(false);
+    case 7:  //  CW fully automatic radio calibration.
+      cwcalibrater.RadioCal(false);
       calibrateFlag = 0;
       break;
 
-    case 8:  // Full automatic calibration refinement.
-      calibrater.RadioCal(true);
+    case 8:  // CW fully automatic calibration refinement.
+      cwcalibrater.RadioCal(true);
       calibrateFlag = 0;
       break;
 
-    case 9:  // Fully automatic radio calibration.
+    case 9:  // SSB fully automatic radio calibration.
       ssbcalibrater.RadioCal(false);
       calibrateFlag = 0;
       break;
 
-    case 10:  // Full automatic calibration refinement.
+    case 10:  // SSB fully automatic calibration refinement.
       ssbcalibrater.RadioCal(true);
       calibrateFlag = 0;
       break;
