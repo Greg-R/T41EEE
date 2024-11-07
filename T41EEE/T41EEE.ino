@@ -1,5 +1,5 @@
 /*
-### Version T41EEE.7 T41 Software Defined Transceiver Arduino Sketch
+### Version T41EEE.8 T41 Software Defined Transceiver Arduino Sketch
 
 This is the "T41 Extreme Experimenter's Edition" software for the 
 T41 Software Defined Transceiver.  The T41EEE was "forked" from the V049.2 version
@@ -43,7 +43,7 @@ successful.
 
 ## How to Compile T41EEE
 
-T41EEE.7 was developed and compiled using Arduino IDE version 2.3.2 with the following
+T41EEE.8 was developed and compiled using Arduino IDE version 2.3.2 with the following
 configuration:
 
 1.  Optimize is set to "Smallest Code" (Tools menu).
