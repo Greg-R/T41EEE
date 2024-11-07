@@ -12,12 +12,12 @@
    Return value:
       void
  *****/
-void CWCalibrate::loadCalToneBuffers() {
+void CWCalibrate::loadCalToneBuffers(float toneFreq) {
   float theta;
 //  float32_t tones[2]{ 750.0, 3000.0 };
   // This loop creates the sinusoidal waveform for the tone.
   for (int kf = 0; kf < 256; kf++) {
-    theta = kf * 2.0 * PI * 3000.0 / 24000;
+    theta = kf * 2.0 * PI * toneFreq / 24000;
     sinBuffer[kf] = sin(theta);
     cosBuffer[kf] = cos(theta);
   }
@@ -104,11 +104,12 @@ void CWCalibrate::warmUpCal(int mode) {
   Return value:
     void
 *****/
-void CWCalibrate::printCalType(int IQCalType, bool autoCal, bool autoCalDone) {
+void CWCalibrate::printCalType(int mode, int IQCalType, bool autoCal, bool autoCalDone) {
   const char *calName;
-  const char *IQName[4] = { "Receive", "Transmit CW", "Carrier CW", "Calibrate" };
+  const char *IQName[4] = { "Receive CW", "Transmit CW", "Carrier CW", "Calibrate" };
   tft.writeTo(L1);
   calName = IQName[calTypeFlag];
+  if(mode == 1) calName = "Receive SSB";
   tft.setFontScale((enum RA8875tsize)1);
   tft.setTextColor(RA8875_RED);
   if ((bands[EEPROMData.currentBand].mode == DEMOD_LSB) && (calTypeFlag == 0)) {
@@ -263,7 +264,7 @@ void CWCalibrate::CalibratePreamble(int setZoom) {
                                              //  userxmtMode = EEPROMData.xmtMode;          // Store the user's mode setting.  KF5N July 22, 2023
   userZoomIndex = EEPROMData.spectrum_zoom;  // Save the zoom index so it can be reset at the conclusion.  KF5N August 12, 2023
   zoomIndex = setZoom - 1;
-  loadCalToneBuffers();  // Restore in the epilogue.
+//  loadCalToneBuffers();  // Restore in the epilogue.  Move to specific cal function and use correct tone freq.
   ButtonZoom();
   tft.fillRect(0, 272, 517, 399, RA8875_BLACK);  // Erase waterfall.  KF5N August 14, 2023
   RedrawDisplayScreen();                         // Erase any existing spectrum trace data.
@@ -350,7 +351,7 @@ void CWCalibrate::CalibrateEpilogue() {
   tft.writeTo(L1);  // Exit function in layer 1.  KF5N August 3, 2023
   calOnFlag = false;
   RedrawDisplayScreen();
-  IQChoice = 9;
+//  IQChoice = 9;
   radioState = RadioState::CW_RECEIVE_STATE;  // KF5N
   fftOffset = 0;                              // Some reboots may be caused by large fftOffset values when Auto-Spectrum is on.
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
@@ -380,6 +381,7 @@ void CWCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal) {
   float phaseCal = 0.0; // Phase calibration result.
 //  calFreqTemp = EEPROMData.calFreq;                                           // Save user selected calibration frequency.
 //  EEPROMData.calFreq = 1;                                                     // Receive calibration currently must use 3 kHz.
+  loadCalToneBuffers(3000.0);
   CalibratePreamble(0);                                                       // Set zoom to 1X.
   if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) calFreqShift = 24000;  //  LSB offset.  KF5N
   if (bands[EEPROMData.currentBand].mode == DEMOD_USB) calFreqShift = 24000;  //  USB offset.  KF5N
@@ -392,7 +394,7 @@ void CWCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal) {
   tft.fillRect(405, 125, 50, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(405, 125);
   tft.print(correctionIncrement, 3);
-  printCalType(calTypeFlag, autoCal, false);
+  printCalType(mode, calTypeFlag, autoCal, false);
   warmUpCal(mode);
   State state = State::warmup;  // Start calibration state machine in warmup state.
   float maxSweepAmp = 0.2;
@@ -410,7 +412,7 @@ void CWCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal) {
   // bool stopSweep = false;
 
   plotCalGraphics(calTypeFlag);
-  printCalType(calTypeFlag, autoCal, false);
+  printCalType(mode, calTypeFlag, autoCal, false);
   // Run this so Phase shows from begining.  Get the current values assigned to the local variables.
 if(mode == 0) {
   GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQCWRXPhaseCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
@@ -427,7 +429,7 @@ phaseCal = EEPROMData.IQSSBRXPhaseCorrectionFactor[EEPROMData.currentBand];
 
   if (radioCal) {
     autoCal = true;
-    printCalType(calTypeFlag, autoCal, false);
+    printCalType(mode, calTypeFlag, autoCal, false);
     count = 0;
     warmup = 0;
     index = 1;
@@ -438,8 +440,17 @@ phaseCal = EEPROMData.IQSSBRXPhaseCorrectionFactor[EEPROMData.currentBand];
     state = State::warmup;
   }
 
-  // Transmit Calibration Loop
+  // Receive Calibration Loop
   while (true) {
+    // Update values before calculating spectrum.
+    if(mode == 0) {
+        EEPROMData.IQCWRXAmpCorrectionFactor[EEPROMData.currentBand] = ampCal;
+        EEPROMData.IQCWRXPhaseCorrectionFactor[EEPROMData.currentBand] = phaseCal;
+    }
+        if(mode == 1) {
+        EEPROMData.IQSSBRXAmpCorrectionFactor[EEPROMData.currentBand] = ampCal;
+        EEPROMData.IQSSBRXPhaseCorrectionFactor[EEPROMData.currentBand] = phaseCal;
+    }
     CWCalibrate::ShowSpectrum2(mode);
     task = readButton(lastUsedTask);
     if (shortCal) task = MenuSelect::FILTER;
@@ -447,7 +458,7 @@ phaseCal = EEPROMData.IQSSBRXPhaseCorrectionFactor[EEPROMData.currentBand];
       // Activate automatic calibration.
       case MenuSelect::ZOOM:  // 2nd row, 1st column button
         autoCal = true;
-        printCalType(calTypeFlag, autoCal, false);
+        printCalType(mode, calTypeFlag, autoCal, false);
         count = 0;
         warmup = 0;
         index = 1;
@@ -455,8 +466,16 @@ phaseCal = EEPROMData.IQSSBRXPhaseCorrectionFactor[EEPROMData.currentBand];
         IQCalType = 0;
         std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
         std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
-        iOptimal = ampCal;
-        qOptimal = phaseCal;
+        /*
+        if(mode == 0) {
+        iOptimal = ampCal = EEPROMData.IQCWRXAmpCorrectionFactor[EEPROMData.currentBand];;
+        qOptimal = phaseCal = EEPROMData.IQCWRXPhaseCorrectionFactor[EEPROMData.currentBand];
+        }
+        if(mode == 1) {
+        iOptimal = ampCal = EEPROMData.IQSSBRXAmpCorrectionFactor[EEPROMData.currentBand];;
+        qOptimal = phaseCal = EEPROMData.IQSSBRXPhaseCorrectionFactor[EEPROMData.currentBand];
+        }
+        */
         state = State::warmup;
         averageFlag = false;
         break;
@@ -464,7 +483,7 @@ phaseCal = EEPROMData.IQSSBRXPhaseCorrectionFactor[EEPROMData.currentBand];
       case MenuSelect::FILTER:  // 3rd row, 1st column button
         shortCal = false;
         autoCal = true;
-        printCalType(calTypeFlag, autoCal, false);
+        printCalType(mode, calTypeFlag, autoCal, false);
         count = 0;
         warmup = 0;
         index = 1;
@@ -472,8 +491,16 @@ phaseCal = EEPROMData.IQSSBRXPhaseCorrectionFactor[EEPROMData.currentBand];
         IQCalType = 0;
         std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
         std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
-        iOptimal = ampCal;
-        qOptimal = phaseCal;
+        
+        if(mode == 0) {
+        iOptimal = ampCal = EEPROMData.IQCWRXAmpCorrectionFactor[EEPROMData.currentBand];;
+        qOptimal = phaseCal = EEPROMData.IQCWRXPhaseCorrectionFactor[EEPROMData.currentBand];
+        }
+        if(mode == 1) {
+        iOptimal = ampCal = EEPROMData.IQSSBRXAmpCorrectionFactor[EEPROMData.currentBand];;
+        qOptimal = phaseCal = EEPROMData.IQSSBRXPhaseCorrectionFactor[EEPROMData.currentBand];
+        }
+        
         state = State::warmup;
         averageFlag = false;
         refineCal = true;
@@ -497,7 +524,9 @@ phaseCal = EEPROMData.IQSSBRXPhaseCorrectionFactor[EEPROMData.currentBand];
         break;
       case MenuSelect::MENU_OPTION_SELECT:  // Save values and exit calibration.
         tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-        IQChoice = 6;  // AFP 2-11-23
+//        IQChoice = 6;
+          CWCalibrate::CalibrateEpilogue();
+          return;
         break;
       default:
         break;
@@ -508,7 +537,7 @@ phaseCal = EEPROMData.IQSSBRXPhaseCorrectionFactor[EEPROMData.currentBand];
       switch (state) {
         case State::warmup:
           autoCal = true;
-          printCalType(calTypeFlag, autoCal, false);
+          printCalType(mode, calTypeFlag, autoCal, false);
           count = 0;
           index = 0;
           //  stopSweep = false;
@@ -542,9 +571,9 @@ phaseCal = EEPROMData.IQSSBRXPhaseCorrectionFactor[EEPROMData.currentBand];
           phaseCal = 0.0;
           ampCal = 1.0 - maxSweepAmp;  // Begin sweep at low end and move upwards.
           if(mode == 0)
-          GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQCWRXPhaseCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
+          GetEncoderValueLive(-2.0, 2.0, phaseCal, correctionIncrement, (char *)"IQ Phase", false);  // Display the phase value.
           if(mode == 1)
-          GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQSSBRXPhaseCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
+          GetEncoderValueLive(-2.0, 2.0, phaseCal, correctionIncrement, (char *)"IQ Phase", false);
           adjdB = 0;
           adjdB_avg = 0;
           index = 0;
@@ -723,7 +752,7 @@ EEPROMData.IQSSBRXPhaseCorrectionFactor[EEPROMData.currentBand] = phaseCal;
           break;
         case State::exit:
           if (radioCal) {
-            printCalType(calTypeFlag, autoCal, true);
+            printCalType(mode, calTypeFlag, autoCal, true);
             if ((fiveSeconds - viewTime) < 5000) {  // Show calibration result for 5 seconds at conclusion during Radio Cal.
               state = State::exit;
               break;
@@ -734,7 +763,7 @@ EEPROMData.IQSSBRXPhaseCorrectionFactor[EEPROMData.currentBand] = phaseCal;
           }
           autoCal = false;
           refineCal = false;  // Reset refine cal.
-          printCalType(calTypeFlag, autoCal, false);
+          printCalType(mode, calTypeFlag, autoCal, false);
           break;
       }
     }  // end automatic calibration state machine
@@ -743,13 +772,17 @@ EEPROMData.IQSSBRXPhaseCorrectionFactor[EEPROMData.currentBand] = phaseCal;
     task = MenuSelect::DEFAULT;                            // Reset task after it is used.
     //  Read encoder and update values.
     if (IQCalType == 0) {
-      EEPROMData.IQCWRXAmpCorrectionFactor[EEPROMData.currentBand] = GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQCWRXAmpCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Gain", true);
+//      EEPROMData.IQCWRXAmpCorrectionFactor[EEPROMData.currentBand] = GetEncoderValueLive(-2.0, 2.0, ampCal, correctionIncrement, (char *)"IQ Gain", true);
+      ampCal = GetEncoderValueLive(-2.0, 2.0, ampCal, correctionIncrement, (char *)"IQ Gain", true);
+      if(mode == 0) EEPROMData.IQCWRXAmpCorrectionFactor[EEPROMData.currentBand] = ampCal;
+      if(mode == 1) EEPROMData.IQSSBRXAmpCorrectionFactor[EEPROMData.currentBand] = ampCal;
     } else {
-      EEPROMData.IQCWRXPhaseCorrectionFactor[EEPROMData.currentBand] = GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQCWRXPhaseCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
+      phaseCal = GetEncoderValueLive(-2.0, 2.0, phaseCal, correctionIncrement, (char *)"IQ Phase", false);
+      if(mode == 0) EEPROMData.IQCWRXPhaseCorrectionFactor[EEPROMData.currentBand] = phaseCal;
+      if(mode == 1) EEPROMData.IQSSBRXPhaseCorrectionFactor[EEPROMData.currentBand] = phaseCal;
     }
-    if (IQChoice == 6) break;  //  Exit the while loop.
   }                            // end while
-  CWCalibrate::CalibrateEpilogue();
+
 }  // End Transmit calibration
 
 
@@ -795,6 +828,7 @@ void CWCalibrate::DoXmitCalibrate(int mode, bool radioCal, bool shortCal) {
 //    CWCalibrate::CalibratePreamble(2);  // Set zoom to 4X.
 //    freqOffset = 2250;                  // Need 750 + 2250 = 3 kHz
 //  }
+  loadCalToneBuffers(750.0);
   calTypeFlag = 1;  // TX cal
   plotCalGraphics(calTypeFlag);
   tft.setFontScale((enum RA8875tsize)0);
@@ -807,14 +841,14 @@ void CWCalibrate::DoXmitCalibrate(int mode, bool radioCal, bool shortCal) {
     delay(1000);
   }
   SetFreqCal(freqOffset);
-  printCalType(calTypeFlag, autoCal, false);
+  printCalType(mode, calTypeFlag, autoCal, false);
   // Run this so Phase shows from begining.
   GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQCWPhaseCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
   warmUpCal(mode);
 
   if (radioCal) {
     autoCal = true;
-    printCalType(calTypeFlag, autoCal, false);
+    printCalType(mode, calTypeFlag, autoCal, false);
     count = 0;
     warmup = 0;
     index = 1;
@@ -842,7 +876,7 @@ void CWCalibrate::DoXmitCalibrate(int mode, bool radioCal, bool shortCal) {
       // Activate automatic calibration.
       case MenuSelect::ZOOM:  // 2nd row, 1st column button
         autoCal = true;
-        printCalType(calTypeFlag, autoCal, false);
+        printCalType(mode, calTypeFlag, autoCal, false);
         count = 0;
         warmup = 0;
         index = 0;
@@ -860,7 +894,7 @@ void CWCalibrate::DoXmitCalibrate(int mode, bool radioCal, bool shortCal) {
       case MenuSelect::FILTER:  // 3rd row, 1st column button
         shortCal = false;
         autoCal = true;
-        printCalType(calTypeFlag, autoCal, false);
+        printCalType(mode, calTypeFlag, autoCal, false);
         count = 0;
         warmup = 0;
         index = 1;
@@ -893,7 +927,9 @@ void CWCalibrate::DoXmitCalibrate(int mode, bool radioCal, bool shortCal) {
         break;
       case MenuSelect::MENU_OPTION_SELECT:  // Save values and exit calibration.
         tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-        IQChoice = 6;  // AFP 2-11-23
+//        IQChoice = 6;  // AFP 2-11-23
+  CWCalibrate::CalibrateEpilogue();
+  return;
         break;
       default:
         break;
@@ -904,7 +940,7 @@ void CWCalibrate::DoXmitCalibrate(int mode, bool radioCal, bool shortCal) {
       switch (state) {
         case State::warmup:
           autoCal = true;
-          printCalType(calTypeFlag, autoCal, false);
+          printCalType(mode, calTypeFlag, autoCal, false);
           //  stopSweep = false;
           std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
           std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
@@ -1104,7 +1140,7 @@ void CWCalibrate::DoXmitCalibrate(int mode, bool radioCal, bool shortCal) {
           break;
         case State::exit:
           if (radioCal) {
-            printCalType(calTypeFlag, autoCal, true);
+            printCalType(mode, calTypeFlag, autoCal, true);
             if ((fiveSeconds - viewTime) < 5000) {  // Show calibration result for 5 seconds at conclusion during Radio Cal.
               state = State::exit;
               break;
@@ -1115,7 +1151,7 @@ void CWCalibrate::DoXmitCalibrate(int mode, bool radioCal, bool shortCal) {
           }
           autoCal = false;
           refineCal = false;  // Reset refine cal.
-          printCalType(calTypeFlag, autoCal, false);
+          printCalType(mode, calTypeFlag, autoCal, false);
           break;
       }
     }  // end automatic calibration state machine
@@ -1128,9 +1164,9 @@ void CWCalibrate::DoXmitCalibrate(int mode, bool radioCal, bool shortCal) {
     } else {
       EEPROMData.IQCWPhaseCorrectionFactor[EEPROMData.currentBand] = GetEncoderValueLive(-2.0, 2.0, EEPROMData.IQCWPhaseCorrectionFactor[EEPROMData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
     }
-    if (IQChoice == 6) break;  //  Exit the while loop.
+//    if (IQChoice == 6) break;  //  Exit the while loop.
   }                            // end while
-  CWCalibrate::CalibrateEpilogue();
+
 }  // End Transmit calibration
 
 
@@ -1144,7 +1180,7 @@ void CWCalibrate::DoXmitCalibrate(int mode, bool radioCal, bool shortCal) {
       void
  *****/
 #ifdef QSE2
-void CWCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool shortCal) {
+void CWCalibrate::DoXmitCarrierCalibrate(int mode, bool radioCal, bool shortCal) {
   MenuSelect task, lastUsedTask = MenuSelect::DEFAULT;
   int freqOffset;
   int correctionIncrement = 10;
@@ -1167,14 +1203,15 @@ void CWCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool 
   std::vector<float>::iterator result;
   // bool stopSweep = false;
 
-  if (toneFreqIndex == 0) {             // 750 Hz
+//  if (toneFreqIndex == 0) {             // 750 Hz
     CWCalibrate::CalibratePreamble(4);  // Set zoom to 16X.
     freqOffset = 0;                     // Calibration tone same as regular modulation tone.
-  }
-  if (toneFreqIndex == 1) {             // 3 kHz
-    CWCalibrate::CalibratePreamble(2);  // Set zoom to 4X.
-    freqOffset = 2250;                  // Need 750 + 2250 = 3 kHz
-  }
+//  }
+//  if (toneFreqIndex == 1) {             // 3 kHz
+//    CWCalibrate::CalibratePreamble(2);  // Set zoom to 4X.
+//    freqOffset = 2250;                  // Need 750 + 2250 = 3 kHz
+//  }
+  loadCalToneBuffers(750.0);
   calTypeFlag = 2;  // Carrier cal
   plotCalGraphics(calTypeFlag);
   tft.setFontScale((enum RA8875tsize)0);
@@ -1183,14 +1220,14 @@ void CWCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool 
   tft.print(correctionIncrement);
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreqCal(freqOffset);
-  printCalType(calTypeFlag, autoCal, false);
+  printCalType(mode, calTypeFlag, autoCal, false);
   // Run this so Phase shows from begining.
   GetEncoderValueLiveQ15t(-1000, 1000, EEPROMData.qDCoffsetCW[EEPROMData.currentBand], correctionIncrement, (char *)"Q Offset", false);
-  warmUpCal();
+  warmUpCal(mode);
 
   if (radioCal) {
     autoCal = true;
-    printCalType(calTypeFlag, autoCal, false);
+    printCalType(mode, calTypeFlag, autoCal, false);
     count = 0;
     warmup = 0;
     index = 0;
@@ -1203,7 +1240,7 @@ void CWCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool 
 
   // Transmit Calibration Loop
   while (true) {
-    CWCalibrate::ShowSpectrum2();
+    CWCalibrate::ShowSpectrum2(mode);
     /*
     val = ReadSelectedPushButton();
     if (val != BOGUS_PIN_READ) {
@@ -1218,7 +1255,7 @@ void CWCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool 
       // Activate automatic calibration.
       case MenuSelect::ZOOM:  // 2nd row, 1st column button
         autoCal = true;
-        printCalType(calTypeFlag, autoCal, false);
+        printCalType(mode, calTypeFlag, autoCal, false);
         count = 0;
         warmup = 0;
         index = 1;
@@ -1236,7 +1273,7 @@ void CWCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool 
       case MenuSelect::FILTER:  // 3rd row, 1st column button
         shortCal = false;
         autoCal = true;
-        printCalType(calTypeFlag, autoCal, false);
+        printCalType(mode, calTypeFlag, autoCal, false);
         count = 0;
         warmup = 0;
         index = 0;
@@ -1269,7 +1306,10 @@ void CWCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool 
         break;
       case MenuSelect::MENU_OPTION_SELECT:  // Save values and exit calibration.
         tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-        IQChoice = 6;  // AFP 2-11-23
+//        IQChoice = 6;  // AFP 2-11-23
+  CWCalibrate::CalibrateEpilogue();
+  return;
+
         break;
       default:
         break;
@@ -1280,7 +1320,7 @@ void CWCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool 
       switch (state) {
         case State::warmup:
           autoCal = true;
-          printCalType(calTypeFlag, autoCal, false);
+          printCalType(mode, calTypeFlag, autoCal, false);
           //  stopSweep = false;
           std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
           std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
@@ -1479,7 +1519,7 @@ void CWCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool 
           break;
         case State::exit:
           if (radioCal) {
-            printCalType(calTypeFlag, autoCal, true);
+            printCalType(mode, calTypeFlag, autoCal, true);
             if ((fiveSeconds - viewTime) < 5000) {  // Show calibration result for 5 seconds at conclusion during Radio Cal.
               state = State::exit;
               break;
@@ -1490,7 +1530,7 @@ void CWCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool 
           }
           autoCal = false;
           refineCal = false;  // Reset refine cal.
-          printCalType(calTypeFlag, autoCal, false);
+          printCalType(mode, calTypeFlag, autoCal, false);
           break;
       }
     }  // end automatic calibration state machine
@@ -1503,9 +1543,9 @@ void CWCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool 
     } else {
       EEPROMData.qDCoffsetCW[EEPROMData.currentBand] = GetEncoderValueLiveQ15t(-1000, 1000, EEPROMData.qDCoffsetCW[EEPROMData.currentBand], correctionIncrement, (char *)"Q Offset", false);
     }
-    if (IQChoice == 6) break;  //  Exit the while loop.
+//    if (IQChoice == 6) break;  //  Exit the while loop.
   }                            // end while
-  CWCalibrate::CalibrateEpilogue();
+
 }  // End carrier calibration
 #endif
 
@@ -1520,22 +1560,22 @@ void CWCalibrate::RadioCal(bool refineCal) {
     tft.print("RADIO NOT CALIBRATED");
     return;
   }
-  IQChoice = 0;  // Global variable.
+//  IQChoice = 0;  // Global variable.
   BandSet(BAND_80M);
 #ifdef QSE2
-  CWCalibrate::DoXmitCarrierCalibrate(true, refineCal);
+  CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal);
 #endif
-  CWCalibrate::DoXmitCalibrate(true, refineCal, 0);
+  CWCalibrate::DoXmitCalibrate(0, true, refineCal);
   CWCalibrate::DoReceiveCalibrate(0, true, refineCal);
   BandSet(BAND_40M);
 #ifdef QSE2
-  CWCalibrate::DoXmitCarrierCalibrate(true, refineCal);
+  CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal);
 #endif
   CWCalibrate::DoXmitCalibrate(0, true, refineCal);
   CWCalibrate::DoReceiveCalibrate(0, true, refineCal);
   BandSet(BAND_20M);
 #ifdef QSE2
-  CWCalibrate::DoXmitCarrierCalibrate(true, refineCal);
+  CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal);
 #endif
   CWCalibrate::DoXmitCalibrate(0, true, refineCal);
   CWCalibrate::DoReceiveCalibrate(0, true, refineCal);

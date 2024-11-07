@@ -87,7 +87,7 @@ void SSBCalibrate::warmUpCal() {
 *****/
 void SSBCalibrate::printCalType(int IQCalType, bool autoCal, bool autoCalDone) {
   const char *calName;
-  const char *IQName[4] = { "Receive", "Transmit SSB", "Carrier SSB", "Calibrate" };
+  const char *IQName[4] = { "Receive", "Transmit SSB", "Carrier SSB", "Calibrate" };  // Receive not used here.
   tft.writeTo(L1);
   calName = IQName[calTypeFlag];
   tft.setFontScale((enum RA8875tsize)1);
@@ -732,7 +732,7 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal) {
       void
  *****/
 #ifdef QSE2
-void SSBCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool shortCal) {
+void SSBCalibrate::DoXmitCarrierCalibrate(bool radioCal, bool shortCal) {
   //  int task = -1;
   //  int lastUsedTask = -2;
   MenuSelect task, lastUsedTask = MenuSelect::DEFAULT;
@@ -759,14 +759,14 @@ void SSBCalibrate::DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool
   std::vector<float>::iterator result;
   // bool stopSweep = false;
 
-  if (toneFreqIndex == 0) {              // 750 Hz
+//  if (toneFreqIndex == 0) {              // 750 Hz
     SSBCalibrate::CalibratePreamble(2);  // Set zoom to 16X.
     freqOffset = 0;                      // Calibration tone same as regular modulation tone.
-  }
-  if (toneFreqIndex == 1) {              // 3 kHz
-    SSBCalibrate::CalibratePreamble(2);  // Set zoom to 4X.
-    freqOffset = 2250;                   // Need 750 + 2250 = 3 kHz
-  }
+//  }
+//  if (toneFreqIndex == 1) {              // 3 kHz
+//    SSBCalibrate::CalibratePreamble(2);  // Set zoom to 4X.
+//    freqOffset = 2250;                   // Need 750 + 2250 = 3 kHz
+//  }
   calTypeFlag = 2;  // Carrier cal
   plotCalGraphics(calTypeFlag);
   tft.setFontScale((enum RA8875tsize)0);
@@ -1119,45 +1119,52 @@ void SSBCalibrate::RadioCal(bool refineCal) {
   //  IQChoice = 0;  // Global variable.
   BandSet(BAND_80M);
 #ifdef QSE2
-  SSBCalibrate::DoXmitCarrierCalibrate(EEPROMData.calFreq, true, refineCal);
+  SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
 #endif
   SSBCalibrate::DoXmitCalibrate(true, refineCal);
+  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal);
 
   BandSet(BAND_40M);
 #ifdef QSE2
   SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
 #endif
   SSBCalibrate::DoXmitCalibrate(true, refineCal);
+  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal);
 
   BandSet(BAND_20M);
 #ifdef QSE2
   SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
 #endif
   SSBCalibrate::DoXmitCalibrate(true, refineCal);
+  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal);
 
   BandSet(BAND_17M);
 #ifdef QSE2
   SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
 #endif
   SSBCalibrate::DoXmitCalibrate(true, refineCal);
+  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal);
 
   BandSet(BAND_15M);
 #ifdef QSE2
   SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
 #endif
   SSBCalibrate::DoXmitCalibrate(true, refineCal);
+  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal);
 
   BandSet(BAND_12M);
 #ifdef QSE2
   SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
 #endif
   SSBCalibrate::DoXmitCalibrate(true, refineCal);
+  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal);
 
   BandSet(BAND_10M);
 #ifdef QSE2
   SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
 #endif
   SSBCalibrate::DoXmitCalibrate(true, refineCal);
+  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal);
 
   // Set flag for initial calibration completed.
   EEPROMData.SSBradioCalComplete = true;

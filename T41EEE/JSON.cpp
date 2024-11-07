@@ -211,7 +211,7 @@ FLASHMEM void JSON::saveConfiguration(const char *filename, const config_t &EEPR
   for (int i = 0; i < 7; i++) doc["IQCWAmpCorrectionFactor"][i] =   EEPROMData.IQCWAmpCorrectionFactor[i];
   for (int i = 0; i < 7; i++) doc["IQCWPhaseCorrectionFactor"][i] = EEPROMData.IQCWPhaseCorrectionFactor[i];
   for (int i = 0; i < 7; i++) doc["IQSSBRXAmpCorrectionFactor"][i] =   EEPROMData.IQSSBRXAmpCorrectionFactor[i];
-  for (int i = 0; i < 7; i++) doc["IQSSBRXPhaseCorrectionFactor"][i] = EEPROMData.IQSSBPhaseCorrectionFactor[i];
+  for (int i = 0; i < 7; i++) doc["IQSSBRXPhaseCorrectionFactor"][i] = EEPROMData.IQSSBRXPhaseCorrectionFactor[i];
   for (int i = 0; i < 7; i++) doc["IQSSBAmpCorrectionFactor"][i] =   EEPROMData.IQSSBAmpCorrectionFactor[i];
   for (int i = 0; i < 7; i++) doc["IQSSBPhaseCorrectionFactor"][i] = EEPROMData.IQSSBPhaseCorrectionFactor[i];  
   for (int i = 0; i < 13; i++) doc["favoriteFreqs"][i] = EEPROMData.favoriteFreqs[i];

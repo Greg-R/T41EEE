@@ -324,7 +324,7 @@ bool agc_action = false;
 #include "Process.h"
 
 Process process;         // Receiver process object.
-CWCalibrate calibrater;  // Instantiate the calibration objects.
+CWCalibrate cwcalibrater;  // Instantiate the calibration objects.
 SSBCalibrate ssbcalibrater;
 JSON json;
 Eeprom eeprom;           // Eeprom object.
@@ -539,7 +539,6 @@ bool calibrateFlag = 0;
 bool calOnFlag = false;
 int chipSelect = BUILTIN_SDCARD;
 int idx;
-int IQChoice;
 int NR_Index = 0;
 int n_L;
 int n_R;

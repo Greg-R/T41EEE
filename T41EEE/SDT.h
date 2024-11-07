@@ -555,7 +555,7 @@ extern Metro ms_500;
 extern Process process;              // Receiver DSP object.
 extern Eeprom eeprom;                // EEPROM memory object.
 extern JSON json;
-extern CWCalibrate calibrater;         // CW mode calibration object.
+extern CWCalibrate cwcalibrater;         // CW mode calibration object.
 extern SSBCalibrate ssbcalibrater;   // SSB mode calibration object.
 
 extern Si5351 si5351;
@@ -680,7 +680,6 @@ extern volatile long fineTuneEncoderMove;
 extern int freqIncrement;
 extern void (*functionPtr[])();
 extern int idx;
-extern int IQChoice;
 extern bool buttonInterruptsEnabled;
 extern int n_L;
 extern int n_R;

@@ -53,11 +53,11 @@ std::vector<float> sub_vectorPhaseResult = std::vector<float>(21);
 
 averagingState avgState = averagingState::refineAmp;
 
-void loadCalToneBuffers();
+void loadCalToneBuffers(float toneFreq);
 void plotCalGraphics(int calType);
 void ProcessIQData2(int mode);
 void warmUpCal(int mode);
-void printCalType(int IQCalType, bool autoCal, bool autoCalDone);
+void printCalType(int mode, int IQCalType, bool autoCal, bool autoCalDone);
 void CalibratePreamble(int setZoom);
 void CalibrateEpilogue();
 void DoReceiveCalibrate(int mode, bool radioCal, bool shortCal);
