@@ -287,7 +287,7 @@ extern struct maps myMapFiles[];
 
 struct config_t {
 
-  char versionSettings[10] = "T41EEE.7";  // This is required to be the first!  See EEPROMRead() function.
+  char versionSettings[10] = "T41EEE.8";  // This is required to be the first!  See EEPROMRead() function.
   int AGCMode = 1;
   int audioVolume = 30;  // 4 bytes
   int rfGainCurrent = 0;
