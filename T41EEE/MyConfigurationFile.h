@@ -52,14 +52,14 @@
 //#define                           FOURSQRP
 
 // Set multiplication factors for your QSD and QSE boards.
-#define MASTER_CLK_MULT_RX 2
-#define MASTER_CLK_MULT_TX 2
+#define MASTER_CLK_MULT_RX 4
+#define MASTER_CLK_MULT_TX 4
 
 // Uncomment this line for QSE2.
-#define QSE2
+//#define QSE2
 
 // Uncomment this line if using an external PLL module.
-#define PLLMODULE
+//#define PLLMODULE
 
 // Customizable definitions for center and fine tune defaults and increments.  Larry K3PTO June 24, 2024
 #define CENTER_TUNE_DEFAULT		      1000                           // Set to the desired default in the CENTER_TUNE_ARRAY.
@@ -68,14 +68,14 @@
 #define FINE_TUNE_ARRAY           { 10, 20, 50, 100, 200, 500 }
 
 // Uncomment for the original T41 audio mute control.
-//#define UNMUTEAUDIO LOW
-//#define MUTEAUDIO   HIGH
+#define UNMUTEAUDIO LOW
+#define MUTEAUDIO   HIGH
 // Use this for external amp with mute LOW, unmute HIGH.
-#define UNMUTEAUDIO HIGH
-#define MUTEAUDIO   LOW
+//#define UNMUTEAUDIO HIGH
+//#define MUTEAUDIO   LOW
 
 // If using an external amplifier, the gain may need to be adjusted for the best volume range.
-#define AUDIOSCALE  30    // A typical value is 20.  Increase or decrease this value depending on your amplifier gain.
+#define AUDIOSCALE  20    // A typical value is 20.  Increase or decrease this value depending on your amplifier gain.
 #define DSPGAINSCALE 10.0  // A typical value for V10/V11 is in the range of 5.0 to 15.
                            // Adjust this parameter for visible noise in the audio spectrum with an antenna connected.
 
