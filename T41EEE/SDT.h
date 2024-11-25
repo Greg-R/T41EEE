@@ -700,8 +700,6 @@ extern int updateDisplayCounter;
 extern const int DEC2STATESIZE;
 extern const int INT1_STATE_SIZE;
 extern const int INT2_STATE_SIZE;
-extern long long freqCorrectionFactor;
-extern long long freqCorrectionFactorOld;  //AFP 09-21-22
 extern int32_t mainMenuIndex;
 extern const uint32_t N_B;
 extern const uint32_t N_DEC_B;
