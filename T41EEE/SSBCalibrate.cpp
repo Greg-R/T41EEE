@@ -306,7 +306,7 @@ void SSBCalibrate::CalibrateEpilogue() {
 
   digitalWrite(RXTX, LOW);  // Turn off the transmitter.
   updateDisplayFlag = false;
-  tone1kHz.end();
+  toneSSBCal.end();
   SampleRate = SAMPLE_RATE_192K;  // Return to receiver sample rate.
   SetI2SFreq(SR[SampleRate].rate);
   InitializeDataArrays();  // Re-initialize the filters back to 192ksps.
