@@ -53,19 +53,21 @@ std::vector<float> sub_vectorPhaseResult = std::vector<float>(21);
 
 averagingState avgState = averagingState::refineAmp;
 
-void loadCalToneBuffers();
+void loadCalToneBuffers(float toneFreq);
 void plotCalGraphics(int calType);
-void ProcessIQData2();
-void warmUpCal();
-void printCalType(int IQCalType, bool autoCal, bool autoCalDone);
+void ProcessIQData2(int mode);
+void warmUpCal(int mode);
+void printCalType(int mode, int IQCalType, bool autoCal, bool autoCalDone);
 void CalibratePreamble(int setZoom);
 void CalibrateEpilogue();
-void DoReceiveCalibrate(bool radioCal, bool shortCal);
-void DoXmitCalibrate(int toneFreqIndex, bool radioCal, bool shortCal);
-void DoXmitCarrierCalibrate(int toneFreqIndex, bool radioCal, bool shortCal);
-const char *calFreqs[2]{ "750 Hz", "3.0 kHz" };
-void SelectCalFreq();
-void ShowSpectrum2();
-float PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins);
+void DoReceiveCalibrate(int mode, bool radioCal, bool shortCal);
+void DoXmitCalibrate(int mode, bool radioCal, bool shortCal);
+#ifdef QSE2
+void DoXmitCarrierCalibrate(int mode, bool radioCal, bool shortCal);
+#endif
+//const char *calFreqs[2]{ "750 Hz", "3.0 kHz" };
+//void SelectCalFreq();
+void ShowSpectrum2(int mode);
+float PlotCalSpectrum(int mode, int x1, int cal_bins[3], int capture_bins);
 void RadioCal(bool refineCal);
 };

@@ -1,5 +1,5 @@
 /*
-### Version T41EEE.7 T41 Software Defined Transceiver Arduino Sketch
+### Version T41EEE.8 T41 Software Defined Transceiver Arduino Sketch
 
 This is the "T41 Extreme Experimenter's Edition" software for the 
 T41 Software Defined Transceiver.  The T41EEE was "forked" from the V049.2 version
@@ -43,7 +43,7 @@ successful.
 
 ## How to Compile T41EEE
 
-T41EEE.7 was developed and compiled using Arduino IDE version 2.3.2 with the following
+T41EEE.8 was developed and compiled using Arduino IDE version 2.3.2 with the following
 configuration:
 
 1.  Optimize is set to "Smallest Code" (Tools menu).
@@ -319,12 +319,17 @@ uint32_t FFT_length = FFT_LENGTH;
 bool agc_action = false;
 // Teensy and OpenAudio dataflow code.
 #include "AudioSignal.h"
-//End dataflow code
+//End dataflow 
 
-CWCalibrate calibrater;  // Instantiate the calibration objects.
+#include "Process.h"
+
+Process process;         // Receiver process object.
+CWCalibrate cwcalibrater;  // Instantiate the calibration objects.
 SSBCalibrate ssbcalibrater;
 JSON json;
 Eeprom eeprom;           // Eeprom object.
+
+
 
 Rotary volumeEncoder = Rotary(VOLUME_ENCODER_A, VOLUME_ENCODER_B);        //( 2,  3)
 Rotary tuneEncoder = Rotary(TUNE_ENCODER_A, TUNE_ENCODER_B);              //(16, 17)
@@ -534,7 +539,6 @@ bool calibrateFlag = 0;
 bool calOnFlag = false;
 int chipSelect = BUILTIN_SDCARD;
 int idx;
-int IQChoice;
 int NR_Index = 0;
 int n_L;
 int n_R;
@@ -586,7 +590,6 @@ float32_t coefficient_set[5] = { 0, 0, 0, 0, 0 };
 float32_t corr[2];
 
 float32_t dbm = -145.0;
-float32_t dbm_calibration = 22.0;
 
 float32_t DMAMEM FFT_buffer[FFT_LENGTH * 2] __attribute__((aligned(4))) = { 0 };
 float32_t DMAMEM FFT_spec[1024] = { 0 };
@@ -1270,8 +1273,7 @@ elapsedMicros usec = 0;  // Automatically increases as time passes; no ++ necess
   Return value:
     void
 *****/
-float audioBW{0.0}; 
-int dBoffset{0};
+float audioBW{0.0};
 
 void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
 {
@@ -1481,10 +1483,14 @@ if(cessb1.levelDataCount() > 2000) {
     // The upper and lower frequency limits are bands[EEPROMData.currentBand].FLoCut and bands[EEPROMData.currentBand].FHiCut.
     audioBW = bands[EEPROMData.currentBand].FHiCut - bands[EEPROMData.currentBand].FLoCut;
     // How many dB between reference and current setting?  Round to integer.
-    dBoffset = static_cast<int>(40.0 * log10f_fast(audioBW/2800.0));
-    volumeAdjust.gain(volumeLog[(EEPROMData.audioVolume - dBoffset)]);
+//    dBoffset = static_cast<int>(40.0 * log10f_fast(audioBW/2800.0));
+    process.audioGainCompensate = 4 * 2800.0/audioBW;
+    volumeAdjust.gain(volumeLog[EEPROMData.audioVolume]);
+//    int gainAdjust = EEPROMData.audioVolume - dBoffset;
     volumeChangeFlag = false;
     UpdateVolumeField();
+//    Serial.printf("audioBW = %d\n", static_cast<int>(audioBW));
+//    Serial.printf("EEPROMData.audioVolume = %d\n", EEPROMData.audioVolume);
   }
 
 }  // end loop()

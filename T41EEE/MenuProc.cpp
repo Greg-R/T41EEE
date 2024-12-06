@@ -15,6 +15,7 @@
 
 int micChoice = 0;
 int splitOn = 0;
+int IQChoice = 0;
 
 #include "SDT.h"
 
@@ -69,9 +70,9 @@ void CalibrateOptions() {
   tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 30, CHAR_HEIGHT, RA8875_BLACK);
 
   // Select the type of calibration, and then skip this during the loop() function.
-  if (calibrateFlag == 0) {
-    const char *IQOptions[18]{ "Freq Cal", "CW PA Cal", "Rec Cal", "CW Carrier Cal", "CW Xmit Cal", "SSB PA Cal", "SSB Carrier Cal", "SSB Transmit Cal", "CW Radio Cal", "CW Refine Cal", "SSB Radio Cal", "SSB Refine Cal", "CW Cal Tone", "DAC Offset CW", "DAC Offset SSB", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
-    IQChoice = SubmenuSelect(IQOptions, 18, 0);                                                                                                                                                                                                                                                                      //AFP 10-21-22
+  if (calibrateFlag == 0) {   //    0             1           2               3                4              5             6              7                  8                  9               10                11               12                13               14               15              16          17           18
+    const char *IQOptions[19]{ "Freq Cal", "CW PA Cal", "CW Rec Cal", "CW Carrier Cal", "CW Xmit Cal", "SSB PA Cal", "SSB Rec Cal", "SSB Carrier Cal", "SSB Transmit Cal", "CW Radio Cal", "CW Refine Cal", "SSB Radio Cal", "SSB Refine Cal", "dBm Level Cal", "DAC Offset CW", "DAC Offset SSB", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
+    IQChoice = SubmenuSelect(IQOptions, 19, 0);                                                                                                                                                                                                                                                                      //AFP 10-21-22
   }
   calibrateFlag = 1;
   switch (IQChoice) {
@@ -105,19 +106,19 @@ void CalibrateOptions() {
       }
       break;
 
-    case 2:                                         // IQ Receive Cal - Gain and Phase
-      calibrater.DoReceiveCalibrate(false, false);  // This function was significantly revised.  KF5N August 16, 2023
+    case 2:                                         // CW IQ Receive Cal - Gain and Phase
+      cwcalibrater.DoReceiveCalibrate(0, false, false);  // This function was significantly revised.  KF5N August 16, 2023
       break;
 
-    case 3:  // Xmit Carrier calibration.
-      calibrater.DoXmitCarrierCalibrate(EEPROMData.calFreq, false, false);
+    case 3:                                         // CW Xmit Carrier calibration.
+      cwcalibrater.DoXmitCarrierCalibrate(0, false, false);
       break;
 
-    case 4:                                                          // IQ Transmit Cal - Gain and Phase  //AFP 2-21-23
-      calibrater.DoXmitCalibrate(EEPROMData.calFreq, false, false);  // This function was significantly revised.  KF5N August 16, 2023
+    case 4:                                         // CW IQ Transmit Cal - Gain and Phase  //AFP 2-21-23
+      cwcalibrater.DoXmitCalibrate(0, false, false);  // This function was significantly revised.  KF5N August 16, 2023
       break;
 
-    case 5:  // SSB PA Cal
+    case 5:                                         // SSB PA Cal
       EEPROMData.SSBPowerCalibrationFactor[EEPROMData.currentBand] = GetEncoderValueLive(0.0, 1.0, EEPROMData.SSBPowerCalibrationFactor[EEPROMData.currentBand], 0.01, (char *)"SSB PA Cal: ", false);
       EEPROMData.powerOutSSB[EEPROMData.currentBand] = sqrt(EEPROMData.transmitPowerLevel / 20.0) * EEPROMData.SSBPowerCalibrationFactor[EEPROMData.currentBand];
       menu = readButton();
@@ -130,41 +131,57 @@ void CalibrateOptions() {
       }
       break;  // Missing break.  KF5N August 12, 2023
 
-
-    case 6:  // SSB Carrier Cal
-      ssbcalibrater.DoXmitCarrierCalibrate(EEPROMData.calFreq, false, false);
+    case 6:                                         // SSB receive cal
+      cwcalibrater.DoReceiveCalibrate(1, false, false);  // This function was significantly revised.  KF5N August 16, 2023
       break;
 
-    case 7:                                                             // SSB Transmit cal
-      ssbcalibrater.DoXmitCalibrate(EEPROMData.calFreq, false, false);  // This function was significantly revised.  KF5N August 16, 2023
+    case 7:                                           // SSB Carrier Cal
+      ssbcalibrater.DoXmitCarrierCalibrate(false, false);
       break;
 
-    case 8:  // Fully automatic radio calibration.
-      calibrater.RadioCal(false);
+    case 8:                                          // SSB Transmit cal
+      ssbcalibrater.DoXmitCalibrate(false, false);  // This function was significantly revised.  KF5N August 16, 2023
+      break;
+
+    case 9:  // CW fully automatic radio calibration.
+      cwcalibrater.RadioCal(false);
       calibrateFlag = 0;
       break;
 
-    case 9:  // Full automatic calibration refinement.
-      calibrater.RadioCal(true);
+    case 10:  // CW full automatic calibration refinement.
+      cwcalibrater.RadioCal(true);
       calibrateFlag = 0;
       break;
 
-    case 10:  // Fully automatic radio calibration.
+    case 11:  // SSB fully automatic radio calibration.
       ssbcalibrater.RadioCal(false);
       calibrateFlag = 0;
       break;
 
-    case 11:  // Full automatic calibration refinement.
+    case 12:  // SSB fully automatic calibration refinement.
       ssbcalibrater.RadioCal(true);
       calibrateFlag = 0;
       break;
 
-    case 12:  // Choose CW calibration tone frequency.
-      calibrater.SelectCalFreq();
-      calibrateFlag = 0;
+    case 13:  // dBm level cal.  Was choose CW calibration tone frequency.
+//      calibrater.SelectCalFreq();
+//      calibrateFlag = 0;
+      EEPROMData.dBm_calibration = GetEncoderValueLive(0, 50, EEPROMData.dBm_calibration, 1, (char *)"dBm Cal: ", false);
+      if (EEPROMData.dBm_calibration != freqCorrectionFactorOld) {
+//        si5351.set_correction(EEPROMData.freqCorrectionFactor, SI5351_PLL_INPUT_XO);
+        freqCorrectionFactorOld = EEPROMData.dBm_calibration;
+      }
+      menu = readButton();
+      if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
+        if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
+          tft.fillRect(SECONDARY_MENU_X - 1, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT + 1, RA8875_BLACK);
+          eeprom.EEPROMWrite();
+          calibrateFlag = 0;
+        }
+      }
       break;
 
-    case 13:  // Set DAC offset for CW carrier cancellation.
+    case 14:  // Set DAC offset for CW carrier cancellation.
       EEPROMData.dacOffsetCW = GetEncoderValueLiveQ15t(-5000, 5000, EEPROMData.dacOffsetCW, 50, (char *)"DC Offset:", false);
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {
@@ -176,7 +193,7 @@ void CalibrateOptions() {
       }
       break;
 
-    case 14:  // Set DAC offset for SSB carrier cancellation.
+    case 15:  // Set DAC offset for SSB carrier cancellation.
       EEPROMData.dacOffsetSSB = GetEncoderValueLiveQ15t(-5000, 5000, EEPROMData.dacOffsetSSB, 50, (char *)"DC Offset:", false);
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {
@@ -188,7 +205,7 @@ void CalibrateOptions() {
       }
       break;
 
-    case 15:  // Calibrate buttons
+    case 16:  // Calibrate buttons
       SaveAnalogSwitchValues();
       calibrateFlag = 0;
       RedrawDisplayScreen();
@@ -196,7 +213,7 @@ void CalibrateOptions() {
       DrawFrequencyBarValue();
       break;
 
-    case 16:  // Set button repeat rate
+    case 17:  // Set button repeat rate
       EEPROMData.buttonRepeatDelay = 1000 * GetEncoderValueLive(0, 5000, EEPROMData.buttonRepeatDelay / 1000, 1, (char *)"Btn Repeat:  ", false);
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {
@@ -208,7 +225,7 @@ void CalibrateOptions() {
       }
       break;
 
-    case 17:  // Cancelled choice
+    case 18:  // Cancelled choice
       RedrawDisplayScreen();
       currentFreq = TxRxFreq = EEPROMData.centerFreq + NCOFreq;
       DrawBandWidthIndicatorBar();  // AFP 10-20-22
@@ -232,8 +249,8 @@ void CalibrateOptions() {
 
   // Select the type of calibration, and then skip this during the loop() function.
   if (calibrateFlag == 0) {
-    const char *IQOptions[14]{ "Freq Cal", "CW PA Cal", "Rec Cal", "CW Xmit Cal", "SSB PA Cal", "SSB Transmit Cal", "CW Radio Cal", "CW Refine Cal", "SSB Radio Cal", "SSB Refine Cal", "CW Cal Tone", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
-    IQChoice = SubmenuSelect(IQOptions, 14, 0);                                                                                                                                                                                                                                                                      //AFP 10-21-22
+    const char *IQOptions[15]{ "Freq Cal", "CW PA Cal", "CW Rec Cal", "CW Xmit Cal", "SSB PA Cal", "SSB Rec Cal", "SSB Transmit Cal", "CW Radio Cal", "CW Refine Cal", "SSB Radio Cal", "SSB Refine Cal", "dBm Level Cal", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
+    IQChoice = SubmenuSelect(IQOptions, 15, 0);                                                                                                                                                                                                                                                                      //AFP 10-21-22
   }
   calibrateFlag = 1;
   switch (IQChoice) {
@@ -267,12 +284,12 @@ void CalibrateOptions() {
       }
       break;
 
-    case 2:                                         // IQ Receive Cal - Gain and Phase
-      calibrater.DoReceiveCalibrate(false, false);  // This function was significantly revised.  KF5N August 16, 2023
+    case 2:                                         // CW IQ Receive Cal - Gain and Phase
+      cwcalibrater.DoReceiveCalibrate(0, false, false);  // This function was significantly revised.  KF5N August 16, 2023
       break;
 
-    case 3:                                                          // IQ Transmit Cal - Gain and Phase  //AFP 2-21-23
-      calibrater.DoXmitCalibrate(EEPROMData.calFreq, false, false);  // This function was significantly revised.  KF5N August 16, 2023
+    case 3:                                         // CW IQ Transmit Cal - Gain and Phase  //AFP 2-21-23
+      cwcalibrater.DoXmitCalibrate(0, false, false);  // This function was significantly revised.  KF5N August 16, 2023
       break;
 
     case 4:  // SSB PA Cal
@@ -288,36 +305,53 @@ void CalibrateOptions() {
       }
       break;  // Missing break.  KF5N August 12, 2023
 
-    case 5:
-      ssbcalibrater.DoXmitCalibrate(EEPROMData.calFreq, false, false);  // SSB Transmit cal
+    case 5:                                         // SSB IQ Receive Cal - Gain and Phase
+            cwcalibrater.DoReceiveCalibrate(1, false, false);  // This function was significantly revised.  KF5N August 16, 2023
+      break; 
+
+    case 6:
+      ssbcalibrater.DoXmitCalibrate(false, false);  // SSB Transmit cal
       break;
 
-    case 6:  // Fully automatic radio calibration.
-      calibrater.RadioCal(false);
+    case 7:  //  CW fully automatic radio calibration.
+      cwcalibrater.RadioCal(false);
       calibrateFlag = 0;
       break;
 
-    case 7:  // Full automatic calibration refinement.
-      calibrater.RadioCal(true);
+    case 8:  // CW fully automatic calibration refinement.
+      cwcalibrater.RadioCal(true);
       calibrateFlag = 0;
       break;
 
-    case 8:  // Fully automatic radio calibration.
+    case 9:  // SSB fully automatic radio calibration.
       ssbcalibrater.RadioCal(false);
       calibrateFlag = 0;
       break;
 
-    case 9:  // Full automatic calibration refinement.
+    case 10:  // SSB fully automatic calibration refinement.
       ssbcalibrater.RadioCal(true);
       calibrateFlag = 0;
       break;
 
-    case 10:  // Choose CW calibration tone frequency.
-      calibrater.SelectCalFreq();
-      calibrateFlag = 0;
+    case 11:  // dBm level cal.  Was choose CW calibration tone frequency.
+//      calibrater.SelectCalFreq();
+//      calibrateFlag = 0;
+      EEPROMData.dBm_calibration = GetEncoderValueLive(0, 50, EEPROMData.dBm_calibration, 1, (char *)"dBm Cal: ", false);
+      if (EEPROMData.dBm_calibration != freqCorrectionFactorOld) {
+//        si5351.set_correction(EEPROMData.freqCorrectionFactor, SI5351_PLL_INPUT_XO);
+        freqCorrectionFactorOld = EEPROMData.dBm_calibration;
+      }
+      menu = readButton();
+      if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
+        if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
+          tft.fillRect(SECONDARY_MENU_X - 1, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT + 1, RA8875_BLACK);
+          eeprom.EEPROMWrite();
+          calibrateFlag = 0;
+        }
+      }
       break;
 
-    case 11:  // Calibrate buttons
+    case 12:  // Calibrate buttons
       SaveAnalogSwitchValues();
       calibrateFlag = 0;
       RedrawDisplayScreen();
@@ -325,7 +359,7 @@ void CalibrateOptions() {
       DrawFrequencyBarValue();
       break;
 
-    case 12:  // Set button repeat rate
+    case 13:  // Set button repeat rate
       EEPROMData.buttonRepeatDelay = 1000 * GetEncoderValueLive(0, 5000, EEPROMData.buttonRepeatDelay / 1000, 1, (char *)"Btn Repeat:  ", false);
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {
@@ -337,7 +371,7 @@ void CalibrateOptions() {
       }
       break;
 
-    case 13:  // Cancelled choice
+    case 14:  // Cancelled choice
       RedrawDisplayScreen();
       currentFreq = TxRxFreq = EEPROMData.centerFreq + NCOFreq;
       DrawBandWidthIndicatorBar();  // AFP 10-20-22

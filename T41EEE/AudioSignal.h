@@ -19,7 +19,7 @@ radioCESSB_Z_transmit_F32 cessb1;
 AudioConvert_F32toI16 float2Int1, float2Int2;  // Converts Float to Int16.  See class in AudioStream_F32.h
 AudioSwitch4_OA_F32 switch1, switch2, switch3;
 AudioMixer4_F32 mixer1, mixer2;                        // Used to switch in tone during calibration.
-AudioSynthWaveformSine_F32  tone1kHz;          // Tone for SSB calibration.
+AudioSynthWaveformSine_F32  toneSSBCal;          // Tone for SSB calibration.
 AudioRecordQueue Q_in_L_Ex;                    // AudioRecordQueue for input Microphone channel.
 AudioRecordQueue Q_in_R_Ex;           // This 2nd channel is needed as we are bringing I and Q into the sketch instead of only microphone audio.
 AudioPlayQueue Q_out_L_Ex;                     // AudioPlayQueue for driving the I channel (CW/SSB) to the QSE.
@@ -29,7 +29,7 @@ AudioPlayQueue Q_out_R_Ex;                     // AudioPlayQueue for driving the
 AudioConnection connect0(i2s_quadIn, 0, int2Float1, 0);    // Microphone audio channel.  Must use int2Float because Open Audio does not have quad input.
 
 AudioConnection_F32 connect1(int2Float1, 0, switch1, 0);
-AudioConnection_F32 connect2(tone1kHz,  0, switch2, 0);
+AudioConnection_F32 connect2(toneSSBCal,  0, switch2, 0);
 
 // Need a mixer to switch in an audio tone during calibration.  Should be a nominal tone amplitude.
 AudioConnection_F32 connect3(switch1, 0, mixer1, 0);  // Connect microphone mixer1 output 0 via gain control.
@@ -144,7 +144,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       Q_in_R.clear();
       SampleRate = SAMPLE_RATE_48K;
       SetI2SFreq(SR[SampleRate].rate);
-      tone1kHz.end();
+      toneSSBCal.end();
       updateMic();
       mixer1.gain(0, 1.0);   // Connect microphone audio to transmit chain.
       mixer1.gain(1, 0.0);   // Disconnect 1 kHz test tone. 
@@ -185,10 +185,10 @@ void SetAudioOperatingState(RadioState operatingState) {
       Q_in_R.clear();
 
       // Test tone enabled and connected
-      tone1kHz.setSampleRate_Hz(48000);
-      tone1kHz.amplitude(0.3);
-      tone1kHz.frequency(750.0);
-      tone1kHz.begin();
+      toneSSBCal.setSampleRate_Hz(48000);
+      toneSSBCal.amplitude(0.3);
+      toneSSBCal.frequency(750.0);
+      toneSSBCal.begin();
       mixer1.gain(0, 0);  // microphone audio off.
       mixer1.gain(1, 1);  // testTone on.
       switch1.setChannel(1);  // Disconnect microphone path.
@@ -260,7 +260,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       Q_in_R.end();
       Q_in_R.clear();
 
-      tone1kHz.end();
+      toneSSBCal.end();
       mixer1.gain(0, 0);  // microphone audio off.
       mixer1.gain(1, 0);  // testTone off.
 

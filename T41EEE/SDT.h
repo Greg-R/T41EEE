@@ -211,7 +211,6 @@ const int RESET = 0;  // QSD2/QSE2 reset pin
 #define SIXPI (3.0f * TWO_PI)
 #define Si_5351_crystal 25000000L
 
-
 #define SPECTRUM_ZOOM_1 0
 #define SPECTRUM_ZOOM_2 1
 #define SPECTRUM_ZOOM_4 2
@@ -288,7 +287,7 @@ extern struct maps myMapFiles[];
 
 struct config_t {
 
-  char versionSettings[10] = "T41EEE.7";  // This is required to be the first!  See EEPROMRead() function.
+  char versionSettings[10] = "T41EEE.8";  // This is required to be the first!  See EEPROMRead() function.
   int AGCMode = 1;
   int audioVolume = 30;  // 4 bytes
   int rfGainCurrent = 0;
@@ -329,7 +328,7 @@ struct config_t {
   int freqCorrectionFactor = 0;  //68000;
 #else
   //Conventional crystal with freq offset needs a correction factor
-  int freqCorrectionFactor = 130000;
+  int freqCorrectionFactor = 100000;
 #endif
 
   int equalizerRec[EQUALIZER_CELL_COUNT] = { 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100 };
@@ -355,10 +354,12 @@ struct config_t {
   float powerOutSSB[NUMBER_OF_BANDS] = { 0.035, 0.035, 0.035, 0.035, 0.035, 0.035, 0.035 };
   float CWPowerCalibrationFactor[NUMBER_OF_BANDS] =  { 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };        // Increased to 0.04, was 0.019; KF5N February 20, 2024
   float SSBPowerCalibrationFactor[NUMBER_OF_BANDS] = { 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };  // Increased to 0.04, was 0.008; KF5N February 21, 2024
-  float IQRXAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
-  float IQRXPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+  float IQCWRXAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+  float IQCWRXPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
   float IQCWAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
   float IQCWPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+  float IQSSBRXAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+  float IQSSBRXPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };  
   float IQSSBAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
   float IQSSBPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
   uint32_t favoriteFreqs[13] = { 3560000, 3690000, 7030000, 7200000, 14060000, 14200000, 21060000, 21285000, 28060000, 28365000, 5000000, 10000000, 15000000 };
@@ -383,7 +384,7 @@ struct config_t {
   int compressorFlag = 0;  // Compressor is currently deactivated.
   bool xmitEQFlag = false;
   bool receiveEQFlag = false;
-  int calFreq = 0;                    // This is an index into an array of tone frequencies, for example:  {750, 3000}.  Default to 750 Hz. KF5N March 12, 2024
+//  int calFreq = 0;                    // This is an index into an array of tone frequencies, for example:  {750, 3000}.  Default to 750 Hz. KF5N March 12, 2024
   int buttonThresholdPressed = 944;   // switchValues[0] + WIGGLE_ROOM
   int buttonThresholdReleased = 964;  // buttonThresholdPressed + WIGGLE_ROOM
   int buttonRepeatDelay = 300000;     // Increased to 300000 from 200000 to better handle cheap, wornout buttons.
@@ -398,26 +399,29 @@ struct config_t {
   bool CWradioCalComplete = false;
   bool SSBradioCalComplete = false;
   bool cessb = false;
+  float32_t dBm_calibration = 22.0;  // This parameter is adjusted in the calibration menu.
 };
 
 extern struct config_t EEPROMData;
 extern config_t defaultConfig;
 extern config_t EEPROMData_temp;
 
+
+
 // Custom classes in the sketch.
 #include "CWCalibrate.h"
 #include "SSBCalibrate.h"
 #include "JSON.h"
 #include "Eeprom.h"
-
+#include "Process.h"
 
 //------------------------- Global CW Filter declarations ----------
 
-extern float32_t CW_AudioFilterCoeffs1[];  //AFP 10-18-22
-extern float32_t CW_AudioFilterCoeffs2[];  //AFP 10-18-22
-extern float32_t CW_AudioFilterCoeffs3[];  //AFP 10-18-22
-extern float32_t CW_AudioFilterCoeffs4[];  //AFP 10-18-22
-extern float32_t CW_AudioFilterCoeffs5[];  //AFP 10-18-22
+//extern float32_t CW_AudioFilterCoeffs1[];  //AFP 10-18-22
+//extern float32_t CW_AudioFilterCoeffs2[];  //AFP 10-18-22
+//extern float32_t CW_AudioFilterCoeffs3[];  //AFP 10-18-22
+//extern float32_t CW_AudioFilterCoeffs4[];  //AFP 10-18-22
+//extern float32_t CW_AudioFilterCoeffs5[];  //AFP 10-18-22
 
 #define IIR_CW_NUMSTAGES 4
 extern float32_t CW_Filter_Coeffs[];
@@ -533,7 +537,7 @@ extern AudioControlSGTL5000_Extended sgtl5000_1;  // F32 controller for the Teen
 extern AudioConvert_I16toF32 int2Float1;          // Converts Int16 to Float.  See class in AudioStream_F32.h
 extern AudioEffectGain_F32 micGain;               // Added with CESSB.  Greg KF5N July 24, 2024.
 extern AudioConvert_F32toI16 float2Int1;          // Converts Float to Int16.  See class in AudioStream_F32.h
-extern AudioSynthWaveformSine_F32 tone1kHz;
+extern AudioSynthWaveformSine_F32 toneSSBCal;
 extern AudioMixer4_F32 mixer1;
 extern AudioEffectCompressor2_F32  compressor1;   // Open Audio Compressor 2
 extern radioCESSB_Z_transmit_F32 cessb1;
@@ -548,9 +552,10 @@ extern Rotary fineTuneEncoder;  // (4,  5);
 
 extern Metro ms_500;
 
+extern Process process;              // Receiver DSP object.
 extern Eeprom eeprom;                // EEPROM memory object.
 extern JSON json;
-extern CWCalibrate calibrater;         // CW mode calibration object.
+extern CWCalibrate cwcalibrater;         // CW mode calibration object.
 extern SSBCalibrate ssbcalibrater;   // SSB mode calibration object.
 
 extern Si5351 si5351;
@@ -675,7 +680,6 @@ extern volatile long fineTuneEncoderMove;
 extern int freqIncrement;
 extern void (*functionPtr[])();
 extern int idx;
-extern int IQChoice;
 extern bool buttonInterruptsEnabled;
 extern int n_L;
 extern int n_R;
@@ -696,8 +700,6 @@ extern int updateDisplayCounter;
 extern const int DEC2STATESIZE;
 extern const int INT1_STATE_SIZE;
 extern const int INT2_STATE_SIZE;
-extern long long freqCorrectionFactor;
-extern long long freqCorrectionFactorOld;  //AFP 09-21-22
 extern int32_t mainMenuIndex;
 extern const uint32_t N_B;
 extern const uint32_t N_DEC_B;
@@ -746,7 +748,7 @@ extern float32_t corr[];
 extern float32_t *cosBuffer;  // Was cosBuffer2[]; this is a pointer to an array. Greg KF5N February 7, 2024
 extern float32_t d[];
 extern float32_t dbm;
-extern float32_t dbm_calibration;
+//extern float32_t dbm_calibration;
 extern float32_t /*DMAMEM*/ FFT_buffer[];
 extern float32_t /*DMAMEM*/ FFT_spec[];
 extern float32_t /*DMAMEM*/ FFT_spec_old[];
@@ -974,7 +976,7 @@ void EnableButtonInterrupts();
 void playTransmitData();  // KF5N February 23, 2024
 MenuSelect ProcessButtonPress(int valPin);
 void ProcessEqualizerChoices(int EQType, char *title);
-void ProcessIQData();
+//void ProcessIQData();
 MenuSelect readButton(MenuSelect lastUsedTask);
 MenuSelect readButton();
 int ReadSelectedPushButton();

@@ -1,4 +1,5 @@
 
+
 #include "SDT.h"
 
 #define BUFFPIXEL 20  // Use buffer to read image rather than 1 pixel at a time

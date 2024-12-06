@@ -90,10 +90,12 @@ FLASHMEM void JSON::loadConfiguration(const char *filename, config_t &EEPROMData
   EEPROMData.powerOutSSB[0] = doc["powerOutSSB"][0];
   for (int i = 0; i < 7; i++) EEPROMData.CWPowerCalibrationFactor[i] = doc["CWPowerCalibrationFactor"][i];
   for (int i = 0; i < 7; i++) EEPROMData.SSBPowerCalibrationFactor[i] = doc["SSBPowerCalibrationFactor"][i];
-  for (int i = 0; i < 7; i++) EEPROMData.IQRXAmpCorrectionFactor[i] = doc["IQRXAmpCorrectionFactor"][i];
-  for (int i = 0; i < 7; i++) EEPROMData.IQRXPhaseCorrectionFactor[i] = doc["IQRXPhaseCorrectionFactor"][i];
+  for (int i = 0; i < 7; i++) EEPROMData.IQCWRXAmpCorrectionFactor[i] = doc["IQCWRXAmpCorrectionFactor"][i];
+  for (int i = 0; i < 7; i++) EEPROMData.IQCWRXPhaseCorrectionFactor[i] = doc["IQCWRXPhaseCorrectionFactor"][i];
   for (int i = 0; i < 7; i++) EEPROMData.IQCWAmpCorrectionFactor[i] = doc["IQCWAmpCorrectionFactor"][i];
   for (int i = 0; i < 7; i++) EEPROMData.IQCWPhaseCorrectionFactor[i] = doc["IQCWPhaseCorrectionFactor"][i];
+  for (int i = 0; i < 7; i++) EEPROMData.IQSSBRXAmpCorrectionFactor[i] = doc["IQSSBRXAmpCorrectionFactor"][i];
+  for (int i = 0; i < 7; i++) EEPROMData.IQSSBRXPhaseCorrectionFactor[i] = doc["IQSSBRXPhaseCorrectionFactor"][i];  
   for (int i = 0; i < 7; i++) EEPROMData.IQSSBAmpCorrectionFactor[i] = doc["IQSSBAmpCorrectionFactor"][i];
   for (int i = 0; i < 7; i++) EEPROMData.IQSSBPhaseCorrectionFactor[i] = doc["IQSSBPhaseCorrectionFactor"][i];
 
@@ -117,7 +119,7 @@ FLASHMEM void JSON::loadConfiguration(const char *filename, config_t &EEPROMData
   EEPROMData.compressorFlag = doc["compressorFlag"];
   EEPROMData.xmitEQFlag = doc["xmitEQFlag"];
   EEPROMData.receiveEQFlag = doc["receiveEQFlag"];
-  EEPROMData.calFreq = doc["calFreq"];
+//  EEPROMData.calFreq = doc["calFreq"];
   EEPROMData.buttonThresholdPressed = doc["buttonThresholdPressed"] | 944;
   EEPROMData.buttonThresholdReleased = doc["buttonThresholdReleased"] | 964;
   EEPROMData.buttonRepeatDelay = doc["buttonRepeatDelay"] | 300000;
@@ -204,10 +206,12 @@ FLASHMEM void JSON::saveConfiguration(const char *filename, const config_t &EEPR
     doc["CWPowerCalibrationFactor"][i] = EEPROMData.CWPowerCalibrationFactor[i];
   }
   for (int i = 0; i < 7; i++) doc["SSBPowerCalibrationFactor"][i] = EEPROMData.SSBPowerCalibrationFactor[i];
-  for (int i = 0; i < 7; i++) doc["IQRXAmpCorrectionFactor"][i] =   EEPROMData.IQRXAmpCorrectionFactor[i];
-  for (int i = 0; i < 7; i++) doc["IQRXPhaseCorrectionFactor"][i] = EEPROMData.IQRXPhaseCorrectionFactor[i];
+  for (int i = 0; i < 7; i++) doc["IQCWRXAmpCorrectionFactor"][i] =   EEPROMData.IQCWRXAmpCorrectionFactor[i];
+  for (int i = 0; i < 7; i++) doc["IQCWRXPhaseCorrectionFactor"][i] = EEPROMData.IQCWRXPhaseCorrectionFactor[i];
   for (int i = 0; i < 7; i++) doc["IQCWAmpCorrectionFactor"][i] =   EEPROMData.IQCWAmpCorrectionFactor[i];
   for (int i = 0; i < 7; i++) doc["IQCWPhaseCorrectionFactor"][i] = EEPROMData.IQCWPhaseCorrectionFactor[i];
+  for (int i = 0; i < 7; i++) doc["IQSSBRXAmpCorrectionFactor"][i] =   EEPROMData.IQSSBRXAmpCorrectionFactor[i];
+  for (int i = 0; i < 7; i++) doc["IQSSBRXPhaseCorrectionFactor"][i] = EEPROMData.IQSSBRXPhaseCorrectionFactor[i];
   for (int i = 0; i < 7; i++) doc["IQSSBAmpCorrectionFactor"][i] =   EEPROMData.IQSSBAmpCorrectionFactor[i];
   for (int i = 0; i < 7; i++) doc["IQSSBPhaseCorrectionFactor"][i] = EEPROMData.IQSSBPhaseCorrectionFactor[i];  
   for (int i = 0; i < 13; i++) doc["favoriteFreqs"][i] = EEPROMData.favoriteFreqs[i];
@@ -227,7 +231,7 @@ FLASHMEM void JSON::saveConfiguration(const char *filename, const config_t &EEPR
   doc["compressorFlag"] = EEPROMData.compressorFlag;
   doc["xmitEQFlag"] = EEPROMData.xmitEQFlag;
   doc["receiveEQFlag"] = EEPROMData.receiveEQFlag;
-  doc["calFreq"] = EEPROMData.calFreq;
+//  doc["calFreq"] = EEPROMData.calFreq;
   doc["buttonThresholdPressed"] = EEPROMData.buttonThresholdPressed;
   doc["buttonThresholdReleased"] = EEPROMData.buttonThresholdReleased;
   doc["buttonRepeatDelay"] = EEPROMData.buttonRepeatDelay;
