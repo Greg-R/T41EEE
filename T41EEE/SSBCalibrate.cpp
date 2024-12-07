@@ -1183,8 +1183,8 @@ void SSBCalibrate::RadioCal(bool refineCal) {
       void
  *****/
 void SSBCalibrate::ProcessIQData2() {
-  float rfGainValue;                                               // AFP 2-11-23.  Greg KF5N February 13, 2023
-  float recBandFactor[7] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };  // AFP 2-11-23  KF5N uniform values
+  float32_t rfGainValue;                                               // AFP 2-11-23.  Greg KF5N February 13, 2023
+  float32_t recBandFactor[7] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };  // AFP 2-11-23  KF5N uniform values
 
   //  Insert here essentially verbatim code from the SSB Exciter.
   //  uint32_t N_BLOCKS_EX = N_B_EX;
@@ -1268,15 +1268,17 @@ void SSBCalibrate::ProcessIQData2() {
         Q_in_R.freeBuffer();
       }
 
-      rfGainValue = pow(10, (float)EEPROMData.rfGain[EEPROMData.currentBand] / 20);        //AFP 2-11-23
+//      rfGainValue = pow(10, (float)EEPROMData.rfGain[EEPROMData.currentBand] / 20);        //AFP 2-11-23
+      rfGainValue = 10000.0;
+//      rfGainValue = 0.1;
       arm_scale_f32(float_buffer_L, rfGainValue, float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 2-11-23
       arm_scale_f32(float_buffer_R, rfGainValue, float_buffer_R, BUFFER_SIZE * N_BLOCKS);  //AFP 2-11-23
 
       /**********************************************************************************  AFP 12-31-20
       Scale the data buffers by the RFgain value defined in bands[EEPROMData.currentBand] structure
     **********************************************************************************/
-      arm_scale_f32(float_buffer_L, recBandFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 2-11-23
-      arm_scale_f32(float_buffer_R, recBandFactor[EEPROMData.currentBand], float_buffer_R, BUFFER_SIZE * N_BLOCKS);  //AFP 2-11-23
+//      arm_scale_f32(float_buffer_L, recBandFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 2-11-23
+//      arm_scale_f32(float_buffer_R, recBandFactor[EEPROMData.currentBand], float_buffer_R, BUFFER_SIZE * N_BLOCKS);  //AFP 2-11-23
 
       // Manual IQ amplitude correction
       if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
