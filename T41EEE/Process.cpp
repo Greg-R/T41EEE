@@ -66,11 +66,7 @@ void Process::ProcessIQData() {
     //  Set RFGain for all bands.
     if (EEPROMData.autoGain) rfGain = EEPROMData.rfGainCurrent;                          // Auto-gain
     else rfGain = EEPROMData.rfGain[EEPROMData.currentBand];                             // Manual gain adjust.
-<<<<<<< HEAD
-    rfGainValue = pow(10, (float)rfGain / 20) * 4.0 * DSPGAINSCALE;                      // KF5N January 16 2024
-=======
     rfGainValue = pow(10, (float)rfGain / 20) * 4.0 * DSPGAINSCALE;                      // KF5N November 9 2024
->>>>>>> deadaudio
     arm_scale_f32(float_buffer_L, rfGainValue, float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 09-27-22
     arm_scale_f32(float_buffer_R, rfGainValue, float_buffer_R, BUFFER_SIZE * N_BLOCKS);  //AFP 09-27-22
     arm_clip_f32(float_buffer_L, float_buffer_L, -1.0, 1.0, 2048);
