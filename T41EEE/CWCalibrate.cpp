@@ -1626,10 +1626,10 @@ void CWCalibrate::ProcessIQData2(int mode) {
   /**********************************************************************************  AFP 12-31-20
         Get samples from queue buffers
         Teensy Audio Library stores ADC data in two buffers size=128, Q_in_L and Q_in_R as initiated from the audio lib.
-        Then the buffers are read into two arrays sp_L and sp_R in blocks of 128 up to N_BLOCKS.  The arrarys are
+        Then the buffers are read into two arrays sp_L and sp_R in blocks of 128 up to N_BLOCKS.  The arrays are
         of size BUFFER_SIZE * N_BLOCKS.  BUFFER_SIZE is 128.
         N_BLOCKS = FFT_LENGTH / 2 / BUFFER_SIZE * (uint32_t)DF; // should be 16 with DF == 8 and FFT_LENGTH = 512
-        BUFFER_SIZE*N_BLOCKS = 2024 samples
+        BUFFER_SIZE*N_BLOCKS = 2048 samples
      **********************************************************************************/
   // Generate I and Q for the transmit or receive calibration.  KF5N                                  // KF5N
   arm_scale_f32(cosBuffer, 0.20, float_buffer_L_EX, 256);  // AFP 2-11-23 Use pre-calculated sin & cos instead of Hilbert
