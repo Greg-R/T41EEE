@@ -63,7 +63,7 @@ The bullet "Memory Wipe & LED Blink Restore" has the instructions.
 
 ## Highlight of Changes included in T41EEE.8
 
-1.  Changed default CW and SSB power calibration from to 0.5.
+1.  Changed default CW and SSB power calibration to 0.5.
 2.  Fixed problem with CW decoder graphics.
 3.  Fixed problem with switch matrix debug.
 4.  Added variable speed fine tuning by Harry GM3RVL.
@@ -71,6 +71,36 @@ The bullet "Memory Wipe & LED Blink Restore" has the instructions.
 6.  Adding RX Cal to SSB radio auto-calibration.
 7.  Added DSPGAINSCALE parameter to MyConfigurationFile.h.
 8.  Fixed AM and SAM demod problem.
+9.  Add dBm signal level calibration.
+
+## Variable Speed Fine Tuning by Harry GM3RVL
+
+"Variable Speed Fine Tuning" allows for more rapid tuning when the rotation of the fine tuning encoder
+exceeds a threshold.  This allows for quick investigation of signals which appear in the spectral display.
+This feature is implemented by uncommenting the following line in MyConfigurationFile.h:
+
+//#define FAST_TUNE                    // Uncomment to activate variable speed fast tune by Harry GM3RVL.
+
+A big THANK YOU to Harry Brash GM3RVL for providing the code for this feature!
+
+## dBm Signal Level Calibration
+
+A new calibration menu option called "dBm Level Cal" allows adjustment of the dBm level indicator.
+The indicator is calibrated by the input of a known signal level into the antenna connector.
+Then choose "dBm Level Cal" from the Calibration menu.  Adjust the encoder until the dBm level
+shown in the upper right area of the display matches the known signal level.
+
+## DSPGAINSCALE Parameter
+
+A new parameter is available in MyConfigurationFile.h:
+
+#define DSPGAINSCALE 10.0  // A typical value for a V10/V11 radio is in the range of 5 to 15.
+
+It is most likely that you will not need to adjust this parameter.  However, if you find that signals
+are low or not appearing at all in the audio spectrum window, try adjusting this parameter upwards.
+
+A big THANK YOU to Neville Marr ZL2BNE for the excellent feedback which resulted in the implementation of
+this new parameter!
 
 ## Controlled Envelope Single Side Band (CESSB)
 
