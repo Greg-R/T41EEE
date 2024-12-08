@@ -100,7 +100,7 @@ It is most likely that you will not need to adjust this parameter.  However, if 
 are low or not appearing at all in the audio spectrum window, try adjusting this parameter upwards.
 
 A big THANK YOU to Neville Marr ZL2BNE for the excellent feedback which resulted in the implementation of
-this new parameter!
+this new parameter and also the dBm level calibration!
 
 ## Controlled Envelope Single Side Band (CESSB)
 
