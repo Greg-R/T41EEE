@@ -1,9 +1,9 @@
-### Version T41EEE.7 T41 Software Defined Transceiver Arduino Sketch
+### Version T41EEE.8 T41 Software Defined Transceiver Arduino Sketch
 
 This is the "T41 Extreme Experimenter's Edition" software for the 
 T41 Software Defined Transceiver.  The T41EEE was "forked" from the V049.2 version
 of the T41-EP software.  T41EEE is fundamentally different from the mainstream T41-EP
-code in that it adopts C++ rather than C.  C++ language features will be gradually
+code in that it adopts C++ rather than C-style code.  C++ language features will be gradually
 introduced in the next releases.
 
 Purchase the book "Digital Signal Processing and Software Defined Radio" by
@@ -31,7 +31,7 @@ and feature enhancements become available.  You will be able to update and FLASH
 with the revised software quickly.
 
 Please note that the configuration structure is different than the predecessor V049.2
-It is recommended to perform a full FLASH erase before loading T41EEE.7.
+It is recommended to perform a full FLASH erase before loading a new version of T41EEE.
 
 You will need to install the ArduinoJson library by Benoit Blanchon.  Using the IDE:
 Tools -> Manage Libraries ...
@@ -42,46 +42,39 @@ successful.
 
 ## How to Compile T41EEE
 
-T41EEE.7 was developed and compiled using Arduino IDE version 2.3.2 with the following
+T41EEE.8 was developed and compiled using Arduino IDE version 2.3.4 with the following
 configuration:
 
 1.  Optimize is set to "Smallest Code" (Tools menu).
 2.  CPU speed is set to 528 MHz (Tools menu).
 3.  TeensyDuino version is 1.59.0.
-4.  You will need to install ArduinoJson which is currently version 7.1.0.
+4.  You will need to install ArduinoJson which is currently version 7.2.1.
 5.  You will need to update your copy of the Open Audio Library.  The library was updated
-    on October 14, 2024.
+    on October 14, 2024:
+
+<https://github.com/chipaudette/OpenAudio_ArduinoLibrary>
 
 Completing a FLASH erase of the Teensy is strongly recommended before uploading this new version. 
-Remember to save to the SD card via the EEPROM menu EEPROM->SD command prior to erasing.
 The instructions for performing a FLASH erase of the Teensy are here:
 
 <https://www.pjrc.com/store/teensy41.html#programming>
 
 The bullet "Memory Wipe & LED Blink Restore" has the instructions.
 
-## Highlight of Changes included in T41EEE.7
+## Highlight of Changes included in T41EEE.8
 
-1.  Audio bandwidth equalized.  Noise reductions equalized.
-2.  Changed audio filter delimiter line color to red.
-3.  Reduced Spectral noise filter amplitude.
-4.  Fixed problem with audio delimiters and reset tuning, also was not saving AutoSpectrum to SD.
-5.  Added SSB calibration.
-6.  Added audio adapter equalizer to transmit signal chain.
-7.  CESSB modulation from Open Audio Library replaces conventional phasing SSB.
-8.  Added working SSB options menu specific to CESSB.  Mic gain and compression menu removed.
-9.  Removed 1, 2, and 5 dB from displayScale array.
-10. Finished volume/bandwidth compensation.
-11. Added user options for audio amplifier which enable polarity and audio scaling factor.
-12. Fixed CW decode bugs.
-13. Paddle flip was not saved to EEPROM.
-14. Fixed several minor CW related bugs.
-15. Changed direct frequency default to save last frequency On.
-16. The SSB compressor is temporarily disabled.
+1.  Changed default CW and SSB power calibration from to 0.5.
+2.  Fixed problem with CW decoder graphics.
+3.  Fixed problem with switch matrix debug.
+4.  Added variable speed fine tuning by Harry GM3RVL.
+5.  Fixed audio drop-out with narrow filter settings.
+6.  Adding RX Cal to SSB radio auto-calibration.
+7.  Added DSPGAINSCALE parameter to MyConfigurationFile.h.
+8.  Fixed AM and SAM demod problem.
 
 ## Controlled Envelope Single Side Band (CESSB)
 
-Controlled Envelope Single Side Band is employed in T41EEE.7.  This web page has an excellent description of
+Controlled Envelope Single Side Band is employed in T41EEE.  This web page has an excellent description of
 CESSB technology:
 
 <https://www.janbob.com/electron/CESSB_Teensy/CESSB_Teensy.html>

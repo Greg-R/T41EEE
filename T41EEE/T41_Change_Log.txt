@@ -1,5 +1,24 @@
 The following change log documents changes to versions prior to the current.
 
+## Highlight of Changes included in T41EEE.7
+
+1.  Audio bandwidth equalized.  Noise reductions equalized.
+2.  Changed audio filter delimiter line color to red.
+3.  Reduced Spectral noise filter amplitude.
+4.  Fixed problem with audio delimiters and reset tuning, also was not saving AutoSpectrum to SD.
+5.  Added SSB calibration.
+6.  Added audio adapter equalizer to transmit signal chain.
+7.  CESSB modulation from Open Audio Library replaces conventional phasing SSB.
+8.  Added working SSB options menu specific to CESSB.  Mic gain and compression menu removed.
+9.  Removed 1, 2, and 5 dB from displayScale array.
+10. Finished volume/bandwidth compensation.
+11. Added user options for audio amplifier which enable polarity and audio scaling factor.
+12. Fixed CW decode bugs.
+13. Paddle flip was not saved to EEPROM.
+14. Fixed several minor CW related bugs.
+15. Changed direct frequency default to save last frequency On.
+16. The SSB compressor is temporarily disabled.
+
 ## Highlight of Changes included in T41EEE.6
 
  1.  Fixed CW sidetone problem.
