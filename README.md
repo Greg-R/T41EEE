@@ -72,6 +72,7 @@ The bullet "Memory Wipe & LED Blink Restore" has the instructions.
 7.  Added DSPGAINSCALE parameter to MyConfigurationFile.h.
 8.  Fixed AM and SAM demod problem.
 9.  Add dBm signal level calibration.
+10. SSB calibration is separate and independent from CW calibration.
 
 ## Variable Speed Fine Tuning by Harry GM3RVL
 
