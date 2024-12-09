@@ -103,6 +103,14 @@ are low or not appearing at all in the audio spectrum window, try adjusting this
 A big THANK YOU to Neville Marr ZL2BNE for the excellent feedback which resulted in the implementation of
 this new parameter and also dBm level calibration!
 
+## Full SSB Calibration
+
+SSB is now calibrated independently of CW.  In earlier versions, the calibration numbers were shared with CW.
+To complete the SSB calibration process, you will need to adjust the band frequencies to be in the middle
+of the SSB portion of each band prior to calibration.  SSB gain and phase numbers will be stored for each
+of those frequencies.  This also includes receiver calibration, which was also being shared with CW
+calibration in prior versions.
+
 ## Controlled Envelope Single Side Band (CESSB)
 
 Controlled Envelope Single Side Band is employed in T41EEE.  This web page has an excellent description of
