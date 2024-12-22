@@ -47,12 +47,21 @@ configuration:
 
 1.  Optimize is set to "Smallest Code" (Tools menu).
 2.  CPU speed is set to 528 MHz (Tools menu).
-3.  TeensyDuino version is 1.59.0.
-4.  You will need to install ArduinoJson which is currently version 7.2.1.
-5.  You will need to update your copy of the Open Audio Library.  The library was updated
+3.  TeensyDuino version is 1.59.0.  Install TeensyDuino using the IDE Board Manager.
+4.  You will need to install the Adafruit GFX library.  Install via the
+    IDE Library Manager.
+5.  You will need to install the ArduinoJson library.  Install via the
+    IDE Library Manager.
+6.  You will need to install the Etherkit Si5351 library.  Install via the IDE
+    library manager.
+7.  You will need to manually install the Open Audio Library.  The library was updated
     on October 14, 2024:
 
 <https://github.com/chipaudette/OpenAudio_ArduinoLibrary>
+
+8.  You will need to manually install the Rotary library:
+
+<https://github.com/brianlow/Rotary>
 
 Completing a FLASH erase of the Teensy is strongly recommended before uploading this new version. 
 The instructions for performing a FLASH erase of the Teensy are here:

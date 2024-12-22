@@ -6,32 +6,33 @@
 //======================================== Library include files ========================================================
 #include <stdio.h>
 #include <stdlib.h>
-#include <Adafruit_GFX.h>
-#include <ArduinoJson.h>
+#include <Adafruit_GFX.h> // Install the Adafruit GFX library via the IDE Library Manager.
+#include <ArduinoJson.h>  // Install the ArduinoJson library via the IDE Library Manager.
 #include "Fonts/FreeMonoBold24pt7b.h"
 #include "Fonts/FreeMonoBold18pt7b.h"
-#include "Fonts/FreeMono24pt7b.h"
 #include "Fonts/FreeMono9pt7b.h"
-#include <Audio.h>                     //https://github.com/chipaudette/OpenAudio_ArduinoLibrary
-#include <OpenAudio_ArduinoLibrary.h>  // AFP 11-01-22
-#include <TimeLib.h>                   // Part of Teensy Time library
+#include <OpenAudio_ArduinoLibrary.h>  // Manually installed library.  Please see compilation instructions in the ino or README.
+#include <TimeLib.h>                   // Part of Teensy Time library.
 #include <SPI.h>
 #include <SD.h>
 #include <Metro.h>
 #include <Bounce.h>
 #include <arm_math.h>
 #include <arm_const_structs.h>
-#include <si5351.h>  // https://github.com/etherkit/Si5351Arduino
-#include <RA8875.h>  // https://github.com/mjs513/RA8875/tree/RA8875_t4
-#include <Rotary.h>  // https://github.com/brianlow/Rotary
-#include <string.h>
-#include <string_view>
-#include <util/crc16.h>        // mdrhere
+#include <si5351.h>  // Install the Etherkit Si5351 library via the IDE Library Manager.
+#include <RA8875.h>  // This library is included with TeensyDuino.
+#include <Rotary.h>  // Manually installed library.  Please see compilation instructions in the ino or README.
 #include <utility/imxrt_hw.h>  // for setting I2S freq, Thanks, FrankB!
 #include <EEPROM.h>
 #include <vector>
 #include <algorithm>
-#include <utility/imxrt_hw.h>  // for setting I2S freq, Thanks, FrankB!
+
+// These #includes are apparently not required.
+//#include "Fonts/FreeMono24pt7b.h"
+//#include <Audio.h>
+//#include <string.h>
+//#include <string_view>
+//#include <util/crc16.h>
 
 // Constants and #defines first:
 //======================================== Symbolic Constants for the T41 ===================================================
