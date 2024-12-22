@@ -64,6 +64,9 @@ configuration:
 
 <https://github.com/brianlow/Rotary>
 
+The file MyConfigurationFile.h includes several compiler options which add, subtract, or
+adjust parameters of some features.  Please review this file prior to compilation.
+
 Completing a FLASH erase of the Teensy is strongly recommended before uploading this new version. 
 The instructions for performing a FLASH erase of the Teensy are here:
 
