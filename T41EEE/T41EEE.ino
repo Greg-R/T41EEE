@@ -1129,9 +1129,10 @@ FLASHMEM void setup() {
 
   sgtl5000_1.setAddress(LOW);  // This is not documented.  See QuadChannelOutput example.
   sgtl5000_1.enable();
-  sgtl5000_1.audioPreProcessorEnable();  // Need to use one of the equalizers.
-  sgtl5000_1.eqSelect(3);
-  sgtl5000_1.eqBands(-1.0, 0.0, 1.0, 1.0, -1.0);
+//  Don't use the audio pre-processor.  This causes a spurious signal in the SSB transmit output.
+//  sgtl5000_1.audioPreProcessorEnable();  // Need to use one of the equalizers.
+//  sgtl5000_1.eqSelect(3);
+//  sgtl5000_1.eqBands(-1.0, 0.0, 1.0, 1.0, -1.0);
   AudioMemory(200);  //  Increased to 450 from 400.  Memory was hitting max.  KF5N August 31, 2023
   AudioMemory_F32(10);
   sgtl5000_1.inputSelect(AUDIO_INPUT_MIC);
