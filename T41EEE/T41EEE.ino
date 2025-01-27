@@ -1335,6 +1335,10 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   //  State detection
   if (EEPROMData.xmtMode == RadioMode::SSB_MODE and digitalRead(PTT) == HIGH) radioState = RadioState::SSB_RECEIVE_STATE;
   if (EEPROMData.xmtMode == RadioMode::SSB_MODE && digitalRead(PTT) == LOW) radioState = RadioState::SSB_TRANSMIT_STATE;
+
+//  if (EEPROMData.xmtMode == RadioMode::FT8_MODE && Serial.rts() == LOW) radioState = RadioState::FT8_RECEIVE_STATE;
+//  if (EEPROMData.xmtMode == RadioMode::FT8_MODE && Serial.rts() == HIGH) radioState = RadioState::FT8_TRANSMIT_STATE;
+
   if (EEPROMData.xmtMode == RadioMode::CW_MODE && (digitalRead(EEPROMData.paddleDit) == HIGH && digitalRead(EEPROMData.paddleDah) == HIGH)) radioState = RadioState::CW_RECEIVE_STATE;  // Was using symbolic constants. Also changed in code below.  KF5N August 8, 2023
   if (EEPROMData.xmtMode == RadioMode::CW_MODE && (digitalRead(EEPROMData.paddleDit) == LOW && EEPROMData.xmtMode == RadioMode::CW_MODE && EEPROMData.keyType == 0)) radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;
   if (EEPROMData.xmtMode == RadioMode::CW_MODE && (keyPressedOn == 1 && EEPROMData.xmtMode == RadioMode::CW_MODE && EEPROMData.keyType == 1)) radioState = RadioState::CW_TRANSMIT_KEYER_STATE;
@@ -1354,13 +1358,14 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   //  Begin SSB Mode state machine
   switch (radioState) {
     case RadioState::AM_RECEIVE_STATE:
+    case RadioState::FT8_RECEIVE_STATE:
     case RadioState::SSB_RECEIVE_STATE:
       if (lastState != radioState) {  // G0ORX 01092023
         digitalWrite(MUTE, UNMUTEAUDIO);      // Audio Mute off
         digitalWrite(RXTX, LOW);      //xmit off
-        if (keyPressedOn == 1) {
-          return;
-        }
+//        if (keyPressedOn == 1) {  //// Unnecessary here?  Greg KF5N January 26, 2025
+//          return;
+//        }
         ShowTransmitReceiveStatus();
       }
       ShowSpectrum();
@@ -1395,10 +1400,18 @@ if(cessb1.levelDataCount() > 2000) {
         Serial.print(enhance); Serial.println(" dB");
 }
 #endif
-
-
       }
       break;
+
+      case RadioState::FT8_TRANSMIT_STATE:
+      digitalWrite(MUTE, MUTEAUDIO);  //  Mute Audio  (HIGH=Mute)
+      digitalWrite(RXTX, HIGH);  //xmit on
+
+      ShowTransmitReceiveStatus();
+      while (Serial.rts() == HIGH) {
+        ExciterIQData();
+      }
+        break;
 
     default:
       break;

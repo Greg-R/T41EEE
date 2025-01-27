@@ -670,11 +670,15 @@ void BandInformation()  // SSB or CW
 
     tft.writeTo(L1);
     //================  AFP 10-19-22 =========
-  } else {
+  } else if (radioMode == RadioMode::SSB_MODE) {
     tft.fillRect(OPERATION_STATS_X + 90, FREQUENCY_Y + 30, 70, tft.getFontHeight(), RA8875_BLACK);
     if(EEPROMData.cessb) tft.print("CESSB");  // Which mode
     if(not EEPROMData.cessb) tft.print("SSB Data");
+  } else {
+        tft.fillRect(OPERATION_STATS_X + 90, FREQUENCY_Y + 30, 70, tft.getFontHeight(), RA8875_BLACK);
+tft.print("FT8");
   }
+
 
   tft.fillRect(OPERATION_STATS_X + 160, FREQUENCY_Y + 30, tft.getFontWidth() * 11, tft.getFontHeight(), RA8875_BLACK);  // AFP 11-01-22 Clear top-left menu area
   tft.setCursor(OPERATION_STATS_X + 165, FREQUENCY_Y + 30);                                                             // AFP 11-01-22

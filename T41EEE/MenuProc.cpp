@@ -727,9 +727,9 @@ void SSBOptions()  // AFP 09-22-22 All new
 {
 static int micChoice = 0;
   //  const char *micChoices[] = { "Mic Comp On", "Mic Comp Off", "Set Threshold", "Set Comp_Ratio", "Set Attack", "Set Decay", "Cancel" };
-  const char *micChoices[] = { "CESSB", "SSB Data", "Comp On", "Comp Off", "Mic Gain", "Comp Threshold", "Comp Ratio", "Cancel" };
+  const char *micChoices[] = { "CESSB", "SSB", "FT8", "Comp On", "Comp Off", "Mic Gain", "Comp Threshold", "Comp Ratio", "Cancel" };
 
-  micChoice = SubmenuSelect(micChoices, 8, micChoice);
+  micChoice = SubmenuSelect(micChoices, 9, micChoice);
   switch (micChoice) {
 
     case 0:  // CESSB on
@@ -748,33 +748,41 @@ static int micChoice = 0;
     BandInformation();
       break;
 
-    case 2:  // Compressor On
+    case 2:  // FT8
+    EEPROMData.cessb = false;
+    cessb1.setProcessing(EEPROMData.cessb);
+    Serial.printf("processing = %d", cessb1.getProcessing());
+    eeprom.EEPROMWrite();
+    BandInformation();
+    break;
+
+    case 3:  // Compressor On
     EEPROMData.compressorFlag = true;
     UpdateCompressionField();
     eeprom.EEPROMWrite();
     break;
 
-    case 3:  // Compressor Off
+    case 4:  // Compressor Off
     EEPROMData.compressorFlag = false;
     UpdateCompressionField();
     eeprom.EEPROMWrite();
     break;
 
-    case 4:  // Adjust mic gain in dB.  Default 0 db.
+    case 5:  // Adjust mic gain in dB.  Default 0 db.
       MicGainSet();
       break;
 
-    case 5:  // Set compression ratio.  Default -10 dB.
+    case 6:  // Set compression ratio.  Default -10 dB.
       SetCompressionThreshold();
       UpdateCompressionField();
       break;
 
-    case 6:  // Set compressor threshold.  Default 100.0.
+    case 7:  // Set compressor threshold.  Default 100.0.
       SetCompressionRatio();
       UpdateCompressionField();
       break;
 
-    case 7:  // Cancel
+    case 8:  // Cancel
       return;
       break;
 

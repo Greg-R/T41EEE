@@ -269,10 +269,10 @@ const int RESET = 0;  // QSD2/QSE2 reset pin
 // End constants
 
 //  States for the loop() modal state machine.
-enum class RadioState{SSB_RECEIVE_STATE, SSB_TRANSMIT_STATE, CW_RECEIVE_STATE, CW_TRANSMIT_STRAIGHT_STATE, 
+enum class RadioState{SSB_RECEIVE_STATE, SSB_TRANSMIT_STATE, FT8_TRANSMIT_STATE, FT8_RECEIVE_STATE, CW_RECEIVE_STATE, CW_TRANSMIT_STRAIGHT_STATE, 
                       CW_TRANSMIT_KEYER_STATE, AM_RECEIVE_STATE, SSB_CALIBRATE_STATE, CW_CALIBRATE_STATE, 
                       SET_CW_SIDETONE, NOSTATE};
-enum class RadioMode{SSB_MODE, CW_MODE, AM_MODE};  // Probably need only modes, not receive or transmit.
+enum class RadioMode{SSB_MODE, FT8_MODE, CW_MODE, AM_MODE};  // Probably need only modes, not receive or transmit.
 //  Primary menu selections.
 enum class MenuSelect{MENU_OPTION_SELECT, MAIN_MENU_UP, BAND_UP, ZOOM, MAIN_MENU_DN, BAND_DN, FILTER, DEMODULATION, SET_MODE,
                       NOISE_REDUCTION, NOTCH_FILTER, NOISE_FLOOR, FINE_TUNE_INCREMENT, DECODER_TOGGLE,
@@ -616,7 +616,6 @@ struct band {
   uint32_t band_type;
   float32_t gainCorrection;  // is hardware dependent and has to be calibrated ONCE and hardcoded in the table below
   int AGC_thresh;
-//  int32_t pixel_offset;
 };
 extern struct band bands[];
 
