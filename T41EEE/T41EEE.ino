@@ -1127,6 +1127,7 @@ FLASHMEM void setup() {
   Teensy3Clock.set(now());  // set the RTC
   T4_rtc_set(Teensy3Clock.get());
 
+// Set up Audio Adapter and data converters (PCM1808 ADC, PCB5102 DAC)
   sgtl5000_1.setAddress(LOW);  // This is not documented.  See QuadChannelOutput example.
   sgtl5000_1.enable();
 //  Don't use the audio pre-processor.  This causes a spurious signal in the SSB transmit output.
@@ -1137,6 +1138,7 @@ FLASHMEM void setup() {
   AudioMemory_F32(10);
   sgtl5000_1.inputSelect(AUDIO_INPUT_MIC);
   sgtl5000_1.muteHeadphone();  // KF5N March 11, 2024
+//  sgtl5000_1.volume(0.5);
   sgtl5000_1.micGain(0);
   sgtl5000_1.lineInLevel(0);
 #ifdef QSE2
@@ -1148,9 +1150,11 @@ sgtl5000_1.adcHighPassFilterEnable();
 //sgtl5000_1.adcHighPassFilterDisable();  //reduces noise.  https://forum.pjrc.com/threads/27215-24-bit-audio-boards?p=78831&viewfull=1#post78831
 //sgtl5000_1.adcHighPassFilterFreeze();
   sgtl5000_2.setAddress(HIGH);            // T41 has only a single Audio Adaptor.  This is being used essentially as a 2nd I2S port.
+//                                               This doesn't seem to matter.  There is not a 2nd device with another I2C address.
   sgtl5000_2.enable();
   sgtl5000_2.inputSelect(AUDIO_INPUT_LINEIN);  // Why is a second sgtl5000 device used???  This is the receiver ADCs, PCM1808?
-  sgtl5000_2.muteHeadphone();                  // KF5N March 11, 2024
+  sgtl5000_2.unmuteHeadphone();                  // KF5N March 11, 2024
+  sgtl5000_2.volume(0.8);
                                                //  sgtl5000_2.volume(0.5);   //  Headphone volume???  Not required as headphone is muted.
   updateMic();  // This updates the transmit signal chain settings.
 
@@ -1303,6 +1307,9 @@ sgtl5000_1.adcHighPassFilterEnable();
   UpdateEqualizerField(EEPROMData.receiveEQFlag);
   EEPROMData.rfGainCurrent = 0;  // Start with lower gain so you don't get blasted.
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();  // Required only for QSD2/QSE2.
+
+  Serial.printf("Serial.rts() = %d\n", Serial.rts());
+  Serial.printf("Serial.dtr() = %d\n", Serial.dtr());
 }
 //============================================================== END setup() =================================================================
 
@@ -1336,8 +1343,8 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   if (EEPROMData.xmtMode == RadioMode::SSB_MODE and digitalRead(PTT) == HIGH) radioState = RadioState::SSB_RECEIVE_STATE;
   if (EEPROMData.xmtMode == RadioMode::SSB_MODE && digitalRead(PTT) == LOW) radioState = RadioState::SSB_TRANSMIT_STATE;
 
-//  if (EEPROMData.xmtMode == RadioMode::FT8_MODE && Serial.rts() == LOW) radioState = RadioState::FT8_RECEIVE_STATE;
-//  if (EEPROMData.xmtMode == RadioMode::FT8_MODE && Serial.rts() == HIGH) radioState = RadioState::FT8_TRANSMIT_STATE;
+    if (EEPROMData.xmtMode == RadioMode::FT8_MODE and Serial.rts() == LOW) radioState = RadioState::FT8_RECEIVE_STATE;
+    if (EEPROMData.xmtMode == RadioMode::FT8_MODE and Serial.rts() == HIGH) radioState = RadioState::FT8_TRANSMIT_STATE;
 
   if (EEPROMData.xmtMode == RadioMode::CW_MODE && (digitalRead(EEPROMData.paddleDit) == HIGH && digitalRead(EEPROMData.paddleDah) == HIGH)) radioState = RadioState::CW_RECEIVE_STATE;  // Was using symbolic constants. Also changed in code below.  KF5N August 8, 2023
   if (EEPROMData.xmtMode == RadioMode::CW_MODE && (digitalRead(EEPROMData.paddleDit) == LOW && EEPROMData.xmtMode == RadioMode::CW_MODE && EEPROMData.keyType == 0)) radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;

@@ -152,7 +152,7 @@ void ShowSpectrum() {
     // Don't call this function unless the filter bandwidth has been adjusted.  This requires 2 global variables.
     if (filter_pos != last_filter_pos) FilterSetSSB();
 
-    if (radioMode == RadioMode::SSB_MODE or radioMode == RadioMode::CW_MODE or radioMode == RadioMode::AM_MODE) {  // AFP 08-24-22
+    if (radioMode == RadioMode::SSB_MODE or radioMode == RadioMode::FT8_MODE or radioMode == RadioMode::CW_MODE or radioMode == RadioMode::AM_MODE) {  // AFP 08-24-22
       process.ProcessIQData();                                        // Call the Audio process from within the display routine to eliminate conflicts with drawing the spectrum and waterfall displays
     }
     EncoderCenterTune();  //Moved the tuning encoder to reduce lag times and interference during tuning.
@@ -610,13 +610,16 @@ void BandInformation()  // SSB or CW
 {
   float CWFilterPosition = 0.0;
   const char *CWFilter[] = { "0.8kHz", "1.0kHz", "1.3kHz", "1.8kHz", "2.0kHz", " Off " };
+
   tft.setFontScale((enum RA8875tsize)0);
   tft.setTextColor(RA8875_GREEN);
-
   tft.setCursor(5, FREQUENCY_Y + 30);
   tft.setTextColor(RA8875_WHITE);
-  tft.print("Center Freq");
-  tft.fillRect(100, FREQUENCY_Y + 30, 300, tft.getFontHeight(), RA8875_BLACK);  // Clear volume field
+
+  tft.print("Center Freq");  // This is static, never changes.
+  tft.fillRect(100, FREQUENCY_Y + 33, 190, 12, RA8875_BLACK);  // Clear frequency, band, and mode.
+
+// Write the center frequency to the display.
   tft.setCursor(100, FREQUENCY_Y + 30);
   tft.setTextColor(RA8875_LIGHT_ORANGE);
   if (EEPROMData.spectrum_zoom == SPECTRUM_ZOOM_1) {  // AFP 11-02-22
@@ -624,22 +627,23 @@ void BandInformation()  // SSB or CW
   } else {
     tft.print(static_cast<int>(EEPROMData.centerFreq));
   }
-  tft.fillRect(OPERATION_STATS_X + 50, FREQUENCY_Y + 30, 300, tft.getFontHeight(), RA8875_BLACK);  // Clear volume field
+
+// Write the band to the display.
+////  tft.fillRect(OPERATION_STATS_X + 50, FREQUENCY_Y + 30, 300, tft.getFontHeight(), RA8875_BLACK);  // Clear volume field
   tft.setTextColor(RA8875_LIGHT_ORANGE);
   tft.setCursor(OPERATION_STATS_X + 50, FREQUENCY_Y + 30);
   if (EEPROMData.activeVFO == VFO_A) {
-    tft.print(bands[EEPROMData.currentBandA].name);  // Show band -- 40M
+    tft.print(bands[EEPROMData.currentBandA].name);  // Write current band to the display.
   } else {
-    tft.print(bands[EEPROMData.currentBandB].name);  // Show band -- 40M
+    tft.print(bands[EEPROMData.currentBandB].name);
   }
 
-  tft.fillRect(OPERATION_STATS_X + 90, FREQUENCY_Y + 30, 70, tft.getFontHeight(), RA8875_BLACK);  //AFP 10-18-22
+// Write CW mode and filter bandwidth to display.
+//  tft.fillRect(OPERATION_STATS_X + 90, FREQUENCY_Y + 30, 70, tft.getFontHeight(), RA8875_BLACK);  //AFP 10-18-22
   tft.setTextColor(RA8875_GREEN);
   tft.setCursor(OPERATION_STATS_X + 90, FREQUENCY_Y + 30);  //AFP 10-18-22
-
-  //================  AFP 10-19-22
   if (EEPROMData.xmtMode == RadioMode::CW_MODE) {
-    tft.fillRect(OPERATION_STATS_X + 85, FREQUENCY_Y + 30, 70, tft.getFontHeight(), RA8875_BLACK);
+//    tft.fillRect(OPERATION_STATS_X + 85, FREQUENCY_Y + 30, 70, tft.getFontHeight(), RA8875_BLACK);
     tft.print("CW ");
     tft.setCursor(OPERATION_STATS_X + 115, FREQUENCY_Y + 30);  //AFP 10-18-22
     tft.writeTo(L2);                                           // Moved to L2 here to properly refresh the CW filter bandwidth.  KF5N July 30, 2023
@@ -664,22 +668,26 @@ void BandInformation()  // SSB or CW
         CWFilterPosition = 0.0;
         break;
     }
-
-    tft.fillRect(BAND_INDICATOR_X - 8, AUDIO_SPECTRUM_TOP, CWFilterPosition, 120, MAROON);
+//    tft.fillRect(BAND_INDICATOR_X - 8, AUDIO_SPECTRUM_TOP, CWFilterPosition, 120, MAROON);
     tft.drawFastVLine(BAND_INDICATOR_X - 8 + CWFilterPosition, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_LIGHT_GREY);
-
     tft.writeTo(L1);
     //================  AFP 10-19-22 =========
-  } else if (radioMode == RadioMode::SSB_MODE) {
-    tft.fillRect(OPERATION_STATS_X + 90, FREQUENCY_Y + 30, 70, tft.getFontHeight(), RA8875_BLACK);
+  }
+  
+  // Write SSB mode to display
+  if (radioMode == RadioMode::SSB_MODE) {
+//    tft.fillRect(OPERATION_STATS_X + 90, FREQUENCY_Y + 30, 70, tft.getFontHeight(), RA8875_BLACK);
     if(EEPROMData.cessb) tft.print("CESSB");  // Which mode
     if(not EEPROMData.cessb) tft.print("SSB Data");
-  } else {
-        tft.fillRect(OPERATION_STATS_X + 90, FREQUENCY_Y + 30, 70, tft.getFontHeight(), RA8875_BLACK);
+  }
+  
+  // Write FT8 mode to display.
+if(radioMode == RadioMode::FT8_MODE)  {
+//        tft.fillRect(OPERATION_STATS_X + 90, FREQUENCY_Y + 30, 70, tft.getFontHeight(), RA8875_BLACK);
 tft.print("FT8");
   }
 
-
+// Write sideband or AM demodulation type to display.
   tft.fillRect(OPERATION_STATS_X + 160, FREQUENCY_Y + 30, tft.getFontWidth() * 11, tft.getFontHeight(), RA8875_BLACK);  // AFP 11-01-22 Clear top-left menu area
   tft.setCursor(OPERATION_STATS_X + 165, FREQUENCY_Y + 30);                                                             // AFP 11-01-22
   tft.setTextColor(RA8875_WHITE);
@@ -708,7 +716,7 @@ tft.print("FT8");
       tft.print("(SAM) ");  //AFP 11-01-22
       break;
   }
-  ShowCurrentPowerSetting();
+  ShowCurrentPowerSetting();  // Why is this done here?
 }
 
 

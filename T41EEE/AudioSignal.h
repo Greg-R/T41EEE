@@ -9,7 +9,8 @@ AudioInputI2SQuad i2s_quadIn;     // 4 inputs/outputs available only in Teensy a
 AudioOutputI2SQuad i2s_quadOut;
 
 // Transmitter
-AudioControlSGTL5000_Extended sgtl5000_1;      // Controller for the Teensy Audio Board, transmitter only.
+//; AudioControlSGTL5000_Extended sgtl5000_1     // Controller for the Teensy Audio Board, transmitter only.
+AudioControlSGTL5000 sgtl5000_1;    // This is not a 2nd Audio Adapter.  It is I2S to the PCM1808 (ADC I and Q receiver in) and PCM5102 (DAC audio out).
 AudioConvert_I16toF32 int2Float1;              // Converts Int16 to Float.  See class in AudioStream_F32.h
 //AudioEffectGain_F32 micGain(audio_settings);                   // Microphone gain control.
 AudioEffectGain_F32 micGain;                   // Microphone gain control.
@@ -70,9 +71,12 @@ AudioConnection patchCord10(i2s_quadIn, 3, Q_in_R, 0);
 
 AudioAmplifier volumeAdjust;
 AudioConnection patchCord17(Q_out_L, 0, volumeAdjust, 0);
-AudioConnection patchCord18(volumeAdjust, 0, i2s_quadOut, 2);
+AudioConnection patchCord18(volumeAdjust, 0, i2s_quadOut, 2);  // To pin 32 of Teensy and DIN of PCM5102 DAC.
+AudioConnection patchCord19(volumeAdjust, 0, i2s_quadOut, 0);  // To pin 32 of Teensy and DIN of PCM5102 DAC.
 
-AudioControlSGTL5000 sgtl5000_2;  // This is not a 2nd Audio Adapter.  It is I2S to the PCM1808 (ADC I and Q receiver in) and PCM5102 (DAC audio out).
+AudioConnection patchCord20(volumeAdjust, 0, i2s_quadOut, 1);  // Try to route receive audio to Audio Adapter.
+
+AudioControlSGTL5000 sgtl5000_2;  // Teensy Audio Adapter
 // End dataflow code
 
 
@@ -102,6 +106,7 @@ void SetAudioOperatingState(RadioState operatingState) {
 #endif
   switch (operatingState) {
     case RadioState::SSB_RECEIVE_STATE:
+    case RadioState::FT8_RECEIVE_STATE:
     case RadioState::AM_RECEIVE_STATE:
     case RadioState::CW_RECEIVE_STATE:
       SampleRate = SAMPLE_RATE_192K;
@@ -129,10 +134,13 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord9.connect();                                  // Receiver I channel
       patchCord10.connect();                                 // Receiver Q channel
       patchCord17.connect();                                 // Receiver audio channel
-      patchCord18.connect();      
+      patchCord18.connect();
+      patchCord19.connect();
+      patchCord20.connect();
       volumeAdjust.gain(volumeLog[EEPROMData.audioVolume]);  // Set volume because sidetone may have changed it.
       break;
     case RadioState::SSB_TRANSMIT_STATE:
+    case RadioState::FT8_TRANSMIT_STATE:
       // QSD disabled and disconnected
       patchCord9.disconnect();   // Receiver I channel
       patchCord10.disconnect();  // Receiver Q channel

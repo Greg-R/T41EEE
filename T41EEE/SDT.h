@@ -534,7 +534,7 @@ extern AudioPlayQueue Q_out_L;
 extern AudioPlayQueue Q_out_L_Ex;
 extern AudioPlayQueue Q_out_R_Ex;
 
-extern AudioControlSGTL5000_Extended sgtl5000_1;  // F32 controller for the Teensy Audio Board
+//extern AudioControlSGTL5000_Extended sgtl5000_1;  // F32 controller for the Teensy Audio Board
 extern AudioConvert_I16toF32 int2Float1;          // Converts Int16 to Float.  See class in AudioStream_F32.h
 extern AudioEffectGain_F32 micGain;               // Added with CESSB.  Greg KF5N July 24, 2024.
 extern AudioConvert_F32toI16 float2Int1;          // Converts Float to Int16.  See class in AudioStream_F32.h
