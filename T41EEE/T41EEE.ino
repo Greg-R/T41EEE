@@ -1129,6 +1129,8 @@ FLASHMEM void setup() {
 
   sgtl5000_1.setAddress(LOW);  // This sets to one of two possible I2C addresses, controlled by a jumper on the Audio Adapter.
   sgtl5000_1.enable();
+
+
 //  Don't use the audio pre-processor.  This causes a spurious signal in the SSB transmit output.
 //  sgtl5000_1.audioPreProcessorEnable();  // Need to use one of the equalizers.
 //  sgtl5000_1.eqSelect(3);
@@ -1139,12 +1141,13 @@ FLASHMEM void setup() {
   sgtl5000_1.muteHeadphone();  // KF5N March 11, 2024
   sgtl5000_1.volume(0.8);
   sgtl5000_1.micGain(0);
-  sgtl5000_1.lineInLevel(0);
+  sgtl5000_1.lineInLevel(0);   // Line-in is not used.  Can't turn it off though.
 #ifdef QSE2
   sgtl5000_1.lineOutLevel(13);  // Setting of 13 limits line-out level to 3.15 volts p-p (maximum).
 #else
   sgtl5000_1.lineOutLevel(20);  // Setting of 20 limits line-out level to 2.14 volts p-p.
 #endif
+//sgtl5000_1.muteLineout();  // This controls the Audio Adapter.  The Audio Adapter is sgtl5000_1.
 sgtl5000_1.adcHighPassFilterEnable();  
 //sgtl5000_1.adcHighPassFilterDisable();  //reduces noise.  https://forum.pjrc.com/threads/27215-24-bit-audio-boards?p=78831&viewfull=1#post78831
 //sgtl5000_1.adcHighPassFilterFreeze();
@@ -1153,6 +1156,7 @@ sgtl5000_1.adcHighPassFilterEnable();
   sgtl5000_2.inputSelect(AUDIO_INPUT_LINEIN);  // Why is a second sgtl5000 device used???  This is the receiver ADCs, PCM1808?
   sgtl5000_2.muteHeadphone();                  // This one controls the headphone.  Why???
   sgtl5000_2.volume(0.8);   //  Headphone volume???  Not required as headphone is muted.
+  //sgtl5000_2.muteLineout();
   updateMic();  // This updates the transmit signal chain settings.
 
 // Set up "Controlled Envelope Single Side Band" from the Open Audio Library.

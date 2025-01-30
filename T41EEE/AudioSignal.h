@@ -9,7 +9,7 @@ AudioInputI2SQuad i2s_quadIn;     // 4 inputs/outputs available only in Teensy a
 AudioOutputI2SQuad i2s_quadOut;
 
 // Transmitter
-AudioControlSGTL5000_Extended sgtl5000_1;      // Controller for the Teensy Audio Board, transmitter only.  Or is the Audio Adapter sgtl5000_1???
+AudioControlSGTL5000 sgtl5000_1;      // Controller for the Teensy Audio Board, transmitter only.  Or is the Audio Adapter sgtl5000_1???
 AudioConvert_I16toF32 int2Float1;              // Converts Int16 to Float.  See class in AudioStream_F32.h
 //AudioEffectGain_F32 micGain(audio_settings);                   // Microphone gain control.
 AudioEffectGain_F32 micGain;                   // Microphone gain control.
@@ -143,6 +143,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord10.disconnect();  // Receiver Q channel
       patchCord17.disconnect();  // CW sidetone
       patchCord18.disconnect();
+      patchCord19.disconnect();
+      patchCord20.disconnect(); 
       Q_in_L.end();
       Q_in_L.clear();
       Q_in_R.end();
@@ -183,6 +185,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord10.connect();  // Receiver Q channel
       patchCord17.disconnect();  // Receiver audio and CW sidetone
       patchCord18.disconnect();
+      patchCord19.disconnect();
+      patchCord20.disconnect(); 
 
       Q_in_L.end();
       Q_in_L.clear();
@@ -225,6 +229,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       // QSD disabled and disconnected
       patchCord9.disconnect();
       patchCord10.disconnect();
+      patchCord19.disconnect();
+      patchCord20.disconnect(); 
       Q_in_L.end();
       Q_in_L.clear();
       Q_in_R.end();
@@ -251,6 +257,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord10.connect();  // Receiver Q channel
       patchCord17.disconnect();  // CW sidetone
       patchCord18.disconnect();
+      patchCord19.disconnect();
+      patchCord20.disconnect(); 
       switch1.setChannel(1);  // Disconnect microphone path.
       switch2.setChannel(1);  //  Disconnect 1 kHz test tone path.
 
