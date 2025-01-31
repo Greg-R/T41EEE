@@ -59,10 +59,10 @@ AudioConnection patchCord16(Q_out_R_Ex, 0, i2s_quadOut, 1);  // Q channel to lin
 
 // Receiver
 
-AudioRecordQueue Q_in_L;
-AudioRecordQueue Q_in_R;
+AudioRecordQueue Q_in_L;  // I channel from ADC PCM1808.
+AudioRecordQueue Q_in_R;  // Q channel from ADC PCM1808.
 
-AudioPlayQueue Q_out_L;
+AudioPlayQueue Q_out_L;  // Receiver audio out and CW sidetone.
 //AudioPlayQueue Q_out_R;  2nd audio channel not used.  KF5N March 11, 2024
 
 AudioConnection patchCord9(i2s_quadIn, 2, Q_in_L, 0);  // Receiver I and Q channel data stream.
@@ -70,9 +70,9 @@ AudioConnection patchCord10(i2s_quadIn, 3, Q_in_R, 0);
 
 AudioAmplifier volumeAdjust;
 AudioConnection patchCord17(Q_out_L, 0, volumeAdjust, 0);
-AudioConnection patchCord18(volumeAdjust, 0, i2s_quadOut, 2);
-AudioConnection patchCord19(volumeAdjust, 0, i2s_quadOut, 0);
-AudioConnection patchCord20(volumeAdjust, 0, i2s_quadOut, 1);
+AudioConnection patchCord18(volumeAdjust, 0, i2s_quadOut, 2);   // To audio ADC PCM5102 via Teensy pin 32.
+AudioConnection patchCord19(volumeAdjust, 0, i2s_quadOut, 0);   // To Audio Adapter via via Teensy pin 7.
+AudioConnection patchCord20(volumeAdjust, 0, i2s_quadOut, 1);   // To Audio Adapter via via Teensy pin 7.
 
 // It is unclear that this is actually required.
 AudioControlSGTL5000 sgtl5000_2;  // This is not a 2nd Audio Adapter.  It is I2S to the PCM1808 (ADC I and Q receiver in) and PCM5102 (DAC audio out).
@@ -108,7 +108,7 @@ void SetAudioOperatingState(RadioState operatingState) {
     case RadioState::AM_RECEIVE_STATE:
     case RadioState::CW_RECEIVE_STATE:
       SampleRate = SAMPLE_RATE_192K;
-      SetI2SFreq(SR[SampleRate].rate);   
+      SetI2SFreq(SR[SampleRate].rate);
       // Deactivate microphone and 1 kHz test tone.
       mixer1.gain(0, 0.0);
       mixer1.gain(1, 0.0);
@@ -126,6 +126,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       // Deactivate TX audio output path.
       patchCord15.disconnect();  // Disconnect transmitter I and Q channel outputs.
       patchCord16.disconnect();
+      sgtl5000_1.unmuteHeadphone();
       // QSD connected and enabled
       Q_in_L.begin();                                        // Receiver I channel
       Q_in_R.begin();                                        // Receiver Q channel
@@ -136,9 +137,12 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord19.connect();
       patchCord20.connect();        
       volumeAdjust.gain(volumeLog[EEPROMData.audioVolume]);  // Set volume because sidetone may have changed it.
+      sgtl5000_1.volume(0.8);
+      sgtl5000_1.unmuteHeadphone();
       break;
     case RadioState::SSB_TRANSMIT_STATE:
       // QSD disabled and disconnected
+      sgtl5000_1.muteHeadphone();
       patchCord9.disconnect();   // Receiver I channel
       patchCord10.disconnect();  // Receiver Q channel
       patchCord17.disconnect();  // CW sidetone
@@ -227,6 +231,9 @@ void SetAudioOperatingState(RadioState operatingState) {
     case RadioState::CW_TRANSMIT_STRAIGHT_STATE:
     case RadioState::CW_TRANSMIT_KEYER_STATE:
       // QSD disabled and disconnected
+      sgtl5000_1.unmuteHeadphone();
+ //     sgtl5000_1.volume(volumeLog[EEPROMData.sidetoneVolume]);
+      sgtl5000_1.volume(0.3);  // This is for sidetone in the headphone output.  Hardcoding for now.
       patchCord9.disconnect();
       patchCord10.disconnect();
       patchCord19.disconnect();

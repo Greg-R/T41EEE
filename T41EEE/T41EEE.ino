@@ -1127,9 +1127,12 @@ FLASHMEM void setup() {
   Teensy3Clock.set(now());  // set the RTC
   T4_rtc_set(Teensy3Clock.get());
 
-  sgtl5000_1.setAddress(LOW);  // This sets to one of two possible I2C addresses, controlled by a jumper on the Audio Adapter.
   sgtl5000_1.enable();
+  sgtl5000_1.setAddress(LOW);  // This sets to one of two possible I2C addresses, controlled by a jumper on the Audio Adapter.
 
+  sgtl5000_2.enable();
+  sgtl5000_2.setAddress(HIGH);            // T41 has only a single Audio Adaptor.  This is being used essentially as a 2nd I2S port.
+ 
 
 //  Don't use the audio pre-processor.  This causes a spurious signal in the SSB transmit output.
 //  sgtl5000_1.audioPreProcessorEnable();  // Need to use one of the equalizers.
@@ -1138,8 +1141,10 @@ FLASHMEM void setup() {
   AudioMemory(200);  //  Increased to 450 from 400.  Memory was hitting max.  KF5N August 31, 2023
   AudioMemory_F32(10);
   sgtl5000_1.inputSelect(AUDIO_INPUT_MIC);
-  sgtl5000_1.muteHeadphone();  // KF5N March 11, 2024
-  sgtl5000_1.volume(0.8);
+
+  sgtl5000_1.volume(1.0);
+  sgtl5000_1.unmuteHeadphone();  // KF5N March 11, 2024
+
   sgtl5000_1.micGain(0);
   sgtl5000_1.lineInLevel(0);   // Line-in is not used.  Can't turn it off though.
 #ifdef QSE2
@@ -1151,11 +1156,12 @@ FLASHMEM void setup() {
 sgtl5000_1.adcHighPassFilterEnable();  
 //sgtl5000_1.adcHighPassFilterDisable();  //reduces noise.  https://forum.pjrc.com/threads/27215-24-bit-audio-boards?p=78831&viewfull=1#post78831
 //sgtl5000_1.adcHighPassFilterFreeze();
-  sgtl5000_2.setAddress(HIGH);            // T41 has only a single Audio Adaptor.  This is being used essentially as a 2nd I2S port.
-  sgtl5000_2.enable();
+
   sgtl5000_2.inputSelect(AUDIO_INPUT_LINEIN);  // Why is a second sgtl5000 device used???  This is the receiver ADCs, PCM1808?
-  sgtl5000_2.muteHeadphone();                  // This one controls the headphone.  Why???
-  sgtl5000_2.volume(0.8);   //  Headphone volume???  Not required as headphone is muted.
+
+//  sgtl5000_2.volume(0.8);   //  Headphone volume???  Not required as headphone is muted.
+//  sgtl5000_2.muteHeadphone();                  // This one controls the headphone.  Why???
+
   //sgtl5000_2.muteLineout();
   updateMic();  // This updates the transmit signal chain settings.
 
