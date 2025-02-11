@@ -66,11 +66,12 @@ void Process::ProcessIQData() {
     //  Set RFGain for all bands.
     if (EEPROMData.autoGain) rfGain = EEPROMData.rfGainCurrent;                          // Auto-gain
     else rfGain = EEPROMData.rfGain[EEPROMData.currentBand];                             // Manual gain adjust.
-    rfGainValue = pow(10, (float)rfGain / 20) * 4.0 * DSPGAINSCALE;                      // KF5N November 9 2024
+//    rfGainValue = pow(10, static_cast<float32_t>(rfGain) / 20) * 1.0 * DSPGAINSCALE;                      // KF5N November 9 2024
+    rfGainValue = pow(10, static_cast<float32_t>(rfGain) / 20.0);
     arm_scale_f32(float_buffer_L, rfGainValue, float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 09-27-22
     arm_scale_f32(float_buffer_R, rfGainValue, float_buffer_R, BUFFER_SIZE * N_BLOCKS);  //AFP 09-27-22
-    arm_clip_f32(float_buffer_L, float_buffer_L, -1.0, 1.0, 2048);
-    arm_clip_f32(float_buffer_R, float_buffer_R, -1.0, 1.0, 2048);
+//    arm_clip_f32(float_buffer_L, float_buffer_L, -1.0, 1.0, 2048);
+//    arm_clip_f32(float_buffer_R, float_buffer_R, -1.0, 1.0, 2048);
     //    arm_max_f32(float_buffer_L, 2048, &dataMax, &dataMaxIndex);
     //    Serial.printf("dataMax = %f\n", dataMax);
     /**********************************************************************************  AFP 12-31-20
@@ -294,10 +295,10 @@ void Process::ProcessIQData() {
       for (int k = 3; k < 256; k++) {
         if (bands[EEPROMData.currentBand].mode == 0 || bands[EEPROMData.currentBand].mode == DEMOD_AM || bands[EEPROMData.currentBand].mode == DEMOD_SAM) {  //AFP 10-26-22
           //audioYPixel[k] = 20+  map((int)displayScale[EEPROMData.currentScale].dBScale * log10f((audioSpectBuffer[1024 - k] + audioSpectBuffer[1024 - k + 1] + audioSpectBuffer[1024 - k + 2]) / 3), 0, 100, 0, 120);
-          audioYPixel[k] = 50 + map(15 * log10f((audioSpectBuffer[1024 - k] + audioSpectBuffer[1024 - k + 1] + audioSpectBuffer[1024 - k + 2]) / 3), 0, 100, 0, 120);
+          audioYPixel[k] = AUDIOSPECTRUMSCALE + map(15 * log10f((audioSpectBuffer[1024 - k] + audioSpectBuffer[1024 - k + 1] + audioSpectBuffer[1024 - k + 2]) / 3), 0, 100, 0, 120) + audioFFToffset;
         } else if (bands[EEPROMData.currentBand].mode == 1) {  //AFP 10-26-22
           //audioYPixel[k] = 20+   map((int)displayScale[EEPROMData.currentScale].dBScale * log10f((audioSpectBuffer[k] + audioSpectBuffer[k + 1] + audioSpectBuffer[k + 2]) / 3), 0, 100, 0, 120);
-          audioYPixel[k] = 50 + map(15 * log10f((audioSpectBuffer[k] + audioSpectBuffer[k + 1] + audioSpectBuffer[k + 2]) / 3), 0, 100, 0, 120);
+          audioYPixel[k] = AUDIOSPECTRUMSCALE + map(15 * log10f((audioSpectBuffer[k] + audioSpectBuffer[k + 1] + audioSpectBuffer[k + 2]) / 3), 0, 100, 0, 120) + audioFFToffset;
         }
         if (audioYPixel[k] < 0)
           audioYPixel[k] = 0;

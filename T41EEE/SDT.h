@@ -647,6 +647,7 @@ extern Menu_D Menus[];
 extern int last_filter_pos;
 extern int filter_pos;
 extern int16_t fftOffset;
+extern int16_t audioFFToffset;
 extern bool volumeChangeFlag;
 extern char keyboardBuffer[];
 extern const char *topMenus[];

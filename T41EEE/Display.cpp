@@ -104,11 +104,13 @@ void ShowSpectrum() {
 #define UPPERPIXTARGET 15
 
   tft.writeTo(L1);  // TEMPORARY for graphics debugging.
-
+  int AudioH_max = 0, AudioH_max_box = 0;  // Used to center audio spectrum.
   char buff[10];
   int frequ_hist[32]{ 0 };  // All values are initialized to zero using this syntax.
+  int audio_hist[256]{ 0 };  // All values are initialized to zero using this syntax.  
   int j, k;
   int FH_max = 0, FH_max_box = 0;  //  HB finish
+
   int centerLine = (MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2;
   int middleSlice = centerLine / 2;  // Approximate center element
   int x1 = 0;                        //AFP
@@ -166,12 +168,13 @@ void ShowSpectrum() {
     y_old_plot = 247 - y_old - EEPROMData.currentNoiseFloor[EEPROMData.currentBand];
     y_old2_plot = 247 - y_old2 - EEPROMData.currentNoiseFloor[EEPROMData.currentBand];
 
-    // 247 is the spectral display bottom.
+    // Collect a histogram of RF spectrum values.  This is used in AutoGain and AutoSpectrum.
+    // 247 is the spectral display bottom.  120 is the spectral display top.
     if ((x1 > 51) && (x1 < 461))  //  HB start for auto RFgain collect frequency distribution. Limited to core of FFT and dividable by 4.
     {
       j = 247 - y_new_plot + 40;   // +40 to get 10 bins below zero - want to straddle zero to make the entire spectrum viewable.
       k = j >> 2;                  // Divide by 4
-      if ((k > -1) && (k < 32)) {  // The index of the bin array.
+      if ((k > -1) && (k < 32)) {  // The index of the bin array.  This indicates a value within the defined spectral box.
         frequ_hist[k] += 1;        // Add (accumulate) to the bin.
       if (frequ_hist[k] > FH_max) {  // FH_max starts at 0.
         FH_max = frequ_hist[k];      // Reset FH_max to the current bin value.
@@ -179,6 +182,24 @@ void ShowSpectrum() {
       }
     }  
     } //  HB finish
+
+    // Collect a histogram of audio spectral values.  This is used to keep the audio spectrum in the viewable area.
+    // 247??? is the spectral display bottom.  129 is the audio spectrum display top.
+    if ((x1 < 256) and (audioYPixel[x1] > 0))  //  Collect audio frequency distribution to find noise floor.
+    {
+      k = audioYPixel[x1];   // +40 to get 10 bins below zero - want to straddle zero to make the entire spectrum viewable.
+//      if(x1 == 50) Serial.printf("k = %d audioYPixel = %d\n", k, audioYPixel[x1]);
+//      k = j >> 2;                  // Divide by 4
+//      if ((k > -1) && (k < 32)) {  // The index of the bin array.  This indicates a value within the defined spectral box.
+        audio_hist[k] += 1;        // Add (accumulate) to the bin.
+//       if(x1 == 50) Serial.printf("audio_hist[k] = %d AudioH_max = %d\n", audio_hist[k], AudioH_max);       
+      if (audio_hist[k] > AudioH_max) {  // FH_max starts at 0.
+        AudioH_max = audio_hist[k];      // Reset FH_max to the current bin value.
+        AudioH_max_box = k;              // Index of FH_max.  this corresponds to the noise floor.
+//        Serial.printf("k = %d AudioH_max_box = %d\n", k, AudioH_max_box);
+      }
+    }
+//    } //  HB finish
 
     // Prevent spectrum from going below the bottom of the spectrum area.  KF5N
     if (y_new_plot > 247) y_new_plot = 247;
@@ -200,6 +221,7 @@ void ShowSpectrum() {
     //  In the case of a CW interrupt, the array pixelnew should be saved as the actual spectrum.
     pixelCurrent[x1] = pixelnew[x1];  //  This is the actual "old" spectrum!  This is required due to CW interrupts.  pixelCurrent gets copied to pixelold by the FFT function.  KF5N
 
+// Draw audio spectrum.  The audio spectrum width is smaller than the RF spectrum width.
     if (x1 < 253) {                                                                              //AFP 09-01-22
       if (keyPressedOn == 1) {                                                                   //AFP 09-01-22
         return;                                                                                  //AFP 09-01-22
@@ -221,10 +243,11 @@ void ShowSpectrum() {
     if (test1 > 117) test1 = 117;
     waterfall[x1] = gradient[test1];  // Try to put pixel values in middle of gradient array.  KF5N
     tft.writeTo(L1);
-  }
-  // End for(...) Draw MAX_WATERFALL_WIDTH spectral points
-  // Use the Block Transfer Engine (BTE) to move waterfall down a line
+  }  // End for(...) Draw MAX_WATERFALL_WIDTH spectral points
 
+  Serial.printf("AudioH_max_box = %d\n", AudioH_max_box);
+
+  // Use the Block Transfer Engine (BTE) to move waterfall down a line
   if (keyPressedOn == 1) {
     return;
   } else {
@@ -240,15 +263,16 @@ void ShowSpectrum() {
   // Then write new row data into the missing top row to get a scroll effect using display hardware, not the CPU.
   tft.writeRect(WATERFALL_LEFT_X, FIRST_WATERFALL_LINE, MAX_WATERFALL_WIDTH, 1, waterfall);
 
+// Manage RF spectral display graphics.  Keep the spectrum within the viewable area.
   if (EEPROMData.autoGain || EEPROMData.autoSpectrum) {
-    if (FH_max_box > UPPERPIXTARGET) {  //  HB Start adjust rfGainAllBands 15 and 13 to alter to move target base up and down
+    if (FH_max_box > UPPERPIXTARGET) { // HB. Adjust rfGainAllBands 15 and 13 to alter to move target base up and down. UPPERPIXTARGET = 15
       if (EEPROMData.autoGain) EEPROMData.rfGainCurrent = EEPROMData.rfGainCurrent - 1;
       if (EEPROMData.autoSpectrum) {
         EEPROMData.rfGainCurrent = EEPROMData.rfGain[EEPROMData.currentBand];
         fftOffset = fftOffset - 1;
       }
     }
-    if (FH_max_box < LOWERPIXTARGET) {
+    if (FH_max_box < LOWERPIXTARGET) {  // LOWERPIXTARGET = 13
       if (EEPROMData.autoGain) {
         EEPROMData.rfGainCurrent = EEPROMData.rfGainCurrent + 1;
         if (EEPROMData.rfGainCurrent > 25.0) EEPROMData.rfGainCurrent = 25.0;  //  Do not allow RF gain greater than 25.
@@ -259,6 +283,19 @@ void ShowSpectrum() {
       }
     }
   }
+
+
+// Manage audio spectral display graphics.  Keep the spectrum within the viewable area.
+
+    if (AudioH_max_box > 30) { // HB. Adjust rfGainAllBands 15 and 13 to alter to move target base up and down. UPPERPIXTARGET = 15
+        audioFFToffset = audioFFToffset - 1;
+      }
+    if (AudioH_max_box < 28) {  // LOWERPIXTARGET = 13
+        audioFFToffset = audioFFToffset + 1;
+      }
+
+
+  // Report the current RF "gain" setting.
   tft.fillRect(SPECTRUM_LEFT_X + 125, SPECTRUM_TOP_Y + 2, 33, tft.getFontHeight(), RA8875_BLACK);
   tft.setFontScale((enum RA8875tsize)0);
   tft.setTextColor(RA8875_WHITE);
@@ -1646,7 +1683,7 @@ void EraseSecondaryMenu() {
 void ShowTransmitReceiveStatus() {
   tft.setFontScale((enum RA8875tsize)1);
   tft.setTextColor(RA8875_BLACK);
-  if (radioState == RadioState::SSB_TRANSMIT_STATE or radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE or radioState == RadioState::CW_TRANSMIT_KEYER_STATE) {
+  if (radioState == RadioState::SSB_TRANSMIT_STATE or radioState == RadioState::FT8_TRANSMIT_STATE or radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE or radioState == RadioState::CW_TRANSMIT_KEYER_STATE) {
     tft.fillRect(X_R_STATUS_X, X_R_STATUS_Y, 55, 25, RA8875_RED);
     tft.setCursor(X_R_STATUS_X + 4, X_R_STATUS_Y - 5);
     tft.print("XMT");

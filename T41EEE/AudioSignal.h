@@ -9,8 +9,7 @@ AudioInputI2SQuad i2s_quadIn;     // 4 inputs/outputs available only in Teensy a
 AudioOutputI2SQuad i2s_quadOut;
 
 // Transmitter
-//; AudioControlSGTL5000_Extended sgtl5000_1     // Controller for the Teensy Audio Board, transmitter only.
-AudioControlSGTL5000 sgtl5000_1;    // This is not a 2nd Audio Adapter.  It is I2S to the PCM1808 (ADC I and Q receiver in) and PCM5102 (DAC audio out).
+AudioControlSGTL5000 sgtl5000_1;      // Controller for the Teensy Audio Adapter.
 AudioConvert_I16toF32 int2Float1;              // Converts Int16 to Float.  See class in AudioStream_F32.h
 //AudioEffectGain_F32 micGain(audio_settings);                   // Microphone gain control.
 AudioEffectGain_F32 micGain;                   // Microphone gain control.
@@ -18,13 +17,15 @@ AudioEffectCompressor2_F32  compressor1; // Open Audio Compressor
 AudioEffectCompressor2_F32 *pc1 = &compressor1;
 radioCESSB_Z_transmit_F32 cessb1;
 AudioConvert_F32toI16 float2Int1, float2Int2;  // Converts Float to Int16.  See class in AudioStream_F32.h
-AudioSwitch4_OA_F32 switch1, switch2, switch3;
-AudioMixer4_F32 mixer1, mixer2;                        // Used to switch in tone during calibration.
+AudioConvert_I16toF32 int2float1, int2float2;
+AudioSwitch4_OA_F32 switch1, switch2, switch3, switch4;
+AudioMixer4_F32 mixer1, mixer2;          // Used to switch in tone during calibration.
 AudioSynthWaveformSine_F32  toneSSBCal;          // Tone for SSB calibration.
 AudioRecordQueue Q_in_L_Ex;                    // AudioRecordQueue for input Microphone channel.
 AudioRecordQueue Q_in_R_Ex;           // This 2nd channel is needed as we are bringing I and Q into the sketch instead of only microphone audio.
 AudioPlayQueue Q_out_L_Ex;                     // AudioPlayQueue for driving the I channel (CW/SSB) to the QSE.
 AudioPlayQueue Q_out_R_Ex;                     // AudioPlayQueue for driving the Q channel (CW/SSB) to the QSE.
+AudioInputUSB usbIn;  // AudioInputUSB_F32
 
 //  Begin transmit signal chain.
 AudioConnection connect0(i2s_quadIn, 0, int2Float1, 0);    // Microphone audio channel.  Must use int2Float because Open Audio does not have quad input.
@@ -32,27 +33,33 @@ AudioConnection connect0(i2s_quadIn, 0, int2Float1, 0);    // Microphone audio c
 AudioConnection_F32 connect1(int2Float1, 0, switch1, 0);
 AudioConnection_F32 connect2(toneSSBCal,  0, switch2, 0);
 
-// Need a mixer to switch in an audio tone during calibration.  Should be a nominal tone amplitude.
-AudioConnection_F32 connect3(switch1, 0, mixer1, 0);  // Connect microphone mixer1 output 0 via gain control.
-AudioConnection_F32 connect4(switch2, 0, mixer1, 1);  // Connect tone for SSB calibration.
 
-AudioConnection_F32 connect5(mixer1, 0, micGain, 0);
-AudioConnection_F32 connect6(micGain, 0, switch3, 0);
+AudioConnection connect3(usbIn, 0, int2float2, 0);
+AudioConnection_F32 connect4(int2float2, 0, switch4, 0);          // Connect USB for FT8 from WSJTX on PC.
+
+
+// Need a mixer to switch in an audio tone during calibration.  Should be a nominal tone amplitude.
+AudioConnection_F32 connect5(switch1, 0, mixer1, 0);  // Connect microphone mixer1 output 0 via gain control.
+AudioConnection_F32 connect6(switch2, 0, mixer1, 1);  // Connect tone for SSB calibration.
+AudioConnection_F32 connect7(switch4, 0, mixer1, 2);  // USB audio from WSJTX on PC.
+
+AudioConnection_F32 connect8(mixer1, 0, micGain, 0);
+AudioConnection_F32 connect9(micGain, 0, switch3, 0);
 
 // The compressor is temporarily disabled.
 //AudioConnection_F32 connect7(switch3, 0, compressor1, 0);
 //AudioConnection_F32 connect8(compressor1, 0, mixer2, 0);
 
-AudioConnection_F32 connect9(switch3, 1, mixer2, 1);  // Compressor bypass path.
+AudioConnection_F32 connect10(switch3, 1, mixer2, 1);  // Compressor bypass path.
 
-AudioConnection_F32 connect10(mixer2, 0, cessb1, 0);
+AudioConnection_F32 connect11(mixer2, 0, cessb1, 0);
 
 // Controlled envelope SSB from Open Audio library.
-AudioConnection_F32 connect11(cessb1, 0, float2Int1, 0);
-AudioConnection_F32 connect12(cessb1, 1, float2Int2, 0);
+AudioConnection_F32 connect12(cessb1, 0, float2Int1, 0);
+AudioConnection_F32 connect13(cessb1, 1, float2Int2, 0);
 
-AudioConnection connect13(float2Int1, 0, Q_in_L_Ex, 0);
-AudioConnection connect14(float2Int2, 0, Q_in_R_Ex, 0);
+AudioConnection connect14(float2Int1, 0, Q_in_L_Ex, 0);
+AudioConnection connect15(float2Int2, 0, Q_in_R_Ex, 0);
 
 // Transmitter back-end.  This takes streaming data from the sketch and drives it into the I2S.
 AudioConnection patchCord15(Q_out_L_Ex, 0, i2s_quadOut, 0);  // I channel to line out
@@ -60,23 +67,27 @@ AudioConnection patchCord16(Q_out_R_Ex, 0, i2s_quadOut, 1);  // Q channel to lin
 
 // Receiver
 
-AudioRecordQueue Q_in_L;
-AudioRecordQueue Q_in_R;
+AudioRecordQueue Q_in_L;  // I channel from ADC PCM1808.
+AudioRecordQueue Q_in_R;  // Q channel from ADC PCM1808.
 
-AudioPlayQueue Q_out_L;
+AudioPlayQueue Q_out_L;  // Receiver audio out and CW sidetone.
 //AudioPlayQueue Q_out_R;  2nd audio channel not used.  KF5N March 11, 2024
+
+AudioOutputUSB usbOut;
 
 AudioConnection patchCord9(i2s_quadIn, 2, Q_in_L, 0);  // Receiver I and Q channel data stream.
 AudioConnection patchCord10(i2s_quadIn, 3, Q_in_R, 0);
 
 AudioAmplifier volumeAdjust;
 AudioConnection patchCord17(Q_out_L, 0, volumeAdjust, 0);
-AudioConnection patchCord18(volumeAdjust, 0, i2s_quadOut, 2);  // To pin 32 of Teensy and DIN of PCM5102 DAC.
-AudioConnection patchCord19(volumeAdjust, 0, i2s_quadOut, 0);  // To pin 32 of Teensy and DIN of PCM5102 DAC.
+AudioConnection patchCord18(volumeAdjust, 0, i2s_quadOut, 2);   // To audio ADC PCM5102 via Teensy pin 32.
+AudioConnection patchCord19(volumeAdjust, 0, i2s_quadOut, 0);   // To Audio Adapter via via Teensy pin 7.
 
-AudioConnection patchCord20(volumeAdjust, 0, i2s_quadOut, 1);  // Try to route receive audio to Audio Adapter.
+AudioConnection patchCord20(volumeAdjust, 0, usbOut, 0);   // To Audio Adapter via via Teensy pin 7.
+AudioConnection patchCord21(volumeAdjust, 0, usbOut, 1);   // To Audio Adapter via via Teensy pin 7.
 
-AudioControlSGTL5000 sgtl5000_2;  // Teensy Audio Adapter
+// It is unclear that this is actually required.
+AudioControlSGTL5000 sgtl5000_2;  // This is not a 2nd Audio Adapter.  It is I2S to the PCM1808 (ADC I and Q receiver in) and PCM5102 (DAC audio out).
 // End dataflow code
 
 
@@ -110,7 +121,7 @@ void SetAudioOperatingState(RadioState operatingState) {
     case RadioState::AM_RECEIVE_STATE:
     case RadioState::CW_RECEIVE_STATE:
       SampleRate = SAMPLE_RATE_192K;
-      SetI2SFreq(SR[SampleRate].rate);   
+      SetI2SFreq(SR[SampleRate].rate);
       // Deactivate microphone and 1 kHz test tone.
       mixer1.gain(0, 0.0);
       mixer1.gain(1, 0.0);
@@ -128,6 +139,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       // Deactivate TX audio output path.
       patchCord15.disconnect();  // Disconnect transmitter I and Q channel outputs.
       patchCord16.disconnect();
+      sgtl5000_1.unmuteHeadphone();
       // QSD connected and enabled
       Q_in_L.begin();                                        // Receiver I channel
       Q_in_R.begin();                                        // Receiver Q channel
@@ -136,16 +148,21 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord17.connect();                                 // Receiver audio channel
       patchCord18.connect();
       patchCord19.connect();
-      patchCord20.connect();
+      patchCord20.connect();        
       volumeAdjust.gain(volumeLog[EEPROMData.audioVolume]);  // Set volume because sidetone may have changed it.
+      sgtl5000_1.volume(0.8);
+      sgtl5000_1.unmuteHeadphone();
       break;
     case RadioState::SSB_TRANSMIT_STATE:
     case RadioState::FT8_TRANSMIT_STATE:
       // QSD disabled and disconnected
+      sgtl5000_1.muteHeadphone();
       patchCord9.disconnect();   // Receiver I channel
       patchCord10.disconnect();  // Receiver Q channel
       patchCord17.disconnect();  // CW sidetone
       patchCord18.disconnect();
+      patchCord19.disconnect();
+      patchCord20.disconnect(); 
       Q_in_L.end();
       Q_in_L.clear();
       Q_in_R.end();
@@ -154,10 +171,12 @@ void SetAudioOperatingState(RadioState operatingState) {
       SetI2SFreq(SR[SampleRate].rate);
       toneSSBCal.end();
       updateMic();
-      mixer1.gain(0, 1.0);   // Connect microphone audio to transmit chain.
-      mixer1.gain(1, 0.0);   // Disconnect 1 kHz test tone. 
-      switch1.setChannel(0);  // Connect microphone path.
+      mixer1.gain(0, 0.0);    // Disonnect microphone audio to transmit chain.
+      mixer1.gain(1, 0.0);    // Disconnect 1 kHz test tone.
+      mixer1.gain(2, 1.0);    // Connect USB audio from WSJTX on PC.
+      switch1.setChannel(1);  // Connect microphone path.
       switch2.setChannel(1);  //  Disconnect 1 kHz test tone path.
+      switch4.setChannel(0);  //  Connect USB audio from WSJTX on PC.
 
       if(EEPROMData.compressorFlag) {
             switch3.setChannel(0);
@@ -186,6 +205,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord10.connect();  // Receiver Q channel
       patchCord17.disconnect();  // Receiver audio and CW sidetone
       patchCord18.disconnect();
+      patchCord19.disconnect();
+      patchCord20.disconnect(); 
 
       Q_in_L.end();
       Q_in_L.clear();
@@ -226,8 +247,13 @@ void SetAudioOperatingState(RadioState operatingState) {
     case RadioState::CW_TRANSMIT_STRAIGHT_STATE:
     case RadioState::CW_TRANSMIT_KEYER_STATE:
       // QSD disabled and disconnected
+      sgtl5000_1.unmuteHeadphone();
+ //     sgtl5000_1.volume(volumeLog[EEPROMData.sidetoneVolume]);
+      sgtl5000_1.volume(0.3);  // This is for sidetone in the headphone output.  Hardcoding for now.
       patchCord9.disconnect();
       patchCord10.disconnect();
+      patchCord19.disconnect();
+      patchCord20.disconnect(); 
       Q_in_L.end();
       Q_in_L.clear();
       Q_in_R.end();
@@ -254,6 +280,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord10.connect();  // Receiver Q channel
       patchCord17.disconnect();  // CW sidetone
       patchCord18.disconnect();
+      patchCord19.disconnect();
+      patchCord20.disconnect(); 
       switch1.setChannel(1);  // Disconnect microphone path.
       switch2.setChannel(1);  //  Disconnect 1 kHz test tone path.
 

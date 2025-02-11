@@ -438,17 +438,14 @@ switch(EEPROMData.xmtMode) {
   case RadioMode::SSB_MODE:
     EEPROMData.xmtMode = RadioMode::CW_MODE;
     radioMode = RadioMode::CW_MODE;
-//    Serial.printf("CW mode\n");
     break;
   case RadioMode::CW_MODE:   // Toggle the current mode
     EEPROMData.xmtMode = RadioMode::FT8_MODE;
     radioMode = RadioMode::FT8_MODE;
-//        Serial.printf("FT8 mode\n");
     break;
   case RadioMode::FT8_MODE:   // Toggle the current mode
     EEPROMData.xmtMode = RadioMode::SSB_MODE;
     radioMode = RadioMode::SSB_MODE;
-//        Serial.printf("SSB mode\n");
   break;
   default:
   break;
