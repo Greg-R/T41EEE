@@ -10,14 +10,14 @@ AudioOutputI2SQuad i2s_quadOut;
 
 // Transmitter
 AudioControlSGTL5000 sgtl5000_1;      // Controller for the Teensy Audio Adapter.
-AudioConvert_I16toF32 int2Float1;              // Converts Int16 to Float.  See class in AudioStream_F32.h
+AudioConvert_I16toF32 int2Float1, int2Float2;              // Converts Int16 to Float.  See class in AudioStream_F32.h
 //AudioEffectGain_F32 micGain(audio_settings);                   // Microphone gain control.
 AudioEffectGain_F32 micGain;                   // Microphone gain control.
 AudioEffectCompressor2_F32  compressor1; // Open Audio Compressor
 AudioEffectCompressor2_F32 *pc1 = &compressor1;
 radioCESSB_Z_transmit_F32 cessb1;
 AudioConvert_F32toI16 float2Int1, float2Int2;  // Converts Float to Int16.  See class in AudioStream_F32.h
-AudioConvert_I16toF32 int2float1, int2float2;
+// AudioConvert_I16toF32 int2float1, int2float2;
 AudioSwitch4_OA_F32 switch1, switch2, switch3, switch4;
 AudioMixer4_F32 mixer1, mixer2;          // Used to switch in tone during calibration.
 AudioSynthWaveformSine_F32  toneSSBCal;          // Tone for SSB calibration.
@@ -33,9 +33,8 @@ AudioConnection connect0(i2s_quadIn, 0, int2Float1, 0);    // Microphone audio c
 AudioConnection_F32 connect1(int2Float1, 0, switch1, 0);
 AudioConnection_F32 connect2(toneSSBCal,  0, switch2, 0);
 
-
-AudioConnection connect3(usbIn, 0, int2float2, 0);
-AudioConnection_F32 connect4(int2float2, 0, switch4, 0);          // Connect USB for FT8 from WSJTX on PC.
+AudioConnection connect3(usbIn, 0, int2Float2, 0);
+AudioConnection_F32 connect4(int2Float2, 0, switch4, 0);          // Connect USB for FT8 from WSJTX on PC.
 
 
 // Need a mixer to switch in an audio tone during calibration.  Should be a nominal tone amplitude.
@@ -154,6 +153,48 @@ void SetAudioOperatingState(RadioState operatingState) {
       sgtl5000_1.unmuteHeadphone();
       break;
     case RadioState::SSB_TRANSMIT_STATE:
+        // QSD disabled and disconnected
+      sgtl5000_1.muteHeadphone();
+      patchCord9.disconnect();   // Receiver I channel
+      patchCord10.disconnect();  // Receiver Q channel
+      patchCord17.disconnect();  // CW sidetone
+      patchCord18.disconnect();
+      patchCord19.disconnect();
+      patchCord20.disconnect(); 
+      Q_in_L.end();
+      Q_in_L.clear();
+      Q_in_R.end();
+      Q_in_R.clear();
+      SampleRate = SAMPLE_RATE_48K;
+      SetI2SFreq(SR[SampleRate].rate);
+      toneSSBCal.end();
+      updateMic();
+      mixer1.gain(0, 1.0);    // Connect microphone audio to transmit chain.
+      mixer1.gain(1, 0.0);    // Disconnect 1 kHz test tone.
+      mixer1.gain(2, 0.0);    // Connect USB audio from WSJTX on PC.
+      switch1.setChannel(0);  // Connect microphone path.
+      switch2.setChannel(1);  //  Disconnect 1 kHz test tone path.
+      switch4.setChannel(1);  //  Disconnect USB audio from WSJTX on PC.
+
+      if(EEPROMData.cessb) {
+      switch3.setChannel(0);  // Enable compressor path!
+      mixer2.gain(0, 1.0);  // Enable compressor path!
+      mixer2.gain(1, 0.0);
+      cessb1.getLevels(0);  // Initialize the CESSB information struct.
+      } else {
+      switch3.setChannel(1);  // Enable compressor path!
+      mixer2.gain(0, 0.0);  // Enable compressor path!   
+      mixer2.gain(1, 1.0);
+      }
+
+      patchCord15.connect();  // Transmitter I channel
+      patchCord16.connect();  // Transmitter Q channel
+
+      Q_in_L_Ex.begin();  // I channel Microphone audio
+      Q_in_R_Ex.begin();  // Q channel Microphone audio
+
+      break;
+  
     case RadioState::FT8_TRANSMIT_STATE:
       // QSD disabled and disconnected
       sgtl5000_1.muteHeadphone();
@@ -170,25 +211,19 @@ void SetAudioOperatingState(RadioState operatingState) {
       SampleRate = SAMPLE_RATE_48K;
       SetI2SFreq(SR[SampleRate].rate);
       toneSSBCal.end();
-      updateMic();
+//      updateMic();    Not needed here?
       mixer1.gain(0, 0.0);    // Disonnect microphone audio to transmit chain.
       mixer1.gain(1, 0.0);    // Disconnect 1 kHz test tone.
       mixer1.gain(2, 1.0);    // Connect USB audio from WSJTX on PC.
-      switch1.setChannel(1);  // Connect microphone path.
+      switch1.setChannel(1);  // Disconnect microphone path.
       switch2.setChannel(1);  //  Disconnect 1 kHz test tone path.
       switch4.setChannel(0);  //  Connect USB audio from WSJTX on PC.
 
-      if(EEPROMData.compressorFlag) {
-            switch3.setChannel(0);
-            mixer2.gain(0, 1.0);
-            mixer2.gain(1, 0.0);
-      } else {
-            switch3.setChannel(1);  // Bypass compressor.
-            mixer2.gain(0, 0.0);
-            mixer2.gain(1, 1.0);
-      }
+      switch3.setChannel(1);  // Don't use compressor with FT8!
+      mixer2.gain(0, 0.0);
+      mixer2.gain(1, 1.0);
 
-      cessb1.getLevels(0);  // Initialize the CESSB information struct.
+//      cessb1.getLevels(0);  // Initialize the CESSB information struct.
       patchCord15.connect();  // Transmitter I channel
       patchCord16.connect();  // Transmitter Q channel
 
