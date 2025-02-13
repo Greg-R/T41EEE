@@ -197,7 +197,7 @@ const int FILTERPIN20M = 28;  // 20M filter relay
 const int FILTERPIN15M = 29;  // 15M filter relay
 const int RXTX = 22;          // Transmit/Receive
 const int PTT = 37;           // Transmit/Receive
-const int MUTE = 38;          // Mute Audio,  HIGH = "On" Audio available from Audio PA, LOW = Mute audio
+const int MUTE = 38;          // Mute Audio, HIGH = "On" Audio PA, LOW = Mute Audio PA off.  This may be reversed depending on PA.
 //========================================= Key/Keyer pins
 const int KEYER_DAH_INPUT_RING = 35;  // Ring connection for keyer.  Default for righthanded user.  
 const int KEYER_DIT_INPUT_TIP = 36;   // Tip connection for keyer.  Also straight key.
@@ -275,7 +275,7 @@ enum class RadioState{SSB_RECEIVE_STATE, SSB_TRANSMIT_STATE, FT8_TRANSMIT_STATE,
 enum class RadioMode{SSB_MODE, FT8_MODE, CW_MODE, AM_MODE};  // Probably need only modes, not receive or transmit.
 //  Primary menu selections.
 enum class MenuSelect{MENU_OPTION_SELECT, MAIN_MENU_UP, BAND_UP, ZOOM, MAIN_MENU_DN, BAND_DN, FILTER, DEMODULATION, SET_MODE,
-                      NOISE_REDUCTION, NOTCH_FILTER, NOISE_FLOOR, FINE_TUNE_INCREMENT, DECODER_TOGGLE,
+                      NOISE_REDUCTION, NOTCH_FILTER, MUTE_AUDIO, FINE_TUNE_INCREMENT, DECODER_TOGGLE,
                       MAIN_TUNE_INCREMENT, RESET_TUNING, UNUSED_1, BEARING, BOGUS_PIN_READ, DEFAULT
 };
 
@@ -288,7 +288,7 @@ extern struct maps myMapFiles[];
 
 struct config_t {
 
-  char versionSettings[10] = "T41EEE.8";  // This is required to be the first!  See EEPROMRead() function.
+  char versionSettings[10] = "T41EEE.9";  // This is required to be the first!  See EEPROMRead() function.
   int AGCMode = 1;
   int audioVolume = 30;  // 4 bytes
   int rfGainCurrent = 0;
@@ -388,7 +388,7 @@ struct config_t {
 //  int calFreq = 0;                    // This is an index into an array of tone frequencies, for example:  {750, 3000}.  Default to 750 Hz. KF5N March 12, 2024
   int buttonThresholdPressed = 944;   // switchValues[0] + WIGGLE_ROOM
   int buttonThresholdReleased = 964;  // buttonThresholdPressed + WIGGLE_ROOM
-  int buttonRepeatDelay = 300000;     // Increased to 300000 from 200000 to better handle cheap, wornout buttons.
+  uint32_t buttonRepeatDelay = 300000;     // Increased to 300000 from 200000 to better handle cheap, wornout buttons.
 #ifdef QSE2
   q15_t iDCoffsetCW[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
   q15_t qDCoffsetCW[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
@@ -407,9 +407,8 @@ extern struct config_t EEPROMData;
 extern config_t defaultConfig;
 extern config_t EEPROMData_temp;
 
-
-
 // Custom classes in the sketch.
+#include "Button.h"
 #include "CWCalibrate.h"
 #include "SSBCalibrate.h"
 #include "JSON.h"
@@ -558,6 +557,7 @@ extern Eeprom eeprom;                // EEPROM memory object.
 extern JSON json;
 extern CWCalibrate cwcalibrater;         // CW mode calibration object.
 extern SSBCalibrate ssbcalibrater;   // SSB mode calibration object.
+extern Button button;
 
 extern Si5351 si5351;
 
@@ -681,7 +681,7 @@ extern volatile long fineTuneEncoderMove;
 extern int freqIncrement;
 extern void (*functionPtr[])();
 extern int idx;
-extern bool buttonInterruptsEnabled;
+//extern bool buttonInterruptsEnabled;
 extern int n_L;
 extern int n_R;
 extern int newCursorPosition;
@@ -872,23 +872,23 @@ void arm_clip_f32(const float32_t *pSrc,
                   float32_t high,
                   uint32_t numSamples);
 int BandOptions();
-void BandSet(int band);  // Used in RadioCal().  Greg KF5N June 4, 2024.
+//void BandSet(int band);  // Used in RadioCal().  Greg KF5N June 4, 2024.
 float BearingHeading(char *dxCallPrefix);
 void BearingMaps();
 void bmpDraw(const char *filename, int x, int y);
-void ButtonBandDecrease();
-void ButtonBandIncrease();
-int ButtonDemod();
-void ButtonDemodMode();
-void ButtonFilter();
-void ButtonFrequencyEntry();
-void ButtonMenuIncrease();
-void ButtonMenuDecrease();
-void ButtonMode();
-void ButtonNotchFilter();
-void ButtonNR();
-void ButtonSetNoiseFloor();
-void ButtonZoom();
+//void ButtonBandDecrease();
+//void ButtonBandIncrease();
+//int ButtonDemod();
+//void ButtonDemodMode();
+//void ButtonFilter();
+//void ButtonFrequencyEntry();
+//void ButtonMenuIncrease();
+//void ButtonMenuDecrease();
+//void ButtonMode();
+//void ButtonNotchFilter();
+//void ButtonNR();
+//void ButtonSetNoiseFloor();
+//void ButtonZoom();
 void CalcZoom1Magn();
 void CalcFIRCoeffs(float *coeffs_I, int numCoeffs, float32_t fc, float32_t Astop, int type, float dfc, float Fsamprate);
 void CalcCplxFIRCoeffs(float *coeffs_I, float *coeffs_Q, int numCoeffs, float32_t FLoCut, float32_t FHiCut, float SampleRate);
@@ -922,7 +922,7 @@ void DrawBandWidthIndicatorBar();  // AFP 03-27-22 Layers
 void DrawFrequencyBarValue();
 void DrawInfoWindowFrame();
 void DrawKeyboard();
-int DrawNewFloor(int floor);
+//int DrawNewFloor(int floor);
 void DrawSMeterContainer();
 void DrawSpectrumDisplayContainer();
 void DrawAudioSpectContainer();
@@ -937,7 +937,7 @@ void EraseMenus();
 void ErasePrimaryMenu();
 void EraseSpectrumDisplayContainer();
 void EraseSpectrumWindow();
-void ExecuteButtonPress(MenuSelect val);
+//void ExecuteButtonPress(MenuSelect val);
 void FilterBandwidth();
 void FilterOverlay();
 void FilterSetSSB();
@@ -973,20 +973,20 @@ void MorseCharacterDisplay(char currentLetter);
 void MyDrawFloat(float val, int decimals, int x, int y, char *buff);
 float MSinc(int m, float fc);
 void printFile(const char *filename);
-void EnableButtonInterrupts();
+//void EnableButtonInterrupts();
 void playTransmitData();  // KF5N February 23, 2024
-MenuSelect ProcessButtonPress(int valPin);
+//MenuSelect ProcessButtonPress(int valPin);
 void ProcessEqualizerChoices(int EQType, char *title);
 //void ProcessIQData();
 MenuSelect readButton(MenuSelect lastUsedTask);
 MenuSelect readButton();
-int ReadSelectedPushButton();
+//int ReadSelectedPushButton();
 void RedrawDisplayScreen();
 void ResetFlipFlops();
 void ResetHistograms();
 void ResetTuning();  // AFP 10-11-22
 void RFOptions();
-void ResetZoom(int zoomIndex1);  // AFP 11-06-22
+//void ResetZoom(int zoomIndex1);  // AFP 11-06-22
 int SDPresentCheck();
 void SetCompressionThreshold();
 void SetCompressionRatio();

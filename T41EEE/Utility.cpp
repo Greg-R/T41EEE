@@ -506,15 +506,15 @@ void SaveAnalogSwitchValues() {
     tft.print(". ");
     tft.print(labels[index]);
 
-    if (buttonInterruptsEnabled) {
-      while ((value = ReadSelectedPushButton()) == -1) {
+    if (button.buttonInterruptsEnabled) {
+      while ((value = button.ReadSelectedPushButton()) == -1) {
         // Wait until a button is pressed
       }
     } else {
       value = -1;
       minVal = NOTHING_TO_SEE_HERE;
       while (true) {
-        value = ReadSelectedPushButton();
+        value = button.ReadSelectedPushButton();
         if (value < NOTHING_TO_SEE_HERE && value > 0) {
           delay(100L);
           if (value < minVal) {
@@ -543,7 +543,7 @@ void SaveAnalogSwitchValues() {
     }
 
     index++;
-    while ((value = ReadSelectedPushButton()) != -1 && value < NOTHING_TO_SEE_HERE) {
+    while ((value = button.ReadSelectedPushButton()) != -1 && value < NOTHING_TO_SEE_HERE) {
       // Wait until the button is released
     }
   }

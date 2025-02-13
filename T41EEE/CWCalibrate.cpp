@@ -265,7 +265,7 @@ void CWCalibrate::CalibratePreamble(int setZoom) {
   userZoomIndex = EEPROMData.spectrum_zoom;  // Save the zoom index so it can be reset at the conclusion.  KF5N August 12, 2023
   zoomIndex = setZoom - 1;
 //  loadCalToneBuffers();  // Restore in the epilogue.  Move to specific cal function and use correct tone freq.
-  ButtonZoom();
+  button.ButtonZoom();
   tft.fillRect(0, 272, 517, 399, RA8875_BLACK);  // Erase waterfall.  KF5N August 14, 2023
   RedrawDisplayScreen();                         // Erase any existing spectrum trace data.
   tft.writeTo(L2);                               // Erase the bandwidth bar.  KF5N August 16, 2023
@@ -344,7 +344,7 @@ void CWCalibrate::CalibrateEpilogue() {
   EEPROMData.transmitPowerLevel = transmitPowerLevelTemp;  // Restore the user's transmit power level setting.  KF5N August 15, 2023
   //EEPROMWrite();                                           // Save calibration numbers and configuration.  KF5N August 12, 2023
   zoomIndex = userZoomIndex - 1;
-  ButtonZoom();          // Restore the user's zoom setting.  Note that this function also modifies EEPROMData.spectrum_zoom.
+  button.ButtonZoom();          // Restore the user's zoom setting.  Note that this function also modifies EEPROMData.spectrum_zoom.
   eeprom.EEPROMWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
   tft.writeTo(L2);       // Clear layer 2.  KF5N July 31, 2023
   tft.clearMemory();
@@ -1561,43 +1561,43 @@ void CWCalibrate::RadioCal(bool refineCal) {
     return;
   }
 //  IQChoice = 0;  // Global variable.
-  BandSet(BAND_80M);
+  button.BandSet(BAND_80M);
 #ifdef QSE2
   CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal);
 #endif
   CWCalibrate::DoXmitCalibrate(0, true, refineCal);
   CWCalibrate::DoReceiveCalibrate(0, true, refineCal);
-  BandSet(BAND_40M);
+  button.BandSet(BAND_40M);
 #ifdef QSE2
   CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal);
 #endif
   CWCalibrate::DoXmitCalibrate(0, true, refineCal);
   CWCalibrate::DoReceiveCalibrate(0, true, refineCal);
-  BandSet(BAND_20M);
+  button.BandSet(BAND_20M);
 #ifdef QSE2
   CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal);
 #endif
   CWCalibrate::DoXmitCalibrate(0, true, refineCal);
   CWCalibrate::DoReceiveCalibrate(0, true, refineCal);
-  BandSet(BAND_17M);
+  button.BandSet(BAND_17M);
 #ifdef QSE2
   CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal);
 #endif
   CWCalibrate::DoXmitCalibrate(0, true, refineCal);
   CWCalibrate::DoReceiveCalibrate(0, true, refineCal);
-  BandSet(BAND_15M);
+  button.BandSet(BAND_15M);
 #ifdef QSE2
   CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal);
 #endif
   CWCalibrate::DoXmitCalibrate(0, true, refineCal);
   CWCalibrate::DoReceiveCalibrate(0, true, refineCal);
-  BandSet(BAND_12M);
+  button.BandSet(BAND_12M);
 #ifdef QSE2
   CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal);
 #endif
   CWCalibrate::DoXmitCalibrate(0, true, refineCal);
   CWCalibrate::DoReceiveCalibrate(0, true, refineCal);
-  BandSet(BAND_10M);
+  button.BandSet(BAND_10M);
 #ifdef QSE2
   CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal);
 #endif

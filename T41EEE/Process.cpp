@@ -295,10 +295,10 @@ void Process::ProcessIQData() {
       for (int k = 3; k < 256; k++) {
         if (bands[EEPROMData.currentBand].mode == 0 || bands[EEPROMData.currentBand].mode == DEMOD_AM || bands[EEPROMData.currentBand].mode == DEMOD_SAM) {  //AFP 10-26-22
           //audioYPixel[k] = 20+  map((int)displayScale[EEPROMData.currentScale].dBScale * log10f((audioSpectBuffer[1024 - k] + audioSpectBuffer[1024 - k + 1] + audioSpectBuffer[1024 - k + 2]) / 3), 0, 100, 0, 120);
-          audioYPixel[k] = AUDIOSPECTRUMSCALE + map(15 * log10f((audioSpectBuffer[1024 - k] + audioSpectBuffer[1024 - k + 1] + audioSpectBuffer[1024 - k + 2]) / 3), 0, 100, 0, 120) + audioFFToffset;
+          audioYPixel[k] = 65 + map(15 * log10f((audioSpectBuffer[1024 - k] + audioSpectBuffer[1024 - k + 1] + audioSpectBuffer[1024 - k + 2]) / 3), 0, 100, 0, 120) + audioFFToffset;
         } else if (bands[EEPROMData.currentBand].mode == 1) {  //AFP 10-26-22
           //audioYPixel[k] = 20+   map((int)displayScale[EEPROMData.currentScale].dBScale * log10f((audioSpectBuffer[k] + audioSpectBuffer[k + 1] + audioSpectBuffer[k + 2]) / 3), 0, 100, 0, 120);
-          audioYPixel[k] = AUDIOSPECTRUMSCALE + map(15 * log10f((audioSpectBuffer[k] + audioSpectBuffer[k + 1] + audioSpectBuffer[k + 2]) / 3), 0, 100, 0, 120) + audioFFToffset;
+          audioYPixel[k] = 65 + map(15 * log10f((audioSpectBuffer[k] + audioSpectBuffer[k + 1] + audioSpectBuffer[k + 2]) / 3), 0, 100, 0, 120) + audioFFToffset;
         }
         if (audioYPixel[k] < 0)
           audioYPixel[k] = 0;
@@ -476,9 +476,9 @@ void Process::ProcessIQData() {
       }
     }
 
-    // ======================================Interpolation  ================
+    // =================Interpolation up to 192ksps  ================
     //  Right channel audio deactivated.  KF5N March 11, 2024
-    arm_fir_interpolate_f32(&FIR_int1_I, float_buffer_L, iFFT_buffer, BUFFER_SIZE * N_BLOCKS / (uint32_t)(DF));  // Interpolatikon
+    arm_fir_interpolate_f32(&FIR_int1_I, float_buffer_L, iFFT_buffer, BUFFER_SIZE * N_BLOCKS / (uint32_t)(DF));  // Interpolation by 2?  To 48ksps???
 
     // interpolation-by-4
     arm_fir_interpolate_f32(&FIR_int2_I, iFFT_buffer, float_buffer_L, BUFFER_SIZE * N_BLOCKS / (uint32_t)(DF1));
@@ -487,7 +487,7 @@ void Process::ProcessIQData() {
       Digital Volume Control
     **********************************************************************************/
   
-    arm_scale_f32(float_buffer_L, AUDIOSCALE * audioGainCompensate, float_buffer_L, BUFFER_SIZE * N_BLOCKS);  // Set scaling constant to optimize volume control range.
+    arm_scale_f32(float_buffer_L, 80 * audioGainCompensate, float_buffer_L, BUFFER_SIZE * N_BLOCKS);  // Set scaling constant to optimize volume control range.
                                                                                         //      arm_scale_f32(float_buffer_R, DF * volumeLog[EEPROMData.audioVolume] * 4, float_buffer_R, BUFFER_SIZE * N_BLOCKS);
                                                                                         //    }
     /**********************************************************************************  AFP 12-31-20

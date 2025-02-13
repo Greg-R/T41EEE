@@ -1,10 +1,11 @@
 // Teensy and Open Audio Signal Chains include file.
 
-// Common to Transmitter and Receiver.
+#include "USB_Audio_F32.h"  // Required to use F32 USB in/out.
 
-//const float sample_rate_Hz = 48000.0f;
-//const int   audio_block_samples = 128;  // Always 128
-//AudioSettings_F32 audio_settings(sample_rate_Hz, audio_block_samples);
+// Common to Transmitter and Receiver.
+const float sample_rate_Hz = 48000.0f;
+const int   audio_block_samples = 128;  // Always 128
+AudioSettings_F32 audio_settings(sample_rate_Hz, audio_block_samples);
 AudioInputI2SQuad i2s_quadIn;     // 4 inputs/outputs available only in Teensy audio not Open Audio library.
 AudioOutputI2SQuad i2s_quadOut;
 
@@ -16,7 +17,7 @@ AudioEffectGain_F32 micGain;                   // Microphone gain control.
 AudioEffectCompressor2_F32  compressor1; // Open Audio Compressor
 AudioEffectCompressor2_F32 *pc1 = &compressor1;
 radioCESSB_Z_transmit_F32 cessb1;
-AudioConvert_F32toI16 float2Int1, float2Int2;  // Converts Float to Int16.  See class in AudioStream_F32.h
+AudioConvert_F32toI16 float2Int1, float2Int2, float2Int3, float2Int4;  // Converts Float to Int16.  See class in AudioStream_F32.h
 // AudioConvert_I16toF32 int2float1, int2float2;
 AudioSwitch4_OA_F32 switch1, switch2, switch3, switch4;
 AudioMixer4_F32 mixer1, mixer2;          // Used to switch in tone during calibration.
@@ -25,7 +26,9 @@ AudioRecordQueue Q_in_L_Ex;                    // AudioRecordQueue for input Mic
 AudioRecordQueue Q_in_R_Ex;           // This 2nd channel is needed as we are bringing I and Q into the sketch instead of only microphone audio.
 AudioPlayQueue Q_out_L_Ex;                     // AudioPlayQueue for driving the I channel (CW/SSB) to the QSE.
 AudioPlayQueue Q_out_R_Ex;                     // AudioPlayQueue for driving the Q channel (CW/SSB) to the QSE.
-AudioInputUSB usbIn;  // AudioInputUSB_F32
+AudioInputUSB_F32 usbIn_F32(audio_settings);
+//AudioInputUSB usbIn;
+
 
 //  Begin transmit signal chain.
 AudioConnection connect0(i2s_quadIn, 0, int2Float1, 0);    // Microphone audio channel.  Must use int2Float because Open Audio does not have quad input.
@@ -33,9 +36,10 @@ AudioConnection connect0(i2s_quadIn, 0, int2Float1, 0);    // Microphone audio c
 AudioConnection_F32 connect1(int2Float1, 0, switch1, 0);
 AudioConnection_F32 connect2(toneSSBCal,  0, switch2, 0);
 
-AudioConnection connect3(usbIn, 0, int2Float2, 0);
-AudioConnection_F32 connect4(int2Float2, 0, switch4, 0);          // Connect USB for FT8 from WSJTX on PC.
+//AudioConnection connect3(usbIn, 0, int2Float2, 0);
+//AudioConnection_F32 connect4(int2Float2, 0, switch4, 0);          // Connect USB for FT8 from WSJTX on PC.
 
+AudioConnection_F32 connect4(usbIn_F32, 0, switch4, 0);
 
 // Need a mixer to switch in an audio tone during calibration.  Should be a nominal tone amplitude.
 AudioConnection_F32 connect5(switch1, 0, mixer1, 0);  // Connect microphone mixer1 output 0 via gain control.
@@ -72,18 +76,31 @@ AudioRecordQueue Q_in_R;  // Q channel from ADC PCM1808.
 AudioPlayQueue Q_out_L;  // Receiver audio out and CW sidetone.
 //AudioPlayQueue Q_out_R;  2nd audio channel not used.  KF5N March 11, 2024
 
-AudioOutputUSB usbOut;
+//AudioOutputUSB usbOut;
+AudioOutputUSB_F32 usbOut_F32(audio_settings);
 
 AudioConnection patchCord9(i2s_quadIn, 2, Q_in_L, 0);  // Receiver I and Q channel data stream.
 AudioConnection patchCord10(i2s_quadIn, 3, Q_in_R, 0);
 
-AudioAmplifier volumeAdjust;
+AudioAmplifier volumeAdjust, speakerScale, headphoneScale;
 AudioConnection patchCord17(Q_out_L, 0, volumeAdjust, 0);
-AudioConnection patchCord18(volumeAdjust, 0, i2s_quadOut, 2);   // To audio ADC PCM5102 via Teensy pin 32.
-AudioConnection patchCord19(volumeAdjust, 0, i2s_quadOut, 0);   // To Audio Adapter via via Teensy pin 7.
 
-AudioConnection patchCord20(volumeAdjust, 0, usbOut, 0);   // To Audio Adapter via via Teensy pin 7.
-AudioConnection patchCord21(volumeAdjust, 0, usbOut, 1);   // To Audio Adapter via via Teensy pin 7.
+AudioConnection patchCord18(volumeAdjust, 0, speakerScale, 0);   // To audio ADC PCM5102 via Teensy pin 32.  Speaker.
+AudioConnection patchCord19(volumeAdjust, 0, headphoneScale, 0);   // To Audio Adapter via via Teensy pin 7.  Headphones.
+//AudioConnection patchCord20(volumeAdjust, 0, i2s_quadOut, 1);   // To Audio Adapter via via Teensy pin 7.  Headphones (other side).
+
+AudioConnection patchCord20(speakerScale, 0, i2s_quadOut, 2);   // To audio ADC PCM5102 via Teensy pin 32.  Speaker.
+AudioConnection patchCord21(headphoneScale, 0, i2s_quadOut, 0);   // To Audio Adapter via via Teensy pin 7.  Headphones.
+AudioConnection patchCord22(headphoneScale, 0, i2s_quadOut, 1);   // To Audio Adapter via via Teensy pin 7.  Headphones (other side).
+
+//AudioConnection patchCord20(volumeAdjust, 0, usbOut, 0);   // To Audio Adapter via via Teensy pin 7.
+//AudioConnection patchCord21(volumeAdjust, 0, usbOut, 1);   // To Audio Adapter via via Teensy pin 7.
+
+AudioConnection patchCord23(volumeAdjust, 0, float2Int3, 0);   // To Audio Adapter via via Teensy pin 7.
+AudioConnection patchCord24(volumeAdjust, 0, float2Int4, 0);   // To Audio Adapter via via Teensy pin 7.
+
+AudioConnection patchCord25(float2Int3, 0, usbOut_F32, 0);   // To Audio Adapter via via Teensy pin 7.
+AudioConnection patchCord26(float2Int4, 0, usbOut_F32, 1);   // To Audio Adapter via via Teensy pin 7.
 
 // It is unclear that this is actually required.
 AudioControlSGTL5000 sgtl5000_2;  // This is not a 2nd Audio Adapter.  It is I2S to the PCM1808 (ADC I and Q receiver in) and PCM5102 (DAC audio out).
@@ -147,8 +164,18 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord17.connect();                                 // Receiver audio channel
       patchCord18.connect();
       patchCord19.connect();
-      patchCord20.connect();        
+      patchCord20.connect();  // Experimental USB output. 
+      patchCord21.connect();  // Experimental USB output.
+      patchCord22.connect();  // Experimental USB output.
+      patchCord23.connect();
+      patchCord24.connect();
+      patchCord25.connect();
+      patchCord26.connect();
       volumeAdjust.gain(volumeLog[EEPROMData.audioVolume]);  // Set volume because sidetone may have changed it.
+//      speakerScale.gain(volumeLog[SPEAKERSCALE]);
+      speakerScale.gain(SPEAKERSCALE);      
+//      headphoneScale.gain(volumeLog[HEADPHONESCALE]);
+      headphoneScale.gain(HEADPHONESCALE);     
       sgtl5000_1.volume(0.8);
       sgtl5000_1.unmuteHeadphone();
       break;
@@ -208,7 +235,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       Q_in_L.clear();
       Q_in_R.end();
       Q_in_R.clear();
-      SampleRate = SAMPLE_RATE_48K;
+      SampleRate = SAMPLE_RATE_44K;
       SetI2SFreq(SR[SampleRate].rate);
       toneSSBCal.end();
 //      updateMic();    Not needed here?

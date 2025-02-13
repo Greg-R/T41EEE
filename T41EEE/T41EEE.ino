@@ -350,12 +350,6 @@ const char *topMenus[] = { "CW Options", "RF Set", "VFO Select",
 
 // Button array labels array is located in Utility.cpp.
 
-// Pointers to functions which execute the menu options.  Do these functions used the returned integer???
-void (*functionPtr[])() = { &CWOptions, &RFOptions, &VFOSelect,
-                            &EEPROMOptions, &AGCOptions, &SpectrumOptions,
-                            &ButtonSetNoiseFloor, &SSBOptions,
-                            &EqualizerRecOptions, &CalibrateOptions, &BearingMaps };
-
 uint32_t FFT_length = FFT_LENGTH;
 
 //======================================== Global object definitions ==================================================
@@ -372,8 +366,14 @@ CWCalibrate cwcalibrater;  // Instantiate the calibration objects.
 SSBCalibrate ssbcalibrater;
 JSON json;
 Eeprom eeprom;           // Eeprom object.
+Button button;
 
-
+// Pointers to functions which execute the menu options.  Do these functions used the returned integer???
+void (*functionPtr[])() = { &CWOptions, &RFOptions, &VFOSelect,
+                            &EEPROMOptions, &AGCOptions, &SpectrumOptions,
+//                            button.ButtonMuteAudio, &SSBOptions,
+                            &SSBOptions,                            
+                            &EqualizerRecOptions, &CalibrateOptions, &BearingMaps };
 
 Rotary volumeEncoder = Rotary(VOLUME_ENCODER_A, VOLUME_ENCODER_B);        //( 2,  3)
 Rotary tuneEncoder = Rotary(TUNE_ENCODER_A, TUNE_ENCODER_B);              //(16, 17)
@@ -1090,9 +1090,9 @@ FLASHMEM void Splash() {
 MenuSelect readButton(MenuSelect lastUsedTask) {
   int val = 0;
   MenuSelect menu, task = MenuSelect::DEFAULT;
-    val = ReadSelectedPushButton();
+    val = button.ReadSelectedPushButton();
     if (val != -1) {  // -1 is returned by ReadSelectedPushButton in the case of an invalid read.
-      menu = ProcessButtonPress(val);
+      menu = button.ProcessButtonPress(val);
       if (menu != lastUsedTask && task == MenuSelect::DEFAULT) task = menu;
       else task = MenuSelect::BOGUS_PIN_READ;
     }
@@ -1103,9 +1103,9 @@ MenuSelect readButton(MenuSelect lastUsedTask) {
 MenuSelect readButton() {
   int val = 0;
   MenuSelect menu = MenuSelect::DEFAULT;
-    val = ReadSelectedPushButton();
+    val = button.ReadSelectedPushButton();
     if (val != -1) {  // -1 is returned by ReadSelectedPushButton in the case of an invalid read.
-      menu = ProcessButtonPress(val);
+      menu = button.ProcessButtonPress(val);
     }  else menu = MenuSelect::BOGUS_PIN_READ;
     return menu;
 }
@@ -1258,7 +1258,7 @@ sgtl5000_1.adcHighPassFilterEnable();
     eeprom.EEPROMWrite();  // Call to reset switch matrix values
   }                // KD0RC end
 #else
-  EnableButtonInterrupts();
+  button.EnableButtonInterrupts();
   eeprom.EEPROMStartup();
 #endif
 
@@ -1304,7 +1304,7 @@ sgtl5000_1.adcHighPassFilterEnable();
   ShowFrequency();
   ShowAutoStatus();
   zoomIndex = EEPROMData.spectrum_zoom - 1;  // ButtonZoom() increments zoomIndex, so this cancels it so the read from EEPROM is accurately restored.  KF5N August 3, 2023
-  ButtonZoom();                              // Restore zoom settings.  KF5N August 3, 2023
+  button.ButtonZoom();                              // Restore zoom settings.  KF5N August 3, 2023
 
   EEPROMData.sdCardPresent = SDPresentCheck();  // JJP 7/18/23
   lastState = RadioState::NOSTATE;                             // To make sure the receiver will be configured on the first pass through.  KF5N September 3, 2023
@@ -1342,7 +1342,7 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
 
   menu = readButton();
   if (menu != MenuSelect::BOGUS_PIN_READ and (radioState != RadioState::SSB_TRANSMIT_STATE) and (radioState != RadioState::CW_TRANSMIT_STRAIGHT_STATE) and (radioState != RadioState::CW_TRANSMIT_KEYER_STATE)) {
-    ExecuteButtonPress(menu);
+    button.ExecuteButtonPress(menu);
   }
   //  State detection
   if (EEPROMData.xmtMode == RadioMode::SSB_MODE and digitalRead(PTT) == HIGH) radioState = RadioState::SSB_RECEIVE_STATE;
