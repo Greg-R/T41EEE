@@ -1,3 +1,5 @@
+// Morse decode and other Morse related utilities.
+
 
 #include "SDT.h"
 
@@ -187,6 +189,7 @@ void SetDitLength(int wpm) {
   ditLength = 1200 / wpm;
 }
 
+
 /*****
   Purpose: establish the dit length for code transmission. Crucial since
     all spacing is done using dit length
@@ -350,6 +353,7 @@ void MorseCharacterClear(void) {
   col = 0;
   decodeBuffer[col] = '\0';  // Make it a string
 }
+
 
 /*****
   Purpose: This function displays the decoded Morse code below waterfall. Arranged as:
@@ -536,7 +540,6 @@ FASTRUN void DoCWDecoding(int audioValue) {
 
   Return value;
     void
-
 *****/
 FASTRUN void DoGapHistogram(long gapLen) {
   int32_t tempAtom, tempChar;
@@ -583,6 +586,7 @@ FASTRUN void DoGapHistogram(long gapLen) {
     gapChar = charIndex;
   }
 }
+
 
 /*****
   Purpose: This function replaces the arm_max_float32() function that finds the maximum element in an array.

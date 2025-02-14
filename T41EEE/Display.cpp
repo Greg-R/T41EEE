@@ -1,6 +1,19 @@
 
 #include "SDT.h"
 
+// DrawAudioSpectContainer()
+// ShowName()
+// ShowSpectrum()
+// ShowBandwidth()
+// ShowSpectrumdBScale()
+// DrawSMeterContainer()
+// ShowSpectrumdBScale()
+// DrawSpectrumDisplayContainer()
+// DrawFrequencyBarValue()
+// ShowAutoStatus()
+// BandInformation()
+// 
+
 #define CLIP_AUDIO_PEAK 115            // The pixel value where audio peak overwrites S-meter
 #define INCREMENT_X WATERFALL_RIGHT_X + 25
 #define INCREMENT_Y WATERFALL_TOP_Y + 70
@@ -245,7 +258,7 @@ void ShowSpectrum() {
     tft.writeTo(L1);
   }  // End for(...) Draw MAX_WATERFALL_WIDTH spectral points
 
-  Serial.printf("AudioH_max_box = %d\n", AudioH_max_box);
+//  Serial.printf("AudioH_max_box = %d\n", AudioH_max_box);
 
   // Use the Block Transfer Engine (BTE) to move waterfall down a line
   if (keyPressedOn == 1) {
@@ -654,7 +667,7 @@ void BandInformation()  // SSB or CW
   tft.setTextColor(RA8875_WHITE);
 
   tft.print("Center Freq");  // This is static, never changes.
-  tft.fillRect(100, FREQUENCY_Y + 33, 190, 12, RA8875_BLACK);  // Clear frequency, band, and mode.
+  tft.fillRect(100, FREQUENCY_Y + 31, 290, 15, RA8875_BLACK);  // Clear frequency, band, and mode.  This should be the only erase required.
 
 // Write the center frequency to the display.
   tft.setCursor(100, FREQUENCY_Y + 30);
@@ -725,7 +738,7 @@ tft.print("FT8");
   }
 
 // Write sideband or AM demodulation type to display.
-  tft.fillRect(OPERATION_STATS_X + 160, FREQUENCY_Y + 30, tft.getFontWidth() * 11, tft.getFontHeight(), RA8875_BLACK);  // AFP 11-01-22 Clear top-left menu area
+//  tft.fillRect(OPERATION_STATS_X + 160, FREQUENCY_Y + 30, tft.getFontWidth() * 11, tft.getFontHeight(), RA8875_BLACK);  // AFP 11-01-22 Clear top-left menu area
   tft.setCursor(OPERATION_STATS_X + 165, FREQUENCY_Y + 30);                                                             // AFP 11-01-22
   tft.setTextColor(RA8875_WHITE);
 
@@ -1083,7 +1096,61 @@ void UpdateInfoWindow() {
   UpdateWPMField();
   UpdateZoomField();
   UpdateEqualizerField(EEPROMData.receiveEQFlag);
+  UpdateAudioField();
 }
+
+
+/*****
+  Purpose: Updates the states of the speaker and headphone.
+
+  Parameter list:
+    void
+
+  Return value;
+    void
+*****/
+void UpdateAudioField() {
+  tft.setFontScale((enum RA8875tsize)0);
+  tft.setCursor(670, 365);
+  tft.fillRect(670, 365, 115, 30, RA8875_BLACK);  // Erase previous states.
+  switch (EEPROMData.audioOut) {
+case AudioState::SPEAKER:
+  tft.setTextColor(RA8875_WHITE);
+  tft.print("Speaker On");
+  tft.setCursor(670, 380);
+  tft.setTextColor(RA8875_RED);
+  tft.print("Headphone Mute");
+break;
+case AudioState::MUTE_BOTH:
+  tft.setTextColor(RA8875_RED);
+  tft.print("Speaker Mute");
+  tft.setCursor(670, 380);
+  tft.setTextColor(RA8875_RED);
+  tft.print("Headphone Mute");
+break;
+case AudioState::HEADPHONE:
+  tft.setTextColor(RA8875_RED);
+  tft.print("Speaker Mute");
+  tft.setCursor(670, 380);
+  tft.setTextColor(RA8875_WHITE);
+  tft.print("Headphone On");
+break;
+case AudioState::BOTH:
+  tft.setTextColor(RA8875_WHITE);
+  tft.print("Speaker On");
+  tft.setCursor(670, 380);
+  tft.print("Headphone On");
+break;
+default:
+break;
+}
+
+//  tft.setTextColor(RA8875_GREEN);
+//  tft.fillRect(BAND_INDICATOR_X + 90, BAND_INDICATOR_Y, tft.getFontWidth() * 3 + 2, tft.getFontHeight(), RA8875_BLACK);
+//  tft.setCursor(FIELD_OFFSET_X, BAND_INDICATOR_Y);
+//  tft.print(EEPROMData.audioVolume);
+}
+
 
 /*****
   Purpose: Updates the Volume setting on the display
@@ -1245,7 +1312,7 @@ void UpdateNotchField() {
 void UpdateZoomField() {
   tft.setFontScale((enum RA8875tsize)0);
 
-  tft.fillRect(ZOOM_X, ZOOM_Y, 100, tft.getFontHeight(), RA8875_BLACK);
+  tft.fillRect(ZOOM_X, ZOOM_Y, 80, tft.getFontHeight(), RA8875_BLACK);
   tft.setTextColor(RA8875_WHITE);  // Display zoom factor
   tft.setCursor(ZOOM_X + 5, ZOOM_Y - 4);
   tft.print("Zoom:");
@@ -1460,9 +1527,9 @@ void UpdateWPMField() {
     void
 *****/
 void UpdateNoiseField() {
-  const char *filter[] = { "Off", "Kim", "Spectral", "LMS" };  //AFP 09-19-22
+  const char *filter[] = { "Off", "Kim", "Spec", "LMS" };  //AFP 09-19-22
   tft.setFontScale((enum RA8875tsize)0);
-  tft.fillRect(FIELD_OFFSET_X, NOISE_REDUCE_Y, 70, tft.getFontHeight(), RA8875_BLACK);
+  tft.fillRect(FIELD_OFFSET_X, NOISE_REDUCE_Y, 35, tft.getFontHeight(), RA8875_BLACK);
   tft.setTextColor(RA8875_WHITE);  // Noise reduction
   tft.setCursor(NOISE_REDUCE_X + 5, NOISE_REDUCE_Y - 3);
   tft.print("Noise:");

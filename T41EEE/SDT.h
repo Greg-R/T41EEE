@@ -273,6 +273,7 @@ enum class RadioState{SSB_RECEIVE_STATE, SSB_TRANSMIT_STATE, FT8_TRANSMIT_STATE,
                       CW_TRANSMIT_KEYER_STATE, AM_RECEIVE_STATE, SSB_CALIBRATE_STATE, CW_CALIBRATE_STATE, 
                       SET_CW_SIDETONE, NOSTATE};
 enum class RadioMode{SSB_MODE, FT8_MODE, CW_MODE, AM_MODE};  // Probably need only modes, not receive or transmit.
+enum class AudioState{SPEAKER, HEADPHONE, BOTH, MUTE_BOTH};
 //  Primary menu selections.
 enum class MenuSelect{MENU_OPTION_SELECT, MAIN_MENU_UP, BAND_UP, ZOOM, MAIN_MENU_DN, BAND_DN, FILTER, DEMODULATION, SET_MODE,
                       NOISE_REDUCTION, NOTCH_FILTER, MUTE_AUDIO, FINE_TUNE_INCREMENT, DECODER_TOGGLE,
@@ -300,6 +301,7 @@ struct config_t {
   uint32_t fineTuneStep = FINE_TUNE_DEFAULT;           // JJP 7-3-23
   float32_t transmitPowerLevel = DEFAULT_POWER_LEVEL;  // Changed from int to float; Greg KF5N February 12, 2024
   RadioMode xmtMode = RadioMode::SSB_MODE;             //
+  AudioState audioOut = AudioState::SPEAKER;                       // Default audio output is speaker.
   int nrOptionSelect = 0;                              // 1 byte
   int currentScale = 1;
   long spectrum_zoom = SPECTRUM_ZOOM_2;
@@ -533,7 +535,7 @@ extern AudioPlayQueue Q_out_L;
 extern AudioPlayQueue Q_out_L_Ex;
 extern AudioPlayQueue Q_out_R_Ex;
 
-//extern AudioControlSGTL5000_Extended sgtl5000_1;  // F32 controller for the Teensy Audio Board
+extern AudioControlSGTL5000 sgtl5000_1;  // F32 controller for the Teensy Audio Board
 extern AudioConvert_I16toF32 int2Float1;          // Converts Int16 to Float.  See class in AudioStream_F32.h
 extern AudioEffectGain_F32 micGain;               // Added with CESSB.  Greg KF5N July 24, 2024.
 extern AudioConvert_F32toI16 float2Int1;          // Converts Float to Int16.  See class in AudioStream_F32.h
@@ -689,6 +691,7 @@ extern int NR_Index;
 extern int oldCursorPosition;
 extern RadioMode radioMode;
 extern RadioState radioState, lastState;  // Used by the loop to monitor current state.
+
 extern int resetTuningFlag;        // Experimental flag for ResetTuning() due to possible timing issues.  KF5N July 31, 2023
 extern int selectedMapIndex;
 extern bool switchFilterSideband;  //AFP 1-28-21
@@ -1038,6 +1041,7 @@ void T4_rtc_set(unsigned long t);
 float TGetTemp();
 
 void UpdateAGCField();
+void UpdateAudioField();
 void UpdateCompressionField();
 void UpdateDecoderField();
 void UpdateEqualizerField(bool rxEqState);

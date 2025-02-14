@@ -923,8 +923,32 @@ void Button::ButtonNotchFilter() {
     void
 *****/
 void Button::ButtonMuteAudio() {
-  audioState = not audioState;
-      digitalWrite(MUTE, audioState);  //  Mute Audio
+  switch (EEPROMData.audioOut) {
+    case AudioState::SPEAKER:      // Speaker is on, mute and unmute headphones.
+    digitalWrite(MUTE, MUTEAUDIO);  //  Speaker mute
+    sgtl5000_1.unmuteHeadphone();  // Make the headphone output active.
+    EEPROMData.audioOut = AudioState::HEADPHONE;
+    break;
+  case AudioState::HEADPHONE:      // Mute both speaker and headphones.
+    digitalWrite(MUTE, MUTEAUDIO);  // Speaker unmute
+    sgtl5000_1.muteHeadphone();  // Mute headphonts
+    EEPROMData.audioOut = AudioState::MUTE_BOTH;
+  break;
+    case AudioState::MUTE_BOTH:     //  Unmute both.
+    digitalWrite(MUTE, UNMUTEAUDIO);  //  Mute Speaker
+    sgtl5000_1.unmuteHeadphone();  // Make the headphone output active.
+    EEPROMData.audioOut = AudioState::BOTH;
+  break;
+      case AudioState::BOTH:     //  Headphones mute, speaker on
+    digitalWrite(MUTE, UNMUTEAUDIO);  //  Mute Speaker
+    sgtl5000_1.muteHeadphone();  // Make the headphone output active.
+    EEPROMData.audioOut = AudioState::SPEAKER;
+  break;
+  default:
+  return;
+  break;
+  }
+  UpdateAudioField();
 }
 
 /*****

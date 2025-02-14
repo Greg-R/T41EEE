@@ -9,15 +9,26 @@ int state;
 state = static_cast<int>(src);
 //  char buf[32];
 //  strftime(buf, sizeof(buf), "%FT%TZ", &src);
-
   return dst.set(state);
 }
-
 
 RadioMode convertFromJson(JsonVariantConst src, RadioMode& dst) {
 int state;
 state = src.as<int>();
 return dst = static_cast<RadioMode>(state);
+}
+
+// Custom converters are needed for the audio states.
+bool convertToJson(const AudioState& src, JsonVariant dst) {
+int state;
+state = static_cast<int>(src);
+  return dst.set(state);
+}
+
+AudioState convertFromJson(JsonVariantConst src, AudioState& dst) {
+int state;
+state = src.as<int>();
+return dst = static_cast<AudioState>(state);
 }
 
 
@@ -52,6 +63,7 @@ FLASHMEM void JSON::loadConfiguration(const char *filename, config_t &EEPROMData
   EEPROMData.fineTuneStep = doc["fineTuneStep"];
   EEPROMData.transmitPowerLevel = doc["transmitPowerLevel"];
   EEPROMData.xmtMode = doc["xmtMode"];
+  EEPROMData.audioOut = doc["audioOut"];
   EEPROMData.nrOptionSelect = doc["nrOptionSelect"];
   EEPROMData.currentScale = doc["currentScale"];
   EEPROMData.spectrum_zoom = doc["spectrum_zoom"];
@@ -167,6 +179,7 @@ FLASHMEM void JSON::saveConfiguration(const char *filename, const config_t &EEPR
   doc["fineTuneStep"] = EEPROMData.fineTuneStep;
   doc["transmitPowerLevel"] = EEPROMData.transmitPowerLevel;
   doc["xmtMode"] = EEPROMData.xmtMode;
+  doc["audioOut"] = EEPROMData.audioOut;
   doc["nrOptionSelect"] = EEPROMData.nrOptionSelect;
   doc["currentScale"] = EEPROMData.currentScale;
   doc["spectrum_zoom"] = EEPROMData.spectrum_zoom;

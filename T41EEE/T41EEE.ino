@@ -1144,7 +1144,7 @@ FLASHMEM void setup() {
   AudioMemory_F32(10);
   sgtl5000_1.inputSelect(AUDIO_INPUT_MIC);
   sgtl5000_1.volume(1.0);
-  sgtl5000_1.unmuteHeadphone();  // Make the headphone output active.
+  sgtl5000_1.muteHeadphone();  // Make the headphone output active.
 
   sgtl5000_1.micGain(0);
   sgtl5000_1.lineInLevel(0);   // Line-in is not used.  Can't turn it off though.
@@ -1310,6 +1310,7 @@ sgtl5000_1.adcHighPassFilterEnable();
   lastState = RadioState::NOSTATE;                             // To make sure the receiver will be configured on the first pass through.  KF5N September 3, 2023
   if(EEPROMData.xmtMode == RadioMode::CW_MODE) {radioState = RadioState::CW_RECEIVE_STATE; radioMode = RadioMode::CW_MODE;}
   if(EEPROMData.xmtMode == RadioMode::SSB_MODE) {radioState = RadioState::SSB_RECEIVE_STATE; radioMode = RadioMode::SSB_MODE;}
+  BandInformation();
   UpdateDecoderField();                         // Adjust graphics for Morse decoder.
   FilterSetSSB();
   UpdateEqualizerField(EEPROMData.receiveEQFlag);
