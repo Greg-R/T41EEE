@@ -274,7 +274,7 @@ enum class RadioState{SSB_RECEIVE_STATE, SSB_TRANSMIT_STATE, FT8_TRANSMIT_STATE,
                       SET_CW_SIDETONE, NOSTATE};
 enum class RadioMode{SSB_MODE, FT8_MODE, CW_MODE, AM_MODE};  // Probably need only modes, not receive or transmit.
 enum class AudioState{SPEAKER, HEADPHONE, BOTH, MUTE_BOTH};
-//  Primary menu selections.
+//  Primary menu selections from the switch matrix.  This is for a 6x3 matrix for a total of 18 buttons.
 enum class MenuSelect{MENU_OPTION_SELECT, MAIN_MENU_UP, BAND_UP, ZOOM, MAIN_MENU_DN, BAND_DN, FILTER, DEMODULATION, SET_MODE,
                       NOISE_REDUCTION, NOTCH_FILTER, MUTE_AUDIO, FINE_TUNE_INCREMENT, DECODER_TOGGLE,
                       MAIN_TUNE_INCREMENT, RESET_TUNING, UNUSED_1, BEARING, BOGUS_PIN_READ, DEFAULT

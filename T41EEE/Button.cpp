@@ -183,7 +183,7 @@ int Button::ReadSelectedPushButton() {
            a button press.
 
   Parameter list:
-    int vsl               the value from analogRead in loop()
+    MenuSelect val               The value from analogRead in loop()
 
   Return value;
     void

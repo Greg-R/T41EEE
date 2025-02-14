@@ -319,7 +319,7 @@ struct maps myMapFiles[10] = {
   { "", 0.0, 0.0 }
 };
 
-struct band bands[NUMBER_OF_BANDS]{  //AFP Changed 1-30-21 // G0ORX Changed AGC to 20
+struct band bands[NUMBER_OF_BANDS] {  //AFP Changed 1-30-21 // G0ORX Changed AGC to 20
 //freq    band low   band hi   name    mode      Low    Hi  Gain  type    gain  AGC   pixel
 //                                             filter filter             correct     offset
 //DB2OO, 29-AUG-23: take ITU_REGION into account for band limits
@@ -327,20 +327,22 @@ struct band bands[NUMBER_OF_BANDS]{  //AFP Changed 1-30-21 // G0ORX Changed AGC 
 // Calibration done with TinySA as signal generator with -73dBm levels (S9) at the FT8 frequencies
 // with V010 QSD with the 12V mod of the pre-amp
 #if defined(ITU_REGION) && ITU_REGION == 1
- { 3700000UL, 3500000, 3800000, "80M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20},
- { 7150000, 7000000, 7200000, "40M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20},
+  { 3700000UL, 3500000, 3800000, "80M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20 },
+    { 7150000, 7000000, 7200000, "40M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20 },
 #elif defined(ITU_REGION) && ITU_REGION == 2
- {  3700000UL, 3500000, 4000000, "80M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20},
- {  7150000, 7000000, 7300000, "40M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20},
+  { 3700000UL, 3500000, 4000000, "80M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20 },
+    { 7150000, 7000000, 7300000, "40M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20 },
 #elif defined(ITU_REGION) && ITU_REGION == 3
- {  3700000UL, 3500000, 3900000, "80M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20},
- {  7150000, 7000000, 7200000, "40M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20},
+  { 3700000UL, 3500000, 3900000, "80M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20 },
+    { 7150000, 7000000, 7200000, "40M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20 },
 #endif
- {  14200000, 14000000, 14350000, "20M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20},
- {  18100000, 18068000, 18168000, "17M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20},
- {  21200000, 21000000, 21450000, "15M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20},
- {  24920000, 24890000, 24990000, "12M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20},
- {  28350000, 28000000, 29700000, "10M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20}
+    { 14200000, 14000000, 14350000, "20M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20 },
+    { 18100000, 18068000, 18168000, "17M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20 },
+    { 21200000, 21000000, 21450000, "15M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20 },
+    { 24920000, 24890000, 24990000, "12M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20 },
+  {
+    28350000, 28000000, 29700000, "10M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20
+  }
 };
 
 const char *topMenus[] = { "CW Options", "RF Set", "VFO Select",
@@ -357,22 +359,22 @@ uint32_t FFT_length = FFT_LENGTH;
 bool agc_action = false;
 // Teensy and OpenAudio dataflow code.
 #include "AudioSignal.h"
-//End dataflow 
+//End dataflow
 
 #include "Process.h"
 
-Process process;         // Receiver process object.
+Process process;           // Receiver process object.
 CWCalibrate cwcalibrater;  // Instantiate the calibration objects.
 SSBCalibrate ssbcalibrater;
 JSON json;
-Eeprom eeprom;           // Eeprom object.
+Eeprom eeprom;  // Eeprom object.
 Button button;
 
 // Pointers to functions which execute the menu options.  Do these functions used the returned integer???
 void (*functionPtr[])() = { &CWOptions, &RFOptions, &VFOSelect,
                             &EEPROMOptions, &AGCOptions, &SpectrumOptions,
-//                            button.ButtonMuteAudio, &SSBOptions,
-                            &SSBOptions,                            
+                            //                            button.ButtonMuteAudio, &SSBOptions,
+                            &SSBOptions,
                             &EqualizerRecOptions, &CalibrateOptions, &BearingMaps };
 
 Rotary volumeEncoder = Rotary(VOLUME_ENCODER_A, VOLUME_ENCODER_B);        //( 2,  3)
@@ -385,7 +387,7 @@ Metro ms_500 = Metro(500);  // Set up a Metro
 Si5351 si5351;  // Instantiate the PLL device.
 
 RadioState radioState, lastState;  // KF5N
-RadioMode radioMode;  // Greg KF5N August 1, 2024
+RadioMode radioMode;               // Greg KF5N August 1, 2024
 int resetTuningFlag = 0;
 #ifndef RA8875_DISPLAY
 ILI9488_t3 tft = ILI9488_t3(&SPI, TFT_CS, TFT_DC, TFT_RST);  // Instantiate the display.
@@ -1090,24 +1092,24 @@ FLASHMEM void Splash() {
 MenuSelect readButton(MenuSelect lastUsedTask) {
   int val = 0;
   MenuSelect menu, task = MenuSelect::DEFAULT;
-    val = button.ReadSelectedPushButton();
-    if (val != -1) {  // -1 is returned by ReadSelectedPushButton in the case of an invalid read.
-      menu = button.ProcessButtonPress(val);
-      if (menu != lastUsedTask && task == MenuSelect::DEFAULT) task = menu;
-      else task = MenuSelect::BOGUS_PIN_READ;
-    }
-    return task;
+  val = button.ReadSelectedPushButton();
+  if (val != -1) {  // -1 is returned by ReadSelectedPushButton in the case of an invalid read.
+    menu = button.ProcessButtonPress(val);
+    if (menu != lastUsedTask && task == MenuSelect::DEFAULT) task = menu;
+    else task = MenuSelect::BOGUS_PIN_READ;
+  }
+  return task;
 }
 
 
 MenuSelect readButton() {
   int val = 0;
   MenuSelect menu = MenuSelect::DEFAULT;
-    val = button.ReadSelectedPushButton();
-    if (val != -1) {  // -1 is returned by ReadSelectedPushButton in the case of an invalid read.
-      menu = button.ProcessButtonPress(val);
-    }  else menu = MenuSelect::BOGUS_PIN_READ;
-    return menu;
+  val = button.ReadSelectedPushButton();
+  if (val != -1) {  // -1 is returned by ReadSelectedPushButton in the case of an invalid read.
+    menu = button.ProcessButtonPress(val);
+  } else menu = MenuSelect::BOGUS_PIN_READ;
+  return menu;
 }
 
 
@@ -1133,13 +1135,13 @@ FLASHMEM void setup() {
   sgtl5000_1.setAddress(LOW);  // This sets to one of two possible I2C addresses, controlled by a jumper on the Audio Adapter.
 
   sgtl5000_2.enable();
-  sgtl5000_2.setAddress(HIGH);            // T41 has only a single Audio Adaptor.  This is being used essentially as a 2nd I2S port.
- 
+  sgtl5000_2.setAddress(HIGH);  // T41 has only a single Audio Adaptor.  This is being used essentially as a 2nd I2S port.
 
-//  Don't use the audio pre-processor.  This causes a spurious signal in the SSB transmit output.
-//  sgtl5000_1.audioPreProcessorEnable();  // Need to use one of the equalizers.
-//  sgtl5000_1.eqSelect(3);
-//  sgtl5000_1.eqBands(-1.0, 0.0, 1.0, 1.0, -1.0);
+
+  //  Don't use the audio pre-processor.  This causes a spurious signal in the SSB transmit output.
+  //  sgtl5000_1.audioPreProcessorEnable();  // Need to use one of the equalizers.
+  //  sgtl5000_1.eqSelect(3);
+  //  sgtl5000_1.eqBands(-1.0, 0.0, 1.0, 1.0, -1.0);
   AudioMemory(200);  //  Increased to 450 from 400.  Memory was hitting max.  KF5N August 31, 2023
   AudioMemory_F32(10);
   sgtl5000_1.inputSelect(AUDIO_INPUT_MIC);
@@ -1147,34 +1149,34 @@ FLASHMEM void setup() {
   sgtl5000_1.muteHeadphone();  // Make the headphone output active.
 
   sgtl5000_1.micGain(0);
-  sgtl5000_1.lineInLevel(0);   // Line-in is not used.  Can't turn it off though.
+  sgtl5000_1.lineInLevel(0);  // Line-in is not used.  Can't turn it off though.
 #ifdef QSE2
   sgtl5000_1.lineOutLevel(13);  // Setting of 13 limits line-out level to 3.15 volts p-p (maximum).
 #else
   sgtl5000_1.lineOutLevel(20);  // Setting of 20 limits line-out level to 2.14 volts p-p.
 #endif
-//sgtl5000_1.muteLineout();  // This controls the Audio Adapter.  The Audio Adapter is sgtl5000_1.
-sgtl5000_1.adcHighPassFilterEnable();  
-//sgtl5000_1.adcHighPassFilterDisable();  //reduces noise.  https://forum.pjrc.com/threads/27215-24-bit-audio-boards?p=78831&viewfull=1#post78831
-//sgtl5000_1.adcHighPassFilterFreeze();
+  //sgtl5000_1.muteLineout();  // This controls the Audio Adapter.  The Audio Adapter is sgtl5000_1.
+  sgtl5000_1.adcHighPassFilterEnable();
+  //sgtl5000_1.adcHighPassFilterDisable();  //reduces noise.  https://forum.pjrc.com/threads/27215-24-bit-audio-boards?p=78831&viewfull=1#post78831
+  //sgtl5000_1.adcHighPassFilterFreeze();
   sgtl5000_2.inputSelect(AUDIO_INPUT_LINEIN);  // Why is a second sgtl5000 device used???  This is the receiver ADCs, PCM1808?
 
-//  sgtl5000_2.volume(0.8);   //  Headphone volume???  Not required as headphone is muted.
-//  sgtl5000_2.muteHeadphone();                  // This one controls the headphone.  Why???
+  //  sgtl5000_2.volume(0.8);   //  Headphone volume???  Not required as headphone is muted.
+  //  sgtl5000_2.muteHeadphone();                  // This one controls the headphone.  Why???
 
   //sgtl5000_2.muteLineout();
 
   updateMic();  // This updates the transmit signal chain settings.
 
-// Set up "Controlled Envelope Single Side Band" from the Open Audio Library.
-   cessb1.setSampleRate_Hz(48000);
-   cessb1.setGains(3.5f, 1.4f, 0.5f);  // gainIn, gainCompensate, gainOut
-   cessb1.setSideband(false);
-   cessb1.setProcessing(EEPROMData.cessb);  // Set to CESSB or SSB Data.  Greg KF5N August 17 2024
+  // Set up "Controlled Envelope Single Side Band" from the Open Audio Library.
+  cessb1.setSampleRate_Hz(48000);
+  cessb1.setGains(3.5f, 1.4f, 0.5f);  // gainIn, gainCompensate, gainOut
+  cessb1.setSideband(false);
+  cessb1.setProcessing(EEPROMData.cessb);  // Set to CESSB or SSB Data.  Greg KF5N August 17 2024
 
-  Q_out_L_Ex.setMaxBuffers(32);       // Limits determined emperically.  These may need more adjustment.  Greg KF5N August 4, 2024.
+  Q_out_L_Ex.setMaxBuffers(32);  // Limits determined emperically.  These may need more adjustment.  Greg KF5N August 4, 2024.
   Q_out_R_Ex.setMaxBuffers(32);
-  Q_out_L.setMaxBuffers(64);          // Receiver audio buffer limit.
+  Q_out_L.setMaxBuffers(64);  // Receiver audio buffer limit.
 
   // GPOs used to control hardware.
   pinMode(FILTERPIN15M, OUTPUT);
@@ -1215,7 +1217,7 @@ sgtl5000_1.adcHighPassFilterEnable();
   attachInterrupt(digitalPinToInterrupt(KEYER_DIT_INPUT_TIP), KeyTipOn, CHANGE);  // Changed to keyTipOn from KeyOn everywhere JJP 8/31/22
   attachInterrupt(digitalPinToInterrupt(KEYER_DAH_INPUT_RING), KeyRingOn, CHANGE);
 
-// Move these to the initialization function?
+  // Move these to the initialization function?
   arm_fir_init_f32(&FIR_CW_DecodeL, 64, CW_Filter_Coeffs2, FIR_CW_DecodeL_state, 256);  //AFP 10-25-22
   arm_fir_init_f32(&FIR_CW_DecodeR, 64, CW_Filter_Coeffs2, FIR_CW_DecodeR_state, 256);
   arm_fir_interpolate_init_f32(&FIR_int1_EX_I, 2, 48, coeffs48K_8K_LPF_FIR, FIR_int1_EX_I_state, 256);  // Used in CW exciter.
@@ -1256,7 +1258,7 @@ sgtl5000_1.adcHighPassFilterEnable();
     EnableButtonInterrupts();
     SaveAnalogSwitchValues();
     eeprom.EEPROMWrite();  // Call to reset switch matrix values
-  }                // KD0RC end
+  }                        // KD0RC end
 #else
   button.EnableButtonInterrupts();
   eeprom.EEPROMStartup();
@@ -1275,12 +1277,12 @@ sgtl5000_1.adcHighPassFilterEnable();
   si5351.reset();                                                                           // KF5N.  Moved Si5351 start-up to setup. JJP  7/14/23
   si5351.init(SI5351_CRYSTAL_LOAD_10PF, Si_5351_crystal, EEPROMData.freqCorrectionFactor);  // JJP  7/14/23
   si5351.set_ms_source(SI5351_CLK2, SI5351_PLLB);                                           // Allows CLK1 and CLK2 to exceed 100 MHz simultaneously.
-  #ifdef PLLMODULE
-  si5351.drive_strength(SI5351_CLK0, SI5351_DRIVE_8MA);                                     // AFP 10-13-22
-  #else
+#ifdef PLLMODULE
+  si5351.drive_strength(SI5351_CLK0, SI5351_DRIVE_8MA);  // AFP 10-13-22
+#else
   si5351.drive_strength(SI5351_CLK1, SI5351_DRIVE_8MA);
-  #endif
-  si5351.drive_strength(SI5351_CLK2, SI5351_DRIVE_8MA);                                     // CWP AFP 10-13-22
+#endif
+  si5351.drive_strength(SI5351_CLK2, SI5351_DRIVE_8MA);  // CWP AFP 10-13-22
   // Turn off LOs.  Should be default state after init, so probably not really necessary here.
   si5351.output_enable(SI5351_CLK2, 0);
   si5351.output_enable(SI5351_CLK1, 0);
@@ -1292,29 +1294,35 @@ sgtl5000_1.adcHighPassFilterEnable();
   volumeChangeFlag = true;  // Adjust volume so saved value.
   filterEncoderMove = 0;
   fineTuneEncoderMove = 0L;
+
+  lastState = RadioState::NOSTATE;  // To make sure the receiver will be configured on the first pass through.  KF5N September 3, 2023
+  if (EEPROMData.xmtMode == RadioMode::CW_MODE) {
+    radioState = RadioState::CW_RECEIVE_STATE;
+    radioMode = RadioMode::CW_MODE;
+  }
+  if (EEPROMData.xmtMode == RadioMode::SSB_MODE) {
+    radioState = RadioState::SSB_RECEIVE_STATE;
+    radioMode = RadioMode::SSB_MODE;
+  }
+
+  // Write graphics to display.
   UpdateInfoWindow();
   DrawSpectrumDisplayContainer();
   RedrawDisplayScreen();
-
   mainMenuIndex = 0;  // Changed from middle to first. Do Menu Down to get to Calibrate quickly
   ShowName();
-
   ShowBandwidth();
   FilterBandwidth();
   ShowFrequency();
   ShowAutoStatus();
   zoomIndex = EEPROMData.spectrum_zoom - 1;  // ButtonZoom() increments zoomIndex, so this cancels it so the read from EEPROM is accurately restored.  KF5N August 3, 2023
-  button.ButtonZoom();                              // Restore zoom settings.  KF5N August 3, 2023
+  button.ButtonZoom();                       // Restore zoom settings.  KF5N August 3, 2023
 
   EEPROMData.sdCardPresent = SDPresentCheck();  // JJP 7/18/23
-  lastState = RadioState::NOSTATE;                             // To make sure the receiver will be configured on the first pass through.  KF5N September 3, 2023
-  if(EEPROMData.xmtMode == RadioMode::CW_MODE) {radioState = RadioState::CW_RECEIVE_STATE; radioMode = RadioMode::CW_MODE;}
-  if(EEPROMData.xmtMode == RadioMode::SSB_MODE) {radioState = RadioState::SSB_RECEIVE_STATE; radioMode = RadioMode::SSB_MODE;}
-  BandInformation();
   UpdateDecoderField();                         // Adjust graphics for Morse decoder.
   FilterSetSSB();
   UpdateEqualizerField(EEPROMData.receiveEQFlag);
-  EEPROMData.rfGainCurrent = 0;  // Start with lower gain so you don't get blasted.
+  EEPROMData.rfGainCurrent = 0;                                                  // Start with lower gain so you don't get blasted.
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();  // Required only for QSD2/QSE2.
 }
 //============================================================== END setup() =================================================================
@@ -1331,7 +1339,7 @@ elapsedMicros usec = 0;  // Automatically increases as time passes; no ++ necess
   Return value:
     void
 *****/
-float audioBW{0.0};
+float audioBW{ 0.0 };
 
 void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
 {
@@ -1342,23 +1350,23 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   unsigned long cwBlockIndex;
 
   menu = readButton();
-  if (menu != MenuSelect::BOGUS_PIN_READ and (radioState != RadioState::SSB_TRANSMIT_STATE) and (radioState != RadioState::CW_TRANSMIT_STRAIGHT_STATE) and (radioState != RadioState::CW_TRANSMIT_KEYER_STATE)) {
+  if (menu != MenuSelect::BOGUS_PIN_READ and (radioState != RadioState::SSB_TRANSMIT_STATE) and (radioState != RadioState::FT8_TRANSMIT_STATE) and (radioState != RadioState::CW_TRANSMIT_STRAIGHT_STATE) and (radioState != RadioState::CW_TRANSMIT_KEYER_STATE)) {
     button.ExecuteButtonPress(menu);
   }
   //  State detection
   if (EEPROMData.xmtMode == RadioMode::SSB_MODE and digitalRead(PTT) == HIGH) radioState = RadioState::SSB_RECEIVE_STATE;
   if (EEPROMData.xmtMode == RadioMode::SSB_MODE && digitalRead(PTT) == LOW) radioState = RadioState::SSB_TRANSMIT_STATE;
 
-    if (EEPROMData.xmtMode == RadioMode::FT8_MODE and Serial.rts() == LOW) radioState = RadioState::FT8_RECEIVE_STATE;
-    if (EEPROMData.xmtMode == RadioMode::FT8_MODE and Serial.rts() == HIGH) radioState = RadioState::FT8_TRANSMIT_STATE;
+  if (EEPROMData.xmtMode == RadioMode::FT8_MODE and Serial.rts() == LOW) radioState = RadioState::FT8_RECEIVE_STATE;
+  if (EEPROMData.xmtMode == RadioMode::FT8_MODE and Serial.rts() == HIGH) radioState = RadioState::FT8_TRANSMIT_STATE;
 
   if (EEPROMData.xmtMode == RadioMode::CW_MODE && (digitalRead(EEPROMData.paddleDit) == HIGH && digitalRead(EEPROMData.paddleDah) == HIGH)) radioState = RadioState::CW_RECEIVE_STATE;  // Was using symbolic constants. Also changed in code below.  KF5N August 8, 2023
   if (EEPROMData.xmtMode == RadioMode::CW_MODE && (digitalRead(EEPROMData.paddleDit) == LOW && EEPROMData.xmtMode == RadioMode::CW_MODE && EEPROMData.keyType == 0)) radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;
   if (EEPROMData.xmtMode == RadioMode::CW_MODE && (keyPressedOn == 1 && EEPROMData.xmtMode == RadioMode::CW_MODE && EEPROMData.keyType == 1)) radioState = RadioState::CW_TRANSMIT_KEYER_STATE;
   if (bands[EEPROMData.currentBand].mode > 1) {
-  radioState = RadioState::AM_RECEIVE_STATE;  // Inhibit transmit in AM demod modes.  KF5N March 21, 2024
-  radioMode = RadioMode::AM_MODE;             // AM is currently receive only.
-  keyPressedOn = 0;
+    radioState = RadioState::AM_RECEIVE_STATE;  // Inhibit transmit in AM demod modes.  KF5N March 21, 2024
+    radioMode = RadioMode::AM_MODE;             // AM is currently receive only.
+    keyPressedOn = 0;
   }
 
   if (lastState != radioState) {
@@ -1373,58 +1381,58 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
     case RadioState::AM_RECEIVE_STATE:
     case RadioState::FT8_RECEIVE_STATE:
     case RadioState::SSB_RECEIVE_STATE:
-      if (lastState != radioState) {  // G0ORX 01092023
-        digitalWrite(MUTE, UNMUTEAUDIO);      // Audio Mute off
-        digitalWrite(RXTX, LOW);      //xmit off
-//        if (keyPressedOn == 1) {  //// Unnecessary here?  Greg KF5N January 26, 2025
-//          return;
-//        }
+      if (lastState != radioState) {      // G0ORX 01092023
+        digitalWrite(MUTE, UNMUTEAUDIO);  // Audio Mute off
+        digitalWrite(RXTX, LOW);          //xmit off
+                                          //        if (keyPressedOn == 1) {  //// Unnecessary here?  Greg KF5N January 26, 2025
+                                          //          return;
+                                          //        }
         ShowTransmitReceiveStatus();
       }
       ShowSpectrum();
       break;
     case RadioState::SSB_TRANSMIT_STATE:
       digitalWrite(MUTE, MUTEAUDIO);  //  Mute Audio  (HIGH=Mute)
-      digitalWrite(RXTX, HIGH);  //xmit on
+      digitalWrite(RXTX, HIGH);       //xmit on
 
       ShowTransmitReceiveStatus();
       while (digitalRead(PTT) == LOW) {
         ExciterIQData();
 
 #ifdef DEBUG_CESSB
-  struct levelsZ* cessbData;
-if(cessb1.levelDataCount() > 2000) {
-        Serial.print("levelDataCount = ");  // Before getLevels(1), because it resets counts to 0.
-        Serial.println(cessb1.levelDataCount());
-  cessbData = cessb1.getLevels(1);  // Update the CESSB information struct.  Write the data to serial.
-          // Detailed Report
-        Serial.print(10.0f*log10f(cessbData->pwr0));
-        Serial.print(" In Ave Pwr Out ");
-        Serial.println(10.0f*log10f(cessbData->pwr1));
-        Serial.print(20.0f*log10f(cessbData->peak0));
-        Serial.print(" In  Peak   Out ");
-        Serial.println(20.0f*log10f(cessbData->peak1));
-        Serial.print(cessbData->peak0, 6);
-        Serial.print(" In  Peak Volts   Out ");
-        Serial.println(cessbData->peak1, 6);
-        Serial.print("Enhancement = ");
-        float32_t enhance = (10.0f*log10f(cessbData->pwr1) - 20.0f*log10f(cessbData->peak1)) -
-                            (10.0f*log10f(cessbData->pwr0) - 20.0f*log10f(cessbData->peak0));
-        Serial.print(enhance); Serial.println(" dB");
-}
+        struct levelsZ *cessbData;
+        if (cessb1.levelDataCount() > 2000) {
+          Serial.print("levelDataCount = ");  // Before getLevels(1), because it resets counts to 0.
+          Serial.println(cessb1.levelDataCount());
+          cessbData = cessb1.getLevels(1);  // Update the CESSB information struct.  Write the data to serial.
+            // Detailed Report
+          Serial.print(10.0f * log10f(cessbData->pwr0));
+          Serial.print(" In Ave Pwr Out ");
+          Serial.println(10.0f * log10f(cessbData->pwr1));
+          Serial.print(20.0f * log10f(cessbData->peak0));
+          Serial.print(" In  Peak   Out ");
+          Serial.println(20.0f * log10f(cessbData->peak1));
+          Serial.print(cessbData->peak0, 6);
+          Serial.print(" In  Peak Volts   Out ");
+          Serial.println(cessbData->peak1, 6);
+          Serial.print("Enhancement = ");
+          float32_t enhance = (10.0f * log10f(cessbData->pwr1) - 20.0f * log10f(cessbData->peak1)) - (10.0f * log10f(cessbData->pwr0) - 20.0f * log10f(cessbData->peak0));
+          Serial.print(enhance);
+          Serial.println(" dB");
+        }
 #endif
       }
       break;
 
-      case RadioState::FT8_TRANSMIT_STATE:
+    case RadioState::FT8_TRANSMIT_STATE:
       digitalWrite(MUTE, MUTEAUDIO);  //  Mute Audio  (HIGH=Mute)
-      digitalWrite(RXTX, HIGH);  //xmit on
+      digitalWrite(RXTX, HIGH);       //xmit on
 
       ShowTransmitReceiveStatus();
       while (Serial.rts() == HIGH) {
         ExciterIQData();
       }
-        break;
+      break;
 
     default:
       break;
@@ -1435,8 +1443,8 @@ if(cessb1.levelDataCount() > 2000) {
 
   switch (radioState) {
     case RadioState::CW_RECEIVE_STATE:
-      if (lastState != radioState) {  // G0ORX 01092023
-        digitalWrite(MUTE, UNMUTEAUDIO);      //turn off mute
+      if (lastState != radioState) {      // G0ORX 01092023
+        digitalWrite(MUTE, UNMUTEAUDIO);  //turn off mute
         ShowTransmitReceiveStatus();
         keyPressedOn = 0;
       }
@@ -1445,7 +1453,7 @@ if(cessb1.levelDataCount() > 2000) {
     case RadioState::CW_TRANSMIT_STRAIGHT_STATE:
       ShowTransmitReceiveStatus();
       digitalWrite(MUTE, UNMUTEAUDIO);  // unmutes audio for sidetone
-      cwKeyDown = false;        // false initiates CW_SHAPING_RISE.
+      cwKeyDown = false;                // false initiates CW_SHAPING_RISE.
       cwTimer = millis();
       while (millis() - cwTimer <= EEPROMData.cwTransmitDelay) {  //Start CW transmit timer on
         digitalWrite(RXTX, HIGH);
@@ -1469,7 +1477,7 @@ if(cessb1.levelDataCount() > 2000) {
         }
       }
       digitalWrite(MUTE, MUTEAUDIO);  // mutes audio
-      digitalWrite(RXTX, LOW);   // End Straight Key Mode
+      digitalWrite(RXTX, LOW);        // End Straight Key Mode
       break;
     case RadioState::CW_TRANSMIT_KEYER_STATE:
       ShowTransmitReceiveStatus();
@@ -1527,9 +1535,9 @@ if(cessb1.levelDataCount() > 2000) {
       }                    //End Relay timer
 
       digitalWrite(MUTE, MUTEAUDIO);  // mutes audio
-      digitalWrite(RXTX, LOW);   // End Straight Key Mode
+      digitalWrite(RXTX, LOW);        // End Straight Key Mode
       break;
-      case RadioState::NOSTATE:
+    case RadioState::NOSTATE:
       break;
     default:
       break;
@@ -1548,20 +1556,20 @@ if(cessb1.levelDataCount() > 2000) {
   }
 #endif
 
-  if (volumeChangeFlag == true) { 
+  if (volumeChangeFlag == true) {
     // Compensate for audio filter setting.
     // Nominal bandwidth is 2.8kHz.  This will be the 0 dB reference.
     // The upper and lower frequency limits are bands[EEPROMData.currentBand].FLoCut and bands[EEPROMData.currentBand].FHiCut.
     audioBW = bands[EEPROMData.currentBand].FHiCut - bands[EEPROMData.currentBand].FLoCut;
     // How many dB between reference and current setting?  Round to integer.
-//    dBoffset = static_cast<int>(40.0 * log10f_fast(audioBW/2800.0));
-    process.audioGainCompensate = 4 * 2800.0/audioBW;
+    //    dBoffset = static_cast<int>(40.0 * log10f_fast(audioBW/2800.0));
+    process.audioGainCompensate = 4 * 2800.0 / audioBW;
     volumeAdjust.gain(volumeLog[EEPROMData.audioVolume]);
-//    int gainAdjust = EEPROMData.audioVolume - dBoffset;
+    //    int gainAdjust = EEPROMData.audioVolume - dBoffset;
     volumeChangeFlag = false;
     UpdateVolumeField();
-//    Serial.printf("audioBW = %d\n", static_cast<int>(audioBW));
-//    Serial.printf("EEPROMData.audioVolume = %d\n", EEPROMData.audioVolume);
+    //    Serial.printf("audioBW = %d\n", static_cast<int>(audioBW));
+    //    Serial.printf("EEPROMData.audioVolume = %d\n", EEPROMData.audioVolume);
   }
 
 }  // end loop()
