@@ -270,7 +270,7 @@ const int RESET = 0;  // QSD2/QSE2 reset pin
 
 //  States used to control radio function.
 enum class RadioState{SSB_RECEIVE_STATE, SSB_TRANSMIT_STATE, FT8_TRANSMIT_STATE, FT8_RECEIVE_STATE, CW_RECEIVE_STATE, CW_TRANSMIT_STRAIGHT_STATE, 
-                      CW_TRANSMIT_KEYER_STATE, AM_RECEIVE_STATE, SSB_CALIBRATE_STATE, CW_CALIBRATE_STATE, 
+                      CW_TRANSMIT_KEYER_STATE, AM_RECEIVE_STATE, SAM_RECEIVE_STATE, SSB_CALIBRATE_STATE, CW_CALIBRATE_STATE, 
                       SET_CW_SIDETONE, NOSTATE};
 enum class RadioMode{CW_MODE, SSB_MODE, FT8_MODE, AM_MODE, SAM_MODE};  // Plain enum, because it needs to be iterated in mode change function.
 enum class Sideband{LOWER, UPPER, BOTH_AM, BOTH_SAM};
@@ -374,6 +374,9 @@ struct config_t {
 #else
   uint32_t lastFrequencies[NUMBER_OF_BANDS][2] = { { 3985000, 3560000 }, { 7200000, 7030000 }, { 14285000, 14060000 }, { 18130000, 18096000 }, { 21385000, 21060000 }, { 24950000, 24906000 }, { 28385000, 28060000 } };
 #endif
+
+Sideband lastSideband[NUMBER_OF_BANDS] = {Sideband::LOWER, Sideband::LOWER, Sideband::UPPER, Sideband::UPPER, Sideband::UPPER, Sideband::UPPER, Sideband::UPPER};
+//Sideband lastSidebandSSB[NUMBER_OF_BANDS] = {Sideband::LOWER, Sideband::LOWER, Sideband::UPPER, Sideband::UPPER, Sideband::UPPER, Sideband::UPPER, Sideband::UPPER};
 
   uint32_t centerFreq = 7030000;  // 4 bytes
   // New user config data                                JJP 7-3-23

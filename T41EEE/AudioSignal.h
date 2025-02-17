@@ -96,8 +96,8 @@ AudioConnection patchCord22(headphoneScale, 0, i2s_quadOut, 1);   // To Audio Ad
 //AudioConnection patchCord20(volumeAdjust, 0, usbOut, 0);   // To Audio Adapter via via Teensy pin 7.
 //AudioConnection patchCord21(volumeAdjust, 0, usbOut, 1);   // To Audio Adapter via via Teensy pin 7.
 
-AudioConnection patchCord23(volumeAdjust, 0, float2Int3, 0);   // To Audio Adapter via via Teensy pin 7.
-AudioConnection patchCord24(volumeAdjust, 0, float2Int4, 0);   // To Audio Adapter via via Teensy pin 7.
+//AudioConnection patchCord23(volumeAdjust, 0, float2Int3, 0);   // To Audio Adapter via via Teensy pin 7.
+//AudioConnection patchCord24(volumeAdjust, 0, float2Int4, 0);   // To Audio Adapter via via Teensy pin 7.
 
 //AudioConnection patchCord25(float2Int3, 0, usbOut_F32, 0);   // To Audio Adapter via via Teensy pin 7.
 //AudioConnection patchCord26(float2Int4, 0, usbOut_F32, 1);   // To Audio Adapter via via Teensy pin 7.
@@ -164,11 +164,11 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord17.connect();                                 // Receiver audio channel
       patchCord18.connect();
       patchCord19.connect();
-      patchCord20.connect();  // Experimental USB output. 
-      patchCord21.connect();  // Experimental USB output.
-      patchCord22.connect();  // Experimental USB output.
-      patchCord23.connect();
-      patchCord24.connect();
+//      patchCord20.connect();  // Experimental USB output. 
+//      patchCord21.connect();  // Experimental USB output.
+//      patchCord22.connect();  // Experimental USB output.
+//      patchCord23.connect();
+//      patchCord24.connect();
 //      patchCord25.connect();
 //      patchCord26.connect();
       volumeAdjust.gain(volumeLog[EEPROMData.audioVolume]);  // Set volume because sidetone may have changed it.
@@ -198,7 +198,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       updateMic();
       mixer1.gain(0, 1.0);    // Connect microphone audio to transmit chain.
       mixer1.gain(1, 0.0);    // Disconnect 1 kHz test tone.
-      mixer1.gain(2, 0.0);    // Connect USB audio from WSJTX on PC.
+//      mixer1.gain(2, 0.0);    // Connect USB audio from WSJTX on PC.
       switch1.setChannel(0);  // Connect microphone path.
       switch2.setChannel(1);  //  Disconnect 1 kHz test tone path.
      // switch4.setChannel(1);  //  Disconnect USB audio from WSJTX on PC.

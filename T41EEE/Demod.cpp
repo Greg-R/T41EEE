@@ -47,11 +47,8 @@ void AMDecodeSAM() {
   uint8_t fade_leveler = 1;
   float32_t Sin, Cos;
 
-  tft.setFontScale((enum RA8875tsize)0);
-  tft.fillRect(OPERATION_STATS_X + 160, FREQUENCY_Y + 32, tft.getFontWidth() * 12, 14, RA8875_BLUE);  // AFP 11-01-22 Clear top-left menu area
-  tft.setCursor(OPERATION_STATS_X + 160, FREQUENCY_Y + 30);                                                            // AFP 11-01-22
-  tft.setTextColor(RA8875_WHITE);
-  tft.print("(SAM) ");  //AFP 11-01-22
+
+//  tft.print("(SAM) ");  //AFP 11-01-22
 
   for (unsigned i = 0; i < FFT_length / 2; i++) {
     Sin = arm_sin_f32(phzerror);
@@ -99,12 +96,18 @@ void AMDecodeSAM() {
   // To make this smoother, a simple lowpass/exponential averager here . . .
   SAM_carrier = 0.08 * (omega2 * 24000) / (2 * TWO_PI);
   SAM_carrier = SAM_carrier + 0.92 * SAM_lowpass;
-  SAM_carrier_freq_offset = (int)10 * SAM_carrier;
+  SAM_carrier_freq_offset = static_cast<int>(10 * SAM_carrier);
   SAM_carrier_freq_offset = 0.9 * SAM_carrier_freq_offsetOld + 0.1 * SAM_carrier_freq_offset;
   SAM_lowpass = SAM_carrier;
 
+  tft.setFontScale((enum RA8875tsize)0);
+  tft.fillRect(OPERATION_STATS_X + 205, FREQUENCY_Y + 32, tft.getFontWidth() * 6, 14, RA8875_BLUE);  // AFP 11-01-22 Clear top-left menu area
+  tft.setCursor(OPERATION_STATS_X + 205, FREQUENCY_Y + 30);                                                       // AFP 11-01-22
+  tft.setTextColor(RA8875_WHITE);
+
   if (SAM_carrier_freq_offset != SAM_carrier_freq_offsetOld) {
 //    tft.fillRect(OPERATION_STATS_X + 200, FREQUENCY_Y + 30, tft.getFontWidth() * 8, tft.getFontHeight(), RA8875_BLUE);
+
     tft.print(0.20024 * SAM_carrier_freq_offset, 1);  //AFP 11-01-22
   }
   SAM_carrier_freq_offsetOld = SAM_carrier_freq_offset;

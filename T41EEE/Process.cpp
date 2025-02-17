@@ -355,7 +355,6 @@ void Process::ProcessIQData() {
         for (unsigned i = 0; i < FFT_length / 2; i++) {
           //if (bands[EEPROMData.currentBand].mode == DEMOD_USB || bands[EEPROMData.currentBand].mode == DEMOD_LSB ) {  // for SSB copy real part in both outputs
           float_buffer_L[i] = iFFT_buffer[FFT_length + (i * 2)];
-
           float_buffer_R[i] = float_buffer_L[i];
           //}
         }
@@ -364,7 +363,6 @@ void Process::ProcessIQData() {
         for (unsigned i = 0; i < FFT_length / 2; i++) {
           // if (bands[EEPROMData.currentBand].mode == DEMOD_USB || bands[EEPROMData.currentBand].mode == DEMOD_LSB ) {  // for SSB copy real part in both outputs
           float_buffer_L[i] = iFFT_buffer[FFT_length + (i * 2)];
-
           float_buffer_R[i] = float_buffer_L[i];
           audiotmp = AlphaBetaMag(iFFT_buffer[FFT_length + (i * 2)], iFFT_buffer[FFT_length + (i * 2) + 1]);
           //}
@@ -384,6 +382,8 @@ void Process::ProcessIQData() {
         break;
       case Sideband::BOTH_SAM:  //AFP 11-03-22
         AMDecodeSAM();
+        break;
+        default:
         break;
     }
 

@@ -31,6 +31,19 @@ state = src.as<int>();
 return dst = static_cast<AudioState>(state);
 }
 
+// Custom converters are needed for the audio states.
+bool convertToJson(const Sideband& src, JsonVariant dst) {
+int state;
+state = static_cast<int>(src);
+  return dst.set(state);
+}
+
+Sideband convertFromJson(JsonVariantConst src, Sideband& dst) {
+int state;
+state = src.as<int>();
+return dst = static_cast<Sideband>(state);
+}
+
 
 // Loads the EEPROMData configuration from a file
 FLASHMEM void JSON::loadConfiguration(const char *filename, config_t &EEPROMData) {
@@ -115,6 +128,7 @@ FLASHMEM void JSON::loadConfiguration(const char *filename, config_t &EEPROMData
   for (int i = 0; i < 7; i++) {
     for (int j = 0; j < 2; j++) EEPROMData.lastFrequencies[i][j] = doc["lastFrequencies"][i][j];
   }
+  for (int i = 0; i < 7; i++) EEPROMData.lastSideband[i] = doc["lastSideband"][i];
   EEPROMData.centerFreq = doc["centerFreq"];
   //EEPROMData.mapFileName  = doc["mapFileName"] | "Boston";
   strlcpy(EEPROMData.mapFileName, doc["mapFileName"] | "Boston", 50);
@@ -229,8 +243,9 @@ FLASHMEM void JSON::saveConfiguration(const char *filename, const config_t &EEPR
   for (int i = 0; i < 7; i++) doc["IQSSBPhaseCorrectionFactor"][i] = EEPROMData.IQSSBPhaseCorrectionFactor[i];  
   for (int i = 0; i < 13; i++) doc["favoriteFreqs"][i] = EEPROMData.favoriteFreqs[i];
   for (int i = 0; i < 7; i++) {
-    for (int j = 0; j < 2; j++) doc["lastFrequencies"][i][j] = EEPROMData.lastFrequencies[i][j];
+  for (int j = 0; j < 2; j++) doc["lastFrequencies"][i][j] = EEPROMData.lastFrequencies[i][j];
   }
+  for (int i = 0; i < 7; i++) doc["lastSideband"][i] = EEPROMData.lastSideband[i];
   doc["centerFreq"] = EEPROMData.centerFreq;
   doc["mapFileName"] = EEPROMData.mapFileName;
 //  doc["myCall"] = EEPROMData.myCall;

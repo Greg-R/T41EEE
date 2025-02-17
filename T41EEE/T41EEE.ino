@@ -20,7 +20,7 @@ struct maps myMapFiles[10] = {
 };
 
 struct band bands[NUMBER_OF_BANDS] {  // Revised band struct with mode and sideband.  Greg KF5N February 14, 2025
-//freq    band low   band hi   name    mode sideband      Low    Hi  Gain  type    gain  AGC   pixel
+//freq    band low   band hi   name    mode sideband      FLoCut    FHiCut  Gain  type    gain  AGC   pixel
 //                                             filter filter             correct     offset
 //DB2OO, 29-AUG-23: take ITU_REGION into account for band limits
 // and changed "gainCorrection" to see the correct dBm value on all bands.
@@ -1079,6 +1079,7 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   //  Begin SSB Mode state machine
   switch (radioState) {
     case RadioState::AM_RECEIVE_STATE:
+    case RadioState::SAM_RECEIVE_STATE:
     case RadioState::FT8_RECEIVE_STATE:
     case RadioState::SSB_RECEIVE_STATE:
       if (lastState != radioState) {      // G0ORX 01092023

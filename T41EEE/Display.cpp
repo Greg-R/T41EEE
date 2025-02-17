@@ -472,7 +472,7 @@ void DrawSpectrumDisplayContainer() {
   if (calOnFlag)
     tft.drawRect(SPECTRUM_LEFT_X - 1, SPECTRUM_TOP_Y, MAX_WATERFALL_WIDTH + 2, 362, RA8875_YELLOW);  // Spectrum box for calibration.
   else {
-    tft.drawRect(SPECTRUM_LEFT_X - 1, SPECTRUM_TOP_Y, MAX_WATERFALL_WIDTH + 2, 362, RA8875_BLACK);               // Erase pectrum box for calibration.
+    tft.drawRect(SPECTRUM_LEFT_X - 1, SPECTRUM_TOP_Y, MAX_WATERFALL_WIDTH + 2, 362, RA8875_BLACK);               // Erase spectrum box for calibration.
     tft.drawRect(SPECTRUM_LEFT_X - 1, SPECTRUM_TOP_Y, MAX_WATERFALL_WIDTH + 2, SPECTRUM_HEIGHT, RA8875_YELLOW);  // Spectrum box.  SPECTRUM_HEIGHT = 150
   }
 }
@@ -737,10 +737,16 @@ if(radioMode == RadioMode::FT8_MODE)  {
 tft.print("FT8");
   }
 
-  // Write FT8 mode to display.
+  // Write AM mode to display.
 if(radioMode == RadioMode::AM_MODE)  {
 //        tft.fillRect(OPERATION_STATS_X + 90, FREQUENCY_Y + 30, 70, tft.getFontHeight(), RA8875_BLACK);
 tft.print("AM");
+  }
+
+    // Write SAM mode to display.
+if(radioMode == RadioMode::SAM_MODE)  {
+//        tft.fillRect(OPERATION_STATS_X + 90, FREQUENCY_Y + 30, 70, tft.getFontHeight(), RA8875_BLACK);
+tft.print("SAM");
   }
 
 // Write sideband or AM demodulation type to display.
@@ -766,10 +772,10 @@ tft.print("AM");
       break;
     case Sideband::BOTH_AM:
 //      tft.setTextColor(RA8875_WHITE);
-      tft.print("AM");  //AFP 09-22-22
+      tft.print("DSB");  //AFP 09-22-22
       break;
     case Sideband::BOTH_SAM:         //AFP 11-01-22
-      tft.print("SAM");  //AFP 11-01-22
+      tft.print("DSB");  //AFP 11-01-22
       break;
       default:
       break;

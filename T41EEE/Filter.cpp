@@ -302,6 +302,9 @@ void ControlFilterF()
       bands[EEPROMData.currentBand].FLoCut = - bands[EEPROMData.currentBand].FHiCut;
       break;
   }   //== AFP 10-27-22
+
+  Serial.printf("bands[EEPROMData.currentBand].FLoCut = %d\n", bands[EEPROMData.currentBand].FLoCut);
+  Serial.printf("bands[EEPROMData.currentBand].FHiCut = %d\n", bands[EEPROMData.currentBand].FHiCut);
 }
 
 
