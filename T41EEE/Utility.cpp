@@ -606,37 +606,37 @@ void DisplayClock() {
   Purpose: SetupMode sets default mode for the selected band
 
   Parameter list:
-    int sideBand            the sideband
+    Sideband sideBand            the sideband
 
   Return value;
     void
 *****/
-void SetupMode(int sideBand) {
+void SetupMode(Sideband sideband) {
   int temp;
   // AFP 10-27-22
-  if (old_demod_mode != -99)  // first time radio is switched on and when changing bands
-  {
-    switch (sideBand) {
-      case DEMOD_LSB:
+////  if (old_demod_mode != -99)  // first time radio is switched on and when changing bands
+//  {
+    switch (sideband) {
+      case Sideband::LOWER:
         temp = bands[EEPROMData.currentBand].FHiCut;
         bands[EEPROMData.currentBand].FHiCut = -bands[EEPROMData.currentBand].FLoCut;
         bands[EEPROMData.currentBand].FLoCut = -temp;
         break;
-
-      case DEMOD_USB:
+      case Sideband::UPPER:
         temp = bands[EEPROMData.currentBand].FHiCut;
         bands[EEPROMData.currentBand].FHiCut = -bands[EEPROMData.currentBand].FLoCut;
         bands[EEPROMData.currentBand].FLoCut = -temp;
         break;
-      case DEMOD_AM:
+      case Sideband::BOTH_AM:
+      case Sideband::BOTH_SAM:
         bands[EEPROMData.currentBand].FHiCut = -bands[EEPROMData.currentBand].FLoCut;
         break;
     }
-  }
+//  }
   ShowBandwidth();
   // tft.fillRect(pos_x_frequency + 10, pos_y_frequency + 24, 210, 16, RA8875_BLACK);
   //tft.fillRect(OPERATION_STATS_X + 170, FREQUENCY_Y + 30, tft.getFontWidth() * 5, tft.getFontHeight(), RA8875_BLACK);        // Clear top-left menu area
-  old_demod_mode = bands[EEPROMData.currentBand].mode;  // set old_mode flag for next time, at the moment only used for first time radio is switched on . . .
+////  old_demod_mode = bands[EEPROMData.currentBand].mode;  // set old_mode flag for next time, at the moment only used for first time radio is switched on . . .
 }  // end void setup_mode
 
 
@@ -649,7 +649,7 @@ void SetupMode(int sideBand) {
 *****/
 void SetBand() {
   old_demod_mode = -99;  // used in setup_mode and when changing bands, so that LoCut and HiCut are not changed!
-  SetupMode(bands[EEPROMData.currentBand].mode);
+  SetupMode(bands[EEPROMData.currentBand].sideband);
   SetFreq();
   ShowFrequency();
   FilterBandwidth();

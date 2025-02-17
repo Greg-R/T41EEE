@@ -1,7 +1,7 @@
 // Button class
 #pragma once
 
-#define TOP_MENU_COUNT 11  // Menus to process AFP 09-27-22, JJP 7-8-23
+#define TOP_MENU_COUNT 10  // Changed to 10 after noise floor removed.  Greg KF5N February 14, 2025
 
 class Button {
 

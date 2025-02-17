@@ -75,8 +75,8 @@ void ExciterIQData() {
     }
 
     // Set the sideband.
-    if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) cessb1.setSideband(false);
-    if (bands[EEPROMData.currentBand].mode == DEMOD_USB) cessb1.setSideband(true);
+    if (bands[EEPROMData.currentBand].sideband == Sideband::LOWER) cessb1.setSideband(false);
+    if (bands[EEPROMData.currentBand].sideband == Sideband::UPPER) cessb1.setSideband(true);
 
     // Apply amplitude and phase corrections.
     cessb1.setIQCorrections(true, EEPROMData.IQSSBAmpCorrectionFactor[EEPROMData.currentBandA], EEPROMData.IQSSBPhaseCorrectionFactor[EEPROMData.currentBandA], 0.0);

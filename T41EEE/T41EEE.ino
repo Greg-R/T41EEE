@@ -19,35 +19,35 @@ struct maps myMapFiles[10] = {
   { "", 0.0, 0.0 }
 };
 
-struct band bands[NUMBER_OF_BANDS] {  //AFP Changed 1-30-21 // G0ORX Changed AGC to 20
-//freq    band low   band hi   name    mode      Low    Hi  Gain  type    gain  AGC   pixel
+struct band bands[NUMBER_OF_BANDS] {  // Revised band struct with mode and sideband.  Greg KF5N February 14, 2025
+//freq    band low   band hi   name    mode sideband      Low    Hi  Gain  type    gain  AGC   pixel
 //                                             filter filter             correct     offset
 //DB2OO, 29-AUG-23: take ITU_REGION into account for band limits
 // and changed "gainCorrection" to see the correct dBm value on all bands.
 // Calibration done with TinySA as signal generator with -73dBm levels (S9) at the FT8 frequencies
 // with V010 QSD with the 12V mod of the pre-amp
 #if defined(ITU_REGION) && ITU_REGION == 1
-  { 3700000UL, 3500000, 3800000, "80M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20 },
-    { 7150000, 7000000, 7200000, "40M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20 },
+  { 3700000UL, 3500000, 3800000, "80M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 15, HAM_BAND, 1.0, 20 },
+    { 7150000, 7000000, 7200000, "40M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 15, HAM_BAND, 1.0, 20 },
 #elif defined(ITU_REGION) && ITU_REGION == 2
-  { 3700000UL, 3500000, 4000000, "80M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20 },
-    { 7150000, 7000000, 7300000, "40M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20 },
+  { 3700000UL, 3500000, 4000000, "80M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 15, HAM_BAND, 1.0, 20 },
+    { 7150000, 7000000, 7300000, "40M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 15, HAM_BAND, 1.0, 20 },
 #elif defined(ITU_REGION) && ITU_REGION == 3
-  { 3700000UL, 3500000, 3900000, "80M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20 },
-    { 7150000, 7000000, 7200000, "40M", DEMOD_LSB, -200, -3000, 15, HAM_BAND, 1.0, 20 },
+  { 3700000UL, 3500000, 3900000, "80M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 15, HAM_BAND, 1.0, 20 },
+    { 7150000, 7000000, 7200000, "40M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 15, HAM_BAND, 1.0, 20 },
 #endif
-    { 14200000, 14000000, 14350000, "20M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20 },
-    { 18100000, 18068000, 18168000, "17M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20 },
-    { 21200000, 21000000, 21450000, "15M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20 },
-    { 24920000, 24890000, 24990000, "12M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20 },
+    { 14200000, 14000000, 14350000, "20M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 15, HAM_BAND, 1.0, 20 },
+    { 18100000, 18068000, 18168000, "17M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 15, HAM_BAND, 1.0, 20 },
+    { 21200000, 21000000, 21450000, "15M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 15, HAM_BAND, 1.0, 20 },
+    { 24920000, 24890000, 24990000, "12M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 15, HAM_BAND, 1.0, 20 },
   {
-    28350000, 28000000, 29700000, "10M", DEMOD_USB, 3000, 200, 15, HAM_BAND, 1.0, 20
+    28350000, 28000000, 29700000, "10M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 15, HAM_BAND, 1.0, 20
   }
 };
 
 const char *topMenus[] = { "CW Options", "RF Set", "VFO Select",
                            "EEPROM", "AGC", "Spectrum Options",
-                           "Noise Floor", "SSB Options",
+                           "SSB Options",                         // Noise floor removed.  Greg KF5N February 14, 2025
                            "EQ Rec Set", "Calibrate", "Bearing" };
 
 // Button array labels array is located in Utility.cpp.
@@ -176,12 +176,12 @@ arm_fir_interpolate_instance_f32 FIR_int2_I;
 arm_fir_interpolate_instance_f32 FIR_int2_Q;
 arm_lms_norm_instance_f32 LMS_Norm_instance;
 
-const DEMOD_Descriptor DEMOD[3] = {
-  //   DEMOD_n, name
-  { DEMOD_USB, "(USB)" },
-  { DEMOD_LSB, "(LSB)" },
-  { DEMOD_AM, "(AM)" },  //AFP09-22-22
-};
+//const DEMOD_Descriptor DEMOD[3] = {
+//  //   DEMOD_n, name
+//  { DEMOD_USB, "(USB)" },
+//  { DEMOD_LSB, "(LSB)" },
+//  { DEMOD_AM, "(AM)" },  //AFP09-22-22
+//};
 
 dispSc displayScale[] =  // dbText, dBScale, baseOffset
   {
@@ -824,7 +824,7 @@ MenuSelect readButton() {
 *****/
 FLASHMEM void setup() {
   Serial.begin(115200);  // Use this serial for Teensy programming.
-  //SerialUSB1.begin(115200);  // Use this serial for FT8 keying.
+  SerialUSB1.begin(115200);  // Use this serial for FT8 keying.
 
   setSyncProvider(getTeensy3Time);  // get TIME from real time clock with 3V backup battery
   setTime(now());
@@ -1057,17 +1057,17 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   if (EEPROMData.xmtMode == RadioMode::SSB_MODE and digitalRead(PTT) == HIGH) radioState = RadioState::SSB_RECEIVE_STATE;
   if (EEPROMData.xmtMode == RadioMode::SSB_MODE && digitalRead(PTT) == LOW) radioState = RadioState::SSB_TRANSMIT_STATE;
 
-  if (EEPROMData.xmtMode == RadioMode::FT8_MODE and Serial.rts() == LOW) radioState = RadioState::FT8_RECEIVE_STATE;
-  if (EEPROMData.xmtMode == RadioMode::FT8_MODE and Serial.rts() == HIGH) radioState = RadioState::FT8_TRANSMIT_STATE;
+  if (EEPROMData.xmtMode == RadioMode::FT8_MODE and SerialUSB1.rts() == LOW) radioState = RadioState::FT8_RECEIVE_STATE;
+  if (EEPROMData.xmtMode == RadioMode::FT8_MODE and SerialUSB1.rts() == HIGH) radioState = RadioState::FT8_TRANSMIT_STATE;
 
   if (EEPROMData.xmtMode == RadioMode::CW_MODE && (digitalRead(EEPROMData.paddleDit) == HIGH && digitalRead(EEPROMData.paddleDah) == HIGH)) radioState = RadioState::CW_RECEIVE_STATE;  // Was using symbolic constants. Also changed in code below.  KF5N August 8, 2023
   if (EEPROMData.xmtMode == RadioMode::CW_MODE && (digitalRead(EEPROMData.paddleDit) == LOW && EEPROMData.xmtMode == RadioMode::CW_MODE && EEPROMData.keyType == 0)) radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;
   if (EEPROMData.xmtMode == RadioMode::CW_MODE && (keyPressedOn == 1 && EEPROMData.xmtMode == RadioMode::CW_MODE && EEPROMData.keyType == 1)) radioState = RadioState::CW_TRANSMIT_KEYER_STATE;
-  if (bands[EEPROMData.currentBand].mode > 1) {
-    radioState = RadioState::AM_RECEIVE_STATE;  // Inhibit transmit in AM demod modes.  KF5N March 21, 2024
-    radioMode = RadioMode::AM_MODE;             // AM is currently receive only.
-    keyPressedOn = 0;
-  }
+ // if (bands[EEPROMData.currentBand].mode > 1) {
+ //   radioState = RadioState::AM_RECEIVE_STATE;  // Inhibit transmit in AM demod modes.  KF5N March 21, 2024
+ //   radioMode = RadioMode::AM_MODE;             // AM is currently receive only.
+ //   keyPressedOn = 0;
+ // }
 
   if (lastState != radioState) {
     SetAudioOperatingState(radioState);
@@ -1129,7 +1129,7 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       digitalWrite(RXTX, HIGH);       //xmit on
 
       ShowTransmitReceiveStatus();
-      while (Serial.rts() == HIGH) {
+      while (SerialUSB1.rts() == HIGH) {
         ExciterIQData();
       }
       break;

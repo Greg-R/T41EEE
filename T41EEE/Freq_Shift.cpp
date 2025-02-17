@@ -121,10 +121,10 @@ void FreqShift2()
   } else {
     if (EEPROMData.xmtMode == RadioMode::CW_MODE ) {
       cwFreqOffset = (EEPROMData.CWOffset + 6) * 24000 / 256;
-      if (bands[EEPROMData.currentBand].mode == 1) {
+      if (bands[EEPROMData.currentBand].sideband == Sideband::UPPER) {
         sideToneShift = cwFreqOffset;  // KF5N experiment
       } else {
-        if (bands[EEPROMData.currentBand].mode == 0) {
+        if (bands[EEPROMData.currentBand].sideband == Sideband::LOWER) {
           sideToneShift = -cwFreqOffset;  // KF5N experiment
         }
       }

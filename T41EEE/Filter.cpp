@@ -283,22 +283,22 @@ void ControlFilterF()
   // low Fcut must never be larger than high Fcut and vice versa
 
   //== AFP 10-27-22
-  switch (bands[EEPROMData.currentBand].mode) {
-    case DEMOD_IQ:
-      bands[EEPROMData.currentBand].FLoCut = - bands[EEPROMData.currentBand].FHiCut;
-      break;
-    case DEMOD_LSB:
+  switch (bands[EEPROMData.currentBand].sideband) {
+//    case DEMOD_IQ:
+//      bands[EEPROMData.currentBand].FLoCut = - bands[EEPROMData.currentBand].FHiCut;
+//      break;
+    case Sideband::LOWER:
       if (bands[EEPROMData.currentBand].FHiCut > 0) bands[EEPROMData.currentBand].FHiCut = -100;
 
       break;
-    case DEMOD_USB:
+    case Sideband::UPPER:
       if (bands[EEPROMData.currentBand].FLoCut < 0) bands[EEPROMData.currentBand].FLoCut = 100;  // AFP 10-27-22
       break;
-    case DEMOD_AM:
+    case Sideband::BOTH_AM:
       bands[EEPROMData.currentBand].FLoCut = - bands[EEPROMData.currentBand].FHiCut;
       //bands[EEPROMData.currentBand].FHiCut= 4000;
       break;
-    case DEMOD_SAM:               //== AFP 11-04-22
+    case Sideband::BOTH_SAM:               //== AFP 11-04-22
       bands[EEPROMData.currentBand].FLoCut = - bands[EEPROMData.currentBand].FHiCut;
       break;
   }   //== AFP 10-27-22

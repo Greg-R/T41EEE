@@ -26,7 +26,7 @@ Thus, the default values below create a filter with 10000 * 0.0217 = 217 Hz band
 */
 
 static unsigned long buttonFilterRegister;
-const uint32_t BUTTON_FILTER_SHIFT = 3;           // Filter parameter k
+const uint32_t BUTTON_FILTER_SHIFT = 3;  // Filter parameter k
 static uint32_t buttonState, buttonADCPressed, buttonElapsed;
 static volatile int buttonADCOut;
 const uint32_t BUTTON_FILTER_SAMPLERATE = 10000;  // Hz
@@ -269,7 +269,7 @@ void Button::ExecuteButtonPress(MenuSelect val) {
       break;
 
     case MenuSelect::MUTE_AUDIO:  // 11.  Was noise floor.  Greg KF5N February 12, 2025
-//      ButtonSetNoiseFloor();
+                                  //      ButtonSetNoiseFloor();
       ButtonMuteAudio();
       break;
 
@@ -343,11 +343,11 @@ void Button::ExecuteButtonPress(MenuSelect val) {
 
       break;
 
-    case MenuSelect::BOGUS_PIN_READ:   // 18
+    case MenuSelect::BOGUS_PIN_READ:  // 18
 
-    break;
+      break;
 
-    default:                           // 19
+    default:  // 19
 
       break;
   }
@@ -791,12 +791,30 @@ void Button::ButtonFilter() {
     void
 *****/
 void Button::ButtonDemodMode() {
-  bands[EEPROMData.currentBand].mode++;
-  if (bands[EEPROMData.currentBand].mode > DEMOD_MAX) {
-    bands[EEPROMData.currentBand].mode = DEMOD_MIN;  // cycle thru demod modes
+  //if (bands[EEPROMData.currentBand].mode > RadioMode::AM_MODE) {
+  //  bands[EEPROMData.currentBand].mode = RadioMode::SSB_MODE;  // cycle thru demod modes
+  //}
+  //  if(bands[EEPROMData.currentBand].mode == 0) radioMode = RadioMode::AM_MODE;
+  //  if(bands[EEPROMData.currentBand].mode > 1) radioMode = RadioMode::AM_MODE;
+
+  switch (bands[EEPROMData.currentBand].mode) {
+    case RadioMode::CW_MODE:
+      bands[EEPROMData.currentBand].mode = RadioMode::SSB_MODE;
+      break;
+    case RadioMode::SSB_MODE:
+      bands[EEPROMData.currentBand].mode = RadioMode::FT8_MODE;
+      break;
+    case RadioMode::FT8_MODE:
+      bands[EEPROMData.currentBand].mode = RadioMode::AM_MODE;
+      break;
+    case RadioMode::AM_MODE:
+      bands[EEPROMData.currentBand].mode = RadioMode::CW_MODE;
+      break;
+    default:
+      break;
   }
-  BandInformation();
-  SetupMode(bands[EEPROMData.currentBand].mode);
+
+  SetupMode(bands[EEPROMData.currentBand].sideband);
   ShowFrequency();
   ControlFilterF();
   tft.writeTo(L2);  // Destroy the bandwidth indicator bar.  KF5N July 30, 2023
@@ -806,12 +824,13 @@ void Button::ButtonDemodMode() {
   FilterBandwidth();
   DrawSMeterContainer();
   AudioInterrupts();
-  SetFreq();         // Must update frequency, for example moving from SSB to CW, the RX LO is shifted.  KF5N
+  SetFreq();  // Must update frequency, for example moving from SSB to CW, the RX LO is shifted.  KF5N
   if ((EEPROMData.xmtMode == RadioMode::CW_MODE) && (EEPROMData.decoderFlag == 1)) {
-  radioMode = RadioMode::CW_MODE;
-  UpdateDecoderField();  // KF5N December 28 2023.
-}
+    radioMode = RadioMode::CW_MODE;
+    UpdateDecoderField();  // KF5N December 28 2023.
+  }
   FilterSetSSB();
+  BandInformation();
 }
 
 
@@ -826,24 +845,24 @@ void Button::ButtonDemodMode() {
 *****/
 void Button::ButtonMode()  //====== Changed AFP 10-05-22  =================
 {
-//   Serial.printf("xmtMode = %d\n", EEPROMData.xmtMode);
-// Toggle modes:
-switch(EEPROMData.xmtMode) {
-  case RadioMode::SSB_MODE:
-    EEPROMData.xmtMode = RadioMode::CW_MODE;
-    radioMode = RadioMode::CW_MODE;
-    break;
-  case RadioMode::CW_MODE:   // Toggle the current mode
-    EEPROMData.xmtMode = RadioMode::FT8_MODE;
-    radioMode = RadioMode::FT8_MODE;
-    break;
-  case RadioMode::FT8_MODE:   // Toggle the current mode
-    EEPROMData.xmtMode = RadioMode::SSB_MODE;
-    radioMode = RadioMode::SSB_MODE;
-  break;
-  default:
-  break;
-}
+  //   Serial.printf("xmtMode = %d\n", EEPROMData.xmtMode);
+  // Toggle modes:
+  switch (EEPROMData.xmtMode) {
+    case RadioMode::SSB_MODE:
+      EEPROMData.xmtMode = RadioMode::CW_MODE;
+      radioMode = RadioMode::CW_MODE;
+      break;
+    case RadioMode::CW_MODE:  // Toggle the current mode
+      EEPROMData.xmtMode = RadioMode::FT8_MODE;
+      radioMode = RadioMode::FT8_MODE;
+      break;
+    case RadioMode::FT8_MODE:  // Toggle the current mode
+      EEPROMData.xmtMode = RadioMode::SSB_MODE;
+      radioMode = RadioMode::SSB_MODE;
+      break;
+    default:
+      break;
+  }
 
   SetFreq();  // Required due to RX LO shift from CW to SSB modes.  KF5N
   DrawSpectrumDisplayContainer();
@@ -904,7 +923,7 @@ void Button::ButtonNR()  //AFP 09-19-22 update
     void
 *****/
 void Button::ButtonNotchFilter() {
-  ANR_notch =  not ANR_notch;
+  ANR_notch = not ANR_notch;
   //  If the notch is activated and LMS NR is also active, turn off NR and update display.
   if (ANR_notch && EEPROMData.nrOptionSelect == 3) {
     EEPROMData.nrOptionSelect = 0;  // Turn off noise reduction.  Other NR selections will be valid.
@@ -924,29 +943,29 @@ void Button::ButtonNotchFilter() {
 *****/
 void Button::ButtonMuteAudio() {
   switch (EEPROMData.audioOut) {
-    case AudioState::SPEAKER:      // Speaker is on, mute and unmute headphones.
-    digitalWrite(MUTE, MUTEAUDIO);  //  Speaker mute
-    sgtl5000_1.unmuteHeadphone();  // Make the headphone output active.
-    EEPROMData.audioOut = AudioState::HEADPHONE;
-    break;
-  case AudioState::HEADPHONE:      // Mute both speaker and headphones.
-    digitalWrite(MUTE, MUTEAUDIO);  // Speaker unmute
-    sgtl5000_1.muteHeadphone();  // Mute headphonts
-    EEPROMData.audioOut = AudioState::MUTE_BOTH;
-  break;
-    case AudioState::MUTE_BOTH:     //  Unmute both.
-    digitalWrite(MUTE, UNMUTEAUDIO);  //  Mute Speaker
-    sgtl5000_1.unmuteHeadphone();  // Make the headphone output active.
-    EEPROMData.audioOut = AudioState::BOTH;
-  break;
-      case AudioState::BOTH:     //  Headphones mute, speaker on
-    digitalWrite(MUTE, UNMUTEAUDIO);  //  Mute Speaker
-    sgtl5000_1.muteHeadphone();  // Make the headphone output active.
-    EEPROMData.audioOut = AudioState::SPEAKER;
-  break;
-  default:
-  return;
-  break;
+    case AudioState::SPEAKER:         // Speaker is on, mute and unmute headphones.
+      digitalWrite(MUTE, MUTEAUDIO);  //  Speaker mute
+      sgtl5000_1.unmuteHeadphone();   // Make the headphone output active.
+      EEPROMData.audioOut = AudioState::HEADPHONE;
+      break;
+    case AudioState::HEADPHONE:       // Mute both speaker and headphones.
+      digitalWrite(MUTE, MUTEAUDIO);  // Speaker unmute
+      sgtl5000_1.muteHeadphone();     // Mute headphonts
+      EEPROMData.audioOut = AudioState::MUTE_BOTH;
+      break;
+    case AudioState::MUTE_BOTH:         //  Unmute both.
+      digitalWrite(MUTE, UNMUTEAUDIO);  //  Mute Speaker
+      sgtl5000_1.unmuteHeadphone();     // Make the headphone output active.
+      EEPROMData.audioOut = AudioState::BOTH;
+      break;
+    case AudioState::BOTH:              //  Headphones mute, speaker on
+      digitalWrite(MUTE, UNMUTEAUDIO);  //  Mute Speaker
+      sgtl5000_1.muteHeadphone();       // Make the headphone output active.
+      EEPROMData.audioOut = AudioState::SPEAKER;
+      break;
+    default:
+      return;
+      break;
   }
   UpdateAudioField();
 }
@@ -1083,12 +1102,12 @@ void Button::ButtonFrequencyEntry() {
   long enteredF = 0L;                          // desired frequency
   char strF[6] = { ' ', ' ', ' ', ' ', ' ' };  // container for frequency string during entry
   String stringF;
-//  int valPin;
+  //  int valPin;
   MenuSelect menu = MenuSelect::DEFAULT;
   int key;
   int numdigits = 0;  // number of digits entered
   int pushButtonSwitchIndex;
-//  EEPROMData.lastFrequencies[EEPROMData.currentBand][EEPROMData.activeVFO] = TxRxFreq;
+  //  EEPROMData.lastFrequencies[EEPROMData.currentBand][EEPROMData.activeVFO] = TxRxFreq;
   // Arrays for allocating values associated with keys and switches - choose whether USB keypad or analogue switch matrix
   // USB keypad and analogue switch matrix
   const char *DE_Band[] = { "80m", "40m", "20m", "17m", "15m", "12m", "10m" };
@@ -1250,8 +1269,8 @@ void Button::ButtonFrequencyEntry() {
             tft.print("Off");
             break;
           } else {
-              tft.setTextColor(RA8875_GREEN);
-              tft.print("On");
+            tft.setTextColor(RA8875_GREEN);
+            tft.print("On");
           }
           break;
         default:
@@ -1304,4 +1323,3 @@ void Button::ButtonFrequencyEntry() {
   RedrawDisplayScreen();  // KD0RC
   FilterSetSSB();
 }
-

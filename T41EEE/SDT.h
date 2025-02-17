@@ -238,12 +238,12 @@ const int RESET = 0;  // QSD2/QSE2 reset pin
 #define SAMPLE_RATE_353K 17
 
 #define DEMOD_MIN 0
-#define DEMOD_USB 0
-#define DEMOD_LSB 1
-#define DEMOD_AM 2
-#define DEMOD_SAM 3
-#define DEMOD_MAX 3  // AFP 11-03-22
-#define DEMOD_IQ 4
+//#define DEMOD_USB 0
+//#define DEMOD_LSB 1
+//#define DEMOD_AM 2
+//#define DEMOD_SAM 3
+//#define DEMOD_MAX 3  // AFP 11-03-22
+//#define DEMOD_IQ 4
 #define HAM_BAND 1
 
 #define BUFFER_SIZE 128
@@ -268,11 +268,12 @@ const int RESET = 0;  // QSD2/QSE2 reset pin
 
 // End constants
 
-//  States for the loop() modal state machine.
+//  States used to control radio function.
 enum class RadioState{SSB_RECEIVE_STATE, SSB_TRANSMIT_STATE, FT8_TRANSMIT_STATE, FT8_RECEIVE_STATE, CW_RECEIVE_STATE, CW_TRANSMIT_STRAIGHT_STATE, 
                       CW_TRANSMIT_KEYER_STATE, AM_RECEIVE_STATE, SSB_CALIBRATE_STATE, CW_CALIBRATE_STATE, 
                       SET_CW_SIDETONE, NOSTATE};
-enum class RadioMode{SSB_MODE, FT8_MODE, CW_MODE, AM_MODE};  // Probably need only modes, not receive or transmit.
+enum class RadioMode{CW_MODE, SSB_MODE, FT8_MODE, AM_MODE, SAM_MODE};  // Plain enum, because it needs to be iterated in mode change function.
+enum class Sideband{LOWER, UPPER, BOTH_AM, BOTH_SAM};
 enum class AudioState{SPEAKER, HEADPHONE, BOTH, MUTE_BOTH};
 //  Primary menu selections from the switch matrix.  This is for a 6x3 matrix for a total of 18 buttons.
 enum class MenuSelect{MENU_OPTION_SELECT, MAIN_MENU_UP, BAND_UP, ZOOM, MAIN_MENU_DN, BAND_DN, FILTER, DEMODULATION, SET_MODE,
@@ -611,7 +612,8 @@ struct band {
   uint32_t fBandLow;   // Lower band edge
   uint32_t fBandHigh;  // Upper band edge
   const char name[4];  // name of band, 3 characters + terminator.
-  int mode;
+  RadioMode mode;
+  Sideband sideband;
   int FHiCut;
   int FLoCut;
   float32_t RFgain;  // This is not being used.  Greg KF5N February 14, 2024
@@ -1012,7 +1014,7 @@ void SetKeyPowerUp();
 void SetSideToneVolume();  // This function uses encoder to set sidetone volume.  KF5N August 29, 2023
 long SetTransmitDelay();
 void SetTransmitDitLength(int wpm);  // JJP 8/19/23
-void SetupMode(int sideBand);
+void SetupMode(Sideband sideband);
 int SetWPM();
 void ShowAutoStatus();
 void ShowBandwidth();

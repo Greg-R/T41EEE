@@ -36,7 +36,7 @@ void CWCalibrate::loadCalToneBuffers(float toneFreq) {
 void CWCalibrate::plotCalGraphics(int calType) {
   tft.writeTo(L2);
   if (calType == 0) {  // Receive Cal
-    if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
+    if (bands[EEPROMData.currentBand].sideband == Sideband::LOWER) {
       tft.fillRect(445, SPECTRUM_TOP_Y + 20, 20, 341, DARK_RED);     // SPECTRUM_TOP_Y = 100, h = 135
       tft.fillRect(304, SPECTRUM_TOP_Y + 20, 20, 341, RA8875_BLUE);  // h = SPECTRUM_HEIGHT + 3
     } else {                                                         // SPECTRUM_HEIGHT = 150 so h = 153
@@ -45,22 +45,22 @@ void CWCalibrate::plotCalGraphics(int calType) {
     }
   }
   if (calType == 1) {  // Transmit Cal
-    if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
+    if (bands[EEPROMData.currentBand].sideband == Sideband::LOWER) {
       tft.fillRect(312, SPECTRUM_TOP_Y + 20, 20, 341, DARK_RED);  // Adjusted height due to other graphics changes.  KF5N August 3, 2023
       tft.fillRect(247, SPECTRUM_TOP_Y + 20, 20, 341, RA8875_BLUE);
     } else {
-      if (bands[EEPROMData.currentBand].mode == DEMOD_USB) {
+      if (bands[EEPROMData.currentBand].sideband == Sideband::UPPER) {
         tft.fillRect(183, SPECTRUM_TOP_Y + 20, 20, 341, DARK_RED);
         tft.fillRect(247, SPECTRUM_TOP_Y + 20, 20, 341, RA8875_BLUE);
       }
     }
   }
   if (calType == 2) {  // Carrier Cal
-    if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
+    if (bands[EEPROMData.currentBand].sideband == Sideband::LOWER) {
       tft.fillRect(279, SPECTRUM_TOP_Y + 20, 20, 341, DARK_RED);  // Adjusted height due to other graphics changes.  KF5N August 3, 2023
       tft.fillRect(247, SPECTRUM_TOP_Y + 20, 20, 341, RA8875_BLUE);
     } else {
-      if (bands[EEPROMData.currentBand].mode == DEMOD_USB) {  //mode == DEMOD_LSB
+      if (bands[EEPROMData.currentBand].sideband == Sideband::UPPER) {  //mode == DEMOD_LSB
         tft.fillRect(215, SPECTRUM_TOP_Y + 20, 20, 341, DARK_RED);
         tft.fillRect(247, SPECTRUM_TOP_Y + 20, 20, 341, RA8875_BLUE);
       }
@@ -112,7 +112,7 @@ void CWCalibrate::printCalType(int mode, int IQCalType, bool autoCal, bool autoC
   if(mode == 1) calName = "Receive SSB";
   tft.setFontScale((enum RA8875tsize)1);
   tft.setTextColor(RA8875_RED);
-  if ((bands[EEPROMData.currentBand].mode == DEMOD_LSB) && (calTypeFlag == 0)) {
+  if ((bands[EEPROMData.currentBand].sideband == Sideband::LOWER) && (calTypeFlag == 0)) {
     tft.setCursor(35, 260);
     tft.print(calName);
     tft.setCursor(35, 295);
@@ -133,7 +133,7 @@ void CWCalibrate::printCalType(int mode, int IQCalType, bool autoCal, bool autoC
       tft.print("Manual Mode");
     }
   }
-  if ((bands[EEPROMData.currentBand].mode == DEMOD_USB) && (calTypeFlag == 0)) {
+  if ((bands[EEPROMData.currentBand].sideband == Sideband::UPPER) && (calTypeFlag == 0)) {
     tft.setCursor(275, 260);
     tft.print(calName);
     tft.setCursor(275, 295);
@@ -154,7 +154,7 @@ void CWCalibrate::printCalType(int mode, int IQCalType, bool autoCal, bool autoC
       tft.print("Manual Mode");
     }
   }
-  if ((bands[EEPROMData.currentBand].mode == DEMOD_LSB) && (calTypeFlag == 1)) {
+  if ((bands[EEPROMData.currentBand].sideband == Sideband::LOWER) && (calTypeFlag == 1)) {
     tft.setCursor(30, 260);
     tft.print(calName);
     tft.setCursor(30, 295);
@@ -175,7 +175,7 @@ void CWCalibrate::printCalType(int mode, int IQCalType, bool autoCal, bool autoC
       tft.print("Manual Mode");
     }
   }
-  if ((bands[EEPROMData.currentBand].mode == DEMOD_USB) && (calTypeFlag == 1)) {
+  if ((bands[EEPROMData.currentBand].sideband == Sideband::UPPER) && (calTypeFlag == 1)) {
     tft.setCursor(290, 260);
     tft.print(calName);
     tft.setCursor(290, 295);
@@ -196,7 +196,7 @@ void CWCalibrate::printCalType(int mode, int IQCalType, bool autoCal, bool autoC
       tft.print("Manual Mode");
     }
   }
-  if ((bands[EEPROMData.currentBand].mode == DEMOD_LSB) && (calTypeFlag == 2)) {
+  if ((bands[EEPROMData.currentBand].sideband == Sideband::LOWER) && (calTypeFlag == 2)) {
     tft.setCursor(30, 260);
     tft.print(calName);
     tft.setCursor(30, 295);
@@ -217,7 +217,7 @@ void CWCalibrate::printCalType(int mode, int IQCalType, bool autoCal, bool autoC
       tft.print("Manual Mode");
     }
   }
-  if ((bands[EEPROMData.currentBand].mode == DEMOD_USB) && (calTypeFlag == 2)) {
+  if ((bands[EEPROMData.currentBand].sideband == Sideband::UPPER) && (calTypeFlag == 2)) {
     tft.setCursor(290, 260);
     tft.print(calName);
     tft.setCursor(290, 295);
@@ -383,8 +383,8 @@ void CWCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal) {
 //  EEPROMData.calFreq = 1;                                                     // Receive calibration currently must use 3 kHz.
   loadCalToneBuffers(3000.0);
   CalibratePreamble(0);                                                       // Set zoom to 1X.
-  if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) calFreqShift = 24000;  //  LSB offset.  KF5N
-  if (bands[EEPROMData.currentBand].mode == DEMOD_USB) calFreqShift = 24000;  //  USB offset.  KF5N
+  if (bands[EEPROMData.currentBand].sideband == Sideband::LOWER) calFreqShift = 24000;  //  LSB offset.  KF5N
+  if (bands[EEPROMData.currentBand].sideband == Sideband::UPPER) calFreqShift = 24000;  //  USB offset.  KF5N
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreqCal(calFreqShift);
   calTypeFlag = 0;  // RX cal
@@ -1636,11 +1636,11 @@ void CWCalibrate::ProcessIQData2(int mode) {
   arm_scale_f32(sinBuffer, 0.20, float_buffer_R_EX, 256);  // AFP 2-11-23 Sidetone = 3000
 
 if(mode == 0) {
-  if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
+  if (bands[EEPROMData.currentBand].sideband == Sideband::LOWER) {
     arm_scale_f32(float_buffer_L_EX, -EEPROMData.IQCWAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L_EX, 256);       //Adjust level of L buffer // AFP 2-11-23
     IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, EEPROMData.IQCWPhaseCorrectionFactor[EEPROMData.currentBand], 256);  // Adjust phase
   } else {
-    if (bands[EEPROMData.currentBand].mode == DEMOD_USB) {
+    if (bands[EEPROMData.currentBand].sideband == Sideband::UPPER) {
       arm_scale_f32(float_buffer_L_EX, EEPROMData.IQCWAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L_EX, 256);  // AFP 2-11-23
       IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, EEPROMData.IQCWPhaseCorrectionFactor[EEPROMData.currentBand], 256);
     }
@@ -1648,11 +1648,11 @@ if(mode == 0) {
 }
 
 if(mode == 1) {
-  if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
+  if (bands[EEPROMData.currentBand].sideband == Sideband::LOWER) {
     arm_scale_f32(float_buffer_L_EX, -EEPROMData.IQSSBAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L_EX, 256);       //Adjust level of L buffer // AFP 2-11-23
     IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, EEPROMData.IQSSBPhaseCorrectionFactor[EEPROMData.currentBand], 256);  // Adjust phase
   } else {
-    if (bands[EEPROMData.currentBand].mode == DEMOD_USB) {
+    if (bands[EEPROMData.currentBand].sideband == Sideband::UPPER) {
       arm_scale_f32(float_buffer_L_EX, EEPROMData.IQSSBAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L_EX, 256);  // AFP 2-11-23
       IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, EEPROMData.IQSSBPhaseCorrectionFactor[EEPROMData.currentBand], 256);
     }
@@ -1726,11 +1726,11 @@ if(mode == 1) {
 
     // Manual IQ amplitude correction
     if(mode == 0) {
-    if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
+    if (bands[EEPROMData.currentBand].sideband == Sideband::LOWER) {
       arm_scale_f32(float_buffer_L, -EEPROMData.IQCWRXAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
       IQPhaseCorrection(float_buffer_L, float_buffer_R, EEPROMData.IQCWRXPhaseCorrectionFactor[EEPROMData.currentBand], BUFFER_SIZE * N_BLOCKS);
     } else {
-      if (bands[EEPROMData.currentBand].mode == DEMOD_USB) {
+      if (bands[EEPROMData.currentBand].sideband == Sideband::UPPER) {
         arm_scale_f32(float_buffer_L, -EEPROMData.IQCWRXAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22 KF5N changed sign
         IQPhaseCorrection(float_buffer_L, float_buffer_R, EEPROMData.IQCWRXPhaseCorrectionFactor[EEPROMData.currentBand], BUFFER_SIZE * N_BLOCKS);
       }
@@ -1738,11 +1738,11 @@ if(mode == 1) {
     }
 
     if(mode == 1) {
-    if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
+    if (bands[EEPROMData.currentBand].sideband == Sideband::LOWER) {
       arm_scale_f32(float_buffer_L, -EEPROMData.IQSSBRXAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
       IQPhaseCorrection(float_buffer_L, float_buffer_R, EEPROMData.IQSSBRXPhaseCorrectionFactor[EEPROMData.currentBand], BUFFER_SIZE * N_BLOCKS);
     } else {
-      if (bands[EEPROMData.currentBand].mode == DEMOD_USB) {
+      if (bands[EEPROMData.currentBand].sideband == Sideband::UPPER) {
         arm_scale_f32(float_buffer_L, -EEPROMData.IQSSBRXAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22 KF5N changed sign
         IQPhaseCorrection(float_buffer_L, float_buffer_R, EEPROMData.IQSSBRXPhaseCorrectionFactor[EEPROMData.currentBand], BUFFER_SIZE * N_BLOCKS);
       }
@@ -1794,20 +1794,20 @@ void CWCalibrate::ShowSpectrum2(int mode)  //AFP 2-10-23
   //  Thus there is a target "bin" for the reference signal and another "bin" for the undesired sideband.
   //  The target bin locations are used by the for-loop to sweep a small range in the FFT.  A maximum finding function finds the peak signal strength.
   int cal_bins[3] = { 0, 0, 0 };
-  if (calTypeFlag == 0 && bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
+  if (calTypeFlag == 0 && bands[EEPROMData.currentBand].sideband == Sideband::LOWER) {
     cal_bins[0] = 315;
     cal_bins[1] = 455;
   }  // Receive calibration, LSB.  KF5N
-  if (calTypeFlag == 0 && bands[EEPROMData.currentBand].mode == DEMOD_USB) {
+  if (calTypeFlag == 0 && bands[EEPROMData.currentBand].sideband == Sideband::UPPER) {
     cal_bins[0] = 59;
     cal_bins[1] = 199;
   }  // Receive calibration, USB.  KF5N
-  if ((calTypeFlag == 1 || calTypeFlag == 2) && bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
+  if ((calTypeFlag == 1 || calTypeFlag == 2) && bands[EEPROMData.currentBand].sideband == Sideband::LOWER) {
     cal_bins[0] = 257;  // LSB
     cal_bins[1] = 289;  // Carrier
     cal_bins[2] = 322;  // Undesired sideband
   }                     // Transmit and Carrier calibration, LSB.  KF5N
-  if ((calTypeFlag == 1 || calTypeFlag == 2) && bands[EEPROMData.currentBand].mode == DEMOD_USB) {
+  if ((calTypeFlag == 1 || calTypeFlag == 2) && bands[EEPROMData.currentBand].sideband == Sideband::UPPER) {
     cal_bins[0] = 257;  // USB
     cal_bins[1] = 225;  // Carrier
     cal_bins[2] = 193;  // Undesired sideband
@@ -1878,29 +1878,29 @@ float CWCalibrate::PlotCalSpectrum(int mode, int x1, int cal_bins[3], int captur
 
   // Find the maximums of the desired and undesired signals.
 
-  if ((bands[EEPROMData.currentBand].mode == DEMOD_LSB) && (calTypeFlag == 0)) {
+  if ((bands[EEPROMData.currentBand].sideband == Sideband::LOWER) && (calTypeFlag == 0)) {
     arm_max_q15(&pixelnew[(cal_bins[0] - capture_bins)], capture_bins * 2, &refAmplitude, &index_of_max);
     arm_max_q15(&pixelnew[(cal_bins[1] - capture_bins)], capture_bins * 2, &adjAmplitude, &index_of_max);
   }
-  if ((bands[EEPROMData.currentBand].mode == DEMOD_USB) && (calTypeFlag == 0)) {
+  if ((bands[EEPROMData.currentBand].sideband == Sideband::UPPER) && (calTypeFlag == 0)) {
     arm_max_q15(&pixelnew[(cal_bins[0] - capture_bins)], capture_bins * 2, &adjAmplitude, &index_of_max);
     arm_max_q15(&pixelnew[(cal_bins[1] - capture_bins)], capture_bins * 2, &refAmplitude, &index_of_max);
   }
 
-  if ((bands[EEPROMData.currentBand].mode == DEMOD_LSB) && (calTypeFlag == 1)) {
+  if ((bands[EEPROMData.currentBand].sideband == Sideband::LOWER) && (calTypeFlag == 1)) {
     arm_max_q15(&pixelnew[(cal_bins[0] - capture_bins)], capture_bins * 2, &refAmplitude, &index_of_max);
     arm_max_q15(&pixelnew[(cal_bins[2] - capture_bins)], capture_bins * 2, &adjAmplitude, &index_of_max);
   }
-  if ((bands[EEPROMData.currentBand].mode == DEMOD_USB) && (calTypeFlag == 1)) {
+  if ((bands[EEPROMData.currentBand].sideband == Sideband::UPPER) && (calTypeFlag == 1)) {
     arm_max_q15(&pixelnew[(cal_bins[0] - capture_bins)], capture_bins * 2, &adjAmplitude, &index_of_max);
     arm_max_q15(&pixelnew[(cal_bins[2] - capture_bins)], capture_bins * 2, &refAmplitude, &index_of_max);
   }
 
-  if ((bands[EEPROMData.currentBand].mode == DEMOD_LSB) && (calTypeFlag == 2)) {
+  if ((bands[EEPROMData.currentBand].sideband == Sideband::LOWER) && (calTypeFlag == 2)) {
     arm_max_q15(&pixelnew[(cal_bins[0] - capture_bins)], capture_bins * 2, &refAmplitude, &index_of_max);
     arm_max_q15(&pixelnew[(cal_bins[1] - capture_bins)], capture_bins * 2, &adjAmplitude, &index_of_max);
   }
-  if ((bands[EEPROMData.currentBand].mode == DEMOD_USB) && (calTypeFlag == 2)) {
+  if ((bands[EEPROMData.currentBand].sideband == Sideband::UPPER) && (calTypeFlag == 2)) {
     arm_max_q15(&pixelnew[(cal_bins[0] - capture_bins)], capture_bins * 2, &adjAmplitude, &index_of_max);
     arm_max_q15(&pixelnew[(cal_bins[1] - capture_bins)], capture_bins * 2, &refAmplitude, &index_of_max);
   }
@@ -1929,7 +1929,7 @@ float CWCalibrate::PlotCalSpectrum(int mode, int x1, int cal_bins[3], int captur
   pixelCurrent[x1] = pixelnew[x1];  //  This is the actual "old" spectrum! Copied to pixelold by the FFT function.
 
   adjdB = ((float)adjAmplitude - (float)refAmplitude) / (1.95 * 2.0);                            // Cast to float and calculate the dB level.  Needs further refinement for accuracy.  KF5N
-  if (bands[EEPROMData.currentBand].mode == DEMOD_USB && not(calTypeFlag == 0)) adjdB = -adjdB;  // Flip sign for USB only for TX cal.
+  if (bands[EEPROMData.currentBand].sideband == Sideband::UPPER && not(calTypeFlag == 0)) adjdB = -adjdB;  // Flip sign for USB only for TX cal.
   adjdB_avg = adjdB * alpha + adjdBold * (1.0 - alpha);                                          // Exponential average.
                                                                                                  //  adjdB_avg = adjdB;     // TEMPORARY EXPERIMENT
   adjdBold = adjdB_avg;

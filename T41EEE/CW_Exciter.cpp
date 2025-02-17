@@ -63,11 +63,11 @@ void CW_ExciterIQData(int shaping) //AFP 08-20-22
 
   //  Apply amplitude and phase corrections.
 
-  if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
+  if (bands[EEPROMData.currentBand].sideband == Sideband::LOWER) {
     arm_scale_f32(float_buffer_L_EX, -EEPROMData.IQCWAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L_EX, 256);       //Adjust level of L buffer KF5N flipped sign, original was +.
     IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, EEPROMData.IQCWPhaseCorrectionFactor[EEPROMData.currentBand], 256);  // Adjust phase
   } else {
-    if (bands[EEPROMData.currentBand].mode == DEMOD_USB) {
+    if (bands[EEPROMData.currentBand].sideband == Sideband::UPPER) {
       arm_scale_f32 (float_buffer_L_EX, + EEPROMData.IQCWAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L_EX, 256);   // KF5N flipped sign, original was minus.
       IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, EEPROMData.IQCWPhaseCorrectionFactor[EEPROMData.currentBand], 256); // Adjust phase
     }

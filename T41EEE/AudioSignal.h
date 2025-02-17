@@ -1,6 +1,6 @@
 // Teensy and Open Audio Signal Chains include file.
 
-#include "USB_Audio_F32.h"  // Required to use F32 USB in/out.
+//#include "USB_Audio_F32.h"  // Required to use F32 USB in/out.
 
 // Common to Transmitter and Receiver.
 const float sample_rate_Hz = 48000.0f;
@@ -11,7 +11,7 @@ AudioOutputI2SQuad i2s_quadOut;
 
 // Transmitter
 AudioControlSGTL5000 sgtl5000_1;      // Controller for the Teensy Audio Adapter.
-AudioConvert_I16toF32 int2Float1, int2Float2;              // Converts Int16 to Float.  See class in AudioStream_F32.h
+AudioConvert_I16toF32 int2Float1;              // Converts Int16 to Float.  See class in AudioStream_F32.h
 //AudioEffectGain_F32 micGain(audio_settings);                   // Microphone gain control.
 AudioEffectGain_F32 micGain;                   // Microphone gain control.
 AudioEffectCompressor2_F32  compressor1; // Open Audio Compressor
@@ -19,14 +19,14 @@ AudioEffectCompressor2_F32 *pc1 = &compressor1;
 radioCESSB_Z_transmit_F32 cessb1;
 AudioConvert_F32toI16 float2Int1, float2Int2, float2Int3, float2Int4;  // Converts Float to Int16.  See class in AudioStream_F32.h
 // AudioConvert_I16toF32 int2float1, int2float2;
-AudioSwitch4_OA_F32 switch1, switch2, switch3, switch4;
+AudioSwitch4_OA_F32 switch1, switch2, switch3;
 AudioMixer4_F32 mixer1, mixer2;          // Used to switch in tone during calibration.
 AudioSynthWaveformSine_F32  toneSSBCal;          // Tone for SSB calibration.
 AudioRecordQueue Q_in_L_Ex;                    // AudioRecordQueue for input Microphone channel.
 AudioRecordQueue Q_in_R_Ex;           // This 2nd channel is needed as we are bringing I and Q into the sketch instead of only microphone audio.
 AudioPlayQueue Q_out_L_Ex;                     // AudioPlayQueue for driving the I channel (CW/SSB) to the QSE.
 AudioPlayQueue Q_out_R_Ex;                     // AudioPlayQueue for driving the Q channel (CW/SSB) to the QSE.
-AudioInputUSB_F32 usbIn_F32(audio_settings);
+//AudioInputUSB_F32 usbIn_F32(audio_settings);
 //AudioInputUSB usbIn;
 
 
@@ -39,12 +39,12 @@ AudioConnection_F32 connect2(toneSSBCal,  0, switch2, 0);
 //AudioConnection connect3(usbIn, 0, int2Float2, 0);
 //AudioConnection_F32 connect4(int2Float2, 0, switch4, 0);          // Connect USB for FT8 from WSJTX on PC.
 
-AudioConnection_F32 connect4(usbIn_F32, 0, switch4, 0);
+//AudioConnection_F32 connect4(usbIn_F32, 0, switch4, 0);
 
 // Need a mixer to switch in an audio tone during calibration.  Should be a nominal tone amplitude.
 AudioConnection_F32 connect5(switch1, 0, mixer1, 0);  // Connect microphone mixer1 output 0 via gain control.
 AudioConnection_F32 connect6(switch2, 0, mixer1, 1);  // Connect tone for SSB calibration.
-AudioConnection_F32 connect7(switch4, 0, mixer1, 2);  // USB audio from WSJTX on PC.
+//AudioConnection_F32 connect7(switch4, 0, mixer1, 2);  // USB audio from WSJTX on PC.
 
 AudioConnection_F32 connect8(mixer1, 0, micGain, 0);
 AudioConnection_F32 connect9(micGain, 0, switch3, 0);
@@ -77,7 +77,7 @@ AudioPlayQueue Q_out_L;  // Receiver audio out and CW sidetone.
 //AudioPlayQueue Q_out_R;  2nd audio channel not used.  KF5N March 11, 2024
 
 //AudioOutputUSB usbOut;
-AudioOutputUSB_F32 usbOut_F32(audio_settings);
+//AudioOutputUSB_F32 usbOut_F32(audio_settings);
 
 AudioConnection patchCord9(i2s_quadIn, 2, Q_in_L, 0);  // Receiver I and Q channel data stream.
 AudioConnection patchCord10(i2s_quadIn, 3, Q_in_R, 0);
@@ -99,8 +99,8 @@ AudioConnection patchCord22(headphoneScale, 0, i2s_quadOut, 1);   // To Audio Ad
 AudioConnection patchCord23(volumeAdjust, 0, float2Int3, 0);   // To Audio Adapter via via Teensy pin 7.
 AudioConnection patchCord24(volumeAdjust, 0, float2Int4, 0);   // To Audio Adapter via via Teensy pin 7.
 
-AudioConnection patchCord25(float2Int3, 0, usbOut_F32, 0);   // To Audio Adapter via via Teensy pin 7.
-AudioConnection patchCord26(float2Int4, 0, usbOut_F32, 1);   // To Audio Adapter via via Teensy pin 7.
+//AudioConnection patchCord25(float2Int3, 0, usbOut_F32, 0);   // To Audio Adapter via via Teensy pin 7.
+//AudioConnection patchCord26(float2Int4, 0, usbOut_F32, 1);   // To Audio Adapter via via Teensy pin 7.
 
 // It is unclear that this is actually required.
 AudioControlSGTL5000 sgtl5000_2;  // This is not a 2nd Audio Adapter.  It is I2S to the PCM1808 (ADC I and Q receiver in) and PCM5102 (DAC audio out).
@@ -169,8 +169,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord22.connect();  // Experimental USB output.
       patchCord23.connect();
       patchCord24.connect();
-      patchCord25.connect();
-      patchCord26.connect();
+//      patchCord25.connect();
+//      patchCord26.connect();
       volumeAdjust.gain(volumeLog[EEPROMData.audioVolume]);  // Set volume because sidetone may have changed it.
 //      speakerScale.gain(volumeLog[SPEAKERSCALE]);
       speakerScale.gain(SPEAKERSCALE);      
@@ -201,7 +201,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       mixer1.gain(2, 0.0);    // Connect USB audio from WSJTX on PC.
       switch1.setChannel(0);  // Connect microphone path.
       switch2.setChannel(1);  //  Disconnect 1 kHz test tone path.
-      switch4.setChannel(1);  //  Disconnect USB audio from WSJTX on PC.
+     // switch4.setChannel(1);  //  Disconnect USB audio from WSJTX on PC.
 
       if(EEPROMData.cessb) {
       switch3.setChannel(0);  // Enable compressor path!
@@ -244,7 +244,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       mixer1.gain(2, 1.0);    // Connect USB audio from WSJTX on PC.
       switch1.setChannel(1);  // Disconnect microphone path.
       switch2.setChannel(1);  //  Disconnect 1 kHz test tone path.
-      switch4.setChannel(0);  //  Connect USB audio from WSJTX on PC.
+//      switch4.setChannel(0);  //  Connect USB audio from WSJTX on PC.
 
       switch3.setChannel(1);  // Don't use compressor with FT8!
       mixer2.gain(0, 0.0);

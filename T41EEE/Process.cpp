@@ -128,22 +128,22 @@ void Process::ProcessIQData() {
 
     // Manual IQ amplitude correction
     if(radioState == RadioState::CW_RECEIVE_STATE || radioState == RadioState::AM_RECEIVE_STATE) {
-    if (bands[EEPROMData.currentBand].mode == DEMOD_LSB || bands[EEPROMData.currentBand].mode == DEMOD_AM || bands[EEPROMData.currentBand].mode == DEMOD_SAM) {
+    if (bands[EEPROMData.currentBand].sideband == Sideband::LOWER || bands[EEPROMData.currentBand].sideband == Sideband::BOTH_AM || bands[EEPROMData.currentBand].sideband == Sideband::BOTH_SAM) {
       arm_scale_f32(float_buffer_L, -EEPROMData.IQCWRXAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
       IQPhaseCorrection(float_buffer_L, float_buffer_R, EEPROMData.IQCWRXPhaseCorrectionFactor[EEPROMData.currentBand], BUFFER_SIZE * N_BLOCKS);
     } else {
-      if (bands[EEPROMData.currentBand].mode == DEMOD_USB || bands[EEPROMData.currentBand].mode == DEMOD_AM || bands[EEPROMData.currentBand].mode == DEMOD_SAM) {
+      if (bands[EEPROMData.currentBand].sideband == Sideband::UPPER || bands[EEPROMData.currentBand].sideband == Sideband::BOTH_AM || bands[EEPROMData.currentBand].sideband == Sideband::BOTH_SAM) {
         arm_scale_f32(float_buffer_L, -EEPROMData.IQCWRXAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
         IQPhaseCorrection(float_buffer_L, float_buffer_R, EEPROMData.IQCWRXPhaseCorrectionFactor[EEPROMData.currentBand], BUFFER_SIZE * N_BLOCKS);
       }
     }
     }
     else if(radioState == RadioState::SSB_RECEIVE_STATE || radioState == RadioState::FT8_RECEIVE_STATE || radioState == RadioState::AM_RECEIVE_STATE) {
-    if (bands[EEPROMData.currentBand].mode == DEMOD_LSB || bands[EEPROMData.currentBand].mode == DEMOD_AM || bands[EEPROMData.currentBand].mode == DEMOD_SAM) {
+    if (bands[EEPROMData.currentBand].sideband == Sideband::LOWER || bands[EEPROMData.currentBand].sideband == Sideband::BOTH_AM || bands[EEPROMData.currentBand].sideband == Sideband::BOTH_SAM) {
       arm_scale_f32(float_buffer_L, -EEPROMData.IQSSBRXAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
       IQPhaseCorrection(float_buffer_L, float_buffer_R, EEPROMData.IQSSBRXPhaseCorrectionFactor[EEPROMData.currentBand], BUFFER_SIZE * N_BLOCKS);
     } else {
-      if (bands[EEPROMData.currentBand].mode == DEMOD_USB || bands[EEPROMData.currentBand].mode == DEMOD_AM || bands[EEPROMData.currentBand].mode == DEMOD_SAM) {
+      if (bands[EEPROMData.currentBand].sideband == Sideband::UPPER || bands[EEPROMData.currentBand].sideband == Sideband::BOTH_AM || bands[EEPROMData.currentBand].sideband == Sideband::BOTH_SAM) {
         arm_scale_f32(float_buffer_L, -EEPROMData.IQSSBRXAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
         IQPhaseCorrection(float_buffer_L, float_buffer_R, EEPROMData.IQSSBRXPhaseCorrectionFactor[EEPROMData.currentBand], BUFFER_SIZE * N_BLOCKS);
       }      
@@ -293,10 +293,10 @@ void Process::ProcessIQData() {
         audioSpectBuffer[1024 - k] = (iFFT_buffer[k] * iFFT_buffer[k]);
       }
       for (int k = 3; k < 256; k++) {
-        if (bands[EEPROMData.currentBand].mode == 0 || bands[EEPROMData.currentBand].mode == DEMOD_AM || bands[EEPROMData.currentBand].mode == DEMOD_SAM) {  //AFP 10-26-22
+        if (bands[EEPROMData.currentBand].sideband == Sideband::UPPER || bands[EEPROMData.currentBand].sideband == Sideband::BOTH_AM || bands[EEPROMData.currentBand].sideband == Sideband::BOTH_SAM) {  //AFP 10-26-22
           //audioYPixel[k] = 20+  map((int)displayScale[EEPROMData.currentScale].dBScale * log10f((audioSpectBuffer[1024 - k] + audioSpectBuffer[1024 - k + 1] + audioSpectBuffer[1024 - k + 2]) / 3), 0, 100, 0, 120);
           audioYPixel[k] = 65 + map(15 * log10f((audioSpectBuffer[1024 - k] + audioSpectBuffer[1024 - k + 1] + audioSpectBuffer[1024 - k + 2]) / 3), 0, 100, 0, 120) + audioFFToffset;
-        } else if (bands[EEPROMData.currentBand].mode == 1) {  //AFP 10-26-22
+        } else if (bands[EEPROMData.currentBand].sideband == Sideband::LOWER) {  //AFP 10-26-22
           //audioYPixel[k] = 20+   map((int)displayScale[EEPROMData.currentScale].dBScale * log10f((audioSpectBuffer[k] + audioSpectBuffer[k + 1] + audioSpectBuffer[k + 2]) / 3), 0, 100, 0, 120);
           audioYPixel[k] = 65 + map(15 * log10f((audioSpectBuffer[k] + audioSpectBuffer[k + 1] + audioSpectBuffer[k + 2]) / 3), 0, 100, 0, 120) + audioFFToffset;
         }
@@ -350,8 +350,8 @@ void Process::ProcessIQData() {
        **********************************************************************************/
     //===================== AFP 10-27-22  =========
 
-    switch (bands[EEPROMData.currentBand].mode) {
-      case DEMOD_LSB:
+    switch (bands[EEPROMData.currentBand].sideband) {
+      case Sideband::LOWER:
         for (unsigned i = 0; i < FFT_length / 2; i++) {
           //if (bands[EEPROMData.currentBand].mode == DEMOD_USB || bands[EEPROMData.currentBand].mode == DEMOD_LSB ) {  // for SSB copy real part in both outputs
           float_buffer_L[i] = iFFT_buffer[FFT_length + (i * 2)];
@@ -360,7 +360,7 @@ void Process::ProcessIQData() {
           //}
         }
         break;
-      case DEMOD_USB:
+      case Sideband::UPPER:
         for (unsigned i = 0; i < FFT_length / 2; i++) {
           // if (bands[EEPROMData.currentBand].mode == DEMOD_USB || bands[EEPROMData.currentBand].mode == DEMOD_LSB ) {  // for SSB copy real part in both outputs
           float_buffer_L[i] = iFFT_buffer[FFT_length + (i * 2)];
@@ -371,7 +371,7 @@ void Process::ProcessIQData() {
         }
 
         break;
-      case DEMOD_AM:
+      case Sideband::BOTH_AM:
         for (unsigned i = 0; i < FFT_length / 2; i++) {  // Magnitude estimation Lyons (2011): page 652 / libcsdr
           audiotmp = AlphaBetaMag(iFFT_buffer[FFT_length + (i * 2)], iFFT_buffer[FFT_length + (i * 2) + 1]);
           // DC removal filter -----------------------
@@ -382,7 +382,7 @@ void Process::ProcessIQData() {
         arm_biquad_cascade_df1_f32(&biquad_lowpass1, float_buffer_L, float_buffer_R, FFT_length / 2);
         arm_copy_f32(float_buffer_R, float_buffer_L, FFT_length / 2);
         break;
-      case DEMOD_SAM:  //AFP 11-03-22
+      case Sideband::BOTH_SAM:  //AFP 11-03-22
         AMDecodeSAM();
         break;
     }

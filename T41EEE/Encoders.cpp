@@ -44,8 +44,8 @@ int32_t filter_change;
     }
     last_filter_pos = filter_pos;
     // Change the FLoCut and FhiCut variables which adjust the DSP filters.
-    switch (bands[EEPROMData.currentBand].mode) {
-      case DEMOD_LSB:
+    switch (bands[EEPROMData.currentBand].sideband) {
+      case Sideband::LOWER:
         if (switchFilterSideband == false)  // LSB "0" = normal, "1" means change opposite filter.  ButtonFilter() function swaps this.
         {  // Adjust FLoCut and limit FLoCut based on the current frequency of FHiCut.
           bands[EEPROMData.currentBand].FLoCut = bands[EEPROMData.currentBand].FLoCut - filterEncoderMove * 100 * ENCODER_FACTOR;  
@@ -59,7 +59,7 @@ int32_t filter_change;
         }
         FilterBandwidth();
         break;
-      case DEMOD_USB:
+      case Sideband::UPPER:
       if (switchFilterSideband == false)
  {  // Adjust and limit FHiCut.
           bands[EEPROMData.currentBand].FHiCut = bands[EEPROMData.currentBand].FHiCut + filterEncoderMove * 100 * ENCODER_FACTOR;
@@ -76,17 +76,24 @@ int32_t filter_change;
         } 
         FilterBandwidth();
         break;
-      case DEMOD_AM:
+        default:
+        break;
+    }
+
+      switch (bands[EEPROMData.currentBand].mode) {
+    case RadioMode::AM_MODE:
         bands[EEPROMData.currentBand].FHiCut = bands[EEPROMData.currentBand].FHiCut - filter_change * 50 * ENCODER_FACTOR;
         bands[EEPROMData.currentBand].FLoCut = -bands[EEPROMData.currentBand].FHiCut;
         FilterBandwidth();
 //        InitFilterMask();  This function is called by FilterBandwidth().  Greg KF5N April 21, 2024
         break;
-      case DEMOD_SAM:  // AFP 11-03-22
+      case RadioMode::SAM_MODE:  // AFP 11-03-22
         bands[EEPROMData.currentBand].FHiCut = bands[EEPROMData.currentBand].FHiCut - filter_change * 50 * ENCODER_FACTOR;
         bands[EEPROMData.currentBand].FLoCut = -bands[EEPROMData.currentBand].FHiCut;
         FilterBandwidth();
 //        InitFilterMask();
+        break;
+        default:
         break;
     }
       volumeChangeFlag = true;
@@ -108,7 +115,7 @@ int32_t filter_change;
         filterLoPositionMarker = map(bands[EEPROMData.currentBand].FLoCut, 0, 6000, 0, 256);
         filterHiPositionMarker = map(bands[EEPROMData.currentBand].FHiCut, 0, 6000, 0, 256);
         // Flip positions if LSB so that correct delimiter is highlighted.
-        if (bands[EEPROMData.currentBand].mode == DEMOD_LSB) {
+        if (bands[EEPROMData.currentBand].sideband == Sideband::LOWER) {
            temp = filterLoPositionMarker;
            filterLoPositionMarker = filterHiPositionMarker;
            filterHiPositionMarker = temp;
