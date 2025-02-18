@@ -237,7 +237,7 @@ const int RESET = 0;  // QSD2/QSE2 reset pin
 #define SAMPLE_RATE_281K 16  // ??
 #define SAMPLE_RATE_353K 17
 
-#define DEMOD_MIN 0
+//#define DEMOD_MIN 0
 //#define DEMOD_USB 0
 //#define DEMOD_LSB 1
 //#define DEMOD_AM 2
@@ -1017,7 +1017,7 @@ void SetKeyPowerUp();
 void SetSideToneVolume();  // This function uses encoder to set sidetone volume.  KF5N August 29, 2023
 long SetTransmitDelay();
 void SetTransmitDitLength(int wpm);  // JJP 8/19/23
-void SetupMode(Sideband sideband);
+void SetupMode(RadioMode mode, Sideband sideband);
 int SetWPM();
 void ShowAutoStatus();
 void ShowBandwidth();

@@ -381,6 +381,7 @@ void Process::ProcessIQData() {
         arm_copy_f32(float_buffer_R, float_buffer_L, FFT_length / 2);
         break;
       case Sideband::BOTH_SAM:  //AFP 11-03-22
+//      Serial.printf("Decode SAM\n");
         AMDecodeSAM();
         break;
         default:

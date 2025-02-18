@@ -76,18 +76,18 @@ int32_t filter_change;
         } 
         FilterBandwidth();
         break;
-        default:
-        break;
-    }
+//        default:
+//        break;
+//    }
 
-      switch (bands[EEPROMData.currentBand].mode) {
-    case RadioMode::AM_MODE:
+//      switch (bands[EEPROMData.currentBand].mode) {
+    case Sideband::BOTH_AM:
         bands[EEPROMData.currentBand].FHiCut = bands[EEPROMData.currentBand].FHiCut - filter_change * 50 * ENCODER_FACTOR;
         bands[EEPROMData.currentBand].FLoCut = -bands[EEPROMData.currentBand].FHiCut;
         FilterBandwidth();
 //        InitFilterMask();  This function is called by FilterBandwidth().  Greg KF5N April 21, 2024
         break;
-      case RadioMode::SAM_MODE:  // AFP 11-03-22
+      case Sideband::BOTH_SAM:  // AFP 11-03-22
         bands[EEPROMData.currentBand].FHiCut = bands[EEPROMData.currentBand].FHiCut - filter_change * 50 * ENCODER_FACTOR;
         bands[EEPROMData.currentBand].FLoCut = -bands[EEPROMData.currentBand].FHiCut;
         FilterBandwidth();

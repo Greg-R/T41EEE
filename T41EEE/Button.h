@@ -33,7 +33,7 @@ void ButtonBandDecrease();
 void BandSet(int band);
 void ButtonZoom();
 void ButtonFilter();
-void ButtonDemodMode();
+void ButtonSelectSideband();
 void ButtonMode();
 void ButtonNR();
 void ButtonNotchFilter();

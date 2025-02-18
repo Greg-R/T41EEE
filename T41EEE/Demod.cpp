@@ -19,6 +19,92 @@ float32_t ai_ps, bi_ps, aq_ps, bq_ps;
 float32_t audiou;
 float32_t Cos = 0.0;
 
+
+/*****
+  Purpose: Switch filter edges based on selected sideband.
+
+  Parameter list:
+    Sideband sideBand            the sideband
+
+  Return value;
+    void
+*****/
+void SetupMode(RadioMode mode, Sideband sideband) {
+//  int flow = 0, fhigh = 0;
+
+// First, determine flow and fhigh, which are the audio filter settings.
+// This is confusing, because of lower and upper sidebands make them different.
+
+if(mode == RadioMode::SSB_MODE or mode == RadioMode::CW_MODE) {
+  if(sideband == Sideband::UPPER) {
+bands[EEPROMData.currentBand].FHiCut = 3000;
+bands[EEPROMData.currentBand].FLoCut =  300;
+  }
+    if(sideband == Sideband::LOWER) {
+bands[EEPROMData.currentBand].FHiCut =  -300;
+bands[EEPROMData.currentBand].FLoCut = -3000;
+  }
+}
+
+if(mode == RadioMode::FT8_MODE) {
+bands[EEPROMData.currentBand].FHiCut = 3000;
+bands[EEPROMData.currentBand].FLoCut =  300;
+}
+
+if(mode == RadioMode::AM_MODE or mode == RadioMode::SAM_MODE) {
+bands[EEPROMData.currentBand].FHiCut =  3000;
+bands[EEPROMData.currentBand].FLoCut = -3000;
+if(mode == RadioMode::AM_MODE) bands[EEPROMData.currentBand].sideband = Sideband::BOTH_AM;
+if(mode == RadioMode::SAM_MODE) {
+bands[EEPROMData.currentBand].sideband = Sideband::BOTH_SAM;
+Serial.printf("BOTH_SAM sideband selected\n");
+}
+}
+
+
+/*
+if(bands[EEPROMData.currentBand].FHiCut < 0 and bands[EEPROMData.currentBand].FLoCut < 0) {
+flow = -bands[EEPROMData.currentBand].FHiCut;
+fhigh = -bands[EEPROMData.currentBand].FLoCut;
+}
+
+if(bands[EEPROMData.currentBand].FHiCut > 0 and bands[EEPROMData.currentBand].FLoCut > 0) {
+flow = bands[EEPROMData.currentBand].FLoCut;
+fhigh = bands[EEPROMData.currentBand].FHiCut;
+}
+  {
+    switch (sideband) {
+      case Sideband::LOWER:
+//        temp = bands[EEPROMData.currentBand].FHiCut;
+        bands[EEPROMData.currentBand].FHiCut = -flow;
+        bands[EEPROMData.currentBand].FLoCut = -fhigh;
+        break;
+      case Sideband::UPPER:
+//        temp = bands[EEPROMData.currentBand].FHiCut;
+        bands[EEPROMData.currentBand].FHiCut = fhigh;
+        bands[EEPROMData.currentBand].FLoCut = flow;
+        break;
+      case Sideband::BOTH_AM:
+      case Sideband::BOTH_SAM:
+      if(abs(bands[EEPROMData.currentBand].FHiCut) > abs(bands[EEPROMData.currentBand].FLoCut)) {
+fhigh = bands[EEPROMData.currentBand].FHiCut;
+} else fhigh = bands[EEPROMData.currentBand].FLoCut;
+        bands[EEPROMData.currentBand].FHiCut = fhigh;
+        bands[EEPROMData.currentBand].FLoCut = -fhigh;
+        break;
+    }
+//  }
+*/
+
+  ShowBandwidth();
+  Serial.printf("bands[EEPROMData.currentBand].FLoCut = %d\n",bands[EEPROMData.currentBand].FLoCut);
+  Serial.printf("bands[EEPROMData.currentBand].FHiCut = %d\n",bands[EEPROMData.currentBand].FHiCut);  
+  // tft.fillRect(pos_x_frequency + 10, pos_y_frequency + 24, 210, 16, RA8875_BLACK);
+  //tft.fillRect(OPERATION_STATS_X + 170, FREQUENCY_Y + 30, tft.getFontWidth() * 5, tft.getFontHeight(), RA8875_BLACK);        // Clear top-left menu area
+////  old_demod_mode = bands[EEPROMData.currentBand].mode;  // set old_mode flag for next time, at the moment only used for first time radio is switched on . . .
+}  // end void setup_mode
+
+
 /*****  AFP 11-03-22
   Purpose: AMDecodeSAM()
   Parameter list:
@@ -27,7 +113,7 @@ float32_t Cos = 0.0;
     void
   Notes:  Synchronous AM detection.  Determines the carrier frequency, adjusts freq and replaces the received carrier with a steady signal to prevent fading.
   This algorithm works best of those implemented.
-      // taken from Warren Pratt´s WDSP, 2016
+  // taken from Warren Pratt´s WDSP, 2016
   // http://svn.tapr.org/repos_sdr_hpsdr/trunk/W5WC/PowerSDR_HPSDR_mRX_PS/Source/wdsp/
 *****/
 void AMDecodeSAM() {
@@ -46,7 +132,6 @@ void AMDecodeSAM() {
   float32_t onem_mtauI = 1.0 - mtauI;
   uint8_t fade_leveler = 1;
   float32_t Sin, Cos;
-
 
 //  tft.print("(SAM) ");  //AFP 11-01-22
 

@@ -250,7 +250,7 @@ void Button::ExecuteButtonPress(MenuSelect val) {
 
     case MenuSelect::DEMODULATION:  // 7
       EraseMenus();
-      ButtonDemodMode();
+      ButtonSelectSideband();
       break;
 
     case MenuSelect::SET_MODE:  // 8
@@ -775,14 +775,15 @@ void Button::ButtonZoom() {
 void Button::ButtonFilter() {
   switchFilterSideband = not switchFilterSideband;
   FilterSetSSB();  // Call this so the delimiter is set to the correct color.
-  ControlFilterF();
+  SetupMode(radioMode, bands[EEPROMData.currentBand].sideband);
+////  ControlFilterF();
   FilterBandwidth();
   ShowFrequency();
 }
 
 
 /*****
-  Purpose: Change LSB, USB
+  Purpose: Change LSB, USB, but only in CW or SSB modes.  Has to re-arrange FHiCut and FLoCut.
 
   Parameter list:
     void
@@ -790,7 +791,7 @@ void Button::ButtonFilter() {
   Return value:
     void
 *****/
-void Button::ButtonDemodMode() {
+void Button::ButtonSelectSideband() {
   //if (bands[EEPROMData.currentBand].mode > RadioMode::AM_MODE) {
   //  bands[EEPROMData.currentBand].mode = RadioMode::SSB_MODE;  // cycle thru demod modes
   //}
@@ -798,28 +799,30 @@ void Button::ButtonDemodMode() {
   //  if(bands[EEPROMData.currentBand].mode > 1) radioMode = RadioMode::AM_MODE;
 
   switch (bands[EEPROMData.currentBand].sideband) {
-    case Sideband::LOWER:
+    case Sideband::LOWER:                            // Switch to USB.
       bands[EEPROMData.currentBand].sideband = Sideband::UPPER;
       EEPROMData.lastSideband[EEPROMData.currentBand] = Sideband::UPPER;
+
       break;
-    case Sideband::UPPER:
+    case Sideband::UPPER:                             // Switch to LSB.
     // Leave FT8 in USB.
     if(radioMode == RadioMode::FT8_MODE) return;
       bands[EEPROMData.currentBand].sideband = Sideband::LOWER;
       EEPROMData.lastSideband[EEPROMData.currentBand] = Sideband::LOWER;
+
       break;
     case Sideband::BOTH_AM:
     case Sideband::BOTH_SAM:    
-//  If already in AM or SAM mode, don't need to alter sidebands.
+//  If already in AM or SAM mode, don't need to alter sidebands.  Demod selection already setup sidebands.
     return;
       break;
     default:
       break;
   }
 
-  SetupMode(bands[EEPROMData.currentBand].sideband);
+  SetupMode(radioMode, bands[EEPROMData.currentBand].sideband);
   ShowFrequency();
-  ControlFilterF();
+////  ControlFilterF();
   tft.writeTo(L2);  // Destroy the bandwidth indicator bar.  KF5N July 30, 2023
   tft.clearMemory();
   if (EEPROMData.xmtMode == RadioMode::CW_MODE) BandInformation();
@@ -834,6 +837,9 @@ void Button::ButtonDemodMode() {
   }
   FilterSetSSB();
   BandInformation();
+
+  Serial.printf("bands[EEPROMData.currentBand].FLoCut = %d\n", bands[EEPROMData.currentBand].FLoCut);
+  Serial.printf("bands[EEPROMData.currentBand].FHiCut = %d\n", bands[EEPROMData.currentBand].FHiCut);
 }
 
 
@@ -854,17 +860,19 @@ void Button::ButtonMode()  //====== Changed AFP 10-05-22  =================
     case RadioMode::SSB_MODE:
       EEPROMData.xmtMode = RadioMode::CW_MODE;
       radioMode = RadioMode::CW_MODE;
+      radioState = RadioState::CW_RECEIVE_STATE;
       bands[EEPROMData.currentBand].sideband = EEPROMData.lastSideband[EEPROMData.currentBand];
       break;
     case RadioMode::CW_MODE:  // Toggle the current mode
       EEPROMData.xmtMode = RadioMode::FT8_MODE;
       radioMode = RadioMode::FT8_MODE;
+      radioState = RadioState::FT8_RECEIVE_STATE;
       bands[EEPROMData.currentBand].sideband = Sideband::UPPER;
       break;
     case RadioMode::FT8_MODE:  // Toggle the current mode
       EEPROMData.xmtMode = RadioMode::AM_MODE;
       radioMode = RadioMode::AM_MODE;
-      radioState = RadioState::SAM_RECEIVE_STATE;
+      radioState = RadioState::AM_RECEIVE_STATE;
       bands[EEPROMData.currentBand].sideband = Sideband::BOTH_AM;
       break;
     case RadioMode::AM_MODE:  // Toggle the current mode
@@ -872,17 +880,19 @@ void Button::ButtonMode()  //====== Changed AFP 10-05-22  =================
       radioMode = RadioMode::SAM_MODE;
       radioState = RadioState::SAM_RECEIVE_STATE;
       bands[EEPROMData.currentBand].sideband = Sideband::BOTH_SAM;
+      Serial.printf("Selected SAM\n");
       break;
     case RadioMode::SAM_MODE:  // Toggle the current mode
       EEPROMData.xmtMode = RadioMode::SSB_MODE;
       radioMode = RadioMode::SSB_MODE;
+      radioState = RadioState::SSB_RECEIVE_STATE;
       bands[EEPROMData.currentBand].sideband = EEPROMData.lastSideband[EEPROMData.currentBand];
       break;
     default:
       break;
   }
 
-  SetupMode(bands[EEPROMData.currentBand].sideband);
+  SetupMode(radioMode, bands[EEPROMData.currentBand].sideband);  // Setup mode and sideband(s);
   SetFreq();  // Required due to RX LO shift from CW to SSB modes.  KF5N
   DrawSpectrumDisplayContainer();
   DrawFrequencyBarValue();
@@ -892,7 +902,7 @@ void Button::ButtonMode()  //====== Changed AFP 10-05-22  =================
   UpdateAGCField();
   EncoderVolume();
   UpdateInfoWindow();
-  ControlFilterF();
+////  ControlFilterF();
   BandInformation();  // This updates display; at the line above spectrum.
   FilterBandwidth();
   DrawSMeterContainer();

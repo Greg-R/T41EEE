@@ -73,7 +73,7 @@ uint32_t IFFreq = SR[SampleRate].rate / 4;  // IF (intermediate) frequency
   //  The receive LO frequency is not dependent on mode or sideband.  CW frequency shift is done in DSP code.
   Clk0SetFreq = ((EEPROMData.centerFreq * SI5351_FREQ_MULT) + IFFreq * SI5351_FREQ_MULT) * MASTER_CLK_MULT_RX;
 
-  if (radioState == RadioState::SSB_RECEIVE_STATE or radioState == RadioState::FT8_RECEIVE_STATE or radioState == RadioState::CW_RECEIVE_STATE or radioState == RadioState::AM_RECEIVE_STATE) {  //  Receive state
+  if (radioState == RadioState::SSB_RECEIVE_STATE or radioState == RadioState::FT8_RECEIVE_STATE or radioState == RadioState::CW_RECEIVE_STATE or radioState == RadioState::AM_RECEIVE_STATE or radioState == RadioState::SAM_RECEIVE_STATE) {  //  Receive state
     si5351.set_freq(Clk0SetFreq, SI5351_CLK0);
     si5351.output_enable(SI5351_CLK2, 0);  // CLK2 (transmit) off during receive to prevent birdies
     si5351.output_enable(SI5351_CLK0, 1);

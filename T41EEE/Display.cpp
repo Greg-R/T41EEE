@@ -167,7 +167,7 @@ void ShowSpectrum() {
     // Don't call this function unless the filter bandwidth has been adjusted.  This requires 2 global variables.
     if (filter_pos != last_filter_pos) FilterSetSSB();
 
-    if (radioMode == RadioMode::SSB_MODE or radioMode == RadioMode::FT8_MODE or radioMode == RadioMode::CW_MODE or radioMode == RadioMode::AM_MODE) {  // AFP 08-24-22
+    if (radioMode == RadioMode::SSB_MODE or radioMode == RadioMode::FT8_MODE or radioMode == RadioMode::CW_MODE or radioMode == RadioMode::AM_MODE or radioMode == RadioMode::SAM_MODE) {  // AFP 08-24-22
       process.ProcessIQData();                                        // Call the Audio process from within the display routine to eliminate conflicts with drawing the spectrum and waterfall displays
     }
     EncoderCenterTune();  //Moved the tuning encoder to reduce lag times and interference during tuning.

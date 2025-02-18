@@ -135,6 +135,7 @@ void SetAudioOperatingState(RadioState operatingState) {
     case RadioState::SSB_RECEIVE_STATE:
     case RadioState::FT8_RECEIVE_STATE:
     case RadioState::AM_RECEIVE_STATE:
+    case RadioState::SAM_RECEIVE_STATE:
     case RadioState::CW_RECEIVE_STATE:
       SampleRate = SAMPLE_RATE_192K;
       SetI2SFreq(SR[SampleRate].rate);

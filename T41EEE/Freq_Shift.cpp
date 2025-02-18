@@ -130,6 +130,9 @@ void FreqShift2()
       }
     }
   }
+
+//Serial.printf("sideToneShift = %d\n", sideToneShift);
+
   NCO_INC = 2.0 * PI * (NCOFreq + sideToneShift) / SR[SampleRate].rate; // 192000 SPS is the actual sample rate used in the Receive ADC
 
   OSC_COS = cos (NCO_INC);

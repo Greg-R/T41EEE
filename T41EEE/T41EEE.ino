@@ -999,11 +999,29 @@ FLASHMEM void setup() {
   if (EEPROMData.xmtMode == RadioMode::CW_MODE) {
     radioState = RadioState::CW_RECEIVE_STATE;
     radioMode = RadioMode::CW_MODE;
+    SetupMode(radioMode, bands[EEPROMData.currentBand].sideband);
   }
   if (EEPROMData.xmtMode == RadioMode::SSB_MODE) {
     radioState = RadioState::SSB_RECEIVE_STATE;
     radioMode = RadioMode::SSB_MODE;
+    SetupMode(radioMode, bands[EEPROMData.currentBand].sideband);
   }
+  if (EEPROMData.xmtMode == RadioMode::FT8_MODE) {
+    radioState = RadioState::FT8_RECEIVE_STATE;
+    radioMode = RadioMode::FT8_MODE;
+    SetupMode(radioMode, Sideband::UPPER);
+  }
+  if (EEPROMData.xmtMode == RadioMode::AM_MODE) {
+    radioState = RadioState::AM_RECEIVE_STATE;
+    radioMode = RadioMode::AM_MODE;
+    SetupMode(radioMode, Sideband::BOTH_AM);
+  }
+  if (EEPROMData.xmtMode == RadioMode::SAM_MODE) {
+    radioState = RadioState::SAM_RECEIVE_STATE;
+    radioMode = RadioMode::SAM_MODE;
+    SetupMode(radioMode, Sideband::BOTH_SAM);
+  }
+
 
   // Write graphics to display.
   UpdateInfoWindow();
@@ -1073,6 +1091,8 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
     SetAudioOperatingState(radioState);
     SetFreq();  // Update frequencies if the radio state has changed.
   }
+
+//Serial.printf("bands[EEPROMData.currentBand].sideband = %d\n", bands[EEPROMData.currentBand].sideband);
 
   //  Begin radio state machines
 
