@@ -127,7 +127,7 @@ void Process::ProcessIQData() {
     ***********************************************************************************************/
 
     // Manual IQ amplitude correction
-    if(radioState == RadioState::CW_RECEIVE_STATE || radioState == RadioState::AM_RECEIVE_STATE) {
+    if(radioState == RadioState::CW_RECEIVE_STATE or radioState == RadioState::AM_RECEIVE_STATE or radioState == RadioState::SAM_RECEIVE_STATE) {
     if (bands[EEPROMData.currentBand].sideband == Sideband::LOWER || bands[EEPROMData.currentBand].sideband == Sideband::BOTH_AM || bands[EEPROMData.currentBand].sideband == Sideband::BOTH_SAM) {
       arm_scale_f32(float_buffer_L, -EEPROMData.IQCWRXAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
       IQPhaseCorrection(float_buffer_L, float_buffer_R, EEPROMData.IQCWRXPhaseCorrectionFactor[EEPROMData.currentBand], BUFFER_SIZE * N_BLOCKS);

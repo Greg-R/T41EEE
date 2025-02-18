@@ -1625,12 +1625,12 @@ void DrawBandWidthIndicatorBar()  // AFP 10-30-22
       Zoom1Offset = -128;  // The "center" is halfway to the left of the spectrum window center.  // KF5N April 23, 2024
       break;
 
-    case 1:
+    case 1:  // 2X
       hz_per_pixel = 187.5;
       Zoom1Offset = 0;
       break;
 
-    case 2:
+    case 2:  // 4X
       hz_per_pixel = 93.75;
       Zoom1Offset = 0;
       break;
@@ -1651,7 +1651,7 @@ void DrawBandWidthIndicatorBar()  // AFP 10-30-22
   //  tft.clearScreen(RA8875_BLACK);  // This causes an audio hole in fine tuning.  KF5N 7-16-23
 
   pixel_per_khz = ((1 << EEPROMData.spectrum_zoom) * SPECTRUM_RES * 1000.0 / SR[SampleRate].rate);
-  filterWidth = (int)(((bands[EEPROMData.currentBand].FHiCut - bands[EEPROMData.currentBand].FLoCut) / 1000.0) * pixel_per_khz * 1.06);  // AFP 10-30-22
+  filterWidth = static_cast<int>(((bands[EEPROMData.currentBand].FHiCut - bands[EEPROMData.currentBand].FLoCut) / 1000.0) * pixel_per_khz * 1.06);  // AFP 10-30-22
 
   switch (bands[EEPROMData.currentBand].sideband) {
     case Sideband::LOWER:

@@ -118,7 +118,8 @@ void FreqShift2()
   //}
   if (EEPROMData.xmtMode == RadioMode::SSB_MODE ) {
     sideToneShift = 0;
-  } else {
+  } 
+  
     if (EEPROMData.xmtMode == RadioMode::CW_MODE ) {
       cwFreqOffset = (EEPROMData.CWOffset + 6) * 24000 / 256;
       if (bands[EEPROMData.currentBand].sideband == Sideband::UPPER) {
@@ -129,9 +130,9 @@ void FreqShift2()
         }
       }
     }
-  }
 
-//Serial.printf("sideToneShift = %d\n", sideToneShift);
+Serial.printf("sideToneShift = %d\n", sideToneShift);
+Serial.printf("NCOFreq = %d TxRxFreq = %d\n", NCOFreq, TxRxFreq);
 
   NCO_INC = 2.0 * PI * (NCOFreq + sideToneShift) / SR[SampleRate].rate; // 192000 SPS is the actual sample rate used in the Receive ADC
 
