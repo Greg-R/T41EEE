@@ -2,7 +2,6 @@
 #include "SDT.h"
 
 
-
 /*
 The button interrupt routine implements a first-order recursive filter, or "leaky integrator,"
 as described at:

@@ -196,6 +196,9 @@ void Process::ProcessIQData() {
     if (calibrateFlag == 1) {
       CalibrateOptions();
     }
+        if (morseDecodeAdjustFlag == 1) {
+      CWOptions();
+    }
 
     /*************************************************************************************************
         freq_conv2()

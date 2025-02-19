@@ -30,7 +30,7 @@
 // These #includes are apparently not required.
 //#include "Fonts/FreeMono24pt7b.h"
 //#include <Audio.h>
-//#include <string.h>
+#include <string.h>
 //#include <string_view>
 //#include <util/crc16.h>
 
@@ -310,6 +310,7 @@ struct config_t {
   int paddleDit = KEYER_DIT_INPUT_TIP;
   int paddleDah = KEYER_DAH_INPUT_RING;
   int decoderFlag = false;                // JJP 7-3-23
+  uint32_t morseDecodeSensitivity = 200;  // Greg KF5N February 19, 2025
   int keyType = STRAIGHT_KEY_OR_PADDLES;  // straight key = 0, keyer = 1  JJP 7-3-23
   int currentWPM = DEFAULT_KEYER_WPM;     // 4 bytes default = 15 JJP 7-3-23
   int CWOffset = 2;                       // Default is 750 Hz.
@@ -680,6 +681,7 @@ extern int attenuator;
 extern int audioYPixel[];
 extern int bandswitchPins[];
 extern bool calibrateFlag;
+extern bool morseDecodeAdjustFlag;
 extern int chipSelect;
 extern int fLoCutOld;
 extern int fHiCutOld;
@@ -956,6 +958,7 @@ void FreqShift2();
 float goertzel_mag(int numSamples, int TARGET_FREQUENCY, int SAMPLING_RATE, float *data);
 int GetEncoderValue(int minValue, int maxValue, int startValue, int increment, char prompt[]);
 float GetEncoderValueLive(float minValue, float maxValue, float startValue, float increment, char prompt[], bool left);  //AFP 10-22-22
+float GetEncoderValueLiveString(float minValue, float maxValue, float startValue, float increment, std::string prompt, bool left);  //AFP 10-22-22
 q15_t GetEncoderValueLiveQ15t(int minValue, int maxValue, int startValue, int increment, char prompt[], bool left);
 void GetFavoriteFrequency();
 float HaversineDistance(float dxLat, float dxLon);
@@ -1041,7 +1044,7 @@ void SpectralNoiseReductionInit();
 void Splash();
 void SSBOptions();
 int SubmenuSelect(const char *options[], int numberOfChoices, int defaultStart);
-
+int SubmenuSelectString(std::string options[], int numberOfChoices, int defaultStart);
 void T4_rtc_set(unsigned long t);
 float TGetTemp();
 

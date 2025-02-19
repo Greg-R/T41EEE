@@ -282,7 +282,8 @@ int bandswitchPins[] = {
   0    // 10M
 };
 
-bool calibrateFlag = 0;
+bool calibrateFlag = false;
+bool morseDecodeAdjustFlag = false;
 bool calOnFlag = false;
 int chipSelect = BUILTIN_SDCARD;
 int idx;

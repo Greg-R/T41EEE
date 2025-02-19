@@ -1,9 +1,8 @@
 
+
+// ShowMenu
 // CalibrateOptions
 // CWOptions
-// ShowMenu
-// Calibrate Options
-// CW Options
 // Spectrum Options
 // AGC Options
 // Receive Equalizer Options
@@ -67,9 +66,11 @@ void CalibrateOptions() {
   int freqCorrectionFactorOld = 0;
   int32_t increment = 100L;
   MenuSelect menu;
+  char freqCal[] = "Freq Cal: ";
   tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 30, CHAR_HEIGHT, RA8875_BLACK);
 
   // Select the type of calibration, and then skip this during the loop() function.
+  // Note that some calibrate options run inside the loop() function!
   if (calibrateFlag == 0) {   //    0             1           2               3                4              5             6              7                  8                  9               10                11               12                13               14               15              16          17           18
     const char *IQOptions[19]{ "Freq Cal", "CW PA Cal", "CW Rec Cal", "CW Carrier Cal", "CW Xmit Cal", "SSB PA Cal", "SSB Rec Cal", "SSB Carrier Cal", "SSB Transmit Cal", "CW Radio Cal", "CW Refine Cal", "SSB Radio Cal", "SSB Refine Cal", "dBm Level Cal", "DAC Offset CW", "DAC Offset SSB", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
     IQChoice = SubmenuSelect(IQOptions, 19, 0);                                                                                                                                                                                                                                                                      //AFP 10-21-22
@@ -78,7 +79,7 @@ void CalibrateOptions() {
   switch (IQChoice) {
 
     case 0:  // Calibrate Frequency  - uses WWV
-      EEPROMData.freqCorrectionFactor = GetEncoderValueLive(-200000, 200000, EEPROMData.freqCorrectionFactor, increment, (char *)"Freq Cal: ", false);
+      EEPROMData.freqCorrectionFactor = GetEncoderValueLive(-200000, 200000, EEPROMData.freqCorrectionFactor, increment, freqCal, false);
       if (EEPROMData.freqCorrectionFactor != freqCorrectionFactorOld) {
         si5351.set_correction(EEPROMData.freqCorrectionFactor, SI5351_PLL_INPUT_XO);
         freqCorrectionFactorOld = EEPROMData.freqCorrectionFactor;
@@ -250,9 +251,9 @@ void CalibrateOptions() {
   // Select the type of calibration, and then skip this during the loop() function.
   if (calibrateFlag == 0) {
     const char *IQOptions[15]{ "Freq Cal", "CW PA Cal", "CW Rec Cal", "CW Xmit Cal", "SSB PA Cal", "SSB Rec Cal", "SSB Transmit Cal", "CW Radio Cal", "CW Refine Cal", "SSB Radio Cal", "SSB Refine Cal", "dBm Level Cal", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
-    IQChoice = SubmenuSelect(IQOptions, 15, 0);                                                                                                                                                                                                                                                                      //AFP 10-21-22
+    IQChoice = SubmenuSelect(IQOptions, 15, 0);                                                                                                                                                                                                                                                                   //AFP 10-21-22
   }
-  calibrateFlag = 1;
+  calibrateFlag = true;
   switch (IQChoice) {
 
     case 0:  // Calibrate Frequency  - uses WWV
@@ -266,7 +267,7 @@ void CalibrateOptions() {
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X - 1, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT + 1, RA8875_BLACK);
           eeprom.EEPROMWrite();
-          calibrateFlag = 0;
+          calibrateFlag = false;
         }
       }
       break;
@@ -400,40 +401,63 @@ void CalibrateOptions() {
 *****/
 void CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
 {
-  const char *cwChoices[]{ "WPM", "Key Type", "CW Filter", "Paddle Flip", "CW Offset", "Sidetone Volume", "Transmit Delay", "Cancel" };  // AFP 10-18-22
+  // const char *cwChoices[]{ "Decode Sens", "CW Filter", "CW Offset", "WPM", "Sidetone Volume", "Key Type", "Paddle Flip", "Transmit Delay", "Cancel" };  // AFP 10-18-22
+  std::string cwChoices[]{ "Decode Sens", "CW Filter", "CW Offset", "WPM", "Sidetone Volume", "Key Type", "Paddle Flip", "Transmit Delay", "Cancel" };  // AFP 10-18-22
+  std::string test = "bullshit";
   int CWChoice = 0;
+  uint32_t morseDecodeSensitivityOld = 0;
+  uint32_t increment = 10;
+  MenuSelect menu;
 
-  CWChoice = SubmenuSelect(cwChoices, 8, 0);
+  if(morseDecodeAdjustFlag == false) {
+    CWChoice = SubmenuSelectString(cwChoices, 9, 0);
+    if(CWChoice == 0) morseDecodeAdjustFlag = true;  // Handle the special case of Morse decoder adjust; the loop must run.
+  }
 
   switch (CWChoice) {
-    case 0:  // WPM
+
+case 0:  // Set Morse decoder sensitivity.
+      EEPROMData.morseDecodeSensitivity = GetEncoderValueLiveString(0, 10000, EEPROMData.morseDecodeSensitivity, increment, cwChoices[CWChoice], false);
+      if (EEPROMData.morseDecodeSensitivity != morseDecodeSensitivityOld) morseDecodeSensitivityOld = EEPROMData.morseDecodeSensitivity;
+      menu = readButton();
+      if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
+        if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
+          tft.fillRect(SECONDARY_MENU_X - 1, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT + 1, RA8875_BLACK);
+          eeprom.EEPROMWrite();
+          morseDecodeAdjustFlag = false;
+        }
+      }
+break;
+
+    case 1:              // CW Filter BW:      // AFP 10-18-22
+      SelectCWFilter();  // in CWProcessing    // AFP 10-18-22
+      break;             // AFP 10-18-22
+
+    case 2:              // Select a preferred CW offset frequency.
+      SelectCWOffset();  //  Located in CWProcessing.cpp
+      break;
+
+
+          case 3:  // WPM
       SetWPM();
       SetTransmitDitLength(EEPROMData.currentWPM);  //Afp 09-22-22     // JJP 8/19/23
       break;
 
-    case 1:          // Type of key:
+    case 4:  // Sidetone volume
+      SetSideToneVolume();
+      break;
+
+    case 5:          // Type of key:
       SetKeyType();  // Straight key or keyer? Stored in EEPROMData.keyType.
       SetKeyPowerUp();
       UpdateWPMField();
       break;
 
-    case 2:              // CW Filter BW:      // AFP 10-18-22
-      SelectCWFilter();  // in CWProcessing    // AFP 10-18-22
-      break;             // AFP 10-18-22
-
-    case 3:            // Flip paddles
+    case 6:            // Flip paddles
       DoPaddleFlip();
       break;
 
-    case 4:              // Select a preferred CW offset frequency.
-      SelectCWOffset();  //  Located in CWProcessing.cpp
-      break;
-
-    case 5:  // Sidetone volume
-      SetSideToneVolume();
-      break;
-
-    case 6:                // new function JJP 9/1/22
+    case 7:                // new function JJP 9/1/22
       SetTransmitDelay();  // Transmit relay hold delay
       break;
 
@@ -1134,3 +1158,74 @@ int SubmenuSelect(const char *options[], int numberOfChoices, int defaultStart) 
       }
     }
 }
+
+
+/*****
+  Purpose: To select an option from a submenu
+
+  Parameter list:
+    string options[]           submenus
+    int numberOfChoices       choices available
+    int defaultState          the starting option
+
+  Return value
+    int           an index into the band array
+*****/
+int SubmenuSelectString(std::string options[], int numberOfChoices, int defaultStart) {
+  int refreshFlag = 0;
+  MenuSelect menu;
+  int encoderReturnValue;
+
+  tft.setTextColor(RA8875_BLACK);
+  encoderReturnValue = defaultStart;  // Start the options using this option
+
+  tft.setFontScale((enum RA8875tsize)1);
+  if (refreshFlag == 0) {
+    tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH, CHAR_HEIGHT, RA8875_GREEN);  // Show the option in the second field
+    tft.setCursor(SECONDARY_MENU_X + 1, MENUS_Y + 1);
+    tft.print(options[encoderReturnValue].c_str());  // Secondary Menu
+    refreshFlag = 1;
+  }
+//  delay(150L);
+
+  while (true) {
+    menu = readButton();  // Read the ladder value
+//    delay(150L);
+//    if (val != -1 && val < (EEPROMData.switchValues[0] + WIGGLE_ROOM)) {
+//      menu = ProcessButtonPress(val);  // Use ladder value to get menu choice
+      if (menu != MenuSelect::BOGUS_PIN_READ) {                 // Valid choice?
+        switch (menu) {
+          case MenuSelect::MENU_OPTION_SELECT:  // They made a choice
+            tft.setTextColor(RA8875_WHITE);
+            EraseMenus();
+            return encoderReturnValue;
+            break;
+
+          case MenuSelect::MAIN_MENU_UP:
+            encoderReturnValue++;
+            if (encoderReturnValue >= numberOfChoices)
+              encoderReturnValue = 0;
+            break;
+
+          case MenuSelect::MAIN_MENU_DN:
+            encoderReturnValue--;
+            if (encoderReturnValue < 0)
+              encoderReturnValue = numberOfChoices - 1;
+            break;
+
+          default:
+            encoderReturnValue = -1;  // An error selection
+            break;
+        }
+        if (encoderReturnValue != -1) {
+          tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH, CHAR_HEIGHT, RA8875_GREEN);  // Show the option in the second field
+          tft.setTextColor(RA8875_BLACK);
+          tft.setCursor(SECONDARY_MENU_X + 1, MENUS_Y + 1);
+          tft.print(options[encoderReturnValue].c_str());
+//          delay(50L);
+          refreshFlag = 0;
+        }
+      }
+    }
+}
+

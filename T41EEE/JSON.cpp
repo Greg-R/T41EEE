@@ -84,6 +84,7 @@ FLASHMEM void JSON::loadConfiguration(const char *filename, config_t &EEPROMData
   EEPROMData.paddleDit = doc["paddleDit"];
   EEPROMData.paddleDah = doc["paddleDah"];
   EEPROMData.decoderFlag = doc["decoderFlag"];
+  EEPROMData.morseDecodeSensitivity = doc["morseDecodeSensitivity"];
   EEPROMData.keyType = doc["keyType"];
   EEPROMData.currentWPM = doc["currentWPM"];
   EEPROMData.CWOffset = doc["CWOffset"];  
@@ -201,6 +202,7 @@ FLASHMEM void JSON::saveConfiguration(const char *filename, const config_t &EEPR
   doc["paddleDit"] = EEPROMData.paddleDit;
   doc["paddleDah"] = EEPROMData.paddleDah;
   doc["decoderFlag"] = EEPROMData.decoderFlag;
+  doc["morseDecodeSensitivity"] = EEPROMData.morseDecodeSensitivity;
   doc["keyType"] = EEPROMData.keyType;
   doc["currentWPM"] = EEPROMData.currentWPM;
   doc["CWOffset"] = EEPROMData.CWOffset;  
