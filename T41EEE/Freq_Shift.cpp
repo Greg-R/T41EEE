@@ -122,14 +122,9 @@ void FreqShift2()
   
     if (EEPROMData.xmtMode == RadioMode::CW_MODE ) {
       cwFreqOffset = (EEPROMData.CWOffset + 6) * 24000 / 256;
-      if (bands[EEPROMData.currentBand].sideband == Sideband::UPPER) {
-        sideToneShift = cwFreqOffset;  // KF5N experiment
-      } else {
-        if (bands[EEPROMData.currentBand].sideband == Sideband::LOWER) {
-          sideToneShift = -cwFreqOffset;  // KF5N experiment
+        if (bands[EEPROMData.currentBand].sideband == Sideband::UPPER) sideToneShift = -cwFreqOffset;
+        if (bands[EEPROMData.currentBand].sideband == Sideband::LOWER) sideToneShift =  cwFreqOffset;
         }
-      }
-    }
 
 Serial.printf("sideToneShift = %d\n", sideToneShift);
 Serial.printf("NCOFreq = %d TxRxFreq = %d\n", NCOFreq, TxRxFreq);

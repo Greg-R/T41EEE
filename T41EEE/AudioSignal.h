@@ -165,9 +165,9 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord17.connect();                                 // Receiver audio channel
       patchCord18.connect();
       patchCord19.connect();
-//      patchCord20.connect();  // Experimental USB output. 
-//      patchCord21.connect();  // Experimental USB output.
-//      patchCord22.connect();  // Experimental USB output.
+      patchCord20.connect();  // Experimental USB output. 
+      patchCord21.connect();  // Experimental USB output.
+      patchCord22.connect();  // Experimental USB output.
 //      patchCord23.connect();
 //      patchCord24.connect();
 //      patchCord25.connect();
@@ -264,12 +264,15 @@ void SetAudioOperatingState(RadioState operatingState) {
       SampleRate = SAMPLE_RATE_48K;
       InitializeDataArrays();  // I2S sample rate set in this function.
       // QSD disabled and disconnected
+      sgtl5000_1.muteHeadphone();
       patchCord9.connect();   // Receiver I channel
       patchCord10.connect();  // Receiver Q channel
       patchCord17.disconnect();  // Receiver audio and CW sidetone
       patchCord18.disconnect();
       patchCord19.disconnect();
-      patchCord20.disconnect(); 
+      patchCord20.disconnect();
+      patchCord21.disconnect();
+      patchCord22.disconnect();
 
       Q_in_L.end();
       Q_in_L.clear();
@@ -284,7 +287,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       mixer1.gain(0, 0);  // microphone audio off.
       mixer1.gain(1, 1);  // testTone on.
       switch1.setChannel(1);  // Disconnect microphone path.
-      switch2.setChannel(0);  //  Disconnect 1 kHz test tone path.
+      switch2.setChannel(0);  // Connect 1 kHz test tone path.
 
       if(EEPROMData.compressorFlag) {
             switch3.setChannel(0);
@@ -316,7 +319,9 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord9.disconnect();
       patchCord10.disconnect();
       patchCord19.disconnect();
-      patchCord20.disconnect(); 
+      patchCord20.disconnect();
+      patchCord21.disconnect();
+      patchCord22.disconnect();     
       Q_in_L.end();
       Q_in_L.clear();
       Q_in_R.end();
@@ -339,12 +344,15 @@ void SetAudioOperatingState(RadioState operatingState) {
       SampleRate = SAMPLE_RATE_192K;
       SetI2SFreq(SR[SampleRate].rate);
       // QSD receiver enabled.  Calibrate is full duplex.
+      sgtl5000_1.muteHeadphone();
       patchCord9.connect();   // Receiver I channel
       patchCord10.connect();  // Receiver Q channel
       patchCord17.disconnect();  // CW sidetone
       patchCord18.disconnect();
       patchCord19.disconnect();
-      patchCord20.disconnect(); 
+      patchCord20.disconnect();
+      patchCord21.disconnect();
+      patchCord22.disconnect();
       switch1.setChannel(1);  // Disconnect microphone path.
       switch2.setChannel(1);  //  Disconnect 1 kHz test tone path.
 
