@@ -33,8 +33,8 @@ AudioPlayQueue Q_out_R_Ex;                     // AudioPlayQueue for driving the
 //  Begin transmit signal chain.
 AudioConnection connect0(i2s_quadIn, 0, int2Float1, 0);    // Microphone audio channel.  Must use int2Float because Open Audio does not have quad input.
 
-AudioConnection_F32 connect1(int2Float1, 0, switch1, 0);
-AudioConnection_F32 connect2(toneSSBCal,  0, switch2, 0);
+AudioConnection_F32 connect1(int2Float1, 0, switch1, 0);   // Used switches here because it appeared necessary to stop flow of data.
+AudioConnection_F32 connect2(toneSSBCal,  0, switch2, 0);  // Tone used during SSB calibration.
 
 //AudioConnection connect3(usbIn, 0, int2Float2, 0);
 //AudioConnection_F32 connect4(int2Float2, 0, switch4, 0);          // Connect USB for FT8 from WSJTX on PC.
@@ -42,27 +42,27 @@ AudioConnection_F32 connect2(toneSSBCal,  0, switch2, 0);
 //AudioConnection_F32 connect4(usbIn_F32, 0, switch4, 0);
 
 // Need a mixer to switch in an audio tone during calibration.  Should be a nominal tone amplitude.
-AudioConnection_F32 connect5(switch1, 0, mixer1, 0);  // Connect microphone mixer1 output 0 via gain control.
-AudioConnection_F32 connect6(switch2, 0, mixer1, 1);  // Connect tone for SSB calibration.
+AudioConnection_F32 connect3(switch1, 0, mixer1, 0);  // Connect microphone mixer1 output 0 via gain control.
+AudioConnection_F32 connect4(switch2, 0, mixer1, 1);  // Connect tone for SSB calibration.
 //AudioConnection_F32 connect7(switch4, 0, mixer1, 2);  // USB audio from WSJTX on PC.
 
-AudioConnection_F32 connect8(mixer1, 0, micGain, 0);
-AudioConnection_F32 connect9(micGain, 0, switch3, 0);
+AudioConnection_F32 connect5(mixer1, 0, micGain, 0);
+AudioConnection_F32 connect6(micGain, 0, switch3, 0);
 
 // The compressor is temporarily disabled.
-//AudioConnection_F32 connect7(switch3, 0, compressor1, 0);
-//AudioConnection_F32 connect8(compressor1, 0, mixer2, 0);
+AudioConnection_F32 connect7(switch3, 0, compressor1, 0);
+AudioConnection_F32 connect8(compressor1, 0, mixer2, 0);
 
-AudioConnection_F32 connect10(switch3, 1, mixer2, 1);  // Compressor bypass path.
+AudioConnection_F32 connect9(switch3, 1, mixer2, 1);  // Compressor bypass path.
 
-AudioConnection_F32 connect11(mixer2, 0, cessb1, 0);
+AudioConnection_F32 connect10(mixer2, 0, cessb1, 0);
 
 // Controlled envelope SSB from Open Audio library.
-AudioConnection_F32 connect12(cessb1, 0, float2Int1, 0);
-AudioConnection_F32 connect13(cessb1, 1, float2Int2, 0);
+AudioConnection_F32 connect11(cessb1, 0, float2Int1, 0);
+AudioConnection_F32 connect12(cessb1, 1, float2Int2, 0);
 
-AudioConnection connect14(float2Int1, 0, Q_in_L_Ex, 0);
-AudioConnection connect15(float2Int2, 0, Q_in_R_Ex, 0);
+AudioConnection connect13(float2Int1, 0, Q_in_L_Ex, 0);
+AudioConnection connect14(float2Int2, 0, Q_in_R_Ex, 0);
 
 // Transmitter back-end.  This takes streaming data from the sketch and drives it into the I2S.
 AudioConnection patchCord15(Q_out_L_Ex, 0, i2s_quadOut, 0);  // I channel to line out

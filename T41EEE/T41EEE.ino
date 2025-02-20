@@ -867,7 +867,7 @@ FLASHMEM void setup() {
 
   //sgtl5000_2.muteLineout();
 
-  updateMic();  // This updates the transmit signal chain settings.
+  updateMic();  // This updates the transmit signal chain settings.  Located in SSB_Exciter.cpp.
 
   // Set up "Controlled Envelope Single Side Band" from the Open Audio Library.
   cessb1.setSampleRate_Hz(48000);

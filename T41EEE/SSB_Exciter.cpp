@@ -21,7 +21,7 @@ void updateMic() {
 
   int16_t delaySize = 256;                    // Any power of 2, i.e., 256, 128, 64, etc.
   compressor1.setDelayBufferSize(delaySize);  // Improves transient response of compressor.
-
+  compressor1.setAttackReleaseSec(0.005f, 2.0f);
   compressor1.setCompressionCurve(&crv);
   compressor1.begin();
 }
