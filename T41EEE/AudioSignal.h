@@ -49,7 +49,6 @@ AudioConnection_F32 connect4(switch2, 0, mixer1, 1);  // Connect tone for SSB ca
 AudioConnection_F32 connect5(mixer1, 0, micGain, 0);
 AudioConnection_F32 connect6(micGain, 0, switch3, 0);
 
-// The compressor is temporarily disabled.
 AudioConnection_F32 connect7(switch3, 0, compressor1, 0);
 AudioConnection_F32 connect8(compressor1, 0, mixer2, 0);
 
@@ -188,7 +187,9 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord17.disconnect();  // CW sidetone
       patchCord18.disconnect();
       patchCord19.disconnect();
-      patchCord20.disconnect(); 
+      patchCord20.disconnect();
+      patchCord21.disconnect();
+      patchCord22.disconnect();
       Q_in_L.end();
       Q_in_L.clear();
       Q_in_R.end();
@@ -231,7 +232,9 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord17.disconnect();  // CW sidetone
       patchCord18.disconnect();
       patchCord19.disconnect();
-      patchCord20.disconnect(); 
+      patchCord20.disconnect();
+      patchCord21.disconnect();
+      patchCord22.disconnect();
       Q_in_L.end();
       Q_in_L.clear();
       Q_in_R.end();
@@ -303,7 +306,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       Q_out_R_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
       Q_in_L_Ex.begin();  // I channel Microphone audio
       Q_in_R_Ex.begin();  // Q channel Microphone audio
-      Q_in_L.begin();     // Calibration is full duplex!  Activate receiver.
+      Q_in_L.begin();     // Calibration is full duplex!  Activate receiver data.  No demodulation during calibrate, spectrum only.
       Q_in_R.begin();
       patchCord15.connect();  // Transmitter I channel
       patchCord16.connect();  // Transmitter Q channel
@@ -318,6 +321,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       sgtl5000_1.volume(0.3);  // This is for sidetone in the headphone output.  Hardcoding for now.
       patchCord9.disconnect();
       patchCord10.disconnect();
+      patchCord17.disconnect();
+      patchCord18.disconnect();
       patchCord19.disconnect();
       patchCord20.disconnect();
       patchCord21.disconnect();
