@@ -443,7 +443,7 @@ void Process::ProcessIQData() {
     }
 */
 
-    if (radioMode == RadioMode::CW_MODE) {
+    if (bands[EEPROMData.currentBand].mode == RadioMode::CW_MODE) {
       DoCWReceiveProcessing();  //AFP 09-19-22
 
       // ----------------------  CW Narrow band filters  AFP 10-18-22 -------------------------

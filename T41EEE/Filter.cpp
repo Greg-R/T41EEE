@@ -214,10 +214,17 @@ void FilterBandwidth()
 {
   AudioNoInterrupts();
 
-  Serial.printf("bands[EEPROMData.currentBand].FHiCut = %d bands[EEPROMData.currentBand].FLoCut = %d\n", bands[EEPROMData.currentBand].FHiCut, bands[EEPROMData.currentBand].FLoCut);
+Serial.printf("bands[EEPROMData.currentBand].FHiCut = %d bands[EEPROMData.currentBand].FLoCut = %d\n", bands[EEPROMData.currentBand].FHiCut, bands[EEPROMData.currentBand].FLoCut);
+Serial.printf("bands[EEPROMData.currentBand].FAMCut = %d\n", bands[EEPROMData.currentBand].FAMCut);
 
+// The filter must be set up differently for AM and SAM modes.
+if(bands[EEPROMData.currentBand].mode == RadioMode::SSB_MODE or bands[EEPROMData.currentBand].mode == RadioMode::CW_MODE or bands[EEPROMData.currentBand].mode == RadioMode::FT8_MODE) {
   CalcCplxFIRCoeffs(FIR_Coef_I, FIR_Coef_Q, m_NumTaps, static_cast<float>(bands[EEPROMData.currentBand].FLoCut), static_cast<float>(bands[EEPROMData.currentBand].FHiCut), static_cast<float>(SR[SampleRate].rate / DF));
-  InitFilterMask();
+}
+if(bands[EEPROMData.currentBand].mode == RadioMode::AM_MODE or bands[EEPROMData.currentBand].mode == RadioMode::SAM_MODE) {
+  CalcCplxFIRCoeffs(FIR_Coef_I, FIR_Coef_Q, m_NumTaps, static_cast<float>(-bands[EEPROMData.currentBand].FAMCut), static_cast<float>(bands[EEPROMData.currentBand].FAMCut), static_cast<float>(SR[SampleRate].rate / DF));
+}
+InitFilterMask();
 
   // also adjust IIR AM filter
   //int filter_BW_highest = bands[EEPROMData.currentBand].FHiCut;

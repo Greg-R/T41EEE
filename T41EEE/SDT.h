@@ -620,6 +620,7 @@ struct band {
   Sideband sideband;
   int FHiCut;
   int FLoCut;
+  int FAMCut;  // Used for AM and SAM modes.
   float32_t RFgain;  // This is not being used.  Greg KF5N February 14, 2024
   uint32_t band_type;
   float32_t gainCorrection;  // is hardware dependent and has to be calibrated ONCE and hardcoded in the table below
@@ -696,7 +697,7 @@ extern int n_R;
 extern int newCursorPosition;
 extern int NR_Index;
 extern int oldCursorPosition;
-extern RadioMode radioMode;
+//extern RadioMode radioMode;
 extern RadioState radioState, lastState;  // Used by the loop to monitor current state.
 
 extern int resetTuningFlag;        // Experimental flag for ResetTuning() due to possible timing issues.  KF5N July 31, 2023

@@ -67,13 +67,10 @@ bands[EEPROMData.currentBand].FLoCut =  flow;
 }
 
 if(mode == RadioMode::AM_MODE or mode == RadioMode::SAM_MODE) {
-bands[EEPROMData.currentBand].FHiCut =  fhigh;
-bands[EEPROMData.currentBand].FLoCut = -fhigh;
-if(mode == RadioMode::AM_MODE) bands[EEPROMData.currentBand].sideband = Sideband::BOTH_AM;
-if(mode == RadioMode::SAM_MODE) {
-bands[EEPROMData.currentBand].sideband = Sideband::BOTH_SAM;
-Serial.printf("BOTH_SAM sideband selected\n");
-}
+//bands[EEPROMData.currentBand].FHiCut =  fhigh;
+//bands[EEPROMData.currentBand].FLoCut = -fhigh;
+if(mode == RadioMode::AM_MODE)  bands[EEPROMData.currentBand].sideband = Sideband::BOTH_AM;
+if(mode == RadioMode::SAM_MODE) bands[EEPROMData.currentBand].sideband = Sideband::BOTH_SAM;
 }
 
 

@@ -20,28 +20,28 @@ struct maps myMapFiles[10] = {
 };
 
 struct band bands[NUMBER_OF_BANDS] {  // Revised band struct with mode and sideband.  Greg KF5N February 14, 2025
-//freq    band low   band hi   name    mode                  sideband         FHiCut FLoCut  Gain  type    gain  AGC   pixel
+//freq    band low   band hi   name    mode                  sideband         FHiCut FLoCut FAMCut  Gain  type    gain  AGC   pixel
 //                                             filter filter             correct     offset
 //DB2OO, 29-AUG-23: take ITU_REGION into account for band limits
 // and changed "gainCorrection" to see the correct dBm value on all bands.
 // Calibration done with TinySA as signal generator with -73dBm levels (S9) at the FT8 frequencies
 // with V010 QSD with the 12V mod of the pre-amp
 #if defined(ITU_REGION) && ITU_REGION == 1
-  { 3700000UL, 3500000, 3800000, "80M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 15, HAM_BAND, 1.0, 20 },
-    { 7150000, 7000000, 7200000, "40M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 15, HAM_BAND, 1.0, 20 },
+  { 3700000UL, 3500000, 3800000, "80M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 5000, 15, HAM_BAND, 1.0, 20 },
+    { 7150000, 7000000, 7200000, "40M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 5000, 15, HAM_BAND, 1.0, 20 },
 #elif defined(ITU_REGION) && ITU_REGION == 2
-  { 3700000UL, 3500000, 4000000, "80M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 15, HAM_BAND, 1.0, 20 },
-    { 7150000, 7000000, 7300000, "40M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 15, HAM_BAND, 1.0, 20 },
+  { 3700000UL, 3500000, 4000000, "80M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 5000, 15, HAM_BAND, 1.0, 20 },
+    { 7150000, 7000000, 7300000, "40M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 5000, 15, HAM_BAND, 1.0, 20 },
 #elif defined(ITU_REGION) && ITU_REGION == 3
-  { 3700000UL, 3500000, 3900000, "80M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 15, HAM_BAND, 1.0, 20 },
-    { 7150000, 7000000, 7200000, "40M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 15, HAM_BAND, 1.0, 20 },
+  { 3700000UL, 3500000, 3900000, "80M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 5000, 15, HAM_BAND, 1.0, 20 },
+    { 7150000, 7000000, 7200000, "40M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 5000, 15, HAM_BAND, 1.0, 20 },
 #endif
-    { 14200000, 14000000, 14350000, "20M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 15, HAM_BAND, 1.0, 20 },
-    { 18100000, 18068000, 18168000, "17M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 15, HAM_BAND, 1.0, 20 },
-    { 21200000, 21000000, 21450000, "15M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 15, HAM_BAND, 1.0, 20 },
-    { 24920000, 24890000, 24990000, "12M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 15, HAM_BAND, 1.0, 20 },
+    { 14200000, 14000000, 14350000, "20M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
+    { 18100000, 18068000, 18168000, "17M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
+    { 21200000, 21000000, 21450000, "15M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
+    { 24920000, 24890000, 24990000, "12M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
   {
-    28350000, 28000000, 29700000, "10M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 15, HAM_BAND, 1.0, 20
+    28350000, 28000000, 29700000, "10M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20
   }
 };
 
@@ -87,7 +87,7 @@ Metro ms_500 = Metro(500);  // Set up a Metro
 Si5351 si5351;  // Instantiate the PLL device.
 
 RadioState radioState, lastState;  // KF5N
-RadioMode radioMode;               // Greg KF5N August 1, 2024
+//RadioMode radioMode;               // Greg KF5N August 1, 2024
 int resetTuningFlag = 0;
 #ifndef RA8875_DISPLAY
 ILI9488_t3 tft = ILI9488_t3(&SPI, TFT_CS, TFT_DC, TFT_RST);  // Instantiate the display.
@@ -999,28 +999,28 @@ FLASHMEM void setup() {
   lastState = RadioState::NOSTATE;  // To make sure the receiver will be configured on the first pass through.  KF5N September 3, 2023
   if (EEPROMData.xmtMode == RadioMode::CW_MODE) {
     radioState = RadioState::CW_RECEIVE_STATE;
-    radioMode = RadioMode::CW_MODE;
-    SetupMode(radioMode, bands[EEPROMData.currentBand].sideband);
+    bands[EEPROMData.currentBand].mode = RadioMode::CW_MODE;
+    SetupMode(RadioMode::CW_MODE, bands[EEPROMData.currentBand].sideband);
   }
   if (EEPROMData.xmtMode == RadioMode::SSB_MODE) {
     radioState = RadioState::SSB_RECEIVE_STATE;
-    radioMode = RadioMode::SSB_MODE;
-    SetupMode(radioMode, bands[EEPROMData.currentBand].sideband);
+    bands[EEPROMData.currentBand].mode = RadioMode::SSB_MODE;
+    SetupMode(RadioMode::SSB_MODE, bands[EEPROMData.currentBand].sideband);
   }
   if (EEPROMData.xmtMode == RadioMode::FT8_MODE) {
     radioState = RadioState::FT8_RECEIVE_STATE;
-    radioMode = RadioMode::FT8_MODE;
-    SetupMode(radioMode, Sideband::UPPER);
+    bands[EEPROMData.currentBand].mode = RadioMode::FT8_MODE;
+    SetupMode(RadioMode::FT8_MODE, Sideband::UPPER);
   }
   if (EEPROMData.xmtMode == RadioMode::AM_MODE) {
     radioState = RadioState::AM_RECEIVE_STATE;
-    radioMode = RadioMode::AM_MODE;
-    SetupMode(radioMode, Sideband::BOTH_AM);
+    bands[EEPROMData.currentBand].mode = RadioMode::AM_MODE;
+    SetupMode(RadioMode::AM_MODE, Sideband::BOTH_AM);
   }
   if (EEPROMData.xmtMode == RadioMode::SAM_MODE) {
     radioState = RadioState::SAM_RECEIVE_STATE;
-    radioMode = RadioMode::SAM_MODE;
-    SetupMode(radioMode, Sideband::BOTH_SAM);
+    bands[EEPROMData.currentBand].mode = RadioMode::SAM_MODE;
+    SetupMode(RadioMode::SAM_MODE, Sideband::BOTH_SAM);
   }
 
 

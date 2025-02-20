@@ -279,7 +279,7 @@ void Button::ExecuteButtonPress(MenuSelect val) {
     case MenuSelect::DECODER_TOGGLE:  // 13
       EEPROMData.decoderFlag = !EEPROMData.decoderFlag;
       if ((EEPROMData.xmtMode == RadioMode::CW_MODE) && (EEPROMData.decoderFlag == 1)) {
-        radioMode = RadioMode::CW_MODE;
+ //       radioMode = RadioMode::CW_MODE;
       }
       UpdateDecoderField();
       break;
@@ -450,7 +450,7 @@ void Button::ButtonMenuDecrease() {
 
 
 /*****
-  Purpose: To process a band increase button push
+  Purpose: To process a band increase button push.
 
   Parameter list:
     void
@@ -464,7 +464,7 @@ void Button::ButtonBandIncrease() {
   if (EEPROMData.currentBand == NUMBER_OF_BANDS) {  // Incremented too far?
     EEPROMData.currentBand = 0;                     // Yep. Roll to list front.
   }
-  NCOFreq = 0L;
+  NCOFreq = 0;
   switch (EEPROMData.activeVFO) {
     case VFO_A:
       tempIndex = EEPROMData.currentBandA;
@@ -519,6 +519,7 @@ void Button::ButtonBandIncrease() {
       break;
   }
   directFreqFlag = 0;
+  SetupMode(bands[EEPROMData.currentBand].mode, bands[EEPROMData.currentBand].sideband);
   EraseSpectrumDisplayContainer();
   DrawSpectrumDisplayContainer();
   SetBand();
@@ -531,7 +532,8 @@ void Button::ButtonBandIncrease() {
   tft.writeTo(L2);
   tft.clearMemory();
   tft.writeTo(L1);
-  if (EEPROMData.xmtMode == RadioMode::CW_MODE) BandInformation();
+  //if (EEPROMData.xmtMode == RadioMode::CW_MODE) 
+  BandInformation();
   DrawBandWidthIndicatorBar();
   DrawFrequencyBarValue();
   UpdateDecoderField();
@@ -617,6 +619,7 @@ void Button::ButtonBandDecrease() {
       break;
   }
   directFreqFlag = 0;
+  SetupMode(bands[EEPROMData.currentBand].mode, bands[EEPROMData.currentBand].sideband);
   EraseSpectrumDisplayContainer();
   DrawSpectrumDisplayContainer();
   SetBand();
@@ -629,7 +632,8 @@ void Button::ButtonBandDecrease() {
   tft.writeTo(L2);
   tft.clearMemory();
   tft.writeTo(L1);
-  if (EEPROMData.xmtMode == RadioMode::CW_MODE) BandInformation();
+  //if (EEPROMData.xmtMode == RadioMode::CW_MODE) BandInformation();
+  BandInformation();
   DrawBandWidthIndicatorBar();
   DrawFrequencyBarValue();
   UpdateDecoderField();
@@ -805,7 +809,7 @@ void Button::ButtonSelectSideband() {
       break;
     case Sideband::UPPER:                             // Switch to LSB.
     // Leave FT8 in USB.
-    if(radioMode == RadioMode::FT8_MODE) return;
+    if(bands[EEPROMData.currentBand].mode == RadioMode::FT8_MODE) return;
       bands[EEPROMData.currentBand].sideband = Sideband::LOWER;
       EEPROMData.lastSideband[EEPROMData.currentBand] = Sideband::LOWER;
 
@@ -819,19 +823,19 @@ void Button::ButtonSelectSideband() {
       break;
   }
 
-  SetupMode(radioMode, bands[EEPROMData.currentBand].sideband);
+  SetupMode(bands[EEPROMData.currentBand].mode, bands[EEPROMData.currentBand].sideband);
   ShowFrequency();
 ////  ControlFilterF();
   tft.writeTo(L2);  // Destroy the bandwidth indicator bar.  KF5N July 30, 2023
   tft.clearMemory();
-  if (EEPROMData.xmtMode == RadioMode::CW_MODE) BandInformation();
+  if (bands[EEPROMData.currentBand].mode == RadioMode::CW_MODE) BandInformation();
   DrawBandWidthIndicatorBar();  // Restory the bandwidth indicator bar.  KF5N July 30, 2023
   FilterBandwidth();
   DrawSMeterContainer();
   AudioInterrupts();
   SetFreq();  // Must update frequency, for example moving from SSB to CW, the RX LO is shifted.  KF5N
-  if ((EEPROMData.xmtMode == RadioMode::CW_MODE) && (EEPROMData.decoderFlag == 1)) {
-    radioMode = RadioMode::CW_MODE;
+  if ((bands[EEPROMData.currentBand].mode == RadioMode::CW_MODE) && (EEPROMData.decoderFlag == 1)) {
+  //  bands[EEPROMData.currentBand].mode = RadioMode::CW_MODE;
     UpdateDecoderField();  // KF5N December 28 2023.
   }
   FilterSetSSB();
@@ -858,40 +862,40 @@ void Button::ButtonMode()  //====== Changed AFP 10-05-22  =================
   switch (EEPROMData.xmtMode) {
     case RadioMode::SSB_MODE:
       EEPROMData.xmtMode = RadioMode::CW_MODE;
-      radioMode = RadioMode::CW_MODE;
       radioState = RadioState::CW_RECEIVE_STATE;
+      bands[EEPROMData.currentBand].mode = RadioMode::CW_MODE;
       bands[EEPROMData.currentBand].sideband = EEPROMData.lastSideband[EEPROMData.currentBand];
       break;
     case RadioMode::CW_MODE:  // Toggle the current mode
       EEPROMData.xmtMode = RadioMode::FT8_MODE;
-      radioMode = RadioMode::FT8_MODE;
       radioState = RadioState::FT8_RECEIVE_STATE;
+      bands[EEPROMData.currentBand].mode = RadioMode::FT8_MODE;
       bands[EEPROMData.currentBand].sideband = Sideband::UPPER;
       break;
     case RadioMode::FT8_MODE:  // Toggle the current mode
       EEPROMData.xmtMode = RadioMode::AM_MODE;
-      radioMode = RadioMode::AM_MODE;
       radioState = RadioState::AM_RECEIVE_STATE;
+      bands[EEPROMData.currentBand].mode = RadioMode::AM_MODE;
       bands[EEPROMData.currentBand].sideband = Sideband::BOTH_AM;
       break;
     case RadioMode::AM_MODE:  // Toggle the current mode
       EEPROMData.xmtMode = RadioMode::SAM_MODE;
-      radioMode = RadioMode::SAM_MODE;
       radioState = RadioState::SAM_RECEIVE_STATE;
+      bands[EEPROMData.currentBand].mode = RadioMode::SAM_MODE;
       bands[EEPROMData.currentBand].sideband = Sideband::BOTH_SAM;
       Serial.printf("Selected SAM\n");
       break;
     case RadioMode::SAM_MODE:  // Toggle the current mode
       EEPROMData.xmtMode = RadioMode::SSB_MODE;
-      radioMode = RadioMode::SSB_MODE;
       radioState = RadioState::SSB_RECEIVE_STATE;
+      bands[EEPROMData.currentBand].mode = RadioMode::SSB_MODE;
       bands[EEPROMData.currentBand].sideband = EEPROMData.lastSideband[EEPROMData.currentBand];
       break;
     default:
       break;
   }
 
-  SetupMode(radioMode, bands[EEPROMData.currentBand].sideband);  // Setup mode and sideband(s);
+  SetupMode(bands[EEPROMData.currentBand].mode, bands[EEPROMData.currentBand].sideband);  // Setup mode and sideband(s);
   SetFreq();  // Required due to RX LO shift from CW to SSB modes.  KF5N
   DrawSpectrumDisplayContainer();
   DrawFrequencyBarValue();

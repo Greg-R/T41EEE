@@ -167,9 +167,9 @@ void ShowSpectrum() {
     // Don't call this function unless the filter bandwidth has been adjusted.  This requires 2 global variables.
     if (filter_pos != last_filter_pos) FilterSetSSB();
 
-    if (radioMode == RadioMode::SSB_MODE or radioMode == RadioMode::FT8_MODE or radioMode == RadioMode::CW_MODE or radioMode == RadioMode::AM_MODE or radioMode == RadioMode::SAM_MODE) {  // AFP 08-24-22
+//    if (bands[EEPROMData.currentBand].mode == RadioMode::SSB_MODE or radioMode == RadioMode::FT8_MODE or radioMode == RadioMode::CW_MODE or radioMode == RadioMode::AM_MODE or radioMode == RadioMode::SAM_MODE) {  // AFP 08-24-22
       process.ProcessIQData();                                        // Call the Audio process from within the display routine to eliminate conflicts with drawing the spectrum and waterfall displays
-    }
+//    }
     EncoderCenterTune();  //Moved the tuning encoder to reduce lag times and interference during tuning.
     y_new = pixelnew[x1];
     y1_new = pixelnew[x1 - 1];
@@ -692,7 +692,7 @@ void BandInformation()  // SSB or CW
 //  tft.fillRect(OPERATION_STATS_X + 90, FREQUENCY_Y + 30, 70, tft.getFontHeight(), RA8875_BLACK);  //AFP 10-18-22
   tft.setTextColor(RA8875_GREEN);
   tft.setCursor(OPERATION_STATS_X + 90, FREQUENCY_Y + 30);  //AFP 10-18-22
-  if (EEPROMData.xmtMode == RadioMode::CW_MODE) {
+  if (bands[EEPROMData.currentBand].mode == RadioMode::CW_MODE) {
 //    tft.fillRect(OPERATION_STATS_X + 85, FREQUENCY_Y + 30, 70, tft.getFontHeight(), RA8875_BLACK);
     tft.print("CW ");
     tft.setCursor(OPERATION_STATS_X + 115, FREQUENCY_Y + 30);  //AFP 10-18-22
@@ -725,26 +725,26 @@ void BandInformation()  // SSB or CW
   }
   
   // Write SSB mode to display
-  if (radioMode == RadioMode::SSB_MODE) {
+  if (bands[EEPROMData.currentBand].mode == RadioMode::SSB_MODE) {
 //    tft.fillRect(OPERATION_STATS_X + 90, FREQUENCY_Y + 30, 70, tft.getFontHeight(), RA8875_BLACK);
     if(EEPROMData.cessb) tft.print("CESSB");  // Which mode
     if(not EEPROMData.cessb) tft.print("SSB Data");
   }
   
   // Write FT8 mode to display.
-if(radioMode == RadioMode::FT8_MODE)  {
+if(bands[EEPROMData.currentBand].mode == RadioMode::FT8_MODE)  {
 //        tft.fillRect(OPERATION_STATS_X + 90, FREQUENCY_Y + 30, 70, tft.getFontHeight(), RA8875_BLACK);
 tft.print("FT8");
   }
 
   // Write AM mode to display.
-if(radioMode == RadioMode::AM_MODE)  {
+if(bands[EEPROMData.currentBand].mode == RadioMode::AM_MODE)  {
 //        tft.fillRect(OPERATION_STATS_X + 90, FREQUENCY_Y + 30, 70, tft.getFontHeight(), RA8875_BLACK);
 tft.print("AM");
   }
 
     // Write SAM mode to display.
-if(radioMode == RadioMode::SAM_MODE)  {
+if(bands[EEPROMData.currentBand].mode == RadioMode::SAM_MODE)  {
 //        tft.fillRect(OPERATION_STATS_X + 90, FREQUENCY_Y + 30, 70, tft.getFontHeight(), RA8875_BLACK);
 tft.print("SAM");
   }
