@@ -214,6 +214,8 @@ void FilterBandwidth()
 {
   AudioNoInterrupts();
 
+  Serial.printf("bands[EEPROMData.currentBand].FHiCut = %d bands[EEPROMData.currentBand].FLoCut = %d\n", bands[EEPROMData.currentBand].FHiCut, bands[EEPROMData.currentBand].FLoCut);
+
   CalcCplxFIRCoeffs(FIR_Coef_I, FIR_Coef_Q, m_NumTaps, static_cast<float>(bands[EEPROMData.currentBand].FLoCut), static_cast<float>(bands[EEPROMData.currentBand].FHiCut), static_cast<float>(SR[SampleRate].rate / DF));
   InitFilterMask();
 

@@ -20,7 +20,7 @@ struct maps myMapFiles[10] = {
 };
 
 struct band bands[NUMBER_OF_BANDS] {  // Revised band struct with mode and sideband.  Greg KF5N February 14, 2025
-//freq    band low   band hi   name    mode sideband      FLoCut    FHiCut  Gain  type    gain  AGC   pixel
+//freq    band low   band hi   name    mode                  sideband         FHiCut FLoCut  Gain  type    gain  AGC   pixel
 //                                             filter filter             correct     offset
 //DB2OO, 29-AUG-23: take ITU_REGION into account for band limits
 // and changed "gainCorrection" to see the correct dBm value on all bands.
@@ -1039,10 +1039,10 @@ FLASHMEM void setup() {
 
   EEPROMData.sdCardPresent = SDPresentCheck();  // JJP 7/18/23
   UpdateDecoderField();                         // Adjust graphics for Morse decoder.
-  FilterSetSSB();
+//  FilterSetSSB();
   UpdateEqualizerField(EEPROMData.receiveEQFlag);
   EEPROMData.rfGainCurrent = 0;                                                  // Start with lower gain so you don't get blasted.
-  if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();  // Required only for QSD2/QSE2.
+  if ((MASTER_CLK_MULT_RX == 2) or (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();  // Required only for QSD2/QSE2.
 }
 //============================================================== END setup() =================================================================
 

@@ -774,7 +774,7 @@ void Button::ButtonZoom() {
 void Button::ButtonFilter() {
   switchFilterSideband = not switchFilterSideband;
   FilterSetSSB();  // Call this so the delimiter is set to the correct color.
-  SetupMode(radioMode, bands[EEPROMData.currentBand].sideband);
+////  SetupMode(radioMode, bands[EEPROMData.currentBand].sideband);  // No required here?
 ////  ControlFilterF();
   FilterBandwidth();
   ShowFrequency();

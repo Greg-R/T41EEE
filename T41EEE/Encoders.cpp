@@ -115,6 +115,10 @@ int32_t filter_change;
         int temp{0};
         filterLoPositionMarker = map(bands[EEPROMData.currentBand].FLoCut, 0, 6000, 0, 256);
         filterHiPositionMarker = map(bands[EEPROMData.currentBand].FHiCut, 0, 6000, 0, 256);
+
+Serial.printf("filterLoPositionMarker = %d\n", filterLoPositionMarker);
+Serial.printf("filterHiPositionMarker = %d\n", filterHiPositionMarker);
+
         // Flip positions if LSB so that correct delimiter is highlighted.
         if (bands[EEPROMData.currentBand].sideband == Sideband::LOWER) {
            temp = filterLoPositionMarker;
@@ -134,7 +138,7 @@ int32_t filter_change;
     tft.writeTo(L1);    
     DrawFrequencyBarValue();  // This calls ShowBandwidth().  YES, this function is useful here.
     UpdateDecoderField();   // Redraw Morse decoder graphics because they get erased due to filter graphics updates.
-//    DrawBandWidthIndicatorBar();
+    DrawBandWidthIndicatorBar();
 }
 
 
@@ -416,7 +420,6 @@ int GetEncoderValue(int minValue, int maxValue, int startValue, int increment, c
   }
 
 
-
 /*****
   Purpose: Allows quick setting of WPM without going through a menu
 
@@ -649,6 +652,7 @@ else {      //  FT is off so check for short delays
   TxRxFreq = EEPROMData.centerFreq + NCOFreq;  // KF5N
 }
 #endif
+
 
 // This function is attached to interrupts (in the .ino file).
   void EncoderFilter() {

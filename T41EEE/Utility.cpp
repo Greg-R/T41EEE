@@ -601,9 +601,6 @@ void DisplayClock() {
 }  // end function displayTime
 
 
-
-
-
 /*****
   Purpose: set Band
   Parameter list:
@@ -613,7 +610,7 @@ void DisplayClock() {
 *****/
 void SetBand() {
   old_demod_mode = -99;  // used in setup_mode and when changing bands, so that LoCut and HiCut are not changed!
-  SetupMode(radioMode, bands[EEPROMData.currentBand].sideband);
+////  SetupMode(radioMode, bands[EEPROMData.currentBand].sideband);  // Not required here?
   SetFreq();
   ShowFrequency();
   FilterBandwidth();

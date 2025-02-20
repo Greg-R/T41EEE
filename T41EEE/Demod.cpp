@@ -21,7 +21,7 @@ float32_t Cos = 0.0;
 
 
 /*****
-  Purpose: Switch filter edges based on selected sideband.
+  Purpose: Switch filter edges based on selected sideband.  This should be called only when mode changes.
 
   Parameter list:
     Sideband sideBand            the sideband
@@ -30,30 +30,45 @@ float32_t Cos = 0.0;
     void
 *****/
 void SetupMode(RadioMode mode, Sideband sideband) {
-//  int flow = 0, fhigh = 0;
+  int flow = 0, fhigh = 0;
 
 // First, determine flow and fhigh, which are the audio filter settings.
 // This is confusing, because of lower and upper sidebands make them different.
 
+if(bands[EEPROMData.currentBand].FHiCut < 0 and bands[EEPROMData.currentBand].FLoCut < 0) {  // Indicates LSB.
+fhigh = -bands[EEPROMData.currentBand].FLoCut;
+flow = -bands[EEPROMData.currentBand].FHiCut;
+}
+
+if(bands[EEPROMData.currentBand].FHiCut > 0 and bands[EEPROMData.currentBand].FLoCut > 0) {  // Indicates USB.
+fhigh = bands[EEPROMData.currentBand].FHiCut;
+flow = bands[EEPROMData.currentBand].FLoCut;
+}
+
+if(bands[EEPROMData.currentBand].FHiCut > 0 and bands[EEPROMData.currentBand].FLoCut < 0) {  // Indicates AM or SAM.
+fhigh = bands[EEPROMData.currentBand].FHiCut;
+flow = bands[EEPROMData.currentBand].FLoCut;
+}
+
 if(mode == RadioMode::SSB_MODE or mode == RadioMode::CW_MODE) {
   if(sideband == Sideband::UPPER) {
-bands[EEPROMData.currentBand].FHiCut = 3000;
-bands[EEPROMData.currentBand].FLoCut =  300;
+bands[EEPROMData.currentBand].FHiCut = fhigh;
+bands[EEPROMData.currentBand].FLoCut =  flow;
   }
     if(sideband == Sideband::LOWER) {
-bands[EEPROMData.currentBand].FHiCut =  -300;
-bands[EEPROMData.currentBand].FLoCut = -3000;
+bands[EEPROMData.currentBand].FHiCut =  -flow;
+bands[EEPROMData.currentBand].FLoCut = -fhigh;
   }
 }
 
 if(mode == RadioMode::FT8_MODE) {
-bands[EEPROMData.currentBand].FHiCut = 3000;
-bands[EEPROMData.currentBand].FLoCut =  300;
+bands[EEPROMData.currentBand].FHiCut = fhigh;
+bands[EEPROMData.currentBand].FLoCut =  flow;
 }
 
 if(mode == RadioMode::AM_MODE or mode == RadioMode::SAM_MODE) {
-bands[EEPROMData.currentBand].FHiCut =  3000;
-bands[EEPROMData.currentBand].FLoCut = -3000;
+bands[EEPROMData.currentBand].FHiCut =  fhigh;
+bands[EEPROMData.currentBand].FLoCut = -fhigh;
 if(mode == RadioMode::AM_MODE) bands[EEPROMData.currentBand].sideband = Sideband::BOTH_AM;
 if(mode == RadioMode::SAM_MODE) {
 bands[EEPROMData.currentBand].sideband = Sideband::BOTH_SAM;

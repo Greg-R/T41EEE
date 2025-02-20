@@ -193,10 +193,10 @@ void Process::ProcessIQData() {
         S-Meter & dBm-display ?? not usually called
      **********************************************************************************/
     //============================== AFP 10-22-22  Begin new
-    if (calibrateFlag == 1) {
+    if (calibrateFlag == true) {
       CalibrateOptions();
     }
-        if (morseDecodeAdjustFlag == 1) {
+        if (morseDecodeAdjustFlag == true) {
       CWOptions();
     }
 

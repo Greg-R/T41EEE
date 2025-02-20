@@ -126,9 +126,6 @@ void FreqShift2()
         if (bands[EEPROMData.currentBand].sideband == Sideband::LOWER) sideToneShift =  cwFreqOffset;
         }
 
-Serial.printf("sideToneShift = %d\n", sideToneShift);
-Serial.printf("NCOFreq = %d TxRxFreq = %d\n", NCOFreq, TxRxFreq);
-
   NCO_INC = 2.0 * PI * (NCOFreq + sideToneShift) / SR[SampleRate].rate; // 192000 SPS is the actual sample rate used in the Receive ADC
 
   OSC_COS = cos (NCO_INC);
