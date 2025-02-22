@@ -105,6 +105,8 @@ AudioConnection patchCord22(headphoneScale, 0, i2s_quadOut, 1);   // To Audio Ad
 AudioControlSGTL5000 sgtl5000_2;  // This is not a 2nd Audio Adapter.  It is I2S to the PCM1808 (ADC I and Q receiver in) and PCM5102 (DAC audio out).
 // End dataflow code
 
+void controlAudioOut(AudioState audioState, bool mute);
+
 
 /*****
   Purpose: Manage AudioRecordQueue objects and patchCord connections based on
@@ -138,6 +140,8 @@ void SetAudioOperatingState(RadioState operatingState) {
     case RadioState::CW_RECEIVE_STATE:
       SampleRate = SAMPLE_RATE_192K;
       SetI2SFreq(SR[SampleRate].rate);
+      sgtl5000_1.muteLineout();
+
       // Deactivate microphone and 1 kHz test tone.
       mixer1.gain(0, 0.0);
       mixer1.gain(1, 0.0);
@@ -155,7 +159,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       // Deactivate TX audio output path.
       patchCord15.disconnect();  // Disconnect transmitter I and Q channel outputs.
       patchCord16.disconnect();
-      sgtl5000_1.unmuteHeadphone();
+//      digitalWrite(MUTE, UNMUTEAUDIO);  // Unmute speaker audio amplifier.
+//      sgtl5000_1.unmuteHeadphone();
       // QSD connected and enabled
       Q_in_L.begin();                                        // Receiver I channel
       Q_in_R.begin();                                        // Receiver Q channel
@@ -177,11 +182,13 @@ void SetAudioOperatingState(RadioState operatingState) {
 //      headphoneScale.gain(volumeLog[HEADPHONESCALE]);
       headphoneScale.gain(HEADPHONESCALE);     
       sgtl5000_1.volume(0.8);
-      sgtl5000_1.unmuteHeadphone();
+      controlAudioOut(EEPROMData.audioOut, false);  // Configure audio out; don't mute all.
+//      sgtl5000_1.unmuteHeadphone();
       break;
     case RadioState::SSB_TRANSMIT_STATE:
         // QSD disabled and disconnected
-      sgtl5000_1.muteHeadphone();
+      controlAudioOut(EEPROMData.audioOut, true);  // Mute all.
+      sgtl5000_1.unmuteLineout();
       patchCord9.disconnect();   // Receiver I channel
       patchCord10.disconnect();  // Receiver Q channel
       patchCord17.disconnect();  // CW sidetone
@@ -207,12 +214,12 @@ void SetAudioOperatingState(RadioState operatingState) {
 
       if(EEPROMData.cessb) {
       switch3.setChannel(0);  // Enable compressor path!
-      mixer2.gain(0, 1.0);  // Enable compressor path!
+      mixer2.gain(0, 1.0);
       mixer2.gain(1, 0.0);
-      cessb1.getLevels(0);  // Initialize the CESSB information struct.
+      cessb1.getLevels(0);
       } else {
-      switch3.setChannel(1);  // Enable compressor path!
-      mixer2.gain(0, 0.0);  // Enable compressor path!   
+      switch3.setChannel(1);  // Disable compressor path!
+      mixer2.gain(0, 0.0);
       mixer2.gain(1, 1.0);
       }
 
@@ -226,7 +233,8 @@ void SetAudioOperatingState(RadioState operatingState) {
   
     case RadioState::FT8_TRANSMIT_STATE:
       // QSD disabled and disconnected
-      sgtl5000_1.muteHeadphone();
+      controlAudioOut(EEPROMData.audioOut, false);  // FT8 audio should be headphone only.
+      sgtl5000_1.unmuteLineout();
       patchCord9.disconnect();   // Receiver I channel
       patchCord10.disconnect();  // Receiver Q channel
       patchCord17.disconnect();  // CW sidetone
@@ -267,7 +275,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       SampleRate = SAMPLE_RATE_48K;
       InitializeDataArrays();  // I2S sample rate set in this function.
       // QSD disabled and disconnected
-      sgtl5000_1.muteHeadphone();
+      controlAudioOut(EEPROMData.audioOut, true);  // Mute all audio.
+      sgtl5000_1.unmuteLineout();
       patchCord9.connect();   // Receiver I channel
       patchCord10.connect();  // Receiver Q channel
       patchCord17.disconnect();  // Receiver audio and CW sidetone
@@ -316,7 +325,9 @@ void SetAudioOperatingState(RadioState operatingState) {
     case RadioState::CW_TRANSMIT_STRAIGHT_STATE:
     case RadioState::CW_TRANSMIT_KEYER_STATE:
       // QSD disabled and disconnected
-      sgtl5000_1.unmuteHeadphone();
+      // Speaker and headphones should be unmuted according to current audio out state for sidetone.
+      controlAudioOut(EEPROMData.audioOut, false);  // FT8 audio should be headphone only.
+      sgtl5000_1.unmuteLineout();
  //     sgtl5000_1.volume(volumeLog[EEPROMData.sidetoneVolume]);
       sgtl5000_1.volume(0.3);  // This is for sidetone in the headphone output.  Hardcoding for now.
       patchCord9.disconnect();
@@ -349,7 +360,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       SampleRate = SAMPLE_RATE_192K;
       SetI2SFreq(SR[SampleRate].rate);
       // QSD receiver enabled.  Calibrate is full duplex.
-      sgtl5000_1.muteHeadphone();
+      controlAudioOut(EEPROMData.audioOut, true);  // Mute all audio.
+      sgtl5000_1.unmuteLineout();
       patchCord9.connect();   // Receiver I channel
       patchCord10.connect();  // Receiver Q channel
       patchCord17.disconnect();  // CW sidetone
@@ -387,6 +399,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       case RadioState::SET_CW_SIDETONE:
       SampleRate = SAMPLE_RATE_192K;
       SetI2SFreq(SR[SampleRate].rate);
+      //// Speaker and headphones should be unmuted according to current audio out state!!!!!!!!
+      controlAudioOut(EEPROMData.audioOut, false);  // Unmute according to audio state for sidetone.
       patchCord9.disconnect();
       patchCord10.disconnect();
       // Baseband CESSB data cleared and ended.
@@ -410,4 +424,48 @@ void SetAudioOperatingState(RadioState operatingState) {
       break;
 
   }
+}
+
+
+/*****
+  Purpose: Manage headphone and speaker mute/unmute.
+
+  Parameter list:
+    void AudioState   Desired audio state.
+    bool mute         Mute all audio for SSB and FT8 transmit.
+                      CW requires audio due to sidetone.
+  Return value:
+    void
+
+*****/
+void controlAudioOut(AudioState audioState, bool mute) {
+  if(mute) {
+      sgtl5000_1.muteHeadphone();     // Unmute headphones.
+      digitalWrite(MUTE, MUTEAUDIO);   // Mute speaker audio amplifier.
+      return;
+  }
+  switch(audioState) {
+     case AudioState::HEADPHONE:
+      sgtl5000_1.unmuteHeadphone();     // Unmute headphones.
+      digitalWrite(MUTE, MUTEAUDIO);   // Mute speaker audio amplifier.
+      break;
+
+     case AudioState::SPEAKER:
+      sgtl5000_1.muteHeadphone();     // Unmute headphones.
+      digitalWrite(MUTE, UNMUTEAUDIO);   // Mute speaker audio amplifier.
+      break;
+
+     case AudioState::BOTH:
+      sgtl5000_1.unmuteHeadphone();     // Unmute headphones.
+      digitalWrite(MUTE, UNMUTEAUDIO);   // Mute speaker audio amplifier.
+      break;
+
+     case AudioState::MUTE_BOTH:
+      sgtl5000_1.muteHeadphone();     // Unmute headphones.
+      digitalWrite(MUTE, MUTEAUDIO);   // Mute speaker audio amplifier.
+      break;
+
+      default:
+      break;
+}
 }
