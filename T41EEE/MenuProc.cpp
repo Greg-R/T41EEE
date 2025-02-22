@@ -760,7 +760,7 @@ static int micChoice = 0;
     EEPROMData.cessb = true;
     cessb1.setProcessing(EEPROMData.cessb);
     Serial.printf("processing = %d", cessb1.getProcessing());
-    eeprom.EEPROMWrite();
+//    eeprom.EEPROMWrite();
     BandInformation();
       break;
 
@@ -768,7 +768,7 @@ static int micChoice = 0;
     EEPROMData.cessb = false;
     cessb1.setProcessing(EEPROMData.cessb);
     Serial.printf("processing = %d", cessb1.getProcessing());
-    eeprom.EEPROMWrite();
+//    eeprom.EEPROMWrite();
     BandInformation();
       break;
 
@@ -776,20 +776,20 @@ static int micChoice = 0;
     EEPROMData.cessb = false;
     cessb1.setProcessing(EEPROMData.cessb);
     Serial.printf("processing = %d", cessb1.getProcessing());
-    eeprom.EEPROMWrite();
+//    eeprom.EEPROMWrite();
     BandInformation();
     break;
 
     case 3:  // Compressor On
     EEPROMData.compressorFlag = true;
     UpdateCompressionField();
-    eeprom.EEPROMWrite();
+//    eeprom.EEPROMWrite();
     break;
 
     case 4:  // Compressor Off
     EEPROMData.compressorFlag = false;
     UpdateCompressionField();
-    eeprom.EEPROMWrite();
+//    eeprom.EEPROMWrite();
     break;
 
     case 5:  // Adjust mic gain in dB.  Default 0 db.
@@ -814,6 +814,8 @@ static int micChoice = 0;
       return;
       break;
   }
+        updateMic();
+        eeprom.EEPROMWrite(); 
 }
 
 

@@ -15,7 +15,7 @@ AudioConvert_I16toF32 int2Float1;              // Converts Int16 to Float.  See 
 //AudioEffectGain_F32 micGain(audio_settings);                   // Microphone gain control.
 AudioEffectGain_F32 micGain;                   // Microphone gain control.
 AudioEffectCompressor2_F32  compressor1; // Open Audio Compressor
-AudioEffectCompressor2_F32 *pc1 = &compressor1;
+//AudioEffectCompressor2_F32 *pc1 = &compressor1;
 radioCESSB_Z_transmit_F32 cessb1;
 AudioConvert_F32toI16 float2Int1, float2Int2, float2Int3, float2Int4;  // Converts Float to Int16.  See class in AudioStream_F32.h
 // AudioConvert_I16toF32 int2float1, int2float2;
@@ -204,7 +204,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       SampleRate = SAMPLE_RATE_48K;
       SetI2SFreq(SR[SampleRate].rate);
       toneSSBCal.end();
-      updateMic();
+//      updateMic();
       mixer1.gain(0, 1.0);    // Connect microphone audio to transmit chain.
       mixer1.gain(1, 0.0);    // Disconnect 1 kHz test tone.
 //      mixer1.gain(2, 0.0);    // Connect USB audio from WSJTX on PC.
@@ -212,11 +212,12 @@ void SetAudioOperatingState(RadioState operatingState) {
       switch2.setChannel(1);  //  Disconnect 1 kHz test tone path.
      // switch4.setChannel(1);  //  Disconnect USB audio from WSJTX on PC.
 
-      if(EEPROMData.cessb) {
+      if(EEPROMData.compressorFlag) {
       switch3.setChannel(0);  // Enable compressor path!
       mixer2.gain(0, 1.0);
       mixer2.gain(1, 0.0);
       cessb1.getLevels(0);
+      updateMic();
       } else {
       switch3.setChannel(1);  // Disable compressor path!
       mixer2.gain(0, 0.0);
