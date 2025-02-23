@@ -28,7 +28,7 @@ AudioPlayQueue Q_out_L_Ex;                     // AudioPlayQueue for driving the
 AudioPlayQueue Q_out_R_Ex;                     // AudioPlayQueue for driving the Q channel (CW/SSB) to the QSE.
 //AudioInputUSB_F32 usbIn_F32(audio_settings);
 //AudioInputUSB usbIn;
-
+//radioCWModulator_F32     CWMod1(audio_settings);
 
 //  Begin transmit signal chain.
 AudioConnection connect0(i2s_quadIn, 0, int2Float1, 0);    // Microphone audio channel.  Must use int2Float because Open Audio does not have quad input.

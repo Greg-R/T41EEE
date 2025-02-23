@@ -13,7 +13,7 @@ void updateMic() {
 
   micGain.setGain_dB(EEPROMData.currentMicGain);  // Set the microphone gain.
 
-  struct compressionCurve crv = { -1.0, 0.0,  // margin, offset
+  struct compressionCurve crv = { -3.0, 0.0,  // margin, offset
                                                 //   {0.0f, -7.0f, -10.0f, -1000.0f, -1000.0f},           // kneeDB[]
                                   { 0.0, -10.0, EEPROMData.currentMicThreshold, -1000.0f, -1000.0f },
                                   //     {  100.0, 100.0f, 1.0f, 1.0, 1.0} };   // compressionRatio
