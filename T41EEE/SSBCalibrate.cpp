@@ -65,7 +65,7 @@ void SSBCalibrate::warmUpCal() {
   uint32_t index_of_max;  // Not used, but required by arm_max_q15 function.
   for (int i = 0; i < 16; i = i + 1) {
     updateDisplayFlag = true;  // Causes FFT to be calculated.
-    while (static_cast<uint32_t>(Q_in_L_Ex.available()) < 32 and static_cast<uint32_t>(Q_in_L.available()) < 32) {
+    while (static_cast<uint32_t>(Q_in_L_Ex.available()) < 32 and static_cast<uint32_t>(ADC_RX_I.available()) < 32) {
       delay(1);
     }
     SSBCalibrate::ProcessIQData2();  // Note, FFT not called if buffers not sufficiently filled.
@@ -1255,16 +1255,16 @@ void SSBCalibrate::ProcessIQData2() {
 
     // Get audio samples from the audio  buffers and convert them to float.
     // Read in 16 blocks of 128 samples in I and Q if available.
-    if (static_cast<uint32_t>(Q_in_L.available()) > N_BLOCKS_EX and static_cast<uint32_t>(Q_in_R.available()) > N_BLOCKS_EX) {
+    if (static_cast<uint32_t>(ADC_RX_I.available()) > N_BLOCKS_EX and static_cast<uint32_t>(ADC_RX_Q.available()) > N_BLOCKS_EX) {
       for (unsigned i = 0; i < N_BLOCKS; i++) {
         /**********************************************************************************  AFP 12-31-20
           Using arm_Math library, convert to float one buffer_size.
           Float_buffer samples are now standardized from > -1.0 to < 1.0
       **********************************************************************************/
-        arm_q15_to_float(Q_in_R.readBuffer(), &float_buffer_L[BUFFER_SIZE * i], BUFFER_SIZE);  // convert int_buffer to float 32bit
-        arm_q15_to_float(Q_in_L.readBuffer(), &float_buffer_R[BUFFER_SIZE * i], BUFFER_SIZE);  // convert int_buffer to float 32bit
-        Q_in_L.freeBuffer();
-        Q_in_R.freeBuffer();
+        arm_q15_to_float(ADC_RX_Q.readBuffer(), &float_buffer_L[BUFFER_SIZE * i], BUFFER_SIZE);  // convert int_buffer to float 32bit
+        arm_q15_to_float(ADC_RX_I.readBuffer(), &float_buffer_R[BUFFER_SIZE * i], BUFFER_SIZE);  // convert int_buffer to float 32bit
+        ADC_RX_I.freeBuffer();
+        ADC_RX_Q.freeBuffer();
       }
 
       rfGainValue = pow(10, static_cast<float32_t>(EEPROMData.rfGain[EEPROMData.currentBand]) / 20);        //AFP 2-11-23

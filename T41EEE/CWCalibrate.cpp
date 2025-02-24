@@ -84,7 +84,7 @@ void CWCalibrate::warmUpCal(int mode) {
   uint32_t index_of_max;  // Not used, but required by arm_max_q15 function.
   for (int i = 0; i < 128; i = i + 1) {
     updateDisplayFlag = true;  // Causes FFT to be calculated.
-    while (static_cast<uint32_t>(Q_in_R.available()) < 16 and static_cast<uint32_t>(Q_in_L.available()) < 16) {
+    while (static_cast<uint32_t>(ADC_RX_I.available()) < 16 and static_cast<uint32_t>(ADC_RX_Q.available()) < 16) {
       delay(1);
     }
     CWCalibrate::ProcessIQData2(mode);
@@ -328,10 +328,10 @@ void CWCalibrate::CalibrateEpilogue() {
   updateDisplayFlag = false;
   ShowTransmitReceiveStatus();
   // Clear queues to reduce transient.
-  Q_in_L.end();
-  Q_in_L.clear();
-  Q_in_R.end();
-  Q_in_R.clear();
+  ADC_RX_I.end();
+  ADC_RX_I.clear();
+  ADC_RX_Q.end();
+  ADC_RX_Q.clear();
   EEPROMData.centerFreq = TxRxFreq;
   NCOFreq = 0L;
   calibrateFlag = 0;                       // KF5N
@@ -1680,7 +1680,7 @@ if(mode == 1) {
 
   // This code block was introduced after TeensyDuino 1.58 appeared.  It doesn't use a for loop, but processes the entire 2048 buffer in one pass.
   // Revised I and Q calibration signal generation using large buffers.  Greg KF5N June 4 2023
-  if (static_cast<uint32_t>(Q_in_L.available()) > 16 && static_cast<uint32_t>(Q_in_R.available()) > 16) {  // Audio Record Queues!!!
+  if (static_cast<uint32_t>(ADC_RX_I.available()) > 16 && static_cast<uint32_t>(ADC_RX_Q.available()) > 16) {  // Audio Record Queues!!!
     q15_t q15_buffer_LTemp[2048];                                                                          //KF5N
     q15_t q15_buffer_RTemp[2048];                                                                          //KF5N
     Q_out_L_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
@@ -1708,10 +1708,10 @@ if(mode == 1) {
           Using arm_Math library, convert to float one buffer_size.
           Float_buffer samples are now standardized from > -1.0 to < 1.0
       **********************************************************************************/
-      arm_q15_to_float(Q_in_R.readBuffer(), &float_buffer_L[BUFFER_SIZE * i], BUFFER_SIZE);  // convert int_buffer to float 32bit
-      arm_q15_to_float(Q_in_L.readBuffer(), &float_buffer_R[BUFFER_SIZE * i], BUFFER_SIZE);  // convert int_buffer to float 32bit
-      Q_in_L.freeBuffer();
-      Q_in_R.freeBuffer();
+      arm_q15_to_float(ADC_RX_Q.readBuffer(), &float_buffer_L[BUFFER_SIZE * i], BUFFER_SIZE);  // convert int_buffer to float 32bit
+      arm_q15_to_float(ADC_RX_I.readBuffer(), &float_buffer_R[BUFFER_SIZE * i], BUFFER_SIZE);  // convert int_buffer to float 32bit
+      ADC_RX_I.freeBuffer();
+      ADC_RX_Q.freeBuffer();
     }
 
     rfGainValue = pow(10, (float)EEPROMData.rfGain[EEPROMData.currentBand] / 20);        //AFP 2-11-23

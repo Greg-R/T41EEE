@@ -143,23 +143,23 @@ void ShowSpectrum() {
   //Draws the main Spectrum, Waterfall and Audio displays
   {
     updateDisplayFlag = 0;
-    if ((EEPROMData.spectrum_zoom == 0) && ((uint32_t)Q_in_L.available() > N_BLOCKS + 0 && (uint32_t)Q_in_R.available() > N_BLOCKS + 0)) {
+    if ((EEPROMData.spectrum_zoom == 0) && (static_cast<uint32_t>(ADC_RX_I.available()) > N_BLOCKS + 0 && static_cast<uint32_t>(ADC_RX_Q.available()) > N_BLOCKS + 0)) {
       updateDisplayCounter = updateDisplayCounter + 1;
       if (updateDisplayCounter == 1) updateDisplayFlag = 1;
     }
-    if ((EEPROMData.spectrum_zoom == 1) && ((uint32_t)Q_in_L.available() > N_BLOCKS + 0 && (uint32_t)Q_in_R.available() > N_BLOCKS + 0)) {
+    if ((EEPROMData.spectrum_zoom == 1) && (static_cast<uint32_t>(ADC_RX_I.available()) > N_BLOCKS + 0 && static_cast<uint32_t>(ADC_RX_Q.available()) > N_BLOCKS + 0)) {
       updateDisplayCounter = updateDisplayCounter + 1;
       if (updateDisplayCounter == 1) updateDisplayFlag = 1;
     }
-    if ((EEPROMData.spectrum_zoom == 2) && ((uint32_t)Q_in_L.available() > N_BLOCKS + 0 && (uint32_t)Q_in_R.available() > N_BLOCKS + 0)) {
+    if ((EEPROMData.spectrum_zoom == 2) && (static_cast<uint32_t>(ADC_RX_I.available()) > N_BLOCKS + 0 && static_cast<uint32_t>(ADC_RX_Q.available()) > N_BLOCKS + 0)) {
       updateDisplayCounter = updateDisplayCounter + 1;
       if (updateDisplayCounter == 1) updateDisplayFlag = 1;
     }
-    if ((EEPROMData.spectrum_zoom == 3) && ((uint32_t)Q_in_L.available() > N_BLOCKS + 0 && (uint32_t)Q_in_R.available() > N_BLOCKS + 0)) {
+    if ((EEPROMData.spectrum_zoom == 3) && (static_cast<uint32_t>(ADC_RX_I.available()) > N_BLOCKS + 0 && static_cast<uint32_t>(ADC_RX_Q.available()) > N_BLOCKS + 0)) {
       updateDisplayCounter = updateDisplayCounter + 1;
       if (updateDisplayCounter == 3) updateDisplayFlag = 1;
     }
-    if ((EEPROMData.spectrum_zoom == 4) && ((uint32_t)Q_in_L.available() > N_BLOCKS + 0 && (uint32_t)Q_in_R.available() > N_BLOCKS + 0)) {
+    if ((EEPROMData.spectrum_zoom == 4) && (static_cast<uint32_t>(ADC_RX_I.available()) > N_BLOCKS + 0 && static_cast<uint32_t>(ADC_RX_Q.available()) > N_BLOCKS + 0)) {
       updateDisplayCounter = updateDisplayCounter + 1;
       if (updateDisplayCounter == 7) updateDisplayFlag = 1;
     }

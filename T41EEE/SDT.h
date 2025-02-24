@@ -532,8 +532,8 @@ extern AudioConnection patchCord15;  // Patch cords 15 and 16 are used to connec
 extern AudioConnection patchCord16;
 
 extern AudioAmplifier volumeAdjust;
-extern AudioRecordQueue Q_in_L;
-extern AudioRecordQueue Q_in_R;
+extern AudioRecordQueue ADC_RX_I;
+extern AudioRecordQueue ADC_RX_Q;
 extern AudioRecordQueue Q_in_L_Ex;
 extern AudioRecordQueue Q_in_R_Ex;
 extern AudioPlayQueue Q_out_L;

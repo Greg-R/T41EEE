@@ -69,8 +69,8 @@ AudioConnection patchCord16(Q_out_R_Ex, 0, i2s_quadOut, 1);  // Q channel to lin
 
 // Receiver
 
-AudioRecordQueue Q_in_L;  // I channel from ADC PCM1808.
-AudioRecordQueue Q_in_R;  // Q channel from ADC PCM1808.
+AudioRecordQueue ADC_RX_I;  // I channel from ADC PCM1808.
+AudioRecordQueue ADC_RX_Q;  // Q channel from ADC PCM1808.
 
 AudioPlayQueue Q_out_L;  // Receiver audio out and CW sidetone.
 //AudioPlayQueue Q_out_R;  2nd audio channel not used.  KF5N March 11, 2024
@@ -78,8 +78,8 @@ AudioPlayQueue Q_out_L;  // Receiver audio out and CW sidetone.
 //AudioOutputUSB usbOut;
 //AudioOutputUSB_F32 usbOut_F32(audio_settings);
 
-AudioConnection patchCord9(i2s_quadIn, 2, Q_in_L, 0);  // Receiver I and Q channel data stream.
-AudioConnection patchCord10(i2s_quadIn, 3, Q_in_R, 0);
+AudioConnection patchCord9(i2s_quadIn, 2, ADC_RX_I, 0);  // Receiver I and Q channel data stream.
+AudioConnection patchCord10(i2s_quadIn, 3, ADC_RX_Q, 0);
 
 AudioAmplifier volumeAdjust, speakerScale, headphoneScale;
 AudioConnection patchCord17(Q_out_L, 0, volumeAdjust, 0);
@@ -148,10 +148,10 @@ void SetAudioOperatingState(RadioState operatingState) {
       switch1.setChannel(1);  // Disconnect microphone path.
       switch2.setChannel(1);  //  Disconnect 1 kHz test tone path.
       // Stop and clear the data buffers.     
-      Q_in_L.end();                                        // Receiver I channel
-      Q_in_R.end();                                        // Receiver Q channel
-      Q_in_L.clear();                                      // Receiver I channel
-      Q_in_R.clear();                                      // Receiver Q channel      
+      ADC_RX_I.end();                                        // Receiver I channel
+      ADC_RX_Q.end();                                        // Receiver Q channel
+      ADC_RX_I.clear();                                      // Receiver I channel
+      ADC_RX_Q.clear();                                      // Receiver Q channel      
       Q_in_L_Ex.end();  // Transmit I channel path.
       Q_in_R_Ex.end();  // Transmit Q channel path.
       Q_in_L_Ex.clear();
@@ -162,8 +162,8 @@ void SetAudioOperatingState(RadioState operatingState) {
 //      digitalWrite(MUTE, UNMUTEAUDIO);  // Unmute speaker audio amplifier.
 //      sgtl5000_1.unmuteHeadphone();
       // QSD connected and enabled
-      Q_in_L.begin();                                        // Receiver I channel
-      Q_in_R.begin();                                        // Receiver Q channel
+      ADC_RX_I.begin();                                        // Receiver I channel
+      ADC_RX_Q.begin();                                        // Receiver Q channel
       patchCord9.connect();                                  // Receiver I channel
       patchCord10.connect();                                 // Receiver Q channel
       patchCord17.connect();                                 // Receiver audio channel
@@ -197,10 +197,10 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord20.disconnect();
       patchCord21.disconnect();
       patchCord22.disconnect();
-      Q_in_L.end();
-      Q_in_L.clear();
-      Q_in_R.end();
-      Q_in_R.clear();
+      ADC_RX_I.end();
+      ADC_RX_I.clear();
+      ADC_RX_Q.end();
+      ADC_RX_Q.clear();
       SampleRate = SAMPLE_RATE_48K;
       SetI2SFreq(SR[SampleRate].rate);
       toneSSBCal.end();
@@ -244,10 +244,12 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord20.disconnect();
       patchCord21.disconnect();
       patchCord22.disconnect();
-      Q_in_L.end();
-      Q_in_L.clear();
-      Q_in_R.end();
-      Q_in_R.clear();
+
+      ADC_RX_I.end();
+      ADC_RX_I.clear();
+      ADC_RX_Q.end();
+      ADC_RX_Q.clear();
+
       SampleRate = SAMPLE_RATE_44K;
       SetI2SFreq(SR[SampleRate].rate);
       toneSSBCal.end();
@@ -287,10 +289,10 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord21.disconnect();
       patchCord22.disconnect();
 
-      Q_in_L.end();
-      Q_in_L.clear();
-      Q_in_R.end();
-      Q_in_R.clear();
+      ADC_RX_I.end();
+      ADC_RX_I.clear();
+      ADC_RX_Q.end();
+      ADC_RX_Q.clear();
 
       // Test tone enabled and connected
       toneSSBCal.setSampleRate_Hz(48000);
@@ -316,8 +318,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       Q_out_R_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
       Q_in_L_Ex.begin();  // I channel Microphone audio
       Q_in_R_Ex.begin();  // Q channel Microphone audio
-      Q_in_L.begin();     // Calibration is full duplex!  Activate receiver data.  No demodulation during calibrate, spectrum only.
-      Q_in_R.begin();
+      ADC_RX_I.begin();     // Calibration is full duplex!  Activate receiver data.  No demodulation during calibrate, spectrum only.
+      ADC_RX_Q.begin();
       patchCord15.connect();  // Transmitter I channel
       patchCord16.connect();  // Transmitter Q channel
 
@@ -339,10 +341,11 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord20.disconnect();
       patchCord21.disconnect();
       patchCord22.disconnect();     
-      Q_in_L.end();
-      Q_in_L.clear();
-      Q_in_R.end();
-      Q_in_R.clear();
+
+      ADC_RX_I.end();
+      ADC_RX_I.clear();
+      ADC_RX_Q.end();
+      ADC_RX_Q.clear();
 
       // Baseband CESSB data cleared and ended.
       Q_in_L_Ex.end();  // Clear I channel.
@@ -380,17 +383,17 @@ void SetAudioOperatingState(RadioState operatingState) {
       Q_in_R_Ex.end();  // Transmit Q channel path.
       Q_in_R_Ex.clear();
 
-      Q_in_L.end();
-      Q_in_L.clear();
-      Q_in_R.end();
-      Q_in_R.clear();
+      ADC_RX_I.end();
+      ADC_RX_I.clear();
+      ADC_RX_Q.end();
+      ADC_RX_Q.clear();
 
       toneSSBCal.end();
       mixer1.gain(0, 0);  // microphone audio off.
       mixer1.gain(1, 0);  // testTone off.
 
-      Q_in_L.begin();     // Calibration is full duplex!
-      Q_in_R.begin();
+      ADC_RX_I.begin();     // Calibration is full duplex!
+      ADC_RX_Q.begin();
       //  Transmitter back-end needs to be active during CW calibration.
       patchCord15.connect();  // Transmitter I channel
       patchCord16.connect();  // Transmitter Q channel
@@ -405,10 +408,12 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord9.disconnect();
       patchCord10.disconnect();
       // Baseband CESSB data cleared and ended.
-      Q_in_L.end();
-      Q_in_L.clear();
-      Q_in_R.end();
-      Q_in_R.clear();
+
+      ADC_RX_I.end();
+      ADC_RX_I.clear();
+      ADC_RX_Q.end();
+      ADC_RX_Q.clear();
+
       Q_in_L_Ex.end();  // Clear I channel.
       Q_in_L_Ex.clear();
       Q_in_R_Ex.end();  // Clear Q channel.

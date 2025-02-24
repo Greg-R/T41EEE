@@ -31,7 +31,7 @@ void Process::ProcessIQData() {
   int rfGain;
 
   // Are there at least N_BLOCKS buffers in each channel available ?  N_BLOCKS should be 16.  Fill float_buffer_L/R[2048].
-  if (static_cast<uint32_t>(Q_in_L.available()) > N_BLOCKS && static_cast<uint32_t>(Q_in_R.available()) > N_BLOCKS) {  // Removed addition of 0 to N_BLOCKS.
+  if (static_cast<uint32_t>(ADC_RX_I.available()) > N_BLOCKS && static_cast<uint32_t>(ADC_RX_Q.available()) > N_BLOCKS) {  // Removed addition of 0 to N_BLOCKS.
     usec = 0;
     // Get audio samples from the audio  buffers and convert them to float.
     // Read in 16 blocks and 128 samples in I and Q.  16 * 128 = 2048  (N_BLOCKS = 16)
@@ -42,10 +42,10 @@ void Process::ProcessIQData() {
           Using arm_Math library, convert to float one buffer_size.
           Float_buffer samples are now standardized from > -1.0 to < 1.0
       **********************************************************************************/
-      arm_q15_to_float(Q_in_R.readBuffer(), &float_buffer_L[BUFFER_SIZE * i], BUFFER_SIZE);  // convert int_buffer to float 32bit.  BUFFER_SIZE = 128.
-      arm_q15_to_float(Q_in_L.readBuffer(), &float_buffer_R[BUFFER_SIZE * i], BUFFER_SIZE);  // convert int_buffer to float 32bit
-      Q_in_L.freeBuffer();
-      Q_in_R.freeBuffer();
+      arm_q15_to_float(ADC_RX_Q.readBuffer(), &float_buffer_L[BUFFER_SIZE * i], BUFFER_SIZE);  // convert int_buffer to float 32bit.  BUFFER_SIZE = 128.
+      arm_q15_to_float(ADC_RX_I.readBuffer(), &float_buffer_R[BUFFER_SIZE * i], BUFFER_SIZE);  // convert int_buffer to float 32bit
+      ADC_RX_I.freeBuffer();
+      ADC_RX_Q.freeBuffer();
     }  // end for loop
 
     if (keyPressedOn == 1) {  //AFP 09-01-22.  Bail out if transmitting but ignore in AM mode.
@@ -110,13 +110,13 @@ void Process::ProcessIQData() {
       If the buffers are full, the Teensy needs much more time.
       In that case, we clear the buffers to keep the whole audio chain running smoothly.
       **********************************************************************************/
-    if (Q_in_L.available() > 25) {
-      Q_in_L.clear();
+    if (ADC_RX_I.available() > 25) {
+      ADC_RX_I.clear();
       //  n_clear++; // just for debugging to check how often this occurs
       AudioInterrupts();
     }
-    if (Q_in_R.available() > 25) {
-      Q_in_R.clear();
+    if (ADC_RX_Q.available() > 25) {
+      ADC_RX_Q.clear();
       //  n_clear++; // just for debugging to check how often this occurs
       AudioInterrupts();
     }
@@ -224,7 +224,7 @@ void Process::ProcessIQData() {
         returns the spectrum to the correct orientation.
         Signal has now been shifted to base band, leaving aliases at higher frequencies,
         which are removed at each decimation step using the Arm combined decimate/filter function.
-        If the statring sample rate is 192K SPS after the combined decimation, the sample rate is
+        If the starting sample rate is 192K SPS after the combined decimation, the sample rate is
         now 192K/8 = 24K SPS.  The array size is also reduced by 8, making FFT calculations much faster.
         The effective bandwidth (up to Nyquist frequency) is 12KHz.
      **********************************************************************************/

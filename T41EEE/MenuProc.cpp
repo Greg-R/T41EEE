@@ -514,7 +514,7 @@ void AGCOptions() {
     return;
   }
 
-  AGCLoadValues();  // G0ORX September 5, 2023
+  AGCLoadValues();         // G0ORX September 5, 2023
   eeprom.EEPROMWrite();    // ...save it
   UpdateAGCField();
 }
