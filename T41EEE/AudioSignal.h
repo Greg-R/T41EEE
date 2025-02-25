@@ -82,13 +82,21 @@ AudioConnection patchCord9(i2s_quadIn, 2, ADC_RX_I, 0);  // Receiver I and Q cha
 AudioConnection patchCord10(i2s_quadIn, 3, ADC_RX_Q, 0);
 
 AudioAmplifier volumeAdjust, speakerScale, headphoneScale;
-AudioConnection patchCord17(Q_out_L, 0, volumeAdjust, 0);
+//AudioConnection patchCord17(Q_out_L, 0, volumeAdjust, 0);
 
-AudioConnection patchCord18(volumeAdjust, 0, speakerScale, 0);   // To audio ADC PCM5102 via Teensy pin 32.  Speaker.
+AudioConnection patchCord17(Q_out_L, 0, speakerScale, 0);
+
+//AudioConnection patchCord18(volumeAdjust, 0, speakerScale, 0);   // To audio ADC PCM5102 via Teensy pin 32.  Speaker.
+
+AudioConnection patchCord18(speakerScale, 0, volumeAdjust, 0);   // To audio ADC PCM5102 via Teensy pin 32.  Speaker.
+
 AudioConnection patchCord19(volumeAdjust, 0, headphoneScale, 0);   // To Audio Adapter via via Teensy pin 7.  Headphones.
 //AudioConnection patchCord20(volumeAdjust, 0, i2s_quadOut, 1);   // To Audio Adapter via via Teensy pin 7.  Headphones (other side).
 
-AudioConnection patchCord20(speakerScale, 0, i2s_quadOut, 2);   // To audio ADC PCM5102 via Teensy pin 32.  Speaker.
+//AudioConnection patchCord20(speakerScale, 0, i2s_quadOut, 2);   // To audio ADC PCM5102 via Teensy pin 32.  Speaker.
+
+AudioConnection patchCord20(volumeAdjust, 0, i2s_quadOut, 2);   // To audio ADC PCM5102 via Teensy pin 32.  Speaker.
+
 AudioConnection patchCord21(headphoneScale, 0, i2s_quadOut, 0);   // To Audio Adapter via via Teensy pin 7.  Headphones.
 AudioConnection patchCord22(headphoneScale, 0, i2s_quadOut, 1);   // To Audio Adapter via via Teensy pin 7.  Headphones (other side).
 

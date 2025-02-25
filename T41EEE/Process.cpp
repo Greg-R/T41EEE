@@ -65,8 +65,8 @@ void Process::ProcessIQData() {
 
     //  Set RFGain for all bands.
     if (EEPROMData.autoGain) rfGain = EEPROMData.rfGainCurrent;                          // Auto-gain
-//    else rfGain = EEPROMData.rfGain[EEPROMData.currentBand];                             // Manual gain adjust.
-        else rfGain = EEPROMData.rfGain[EEPROMData.currentBand] - 45;                             //// EXPERIMENT
+    else rfGain = EEPROMData.rfGain[EEPROMData.currentBand];                             // Manual gain adjust.
+//        else rfGain = EEPROMData.rfGain[EEPROMData.currentBand];                             //// EXPERIMENT
 //    rfGainValue = pow(10, static_cast<float32_t>(rfGain) / 20) * 1.0 * DSPGAINSCALE;   // KF5N November 9 2024
     rfGainValue = pow(10, static_cast<float32_t>(rfGain) / 20.0);  // DSPGAINSCALE removed in T41EEE.9.  Greg KF5N February 24, 2024
     arm_scale_f32(float_buffer_L, rfGainValue, float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 09-27-22
@@ -494,7 +494,8 @@ void Process::ProcessIQData() {
     **********************************************************************************/
   
 //    arm_scale_f32(float_buffer_L, 80 * audioGainCompensate, float_buffer_L, BUFFER_SIZE * N_BLOCKS);  // Set scaling constant to optimize volume control range.
-    arm_scale_f32(float_buffer_L, 12800.0, float_buffer_L, BUFFER_SIZE * N_BLOCKS);
+// Scale by 8 to compensate for interpolation.
+    arm_scale_f32(float_buffer_L, 8.0, float_buffer_L, BUFFER_SIZE * N_BLOCKS);
                                                                                         //      arm_scale_f32(float_buffer_R, DF * volumeLog[EEPROMData.audioVolume] * 4, float_buffer_R, BUFFER_SIZE * N_BLOCKS);
                                                                                         //    }
     /**********************************************************************************  AFP 12-31-20

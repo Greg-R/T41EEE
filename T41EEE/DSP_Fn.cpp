@@ -81,7 +81,7 @@ void CalcNotchBins() {
 
 void AGCLoadValues() {
   float32_t tmp;
-  float32_t sample_rate = (float32_t)SR[SampleRate].rate / DF;
+  float32_t sample_rate = static_cast<float32_t>(SR[SampleRate].rate) / DF;
 
   //calculate internal parameters
   switch (EEPROMData.AGCMode) {
@@ -164,7 +164,7 @@ void AGCPrep() {
 
   // max_gain = 1000.0 to be applied??? or is this AGC threshold = knee level?
   max_gain = 10000.0;  // G0ORX
-  fixed_gain = 20.0;   // G0ORX
+  fixed_gain = 20.0;   //// G0ORX.  Buffers are multiplied by this 20 when AGC is off.  Original value was 0.7.  Why this high value???
   max_input = 1.0;     // G0ORX
   out_targ = 1.0;      // G0ORX       // target value of audio after AGC
   var_gain = 1.5;      // G0ORX
@@ -197,7 +197,7 @@ void AGCThresholdChanged() {
 void AGC() {
   int k;
   float32_t mult;
-  if (EEPROMData.AGCMode == 0)  // AGC OFF
+  if (EEPROMData.AGCMode == 0)  // AGC OFF.  Multiply buffers by fixed_gain and return.
   {
     for (unsigned i = 0; i < FFT_length / 2; i++) {
       iFFT_buffer[FFT_length + 2 * i + 0] = fixed_gain * iFFT_buffer[FFT_length + 2 * i + 0];
@@ -206,8 +206,8 @@ void AGC() {
     return;
   }
 
-  for (unsigned i = 0; i < FFT_length / 2; i++) {
-    if (++out_index >= (int)ring_buffsize) out_index -= ring_buffsize;
+  for (uint32_t i = 0; i < FFT_length / 2; i++) {
+    if (++out_index >= static_cast<int>(ring_buffsize)) out_index -= ring_buffsize;
     if (++in_index >= ring_buffsize) in_index -= ring_buffsize;
 
     out_sample[0] = ring[2 * out_index + 0];
@@ -316,7 +316,7 @@ void AGC() {
         }
         break;
     }
-    if (volts < min_volts) {
+    if (volts < min_volts) {  // min_volts is a function of max_gain, which is a function of AGC_threshold.
       volts = min_volts;  // no AGC action is taking place
       agc_action = false;
     } else {
@@ -325,6 +325,9 @@ void AGC() {
 
     //#ifdef USE_LOG10FAST
     mult = (out_target - slope_constant * min(0.0, log10f_fast(inv_max_input * volts))) / volts;
+
+Serial.printf("agc_action = %d mult = %3.2f min_volts = %2.4f\n", agc_action, mult, min_volts);
+
     //#else
     //  mult = (out_target - slope_constant * min (0.0, log10f(inv_max_input * volts))) / volts;
     //#endif
