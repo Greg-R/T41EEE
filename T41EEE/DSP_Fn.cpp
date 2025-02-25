@@ -117,8 +117,8 @@ void AGCLoadValues() {
       break;
   }
 
-  max_gain = powf(10.0, (float32_t)bands[EEPROMData.currentBand].AGC_thresh / 20.0);
-  attack_buffsize = (int)ceil(sample_rate * n_tau * tau_attack);
+  max_gain = powf(10.0, static_cast<float32_t>(bands[EEPROMData.currentBand].AGC_thresh) / 20.0);
+  attack_buffsize = static_cast<int>(ceil(sample_rate * n_tau * tau_attack));
   in_index = attack_buffsize + out_index;
   attack_mult = 1.0 - expf(-1.0 / (sample_rate * tau_attack));
   decay_mult = 1.0 - expf(-1.0 / (sample_rate * tau_decay));
@@ -181,9 +181,9 @@ void AGCPrep() {
   AGCLoadValues();  // G0ORX
 }
 
-
+//  Where is this used???
 void AGCThresholdChanged() {
-  max_gain = powf(10.0, (float32_t)bands[EEPROMData.currentBand].AGC_thresh / 20.0);
+  max_gain = powf(10.0, static_cast<float32_t>(bands[EEPROMData.currentBand].AGC_thresh) / 20.0);
 }
 
 

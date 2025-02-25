@@ -65,9 +65,10 @@ void Process::ProcessIQData() {
 
     //  Set RFGain for all bands.
     if (EEPROMData.autoGain) rfGain = EEPROMData.rfGainCurrent;                          // Auto-gain
-    else rfGain = EEPROMData.rfGain[EEPROMData.currentBand];                             // Manual gain adjust.
-//    rfGainValue = pow(10, static_cast<float32_t>(rfGain) / 20) * 1.0 * DSPGAINSCALE;                      // KF5N November 9 2024
-    rfGainValue = pow(10, static_cast<float32_t>(rfGain) / 20.0);
+//    else rfGain = EEPROMData.rfGain[EEPROMData.currentBand];                             // Manual gain adjust.
+        else rfGain = EEPROMData.rfGain[EEPROMData.currentBand] - 45;                             //// EXPERIMENT
+//    rfGainValue = pow(10, static_cast<float32_t>(rfGain) / 20) * 1.0 * DSPGAINSCALE;   // KF5N November 9 2024
+    rfGainValue = pow(10, static_cast<float32_t>(rfGain) / 20.0);  // DSPGAINSCALE removed in T41EEE.9.  Greg KF5N February 24, 2024
     arm_scale_f32(float_buffer_L, rfGainValue, float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 09-27-22
     arm_scale_f32(float_buffer_R, rfGainValue, float_buffer_R, BUFFER_SIZE * N_BLOCKS);  //AFP 09-27-22
 //    arm_clip_f32(float_buffer_L, float_buffer_L, -1.0, 1.0, 2048);
@@ -291,6 +292,8 @@ void Process::ProcessIQData() {
      **********************************************************************************/
 
     arm_cmplx_mult_cmplx_f32(FFT_buffer, FIR_filter_mask, iFFT_buffer, FFT_length);
+
+    // Create audio spectrum.
     if (updateDisplayFlag == 1) {
       for (int k = 0; k < 1024; k++) {
         audioSpectBuffer[1024 - k] = (iFFT_buffer[k] * iFFT_buffer[k]);
@@ -370,7 +373,6 @@ void Process::ProcessIQData() {
           audiotmp = AlphaBetaMag(iFFT_buffer[FFT_length + (i * 2)], iFFT_buffer[FFT_length + (i * 2) + 1]);
           //}
         }
-
         break;
       case Sideband::BOTH_AM:
         for (unsigned i = 0; i < FFT_length / 2; i++) {  // Magnitude estimation Lyons (2011): page 652 / libcsdr
@@ -485,13 +487,14 @@ void Process::ProcessIQData() {
     arm_fir_interpolate_f32(&FIR_int1_I, float_buffer_L, iFFT_buffer, BUFFER_SIZE * N_BLOCKS / (uint32_t)(DF));  // Interpolation by 2?  To 48ksps???
 
     // interpolation-by-4
-    arm_fir_interpolate_f32(&FIR_int2_I, iFFT_buffer, float_buffer_L, BUFFER_SIZE * N_BLOCKS / (uint32_t)(DF1));
+    arm_fir_interpolate_f32(&FIR_int2_I, iFFT_buffer, float_buffer_L, BUFFER_SIZE * N_BLOCKS / (uint32_t)(DF1));  // to 192ksps
 
     /**********************************************************************************  AFP 12-31-20
       Digital Volume Control
     **********************************************************************************/
   
-    arm_scale_f32(float_buffer_L, 80 * audioGainCompensate, float_buffer_L, BUFFER_SIZE * N_BLOCKS);  // Set scaling constant to optimize volume control range.
+//    arm_scale_f32(float_buffer_L, 80 * audioGainCompensate, float_buffer_L, BUFFER_SIZE * N_BLOCKS);  // Set scaling constant to optimize volume control range.
+    arm_scale_f32(float_buffer_L, 12800.0, float_buffer_L, BUFFER_SIZE * N_BLOCKS);
                                                                                         //      arm_scale_f32(float_buffer_R, DF * volumeLog[EEPROMData.audioVolume] * 4, float_buffer_R, BUFFER_SIZE * N_BLOCKS);
                                                                                         //    }
     /**********************************************************************************  AFP 12-31-20

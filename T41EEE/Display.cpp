@@ -1178,12 +1178,12 @@ break;
 void UpdateVolumeField() {
   tft.setFontScale((enum RA8875tsize)1);
 
-  tft.setCursor(BAND_INDICATOR_X + 20, BAND_INDICATOR_Y);  // Volume
+  tft.setCursor(BAND_INDICATOR_X + 10, BAND_INDICATOR_Y);  // Volume
   tft.setTextColor(RA8875_WHITE);
   tft.print("Vol:");
   tft.setTextColor(RA8875_GREEN);
-  tft.fillRect(BAND_INDICATOR_X + 90, BAND_INDICATOR_Y, tft.getFontWidth() * 3 + 2, tft.getFontHeight(), RA8875_BLACK);
-  tft.setCursor(FIELD_OFFSET_X, BAND_INDICATOR_Y);
+  tft.fillRect(BAND_INDICATOR_X + 80, BAND_INDICATOR_Y, tft.getFontWidth() * 3 + 2, tft.getFontHeight(), RA8875_BLACK);
+  tft.setCursor(FIELD_OFFSET_X - 10, BAND_INDICATOR_Y);
   tft.print(EEPROMData.audioVolume);
 }
 
@@ -1199,8 +1199,8 @@ void UpdateVolumeField() {
 *****/
 void UpdateAGCField() {
   tft.setFontScale((enum RA8875tsize)1);
-  tft.fillRect(AGC_X_OFFSET, AGC_Y_OFFSET, tft.getFontWidth() * 7 - 3, tft.getFontHeight(), RA8875_BLACK);
-  tft.setCursor(BAND_INDICATOR_X + 143, BAND_INDICATOR_Y);
+  tft.fillRect(AGC_X_OFFSET - 10, AGC_Y_OFFSET, tft.getFontWidth() * 7, tft.getFontHeight(), RA8875_BLACK);
+  tft.setCursor(BAND_INDICATOR_X + 133, BAND_INDICATOR_Y);
   switch (EEPROMData.AGCMode) {  // The option for AGC
     case 0:                      // Off
                                  //    tft.setCursor(BAND_INDICATOR_X + 140, BAND_INDICATOR_Y);
