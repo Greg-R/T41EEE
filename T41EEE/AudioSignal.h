@@ -258,7 +258,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       ADC_RX_Q.end();
       ADC_RX_Q.clear();
 
-      SampleRate = SAMPLE_RATE_44K;
+      SampleRate = SAMPLE_RATE_48K;
       SetI2SFreq(SR[SampleRate].rate);
       toneSSBCal.end();
 //      updateMic();    Not needed here?
@@ -335,6 +335,16 @@ void SetAudioOperatingState(RadioState operatingState) {
 
     case RadioState::CW_TRANSMIT_STRAIGHT_STATE:
     case RadioState::CW_TRANSMIT_KEYER_STATE:
+      ADC_RX_I.end();
+      ADC_RX_I.clear();
+      ADC_RX_Q.end();
+      ADC_RX_Q.clear();
+
+      // Baseband SSB data cleared and ended.
+      Q_in_L_Ex.end();  // Clear I channel.
+      Q_in_L_Ex.clear();
+      Q_in_R_Ex.end();  // Clear Q channel.
+      Q_in_R_Ex.clear();
       // QSD disabled and disconnected
       // Speaker and headphones should be unmuted according to current audio out state for sidetone.
       controlAudioOut(EEPROMData.audioOut, false);  // FT8 audio should be headphone only.
@@ -344,26 +354,19 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord9.disconnect();
       patchCord10.disconnect();
       patchCord17.disconnect();
-      patchCord18.disconnect();
-      patchCord19.disconnect();
-      patchCord20.disconnect();
+//      speakerScale.gain(0.0);
+ //     headphoneScale.gain(0.0);
+//      patchCord18.disconnect();
+//      patchCord19.disconnect();
+//      patchCord20.disconnect();
       patchCord21.disconnect();
       patchCord22.disconnect();     
-
-      ADC_RX_I.end();
-      ADC_RX_I.clear();
-      ADC_RX_Q.end();
-      ADC_RX_Q.clear();
-
-      // Baseband CESSB data cleared and ended.
-      Q_in_L_Ex.end();  // Clear I channel.
-      Q_in_L_Ex.clear();
-      Q_in_R_Ex.end();  // Clear Q channel.
-      Q_in_R_Ex.clear();
 
       patchCord15.connect();  // Connect I and Q transmitter output channels.
       patchCord16.connect();
       patchCord17.connect();                                    // Sidetone goes into receiver audio path.
+      patchCord21.connect();
+      patchCord22.connect(); 
       volumeAdjust.gain(volumeLog[EEPROMData.sidetoneVolume]);  // Adjust sidetone volume.
 
       break;

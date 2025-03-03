@@ -843,7 +843,7 @@ FLASHMEM void setup() {
   //  sgtl5000_1.eqSelect(3);
   //  sgtl5000_1.eqBands(-1.0, 0.0, 1.0, 1.0, -1.0);
   AudioMemory(200);  //  Increased to 450 from 400.  Memory was hitting max.  KF5N August 31, 2023
-  AudioMemory_F32(10);
+  AudioMemory_F32(20);
   sgtl5000_1.inputSelect(AUDIO_INPUT_MIC);
   sgtl5000_1.volume(1.0);
   sgtl5000_1.muteHeadphone();  // Make the headphone output active.
@@ -874,9 +874,9 @@ FLASHMEM void setup() {
   cessb1.setSideband(false);
   cessb1.setProcessing(EEPROMData.cessb);  // Set to CESSB or SSB Data.  Greg KF5N August 17 2024
 
-  Q_out_L_Ex.setMaxBuffers(32);  // Limits determined emperically.  These may need more adjustment.  Greg KF5N August 4, 2024.
-  Q_out_R_Ex.setMaxBuffers(32);
-  Q_out_L.setMaxBuffers(64);  // Receiver audio buffer limit.
+////  Q_out_L_Ex.setMaxBuffers(32);  // Limits determined emperically.  These may need more adjustment.  Greg KF5N August 4, 2024.
+////  Q_out_R_Ex.setMaxBuffers(32);
+////  Q_out_L.setMaxBuffers(64);  // Receiver audio buffer limit.
 
   // GPOs used to control hardware.
   pinMode(FILTERPIN15M, OUTPUT);
@@ -965,8 +965,8 @@ FLASHMEM void setup() {
 #endif
 
   // ========================  End set up of Parameters from EEPROM data ===============
-  Q_out_L_Ex.setMaxBuffers(32);  // Put a constraint on the number of blockss to decrease audio memory.  Greg KF5N August 15, 2024
-  Q_out_R_Ex.setMaxBuffers(32);
+//  Q_out_L_Ex.setMaxBuffers(32);  // Put a constraint on the number of blockss to decrease audio memory.  Greg KF5N August 15, 2024
+//  Q_out_R_Ex.setMaxBuffers(32);
   h = 135;
   NCOFreq = 0;
   h = 135;

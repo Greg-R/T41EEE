@@ -326,7 +326,7 @@ void AGC() {
     //#ifdef USE_LOG10FAST
     mult = (out_target - slope_constant * min(0.0, log10f_fast(inv_max_input * volts))) / volts;
 
-Serial.printf("agc_action = %d mult = %3.2f min_volts = %2.4f\n", agc_action, mult, min_volts);
+
 
     //#else
     //  mult = (out_target - slope_constant * min (0.0, log10f(inv_max_input * volts))) / volts;
