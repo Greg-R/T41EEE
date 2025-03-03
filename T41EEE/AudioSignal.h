@@ -377,11 +377,11 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord9.connect();   // Receiver I channel
       patchCord10.connect();  // Receiver Q channel
       patchCord17.disconnect();  // CW sidetone
-      patchCord18.disconnect();
-      patchCord19.disconnect();
-      patchCord20.disconnect();
-      patchCord21.disconnect();
-      patchCord22.disconnect();
+//      patchCord18.disconnect();
+//      patchCord19.disconnect();
+//      patchCord20.disconnect();
+//      patchCord21.disconnect();
+//      patchCord22.disconnect();
       switch1.setChannel(1);  // Disconnect microphone path.
       switch2.setChannel(1);  //  Disconnect 1 kHz test tone path.
 
