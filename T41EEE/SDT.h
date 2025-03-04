@@ -528,7 +528,7 @@ extern int32_t NCOFreq;  // AFP 04-16-22
 
 //======================================== Global object declarations ==================================================
 // Teensy and OpenAudio objects.  Revised by KF5N July 24, 2024
-extern AudioConnection patchCord15;  // Patch cords 15 and 16 are used to connect/disconnect the I and Q datastreams.
+extern AudioConnection_F32 patchCord15;  // Patch cords 15 and 16 are used to connect/disconnect the I and Q datastreams.
 extern AudioConnection patchCord16;
 
 extern AudioAmplifier volumeAdjust;
