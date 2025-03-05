@@ -901,7 +901,7 @@ void Button::ButtonMode()  //====== Changed AFP 10-05-22  =================
   DrawFrequencyBarValue();
   DrawInfoWindowFrame();
   DisplayIncrementField();
-  AGCPrep();
+//  AGCPrep();
   UpdateAGCField();
   EncoderVolume();
   UpdateInfoWindow();

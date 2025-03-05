@@ -65,7 +65,7 @@ void Process::ProcessIQData() {
 
     //  Set RFGain for all bands.
     if (EEPROMData.autoGain) rfGain = EEPROMData.rfGainCurrent;                          // Auto-gain
-    else rfGain = EEPROMData.rfGain[EEPROMData.currentBand];                             // Manual gain adjust.
+    else rfGain = EEPROMData.rfGain[EEPROMData.currentBand] - 30;                             // Manual gain adjust.
 //        else rfGain = EEPROMData.rfGain[EEPROMData.currentBand];                             //// EXPERIMENT
 //    rfGainValue = pow(10, static_cast<float32_t>(rfGain) / 20) * 1.0 * DSPGAINSCALE;   // KF5N November 9 2024
     rfGainValue = pow(10, static_cast<float32_t>(rfGain) / 20.0);  // DSPGAINSCALE removed in T41EEE.9.  Greg KF5N February 24, 2024
@@ -312,7 +312,15 @@ void Process::ProcessIQData() {
       arm_max_f32(audioSpectBuffer, 1024, &audioMaxSquared, &AudioMaxIndex);  // AFP 09-18-22 Max value of squared abin magnitued in audio
       audioMaxSquaredAve = .5 * audioMaxSquared + .5 * audioMaxSquaredAve;    //AFP 09-18-22Running averaged values
       DisplaydbM();
-      DisplayAGC();
+//      DisplayAGC();
+    }
+
+//  Need to scale iFFT_buffer[] here?  To replace the scaling done by AGC()?
+
+    for (unsigned i = 0; i < FFT_length / 2; i++)
+    {
+      iFFT_buffer[FFT_length + 2 * i + 0] = 1024.0 * iFFT_buffer[FFT_length + 2 * i + 0];
+      iFFT_buffer[FFT_length + 2 * i + 1] = 1024.0 * iFFT_buffer[FFT_length + 2 * i + 1];
     }
 
     /**********************************************************************************
@@ -495,7 +503,7 @@ void Process::ProcessIQData() {
   
 //    arm_scale_f32(float_buffer_L, 80 * audioGainCompensate, float_buffer_L, BUFFER_SIZE * N_BLOCKS);  // Set scaling constant to optimize volume control range.
 // Scale by 8 to compensate for interpolation.
-    arm_scale_f32(float_buffer_L, 8.0, float_buffer_L, BUFFER_SIZE * N_BLOCKS);
+    arm_scale_f32(float_buffer_L, 8.0 * audioGainCompensate, float_buffer_L, BUFFER_SIZE * N_BLOCKS);
                                                                                         //      arm_scale_f32(float_buffer_R, DF * volumeLog[EEPROMData.audioVolume] * 4, float_buffer_R, BUFFER_SIZE * N_BLOCKS);
                                                                                         //    }
     /**********************************************************************************  AFP 12-31-20

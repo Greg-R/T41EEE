@@ -73,6 +73,7 @@ if(mode == RadioMode::AM_MODE)  bands[EEPROMData.currentBand].sideband = Sideban
 if(mode == RadioMode::SAM_MODE) bands[EEPROMData.currentBand].sideband = Sideband::BOTH_SAM;
 }
 
+lastState = RadioState::NOSTATE;  // This is to force a change in the main loop if the mode changes.
 
 /*
 if(bands[EEPROMData.currentBand].FHiCut < 0 and bands[EEPROMData.currentBand].FLoCut < 0) {
@@ -109,8 +110,8 @@ fhigh = bands[EEPROMData.currentBand].FHiCut;
 */
 
   ShowBandwidth();
-  Serial.printf("bands[EEPROMData.currentBand].FLoCut = %d\n",bands[EEPROMData.currentBand].FLoCut);
-  Serial.printf("bands[EEPROMData.currentBand].FHiCut = %d\n",bands[EEPROMData.currentBand].FHiCut);  
+//  Serial.printf("bands[EEPROMData.currentBand].FLoCut = %d\n",bands[EEPROMData.currentBand].FLoCut);
+//  Serial.printf("bands[EEPROMData.currentBand].FHiCut = %d\n",bands[EEPROMData.currentBand].FHiCut);  
   // tft.fillRect(pos_x_frequency + 10, pos_y_frequency + 24, 210, 16, RA8875_BLACK);
   //tft.fillRect(OPERATION_STATS_X + 170, FREQUENCY_Y + 30, tft.getFontWidth() * 5, tft.getFontHeight(), RA8875_BLACK);        // Clear top-left menu area
 ////  old_demod_mode = bands[EEPROMData.currentBand].mode;  // set old_mode flag for next time, at the moment only used for first time radio is switched on . . .

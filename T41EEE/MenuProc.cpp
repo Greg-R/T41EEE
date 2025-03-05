@@ -505,7 +505,7 @@ void SpectrumOptions() { /*
 
   Return value
     void
-*****/
+*****
 void AGCOptions() {
   const char *AGCChoices[] = { "AGC Off", "AGC Long", "AGC Slow", "AGC Medium", "AGC Fast", "Cancel" };  // G0ORX (Added Long) September 5, 2023
 
@@ -515,6 +515,24 @@ void AGCOptions() {
   }
 
   AGCLoadValues();         // G0ORX September 5, 2023
+  eeprom.EEPROMWrite();    // ...save it
+  UpdateAGCField();
+}
+*/
+
+
+void AGCOptions() {
+//  const char *AGCChoices[] = { "AGC Off", "AGC Long", "AGC Slow", "AGC Medium", "AGC Fast", "Cancel" };  // G0ORX (Added Long) September 5, 2023
+  const char *AGCChoices[] = { "AGC Off", "AGC On", "Cancel" };  // AGC revised.  Greg KF5N February 26, 2025
+
+//  EEPROMData.AGCMode = SubmenuSelect(AGCChoices, 6, EEPROMData.AGCMode);  // G0ORX
+    EEPROMData.AGCMode = SubmenuSelect(AGCChoices, 3, EEPROMData.AGCMode);  // AGC revised.  Greg KF5N February 26, 2025
+//      if (EEPROMData.AGCMode == 5) {
+  if (EEPROMData.AGCMode == 2) {
+    return;
+  }
+SetAudioOperatingState(radioState);
+//  AGCPrep();         //
   eeprom.EEPROMWrite();    // ...save it
   UpdateAGCField();
 }

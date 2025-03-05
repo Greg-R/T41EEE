@@ -874,9 +874,9 @@ FLASHMEM void setup() {
   cessb1.setSideband(false);
   cessb1.setProcessing(EEPROMData.cessb);  // Set to CESSB or SSB Data.  Greg KF5N August 17 2024
 
-////  Q_out_L_Ex.setMaxBuffers(32);  // Limits determined emperically.  These may need more adjustment.  Greg KF5N August 4, 2024.
-////  Q_out_R_Ex.setMaxBuffers(32);
-////  Q_out_L.setMaxBuffers(64);  // Receiver audio buffer limit.
+  Q_out_L_Ex.setMaxBuffers(32);  // Limits determined emperically.  These may need more adjustment.  Greg KF5N August 4, 2024.
+  Q_out_R_Ex.setMaxBuffers(32);
+  Q_out_L.setMaxBuffers(64);  // Receiver audio buffer limit.
 
   // GPOs used to control hardware.
   pinMode(FILTERPIN15M, OUTPUT);
@@ -990,7 +990,8 @@ FLASHMEM void setup() {
   InitializeDataArrays();
   // Initialize user defined stuff
   initUserDefinedStuff();
-  volumeAdjust.gain(0.0);   // Set volume to zero at power-up.
+  speakerVolume.setGain(0.0);   // Set volume to zero at power-up.
+  headphoneVolume.setGain(0.0);
   volumeChangeFlag = true;  // Adjust volume so saved value.
   filterEncoderMove = 0;
   fineTuneEncoderMove = 0L;
@@ -1287,7 +1288,11 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
     // How many dB between reference and current setting?  Round to integer.
     //    dBoffset = static_cast<int>(40.0 * log10f_fast(audioBW/2800.0));
     process.audioGainCompensate = 4 * 2800.0 / audioBW;
-    volumeAdjust.gain(volumeLog[EEPROMData.audioVolume]);
+ //   volumeAdjust.gain(volumeLog[EEPROMData.audioVolume]);
+
+speakerVolume.setGain(volumeLog[EEPROMData.audioVolume]);
+headphoneVolume.setGain(volumeLog[EEPROMData.audioVolume]);
+
     //    int gainAdjust = EEPROMData.audioVolume - dBoffset;
     volumeChangeFlag = false;
     UpdateVolumeField();

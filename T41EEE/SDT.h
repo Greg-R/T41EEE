@@ -278,8 +278,7 @@ enum class AudioState{SPEAKER, HEADPHONE, BOTH, MUTE_BOTH};
 //  Primary menu selections from the switch matrix.  This is for a 6x3 matrix for a total of 18 buttons.
 enum class MenuSelect{MENU_OPTION_SELECT, MAIN_MENU_UP, BAND_UP, ZOOM, MAIN_MENU_DN, BAND_DN, FILTER, DEMODULATION, SET_MODE,
                       NOISE_REDUCTION, NOTCH_FILTER, MUTE_AUDIO, FINE_TUNE_INCREMENT, DECODER_TOGGLE,
-                      MAIN_TUNE_INCREMENT, RESET_TUNING, UNUSED_1, BEARING, BOGUS_PIN_READ, DEFAULT
-};
+                      MAIN_TUNE_INCREMENT, RESET_TUNING, UNUSED_1, BEARING, BOGUS_PIN_READ, DEFAULT};
 
 struct maps {
   char mapNames[50];
@@ -357,8 +356,8 @@ struct config_t {
   float pll_fmax = 4000.0;                                                                  // 4 bytes
   float powerOutCW[NUMBER_OF_BANDS] = { 0.035, 0.035, 0.035, 0.035, 0.035, 0.035, 0.035 };  // powerOutCW and powerOutSSB are derived from the TX power setting and calibration factors.
   float powerOutSSB[NUMBER_OF_BANDS] = { 0.035, 0.035, 0.035, 0.035, 0.035, 0.035, 0.035 };
-  float CWPowerCalibrationFactor[NUMBER_OF_BANDS] =  { 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };        // Increased to 0.04, was 0.019; KF5N February 20, 2024
-  float SSBPowerCalibrationFactor[NUMBER_OF_BANDS] = { 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };  // Increased to 0.04, was 0.008; KF5N February 21, 2024
+  float CWPowerCalibrationFactor[NUMBER_OF_BANDS] =  { 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 };        // Increased to 0.04, was 0.019; KF5N February 20, 2024
+  float SSBPowerCalibrationFactor[NUMBER_OF_BANDS] = { 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 };  // Increased to 0.04, was 0.008; KF5N February 21, 2024
   float IQCWRXAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
   float IQCWRXPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
   float IQCWAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
@@ -401,8 +400,8 @@ Sideband lastSideband[NUMBER_OF_BANDS] = {Sideband::LOWER, Sideband::LOWER, Side
   q15_t qDCoffsetCW[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
   q15_t iDCoffsetSSB[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
   q15_t qDCoffsetSSB[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-  q15_t dacOffsetCW = 1100;  // This must be "tuned" for each radio and/or Audio Adapter board.
-  q15_t dacOffsetSSB = 1100;  // This must be "tuned" for each radio and/or Audio Adapter board.
+  q15_t dacOffsetCW = 1500;  // This must be "tuned" for each radio and/or Audio Adapter board.
+  q15_t dacOffsetSSB = 1500;  // This must be "tuned" for each radio and/or Audio Adapter board.
 #endif
   bool CWradioCalComplete = false;
   bool SSBradioCalComplete = false;
@@ -543,6 +542,7 @@ extern AudioPlayQueue Q_out_R_Ex;
 extern AudioControlSGTL5000 sgtl5000_1;  // F32 controller for the Teensy Audio Board
 extern AudioConvert_I16toF32 int2Float1;          // Converts Int16 to Float.  See class in AudioStream_F32.h
 extern AudioEffectGain_F32 micGain;               // Added with CESSB.  Greg KF5N July 24, 2024.
+extern AudioEffectGain_F32 speakerVolume, headphoneVolume;
 extern AudioConvert_F32toI16 float2Int1;          // Converts Float to Int16.  See class in AudioStream_F32.h
 extern AudioSynthWaveformSine_F32 toneSSBCal;
 extern AudioMixer4_F32 mixer1;
@@ -916,7 +916,7 @@ void CWOptions();
 #define CW_SHAPING_ZERO 3
 
 void CW_ExciterIQData(int shaping);  // AFP 08-18-22
-void DisplayAGC();
+//void DisplayAGC();
 void DisplayClock();
 void DisplaydbM();
 void DisplayIncrementField();

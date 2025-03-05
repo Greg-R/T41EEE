@@ -68,7 +68,7 @@ AudioConnection connect16(Q_out_R_Ex, 0, i2s_quadOut, 1);  // Q channel to line 
 // 1st experiment.  Add in receiver compressor along with all of the F32 stuff.
 AudioEffectCompressor2_F32 compressor2_1;  // Used for audio AGC.
 AudioEffectCompressor2_F32 *pc1 = &compressor2_1;
-AudioAmplifier volumeAdjust;
+//AudioAmplifier volumeAdjust;
 AudioEffectGain_F32 speakerVolume, speakerScale, headphoneVolume, headphoneScale, compGain;
 AudioMixer4_F32 mixer4;
 AudioSwitch4_OA_F32 switch4;
@@ -245,11 +245,12 @@ void SetAudioOperatingState(RadioState operatingState) {
 //      patchCord24.connect();
 //      patchCord25.connect();
 //      patchCord26.connect();
-      volumeAdjust.gain(volumeLog[EEPROMData.audioVolume]);  // Set volume because sidetone may have changed it.
+
 //      speakerScale.gain(volumeLog[SPEAKERSCALE]);
       speakerScale.setGain(SPEAKERSCALE);      
-//      headphoneScale.gain(volumeLog[HEADPHONESCALE]);
-      headphoneScale.setGain(HEADPHONESCALE);     
+      headphoneScale.setGain(HEADPHONESCALE);
+      speakerVolume.setGain(volumeLog[EEPROMData.audioVolume]);    // Set volume because sidetone may have changed it.
+      headphoneVolume.setGain(volumeLog[EEPROMData.audioVolume]);  // Set volume because sidetone may have changed it.
       sgtl5000_1.volume(0.8);
       controlAudioOut(EEPROMData.audioOut, false);  // Configure audio out; don't mute all.
 //      sgtl5000_1.unmuteHeadphone();
@@ -428,7 +429,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord17.connect();                                    // Sidetone goes into receiver audio path.
 //      patchCord21.connect();
 //      patchCord22.connect(); 
-      volumeAdjust.gain(volumeLog[EEPROMData.sidetoneVolume]);  // Adjust sidetone volume.
+      speakerVolume.setGain(volumeLog[EEPROMData.sidetoneVolume]);  // Adjust sidetone volume.
+      headphoneVolume.setGain(volumeLog[EEPROMData.sidetoneVolume]);  // Adjust sidetone volume.
 
       break;
 
@@ -492,7 +494,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       Q_in_R_Ex.clear();
 
       patchCord17.connect();                                    // Sidetone goes into receiver audio path.
-      volumeAdjust.gain(volumeLog[EEPROMData.sidetoneVolume]);  // Adjust sidetone volume.
+
       break;
 
       case RadioState::NOSTATE:

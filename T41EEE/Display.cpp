@@ -1188,6 +1188,47 @@ void UpdateVolumeField() {
 }
 
 
+void UpdateAGCField() {
+  tft.setFontScale((enum RA8875tsize)1);
+  tft.fillRect(AGC_X_OFFSET - 10, AGC_Y_OFFSET, tft.getFontWidth() * 7 + 2, tft.getFontHeight(), RA8875_BLACK);
+  tft.setCursor(BAND_INDICATOR_X + 133, BAND_INDICATOR_Y);
+  switch (EEPROMData.AGCMode) {  // The option for AGC
+    case 0:                      // Off
+                                 //    tft.setCursor(BAND_INDICATOR_X + 140, BAND_INDICATOR_Y);
+      tft.setTextColor(DARKGREY);
+      tft.print("AGC OFF");
+      //      tft.setFontScale((enum RA8875tsize)0);
+      //      tft.setCursor(BAND_INDICATOR_X + 200, BAND_INDICATOR_Y + 15);
+      //      tft.print(" off");
+      //      tft.setFontScale((enum RA8875tsize)1);
+      break;
+
+    case 1:  // Long
+      tft.setTextColor(RA8875_YELLOW);
+      tft.print("AGC ON");
+      break;
+/*
+    case 2:  // Slow
+      tft.setTextColor(RA8875_WHITE);
+      tft.print("AGC S");
+      break;
+
+    case 3:  // Medium
+      tft.setTextColor(ORANGE);
+      tft.print("AGC M");
+      break;
+
+    case 4:  // Fast
+      tft.setTextColor(RA8875_GREEN);
+      tft.print("AGC F");
+      break;
+*/
+    default:
+      break;
+  }
+}
+
+
 /*****
   Purpose: Updates the AGC on the display.  Long option added. G0ORX September 6, 2023
 
@@ -1196,7 +1237,7 @@ void UpdateVolumeField() {
 
   Return value;
     void
-*****/
+*****
 void UpdateAGCField() {
   tft.setFontScale((enum RA8875tsize)1);
   tft.fillRect(AGC_X_OFFSET - 10, AGC_Y_OFFSET, tft.getFontWidth() * 7, tft.getFontHeight(), RA8875_BLACK);
@@ -1236,7 +1277,7 @@ void UpdateAGCField() {
       break;
   }
 }
-
+*/
 
 /*****
   Purpose: AGC active indicator.
@@ -1246,7 +1287,7 @@ void UpdateAGCField() {
 
   Return value;
     void
-*****/
+*****
 void DisplayAGC() {
   if (EEPROMData.AGCMode != 0) {  // Don't update AGC indicator if AGC is off.
     if (agc_action) tft.fillRect(765, AGC_Y_OFFSET + 10, 15, 15, RA8875_GREEN);
@@ -1254,7 +1295,7 @@ void DisplayAGC() {
   }
   //  Serial.printf("agc_action = %d\n", agc_action);
 }
-
+*/
 
 /*****
   Purpose: Updates the increment setting on the display
