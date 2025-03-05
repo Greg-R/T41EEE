@@ -216,7 +216,7 @@ void SetAudioOperatingState(RadioState operatingState) {
 //      patchCord15.disconnect();  // Disconnect transmitter I and Q channel outputs.
 
       patchCord16.disconnect();
-      if (EEPROMData.AGCMode == 1) {  // Activate compressor2_1 path.
+      if (ConfigData.AGCMode == 1) {  // Activate compressor2_1 path.
         switch4.setChannel(0);
         mixer4.gain(0, 1.0);
         mixer4.gain(1, 0.0);
@@ -248,15 +248,15 @@ void SetAudioOperatingState(RadioState operatingState) {
 //      speakerScale.gain(volumeLog[SPEAKERSCALE]);
       speakerScale.setGain(SPEAKERSCALE);      
       headphoneScale.setGain(HEADPHONESCALE);
-      speakerVolume.setGain(volumeLog[EEPROMData.audioVolume]);    // Set volume because sidetone may have changed it.
-      headphoneVolume.setGain(volumeLog[EEPROMData.audioVolume]);  // Set volume because sidetone may have changed it.
+      speakerVolume.setGain(volumeLog[ConfigData.audioVolume]);    // Set volume because sidetone may have changed it.
+      headphoneVolume.setGain(volumeLog[ConfigData.audioVolume]);  // Set volume because sidetone may have changed it.
       sgtl5000_1.volume(0.8);
-      controlAudioOut(EEPROMData.audioOut, false);  // Configure audio out; don't mute all.
+      controlAudioOut(ConfigData.audioOut, false);  // Configure audio out; don't mute all.
 //      sgtl5000_1.unmuteHeadphone();
       break;
     case RadioState::SSB_TRANSMIT_STATE:
         // QSD disabled and disconnected
-      controlAudioOut(EEPROMData.audioOut, true);  // Mute all.
+      controlAudioOut(ConfigData.audioOut, true);  // Mute all.
       sgtl5000_1.unmuteLineout();
 //      patchCord9.disconnect();   // Receiver I channel
 //      patchCord10.disconnect();  // Receiver Q channel
@@ -281,7 +281,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       switch2.setChannel(1);  //  Disconnect 1 kHz test tone path.
      // switch4.setChannel(1);  //  Disconnect USB audio from WSJTX on PC.
 
-      if(EEPROMData.compressorFlag) {
+      if(ConfigData.compressorFlag) {
       switch3.setChannel(0);  // Enable compressor path!
       mixer2.gain(0, 1.0);
       mixer2.gain(1, 0.0);
@@ -303,7 +303,7 @@ void SetAudioOperatingState(RadioState operatingState) {
   
     case RadioState::FT8_TRANSMIT_STATE:
       // QSD disabled and disconnected
-      controlAudioOut(EEPROMData.audioOut, false);  // FT8 audio should be headphone only.
+      controlAudioOut(ConfigData.audioOut, false);  // FT8 audio should be headphone only.
       sgtl5000_1.unmuteLineout();
 //      patchCord9.disconnect();   // Receiver I channel
 //      patchCord10.disconnect();  // Receiver Q channel
@@ -347,7 +347,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       SampleRate = SAMPLE_RATE_48K;
       InitializeDataArrays();  // I2S sample rate set in this function.
       // QSD disabled and disconnected
-      controlAudioOut(EEPROMData.audioOut, true);  // Mute all audio.
+      controlAudioOut(ConfigData.audioOut, true);  // Mute all audio.
       sgtl5000_1.unmuteLineout();
 //      patchCord9.connect();   // Receiver I channel
 //      patchCord10.connect();  // Receiver Q channel
@@ -373,7 +373,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       switch1.setChannel(1);  // Disconnect microphone path.
       switch2.setChannel(0);  // Connect 1 kHz test tone path.
 
-      if(EEPROMData.compressorFlag) {
+      if(ConfigData.compressorFlag) {
             switch3.setChannel(0);
             mixer2.gain(0, 1.0);
             mixer2.gain(1, 0.0);
@@ -408,9 +408,9 @@ void SetAudioOperatingState(RadioState operatingState) {
       Q_in_R_Ex.clear();
       // QSD disabled and disconnected
       // Speaker and headphones should be unmuted according to current audio out state for sidetone.
-      controlAudioOut(EEPROMData.audioOut, false);  // FT8 audio should be headphone only.
+      controlAudioOut(ConfigData.audioOut, false);  // FT8 audio should be headphone only.
       sgtl5000_1.unmuteLineout();
- //     sgtl5000_1.volume(volumeLog[EEPROMData.sidetoneVolume]);
+ //     sgtl5000_1.volume(volumeLog[ConfigData.sidetoneVolume]);
       sgtl5000_1.volume(0.3);  // This is for sidetone in the headphone output.  Hardcoding for now.
 //      patchCord9.disconnect();
 //      patchCord10.disconnect();
@@ -428,8 +428,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord17.connect();                                    // Sidetone goes into receiver audio path.
 //      patchCord21.connect();
 //      patchCord22.connect(); 
-      speakerVolume.setGain(volumeLog[EEPROMData.sidetoneVolume]);  // Adjust sidetone volume.
-      headphoneVolume.setGain(volumeLog[EEPROMData.sidetoneVolume]);  // Adjust sidetone volume.
+      speakerVolume.setGain(volumeLog[ConfigData.sidetoneVolume]);  // Adjust sidetone volume.
+      headphoneVolume.setGain(volumeLog[ConfigData.sidetoneVolume]);  // Adjust sidetone volume.
 
       break;
 
@@ -437,7 +437,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       SampleRate = SAMPLE_RATE_192K;
       SetI2SFreq(SR[SampleRate].rate);
       // QSD receiver enabled.  Calibrate is full duplex.
-      controlAudioOut(EEPROMData.audioOut, true);  // Mute all audio.
+      controlAudioOut(ConfigData.audioOut, true);  // Mute all audio.
       sgtl5000_1.unmuteLineout();
 //      patchCord9.connect();   // Receiver I channel
 //      patchCord10.connect();  // Receiver Q channel
@@ -477,7 +477,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       SampleRate = SAMPLE_RATE_192K;
       SetI2SFreq(SR[SampleRate].rate);
       //// Speaker and headphones should be unmuted according to current audio out state!!!!!!!!
-      controlAudioOut(EEPROMData.audioOut, false);  // Unmute according to audio state for sidetone.
+      controlAudioOut(ConfigData.audioOut, false);  // Unmute according to audio state for sidetone.
 ////      patchCord9.disconnect();
 ////      patchCord10.disconnect();
       // Baseband CESSB data cleared and ended.

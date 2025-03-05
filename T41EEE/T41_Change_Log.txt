@@ -355,7 +355,7 @@ The following change log documents changes to versions prior to the current.
 
 1.  Fixed keyer problem introduced by last version changes.
 2.  Corrected TX cal on USB to show correct sign.
-3.  Added default values for CW and SSB power arrays in EEPROMData struct.
+3.  Added default values for CW and SSB power arrays in ConfigData struct.
 4.  Fixed type conversion problem in sinusoidal tone array function.
 5.  Keyer selection is remembered in CW Option menu.
 6.  Re-do of button operations to make select button "repeat last command".
@@ -489,7 +489,7 @@ V049.2 October 16, 2023 Greg Raven (KF5N)
   4. Mic compressor fixes.
   5. CW sidetone adjustment via encoder.
   6. Changed volume control to logarithmic.
-  7. Changed instances of EEPROMData.currentBandA to EEPROMData.currentBand in CW Excite.
+  7. Changed instances of ConfigData.currentBandA to ConfigData.currentBand in CW Excite.
   8. Removed Serial print statement.
   9. Removed Serial print statements from volume control.
  10. Increased audio memory to 450.
@@ -506,7 +506,7 @@ V049.2 October 16, 2023 Greg Raven (KF5N)
  21. Changed ENCODER3_ENCODER_A/B to FINETUNE_ENCODER_A/B.
  22. Updated SetBandRelay() function to toggle only necessary GPOs.
  23. Fixed receiver outage after sidetone adjust.  Sidetone default = 50.0
- 24. S-Meter: added debug code and EEPROMData.rfGainAllBands (DB2OO)
+ 24. S-Meter: added debug code and ConfigData.rfGainAllBands (DB2OO)
  25. Add additional debug info in DisplaydbM() (DB2OO)
  26. Removed attribute DMAMEM from audioSpectBuffer because it breaks the S-meter.
  27. Added Jack's code to change color of version when running 4SQRP.
@@ -516,8 +516,8 @@ V049.2 October 16, 2023 Greg Raven (KF5N)
  31. Updated changes list in SDT.ino.  Added macro to increment variable in Encoders.cpp to eliminate warning.
 
 V049.1 Aug 21, 2023 Greg Raven (KF5N)
-  1. Changed 3 instances of VFO_A to EEPROMData.activeVFO in function ButtonFrequencyEntry().
-  2. Added TxRxFreq = EEPROMData.centerFreq to EEPROMRead() to fix frequency related bugs.
+  1. Changed 3 instances of VFO_A to ConfigData.activeVFO in function ButtonFrequencyEntry().
+  2. Added TxRxFreq = ConfigData.centerFreq to EEPROMRead() to fix frequency related bugs.
   3. Added clean-up code to CopySDtoEEPROM() in function EEPROMOptions().
   4. Fixes for calibration graphics.
   5. Changed 2 instances of currentFreqA to currentFreq in ResetTuning() function.
@@ -537,7 +537,7 @@ V049.1 Aug 21, 2023 Greg Raven (KF5N)
 
 V049a Aug 06, 2023, 2023 Jack Purdum (W8TEE)
   1. Corrected paddle flip issue
-  2. Made several changes to set EEPROMData.sdCardPresent to the proper value when tested.
+  2. Made several changes to set ConfigData.sdCardPresent to the proper value when tested.
   3. Changed frequency display to account for new font.
   4. Raised the frequencies by 2 pixels as the new font made then display too low and affect band info
   5. If only 1 map file found, no longer asks you to pick. It selects automatically the one file.
@@ -611,7 +611,7 @@ V047k July 22, 2023 Greg KF5N
    RAM2: variables:342944  free for malloc/new:181344  
    
 V047i July 18, 2023 Jack Purdum (W8TEE)
-  1. Removed SD_CARD_PRESENT and set global EEPROMData.sdCardPresent by call to SDPresentCheck() 
+  1. Removed SD_CARD_PRESENT and set global ConfigData.sdCardPresent by call to SDPresentCheck() 
   FLASH: code:237972, data:134128, headers:8820   free for files:7745544
    RAM1: variables:214496, code:234424, padding:27720   free for local variables:47648
    RAM2: variables:342944  free for malloc/new:181344
@@ -717,7 +717,7 @@ V046d June 27, 2023  Jack Purdum (W8TEE) and includes changes by Greg:
   1.  Add PROGMEM to line 97 in Bearing.cpp (John's change).
   2.  In EEPROM.cpp, change the strcpy function to strncpy in 2 places.  Add the parameter 10 as the third parameter.  Do this on lines 18 and 160.
   3.  In SDTVer045.ino, change line 1032 to:
-      int EEPROMData.AGCMode = 30;
+      int ConfigData.AGCMode = 30;
   4.  In SDTVer045.ino, comment line 698, thereby removing the global variable audioTemp.
       Also remove it from line 673 of SDT.h (the extern).
       Next, add this line

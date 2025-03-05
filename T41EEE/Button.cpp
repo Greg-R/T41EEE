@@ -52,7 +52,7 @@ void ButtonISR() {
 
   switch (buttonState) {
     case BUTTON_STATE_UP:
-      if (filteredADCValue <= EEPROMData.buttonThresholdPressed) {
+      if (filteredADCValue <= ConfigData.buttonThresholdPressed) {
         buttonElapsed = 0;
         buttonState = BUTTON_STATE_DEBOUNCE;
       }
@@ -69,10 +69,10 @@ void ButtonISR() {
 
       break;
     case BUTTON_STATE_PRESSED:
-      if (filteredADCValue >= EEPROMData.buttonThresholdReleased) {
+      if (filteredADCValue >= ConfigData.buttonThresholdReleased) {
         buttonState = BUTTON_STATE_UP;
-      } else if (EEPROMData.buttonRepeatDelay != 0) {  // buttonRepeatDelay of 0 disables repeat
-        if (buttonElapsed < EEPROMData.buttonRepeatDelay) {
+      } else if (ConfigData.buttonRepeatDelay != 0) {  // buttonRepeatDelay of 0 disables repeat
+        if (buttonElapsed < ConfigData.buttonRepeatDelay) {
           buttonElapsed += BUTTON_USEC_PER_ISR;
         } else {
           buttonADCOut = buttonADCPressed;
@@ -122,7 +122,7 @@ MenuSelect Button::ProcessButtonPress(int valPin) {
   }
 
   for (switchIndex = 0; switchIndex < NUMBER_OF_SWITCHES; switchIndex++) {
-    if (abs(valPin - EEPROMData.switchValues[switchIndex]) < WIGGLE_ROOM)  // ...because ADC does return exact values every time
+    if (abs(valPin - ConfigData.switchValues[switchIndex]) < WIGGLE_ROOM)  // ...because ADC does return exact values every time
     {
       return static_cast<MenuSelect>(switchIndex);
     }
@@ -166,7 +166,7 @@ int Button::ReadSelectedPushButton() {
     }
   }
 
-  if (buttonRead > EEPROMData.switchValues[0] + WIGGLE_ROOM) {  //AFP 10-29-22 per Jack Wilson
+  if (buttonRead > ConfigData.switchValues[0] + WIGGLE_ROOM) {  //AFP 10-29-22 per Jack Wilson
     return -1;
   }
   minPinRead = buttonRead;
@@ -206,10 +206,10 @@ void Button::ExecuteButtonPress(MenuSelect val) {
 
     case MenuSelect::BAND_UP:  // 2 Now calls ProcessIQData and Encoders calls
       EraseMenus();
-      if (EEPROMData.currentBand < 5) digitalWrite(bandswitchPins[EEPROMData.currentBand], LOW);  // Added if so unused GPOs will not be touched.  KF5N October 16, 2023.
+      if (ConfigData.currentBand < 5) digitalWrite(bandswitchPins[ConfigData.currentBand], LOW);  // Added if so unused GPOs will not be touched.  KF5N October 16, 2023.
       ButtonBandIncrease();
-      if (EEPROMData.currentBand < 5) digitalWrite(bandswitchPins[EEPROMData.currentBand], HIGH);
-      EEPROMData.rfGainCurrent = 10;
+      if (ConfigData.currentBand < 5) digitalWrite(bandswitchPins[ConfigData.currentBand], HIGH);
+      ConfigData.rfGainCurrent = 10;
       BandInformation();
       NCOFreq = 0L;
       DrawBandWidthIndicatorBar();  // AFP 10-20-22
@@ -232,9 +232,9 @@ void Button::ExecuteButtonPress(MenuSelect val) {
     case MenuSelect::BAND_DN:  // 5
       EraseMenus();
       ShowSpectrum();  //Now calls ProcessIQData and Encoders calls
-      if (EEPROMData.currentBand < 5) digitalWrite(bandswitchPins[EEPROMData.currentBand], LOW);
+      if (ConfigData.currentBand < 5) digitalWrite(bandswitchPins[ConfigData.currentBand], LOW);
       ButtonBandDecrease();
-      if (EEPROMData.currentBand < 5) digitalWrite(bandswitchPins[EEPROMData.currentBand], HIGH);
+      if (ConfigData.currentBand < 5) digitalWrite(bandswitchPins[ConfigData.currentBand], HIGH);
       BandInformation();
       NCOFreq = 0L;
       DrawBandWidthIndicatorBar();  //AFP 10-20-22
@@ -277,8 +277,8 @@ void Button::ExecuteButtonPress(MenuSelect val) {
       break;
 
     case MenuSelect::DECODER_TOGGLE:  // 13
-      EEPROMData.decoderFlag = !EEPROMData.decoderFlag;
-      if ((EEPROMData.xmtMode == RadioMode::CW_MODE) && (EEPROMData.decoderFlag == 1)) {
+      ConfigData.decoderFlag = !ConfigData.decoderFlag;
+      if ((ConfigData.xmtMode == RadioMode::CW_MODE) && (ConfigData.decoderFlag == 1)) {
  //       radioMode = RadioMode::CW_MODE;
       }
       UpdateDecoderField();
@@ -367,13 +367,13 @@ std::vector<uint32_t> centerTuneArray CENTER_TUNE_ARRAY;  // k3pto
 void Button::ButtonCenterFreqIncrement() {
   uint32_t index = 0;
   // Find the index of the current fine tune setting.
-  result = std::find(centerTuneArray.begin(), centerTuneArray.end(), EEPROMData.centerTuneStep);
+  result = std::find(centerTuneArray.begin(), centerTuneArray.end(), ConfigData.centerTuneStep);
   index = std::distance(centerTuneArray.begin(), result);
   index++;                                // Increment index.
   if (index == centerTuneArray.size()) {  // Wrap around.
     index = 0;
   }
-  EEPROMData.centerTuneStep = centerTuneArray[index];
+  ConfigData.centerTuneStep = centerTuneArray[index];
   DisplayIncrementField();
 }
 
@@ -392,13 +392,13 @@ std::vector<uint32_t> fineTuneArray FINE_TUNE_ARRAY;  // K3PTO
 void Button::ButtonFineFreqIncrement() {
   uint32_t index = 0;
   // Find the index of the current fine tune setting.
-  result = std::find(fineTuneArray.begin(), fineTuneArray.end(), EEPROMData.fineTuneStep);
+  result = std::find(fineTuneArray.begin(), fineTuneArray.end(), ConfigData.fineTuneStep);
   index = std::distance(fineTuneArray.begin(), result);
   index++;                              // Increment index.
   if (index == fineTuneArray.size()) {  // Wrap around.
     index = 0;
   }
-  EEPROMData.fineTuneStep = fineTuneArray[index];
+  ConfigData.fineTuneStep = fineTuneArray[index];
   DisplayIncrementField();
 }
 
@@ -460,58 +460,58 @@ void Button::ButtonMenuDecrease() {
 *****/
 void Button::ButtonBandIncrease() {
   int tempIndex;
-  tempIndex = EEPROMData.currentBandA;
-  if (EEPROMData.currentBand == NUMBER_OF_BANDS) {  // Incremented too far?
-    EEPROMData.currentBand = 0;                     // Yep. Roll to list front.
+  tempIndex = ConfigData.currentBandA;
+  if (ConfigData.currentBand == NUMBER_OF_BANDS) {  // Incremented too far?
+    ConfigData.currentBand = 0;                     // Yep. Roll to list front.
   }
   NCOFreq = 0;
-  switch (EEPROMData.activeVFO) {
+  switch (ConfigData.activeVFO) {
     case VFO_A:
-      tempIndex = EEPROMData.currentBandA;
+      tempIndex = ConfigData.currentBandA;
       if (save_last_frequency == 1) {
-        EEPROMData.lastFrequencies[tempIndex][VFO_A] = TxRxFreq;
+        ConfigData.lastFrequencies[tempIndex][VFO_A] = TxRxFreq;
       } else {
         if (save_last_frequency == 0) {
           if (directFreqFlag == 1) {
-            EEPROMData.lastFrequencies[tempIndex][VFO_A] = TxRxFreqOld;
+            ConfigData.lastFrequencies[tempIndex][VFO_A] = TxRxFreqOld;
           } else {
             if (directFreqFlag == 0) {
-              EEPROMData.lastFrequencies[tempIndex][VFO_A] = TxRxFreq;
+              ConfigData.lastFrequencies[tempIndex][VFO_A] = TxRxFreq;
             }
           }
           TxRxFreqOld = TxRxFreq;
         }
       }
-      EEPROMData.currentBandA++;
-      if (EEPROMData.currentBandA == NUMBER_OF_BANDS) {  // Incremented too far?
-        EEPROMData.currentBandA = 0;                     // Yep. Roll to list front.
+      ConfigData.currentBandA++;
+      if (ConfigData.currentBandA == NUMBER_OF_BANDS) {  // Incremented too far?
+        ConfigData.currentBandA = 0;                     // Yep. Roll to list front.
       }
-      EEPROMData.currentBand = EEPROMData.currentBandA;
-      EEPROMData.centerFreq = TxRxFreq = EEPROMData.currentFreqA = EEPROMData.lastFrequencies[EEPROMData.currentBandA][VFO_A] + NCOFreq;
+      ConfigData.currentBand = ConfigData.currentBandA;
+      ConfigData.centerFreq = TxRxFreq = ConfigData.currentFreqA = ConfigData.lastFrequencies[ConfigData.currentBandA][VFO_A] + NCOFreq;
       break;
 
     case VFO_B:
-      tempIndex = EEPROMData.currentBandB;
+      tempIndex = ConfigData.currentBandB;
       if (save_last_frequency == 1) {
-        EEPROMData.lastFrequencies[tempIndex][VFO_B] = TxRxFreq;
+        ConfigData.lastFrequencies[tempIndex][VFO_B] = TxRxFreq;
       } else {
         if (save_last_frequency == 0) {
           if (directFreqFlag == 1) {
-            EEPROMData.lastFrequencies[tempIndex][VFO_B] = TxRxFreqOld;
+            ConfigData.lastFrequencies[tempIndex][VFO_B] = TxRxFreqOld;
           } else {
             if (directFreqFlag == 0) {
-              EEPROMData.lastFrequencies[tempIndex][VFO_B] = TxRxFreq;
+              ConfigData.lastFrequencies[tempIndex][VFO_B] = TxRxFreq;
             }
           }
           TxRxFreqOld = TxRxFreq;
         }
       }
-      EEPROMData.currentBandB++;
-      if (EEPROMData.currentBandB == NUMBER_OF_BANDS) {  // Incremented too far?
-        EEPROMData.currentBandB = 0;                     // Yep. Roll to list front.
+      ConfigData.currentBandB++;
+      if (ConfigData.currentBandB == NUMBER_OF_BANDS) {  // Incremented too far?
+        ConfigData.currentBandB = 0;                     // Yep. Roll to list front.
       }
-      EEPROMData.currentBand = EEPROMData.currentBandB;
-      EEPROMData.centerFreq = TxRxFreq = EEPROMData.currentFreqB = EEPROMData.lastFrequencies[EEPROMData.currentBandB][VFO_B] + NCOFreq;
+      ConfigData.currentBand = ConfigData.currentBandB;
+      ConfigData.centerFreq = TxRxFreq = ConfigData.currentFreqB = ConfigData.lastFrequencies[ConfigData.currentBandB][VFO_B] + NCOFreq;
       break;
 
     case VFO_SPLIT:
@@ -519,7 +519,7 @@ void Button::ButtonBandIncrease() {
       break;
   }
   directFreqFlag = 0;
-  SetupMode(bands[EEPROMData.currentBand].mode, bands[EEPROMData.currentBand].sideband);
+  SetupMode(bands[ConfigData.currentBand].mode, bands[ConfigData.currentBand].sideband);
   EraseSpectrumDisplayContainer();
   DrawSpectrumDisplayContainer();
   SetBand();
@@ -527,12 +527,12 @@ void Button::ButtonBandIncrease() {
   ShowFrequency();
   ShowSpectrumdBScale();
   AudioInterrupts();
-  eeprom.EEPROMWrite();
+  eeprom.ConfigDataWrite();
   // Draw or not draw CW filter graphics to audio spectrum area.  KF5N July 30, 2023
   tft.writeTo(L2);
   tft.clearMemory();
   tft.writeTo(L1);
-  //if (EEPROMData.xmtMode == RadioMode::CW_MODE) 
+  //if (ConfigData.xmtMode == RadioMode::CW_MODE) 
   BandInformation();
   DrawBandWidthIndicatorBar();
   DrawFrequencyBarValue();
@@ -551,67 +551,67 @@ void Button::ButtonBandIncrease() {
     void
 *****/
 void Button::ButtonBandDecrease() {
-  int tempIndex = EEPROMData.currentBand;
+  int tempIndex = ConfigData.currentBand;
 
-  EEPROMData.currentBand--;  // decrement band index
+  ConfigData.currentBand--;  // decrement band index
 
-  if (EEPROMData.currentBand < 0) {                // decremented too far?
-    EEPROMData.currentBand = NUMBER_OF_BANDS - 1;  // Yep. Roll to list end.
+  if (ConfigData.currentBand < 0) {                // decremented too far?
+    ConfigData.currentBand = NUMBER_OF_BANDS - 1;  // Yep. Roll to list end.
   }
 
-  switch (EEPROMData.activeVFO) {
+  switch (ConfigData.activeVFO) {
     case VFO_A:
       if (save_last_frequency == 1) {
-        EEPROMData.lastFrequencies[tempIndex][VFO_A] = TxRxFreq;
+        ConfigData.lastFrequencies[tempIndex][VFO_A] = TxRxFreq;
       } else {
         if (save_last_frequency == 0) {
           if (directFreqFlag == 1) {
-            EEPROMData.lastFrequencies[tempIndex][VFO_A] = TxRxFreqOld;
+            ConfigData.lastFrequencies[tempIndex][VFO_A] = TxRxFreqOld;
 
           } else {
             if (directFreqFlag == 0) {
-              EEPROMData.lastFrequencies[tempIndex][VFO_A] = TxRxFreq;
+              ConfigData.lastFrequencies[tempIndex][VFO_A] = TxRxFreq;
             }
           }
           TxRxFreqOld = TxRxFreq;
         }
       }
-      EEPROMData.currentBandA--;
-      if (EEPROMData.currentBandA == NUMBER_OF_BANDS) {  // decremented too far?
-        EEPROMData.currentBandA = 0;                     // Yep. Roll to list front.
+      ConfigData.currentBandA--;
+      if (ConfigData.currentBandA == NUMBER_OF_BANDS) {  // decremented too far?
+        ConfigData.currentBandA = 0;                     // Yep. Roll to list front.
       }
-      if (EEPROMData.currentBandA < 0) {                // Incremented too far?
-        EEPROMData.currentBandA = NUMBER_OF_BANDS - 1;  // Yep. Roll to list front.
+      if (ConfigData.currentBandA < 0) {                // Incremented too far?
+        ConfigData.currentBandA = NUMBER_OF_BANDS - 1;  // Yep. Roll to list front.
       }
-      EEPROMData.currentBand = EEPROMData.currentBandA;
-      EEPROMData.centerFreq = TxRxFreq = EEPROMData.currentFreqA = EEPROMData.lastFrequencies[EEPROMData.currentBandA][VFO_A] + NCOFreq;
+      ConfigData.currentBand = ConfigData.currentBandA;
+      ConfigData.centerFreq = TxRxFreq = ConfigData.currentFreqA = ConfigData.lastFrequencies[ConfigData.currentBandA][VFO_A] + NCOFreq;
       break;
 
     case VFO_B:
       if (save_last_frequency == 1) {
-        EEPROMData.lastFrequencies[tempIndex][VFO_B] = TxRxFreq;
+        ConfigData.lastFrequencies[tempIndex][VFO_B] = TxRxFreq;
       } else {
         if (save_last_frequency == 0) {
           if (directFreqFlag == 1) {
-            EEPROMData.lastFrequencies[tempIndex][VFO_B] = TxRxFreqOld;
+            ConfigData.lastFrequencies[tempIndex][VFO_B] = TxRxFreqOld;
 
           } else {
             if (directFreqFlag == 0) {
-              EEPROMData.lastFrequencies[tempIndex][VFO_B] = TxRxFreq;
+              ConfigData.lastFrequencies[tempIndex][VFO_B] = TxRxFreq;
             }
           }
           TxRxFreqOld = TxRxFreq;
         }
       }
-      EEPROMData.currentBandB--;
-      if (EEPROMData.currentBandB == NUMBER_OF_BANDS) {  // Incremented too far?
-        EEPROMData.currentBandB = 0;                     // Yep. Roll to list front.
+      ConfigData.currentBandB--;
+      if (ConfigData.currentBandB == NUMBER_OF_BANDS) {  // Incremented too far?
+        ConfigData.currentBandB = 0;                     // Yep. Roll to list front.
       }
-      if (EEPROMData.currentBandB < 0) {                // Incremented too far?
-        EEPROMData.currentBandB = NUMBER_OF_BANDS - 1;  // Yep. Roll to list front.
+      if (ConfigData.currentBandB < 0) {                // Incremented too far?
+        ConfigData.currentBandB = NUMBER_OF_BANDS - 1;  // Yep. Roll to list front.
       }
-      EEPROMData.currentBand = EEPROMData.currentBandB;
-      EEPROMData.centerFreq = TxRxFreq = EEPROMData.currentFreqB = EEPROMData.lastFrequencies[EEPROMData.currentBandB][VFO_B] + NCOFreq;
+      ConfigData.currentBand = ConfigData.currentBandB;
+      ConfigData.centerFreq = TxRxFreq = ConfigData.currentFreqB = ConfigData.lastFrequencies[ConfigData.currentBandB][VFO_B] + NCOFreq;
       break;
 
     case VFO_SPLIT:
@@ -619,7 +619,7 @@ void Button::ButtonBandDecrease() {
       break;
   }
   directFreqFlag = 0;
-  SetupMode(bands[EEPROMData.currentBand].mode, bands[EEPROMData.currentBand].sideband);
+  SetupMode(bands[ConfigData.currentBand].mode, bands[ConfigData.currentBand].sideband);
   EraseSpectrumDisplayContainer();
   DrawSpectrumDisplayContainer();
   SetBand();
@@ -627,12 +627,12 @@ void Button::ButtonBandDecrease() {
   ShowFrequency();
   ShowSpectrumdBScale();
   AudioInterrupts();
-  eeprom.EEPROMWrite();
+  eeprom.ConfigDataWrite();
   // Draw or not draw CW filter graphics to audio spectrum area.  KF5N July 30, 2023
   tft.writeTo(L2);
   tft.clearMemory();
   tft.writeTo(L1);
-  //if (EEPROMData.xmtMode == RadioMode::CW_MODE) BandInformation();
+  //if (ConfigData.xmtMode == RadioMode::CW_MODE) BandInformation();
   BandInformation();
   DrawBandWidthIndicatorBar();
   DrawFrequencyBarValue();
@@ -652,58 +652,58 @@ void Button::ButtonBandDecrease() {
 *****/
 void Button::BandSet(int band) {
   int tempIndex;
-  tempIndex = EEPROMData.currentBandA;
-  if (EEPROMData.currentBand == NUMBER_OF_BANDS) {  // Incremented too far?
-    EEPROMData.currentBand = 0;                     // Yep. Roll to list front.
+  tempIndex = ConfigData.currentBandA;
+  if (ConfigData.currentBand == NUMBER_OF_BANDS) {  // Incremented too far?
+    ConfigData.currentBand = 0;                     // Yep. Roll to list front.
   }
   NCOFreq = 0L;
-  switch (EEPROMData.activeVFO) {
+  switch (ConfigData.activeVFO) {
     case VFO_A:
-      tempIndex = EEPROMData.currentBandA;
+      tempIndex = ConfigData.currentBandA;
       if (save_last_frequency == 1) {
-        EEPROMData.lastFrequencies[tempIndex][VFO_A] = TxRxFreq;
+        ConfigData.lastFrequencies[tempIndex][VFO_A] = TxRxFreq;
       } else {
         if (save_last_frequency == 0) {
           if (directFreqFlag == 1) {
-            EEPROMData.lastFrequencies[tempIndex][VFO_A] = TxRxFreqOld;
+            ConfigData.lastFrequencies[tempIndex][VFO_A] = TxRxFreqOld;
           } else {
             if (directFreqFlag == 0) {
-              EEPROMData.lastFrequencies[tempIndex][VFO_A] = TxRxFreq;
+              ConfigData.lastFrequencies[tempIndex][VFO_A] = TxRxFreq;
             }
           }
           TxRxFreqOld = TxRxFreq;
         }
       }
-      EEPROMData.currentBandA = band;
-      if (EEPROMData.currentBandA == NUMBER_OF_BANDS) {  // Incremented too far?
-        EEPROMData.currentBandA = 0;                     // Yep. Roll to list front.
+      ConfigData.currentBandA = band;
+      if (ConfigData.currentBandA == NUMBER_OF_BANDS) {  // Incremented too far?
+        ConfigData.currentBandA = 0;                     // Yep. Roll to list front.
       }
-      EEPROMData.currentBand = EEPROMData.currentBandA;
-      EEPROMData.centerFreq = TxRxFreq = EEPROMData.currentFreqA = EEPROMData.lastFrequencies[EEPROMData.currentBandA][VFO_A] + NCOFreq;
+      ConfigData.currentBand = ConfigData.currentBandA;
+      ConfigData.centerFreq = TxRxFreq = ConfigData.currentFreqA = ConfigData.lastFrequencies[ConfigData.currentBandA][VFO_A] + NCOFreq;
       break;
 
     case VFO_B:
-      tempIndex = EEPROMData.currentBandB;
+      tempIndex = ConfigData.currentBandB;
       if (save_last_frequency == 1) {
-        EEPROMData.lastFrequencies[tempIndex][VFO_B] = TxRxFreq;
+        ConfigData.lastFrequencies[tempIndex][VFO_B] = TxRxFreq;
       } else {
         if (save_last_frequency == 0) {
           if (directFreqFlag == 1) {
-            EEPROMData.lastFrequencies[tempIndex][VFO_B] = TxRxFreqOld;
+            ConfigData.lastFrequencies[tempIndex][VFO_B] = TxRxFreqOld;
           } else {
             if (directFreqFlag == 0) {
-              EEPROMData.lastFrequencies[tempIndex][VFO_B] = TxRxFreq;
+              ConfigData.lastFrequencies[tempIndex][VFO_B] = TxRxFreq;
             }
           }
           TxRxFreqOld = TxRxFreq;
         }
       }
-      EEPROMData.currentBandB = band;
-      if (EEPROMData.currentBandB == NUMBER_OF_BANDS) {  // Incremented too far?
-        EEPROMData.currentBandB = 0;                     // Yep. Roll to list front.
+      ConfigData.currentBandB = band;
+      if (ConfigData.currentBandB == NUMBER_OF_BANDS) {  // Incremented too far?
+        ConfigData.currentBandB = 0;                     // Yep. Roll to list front.
       }
-      EEPROMData.currentBand = EEPROMData.currentBandB;
-      EEPROMData.centerFreq = TxRxFreq = EEPROMData.currentFreqB = EEPROMData.lastFrequencies[EEPROMData.currentBandB][VFO_B] + NCOFreq;
+      ConfigData.currentBand = ConfigData.currentBandB;
+      ConfigData.centerFreq = TxRxFreq = ConfigData.currentFreqB = ConfigData.lastFrequencies[ConfigData.currentBandB][VFO_B] + NCOFreq;
       break;
 
     case VFO_SPLIT:
@@ -718,12 +718,12 @@ void Button::BandSet(int band) {
   ShowFrequency();
   ShowSpectrumdBScale();
   AudioInterrupts();
-  eeprom.EEPROMWrite();
+  eeprom.ConfigDataWrite();
   // Draw or not draw CW filter graphics to audio spectrum area.  KF5N July 30, 2023
   tft.writeTo(L2);
   tft.clearMemory();
   tft.writeTo(L1);
-  if (EEPROMData.xmtMode == RadioMode::CW_MODE) BandInformation();
+  if (ConfigData.xmtMode == RadioMode::CW_MODE) BandInformation();
   DrawBandWidthIndicatorBar();
   DrawFrequencyBarValue();
   UpdateDecoderField();
@@ -747,9 +747,9 @@ void Button::ButtonZoom() {
     zoomIndex = 0;
   }
   if (zoomIndex <= 0)
-    EEPROMData.spectrum_zoom = 0;
+    ConfigData.spectrum_zoom = 0;
   else
-    EEPROMData.spectrum_zoom = zoomIndex;
+    ConfigData.spectrum_zoom = zoomIndex;
   ZoomFFTPrep();
   UpdateZoomField();
   tft.writeTo(L2);  // Clear layer 2.  KF5N July 31, 2023
@@ -778,7 +778,7 @@ void Button::ButtonZoom() {
 void Button::ButtonFilter() {
   switchFilterSideband = not switchFilterSideband;
   FilterSetSSB();  // Call this so the delimiter is set to the correct color.
-////  SetupMode(radioMode, bands[EEPROMData.currentBand].sideband);  // No required here?
+////  SetupMode(radioMode, bands[ConfigData.currentBand].sideband);  // No required here?
 ////  ControlFilterF();
   FilterBandwidth();
   ShowFrequency();
@@ -795,23 +795,23 @@ void Button::ButtonFilter() {
     void
 *****/
 void Button::ButtonSelectSideband() {
-  //if (bands[EEPROMData.currentBand].mode > RadioMode::AM_MODE) {
-  //  bands[EEPROMData.currentBand].mode = RadioMode::SSB_MODE;  // cycle thru demod modes
+  //if (bands[ConfigData.currentBand].mode > RadioMode::AM_MODE) {
+  //  bands[ConfigData.currentBand].mode = RadioMode::SSB_MODE;  // cycle thru demod modes
   //}
-  //  if(bands[EEPROMData.currentBand].mode == 0) radioMode = RadioMode::AM_MODE;
-  //  if(bands[EEPROMData.currentBand].mode > 1) radioMode = RadioMode::AM_MODE;
+  //  if(bands[ConfigData.currentBand].mode == 0) radioMode = RadioMode::AM_MODE;
+  //  if(bands[ConfigData.currentBand].mode > 1) radioMode = RadioMode::AM_MODE;
 
-  switch (bands[EEPROMData.currentBand].sideband) {
+  switch (bands[ConfigData.currentBand].sideband) {
     case Sideband::LOWER:                            // Switch to USB.
-      bands[EEPROMData.currentBand].sideband = Sideband::UPPER;
-      EEPROMData.lastSideband[EEPROMData.currentBand] = Sideband::UPPER;
+      bands[ConfigData.currentBand].sideband = Sideband::UPPER;
+      ConfigData.lastSideband[ConfigData.currentBand] = Sideband::UPPER;
 
       break;
     case Sideband::UPPER:                             // Switch to LSB.
     // Leave FT8 in USB.
-    if(bands[EEPROMData.currentBand].mode == RadioMode::FT8_MODE) return;
-      bands[EEPROMData.currentBand].sideband = Sideband::LOWER;
-      EEPROMData.lastSideband[EEPROMData.currentBand] = Sideband::LOWER;
+    if(bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) return;
+      bands[ConfigData.currentBand].sideband = Sideband::LOWER;
+      ConfigData.lastSideband[ConfigData.currentBand] = Sideband::LOWER;
 
       break;
     case Sideband::BOTH_AM:
@@ -823,26 +823,26 @@ void Button::ButtonSelectSideband() {
       break;
   }
 
-  SetupMode(bands[EEPROMData.currentBand].mode, bands[EEPROMData.currentBand].sideband);
+  SetupMode(bands[ConfigData.currentBand].mode, bands[ConfigData.currentBand].sideband);
   ShowFrequency();
 ////  ControlFilterF();
   tft.writeTo(L2);  // Destroy the bandwidth indicator bar.  KF5N July 30, 2023
   tft.clearMemory();
-  if (bands[EEPROMData.currentBand].mode == RadioMode::CW_MODE) BandInformation();
+  if (bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) BandInformation();
   DrawBandWidthIndicatorBar();  // Restory the bandwidth indicator bar.  KF5N July 30, 2023
   FilterBandwidth();
   DrawSMeterContainer();
   AudioInterrupts();
   SetFreq();  // Must update frequency, for example moving from SSB to CW, the RX LO is shifted.  KF5N
-  if ((bands[EEPROMData.currentBand].mode == RadioMode::CW_MODE) && (EEPROMData.decoderFlag == 1)) {
-  //  bands[EEPROMData.currentBand].mode = RadioMode::CW_MODE;
+  if ((bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) && (ConfigData.decoderFlag == 1)) {
+  //  bands[ConfigData.currentBand].mode = RadioMode::CW_MODE;
     UpdateDecoderField();  // KF5N December 28 2023.
   }
   FilterSetSSB();
   BandInformation();
 
-  Serial.printf("bands[EEPROMData.currentBand].FLoCut = %d\n", bands[EEPROMData.currentBand].FLoCut);
-  Serial.printf("bands[EEPROMData.currentBand].FHiCut = %d\n", bands[EEPROMData.currentBand].FHiCut);
+  Serial.printf("bands[ConfigData.currentBand].FLoCut = %d\n", bands[ConfigData.currentBand].FLoCut);
+  Serial.printf("bands[ConfigData.currentBand].FHiCut = %d\n", bands[ConfigData.currentBand].FHiCut);
 }
 
 
@@ -857,45 +857,45 @@ void Button::ButtonSelectSideband() {
 *****/
 void Button::ButtonMode()  //====== Changed AFP 10-05-22  =================
 {
-  //   Serial.printf("xmtMode = %d\n", EEPROMData.xmtMode);
+  //   Serial.printf("xmtMode = %d\n", ConfigData.xmtMode);
   // Toggle modes:
-  switch (EEPROMData.xmtMode) {
+  switch (ConfigData.xmtMode) {
     case RadioMode::SSB_MODE:
-      EEPROMData.xmtMode = RadioMode::CW_MODE;
+      ConfigData.xmtMode = RadioMode::CW_MODE;
       radioState = RadioState::CW_RECEIVE_STATE;
-      bands[EEPROMData.currentBand].mode = RadioMode::CW_MODE;
-      bands[EEPROMData.currentBand].sideband = EEPROMData.lastSideband[EEPROMData.currentBand];
+      bands[ConfigData.currentBand].mode = RadioMode::CW_MODE;
+      bands[ConfigData.currentBand].sideband = ConfigData.lastSideband[ConfigData.currentBand];
       break;
     case RadioMode::CW_MODE:  // Toggle the current mode
-      EEPROMData.xmtMode = RadioMode::FT8_MODE;
+      ConfigData.xmtMode = RadioMode::FT8_MODE;
       radioState = RadioState::FT8_RECEIVE_STATE;
-      bands[EEPROMData.currentBand].mode = RadioMode::FT8_MODE;
-      bands[EEPROMData.currentBand].sideband = Sideband::UPPER;
+      bands[ConfigData.currentBand].mode = RadioMode::FT8_MODE;
+      bands[ConfigData.currentBand].sideband = Sideband::UPPER;
       break;
     case RadioMode::FT8_MODE:  // Toggle the current mode
-      EEPROMData.xmtMode = RadioMode::AM_MODE;
+      ConfigData.xmtMode = RadioMode::AM_MODE;
       radioState = RadioState::AM_RECEIVE_STATE;
-      bands[EEPROMData.currentBand].mode = RadioMode::AM_MODE;
-      bands[EEPROMData.currentBand].sideband = Sideband::BOTH_AM;
+      bands[ConfigData.currentBand].mode = RadioMode::AM_MODE;
+      bands[ConfigData.currentBand].sideband = Sideband::BOTH_AM;
       break;
     case RadioMode::AM_MODE:  // Toggle the current mode
-      EEPROMData.xmtMode = RadioMode::SAM_MODE;
+      ConfigData.xmtMode = RadioMode::SAM_MODE;
       radioState = RadioState::SAM_RECEIVE_STATE;
-      bands[EEPROMData.currentBand].mode = RadioMode::SAM_MODE;
-      bands[EEPROMData.currentBand].sideband = Sideband::BOTH_SAM;
+      bands[ConfigData.currentBand].mode = RadioMode::SAM_MODE;
+      bands[ConfigData.currentBand].sideband = Sideband::BOTH_SAM;
       Serial.printf("Selected SAM\n");
       break;
     case RadioMode::SAM_MODE:  // Toggle the current mode
-      EEPROMData.xmtMode = RadioMode::SSB_MODE;
+      ConfigData.xmtMode = RadioMode::SSB_MODE;
       radioState = RadioState::SSB_RECEIVE_STATE;
-      bands[EEPROMData.currentBand].mode = RadioMode::SSB_MODE;
-      bands[EEPROMData.currentBand].sideband = EEPROMData.lastSideband[EEPROMData.currentBand];
+      bands[ConfigData.currentBand].mode = RadioMode::SSB_MODE;
+      bands[ConfigData.currentBand].sideband = ConfigData.lastSideband[ConfigData.currentBand];
       break;
     default:
       break;
   }
 
-  SetupMode(bands[EEPROMData.currentBand].mode, bands[EEPROMData.currentBand].sideband);  // Setup mode and sideband(s);
+  SetupMode(bands[ConfigData.currentBand].mode, bands[ConfigData.currentBand].sideband);  // Setup mode and sideband(s);
   SetFreq();  // Required due to RX LO shift from CW to SSB modes.  KF5N
   DrawSpectrumDisplayContainer();
   DrawFrequencyBarValue();
@@ -916,7 +916,7 @@ void Button::ButtonMode()  //====== Changed AFP 10-05-22  =================
   ShowTransmitReceiveStatus();
   ShowFrequency();
   // Draw or not draw CW filter graphics to audio spectrum area.  KF5N July 30, 2023
-  if (EEPROMData.xmtMode == RadioMode::SSB_MODE || EEPROMData.xmtMode == RadioMode::FT8_MODE) {
+  if (ConfigData.xmtMode == RadioMode::SSB_MODE || ConfigData.xmtMode == RadioMode::FT8_MODE) {
     tft.writeTo(L2);
     tft.clearMemory();
   } else BandInformation();
@@ -936,11 +936,11 @@ void Button::ButtonMode()  //====== Changed AFP 10-05-22  =================
 *****/
 void Button::ButtonNR()  //AFP 09-19-22 update
 {
-  EEPROMData.nrOptionSelect++;
-  if (EEPROMData.nrOptionSelect > 3) {
-    EEPROMData.nrOptionSelect = 0;
+  ConfigData.nrOptionSelect++;
+  if (ConfigData.nrOptionSelect > 3) {
+    ConfigData.nrOptionSelect = 0;
   }
-  if (EEPROMData.nrOptionSelect == 3) ANR_notch = false;  // Turn off AutoNotch if LMS NR is selected.
+  if (ConfigData.nrOptionSelect == 3) ANR_notch = false;  // Turn off AutoNotch if LMS NR is selected.
   UpdateNoiseField();
 }
 
@@ -957,8 +957,8 @@ void Button::ButtonNR()  //AFP 09-19-22 update
 void Button::ButtonNotchFilter() {
   ANR_notch = not ANR_notch;
   //  If the notch is activated and LMS NR is also active, turn off NR and update display.
-  if (ANR_notch && EEPROMData.nrOptionSelect == 3) {
-    EEPROMData.nrOptionSelect = 0;  // Turn off noise reduction.  Other NR selections will be valid.
+  if (ANR_notch && ConfigData.nrOptionSelect == 3) {
+    ConfigData.nrOptionSelect = 0;  // Turn off noise reduction.  Other NR selections will be valid.
     UpdateNoiseField();
   }
 }
@@ -974,26 +974,26 @@ void Button::ButtonNotchFilter() {
     void
 *****/
 void Button::ButtonMuteAudio() {
-  switch (EEPROMData.audioOut) {
+  switch (ConfigData.audioOut) {
     case AudioState::SPEAKER:         // Speaker is on, mute and unmute headphones.
       digitalWrite(MUTE, MUTEAUDIO);  //  Speaker mute
       sgtl5000_1.unmuteHeadphone();   // Make the headphone output active.
-      EEPROMData.audioOut = AudioState::HEADPHONE;
+      ConfigData.audioOut = AudioState::HEADPHONE;
       break;
     case AudioState::HEADPHONE:       // Mute both speaker and headphones.
       digitalWrite(MUTE, MUTEAUDIO);  // Speaker unmute
       sgtl5000_1.muteHeadphone();     // Mute headphonts
-      EEPROMData.audioOut = AudioState::MUTE_BOTH;
+      ConfigData.audioOut = AudioState::MUTE_BOTH;
       break;
     case AudioState::MUTE_BOTH:         //  Unmute both.
       digitalWrite(MUTE, UNMUTEAUDIO);  //  Mute Speaker
       sgtl5000_1.unmuteHeadphone();     // Make the headphone output active.
-      EEPROMData.audioOut = AudioState::BOTH;
+      ConfigData.audioOut = AudioState::BOTH;
       break;
     case AudioState::BOTH:              //  Headphones mute, speaker on
       digitalWrite(MUTE, UNMUTEAUDIO);  //  Mute Speaker
       sgtl5000_1.muteHeadphone();       // Make the headphone output active.
-      EEPROMData.audioOut = AudioState::SPEAKER;
+      ConfigData.audioOut = AudioState::SPEAKER;
       break;
     default:
       return;
@@ -1012,7 +1012,7 @@ void Button::ButtonMuteAudio() {
     void
 *****
 void ButtonSetNoiseFloor() {
-  int floor = EEPROMData.currentNoiseFloor[EEPROMData.currentBand];  // KF5N
+  int floor = ConfigData.currentNoiseFloor[ConfigData.currentBand];  // KF5N
 //  int val;
   MenuSelect menu;
 
@@ -1023,7 +1023,7 @@ void ButtonSetNoiseFloor() {
   tft.setCursor(SECONDARY_MENU_X - 98, MENUS_Y + 1);
   tft.print("Pixels above axis:");
   tft.setCursor(SECONDARY_MENU_X + 200, MENUS_Y + 1);
-  tft.print(EEPROMData.currentNoiseFloor[EEPROMData.currentBand]);
+  tft.print(ConfigData.currentNoiseFloor[ConfigData.currentBand]);
   delay(150L);
 
   while (true) {
@@ -1042,7 +1042,7 @@ void ButtonSetNoiseFloor() {
     menu = readButton();
     if (menu == MenuSelect::MENU_OPTION_SELECT)  // If they made a choice...
     {
-      EEPROMData.currentNoiseFloor[EEPROMData.currentBand] = floor;
+      ConfigData.currentNoiseFloor[ConfigData.currentBand] = floor;
       eeprom.EEPROMWrite();
       break;
     }
@@ -1101,9 +1101,9 @@ void Button::ResetZoom(int zoomIndex1) {
     zoomIndex1 = 0;
   }
   if (zoomIndex1 <= 0)
-    EEPROMData.spectrum_zoom = 0;
+    ConfigData.spectrum_zoom = 0;
   else
-    EEPROMData.spectrum_zoom = zoomIndex1;
+    ConfigData.spectrum_zoom = zoomIndex1;
 
   ZoomFFTPrep();
   UpdateZoomField();
@@ -1139,7 +1139,7 @@ void Button::ButtonFrequencyEntry() {
   int key;
   int numdigits = 0;  // number of digits entered
   int pushButtonSwitchIndex;
-  //  EEPROMData.lastFrequencies[EEPROMData.currentBand][EEPROMData.activeVFO] = TxRxFreq;
+  //  ConfigData.lastFrequencies[ConfigData.currentBand][ConfigData.activeVFO] = TxRxFreq;
   // Arrays for allocating values associated with keys and switches - choose whether USB keypad or analogue switch matrix
   // USB keypad and analogue switch matrix
   const char *DE_Band[] = { "80m", "40m", "20m", "17m", "15m", "12m", "10m" };
@@ -1217,11 +1217,11 @@ void Button::ButtonFrequencyEntry() {
   tft.print("S   Save Direct to Last Freq. ");
   tft.setCursor(WATERFALL_LEFT_X + 20, SPECTRUM_TOP_Y + 240);
   tft.print("Direct Entry was called from ");
-  tft.print(DE_Band[EEPROMData.currentBand]);
+  tft.print(DE_Band[ConfigData.currentBand]);
   tft.print(" band");
   tft.setCursor(WATERFALL_LEFT_X + 20, SPECTRUM_TOP_Y + 270);
   tft.print("Frequency response limited above ");
-  tft.print(DE_Flimit[EEPROMData.currentBand]);
+  tft.print(DE_Flimit[ConfigData.currentBand]);
   tft.print("MHz");
   tft.setCursor(WATERFALL_LEFT_X + 20, SPECTRUM_TOP_Y + 300);
   tft.print("For widest direct entry frequency range");
@@ -1326,14 +1326,14 @@ void Button::ButtonFrequencyEntry() {
   }
   NCOFreq = 0L;
   directFreqFlag = 1;
-  EEPROMData.centerFreq = TxRxFreq;
+  ConfigData.centerFreq = TxRxFreq;
   centerTuneFlag = 1;  // Put back in so tuning bar is refreshed.  KF5N July 31, 2023
   SetFreq();           // Used here instead of centerTuneFlag.  KF5N July 22, 2023
   if (save_last_frequency == true and valid_frequency == true) {
-    EEPROMData.lastFrequencies[EEPROMData.currentBand][EEPROMData.activeVFO] = enteredF;
+    ConfigData.lastFrequencies[ConfigData.currentBand][ConfigData.activeVFO] = enteredF;
   } else {
     if (save_last_frequency == 0) {
-      EEPROMData.lastFrequencies[EEPROMData.currentBand][EEPROMData.activeVFO] = TxRxFreqOld;
+      ConfigData.lastFrequencies[ConfigData.currentBand][ConfigData.activeVFO] = TxRxFreqOld;
     }
   }
   tft.fillRect(0, 0, 799, 479, RA8875_BLACK);  // Clear layer 2  JJP 7/23/23
@@ -1346,11 +1346,11 @@ void Button::ButtonFrequencyEntry() {
   ShowFrequency();
   ShowSpectrumdBScale();
   AudioInterrupts();
-  eeprom.EEPROMWrite();
+  eeprom.ConfigDataWrite();
   // Draw or not draw CW filter graphics to audio spectrum area.  KF5N July 30, 2023
   tft.writeTo(L2);
   tft.clearMemory();
-  if (EEPROMData.xmtMode == RadioMode::CW_MODE) BandInformation();
+  if (ConfigData.xmtMode == RadioMode::CW_MODE) BandInformation();
   DrawBandWidthIndicatorBar();
   RedrawDisplayScreen();  // KD0RC
   FilterSetSSB();

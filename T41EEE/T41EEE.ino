@@ -133,11 +133,11 @@ float32_t DMAMEM float_buffer_RTemp[2048];
 
 //======================================== Global structure declarations ===============================================
 
-config_t EEPROMData;
+config_t ConfigData;
 configData_t ConfigData;
 
 struct calibration_t CalData;
-//struct config_t EEPROMData;
+//struct config_t ConfigData;
 
 const struct SR_Descriptor SR[18] = {
   //   SR_n,        rate,  text
@@ -208,15 +208,15 @@ char keyboardBuffer[10];  // Set for call prefixes. May be increased later
 const char *tune_text = "Fast Tune";
 const char *zoomOptions[] = { "1x ", "2x ", "4x ", "8x ", "16x" };
 
-float32_t pixel_per_khz = ((1 << EEPROMData.spectrum_zoom) * SPECTRUM_RES * 1000.0 / SR[SampleRate].rate);
-int pos_left = centerLine - (int)(bands[EEPROMData.currentBand].FLoCut / 1000.0 * pixel_per_khz);
+float32_t pixel_per_khz = ((1 << ConfigData.spectrum_zoom) * SPECTRUM_RES * 1000.0 / SR[SampleRate].rate);
+int pos_left = centerLine - (int)(bands[ConfigData.currentBand].FLoCut / 1000.0 * pixel_per_khz);
 
 int centerLine = (MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2;
 int16_t fftOffset = 0;
 int16_t audioFFToffset = 0;
 int fLoCutOld;
 int fHiCutOld;
-int filterWidth = (int)((bands[EEPROMData.currentBand].FHiCut - bands[EEPROMData.currentBand].FLoCut) / 1000.0 * pixel_per_khz);
+int filterWidth = (int)((bands[ConfigData.currentBand].FHiCut - bands[ConfigData.currentBand].FLoCut) / 1000.0 * pixel_per_khz);
 int h = SPECTRUM_HEIGHT + 3;
 bool ANR_notch = false;
 uint8_t auto_codec_gain = 1;
@@ -317,7 +317,7 @@ uint32_t s_hotTemp;    /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] at room 
 uint32_t s_hotCount;   /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] at the hot temperature.*/
 uint32_t currentFreq;
 long int n_clear;
-uint32_t TxRxFreq;  // = EEPROMData.centerFreq + NCOFreq  NCOFreq from FreqShift2()
+uint32_t TxRxFreq;  // = ConfigData.centerFreq + NCOFreq  NCOFreq from FreqShift2()
 
 float help;
 float s_hotT_ROOM; /*!< The value of s_hotTemp minus room temperature(25¡æ).*/
@@ -617,7 +617,7 @@ FLASHMEM void InitializeDataArrays() {
   CLEAR_VAR(NR_Gts);                   //memset(NR_Gts, 0, 1024);
   CLEAR_VAR(NR_E);                     //memset(NR_E, 0, 7680);
 
-  CalcCplxFIRCoeffs(FIR_Coef_I, FIR_Coef_Q, m_NumTaps, (float32_t)bands[EEPROMData.currentBand].FLoCut, (float32_t)bands[EEPROMData.currentBand].FHiCut, (float)SR[SampleRate].rate / DF);
+  CalcCplxFIRCoeffs(FIR_Coef_I, FIR_Coef_Q, m_NumTaps, (float32_t)bands[ConfigData.currentBand].FLoCut, (float32_t)bands[ConfigData.currentBand].FHiCut, (float)SR[SampleRate].rate / DF);
 
   /****************************************************************************************
      init complex FFTs
@@ -667,9 +667,9 @@ FLASHMEM void InitializeDataArrays() {
   ****************************************************************************************/
   // also adjust IIR AM filter
   // calculate IIR coeffs
-  LP_F_help = bands[EEPROMData.currentBand].FHiCut;
-  if (LP_F_help < -bands[EEPROMData.currentBand].FLoCut)
-    LP_F_help = -bands[EEPROMData.currentBand].FLoCut;
+  LP_F_help = bands[ConfigData.currentBand].FHiCut;
+  if (LP_F_help < -bands[ConfigData.currentBand].FLoCut)
+    LP_F_help = -bands[ConfigData.currentBand].FLoCut;
   SetIIRCoeffs((float32_t)LP_F_help, 1.3, (float32_t)SR[SampleRate].rate / DF, 0);  // 1st stage
   for (int i = 0; i < 5; i++) {                                                     // fill coefficients into the right file
     biquad_lowpass1_coeffs[i] = coefficient_set[i];
@@ -767,7 +767,7 @@ FLASHMEM void Splash() {
   tft.setFontScale(2);
   tft.print("EXTREME EXPERIMENTER'S EDITION");
   tft.setCursor(310, 125);
-  tft.print(EEPROMData.versionSettings);
+  tft.print(ConfigData.versionSettings);
   tft.setFontScale(1);
   tft.setTextColor(RA8875_YELLOW);
   tft.setCursor(380, 175);
@@ -876,7 +876,7 @@ FLASHMEM void setup() {
   cessb1.setSampleRate_Hz(48000);
   cessb1.setGains(3.5f, 1.4f, 0.5f);  // gainIn, gainCompensate, gainOut
   cessb1.setSideband(false);
-  cessb1.setProcessing(EEPROMData.cessb);  // Set to CESSB or SSB Data.  Greg KF5N August 17 2024
+  cessb1.setProcessing(ConfigData.cessb);  // Set to CESSB or SSB Data.  Greg KF5N August 17 2024
 
   Q_out_L_Ex.setMaxBuffers(32);  // Limits determined emperically.  These may need more adjustment.  Greg KF5N August 4, 2024.
   Q_out_R_Ex.setMaxBuffers(32);
@@ -949,7 +949,7 @@ FLASHMEM void setup() {
   Splash();
 
   // =============== EEPROM section =================
-  EEPROMData.sdCardPresent = InitializeSDCard();  // Initialize mandatory SD card.
+  ConfigData.sdCardPresent = InitializeSDCard();  // Initialize mandatory SD card.
   // Push and hold a button at power up to activate switch matrix calibration.
 #ifdef DEBUG_SWITCH_CAL
   if (analogRead(BUSY_ANALOG_PIN) < NOTHING_TO_SEE_HERE) {
@@ -979,7 +979,7 @@ FLASHMEM void setup() {
      start local oscillator Si5351
   ****************************************************************************************/
   si5351.reset();                                                                           // KF5N.  Moved Si5351 start-up to setup. JJP  7/14/23
-  si5351.init(SI5351_CRYSTAL_LOAD_10PF, Si_5351_crystal, EEPROMData.freqCorrectionFactor);  // JJP  7/14/23
+  si5351.init(SI5351_CRYSTAL_LOAD_10PF, Si_5351_crystal, ConfigData.freqCorrectionFactor);  // JJP  7/14/23
   si5351.set_ms_source(SI5351_CLK2, SI5351_PLLB);                                           // Allows CLK1 and CLK2 to exceed 100 MHz simultaneously.
 #ifdef PLLMODULE
   si5351.drive_strength(SI5351_CLK0, SI5351_DRIVE_8MA);  // AFP 10-13-22
@@ -1001,29 +1001,29 @@ FLASHMEM void setup() {
   fineTuneEncoderMove = 0L;
 
   lastState = RadioState::NOSTATE;  // To make sure the receiver will be configured on the first pass through.  KF5N September 3, 2023
-  if (EEPROMData.xmtMode == RadioMode::CW_MODE) {
+  if (ConfigData.xmtMode == RadioMode::CW_MODE) {
     radioState = RadioState::CW_RECEIVE_STATE;
-    bands[EEPROMData.currentBand].mode = RadioMode::CW_MODE;
-    SetupMode(RadioMode::CW_MODE, bands[EEPROMData.currentBand].sideband);
+    bands[ConfigData.currentBand].mode = RadioMode::CW_MODE;
+    SetupMode(RadioMode::CW_MODE, bands[ConfigData.currentBand].sideband);
   }
-  if (EEPROMData.xmtMode == RadioMode::SSB_MODE) {
+  if (ConfigData.xmtMode == RadioMode::SSB_MODE) {
     radioState = RadioState::SSB_RECEIVE_STATE;
-    bands[EEPROMData.currentBand].mode = RadioMode::SSB_MODE;
-    SetupMode(RadioMode::SSB_MODE, bands[EEPROMData.currentBand].sideband);
+    bands[ConfigData.currentBand].mode = RadioMode::SSB_MODE;
+    SetupMode(RadioMode::SSB_MODE, bands[ConfigData.currentBand].sideband);
   }
-  if (EEPROMData.xmtMode == RadioMode::FT8_MODE) {
+  if (ConfigData.xmtMode == RadioMode::FT8_MODE) {
     radioState = RadioState::FT8_RECEIVE_STATE;
-    bands[EEPROMData.currentBand].mode = RadioMode::FT8_MODE;
+    bands[ConfigData.currentBand].mode = RadioMode::FT8_MODE;
     SetupMode(RadioMode::FT8_MODE, Sideband::UPPER);
   }
-  if (EEPROMData.xmtMode == RadioMode::AM_MODE) {
+  if (ConfigData.xmtMode == RadioMode::AM_MODE) {
     radioState = RadioState::AM_RECEIVE_STATE;
-    bands[EEPROMData.currentBand].mode = RadioMode::AM_MODE;
+    bands[ConfigData.currentBand].mode = RadioMode::AM_MODE;
     SetupMode(RadioMode::AM_MODE, Sideband::BOTH_AM);
   }
-  if (EEPROMData.xmtMode == RadioMode::SAM_MODE) {
+  if (ConfigData.xmtMode == RadioMode::SAM_MODE) {
     radioState = RadioState::SAM_RECEIVE_STATE;
-    bands[EEPROMData.currentBand].mode = RadioMode::SAM_MODE;
+    bands[ConfigData.currentBand].mode = RadioMode::SAM_MODE;
     SetupMode(RadioMode::SAM_MODE, Sideband::BOTH_SAM);
   }
 
@@ -1038,14 +1038,14 @@ FLASHMEM void setup() {
   FilterBandwidth();
   ShowFrequency();
   ShowAutoStatus();
-  zoomIndex = EEPROMData.spectrum_zoom - 1;  // ButtonZoom() increments zoomIndex, so this cancels it so the read from EEPROM is accurately restored.  KF5N August 3, 2023
+  zoomIndex = ConfigData.spectrum_zoom - 1;  // ButtonZoom() increments zoomIndex, so this cancels it so the read from EEPROM is accurately restored.  KF5N August 3, 2023
   button.ButtonZoom();                       // Restore zoom settings.  KF5N August 3, 2023
 
-  EEPROMData.sdCardPresent = SDPresentCheck();  // JJP 7/18/23
+  ConfigData.sdCardPresent = SDPresentCheck();  // JJP 7/18/23
   UpdateDecoderField();                         // Adjust graphics for Morse decoder.
 //  FilterSetSSB();
-  UpdateEqualizerField(EEPROMData.receiveEQFlag);
-  EEPROMData.rfGainCurrent = 0;                                                  // Start with lower gain so you don't get blasted.
+  UpdateEqualizerField(ConfigData.receiveEQFlag);
+  ConfigData.rfGainCurrent = 0;                                                  // Start with lower gain so you don't get blasted.
   if ((MASTER_CLK_MULT_RX == 2) or (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();  // Required only for QSD2/QSE2.
 }
 //============================================================== END setup() =================================================================
@@ -1077,16 +1077,16 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
     button.ExecuteButtonPress(menu);
   }
   //  State detection
-  if (EEPROMData.xmtMode == RadioMode::SSB_MODE and digitalRead(PTT) == HIGH) radioState = RadioState::SSB_RECEIVE_STATE;
-  if (EEPROMData.xmtMode == RadioMode::SSB_MODE && digitalRead(PTT) == LOW) radioState = RadioState::SSB_TRANSMIT_STATE;
+  if (ConfigData.xmtMode == RadioMode::SSB_MODE and digitalRead(PTT) == HIGH) radioState = RadioState::SSB_RECEIVE_STATE;
+  if (ConfigData.xmtMode == RadioMode::SSB_MODE && digitalRead(PTT) == LOW) radioState = RadioState::SSB_TRANSMIT_STATE;
 
-  if (EEPROMData.xmtMode == RadioMode::FT8_MODE and SerialUSB1.rts() == LOW) radioState = RadioState::FT8_RECEIVE_STATE;
-  if (EEPROMData.xmtMode == RadioMode::FT8_MODE and SerialUSB1.rts() == HIGH) radioState = RadioState::FT8_TRANSMIT_STATE;
+  if (ConfigData.xmtMode == RadioMode::FT8_MODE and SerialUSB1.rts() == LOW) radioState = RadioState::FT8_RECEIVE_STATE;
+  if (ConfigData.xmtMode == RadioMode::FT8_MODE and SerialUSB1.rts() == HIGH) radioState = RadioState::FT8_TRANSMIT_STATE;
 
-  if (EEPROMData.xmtMode == RadioMode::CW_MODE && (digitalRead(EEPROMData.paddleDit) == HIGH && digitalRead(EEPROMData.paddleDah) == HIGH)) radioState = RadioState::CW_RECEIVE_STATE;  // Was using symbolic constants. Also changed in code below.  KF5N August 8, 2023
-  if (EEPROMData.xmtMode == RadioMode::CW_MODE && (digitalRead(EEPROMData.paddleDit) == LOW && EEPROMData.xmtMode == RadioMode::CW_MODE && EEPROMData.keyType == 0)) radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;
-  if (EEPROMData.xmtMode == RadioMode::CW_MODE && (keyPressedOn == 1 && EEPROMData.xmtMode == RadioMode::CW_MODE && EEPROMData.keyType == 1)) radioState = RadioState::CW_TRANSMIT_KEYER_STATE;
- // if (bands[EEPROMData.currentBand].mode > 1) {
+  if (ConfigData.xmtMode == RadioMode::CW_MODE && (digitalRead(ConfigData.paddleDit) == HIGH && digitalRead(ConfigData.paddleDah) == HIGH)) radioState = RadioState::CW_RECEIVE_STATE;  // Was using symbolic constants. Also changed in code below.  KF5N August 8, 2023
+  if (ConfigData.xmtMode == RadioMode::CW_MODE && (digitalRead(ConfigData.paddleDit) == LOW && ConfigData.xmtMode == RadioMode::CW_MODE && ConfigData.keyType == 0)) radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;
+  if (ConfigData.xmtMode == RadioMode::CW_MODE && (keyPressedOn == 1 && ConfigData.xmtMode == RadioMode::CW_MODE && ConfigData.keyType == 1)) radioState = RadioState::CW_TRANSMIT_KEYER_STATE;
+ // if (bands[ConfigData.currentBand].mode > 1) {
  //   radioState = RadioState::AM_RECEIVE_STATE;  // Inhibit transmit in AM demod modes.  KF5N March 21, 2024
  //   radioMode = RadioMode::AM_MODE;             // AM is currently receive only.
  //   keyPressedOn = 0;
@@ -1098,7 +1098,7 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
     Serial.printf("Set audio state, begin loop. radioState = %d lastState = %d\n", radioState, lastState);
   }
 
-//Serial.printf("bands[EEPROMData.currentBand].sideband = %d\n", bands[EEPROMData.currentBand].sideband);
+//Serial.printf("bands[ConfigData.currentBand].sideband = %d\n", bands[ConfigData.currentBand].sideband);
 
   //  Begin radio state machines
 
@@ -1182,9 +1182,9 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
 //      digitalWrite(MUTE, UNMUTEAUDIO);  // unmutes audio for sidetone
       cwKeyDown = false;                // false initiates CW_SHAPING_RISE.
       cwTimer = millis();
-      while (millis() - cwTimer <= EEPROMData.cwTransmitDelay) {  //Start CW transmit timer on
+      while (millis() - cwTimer <= ConfigData.cwTransmitDelay) {  //Start CW transmit timer on
         digitalWrite(RXTX, HIGH);
-        if (digitalRead(EEPROMData.paddleDit) == LOW && EEPROMData.keyType == 0) {  // AFP 09-25-22  Turn on CW signal
+        if (digitalRead(ConfigData.paddleDit) == LOW && ConfigData.keyType == 0) {  // AFP 09-25-22  Turn on CW signal
           cwTimer = millis();                                                       //Reset timer
 
           if (!cwKeyDown) {
@@ -1194,7 +1194,7 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
             CW_ExciterIQData(CW_SHAPING_NONE);
           }
         } else {
-          if (digitalRead(EEPROMData.paddleDit) == HIGH && EEPROMData.keyType == 0) {  //Turn off CW signal
+          if (digitalRead(ConfigData.paddleDit) == HIGH && ConfigData.keyType == 0) {  //Turn off CW signal
             keyPressedOn = 0;
             if (cwKeyDown) {  // Initiate falling CW signal.
               CW_ExciterIQData(CW_SHAPING_FALL);
@@ -1210,10 +1210,10 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       ShowTransmitReceiveStatus();
 //      digitalWrite(MUTE, UNMUTEAUDIO);  // unmutes audio for sidetone
       cwTimer = millis();
-      while (millis() - cwTimer <= EEPROMData.cwTransmitDelay) {
+      while (millis() - cwTimer <= ConfigData.cwTransmitDelay) {
         digitalWrite(RXTX, HIGH);
 
-        if (digitalRead(EEPROMData.paddleDit) == LOW) {  // Keyer Dit
+        if (digitalRead(ConfigData.paddleDit) == LOW) {  // Keyer Dit
           ditTimerOn = millis();
           // Queue audio blocks--execution time of this loop will be between 0-20ms shorter
           // than the desired dit time, due to audio buffering.
@@ -1234,7 +1234,7 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
             CW_ExciterIQData(CW_SHAPING_ZERO);
           }
           cwTimer = millis();
-        } else if (digitalRead(EEPROMData.paddleDah) == LOW) {  //Keyer DAH
+        } else if (digitalRead(ConfigData.paddleDah) == LOW) {  //Keyer DAH
           dahTimerOn = millis();
           // Queue audio blocks--execution time of this loop will be between 0-20ms shorter
           // than the desired dah time, due to audio buffering
@@ -1287,23 +1287,23 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   if (volumeChangeFlag == true) {
     // Compensate for audio filter setting.
     // Nominal bandwidth is 2.8kHz.  This will be the 0 dB reference.
-    // The upper and lower frequency limits are bands[EEPROMData.currentBand].FLoCut and bands[EEPROMData.currentBand].FHiCut.
-    audioBW = bands[EEPROMData.currentBand].FHiCut - bands[EEPROMData.currentBand].FLoCut;
+    // The upper and lower frequency limits are bands[ConfigData.currentBand].FLoCut and bands[ConfigData.currentBand].FHiCut.
+    audioBW = bands[ConfigData.currentBand].FHiCut - bands[ConfigData.currentBand].FLoCut;
     // How many dB between reference and current setting?  Round to integer.
     //    dBoffset = static_cast<int>(40.0 * log10f_fast(audioBW/2800.0));
 //    process.audioGainCompensate = 4 * 2800.0 / audioBW;
         process.audioGainCompensate = 1.0;
- //   volumeAdjust.gain(volumeLog[EEPROMData.audioVolume]);
+ //   volumeAdjust.gain(volumeLog[ConfigData.audioVolume]);
 
-speakerVolume.setGain(volumeLog[EEPROMData.audioVolume]);
-headphoneVolume.setGain(volumeLog[EEPROMData.audioVolume]);
+speakerVolume.setGain(volumeLog[ConfigData.audioVolume]);
+headphoneVolume.setGain(volumeLog[ConfigData.audioVolume]);
 
-    //    int gainAdjust = EEPROMData.audioVolume - dBoffset;
+    //    int gainAdjust = ConfigData.audioVolume - dBoffset;
     volumeChangeFlag = false;
     UpdateVolumeField();
     //    Serial.printf("audioBW = %d\n", static_cast<int>(audioBW));
-    //    Serial.printf("EEPROMData.audioVolume = %d\n", EEPROMData.audioVolume);
-//    Serial.printf("EEPROMData.audioVolume = %d\n", EEPROMData.audioVolume);
+    //    Serial.printf("ConfigData.audioVolume = %d\n", ConfigData.audioVolume);
+//    Serial.printf("ConfigData.audioVolume = %d\n", ConfigData.audioVolume);
 //    Serial.printf("audioGainCompensate = %d\n", process.audioGainCompensate);
   }
 

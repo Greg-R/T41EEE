@@ -35,86 +35,86 @@ void SetupMode(RadioMode mode, Sideband sideband) {
 // First, determine flow and fhigh, which are the audio filter settings.
 // This is confusing, because of lower and upper sidebands make them different.
 
-if(bands[EEPROMData.currentBand].FHiCut < 0 and bands[EEPROMData.currentBand].FLoCut < 0) {  // Indicates LSB.
-fhigh = -bands[EEPROMData.currentBand].FLoCut;
-flow = -bands[EEPROMData.currentBand].FHiCut;
+if(bands[ConfigData.currentBand].FHiCut < 0 and bands[ConfigData.currentBand].FLoCut < 0) {  // Indicates LSB.
+fhigh = -bands[ConfigData.currentBand].FLoCut;
+flow = -bands[ConfigData.currentBand].FHiCut;
 }
 
-if(bands[EEPROMData.currentBand].FHiCut > 0 and bands[EEPROMData.currentBand].FLoCut > 0) {  // Indicates USB.
-fhigh = bands[EEPROMData.currentBand].FHiCut;
-flow = bands[EEPROMData.currentBand].FLoCut;
+if(bands[ConfigData.currentBand].FHiCut > 0 and bands[ConfigData.currentBand].FLoCut > 0) {  // Indicates USB.
+fhigh = bands[ConfigData.currentBand].FHiCut;
+flow = bands[ConfigData.currentBand].FLoCut;
 }
 
-if(bands[EEPROMData.currentBand].FHiCut > 0 and bands[EEPROMData.currentBand].FLoCut < 0) {  // Indicates AM or SAM.
-fhigh = bands[EEPROMData.currentBand].FHiCut;
-flow = bands[EEPROMData.currentBand].FLoCut;
+if(bands[ConfigData.currentBand].FHiCut > 0 and bands[ConfigData.currentBand].FLoCut < 0) {  // Indicates AM or SAM.
+fhigh = bands[ConfigData.currentBand].FHiCut;
+flow = bands[ConfigData.currentBand].FLoCut;
 }
 
 if(mode == RadioMode::SSB_MODE or mode == RadioMode::CW_MODE) {
   if(sideband == Sideband::UPPER) {
-bands[EEPROMData.currentBand].FHiCut = fhigh;
-bands[EEPROMData.currentBand].FLoCut =  flow;
+bands[ConfigData.currentBand].FHiCut = fhigh;
+bands[ConfigData.currentBand].FLoCut =  flow;
   }
     if(sideband == Sideband::LOWER) {
-bands[EEPROMData.currentBand].FHiCut =  -flow;
-bands[EEPROMData.currentBand].FLoCut = -fhigh;
+bands[ConfigData.currentBand].FHiCut =  -flow;
+bands[ConfigData.currentBand].FLoCut = -fhigh;
   }
 }
 
 if(mode == RadioMode::FT8_MODE) {
-bands[EEPROMData.currentBand].FHiCut = fhigh;
-bands[EEPROMData.currentBand].FLoCut =  flow;
+bands[ConfigData.currentBand].FHiCut = fhigh;
+bands[ConfigData.currentBand].FLoCut =  flow;
 }
 
 if(mode == RadioMode::AM_MODE or mode == RadioMode::SAM_MODE) {
-//bands[EEPROMData.currentBand].FHiCut =  fhigh;
-//bands[EEPROMData.currentBand].FLoCut = -fhigh;
-if(mode == RadioMode::AM_MODE)  bands[EEPROMData.currentBand].sideband = Sideband::BOTH_AM;
-if(mode == RadioMode::SAM_MODE) bands[EEPROMData.currentBand].sideband = Sideband::BOTH_SAM;
+//bands[ConfigData.currentBand].FHiCut =  fhigh;
+//bands[ConfigData.currentBand].FLoCut = -fhigh;
+if(mode == RadioMode::AM_MODE)  bands[ConfigData.currentBand].sideband = Sideband::BOTH_AM;
+if(mode == RadioMode::SAM_MODE) bands[ConfigData.currentBand].sideband = Sideband::BOTH_SAM;
 }
 
 lastState = RadioState::NOSTATE;  // This is to force a change in the main loop if the mode changes.
 
 /*
-if(bands[EEPROMData.currentBand].FHiCut < 0 and bands[EEPROMData.currentBand].FLoCut < 0) {
-flow = -bands[EEPROMData.currentBand].FHiCut;
-fhigh = -bands[EEPROMData.currentBand].FLoCut;
+if(bands[ConfigData.currentBand].FHiCut < 0 and bands[ConfigData.currentBand].FLoCut < 0) {
+flow = -bands[ConfigData.currentBand].FHiCut;
+fhigh = -bands[ConfigData.currentBand].FLoCut;
 }
 
-if(bands[EEPROMData.currentBand].FHiCut > 0 and bands[EEPROMData.currentBand].FLoCut > 0) {
-flow = bands[EEPROMData.currentBand].FLoCut;
-fhigh = bands[EEPROMData.currentBand].FHiCut;
+if(bands[ConfigData.currentBand].FHiCut > 0 and bands[ConfigData.currentBand].FLoCut > 0) {
+flow = bands[ConfigData.currentBand].FLoCut;
+fhigh = bands[ConfigData.currentBand].FHiCut;
 }
   {
     switch (sideband) {
       case Sideband::LOWER:
-//        temp = bands[EEPROMData.currentBand].FHiCut;
-        bands[EEPROMData.currentBand].FHiCut = -flow;
-        bands[EEPROMData.currentBand].FLoCut = -fhigh;
+//        temp = bands[ConfigData.currentBand].FHiCut;
+        bands[ConfigData.currentBand].FHiCut = -flow;
+        bands[ConfigData.currentBand].FLoCut = -fhigh;
         break;
       case Sideband::UPPER:
-//        temp = bands[EEPROMData.currentBand].FHiCut;
-        bands[EEPROMData.currentBand].FHiCut = fhigh;
-        bands[EEPROMData.currentBand].FLoCut = flow;
+//        temp = bands[ConfigData.currentBand].FHiCut;
+        bands[ConfigData.currentBand].FHiCut = fhigh;
+        bands[ConfigData.currentBand].FLoCut = flow;
         break;
       case Sideband::BOTH_AM:
       case Sideband::BOTH_SAM:
-      if(abs(bands[EEPROMData.currentBand].FHiCut) > abs(bands[EEPROMData.currentBand].FLoCut)) {
-fhigh = bands[EEPROMData.currentBand].FHiCut;
-} else fhigh = bands[EEPROMData.currentBand].FLoCut;
-        bands[EEPROMData.currentBand].FHiCut = fhigh;
-        bands[EEPROMData.currentBand].FLoCut = -fhigh;
+      if(abs(bands[ConfigData.currentBand].FHiCut) > abs(bands[ConfigData.currentBand].FLoCut)) {
+fhigh = bands[ConfigData.currentBand].FHiCut;
+} else fhigh = bands[ConfigData.currentBand].FLoCut;
+        bands[ConfigData.currentBand].FHiCut = fhigh;
+        bands[ConfigData.currentBand].FLoCut = -fhigh;
         break;
     }
 //  }
 */
 
   ShowBandwidth();
-//  Serial.printf("bands[EEPROMData.currentBand].FLoCut = %d\n",bands[EEPROMData.currentBand].FLoCut);
-//  Serial.printf("bands[EEPROMData.currentBand].FHiCut = %d\n",bands[EEPROMData.currentBand].FHiCut);  
+//  Serial.printf("bands[ConfigData.currentBand].FLoCut = %d\n",bands[ConfigData.currentBand].FLoCut);
+//  Serial.printf("bands[ConfigData.currentBand].FHiCut = %d\n",bands[ConfigData.currentBand].FHiCut);  
   // tft.fillRect(pos_x_frequency + 10, pos_y_frequency + 24, 210, 16, RA8875_BLACK);
   //tft.fillRect(OPERATION_STATS_X + 170, FREQUENCY_Y + 30, tft.getFontWidth() * 5, tft.getFontHeight(), RA8875_BLACK);        // Clear top-left menu area
-////  old_demod_mode = bands[EEPROMData.currentBand].mode;  // set old_mode flag for next time, at the moment only used for first time radio is switched on . . .
+////  old_demod_mode = bands[ConfigData.currentBand].mode;  // set old_mode flag for next time, at the moment only used for first time radio is switched on . . .
 }  // end void setup_mode
 
 
@@ -133,10 +133,10 @@ void AMDecodeSAM() {
 
   int zeta_help = 65;
   float32_t zeta = (float32_t)zeta_help / 100.0;  // PLL step response: smaller, slower response 1.0 - 0.1
-  float32_t g1 = 1.0 - exp(-2.0 * EEPROMData.omegaN * zeta * 1 / 24000);
-  float32_t g2 = -g1 + 2.0 * (1 - exp(-EEPROMData.omegaN * zeta * 1 / 24000) * cosf(EEPROMData.omegaN * 1 / 24000 * sqrtf(1.0 - zeta * zeta)));
-  const float32_t omega_min = TWO_PI * -EEPROMData.pll_fmax * 1 / 24000;
-  const float32_t omega_max = TWO_PI * EEPROMData.pll_fmax * 1 / 24000;
+  float32_t g1 = 1.0 - exp(-2.0 * ConfigData.omegaN * zeta * 1 / 24000);
+  float32_t g2 = -g1 + 2.0 * (1 - exp(-ConfigData.omegaN * zeta * 1 / 24000) * cosf(ConfigData.omegaN * 1 / 24000 * sqrtf(1.0 - zeta * zeta)));
+  const float32_t omega_min = TWO_PI * -ConfigData.pll_fmax * 1 / 24000;
+  const float32_t omega_max = TWO_PI * ConfigData.pll_fmax * 1 / 24000;
   const float32_t tauR = 0.02;  // original 0.02;
   const float32_t tauI = 1.4;   // original 1.4;
   float32_t mtauR = exp(-1 / 24000 * tauR);

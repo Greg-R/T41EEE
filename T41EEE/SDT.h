@@ -409,12 +409,12 @@ Sideband lastSideband[NUMBER_OF_BANDS] = {Sideband::LOWER, Sideband::LOWER, Side
   float32_t dBm_calibration = 22.0;  // This parameter is adjusted in the calibration menu.
 };
 
-extern struct config_t EEPROMData;
+extern struct config_t ConfigData;
 extern config_t defaultConfig;
-extern config_t EEPROMData_temp;
+extern config_t ConfigData_temp;
 
 
-
+/*
 
 struct configData_t {
 
@@ -539,10 +539,13 @@ Sideband lastSideband[NUMBER_OF_BANDS] = {Sideband::LOWER, Sideband::LOWER, Side
 };
 
 extern struct configData_t ConfigData;
-extern configData_t defaultConfigData;
+extern struct configData_t defaultConfigData;
 extern configData_t ConfigData_temp;
 
-
+//extern struct config_t ConfigData;
+//extern config_t defaultConfig;
+//extern config_t ConfigData_temp;
+*/
 
 struct calibration_t {
 

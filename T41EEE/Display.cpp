@@ -94,7 +94,7 @@ void ShowName() {
 #else
   tft.setTextColor(RA8875_RED);  // Make it red
 #endif
-  tft.print(EEPROMData.versionSettings);
+  tft.print(ConfigData.versionSettings);
 }
 
 
@@ -143,23 +143,23 @@ void ShowSpectrum() {
   //Draws the main Spectrum, Waterfall and Audio displays
   {
     updateDisplayFlag = 0;
-    if ((EEPROMData.spectrum_zoom == 0) && (static_cast<uint32_t>(ADC_RX_I.available()) > N_BLOCKS + 0 && static_cast<uint32_t>(ADC_RX_Q.available()) > N_BLOCKS + 0)) {
+    if ((ConfigData.spectrum_zoom == 0) && (static_cast<uint32_t>(ADC_RX_I.available()) > N_BLOCKS + 0 && static_cast<uint32_t>(ADC_RX_Q.available()) > N_BLOCKS + 0)) {
       updateDisplayCounter = updateDisplayCounter + 1;
       if (updateDisplayCounter == 1) updateDisplayFlag = 1;
     }
-    if ((EEPROMData.spectrum_zoom == 1) && (static_cast<uint32_t>(ADC_RX_I.available()) > N_BLOCKS + 0 && static_cast<uint32_t>(ADC_RX_Q.available()) > N_BLOCKS + 0)) {
+    if ((ConfigData.spectrum_zoom == 1) && (static_cast<uint32_t>(ADC_RX_I.available()) > N_BLOCKS + 0 && static_cast<uint32_t>(ADC_RX_Q.available()) > N_BLOCKS + 0)) {
       updateDisplayCounter = updateDisplayCounter + 1;
       if (updateDisplayCounter == 1) updateDisplayFlag = 1;
     }
-    if ((EEPROMData.spectrum_zoom == 2) && (static_cast<uint32_t>(ADC_RX_I.available()) > N_BLOCKS + 0 && static_cast<uint32_t>(ADC_RX_Q.available()) > N_BLOCKS + 0)) {
+    if ((ConfigData.spectrum_zoom == 2) && (static_cast<uint32_t>(ADC_RX_I.available()) > N_BLOCKS + 0 && static_cast<uint32_t>(ADC_RX_Q.available()) > N_BLOCKS + 0)) {
       updateDisplayCounter = updateDisplayCounter + 1;
       if (updateDisplayCounter == 1) updateDisplayFlag = 1;
     }
-    if ((EEPROMData.spectrum_zoom == 3) && (static_cast<uint32_t>(ADC_RX_I.available()) > N_BLOCKS + 0 && static_cast<uint32_t>(ADC_RX_Q.available()) > N_BLOCKS + 0)) {
+    if ((ConfigData.spectrum_zoom == 3) && (static_cast<uint32_t>(ADC_RX_I.available()) > N_BLOCKS + 0 && static_cast<uint32_t>(ADC_RX_Q.available()) > N_BLOCKS + 0)) {
       updateDisplayCounter = updateDisplayCounter + 1;
       if (updateDisplayCounter == 3) updateDisplayFlag = 1;
     }
-    if ((EEPROMData.spectrum_zoom == 4) && (static_cast<uint32_t>(ADC_RX_I.available()) > N_BLOCKS + 0 && static_cast<uint32_t>(ADC_RX_Q.available()) > N_BLOCKS + 0)) {
+    if ((ConfigData.spectrum_zoom == 4) && (static_cast<uint32_t>(ADC_RX_I.available()) > N_BLOCKS + 0 && static_cast<uint32_t>(ADC_RX_Q.available()) > N_BLOCKS + 0)) {
       updateDisplayCounter = updateDisplayCounter + 1;
       if (updateDisplayCounter == 7) updateDisplayFlag = 1;
     }
@@ -167,7 +167,7 @@ void ShowSpectrum() {
     // Don't call this function unless the filter bandwidth has been adjusted.  This requires 2 global variables.
     if (filter_pos != last_filter_pos) FilterSetSSB();
 
-//    if (bands[EEPROMData.currentBand].mode == RadioMode::SSB_MODE or radioMode == RadioMode::FT8_MODE or radioMode == RadioMode::CW_MODE or radioMode == RadioMode::AM_MODE or radioMode == RadioMode::SAM_MODE) {  // AFP 08-24-22
+//    if (bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE or radioMode == RadioMode::FT8_MODE or radioMode == RadioMode::CW_MODE or radioMode == RadioMode::AM_MODE or radioMode == RadioMode::SAM_MODE) {  // AFP 08-24-22
       process.ProcessIQData();                                        // Call the Audio process from within the display routine to eliminate conflicts with drawing the spectrum and waterfall displays
 //    }
     EncoderCenterTune();  //Moved the tuning encoder to reduce lag times and interference during tuning.
@@ -176,10 +176,10 @@ void ShowSpectrum() {
     y_old = pixelold[x1];  // pixelold spectrum is saved by the FFT function prior to a new FFT which generates the pixelnew spectrum.  KF5N
     y_old2 = pixelold[x1 - 1];
 
-    y_new_plot = 247 - y_new - EEPROMData.currentNoiseFloor[EEPROMData.currentBand];
-    y1_new_plot = 247 - y1_new - EEPROMData.currentNoiseFloor[EEPROMData.currentBand];
-    y_old_plot = 247 - y_old - EEPROMData.currentNoiseFloor[EEPROMData.currentBand];
-    y_old2_plot = 247 - y_old2 - EEPROMData.currentNoiseFloor[EEPROMData.currentBand];
+    y_new_plot = 247 - y_new - ConfigData.currentNoiseFloor[ConfigData.currentBand];
+    y1_new_plot = 247 - y1_new - ConfigData.currentNoiseFloor[ConfigData.currentBand];
+    y_old_plot = 247 - y_old - ConfigData.currentNoiseFloor[ConfigData.currentBand];
+    y_old2_plot = 247 - y_old2 - ConfigData.currentNoiseFloor[ConfigData.currentBand];
 
     // Collect a histogram of RF spectrum values.  This is used in AutoGain and AutoSpectrum.
     // 247 is the spectral display bottom.  120 is the spectral display top.
@@ -277,21 +277,21 @@ void ShowSpectrum() {
   tft.writeRect(WATERFALL_LEFT_X, FIRST_WATERFALL_LINE, MAX_WATERFALL_WIDTH, 1, waterfall);
 
 // Manage RF spectral display graphics.  Keep the spectrum within the viewable area.
-  if (EEPROMData.autoGain || EEPROMData.autoSpectrum) {
+  if (ConfigData.autoGain || ConfigData.autoSpectrum) {
     if (FH_max_box > UPPERPIXTARGET) { // HB. Adjust rfGainAllBands 15 and 13 to alter to move target base up and down. UPPERPIXTARGET = 15
-      if (EEPROMData.autoGain) EEPROMData.rfGainCurrent = EEPROMData.rfGainCurrent - 1;
-      if (EEPROMData.autoSpectrum) {
-        EEPROMData.rfGainCurrent = EEPROMData.rfGain[EEPROMData.currentBand];
+      if (ConfigData.autoGain) ConfigData.rfGainCurrent = ConfigData.rfGainCurrent - 1;
+      if (ConfigData.autoSpectrum) {
+        ConfigData.rfGainCurrent = ConfigData.rfGain[ConfigData.currentBand];
         fftOffset = fftOffset - 1;
       }
     }
     if (FH_max_box < LOWERPIXTARGET) {  // LOWERPIXTARGET = 13
-      if (EEPROMData.autoGain) {
-        EEPROMData.rfGainCurrent = EEPROMData.rfGainCurrent + 1;
-        if (EEPROMData.rfGainCurrent > 25.0) EEPROMData.rfGainCurrent = 25.0;  //  Do not allow RF gain greater than 25.
+      if (ConfigData.autoGain) {
+        ConfigData.rfGainCurrent = ConfigData.rfGainCurrent + 1;
+        if (ConfigData.rfGainCurrent > 25.0) ConfigData.rfGainCurrent = 25.0;  //  Do not allow RF gain greater than 25.
       }
-      if (EEPROMData.autoSpectrum) {
-        EEPROMData.rfGainCurrent = EEPROMData.rfGain[EEPROMData.currentBand];
+      if (ConfigData.autoSpectrum) {
+        ConfigData.rfGainCurrent = ConfigData.rfGain[ConfigData.currentBand];
         fftOffset = fftOffset + 1;
       }
     }
@@ -315,8 +315,8 @@ void ShowSpectrum() {
   tft.setCursor(SPECTRUM_LEFT_X + 64, SPECTRUM_TOP_Y + 2);
   tft.print("RF GAIN");
   tft.setCursor(SPECTRUM_LEFT_X + 129, SPECTRUM_TOP_Y + 2);
-  if (EEPROMData.autoGain) itoa(EEPROMData.rfGainCurrent, buff, DEC);  // Make into a string
-  else itoa(EEPROMData.rfGain[EEPROMData.currentBand], buff, DEC);
+  if (ConfigData.autoGain) itoa(ConfigData.rfGainCurrent, buff, DEC);  // Make into a string
+  else itoa(ConfigData.rfGain[ConfigData.currentBand], buff, DEC);
 
   tft.print(buff);  // HB End
 
@@ -341,11 +341,11 @@ void ShowBandwidth() {
   int centerLine = (MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2;
   int pos_left;
 
-  if (EEPROMData.spectrum_zoom != SPECTRUM_ZOOM_1)
+  if (ConfigData.spectrum_zoom != SPECTRUM_ZOOM_1)
     spectrum_pos_centre_f = 128 * xExpand - 1;  //AFP
   else
     spectrum_pos_centre_f = 64 * xExpand;  //AFP
-  pos_left = centerLine + ((int)(bands[EEPROMData.currentBand].FLoCut / 1000.0 * pixel_per_khz));
+  pos_left = centerLine + ((int)(bands[ConfigData.currentBand].FLoCut / 1000.0 * pixel_per_khz));
   if (pos_left < spectrum_x) {
     pos_left = spectrum_x;
   }
@@ -361,14 +361,14 @@ void ShowBandwidth() {
   else if (switchFilterSideband == true)
     tft.setTextColor(RA8875_LIGHT_GREY);
 
-  MyDrawFloat((float)(bands[EEPROMData.currentBand].FLoCut / 1000.0f), 1, FILTER_PARAMETERS_X, FILTER_PARAMETERS_Y, buff);
+  MyDrawFloat((float)(bands[ConfigData.currentBand].FLoCut / 1000.0f), 1, FILTER_PARAMETERS_X, FILTER_PARAMETERS_Y, buff);
 
   tft.print("kHz");
   if (switchFilterSideband == true)
     tft.setTextColor(RA8875_WHITE);
   else if (switchFilterSideband == false)
     tft.setTextColor(RA8875_LIGHT_GREY);
-  MyDrawFloat((float)(bands[EEPROMData.currentBand].FHiCut / 1000.0f), 1, FILTER_PARAMETERS_X + 80, FILTER_PARAMETERS_Y, buff);
+  MyDrawFloat((float)(bands[ConfigData.currentBand].FHiCut / 1000.0f), 1, FILTER_PARAMETERS_X + 80, FILTER_PARAMETERS_Y, buff);
   tft.print("kHz");
 
   tft.setTextColor(RA8875_WHITE);  // set text color to white for other print routines not to get confused ;-)
@@ -457,7 +457,7 @@ void ShowSpectrumdBScale() {
   tft.fillRect(SPECTRUM_LEFT_X + 1, SPECTRUM_TOP_Y + 2, 33, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(SPECTRUM_LEFT_X + 5, SPECTRUM_TOP_Y + 2);
   tft.setTextColor(RA8875_WHITE);
-  tft.print(displayScale[EEPROMData.currentScale].dbText);
+  tft.print(displayScale[ConfigData.currentScale].dbText);
 }
 
 
@@ -497,35 +497,35 @@ void DrawFrequencyBarValue() {
   float freq_calc;
   float grat;
   int centerLine = MAX_WATERFALL_WIDTH / 2 + SPECTRUM_LEFT_X;
-  // positions for graticules: first for EEPROMData.spectrum_zoom < 3, then for EEPROMData.spectrum_zoom > 2
+  // positions for graticules: first for ConfigData.spectrum_zoom < 3, then for ConfigData.spectrum_zoom > 2
   const static int idx2pos[2][9] = {
     { -43, 21, 50, 250, 140, 250, 232, 250, 315 },  //AFP 10-30-22
     { -43, 21, 50, 85, 200, 200, 232, 218, 315 }    //AFP 10-30-22
   };
 
-  grat = static_cast<float>(SR[SampleRate].rate / 8000.0) / static_cast<float>(1 << EEPROMData.spectrum_zoom);  // 1, 2, 4, 8, 16, 32, 64 . . . 4096
+  grat = static_cast<float>(SR[SampleRate].rate / 8000.0) / static_cast<float>(1 << ConfigData.spectrum_zoom);  // 1, 2, 4, 8, 16, 32, 64 . . . 4096
 
   tft.writeTo(L2);  // Not writing to correct layer?  KF5N.  July 31, 2023
   tft.setTextColor(RA8875_WHITE);
   tft.setFontScale((enum RA8875tsize)0);
   tft.fillRect(WATERFALL_LEFT_X, WATERFALL_TOP_Y, MAX_WATERFALL_WIDTH + 5, tft.getFontHeight(), RA8875_BLACK);  // 4-16-2022 JACK
 
-  freq_calc = static_cast<float>(static_cast<uint32_t>(EEPROMData.centerFreq));  // get current frequency in Hz
-  //  if (EEPROMData.activeVFO == VFO_A) {  Code appears redundant; removed January 31, 2024.
-  //    EEPROMData.currentFreqA = TxRxFreq;
+  freq_calc = static_cast<float>(static_cast<uint32_t>(ConfigData.centerFreq));  // get current frequency in Hz
+  //  if (ConfigData.activeVFO == VFO_A) {  Code appears redundant; removed January 31, 2024.
+  //    ConfigData.currentFreqA = TxRxFreq;
   //  } else {
-  //    EEPROMData.currentFreqB = TxRxFreq;
+  //    ConfigData.currentFreqB = TxRxFreq;
   //  }
 
-  if (EEPROMData.spectrum_zoom == 0) {
+  if (ConfigData.spectrum_zoom == 0) {
     freq_calc += static_cast<float>(SR[SampleRate].rate) / 4.0;
   }
 
-  if (EEPROMData.spectrum_zoom < 5) {
+  if (ConfigData.spectrum_zoom < 5) {
     freq_calc = roundf(freq_calc / 100) / 10;  // round graticule frequency to the nearest 100Hz
   }
 
-  if (EEPROMData.spectrum_zoom != 0)
+  if (ConfigData.spectrum_zoom != 0)
     centerIdx = 0;
   else
     centerIdx = -2;
@@ -541,7 +541,7 @@ void DrawFrequencyBarValue() {
   tft.setTextColor(RA8875_GREEN);
 
   //  ========= AFP 1-21-22 ======
-  if (EEPROMData.spectrum_zoom == 0) {
+  if (ConfigData.spectrum_zoom == 0) {
     tft.setCursor(centerLine - 140, WATERFALL_TOP_Y);  //AFP 10-20-22
   } else {
     tft.setCursor(centerLine - 20, WATERFALL_TOP_Y);  //AFP 10-20-22
@@ -554,11 +554,11 @@ void DrawFrequencyBarValue() {
    **************************************************************************************************/
   // snprint() extremely memory inefficient. replaced with simple str?? functions JJP
   for (int idx = -4; idx < 5; idx++) {
-    pos_help = idx2pos[EEPROMData.spectrum_zoom < 3 ? 0 : 1][idx + 4];
+    pos_help = idx2pos[ConfigData.spectrum_zoom < 3 ? 0 : 1][idx + 4];
     if (idx != centerIdx) {
       ultoa((freq_calc + (idx * grat)), txt, DEC);
       //================== AFP 10-21-22 =============
-      if (EEPROMData.spectrum_zoom == 0) {
+      if (ConfigData.spectrum_zoom == 0) {
         tft.setCursor(WATERFALL_LEFT_X + pos_help * xExpand + 40, WATERFALL_TOP_Y);  // AFP 10-20-22
       } else {
         tft.setCursor(WATERFALL_LEFT_X + pos_help * xExpand + 40, WATERFALL_TOP_Y);  // AFP 10-20-22
@@ -571,7 +571,7 @@ void DrawFrequencyBarValue() {
         tft.drawFastVLine((WATERFALL_LEFT_X + (pos_help + 9) * xExpand + 60), WATERFALL_TOP_Y - 5, 7, RA8875_YELLOW);
       }
     }
-    if (EEPROMData.spectrum_zoom > 2 || freq_calc > 1000) {
+    if (ConfigData.spectrum_zoom > 2 || freq_calc > 1000) {
       idx++;
     }
   }
@@ -595,9 +595,9 @@ void ShowAutoStatus() {
   tft.fillRect(SPECTRUM_LEFT_X + 350, SPECTRUM_TOP_Y + 2, 130, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(SPECTRUM_LEFT_X + 350, SPECTRUM_TOP_Y + 2);
   tft.setTextColor(RA8875_WHITE);
-  if (EEPROMData.autoGain) {
+  if (ConfigData.autoGain) {
     tft.print("Auto-Gain On");
-  } else if (EEPROMData.autoSpectrum) {
+  } else if (ConfigData.autoSpectrum) {
     tft.print("Auto-Spectrum On");
   } else
     tft.fillRect(SPECTRUM_LEFT_X + 350, SPECTRUM_TOP_Y + 2, 130, tft.getFontHeight(), RA8875_BLACK);
@@ -618,7 +618,7 @@ void ShowAnalogGain() {
   static uint8_t RF_gain_old = 0;
   static uint8_t RF_att_old = 0;
   const uint16_t col = RA8875_GREEN;
-  if ((((bands[EEPROMData.currentBand].RFgain != RF_gain_old) || (attenuator != RF_att_old)) && twinpeaks_tested == 1) || write_analog_gain) {
+  if ((((bands[ConfigData.currentBand].RFgain != RF_gain_old) || (attenuator != RF_att_old)) && twinpeaks_tested == 1) || write_analog_gain) {
     tft.setFontScale((enum RA8875tsize)0);
     tft.setCursor(pos_x_time - 40, pos_y_time + 26);
     tft.print((float)(RF_gain_old * 1.5));
@@ -638,7 +638,7 @@ void ShowAnalogGain() {
     tft.print("dB");
     tft.setTextColor(RA8875_WHITE);
     tft.print("dB");
-    RF_gain_old = bands[EEPROMData.currentBand].RFgain;
+    RF_gain_old = bands[ConfigData.currentBand].RFgain;
     RF_att_old = attenuator;
     write_analog_gain = 0;
   }
@@ -672,33 +672,33 @@ void BandInformation()  // SSB or CW
 // Write the center frequency to the display.
   tft.setCursor(100, FREQUENCY_Y + 30);
   tft.setTextColor(RA8875_LIGHT_ORANGE);
-  if (EEPROMData.spectrum_zoom == SPECTRUM_ZOOM_1) {  // AFP 11-02-22
-    tft.print(static_cast<int>(EEPROMData.centerFreq) + 48000);
+  if (ConfigData.spectrum_zoom == SPECTRUM_ZOOM_1) {  // AFP 11-02-22
+    tft.print(static_cast<int>(ConfigData.centerFreq) + 48000);
   } else {
-    tft.print(static_cast<int>(EEPROMData.centerFreq));
+    tft.print(static_cast<int>(ConfigData.centerFreq));
   }
 
 // Write the band to the display.
 ////  tft.fillRect(OPERATION_STATS_X + 50, FREQUENCY_Y + 30, 300, tft.getFontHeight(), RA8875_BLACK);  // Clear volume field
   tft.setTextColor(RA8875_LIGHT_ORANGE);
   tft.setCursor(OPERATION_STATS_X + 50, FREQUENCY_Y + 30);
-  if (EEPROMData.activeVFO == VFO_A) {
-    tft.print(bands[EEPROMData.currentBandA].name);  // Write current band to the display.
+  if (ConfigData.activeVFO == VFO_A) {
+    tft.print(bands[ConfigData.currentBandA].name);  // Write current band to the display.
   } else {
-    tft.print(bands[EEPROMData.currentBandB].name);
+    tft.print(bands[ConfigData.currentBandB].name);
   }
 
 // Write CW mode and filter bandwidth to display.
 //  tft.fillRect(OPERATION_STATS_X + 90, FREQUENCY_Y + 30, 70, tft.getFontHeight(), RA8875_BLACK);  //AFP 10-18-22
   tft.setTextColor(RA8875_GREEN);
   tft.setCursor(OPERATION_STATS_X + 90, FREQUENCY_Y + 30);  //AFP 10-18-22
-  if (bands[EEPROMData.currentBand].mode == RadioMode::CW_MODE) {
+  if (bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) {
 //    tft.fillRect(OPERATION_STATS_X + 85, FREQUENCY_Y + 30, 70, tft.getFontHeight(), RA8875_BLACK);
     tft.print("CW ");
     tft.setCursor(OPERATION_STATS_X + 115, FREQUENCY_Y + 30);  //AFP 10-18-22
     tft.writeTo(L2);                                           // Moved to L2 here to properly refresh the CW filter bandwidth.  KF5N July 30, 2023
-    tft.print(CWFilter[EEPROMData.CWFilterIndex]);             //AFP 10-18-22
-    switch (EEPROMData.CWFilterIndex) {
+    tft.print(CWFilter[ConfigData.CWFilterIndex]);             //AFP 10-18-22
+    switch (ConfigData.CWFilterIndex) {
       case 0:
         CWFilterPosition = 35.7;  // 0.84 * 42.5;
         break;
@@ -725,26 +725,26 @@ void BandInformation()  // SSB or CW
   }
   
   // Write SSB mode to display
-  if (bands[EEPROMData.currentBand].mode == RadioMode::SSB_MODE) {
+  if (bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE) {
 //    tft.fillRect(OPERATION_STATS_X + 90, FREQUENCY_Y + 30, 70, tft.getFontHeight(), RA8875_BLACK);
-    if(EEPROMData.cessb) tft.print("CESSB");  // Which mode
-    if(not EEPROMData.cessb) tft.print("SSB Data");
+    if(ConfigData.cessb) tft.print("CESSB");  // Which mode
+    if(not ConfigData.cessb) tft.print("SSB Data");
   }
   
   // Write FT8 mode to display.
-if(bands[EEPROMData.currentBand].mode == RadioMode::FT8_MODE)  {
+if(bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE)  {
 //        tft.fillRect(OPERATION_STATS_X + 90, FREQUENCY_Y + 30, 70, tft.getFontHeight(), RA8875_BLACK);
 tft.print("FT8");
   }
 
   // Write AM mode to display.
-if(bands[EEPROMData.currentBand].mode == RadioMode::AM_MODE)  {
+if(bands[ConfigData.currentBand].mode == RadioMode::AM_MODE)  {
 //        tft.fillRect(OPERATION_STATS_X + 90, FREQUENCY_Y + 30, 70, tft.getFontHeight(), RA8875_BLACK);
 tft.print("AM");
   }
 
     // Write SAM mode to display.
-if(bands[EEPROMData.currentBand].mode == RadioMode::SAM_MODE)  {
+if(bands[ConfigData.currentBand].mode == RadioMode::SAM_MODE)  {
 //        tft.fillRect(OPERATION_STATS_X + 90, FREQUENCY_Y + 30, 70, tft.getFontHeight(), RA8875_BLACK);
 tft.print("SAM");
   }
@@ -754,9 +754,9 @@ tft.print("SAM");
   tft.setCursor(OPERATION_STATS_X + 165, FREQUENCY_Y + 30);                                                             // AFP 11-01-22
   tft.setTextColor(RA8875_WHITE);
 
-  switch (bands[EEPROMData.currentBand].sideband) {
+  switch (bands[ConfigData.currentBand].sideband) {
     case Sideband::LOWER:
-//      if (EEPROMData.activeVFO == VFO_A) {
+//      if (ConfigData.activeVFO == VFO_A) {
         tft.print("LSB");  // Which sideband //AFP 09-22-22
 //      } else {
 //        tft.print(LSB);  // Which sideband //AFP 09-22-22
@@ -764,10 +764,10 @@ tft.print("SAM");
       break;
 
     case Sideband::UPPER:
-//      if (EEPROMData.activeVFO == VFO_A) {
+//      if (ConfigData.activeVFO == VFO_A) {
         tft.print("USB");  // Which sideband //AFP 09-22-22
 //      } else {
-//        tft.print(DEMOD[bands[EEPROMData.currentBandB].mode].text);  // Which sideband //AFP 09-22-22
+//        tft.print(DEMOD[bands[ConfigData.currentBandB].mode].text);  // Which sideband //AFP 09-22-22
 //      }
       break;
     case Sideband::BOTH_AM:
@@ -797,7 +797,7 @@ void ShowCurrentPowerSetting() {
   tft.fillRect(OPERATION_STATS_X + 275, FREQUENCY_Y + 30, tft.getFontWidth() * 11, tft.getFontHeight(), RA8875_BLACK);  // Clear top-left menu area
   tft.setCursor(OPERATION_STATS_X + 275, FREQUENCY_Y + 30);
   tft.setTextColor(RA8875_RED);
-  tft.print(EEPROMData.transmitPowerLevel, 1);  // Power output is a float
+  tft.print(ConfigData.transmitPowerLevel, 1);  // Power output is a float
   tft.print(" Watts");
   tft.setTextColor(RA8875_WHITE);
 }
@@ -874,18 +874,18 @@ void FormatFrequency(uint32_t freq, char *freqBuffer) {
 *****/
 void ShowFrequency() {
   char freqBuffer[15];
-  if (EEPROMData.activeVFO == VFO_A) {  // Needed for edge checking
-    EEPROMData.currentBand = EEPROMData.currentBandA;
+  if (ConfigData.activeVFO == VFO_A) {  // Needed for edge checking
+    ConfigData.currentBand = ConfigData.currentBandA;
   } else {
-    EEPROMData.currentBand = EEPROMData.currentBandB;
+    ConfigData.currentBand = ConfigData.currentBandB;
   }
 
-  if (EEPROMData.activeVFO == VFO_A) {
+  if (ConfigData.activeVFO == VFO_A) {
     FormatFrequency(TxRxFreq, freqBuffer);
     //tft.setFont(&FreeMonoBold24pt7b);               // Large font KF5N
     //tft.setFontScale(2, 3);                         // JJP 7/15/23
     tft.setFontScale(3, 2);  // JJP 7/15/23
-    if (TxRxFreq < bands[EEPROMData.currentBandA].fBandLow || TxRxFreq > bands[EEPROMData.currentBandA].fBandHigh) {
+    if (TxRxFreq < bands[ConfigData.currentBandA].fBandLow || TxRxFreq > bands[ConfigData.currentBandA].fBandHigh) {
       tft.setTextColor(RA8875_RED);  // Out of band
     } else {
       tft.setTextColor(RA8875_GREEN);  // In band
@@ -898,7 +898,7 @@ void ShowFrequency() {
     tft.setFontScale(1, 2);  // JJP 7/15/23
     tft.setTextColor(RA8875_LIGHT_GREY);
     tft.setCursor(FREQUENCY_X_SPLIT + 60, FREQUENCY_Y - 15);
-    FormatFrequency(EEPROMData.currentFreqB, freqBuffer);
+    FormatFrequency(ConfigData.currentFreqB, freqBuffer);
     tft.print(freqBuffer);
   } else {  // Show VFO_B
     FormatFrequency(TxRxFreq, freqBuffer);
@@ -908,7 +908,7 @@ void ShowFrequency() {
                                                                                                                          //  tft.fillRect(FREQUENCY_X_SPLIT - 60, FREQUENCY_Y - 12, VFOB_PIXEL_LENGTH, FREQUENCY_PIXEL_HI, RA8875_BLACK);  //JJP 7/15/23
     tft.fillRect(FREQUENCY_X_SPLIT - 60, FREQUENCY_Y - 14, tft.getFontWidth() * 10, tft.getFontHeight(), RA8875_BLACK);  //JJP 7/15/23
     tft.setCursor(FREQUENCY_X_SPLIT - 60, FREQUENCY_Y - 12);
-    if (TxRxFreq < bands[EEPROMData.currentBandB].fBandLow || TxRxFreq > bands[EEPROMData.currentBandB].fBandHigh) {
+    if (TxRxFreq < bands[ConfigData.currentBandB].fBandLow || TxRxFreq > bands[ConfigData.currentBandB].fBandHigh) {
       tft.setTextColor(RA8875_RED);
     } else {
       tft.setTextColor(RA8875_GREEN);
@@ -921,7 +921,7 @@ void ShowFrequency() {
     tft.fillRect(0, FREQUENCY_Y - 14, tft.getFontWidth() * 10, tft.getFontHeight(), RA8875_BLACK);  // JJP 7/15/23
     tft.setTextColor(RA8875_LIGHT_GREY);
     tft.setCursor(20, FREQUENCY_Y - 17);
-    FormatFrequency(EEPROMData.currentFreqA, freqBuffer);
+    FormatFrequency(ConfigData.currentFreqA, freqBuffer);
     tft.print(freqBuffer);  // Show VFO_A
   }                         // end Show VFO_B
   tft.setFontDefault();
@@ -954,11 +954,11 @@ void DisplaydbM() {
 #ifdef TCVSDR_SMETER
   //DB2OO, 9-OCT_23: dbm_calibration set to -22 in SDT.ino; gainCorrection is a value between -2 and +6 to compensate the frequency dependant pre-Amp gain
   // attenuator is 0 and could be set in a future HW revision; RFgain is initialized to 1 in the bands[] init in SDT.ino; cons=-92; slope=10
-  if (EEPROMData.autoGain) rfGain = EEPROMData.rfGainCurrent;
-  else rfGain = EEPROMData.rfGain[EEPROMData.currentBand];
-  dbm = EEPROMData.dBm_calibration + bands[EEPROMData.currentBand].gainCorrection + (float32_t)attenuator + slope * log10f_fast(audioMaxSquaredAve) + cons - (float32_t)bands[EEPROMData.currentBand].RFgain * 1.5 - rfGain;  //DB2OO, 08-OCT-23; added EEPROMData.rfGainAllBands
+  if (ConfigData.autoGain) rfGain = ConfigData.rfGainCurrent;
+  else rfGain = ConfigData.rfGain[ConfigData.currentBand];
+  dbm = ConfigData.dBm_calibration + bands[ConfigData.currentBand].gainCorrection + (float32_t)attenuator + slope * log10f_fast(audioMaxSquaredAve) + cons - (float32_t)bands[ConfigData.currentBand].RFgain * 1.5 - rfGain;  //DB2OO, 08-OCT-23; added ConfigData.rfGainAllBands
 #else
-  //DB2OO, 9-OCT-23: audioMaxSquaredAve is proportional to the input power. With EEPROMData.rfGainAllBands=0 it is approx. 40 for -73dBm @ 14074kHz with the V010 boards and the pre-Amp fed by 12V
+  //DB2OO, 9-OCT-23: audioMaxSquaredAve is proportional to the input power. With ConfigData.rfGainAllBands=0 it is approx. 40 for -73dBm @ 14074kHz with the V010 boards and the pre-Amp fed by 12V
   // for audioMaxSquaredAve=40 audioLogAveSq will be 26
   audioLogAveSq = 10 * log10f_fast(audioMaxSquaredAve) + 10;  //AFP 09-18-22
   //DB2OO, 9-OCT-23: calculate dBm value from audioLogAveSq and ignore band gain differences and a potential attenuator like in original code
@@ -994,8 +994,8 @@ void DisplaydbM() {
 
 #ifdef DEBUG_SMETER
   //added, to debug S-Meter display problems
-  Serial.printf("DisplaydbM(): dbm=%.1f, dbm_calibration=%.1f, bands[EEPROMData.currentBand].gainCorrection=%.1f, attenuator=%d, bands[EEPROMData.currentBand].RFgain=%d, EEPROMData.rfGainAllBands=%d\n",
-                dbm, dbm_calibration, bands[EEPROMData.currentBand].gainCorrection, attenuator, bands[EEPROMData.currentBand].RFgain, EEPROMData.rfGainAllBands);
+  Serial.printf("DisplaydbM(): dbm=%.1f, dbm_calibration=%.1f, bands[ConfigData.currentBand].gainCorrection=%.1f, attenuator=%d, bands[ConfigData.currentBand].RFgain=%d, ConfigData.rfGainAllBands=%d\n",
+                dbm, dbm_calibration, bands[ConfigData.currentBand].gainCorrection, attenuator, bands[ConfigData.currentBand].RFgain, ConfigData.rfGainAllBands);
   Serial.printf("\taudioMaxSquaredAve=%.4f, audioLogAveSq=%.1f\n", audioMaxSquaredAve, audioLogAveSq);
 #endif
 
@@ -1106,10 +1106,10 @@ void UpdateInfoWindow() {
   UpdateDecoderField();
   UpdateNoiseField();
   UpdateNotchField();
-  UpdateSDIndicator(EEPROMData.sdCardPresent);
+  UpdateSDIndicator(ConfigData.sdCardPresent);
   UpdateWPMField();
   UpdateZoomField();
-  UpdateEqualizerField(EEPROMData.receiveEQFlag);
+  UpdateEqualizerField(ConfigData.receiveEQFlag);
   UpdateAudioField();
 }
 
@@ -1127,7 +1127,7 @@ void UpdateAudioField() {
   tft.setFontScale((enum RA8875tsize)0);
   tft.setCursor(670, 365);
   tft.fillRect(670, 365, 115, 30, RA8875_BLACK);  // Erase previous states.
-  switch (EEPROMData.audioOut) {
+  switch (ConfigData.audioOut) {
 case AudioState::SPEAKER:
   tft.setTextColor(RA8875_WHITE);
   tft.print("Speaker On");
@@ -1162,7 +1162,7 @@ break;
 //  tft.setTextColor(RA8875_GREEN);
 //  tft.fillRect(BAND_INDICATOR_X + 90, BAND_INDICATOR_Y, tft.getFontWidth() * 3 + 2, tft.getFontHeight(), RA8875_BLACK);
 //  tft.setCursor(FIELD_OFFSET_X, BAND_INDICATOR_Y);
-//  tft.print(EEPROMData.audioVolume);
+//  tft.print(ConfigData.audioVolume);
 }
 
 
@@ -1184,7 +1184,7 @@ void UpdateVolumeField() {
   tft.setTextColor(RA8875_GREEN);
   tft.fillRect(BAND_INDICATOR_X + 80, BAND_INDICATOR_Y, tft.getFontWidth() * 3 + 2, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(FIELD_OFFSET_X - 10, BAND_INDICATOR_Y);
-  tft.print(EEPROMData.audioVolume);
+  tft.print(ConfigData.audioVolume);
 }
 
 
@@ -1192,7 +1192,7 @@ void UpdateAGCField() {
   tft.setFontScale((enum RA8875tsize)1);
   tft.fillRect(AGC_X_OFFSET - 10, AGC_Y_OFFSET, tft.getFontWidth() * 7 + 2, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(BAND_INDICATOR_X + 133, BAND_INDICATOR_Y);
-  switch (EEPROMData.AGCMode) {  // The option for AGC
+  switch (ConfigData.AGCMode) {  // The option for AGC
     case 0:                      // Off
                                  //    tft.setCursor(BAND_INDICATOR_X + 140, BAND_INDICATOR_Y);
       tft.setTextColor(DARKGREY);
@@ -1242,7 +1242,7 @@ void UpdateAGCField() {
   tft.setFontScale((enum RA8875tsize)1);
   tft.fillRect(AGC_X_OFFSET - 10, AGC_Y_OFFSET, tft.getFontWidth() * 7, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(BAND_INDICATOR_X + 133, BAND_INDICATOR_Y);
-  switch (EEPROMData.AGCMode) {  // The option for AGC
+  switch (ConfigData.AGCMode) {  // The option for AGC
     case 0:                      // Off
                                  //    tft.setCursor(BAND_INDICATOR_X + 140, BAND_INDICATOR_Y);
       tft.setTextColor(DARKGREY);
@@ -1289,7 +1289,7 @@ void UpdateAGCField() {
     void
 *****
 void DisplayAGC() {
-  if (EEPROMData.AGCMode != 0) {  // Don't update AGC indicator if AGC is off.
+  if (ConfigData.AGCMode != 0) {  // Don't update AGC indicator if AGC is off.
     if (agc_action) tft.fillRect(765, AGC_Y_OFFSET + 10, 15, 15, RA8875_GREEN);
     else tft.fillRect(765, AGC_Y_OFFSET + 10, 15, 15, RA8875_BLACK);
   }
@@ -1317,12 +1317,12 @@ void DisplayIncrementField() {
   tft.fillRect(INCREMENT_X + 67, INCREMENT_Y, tft.getFontWidth() * 4, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(FIELD_OFFSET_X - 23, INCREMENT_Y - 1);
   tft.setTextColor(RA8875_GREEN);
-  tft.print(EEPROMData.fineTuneStep);
+  tft.print(ConfigData.fineTuneStep);
 
   tft.fillRect(INCREMENT_X + 188, INCREMENT_Y, tft.getFontWidth() * 7 + 2, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(FIELD_OFFSET_X + 95, INCREMENT_Y - 1);
   tft.setTextColor(RA8875_GREEN);
-  tft.print(EEPROMData.centerTuneStep);
+  tft.print(ConfigData.centerTuneStep);
 }
 
 
@@ -1395,9 +1395,9 @@ void UpdateCompressionField()  // JJP 8/26/2023
   tft.print("Compress:");
   tft.setCursor(FIELD_OFFSET_X, COMPRESSION_Y - 5);
   tft.setTextColor(RA8875_GREEN);
-  if (EEPROMData.compressorFlag == true) {  // JJP 8/26/2023
+  if (ConfigData.compressorFlag == true) {  // JJP 8/26/2023
     tft.print("On  ");
-    tft.print(EEPROMData.currentMicCompRatio, 0);   // This is the compression ratio of the Open Audio compressor.  Greg KF5N July 22, 2024
+    tft.print(ConfigData.currentMicCompRatio, 0);   // This is the compression ratio of the Open Audio compressor.  Greg KF5N July 22, 2024
   } else {
     tft.setCursor(FIELD_OFFSET_X, COMPRESSION_Y - 5);
     tft.print("Off");
@@ -1424,7 +1424,7 @@ FLASHMEM void UpdateDecoderField() {
   //  tft.fillRect(DECODER_X + 90, DECODER_Y, tft.getFontWidth() * 20, tft.getFontHeight() + 2, RA8875_BLACK);
   tft.setCursor(FIELD_OFFSET_X, DECODER_Y - 5);
   tft.fillRect(FIELD_OFFSET_X, DECODER_Y - 5, 140, 17, RA8875_BLACK);  // Erase
-  if (EEPROMData.decoderFlag) {                                        // AFP 09-27-22
+  if (ConfigData.decoderFlag) {                                        // AFP 09-27-22
     tft.setCursor(FIELD_OFFSET_X, DECODER_Y - 5);
     tft.print("    WPM");
   } else {
@@ -1432,22 +1432,22 @@ FLASHMEM void UpdateDecoderField() {
     tft.print("Off");
   }
   // Update graphics
-  if (EEPROMData.xmtMode == RadioMode::CW_MODE && EEPROMData.decoderFlag) {  // In CW mode with decoder on? AFP 09-27-22
+  if (ConfigData.xmtMode == RadioMode::CW_MODE && ConfigData.decoderFlag) {  // In CW mode with decoder on? AFP 09-27-22
     tft.writeTo(L2);
     // Draw delimiter bars for CW offset frequency.  This depends on the user selected offset.
-    if (EEPROMData.CWOffset == 0) {
+    if (ConfigData.CWOffset == 0) {
       tft.drawFastVLine(BAND_INDICATOR_X + 15, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_GREEN);  //CW lower freq indicator
       tft.drawFastVLine(BAND_INDICATOR_X + 21, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_GREEN);  //CW upper freq indicator
     }
-    if (EEPROMData.CWOffset == 1) {
+    if (ConfigData.CWOffset == 1) {
       tft.drawFastVLine(BAND_INDICATOR_X + 18, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_GREEN);  //CW lower freq indicator
       tft.drawFastVLine(BAND_INDICATOR_X + 24, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_GREEN);  //CW upper freq indicator
     }
-    if (EEPROMData.CWOffset == 2) {
+    if (ConfigData.CWOffset == 2) {
       tft.drawFastVLine(BAND_INDICATOR_X + 23, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_GREEN);  //CW lower freq indicator
       tft.drawFastVLine(BAND_INDICATOR_X + 29, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_GREEN);  //CW upper freq indicator
     }
-    if (EEPROMData.CWOffset == 3) {
+    if (ConfigData.CWOffset == 3) {
       tft.drawFastVLine(BAND_INDICATOR_X + 26, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_GREEN);  //CW lower freq indicator
       tft.drawFastVLine(BAND_INDICATOR_X + 32, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_GREEN);  //CW upper freq indicator
     }
@@ -1464,22 +1464,22 @@ FLASHMEM void UpdateDecoderField() {
   }
 */
 // Erase graphics when decoder is off.
-  if ((EEPROMData.xmtMode == RadioMode::CW_MODE && not EEPROMData.decoderFlag) || EEPROMData.xmtMode == RadioMode::SSB_MODE) {  // In CW mode with decoder off.
+  if ((ConfigData.xmtMode == RadioMode::CW_MODE && not ConfigData.decoderFlag) || ConfigData.xmtMode == RadioMode::SSB_MODE) {  // In CW mode with decoder off.
     tft.writeTo(L2);                                                                                                             // or SSB mode.
     // Draw delimiter bars for CW offset frequency.  This depends on the user selected offset.
-    if (EEPROMData.CWOffset == 0) {
+    if (ConfigData.CWOffset == 0) {
       tft.drawFastVLine(BAND_INDICATOR_X + 15, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_BLACK);  //CW lower freq indicator
       tft.drawFastVLine(BAND_INDICATOR_X + 21, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_BLACK);  //CW upper freq indicator
     }
-    if (EEPROMData.CWOffset == 1) {
+    if (ConfigData.CWOffset == 1) {
       tft.drawFastVLine(BAND_INDICATOR_X + 18, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_BLACK);  //CW lower freq indicator
       tft.drawFastVLine(BAND_INDICATOR_X + 24, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_BLACK);  //CW upper freq indicator
     }
-    if (EEPROMData.CWOffset == 2) {
+    if (ConfigData.CWOffset == 2) {
       tft.drawFastVLine(BAND_INDICATOR_X + 23, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_BLACK);  //CW lower freq indicator
       tft.drawFastVLine(BAND_INDICATOR_X + 29, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_BLACK);  //CW upper freq indicator
     }
-    if (EEPROMData.CWOffset == 3) {
+    if (ConfigData.CWOffset == 3) {
       tft.drawFastVLine(BAND_INDICATOR_X + 26, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_BLACK);  //CW lower freq indicator
       tft.drawFastVLine(BAND_INDICATOR_X + 32, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_BLACK);  //CW upper freq indicator
     }
@@ -1555,17 +1555,17 @@ void UpdateWPMField() {
   tft.setTextColor(RA8875_GREEN);
   tft.fillRect(WPM_X + 59, WPM_Y - 4, tft.getFontWidth() * 15, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(FIELD_OFFSET_X, WPM_Y - 5);
-  if (EEPROMData.keyType == 1) {    // 1 is keyer.
+  if (ConfigData.keyType == 1) {    // 1 is keyer.
     // KD0RC start
     tft.print("Paddles ");
-    if (EEPROMData.paddleFlip == 0) {
+    if (ConfigData.paddleFlip == 0) {
       tft.print("R");
     } else {
       tft.print("L");
     }
     tft.print(" ");
     // KD0RC end
-    tft.print(EEPROMData.currentWPM);
+    tft.print(ConfigData.currentWPM);
   } else {
     tft.print("Straight Key");
   }
@@ -1590,7 +1590,7 @@ void UpdateNoiseField() {
   tft.print("Noise:");
   tft.setTextColor(RA8875_GREEN);
   tft.setCursor(FIELD_OFFSET_X, NOISE_REDUCE_Y - 3);
-  tft.print(filter[EEPROMData.nrOptionSelect]);
+  tft.print(filter[ConfigData.nrOptionSelect]);
 }
 
 
@@ -1691,10 +1691,10 @@ void DrawBandWidthIndicatorBar()  // AFP 10-30-22
   //  tft.clearMemory();              // This destroys the CW filter graphics, removed.  KF5N July 30, 2023
   //  tft.clearScreen(RA8875_BLACK);  // This causes an audio hole in fine tuning.  KF5N 7-16-23
 
-  pixel_per_khz = ((1 << EEPROMData.spectrum_zoom) * SPECTRUM_RES * 1000.0 / SR[SampleRate].rate);
-  filterWidth = static_cast<int>(((bands[EEPROMData.currentBand].FHiCut - bands[EEPROMData.currentBand].FLoCut) / 1000.0) * pixel_per_khz * 1.06);  // AFP 10-30-22
+  pixel_per_khz = ((1 << ConfigData.spectrum_zoom) * SPECTRUM_RES * 1000.0 / SR[SampleRate].rate);
+  filterWidth = static_cast<int>(((bands[ConfigData.currentBand].FHiCut - bands[ConfigData.currentBand].FLoCut) / 1000.0) * pixel_per_khz * 1.06);  // AFP 10-30-22
 
-  switch (bands[EEPROMData.currentBand].sideband) {
+  switch (bands[ConfigData.currentBand].sideband) {
     case Sideband::LOWER:
       tft.fillRect(centerLine - filterWidth + oldCursorPosition, SPECTRUM_TOP_Y + 20, filterWidth * 1.0, SPECTRUM_HEIGHT - 20, RA8875_BLACK);  // Was 0.96.  KF5N July 31, 2023
       tft.fillRect(centerLine - filterWidth + newCursorPosition, SPECTRUM_TOP_Y + 20, filterWidth, SPECTRUM_HEIGHT - 20, FILTER_WIN);

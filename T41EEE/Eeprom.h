@@ -9,19 +9,27 @@
 // Major clean-up of calibration.  KF5N August 16, 2023
 
 const int MAX_FAVORITES = 13;  // Max number of favorite frequencies stored in EEPROM
-#define EEPROM_BASE_ADDRESS 0U
+//#define EEPROM_BASE_ADDRESS 0U
 
 class Eeprom {
 public:
 
-void EEPROMWrite();
-void EEPROMRead();
-void EEPROMWriteSize(int structSize);
-int EEPROMReadSize();
+void ConfigDataWrite();
+void ConfigDataRead();
+void ConfigDataWriteSize(int structSize);
+void CalDataWrite();
+void CalDataRead();
+void CalDataWriteSize(int structSize);
+
+int EEPROMReadSize(uint32_t address);
 void EEPROMStuffFavorites(unsigned long current[]);
 void SetFavoriteFrequency();
 void GetFavoriteFrequency();
-void EEPROMDataDefaults();
+void ConfigDataDefaults();
 void EEPROMStartup();
+
+//private:
+const uint32_t EEPROM_BASE_ADDRESS = 0;
+const uint32_t CALIBRATION_BASE_ADDRESS = 1024;
 
 };

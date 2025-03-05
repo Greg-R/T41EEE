@@ -253,8 +253,8 @@ void Calculatedbm() {
   // taken from the spectrum display FFT
   // taking into account the analog gain before the ADC
   // analog gain is adjusted in steps of 1.5dB
-  // bands[EEPROMData.currentBand].RFgain = 0 --> 0dB gain
-  // bands[EEPROMData.currentBand].RFgain = 15 --> 22.5dB gain
+  // bands[ConfigData.currentBand].RFgain = 0 --> 0dB gain
+  // bands[ConfigData.currentBand].RFgain = 15 --> 22.5dB gain
 
   // spectrum display is generated from 256 samples based on 1024 samples of the FIR FFT . . .
   // could this cause errors in the calculation of the signal strength ?
@@ -271,10 +271,10 @@ void Calculatedbm() {
   // width of a 256 tap FFT bin @ 96ksps = 375Hz
   // we have to take into account the magnify mode
   // --> recalculation of bin_BW
-  bin_bandwidth = bin_bandwidth / (1 << EEPROMData.spectrum_zoom);  // correct bin bandwidth is determined by the Zoom FFT display setting
+  bin_bandwidth = bin_bandwidth / (1 << ConfigData.spectrum_zoom);  // correct bin bandwidth is determined by the Zoom FFT display setting
 
   // in all magnify cases (2x up to 16x) the posbin is in the centre of the spectrum display
-  if (EEPROMData.spectrum_zoom != 0) {
+  if (ConfigData.spectrum_zoom != 0) {
     posbin = 128;  // right in the middle!
   } else {
     posbin = 64;
@@ -283,8 +283,8 @@ void Calculatedbm() {
   //  determine Lbin and Ubin from ts.dmod_mode and FilterInfo.width
   //  = determine bandwith separately for lower and upper sideband
 
-  bw_LSB = bands[EEPROMData.currentBand].FLoCut;
-  bw_USB = bands[EEPROMData.currentBand].FHiCut;
+  bw_LSB = bands[ConfigData.currentBand].FLoCut;
+  bw_USB = bands[ConfigData.currentBand].FHiCut;
   // calculate upper and lower limit for determination of signal strength
   // = filter passband is between the lower bin Lbin and the upper bin Ubin
   Lbin = (float32_t)posbin + roundf(bw_LSB / bin_bandwidth);  // bin on the lower/left side
@@ -310,7 +310,7 @@ void Calculatedbm() {
     //#ifdef USE_LOG10FAST
     switch (display_dbm) {
       case DISPLAY_S_METER_DBM:
-        dbm = EEPROMData.dBm_calibration + bands[EEPROMData.currentBand].gainCorrection + static_cast<float32_t>(attenuator) + slope * log10f_fast(sum_db) + cons - static_cast<float32_t>(bands[EEPROMData.currentBand].RFgain) * 1.5;
+        dbm = ConfigData.dBm_calibration + bands[ConfigData.currentBand].gainCorrection + static_cast<float32_t>(attenuator) + slope * log10f_fast(sum_db) + cons - static_cast<float32_t>(bands[ConfigData.currentBand].RFgain) * 1.5;
         dbmhz = 0;
         break;
       case DISPLAY_S_METER_DBMHZ:
@@ -497,8 +497,8 @@ void SaveAnalogSwitchValues() {
   tft.print("the switch shown.");
 
   // Disable button repeat for interrupt driven buttons
-  origRepeatDelay = EEPROMData.buttonRepeatDelay;
-  EEPROMData.buttonRepeatDelay = 0;
+  origRepeatDelay = ConfigData.buttonRepeatDelay;
+  ConfigData.buttonRepeatDelay = 0;
 
   for (index = 0; index < NUMBER_OF_SWITCHES;) {
     tft.setCursor(20, 100);
@@ -534,12 +534,12 @@ void SaveAnalogSwitchValues() {
     tft.print(labels[index]);
     tft.setCursor(660, 20 + index * 25);
     tft.print(value);
-    EEPROMData.switchValues[index] = value;
+    ConfigData.switchValues[index] = value;
 
     // Set interrupt press/release thresholds based on the Select button, which has the highest ADC value
     if (index == 0) {
-      EEPROMData.buttonThresholdPressed = EEPROMData.switchValues[0] + WIGGLE_ROOM;
-      EEPROMData.buttonThresholdReleased = EEPROMData.buttonThresholdPressed + WIGGLE_ROOM;
+      ConfigData.buttonThresholdPressed = ConfigData.switchValues[0] + WIGGLE_ROOM;
+      ConfigData.buttonThresholdReleased = ConfigData.buttonThresholdPressed + WIGGLE_ROOM;
     }
 
     index++;
@@ -548,7 +548,7 @@ void SaveAnalogSwitchValues() {
     }
   }
 
-  EEPROMData.buttonRepeatDelay = origRepeatDelay;  // Restore original repeat delay
+  ConfigData.buttonRepeatDelay = origRepeatDelay;  // Restore original repeat delay
 }
 
 
@@ -610,7 +610,7 @@ void DisplayClock() {
 *****/
 void SetBand() {
   old_demod_mode = -99;  // used in setup_mode and when changing bands, so that LoCut and HiCut are not changed!
-////  SetupMode(radioMode, bands[EEPROMData.currentBand].sideband);  // Not required here?
+////  SetupMode(radioMode, bands[ConfigData.currentBand].sideband);  // Not required here?
   SetFreq();
   ShowFrequency();
   FilterBandwidth();
@@ -637,7 +637,7 @@ int SDPresentCheck() {
     return 0;
   }
   // open the file.
-  File dataFile = SD.open("SDEEPROMData.txt");
+  File dataFile = SD.open("SDConfigData.txt");
 
   if (dataFile) {
     return 1;
@@ -658,21 +658,21 @@ int SDPresentCheck() {
 *****/
 FLASHMEM void initPowerCoefficients() {
       for(int i = 0; i < NUMBER_OF_BANDS; i = i + 1) {        
-         EEPROMData.powerOutCW[i] = sqrt(EEPROMData.transmitPowerLevel/20.0) * EEPROMData.CWPowerCalibrationFactor[i];
-         EEPROMData.powerOutSSB[i] =  sqrt(EEPROMData.transmitPowerLevel/20.0) * EEPROMData.SSBPowerCalibrationFactor[i];
+         ConfigData.powerOutCW[i] = sqrt(ConfigData.transmitPowerLevel/20.0) * ConfigData.CWPowerCalibrationFactor[i];
+         ConfigData.powerOutSSB[i] =  sqrt(ConfigData.transmitPowerLevel/20.0) * ConfigData.SSBPowerCalibrationFactor[i];
       }
 }
 
 
 FLASHMEM void initUserDefinedStuff() {
-  NR_Index = EEPROMData.nrOptionSelect;
-  TxRxFreq = EEPROMData.centerFreq = EEPROMData.lastFrequencies[EEPROMData.currentBand][EEPROMData.activeVFO];
-  SetKeyPowerUp();  // Use EEPROMData.keyType and EEPROMData.paddleFlip to configure key GPIs.  KF5N August 27, 2023
-  SetDitLength(EEPROMData.currentWPM);
-  SetTransmitDitLength(EEPROMData.currentWPM);
+  NR_Index = ConfigData.nrOptionSelect;
+  TxRxFreq = ConfigData.centerFreq = ConfigData.lastFrequencies[ConfigData.currentBand][ConfigData.activeVFO];
+  SetKeyPowerUp();  // Use ConfigData.keyType and ConfigData.paddleFlip to configure key GPIs.  KF5N August 27, 2023
+  SetDitLength(ConfigData.currentWPM);
+  SetTransmitDitLength(ConfigData.currentWPM);
   // Initialize buffers used by the CW transmitter and CW decoder.
-  sineTone(EEPROMData.CWOffset + 6);  // This function takes "number of cycles" which is the offset + 6.
-  si5351.set_correction(EEPROMData.freqCorrectionFactor, SI5351_PLL_INPUT_XO);
+  sineTone(ConfigData.CWOffset + 6);  // This function takes "number of cycles" which is the offset + 6.
+  si5351.set_correction(ConfigData.freqCorrectionFactor, SI5351_PLL_INPUT_XO);
   initCWShaping();
   initPowerCoefficients();
   ResetHistograms();  // KF5N February 20, 2024

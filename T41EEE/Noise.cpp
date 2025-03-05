@@ -27,8 +27,8 @@ float32_t ANR_two_mu = 0.0001;
 float32_t LMS_errsig1[256 + 10];
 float32_t NR_sum = 0;
 float32_t NR_KIM_K = 1.0;
-float32_t NR_onemalpha = (1.0 - EEPROMData.NR_alpha);
-float32_t NR_onemtwobeta = (1.0 - (2.0 * EEPROMData.NR_beta));
+float32_t NR_onemalpha = (1.0 - ConfigData.NR_alpha);
+float32_t NR_onemtwobeta = (1.0 - (2.0 * ConfigData.NR_beta));
 float32_t NR_T;
 const uint8_t NR_L_frames = 3;
 const uint8_t NR_N_frames = 15;
@@ -110,16 +110,16 @@ void Kim1_NR()
     uint8_t VAD_high = 127;
     float32_t lf_freq; // = (offset - width/2) / (12000 / NR_FFT_L); // bin BW is 46.9Hz [12000Hz / 256 bins] @96kHz
     float32_t uf_freq;
-    if (bands[EEPROMData.currentBand].FLoCut <= 0 && bands[EEPROMData.currentBand].FHiCut >= 0) {
+    if (bands[ConfigData.currentBand].FLoCut <= 0 && bands[ConfigData.currentBand].FHiCut >= 0) {
       lf_freq = 0.0;
-      uf_freq = fmax(-(float32_t)bands[EEPROMData.currentBand].FLoCut, (float32_t)bands[EEPROMData.currentBand].FHiCut);
+      uf_freq = fmax(-(float32_t)bands[ConfigData.currentBand].FLoCut, (float32_t)bands[ConfigData.currentBand].FHiCut);
     } else {
-      if (bands[EEPROMData.currentBand].FLoCut > 0) {
-        lf_freq = (float32_t)bands[EEPROMData.currentBand].FLoCut;
-        uf_freq = (float32_t)bands[EEPROMData.currentBand].FHiCut;
+      if (bands[ConfigData.currentBand].FLoCut > 0) {
+        lf_freq = (float32_t)bands[ConfigData.currentBand].FLoCut;
+        uf_freq = (float32_t)bands[ConfigData.currentBand].FHiCut;
       } else {
-        uf_freq = -(float32_t)bands[EEPROMData.currentBand].FLoCut;
-        lf_freq = -(float32_t)bands[EEPROMData.currentBand].FHiCut;
+        uf_freq = -(float32_t)bands[ConfigData.currentBand].FLoCut;
+        lf_freq = -(float32_t)bands[ConfigData.currentBand].FHiCut;
       }
     }
     lf_freq /= ((SR[SampleRate].rate / DF) / NR_FFT_L); // bin BW is 46.9Hz [12000Hz / 256 bins] @96kHz
@@ -200,7 +200,7 @@ void Kim1_NR()
       }
       for (int bindx = VAD_low; bindx < VAD_high; bindx++) { // take first 128 bin values of the FFT result
         NR_T = NR_X[bindx][NR_X_pointer] / NR_M[bindx]; // dies scheint mir besser zu funktionieren !
-        if (NR_T > EEPROMData.NR_PSI) {
+        if (NR_T > ConfigData.NR_PSI) {
           NR_lambda[bindx] = NR_M[bindx];
         } else {
           NR_lambda[bindx] = NR_E[bindx][NR_E_pointer];
@@ -219,17 +219,17 @@ void Kim1_NR()
         }
 
         // time smoothing
-        NR_Gts[bindx][0] = EEPROMData.NR_alpha * NR_Gts[bindx][1] + (NR_onemalpha) * NR_G[bindx];
+        NR_Gts[bindx][0] = ConfigData.NR_alpha * NR_Gts[bindx][1] + (NR_onemalpha) * NR_G[bindx];
         NR_Gts[bindx][1] = NR_Gts[bindx][0]; // copy for next FFT frame
       }
 
       // NR_G is always positive, however often 0.0
       for (int bindx = 1; bindx < ((NR_FFT_L / 2) - 1); bindx++) {// take first 128 bin values of the FFT result
-        NR_G[bindx] = EEPROMData.NR_beta * NR_Gts[bindx - 1][0] + NR_onemtwobeta * NR_Gts[bindx][0] + EEPROMData.NR_beta * NR_Gts[bindx + 1][0];
+        NR_G[bindx] = ConfigData.NR_beta * NR_Gts[bindx - 1][0] + NR_onemtwobeta * NR_Gts[bindx][0] + ConfigData.NR_beta * NR_Gts[bindx + 1][0];
       }
                                                                               // take care of bin 0 and bin NR_FFT_L/2 - 1
-      NR_G[0] = (NR_onemtwobeta + EEPROMData.NR_beta) * NR_Gts[0][0] + EEPROMData.NR_beta * NR_Gts[1][0];
-      NR_G[(NR_FFT_L / 2) - 1] = EEPROMData.NR_beta * NR_Gts[(NR_FFT_L / 2) - 2][0] + (NR_onemtwobeta + EEPROMData.NR_beta) * NR_Gts[(NR_FFT_L / 2) - 1][0];
+      NR_G[0] = (NR_onemtwobeta + ConfigData.NR_beta) * NR_Gts[0][0] + ConfigData.NR_beta * NR_Gts[1][0];
+      NR_G[(NR_FFT_L / 2) - 1] = ConfigData.NR_beta * NR_Gts[(NR_FFT_L / 2) - 2][0] + (NR_onemtwobeta + ConfigData.NR_beta) * NR_Gts[(NR_FFT_L / 2) - 1][0];
       for (int bindx = 0; bindx < NR_FFT_L / 2; bindx++) {                                      // try 128:
         NR_FFT_buffer[bindx * 2] = NR_FFT_buffer [bindx * 2] * NR_G[bindx];                     // real part
         NR_FFT_buffer[bindx * 2 + 1] = NR_FFT_buffer [bindx * 2 + 1] * NR_G[bindx];             // imag part
@@ -391,16 +391,16 @@ void SpectralNoiseReduction()
   float32_t ph1y[NR_FFT_L / 2];
   static int NR_first_time_2 = 1;
 
-  if (bands[EEPROMData.currentBand].FLoCut <= 0 && bands[EEPROMData.currentBand].FHiCut >= 0) {
+  if (bands[ConfigData.currentBand].FLoCut <= 0 && bands[ConfigData.currentBand].FHiCut >= 0) {
     lf_freq = 0.0;
-    uf_freq = fmax(-(float32_t)bands[EEPROMData.currentBand].FLoCut, (float32_t)bands[EEPROMData.currentBand].FHiCut);
+    uf_freq = fmax(-(float32_t)bands[ConfigData.currentBand].FLoCut, (float32_t)bands[ConfigData.currentBand].FHiCut);
   } else {
-    if (bands[EEPROMData.currentBand].FLoCut > 0) {
-      lf_freq = (float32_t)bands[EEPROMData.currentBand].FLoCut;
-      uf_freq = (float32_t)bands[EEPROMData.currentBand].FHiCut;
+    if (bands[ConfigData.currentBand].FLoCut > 0) {
+      lf_freq = (float32_t)bands[ConfigData.currentBand].FLoCut;
+      uf_freq = (float32_t)bands[ConfigData.currentBand].FHiCut;
     } else {
-      uf_freq = -(float32_t)bands[EEPROMData.currentBand].FLoCut;
-      lf_freq = -(float32_t)bands[EEPROMData.currentBand].FHiCut;
+      uf_freq = -(float32_t)bands[ConfigData.currentBand].FLoCut;
+      lf_freq = -(float32_t)bands[ConfigData.currentBand].FHiCut;
     }
   }
   // / rate DF SR[SampleRate].rate/DF
@@ -483,7 +483,7 @@ void SpectralNoiseReduction()
       }
       for (int bindx = 0; bindx < NR_FFT_L / 2; bindx++) { // 1. Step of NR - calculate the SNR's
         NR_SNR_post[bindx] = fmax(fmin(NR_X[bindx][0] / xt[bindx], 1000.0), snr_prio_min); // limited to +30 /-15 dB, might be still too much of reduction, let's try it?
-        NR_SNR_prio[bindx] = fmax(EEPROMData.NR_alpha * NR_Hk_old[bindx] + (1.0 - EEPROMData.NR_alpha) * fmax(NR_SNR_post[bindx] - 1.0, 0.0), 0.0);
+        NR_SNR_prio[bindx] = fmax(ConfigData.NR_alpha * NR_Hk_old[bindx] + (1.0 - ConfigData.NR_alpha) * fmax(NR_SNR_post[bindx] - 1.0, 0.0), 0.0);
       }
 
       VAD_low = (int)lf_freq;

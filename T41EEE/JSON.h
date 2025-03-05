@@ -9,8 +9,8 @@ public:
 
 //RadioMode JSON::convertFromJson(JsonVariantConst src, RadioMode& dst)
 
-void loadConfiguration(const char *filename, config_t &EEPROMData);
-void saveConfiguration(const char *filename, const config_t &EEPROMData, bool toFile);
+void loadConfiguration(const char *filename, config_t &ConfigData);
+void saveConfiguration(const char *filename, const config_t &ConfigData, bool toFile);
 void printFile(const char *filename);
 
 };
