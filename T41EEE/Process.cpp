@@ -130,23 +130,23 @@ void Process::ProcessIQData() {
     // Manual IQ amplitude correction
     if(radioState == RadioState::CW_RECEIVE_STATE or radioState == RadioState::AM_RECEIVE_STATE or radioState == RadioState::SAM_RECEIVE_STATE) {
     if (bands[EEPROMData.currentBand].sideband == Sideband::LOWER || bands[EEPROMData.currentBand].sideband == Sideband::BOTH_AM || bands[EEPROMData.currentBand].sideband == Sideband::BOTH_SAM) {
-      arm_scale_f32(float_buffer_L, -EEPROMData.IQCWRXAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
-      IQPhaseCorrection(float_buffer_L, float_buffer_R, EEPROMData.IQCWRXPhaseCorrectionFactor[EEPROMData.currentBand], BUFFER_SIZE * N_BLOCKS);
+      arm_scale_f32(float_buffer_L, -CalData.IQCWRXAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
+      IQPhaseCorrection(float_buffer_L, float_buffer_R, CalData.IQCWRXPhaseCorrectionFactor[EEPROMData.currentBand], BUFFER_SIZE * N_BLOCKS);
     } else {
       if (bands[EEPROMData.currentBand].sideband == Sideband::UPPER || bands[EEPROMData.currentBand].sideband == Sideband::BOTH_AM || bands[EEPROMData.currentBand].sideband == Sideband::BOTH_SAM) {
-        arm_scale_f32(float_buffer_L, -EEPROMData.IQCWRXAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
-        IQPhaseCorrection(float_buffer_L, float_buffer_R, EEPROMData.IQCWRXPhaseCorrectionFactor[EEPROMData.currentBand], BUFFER_SIZE * N_BLOCKS);
+        arm_scale_f32(float_buffer_L, -CalData.IQCWRXAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
+        IQPhaseCorrection(float_buffer_L, float_buffer_R, CalData.IQCWRXPhaseCorrectionFactor[EEPROMData.currentBand], BUFFER_SIZE * N_BLOCKS);
       }
     }
     }
     else if(radioState == RadioState::SSB_RECEIVE_STATE || radioState == RadioState::FT8_RECEIVE_STATE || radioState == RadioState::AM_RECEIVE_STATE) {
     if (bands[EEPROMData.currentBand].sideband == Sideband::LOWER || bands[EEPROMData.currentBand].sideband == Sideband::BOTH_AM || bands[EEPROMData.currentBand].sideband == Sideband::BOTH_SAM) {
-      arm_scale_f32(float_buffer_L, -EEPROMData.IQSSBRXAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
-      IQPhaseCorrection(float_buffer_L, float_buffer_R, EEPROMData.IQSSBRXPhaseCorrectionFactor[EEPROMData.currentBand], BUFFER_SIZE * N_BLOCKS);
+      arm_scale_f32(float_buffer_L, -CalData.IQSSBRXAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
+      IQPhaseCorrection(float_buffer_L, float_buffer_R, CalData.IQSSBRXPhaseCorrectionFactor[EEPROMData.currentBand], BUFFER_SIZE * N_BLOCKS);
     } else {
       if (bands[EEPROMData.currentBand].sideband == Sideband::UPPER || bands[EEPROMData.currentBand].sideband == Sideband::BOTH_AM || bands[EEPROMData.currentBand].sideband == Sideband::BOTH_SAM) {
-        arm_scale_f32(float_buffer_L, -EEPROMData.IQSSBRXAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
-        IQPhaseCorrection(float_buffer_L, float_buffer_R, EEPROMData.IQSSBRXPhaseCorrectionFactor[EEPROMData.currentBand], BUFFER_SIZE * N_BLOCKS);
+        arm_scale_f32(float_buffer_L, -CalData.IQSSBRXAmpCorrectionFactor[EEPROMData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
+        IQPhaseCorrection(float_buffer_L, float_buffer_R, CalData.IQSSBRXPhaseCorrectionFactor[EEPROMData.currentBand], BUFFER_SIZE * N_BLOCKS);
       }      
     }
     }
@@ -311,16 +311,8 @@ void Process::ProcessIQData() {
       }
       arm_max_f32(audioSpectBuffer, 1024, &audioMaxSquared, &AudioMaxIndex);  // AFP 09-18-22 Max value of squared abin magnitued in audio
       audioMaxSquaredAve = .5 * audioMaxSquared + .5 * audioMaxSquaredAve;    //AFP 09-18-22Running averaged values
-      DisplaydbM();
+//      DisplaydbM();
 //      DisplayAGC();
-    }
-
-//  Need to scale iFFT_buffer[] here?  To replace the scaling done by AGC()?
-
-    for (unsigned i = 0; i < FFT_length / 2; i++)
-    {
-      iFFT_buffer[FFT_length + 2 * i + 0] = 1024.0 * iFFT_buffer[FFT_length + 2 * i + 0];
-      iFFT_buffer[FFT_length + 2 * i + 1] = 1024.0 * iFFT_buffer[FFT_length + 2 * i + 1];
     }
 
     /**********************************************************************************
@@ -356,6 +348,14 @@ void Process::ProcessIQData() {
         AGC acts upon I & Q before demodulation on the decimated audio data in iFFT_buffer
      **********************************************************************************/
 //    AGC();  //AGC function works with time domain I and Q data buffers created in the last step.
+
+//  Need to scale iFFT_buffer[] here?  To replace the scaling done by AGC()?
+
+    for (unsigned i = 0; i < FFT_length / 2; i++)
+    {
+      iFFT_buffer[FFT_length + 2 * i + 0] = 1024.0 * iFFT_buffer[FFT_length + 2 * i + 0];
+      iFFT_buffer[FFT_length + 2 * i + 1] = 1024.0 * iFFT_buffer[FFT_length + 2 * i + 1];
+    }
 
     /**********************************************************************************
           Demodulation
@@ -500,9 +500,8 @@ void Process::ProcessIQData() {
     /**********************************************************************************  AFP 12-31-20
       Digital Volume Control
     **********************************************************************************/
-  
-//    arm_scale_f32(float_buffer_L, 80 * audioGainCompensate, float_buffer_L, BUFFER_SIZE * N_BLOCKS);  // Set scaling constant to optimize volume control range.
-// Scale by 8 to compensate for interpolation.
+
+// Scale by 8 to compensate for interpolation.  Also compensate for audio filter bandwidth.
     arm_scale_f32(float_buffer_L, 8.0 * audioGainCompensate, float_buffer_L, BUFFER_SIZE * N_BLOCKS);
                                                                                         //      arm_scale_f32(float_buffer_R, DF * volumeLog[EEPROMData.audioVolume] * 4, float_buffer_R, BUFFER_SIZE * N_BLOCKS);
                                                                                         //    }

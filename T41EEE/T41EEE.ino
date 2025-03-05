@@ -134,6 +134,7 @@ float32_t DMAMEM float_buffer_RTemp[2048];
 //======================================== Global structure declarations ===============================================
 
 config_t EEPROMData;
+configData_t ConfigData;
 
 struct calibration_t CalData;
 //struct config_t EEPROMData;
