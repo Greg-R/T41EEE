@@ -355,7 +355,7 @@ void Process::ProcessIQData() {
         we´re back in time domain
         AGC acts upon I & Q before demodulation on the decimated audio data in iFFT_buffer
      **********************************************************************************/
-    AGC();  //AGC function works with time domain I and Q data buffers created in the last step.
+//    AGC();  //AGC function works with time domain I and Q data buffers created in the last step.
 
     /**********************************************************************************
           Demodulation

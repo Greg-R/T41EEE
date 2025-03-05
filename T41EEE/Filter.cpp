@@ -286,7 +286,7 @@ void InitFilterMask()
     void
   Return value;
     void
-*****/
+*****
 void ControlFilterF()
 {
   // low Fcut must never be larger than high Fcut and vice versa
@@ -315,7 +315,7 @@ void ControlFilterF()
   Serial.printf("bands[EEPROMData.currentBand].FLoCut = %d\n", bands[EEPROMData.currentBand].FLoCut);
   Serial.printf("bands[EEPROMData.currentBand].FHiCut = %d\n", bands[EEPROMData.currentBand].FHiCut);
 }
-
+*/
 
 /*****
   Purpose: void SetDecIntFilters()

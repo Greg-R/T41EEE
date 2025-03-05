@@ -133,7 +133,10 @@ float32_t DMAMEM float_buffer_RTemp[2048];
 
 //======================================== Global structure declarations ===============================================
 
-struct config_t EEPROMData;
+config_t EEPROMData;
+
+struct calibration_t CalData;
+//struct config_t EEPROMData;
 
 const struct SR_Descriptor SR[18] = {
   //   SR_n,        rate,  text
@@ -1287,7 +1290,8 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
     audioBW = bands[EEPROMData.currentBand].FHiCut - bands[EEPROMData.currentBand].FLoCut;
     // How many dB between reference and current setting?  Round to integer.
     //    dBoffset = static_cast<int>(40.0 * log10f_fast(audioBW/2800.0));
-    process.audioGainCompensate = 4 * 2800.0 / audioBW;
+//    process.audioGainCompensate = 4 * 2800.0 / audioBW;
+        process.audioGainCompensate = 1.0;
  //   volumeAdjust.gain(volumeLog[EEPROMData.audioVolume]);
 
 speakerVolume.setGain(volumeLog[EEPROMData.audioVolume]);
@@ -1298,6 +1302,8 @@ headphoneVolume.setGain(volumeLog[EEPROMData.audioVolume]);
     UpdateVolumeField();
     //    Serial.printf("audioBW = %d\n", static_cast<int>(audioBW));
     //    Serial.printf("EEPROMData.audioVolume = %d\n", EEPROMData.audioVolume);
+//    Serial.printf("EEPROMData.audioVolume = %d\n", EEPROMData.audioVolume);
+//    Serial.printf("audioGainCompensate = %d\n", process.audioGainCompensate);
   }
 
 }  // end loop()

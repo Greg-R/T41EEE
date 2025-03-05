@@ -116,8 +116,8 @@ int32_t filter_change;
         filterLoPositionMarker = map(bands[EEPROMData.currentBand].FLoCut, 0, 6000, 0, 256);
         filterHiPositionMarker = map(bands[EEPROMData.currentBand].FHiCut, 0, 6000, 0, 256);
 
-Serial.printf("filterLoPositionMarker = %d\n", filterLoPositionMarker);
-Serial.printf("filterHiPositionMarker = %d\n", filterHiPositionMarker);
+//Serial.printf("filterLoPositionMarker = %d\n", filterLoPositionMarker);
+//Serial.printf("filterHiPositionMarker = %d\n", filterHiPositionMarker);
 
         // Flip positions if LSB so that correct delimiter is highlighted.
         if (bands[EEPROMData.currentBand].sideband == Sideband::LOWER) {
@@ -483,7 +483,7 @@ int SetWPM() {
   Return value;
     long            the delay length in milliseconds
 *****/
-long SetTransmitDelay()  // new function JJP 9/1/22
+uint32_t SetTransmitDelay()  // new function JJP 9/1/22
 {
 //  int val;
   MenuSelect menu;

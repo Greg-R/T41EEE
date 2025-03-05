@@ -1621,7 +1621,7 @@ void DrawInfoWindowFrame() {
 void RedrawDisplayScreen() {
   tft.fillWindow();
   DisplayIncrementField();
-  AGCPrep();
+//  AGCPrep();
   UpdateAGCField();
   EncoderVolume();
   SetBand();

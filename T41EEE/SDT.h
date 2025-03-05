@@ -413,6 +413,61 @@ extern struct config_t EEPROMData;
 extern config_t defaultConfig;
 extern config_t EEPROMData_temp;
 
+struct calibration_t {
+
+#ifdef TCXO_25MHZ
+  int freqCorrectionFactor = 0;  //68000;
+#else
+  //Conventional crystal with freq offset needs a correction factor
+  int freqCorrectionFactor = 100000;
+#endif
+
+  int switchValues[18] = { 924, 870, 817,
+                           769, 713, 669,
+                           616, 565, 513,
+                           459, 407, 356,
+                           298, 242, 183,
+                           131, 67, 10 };
+
+  float powerOutCW[NUMBER_OF_BANDS] = { 0.035, 0.035, 0.035, 0.035, 0.035, 0.035, 0.035 };  // powerOutCW and powerOutSSB are derived from the TX power setting and calibration factors.
+  float powerOutSSB[NUMBER_OF_BANDS] = { 0.035, 0.035, 0.035, 0.035, 0.035, 0.035, 0.035 };
+  float CWPowerCalibrationFactor[NUMBER_OF_BANDS] =  { 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 };        // Increased to 0.04, was 0.019; KF5N February 20, 2024
+  float SSBPowerCalibrationFactor[NUMBER_OF_BANDS] = { 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 };  // Increased to 0.04, was 0.008; KF5N February 21, 2024
+  float IQCWRXAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+  float IQCWRXPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+  float IQCWAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+  float IQCWPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+  float IQSSBRXAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+  float IQSSBRXPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };  
+  float IQSSBAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+  float IQSSBPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+
+  //DB2OO, 23-AUG-23: Region 1 freqs (from https://qrper.com/qrp-calling-frequencies/)
+#if defined(ITU_REGION) && ITU_REGION == 1
+  uint32_t calFrequencies[NUMBER_OF_BANDS][2] = { { 3690000, 3560000 }, { 7090000, 7030000 }, { 14285000, 14060000 }, { 18130000, 18096000 }, { 21285000, 21060000 }, { 24950000, 24906000 }, { 28365000, 28060000 } };
+#else
+  uint32_t calFrequencies[NUMBER_OF_BANDS][2] = { { 3985000, 3560000 }, { 7200000, 7030000 }, { 14285000, 14060000 }, { 18130000, 18096000 }, { 21385000, 21060000 }, { 24950000, 24906000 }, { 28385000, 28060000 } };
+#endif
+
+  int buttonThresholdPressed = 944;   // switchValues[0] + WIGGLE_ROOM
+  int buttonThresholdReleased = 964;  // buttonThresholdPressed + WIGGLE_ROOM
+  uint32_t buttonRepeatDelay = 300000;     // Increased to 300000 from 200000 to better handle cheap, wornout buttons.
+#ifdef QSE2
+  q15_t iDCoffsetCW[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+  q15_t qDCoffsetCW[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+  q15_t iDCoffsetSSB[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+  q15_t qDCoffsetSSB[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+  q15_t dacOffsetCW = 1500;  // This must be "tuned" for each radio and/or Audio Adapter board.
+  q15_t dacOffsetSSB = 1500;  // This must be "tuned" for each radio and/or Audio Adapter board.
+#endif
+  bool CWradioCalComplete = false;
+  bool SSBradioCalComplete = false;
+  float32_t dBm_calibration = 22.0;  // This parameter is adjusted in the calibration menu.
+};  // end calibration struct
+
+extern struct calibration_t CalData;
+extern calibration_t CalData_temp;
+
 // Custom classes in the sketch.
 #include "Button.h"
 #include "CWCalibrate.h"
@@ -677,7 +732,7 @@ extern const uint32_t IIR_biquad_Zoom_FFT_N_stages;
 extern const uint32_t N_stages_biquad_lowpass1;
 extern const uint16_t n_dec1_taps;
 extern const uint16_t n_dec2_taps;
-extern bool agc_action;
+//extern bool agc_action;
 extern int attenuator;
 extern int audioYPixel[];
 extern int bandswitchPins[];
@@ -870,10 +925,10 @@ extern double elapsed_micros_sum;
 
 //======================================== Function prototypes =========================================================
 
-void AGC();
-void AGCLoadValues();  // AGC fix.  G0ORX September 5, 2023
+//void AGC();
+//void AGCLoadValues();  // AGC fix.  G0ORX September 5, 2023
 void AGCOptions();
-void AGCPrep();
+//void AGCPrep();
 float32_t AlphaBetaMag(float32_t inphase, float32_t quadrature);
 //void AltNoiseBlanking(float *insamp, int Nsam, float *E);
 void AMDecodeSAM();  // AFP 11-03-22
@@ -1019,7 +1074,7 @@ void SetIIRCoeffs(float32_t f0, float32_t Q, float32_t sample_rate, uint8_t filt
 void SetKeyType();
 void SetKeyPowerUp();
 void SetSideToneVolume();  // This function uses encoder to set sidetone volume.  KF5N August 29, 2023
-long SetTransmitDelay();
+uint32_t SetTransmitDelay();
 void SetTransmitDitLength(int wpm);  // JJP 8/19/23
 void SetupMode(RadioMode mode, Sideband sideband);
 int SetWPM();

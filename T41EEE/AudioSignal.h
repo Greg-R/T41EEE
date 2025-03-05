@@ -104,7 +104,6 @@ AudioConnection patchCord12(float2Int3, 0, i2s_quadOut, 2);  //  Speaker audio t
 AudioConnection_F32 patchCord13(mixer4, 0, headphoneScale, 0);
 AudioConnection_F32 patchCord14(headphoneScale, 0, headphoneVolume, 0);
 AudioConnection_F32 patchCord15(headphoneVolume, 0, float2Int4, 0);
-
 AudioConnection patchCord16(float2Int4, 0, i2s_quadOut, 0);  // To Audio Adapter via via Teensy pin 7.  Headphones.
 AudioConnection patchCord17(float2Int4, 0, i2s_quadOut, 1);  // To Audio Adapter via via Teensy pin 7.  Headphones (other side).
 // end F32 code
