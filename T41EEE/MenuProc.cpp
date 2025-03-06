@@ -88,7 +88,7 @@ void CalibrateOptions() {
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X - 1, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT + 1, RA8875_BLACK);
-          ConfigData.ConfigDataWrite();
+          eeprom.ConfigDataWrite();
           calibrateFlag = 0;
         }
       }
@@ -101,7 +101,7 @@ void CalibrateOptions() {
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-          ConfigData.ConfigDataWrite();
+          eeprom.ConfigDataWrite();
           calibrateFlag = 0;
         }
       }
@@ -126,7 +126,7 @@ void CalibrateOptions() {
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-          ConfigData.ConfigDataWrite();
+          eeprom.ConfigDataWrite();
           calibrateFlag = 0;
         }
       }
@@ -176,7 +176,7 @@ void CalibrateOptions() {
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X - 1, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT + 1, RA8875_BLACK);
-          ConfigData.ConfigDataWrite();
+          eeprom.ConfigDataWrite();
           calibrateFlag = 0;
         }
       }
@@ -188,7 +188,7 @@ void CalibrateOptions() {
       if (menu != MenuSelect::BOGUS_PIN_READ) {
         if (menu == MenuSelect::MENU_OPTION_SELECT) {
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-          ConfigData.ConfigDataWrite();
+          eeprom.ConfigDataWrite();
           calibrateFlag = 0;
         }
       }
@@ -200,7 +200,7 @@ void CalibrateOptions() {
       if (menu != MenuSelect::BOGUS_PIN_READ) {
         if (menu == MenuSelect::MENU_OPTION_SELECT) {
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-          ConfigData.ConfigDataWrite();
+          eeprom.ConfigDataWrite();
           calibrateFlag = 0;
         }
       }
@@ -220,7 +220,7 @@ void CalibrateOptions() {
       if (menu != MenuSelect::BOGUS_PIN_READ) {
         if (menu == MenuSelect::MENU_OPTION_SELECT) {
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-          ConfigData.ConfigDataWrite();
+          eeprom.ConfigDataWrite();
           calibrateFlag = 0;
         }
       }
@@ -423,7 +423,7 @@ case 0:  // Set Morse decoder sensitivity.
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X - 1, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT + 1, RA8875_BLACK);
-          ConfigData.ConfigDataWrite();
+          eeprom.ConfigDataWrite();
           morseDecodeAdjustFlag = false;
         }
       }
@@ -491,7 +491,7 @@ void SpectrumOptions() { /*
     return;
   }
   ConfigData.currentScale = spectrumSet;  // Yep...
-  ConfigData.ConfigDataWrite();
+  eeprom.ConfigDataWrite();
   RedrawDisplayScreen();
   ShowSpectrumdBScale();
 }
@@ -533,7 +533,7 @@ void AGCOptions() {
   }
 SetAudioOperatingState(radioState);
 //  AGCPrep();         //
-  ConfigData.ConfigDataWrite();    // ...save it
+  eeprom.ConfigDataWrite();    // ...save it
   UpdateAGCField();
 }
 
@@ -681,7 +681,7 @@ void ProcessEqualizerChoices(int EQType, char *title) {
     //  }
     }  // end inner while
   }    // end outer while
-  ConfigData.ConfigDataWrite();
+  eeprom.ConfigDataWrite();
 }
 }
 
@@ -713,7 +713,7 @@ void EqualizerRecOptions() {
     case 3:
       break;
   }
-  ConfigData.ConfigDataWrite();
+  eeprom.ConfigDataWrite();
   RedrawDisplayScreen();
   UpdateEqualizerField(ConfigData.receiveEQFlag);
   //  return 0;
@@ -833,7 +833,7 @@ static int micChoice = 0;
       break;
   }
         updateMic();
-        ConfigData.ConfigDataWrite(); 
+        eeprom.ConfigDataWrite(); 
 }
 
 
@@ -858,13 +858,13 @@ void RFOptions() {
       // When the transmit power level is set, this means ALL of the power coefficients must be revised!
       // powerOutCW and powerOutSSB must be updated.
       initPowerCoefficients();
-      ConfigData.ConfigDataWrite();  //AFP 10-21-22
+      eeprom.ConfigDataWrite();  //AFP 10-21-22
       BandInformation();
       break;
 
     case 1:  // Manual gain set.
       ConfigData.rfGain[ConfigData.currentBand] = GetEncoderValue(-60, 20, ConfigData.rfGain[ConfigData.currentBand], 5, (char *)"RF Gain dB: ");
-      ConfigData.ConfigDataWrite();
+      eeprom.ConfigDataWrite();
       break;
 
     case 2:  // Auto-Gain On
@@ -872,27 +872,27 @@ void RFOptions() {
       ConfigData.autoSpectrum = false;  // Make sure Auto-Spectrum is off.
       fftOffset = 0;
       ShowAutoStatus();
-      ConfigData.ConfigDataWrite();
+      eeprom.ConfigDataWrite();
       break;
 
     case 3:  // Auto-Gain Off
       ConfigData.autoGain = false;
       ShowAutoStatus();
-      ConfigData.ConfigDataWrite();
+      eeprom.ConfigDataWrite();
       break;
 
     case 4:  // Auto-Spectrum On
       ConfigData.autoSpectrum = true;
       ConfigData.autoGain = false;  // Make sure Auto-Gain is off.
       ShowAutoStatus();
-      ConfigData.ConfigDataWrite();
+      eeprom.ConfigDataWrite();
       break;
 
     case 5:  // Auto-Spectrum Off
       ConfigData.autoSpectrum = false;
       fftOffset = 0;
       ShowAutoStatus();
-      ConfigData.ConfigDataWrite();
+      eeprom.ConfigDataWrite();
       break;
 
     default:  // Cancel
@@ -951,7 +951,7 @@ void DoPaddleFlip() {
         break;
       }
   }
-  ConfigData.ConfigDataWrite();
+  eeprom.ConfigDataWrite();
 }
 
 
@@ -1043,29 +1043,29 @@ void ConfigDataOptions() {  // 0               1                2               
   defaultOpt = SubmenuSelect(ConfigDataOpts, 11, defaultOpt);
   switch (defaultOpt) {
     case 0:  // Save current ConfigData struct to ConfigData non-volatile memory.
-      ConfigData.ConfigDataWrite();
+      eeprom.ConfigDataWrite();
       break;
 
     case 1:
-      ConfigData.ConfigDataDefaults();  // Restore defaults to ConfigData struct and refresh display.
+      eeprom.ConfigDataDefaults();  // Restore defaults to ConfigData struct and refresh display.
       break;
 
     case 2:
-      ConfigData.GetFavoriteFrequency();  // Get a stored frequency and store in active VFO
+      eeprom.GetFavoriteFrequency();  // Get a stored frequency and store in active VFO
       break;
 
     case 3:
-      ConfigData.SetFavoriteFrequency();  // Set favorites
+      eeprom.SetFavoriteFrequency();  // Set favorites
       break;
 
     case 4:                                             // Copy ConfigData->SD.
-      ConfigData.get(ConfigData_BASE_ADDRESS + 4, tempConfig);  // Read as one large chunk
+      EEPROM.get(EEPROM_BASE_ADDRESS + 4, tempConfig);  // Read as one large chunk
       json.saveConfiguration(filename, tempConfig, true);    // Save ConfigData struct to SD
       break;
 
     case 5:                                     // Copy SD->ConfigData
       json.loadConfiguration(filename, ConfigData);  // Copy from SD to struct in active memory (on the stack) ConfigData.
-      ConfigData.ConfigDataWrite();                            // Write to ConfigData non-volatile memory.
+      eeprom.ConfigDataWrite();                            // Write to ConfigData non-volatile memory.
       initUserDefinedStuff();                   // Various things must be initialized.  This is normally done in setup().  KF5N February 21, 2024
       tft.writeTo(L2);                          // This is specifically to clear the bandwidth indicator bar.  KF5N August 7, 2023
       tft.clearMemory();
@@ -1078,7 +1078,7 @@ void ConfigDataOptions() {  // 0               1                2               
         Serial.println(F("\nBegin ConfigData from ConfigData"));
         // Don't want to overwrite the stack.  Need a temporary struct, read the ConfigData data into that.
         config_t ConfigData_temp;
-        ConfigData.get(ConfigData_BASE_ADDRESS + 4, ConfigData_temp);
+        EEPROM.get(EEPROM_BASE_ADDRESS + 4, ConfigData_temp);
         json.saveConfiguration(filename, ConfigData_temp, false);  // Write the temporary struct to the serial monitor.
         Serial.println(F("\nEnd ConfigData from ConfigData\n"));
       }

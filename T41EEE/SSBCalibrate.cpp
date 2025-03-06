@@ -323,10 +323,10 @@ void SSBCalibrate::CalibrateEpilogue() {
   ConfigData.currentScale = userScale;     //  Restore vertical scale to user preference.  KF5N
   ShowSpectrumdBScale();
   ConfigData.transmitPowerLevel = transmitPowerLevelTemp;  // Restore the user's transmit power level setting.  KF5N August 15, 2023
-  eeprom.EEPROMWrite();                                    // Save calibration numbers and configuration.  KF5N August 12, 2023
+  eeprom.CalDataWrite();                                    // Save calibration numbers and configuration.  KF5N August 12, 2023
   zoomIndex = userZoomIndex - 1;
   button.ButtonZoom();          // Restore the user's zoom setting.  Note that this function also modifies ConfigData.spectrum_zoom.
-  eeprom.EEPROMWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
+  eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
   tft.writeTo(L2);       // Clear layer 2.  KF5N July 31, 2023
   tft.clearMemory();
   tft.writeTo(L1);  // Exit function in layer 1.  KF5N August 3, 2023
@@ -1168,7 +1168,7 @@ void SSBCalibrate::RadioCal(bool refineCal) {
 
   // Set flag for initial calibration completed.
   CalData.SSBradioCalComplete = true;
-  eeprom.EEPROMWrite();
+  eeprom.CalDataWrite();
   return;
 }
 

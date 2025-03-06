@@ -29,7 +29,7 @@ void ConfigDataDefaults();
 void EEPROMStartup();
 
 //private:
-const uint32_t EEPROM_BASE_ADDRESS = 0;
+//const uint32_t EEPROM_BASE_ADDRESS = 0;
 const uint32_t CALIBRATION_BASE_ADDRESS = 1024;
 
 };

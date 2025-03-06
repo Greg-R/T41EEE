@@ -303,7 +303,7 @@ MenuSelect menu = MenuSelect::DEFAULT;
 *****/
 
 void Eeprom::ConfigDataDefaults() {
-  struct config_t* defaultConfigData = new config_t;  // Create a copy of the default configuration.
+  struct config_t* defaultConfig = new config_t;  // Create a copy of the default configuration.
   ConfigData = *defaultConfig;                    // Copy the defaults to ConfigData struct.
   // Initialize the frequency setting based on the last used frequency stored to EEPROM.
   TxRxFreq = ConfigData.centerFreq = ConfigData.lastFrequencies[ConfigData.currentBand][ConfigData.activeVFO];

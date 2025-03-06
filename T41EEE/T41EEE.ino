@@ -72,7 +72,7 @@ Button button;
 
 // Pointers to functions which execute the menu options.  Do these functions used the returned integer???
 void (*functionPtr[])() = { &CWOptions, &RFOptions, &VFOSelect,
-                            &EEPROMOptions, &AGCOptions, &SpectrumOptions,
+                            &ConfigDataOptions, &AGCOptions, &SpectrumOptions,
                             //                            button.ButtonMuteAudio, &SSBOptions,
                             &SSBOptions,
                             &EqualizerRecOptions, &CalibrateOptions, &BearingMaps };
@@ -134,10 +134,7 @@ float32_t DMAMEM float_buffer_RTemp[2048];
 //======================================== Global structure declarations ===============================================
 
 config_t ConfigData;
-configData_t ConfigData;
-
-struct calibration_t CalData;
-//struct config_t ConfigData;
+calibration_t CalData;
 
 const struct SR_Descriptor SR[18] = {
   //   SR_n,        rate,  text

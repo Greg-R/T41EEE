@@ -66,6 +66,7 @@ const int MENU_OPTION_SELECT = 0;  // These are the expected values from the swi
 const int XPIXELS = 800;  // This is for the 5.0" display
 const int YPIXELS = 480;
 const int CHAR_HEIGHT = 32;
+#define EEPROM_BASE_ADDRESS 0
 #define PIXELS_PER_EQUALIZER_DELTA 10  // Number of pixels per detent of encoder for equalizer changes
 #define SPECTRUM_LEFT_X 3              // Used to plot left edge of spectrum display  AFP 12-14-21
 #define WATERFALL_LEFT_X SPECTRUM_LEFT_X
@@ -1095,6 +1096,7 @@ void CalcCplxFIRCoeffs(float *coeffs_I, float *coeffs_Q, int numCoeffs, float32_
 void CaptureKeystrokes();
 void CalibrateOptions();  // AFP 10-22-22, changed JJP 2/3/23
 uint16_t Color565(uint8_t r, uint8_t g, uint8_t b);
+void ConfigDataOptions();  // Resides in MenuProc.cpp.
 void ControlFilterF();
 int CreateMapList(char ptrMaps[10][50], int *count);
 void CWOptions();
@@ -1126,7 +1128,7 @@ void DrawKeyboard();
 void DrawSMeterContainer();
 void DrawSpectrumDisplayContainer();
 void DrawAudioSpectContainer();
-void EEPROMOptions();  // Resides in MenuProc.cpp.
+
 void EncoderFineTune();
 void EncoderFilter();
 void EncoderCenterTune();
