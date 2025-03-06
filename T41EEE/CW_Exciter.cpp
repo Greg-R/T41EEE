@@ -64,12 +64,12 @@ void CW_ExciterIQData(int shaping) //AFP 08-20-22
   //  Apply amplitude and phase corrections.
 
   if (bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-    arm_scale_f32(float_buffer_L_EX, -ConfigData.IQCWAmpCorrectionFactor[ConfigData.currentBand], float_buffer_L_EX, 256);       //Adjust level of L buffer KF5N flipped sign, original was +.
-    IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, ConfigData.IQCWPhaseCorrectionFactor[ConfigData.currentBand], 256);  // Adjust phase
+    arm_scale_f32(float_buffer_L_EX, -CalData.IQCWAmpCorrectionFactor[ConfigData.currentBand], float_buffer_L_EX, 256);       //Adjust level of L buffer KF5N flipped sign, original was +.
+    IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, CalData.IQCWPhaseCorrectionFactor[ConfigData.currentBand], 256);  // Adjust phase
   } else {
     if (bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-      arm_scale_f32 (float_buffer_L_EX, + ConfigData.IQCWAmpCorrectionFactor[ConfigData.currentBand], float_buffer_L_EX, 256);   // KF5N flipped sign, original was minus.
-      IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, ConfigData.IQCWPhaseCorrectionFactor[ConfigData.currentBand], 256); // Adjust phase
+      arm_scale_f32 (float_buffer_L_EX, + CalData.IQCWAmpCorrectionFactor[ConfigData.currentBand], float_buffer_L_EX, 256);   // KF5N flipped sign, original was minus.
+      IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, CalData.IQCWPhaseCorrectionFactor[ConfigData.currentBand], 256); // Adjust phase
     }
   }
 
@@ -128,8 +128,8 @@ powerScale = 30.0 * ConfigData.powerOutCW[ConfigData.currentBand];
 //      Q_out_L.play(q15_buffer_LTemp, 2048);    // Sidetone
     // Inject the DC offset from carrier calibration.  There is an ARM function for this.
     #ifdef QSE2
-      arm_offset_q15(q15_buffer_LTemp, ConfigData.iDCoffsetCW[ConfigData.currentBand] + ConfigData.dacOffsetCW, q15_buffer_LTemp, 2048);
-      arm_offset_q15(q15_buffer_RTemp, ConfigData.qDCoffsetCW[ConfigData.currentBand] + ConfigData.dacOffsetCW, q15_buffer_RTemp, 2048);
+      arm_offset_q15(q15_buffer_LTemp, CalData.iDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_LTemp, 2048);
+      arm_offset_q15(q15_buffer_RTemp, CalData.qDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_RTemp, 2048);
     #endif
 
       Q_out_L_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);  // This mode is required when setting sidetone volume.

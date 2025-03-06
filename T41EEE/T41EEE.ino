@@ -5,7 +5,8 @@
 #include "SDT.h"
 #include <charconv>
 
-const char *filename = "/config.txt";  // <- SD library uses 8.3 filenames
+const char *configFilename = "/config.txt";  // <- SD library uses 8.3 filenames
+const char *calFilename = "/calibration.txt";  // <- SD library uses 8.3 filenames
 
 struct maps myMapFiles[10] = {
   { "Cincinnati.bmp", 39.07466, -84.42677 },  // Map name and coordinates for QTH
@@ -45,10 +46,7 @@ struct band bands[NUMBER_OF_BANDS] {  // Revised band struct with mode and sideb
   }
 };
 
-const char *topMenus[] = { "CW Options", "RF Set", "VFO Select",
-                           "EEPROM", "AGC", "Spectrum Options",
-                           "SSB Options",                         // Noise floor removed.  Greg KF5N February 14, 2025
-                           "EQ Rec Set", "Calibrate", "Bearing" };
+
 
 // Button array labels array is located in Utility.cpp.
 
@@ -70,9 +68,13 @@ JSON json;
 Eeprom eeprom;  // Eeprom object.
 Button button;
 
+const char *topMenus[] = { "CW Options", "RF Set", "VFO Select",
+                           "Config EEPROM", "Cal EEPROM", "AGC", "Spectrum Options",
+                           "SSB Options",                         // Noise floor removed.  Greg KF5N February 14, 2025
+                           "EQ Rec Set", "Calibrate", "Bearing" };
 // Pointers to functions which execute the menu options.  Do these functions used the returned integer???
 void (*functionPtr[])() = { &CWOptions, &RFOptions, &VFOSelect,
-                            &ConfigDataOptions, &AGCOptions, &SpectrumOptions,
+                            &ConfigDataOptions, &CalDataOptions, &AGCOptions, &SpectrumOptions,
                             //                            button.ButtonMuteAudio, &SSBOptions,
                             &SSBOptions,
                             &EqualizerRecOptions, &CalibrateOptions, &BearingMaps };

@@ -310,7 +310,7 @@ void Calculatedbm() {
     //#ifdef USE_LOG10FAST
     switch (display_dbm) {
       case DISPLAY_S_METER_DBM:
-        dbm = ConfigData.dBm_calibration + bands[ConfigData.currentBand].gainCorrection + static_cast<float32_t>(attenuator) + slope * log10f_fast(sum_db) + cons - static_cast<float32_t>(bands[ConfigData.currentBand].RFgain) * 1.5;
+        dbm = CalData.dBm_calibration + bands[ConfigData.currentBand].gainCorrection + static_cast<float32_t>(attenuator) + slope * log10f_fast(sum_db) + cons - static_cast<float32_t>(bands[ConfigData.currentBand].RFgain) * 1.5;
         dbmhz = 0;
         break;
       case DISPLAY_S_METER_DBMHZ:
@@ -497,8 +497,8 @@ void SaveAnalogSwitchValues() {
   tft.print("the switch shown.");
 
   // Disable button repeat for interrupt driven buttons
-  origRepeatDelay = ConfigData.buttonRepeatDelay;
-  ConfigData.buttonRepeatDelay = 0;
+  origRepeatDelay = CalData.buttonRepeatDelay;
+  CalData.buttonRepeatDelay = 0;
 
   for (index = 0; index < NUMBER_OF_SWITCHES;) {
     tft.setCursor(20, 100);
@@ -534,12 +534,12 @@ void SaveAnalogSwitchValues() {
     tft.print(labels[index]);
     tft.setCursor(660, 20 + index * 25);
     tft.print(value);
-    ConfigData.switchValues[index] = value;
+    CalData.switchValues[index] = value;
 
     // Set interrupt press/release thresholds based on the Select button, which has the highest ADC value
     if (index == 0) {
-      ConfigData.buttonThresholdPressed = ConfigData.switchValues[0] + WIGGLE_ROOM;
-      ConfigData.buttonThresholdReleased = ConfigData.buttonThresholdPressed + WIGGLE_ROOM;
+      CalData.buttonThresholdPressed = CalData.switchValues[0] + WIGGLE_ROOM;
+      CalData.buttonThresholdReleased = CalData.buttonThresholdPressed + WIGGLE_ROOM;
     }
 
     index++;
@@ -548,7 +548,7 @@ void SaveAnalogSwitchValues() {
     }
   }
 
-  ConfigData.buttonRepeatDelay = origRepeatDelay;  // Restore original repeat delay
+  CalData.buttonRepeatDelay = origRepeatDelay;  // Restore original repeat delay
 }
 
 
@@ -658,8 +658,8 @@ int SDPresentCheck() {
 *****/
 FLASHMEM void initPowerCoefficients() {
       for(int i = 0; i < NUMBER_OF_BANDS; i = i + 1) {        
-         ConfigData.powerOutCW[i] = sqrt(ConfigData.transmitPowerLevel/20.0) * ConfigData.CWPowerCalibrationFactor[i];
-         ConfigData.powerOutSSB[i] =  sqrt(ConfigData.transmitPowerLevel/20.0) * ConfigData.SSBPowerCalibrationFactor[i];
+         ConfigData.powerOutCW[i] = sqrt(ConfigData.transmitPowerLevel/20.0) * CalData.CWPowerCalibrationFactor[i];
+         ConfigData.powerOutSSB[i] =  sqrt(ConfigData.transmitPowerLevel/20.0) * CalData.SSBPowerCalibrationFactor[i];
       }
 }
 

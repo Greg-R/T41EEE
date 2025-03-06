@@ -52,7 +52,7 @@ void ButtonISR() {
 
   switch (buttonState) {
     case BUTTON_STATE_UP:
-      if (filteredADCValue <= ConfigData.buttonThresholdPressed) {
+      if (filteredADCValue <= CalData.buttonThresholdPressed) {
         buttonElapsed = 0;
         buttonState = BUTTON_STATE_DEBOUNCE;
       }
@@ -69,10 +69,10 @@ void ButtonISR() {
 
       break;
     case BUTTON_STATE_PRESSED:
-      if (filteredADCValue >= ConfigData.buttonThresholdReleased) {
+      if (filteredADCValue >= CalData.buttonThresholdReleased) {
         buttonState = BUTTON_STATE_UP;
-      } else if (ConfigData.buttonRepeatDelay != 0) {  // buttonRepeatDelay of 0 disables repeat
-        if (buttonElapsed < ConfigData.buttonRepeatDelay) {
+      } else if (CalData.buttonRepeatDelay != 0) {  // buttonRepeatDelay of 0 disables repeat
+        if (buttonElapsed < CalData.buttonRepeatDelay) {
           buttonElapsed += BUTTON_USEC_PER_ISR;
         } else {
           buttonADCOut = buttonADCPressed;
@@ -122,7 +122,7 @@ MenuSelect Button::ProcessButtonPress(int valPin) {
   }
 
   for (switchIndex = 0; switchIndex < NUMBER_OF_SWITCHES; switchIndex++) {
-    if (abs(valPin - ConfigData.switchValues[switchIndex]) < WIGGLE_ROOM)  // ...because ADC does return exact values every time
+    if (abs(valPin - CalData.switchValues[switchIndex]) < WIGGLE_ROOM)  // ...because ADC does return exact values every time
     {
       return static_cast<MenuSelect>(switchIndex);
     }
@@ -166,7 +166,7 @@ int Button::ReadSelectedPushButton() {
     }
   }
 
-  if (buttonRead > ConfigData.switchValues[0] + WIGGLE_ROOM) {  //AFP 10-29-22 per Jack Wilson
+  if (buttonRead > CalData.switchValues[0] + WIGGLE_ROOM) {  //AFP 10-29-22 per Jack Wilson
     return -1;
   }
   minPinRead = buttonRead;
@@ -841,8 +841,8 @@ void Button::ButtonSelectSideband() {
   FilterSetSSB();
   BandInformation();
 
-  Serial.printf("bands[ConfigData.currentBand].FLoCut = %d\n", bands[ConfigData.currentBand].FLoCut);
-  Serial.printf("bands[ConfigData.currentBand].FHiCut = %d\n", bands[ConfigData.currentBand].FHiCut);
+//  Serial.printf("bands[ConfigData.currentBand].FLoCut = %d\n", bands[ConfigData.currentBand].FLoCut);
+//  Serial.printf("bands[ConfigData.currentBand].FHiCut = %d\n", bands[ConfigData.currentBand].FHiCut);
 }
 
 

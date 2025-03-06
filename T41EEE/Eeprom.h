@@ -25,11 +25,12 @@ int EEPROMReadSize(uint32_t address);
 void EEPROMStuffFavorites(unsigned long current[]);
 void SetFavoriteFrequency();
 void GetFavoriteFrequency();
+void CalDataDefaults();
 void ConfigDataDefaults();
 void EEPROMStartup();
 
 //private:
 //const uint32_t EEPROM_BASE_ADDRESS = 0;
-const uint32_t CALIBRATION_BASE_ADDRESS = 1024;
+//const uint32_t CAL_BASE_ADDRESS = 1024;
 
 };

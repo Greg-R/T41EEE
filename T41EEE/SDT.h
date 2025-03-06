@@ -67,6 +67,7 @@ const int XPIXELS = 800;  // This is for the 5.0" display
 const int YPIXELS = 480;
 const int CHAR_HEIGHT = 32;
 #define EEPROM_BASE_ADDRESS 0
+#define CAL_BASE_ADDRESS 1024
 #define PIXELS_PER_EQUALIZER_DELTA 10  // Number of pixels per detent of encoder for equalizer changes
 #define SPECTRUM_LEFT_X 3              // Used to plot left edge of spectrum display  AFP 12-14-21
 #define WATERFALL_LEFT_X SPECTRUM_LEFT_X
@@ -343,12 +344,12 @@ struct config_t {
 //  float currentMicAttack = 0.1;
 //  float currentMicRelease = 0.1;
   float currentMicGain = 0.0;  // Open Audio gain element.  Gain is in dB.
-  int switchValues[18] = { 924, 870, 817,
-                           769, 713, 669,
-                           616, 565, 513,
-                           459, 407, 356,
-                           298, 242, 183,
-                           131, 67, 10 };
+//  int switchValues[18] = { 924, 870, 817,
+//                           769, 713, 669,
+//                           616, 565, 513,
+//                           459, 407, 356,
+//                           298, 242, 183,
+//                           131, 67, 10 };
   float LPFcoeff = 0.0;                                                                     // 4 bytes
   float NR_PSI = 0.0;                                                                       // 4 bytes
   float NR_alpha = 0.95;                                                                    // 4 bytes
@@ -357,16 +358,16 @@ struct config_t {
   float pll_fmax = 4000.0;                                                                  // 4 bytes
   float powerOutCW[NUMBER_OF_BANDS] = { 0.035, 0.035, 0.035, 0.035, 0.035, 0.035, 0.035 };  // powerOutCW and powerOutSSB are derived from the TX power setting and calibration factors.
   float powerOutSSB[NUMBER_OF_BANDS] = { 0.035, 0.035, 0.035, 0.035, 0.035, 0.035, 0.035 };
-  float CWPowerCalibrationFactor[NUMBER_OF_BANDS] =  { 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 };        // Increased to 0.04, was 0.019; KF5N February 20, 2024
-  float SSBPowerCalibrationFactor[NUMBER_OF_BANDS] = { 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 };  // Increased to 0.04, was 0.008; KF5N February 21, 2024
-  float IQCWRXAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
-  float IQCWRXPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-  float IQCWAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
-  float IQCWPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-  float IQSSBRXAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
-  float IQSSBRXPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };  
-  float IQSSBAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
-  float IQSSBPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+//  float CWPowerCalibrationFactor[NUMBER_OF_BANDS] =  { 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 };        // Increased to 0.04, was 0.019; KF5N February 20, 2024
+//  float SSBPowerCalibrationFactor[NUMBER_OF_BANDS] = { 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 };  // Increased to 0.04, was 0.008; KF5N February 21, 2024
+ // float IQCWRXAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+//  float IQCWRXPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+//  float IQCWAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+//  float IQCWPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+//  float IQSSBRXAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+//  float IQSSBRXPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };  
+//  float IQSSBAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+//  float IQSSBPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
   uint32_t favoriteFreqs[13] = { 3560000, 3690000, 7030000, 7200000, 14060000, 14200000, 21060000, 21285000, 28060000, 28365000, 5000000, 10000000, 15000000 };
 
   //DB2OO, 23-AUG-23: Region 1 freqs (from https://qrper.com/qrp-calling-frequencies/)
@@ -393,21 +394,21 @@ Sideband lastSideband[NUMBER_OF_BANDS] = {Sideband::LOWER, Sideband::LOWER, Side
   bool xmitEQFlag = false;
   bool receiveEQFlag = false;
 //  int calFreq = 0;                    // This is an index into an array of tone frequencies, for example:  {750, 3000}.  Default to 750 Hz. KF5N March 12, 2024
-  int buttonThresholdPressed = 944;   // switchValues[0] + WIGGLE_ROOM
-  int buttonThresholdReleased = 964;  // buttonThresholdPressed + WIGGLE_ROOM
-  uint32_t buttonRepeatDelay = 300000;     // Increased to 300000 from 200000 to better handle cheap, wornout buttons.
-#ifdef QSE2
-  q15_t iDCoffsetCW[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-  q15_t qDCoffsetCW[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-  q15_t iDCoffsetSSB[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-  q15_t qDCoffsetSSB[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-  q15_t dacOffsetCW = 1500;  // This must be "tuned" for each radio and/or Audio Adapter board.
-  q15_t dacOffsetSSB = 1500;  // This must be "tuned" for each radio and/or Audio Adapter board.
-#endif
-  bool CWradioCalComplete = false;
-  bool SSBradioCalComplete = false;
+//  int buttonThresholdPressed = 944;   // switchValues[0] + WIGGLE_ROOM
+//  int buttonThresholdReleased = 964;  // buttonThresholdPressed + WIGGLE_ROOM
+//  uint32_t buttonRepeatDelay = 300000;     // Increased to 300000 from 200000 to better handle cheap, wornout buttons.
+//#ifdef QSE2
+//  q15_t iDCoffsetCW[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+//  q15_t qDCoffsetCW[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+//  q15_t iDCoffsetSSB[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+//  q15_t qDCoffsetSSB[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+//  q15_t dacOffsetCW = 1500;  // This must be "tuned" for each radio and/or Audio Adapter board.
+//  q15_t dacOffsetSSB = 1500;  // This must be "tuned" for each radio and/or Audio Adapter board.
+//#endif
+//  bool CWradioCalComplete = false;
+//  bool SSBradioCalComplete = false;
   bool cessb = false;
-  float32_t dBm_calibration = 22.0;  // This parameter is adjusted in the calibration menu.
+//  float32_t dBm_calibration = 22.0;  // This parameter is adjusted in the calibration menu.
 };
 
 extern struct config_t ConfigData;
@@ -564,8 +565,8 @@ struct calibration_t {
                            298, 242, 183,
                            131, 67, 10 };
 
-  float powerOutCW[NUMBER_OF_BANDS] = { 0.035, 0.035, 0.035, 0.035, 0.035, 0.035, 0.035 };  // powerOutCW and powerOutSSB are derived from the TX power setting and calibration factors.
-  float powerOutSSB[NUMBER_OF_BANDS] = { 0.035, 0.035, 0.035, 0.035, 0.035, 0.035, 0.035 };
+//  float powerOutCW[NUMBER_OF_BANDS] = { 0.035, 0.035, 0.035, 0.035, 0.035, 0.035, 0.035 };  // powerOutCW and powerOutSSB are derived from the TX power setting and calibration factors.
+//  float powerOutSSB[NUMBER_OF_BANDS] = { 0.035, 0.035, 0.035, 0.035, 0.035, 0.035, 0.035 };
   float CWPowerCalibrationFactor[NUMBER_OF_BANDS] =  { 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 };        // Increased to 0.04, was 0.019; KF5N February 20, 2024
   float SSBPowerCalibrationFactor[NUMBER_OF_BANDS] = { 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 };  // Increased to 0.04, was 0.008; KF5N February 21, 2024
   float IQCWRXAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
@@ -767,8 +768,9 @@ struct secondaryMenuConfiguration {
   int numberOfOptions;  // Number of submenu topions
 };
 
-// SD file name:
-extern const char *filename;
+// SD file names:
+extern const char *configFilename;
+extern const char *calFilename;
 
 typedef struct SR_Descriptor {
   const uint8_t SR_n;
@@ -1090,6 +1092,7 @@ void bmpDraw(const char *filename, int x, int y);
 //void ButtonNR();
 //void ButtonSetNoiseFloor();
 //void ButtonZoom();
+void CalDataOptions();  // Resides in MenuProc.cpp.
 void CalcZoom1Magn();
 void CalcFIRCoeffs(float *coeffs_I, int numCoeffs, float32_t fc, float32_t Astop, int type, float dfc, float Fsamprate);
 void CalcCplxFIRCoeffs(float *coeffs_I, float *coeffs_Q, int numCoeffs, float32_t FLoCut, float32_t FHiCut, float SampleRate);

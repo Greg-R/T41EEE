@@ -95,8 +95,8 @@ void CalibrateOptions() {
       break;
 
     case 1:  // CW PA Cal
-      ConfigData.CWPowerCalibrationFactor[ConfigData.currentBand] = GetEncoderValueLive(0.0, 1.0, ConfigData.CWPowerCalibrationFactor[ConfigData.currentBand], 0.01, (char *)"CW PA Cal: ", false);
-      ConfigData.powerOutCW[ConfigData.currentBand] = sqrt(ConfigData.transmitPowerLevel / 20.0) * ConfigData.CWPowerCalibrationFactor[ConfigData.currentBand];
+      CalData.CWPowerCalibrationFactor[ConfigData.currentBand] = GetEncoderValueLive(0.0, 1.0, CalData.CWPowerCalibrationFactor[ConfigData.currentBand], 0.01, (char *)"CW PA Cal: ", false);
+      ConfigData.powerOutCW[ConfigData.currentBand] = sqrt(ConfigData.transmitPowerLevel / 20.0) * CalData.CWPowerCalibrationFactor[ConfigData.currentBand];
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
@@ -120,8 +120,8 @@ void CalibrateOptions() {
       break;
 
     case 5:                                         // SSB PA Cal
-      ConfigData.SSBPowerCalibrationFactor[ConfigData.currentBand] = GetEncoderValueLive(0.0, 1.0, ConfigData.SSBPowerCalibrationFactor[ConfigData.currentBand], 0.01, (char *)"SSB PA Cal: ", false);
-      ConfigData.powerOutSSB[ConfigData.currentBand] = sqrt(ConfigData.transmitPowerLevel / 20.0) * ConfigData.SSBPowerCalibrationFactor[ConfigData.currentBand];
+      CalData.SSBPowerCalibrationFactor[ConfigData.currentBand] = GetEncoderValueLive(0.0, 1.0, CalData.SSBPowerCalibrationFactor[ConfigData.currentBand], 0.01, (char *)"SSB PA Cal: ", false);
+      ConfigData.powerOutSSB[ConfigData.currentBand] = sqrt(ConfigData.transmitPowerLevel / 20.0) * CalData.SSBPowerCalibrationFactor[ConfigData.currentBand];
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
@@ -167,10 +167,10 @@ void CalibrateOptions() {
     case 13:  // dBm level cal.  Was choose CW calibration tone frequency.
 //      calibrater.SelectCalFreq();
 //      calibrateFlag = 0;
-      ConfigData.dBm_calibration = GetEncoderValueLive(0, 50, ConfigData.dBm_calibration, 1, (char *)"dBm Cal: ", false);
-      if (ConfigData.dBm_calibration != freqCorrectionFactorOld) {
+      CalData.dBm_calibration = GetEncoderValueLive(0, 50, CalData.dBm_calibration, 1, (char *)"dBm Cal: ", false);
+      if (CalData.dBm_calibration != freqCorrectionFactorOld) {
 //        si5351.set_correction(ConfigData.freqCorrectionFactor, SI5351_PLL_INPUT_XO);
-        freqCorrectionFactorOld = ConfigData.dBm_calibration;
+        freqCorrectionFactorOld = CalData.dBm_calibration;
       }
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
@@ -183,24 +183,24 @@ void CalibrateOptions() {
       break;
 
     case 14:  // Set DAC offset for CW carrier cancellation.
-      ConfigData.dacOffsetCW = GetEncoderValueLiveQ15t(-5000, 5000, ConfigData.dacOffsetCW, 50, (char *)"DC Offset:", false);
+      CalData.dacOffsetCW = GetEncoderValueLiveQ15t(-5000, 5000, CalData.dacOffsetCW, 50, (char *)"DC Offset:", false);
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {
         if (menu == MenuSelect::MENU_OPTION_SELECT) {
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-          eeprom.ConfigDataWrite();
+          eeprom.CalDataWrite();
           calibrateFlag = 0;
         }
       }
       break;
 
     case 15:  // Set DAC offset for SSB carrier cancellation.
-      ConfigData.dacOffsetSSB = GetEncoderValueLiveQ15t(-5000, 5000, ConfigData.dacOffsetSSB, 50, (char *)"DC Offset:", false);
+      CalData.dacOffsetSSB = GetEncoderValueLiveQ15t(-5000, 5000, CalData.dacOffsetSSB, 50, (char *)"DC Offset:", false);
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {
         if (menu == MenuSelect::MENU_OPTION_SELECT) {
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-          eeprom.ConfigDataWrite();
+          eeprom.CalDataWrite();
           calibrateFlag = 0;
         }
       }
@@ -215,7 +215,7 @@ void CalibrateOptions() {
       break;
 
     case 17:  // Set button repeat rate
-      ConfigData.buttonRepeatDelay = 1000 * GetEncoderValueLive(0, 5000, ConfigData.buttonRepeatDelay / 1000, 1, (char *)"Btn Repeat:  ", false);
+      CalData.buttonRepeatDelay = 1000 * GetEncoderValueLive(0, 5000, CalData.buttonRepeatDelay / 1000, 1, (char *)"Btn Repeat:  ", false);
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {
         if (menu == MenuSelect::MENU_OPTION_SELECT) {
@@ -685,6 +685,7 @@ void ProcessEqualizerChoices(int EQType, char *title) {
 }
 }
 
+
 /*****
   Purpose: Receive EQ set
 
@@ -1060,11 +1061,11 @@ void ConfigDataOptions() {  // 0               1                2               
 
     case 4:                                             // Copy ConfigData->SD.
       EEPROM.get(EEPROM_BASE_ADDRESS + 4, tempConfig);  // Read as one large chunk
-      json.saveConfiguration(filename, tempConfig, true);    // Save ConfigData struct to SD
+      json.saveConfiguration(configFilename, tempConfig, true);    // Save ConfigData struct to SD
       break;
 
     case 5:                                     // Copy SD->ConfigData
-      json.loadConfiguration(filename, ConfigData);  // Copy from SD to struct in active memory (on the stack) ConfigData.
+      json.loadConfiguration(configFilename, ConfigData);  // Copy from SD to struct in active memory (on the stack) ConfigData.
       eeprom.ConfigDataWrite();                            // Write to ConfigData non-volatile memory.
       initUserDefinedStuff();                   // Various things must be initialized.  This is normally done in setup().  KF5N February 21, 2024
       tft.writeTo(L2);                          // This is specifically to clear the bandwidth indicator bar.  KF5N August 7, 2023
@@ -1079,27 +1080,103 @@ void ConfigDataOptions() {  // 0               1                2               
         // Don't want to overwrite the stack.  Need a temporary struct, read the ConfigData data into that.
         config_t ConfigData_temp;
         EEPROM.get(EEPROM_BASE_ADDRESS + 4, ConfigData_temp);
-        json.saveConfiguration(filename, ConfigData_temp, false);  // Write the temporary struct to the serial monitor.
+        json.saveConfiguration(configFilename, ConfigData_temp, false);  // Write the temporary struct to the serial monitor.
         Serial.println(F("\nEnd ConfigData from ConfigData\n"));
       }
       break;
 
     case 7:  // Defaults->Serial
       Serial.println(F("\nBegin ConfigData defaults"));
-      json.saveConfiguration(filename, defaultConfig, false);  // Write default ConfigData struct to the Serial monitor.
+      json.saveConfiguration(configFilename, defaultConfig, false);  // Write default ConfigData struct to the Serial monitor.
       Serial.println(F("\nEnd ConfigData defaults\n"));
       break;
 
     case 8:  // Current->Serial
       Serial.println(F("Begin ConfigData on the stack"));
-      json.saveConfiguration(filename, ConfigData, false);  // Write current ConfigData struct to the Serial monitor.
+      json.saveConfiguration(configFilename, ConfigData, false);  // Write current ConfigData struct to the Serial monitor.
       Serial.println(F("\nEnd ConfigData on the stack\n"));
       break;
 
     case 9:  // SDConfigData->Serial
       Serial.println(F("Begin ConfigData on the SD card"));
-      json.printFile(filename);  // Write SD card ConfigData struct to the Serial monitor.
+      json.printFile(configFilename);  // Write SD card ConfigData struct to the Serial monitor.
       Serial.println(F("End ConfigData on the SD card\n"));
+      break;
+
+    default:
+      defaultOpt = -1;  // No choice made
+      break;
+  }
+  //  return defaultOpt;
+}
+
+
+/*****
+  Purpose: Allow user to set current ConfigData values or restore default settings
+
+  Parameter list:
+    void
+
+  Return value
+    int           the user's choice
+*****/
+void CalDataOptions() {  // 0               1                2               3               4                  5                  6                  7                   8                  9
+  const char *CalDataOpts[] = { "Save Current", "Load Defaults", "Copy CalData->SD", "Copy SD->CalData", "CalData->Serial", "Default->Serial", "Stack->Serial", "SD->Serial", "Cancel" };
+  int defaultOpt = 0;
+  calibration_t tempCal;     // A temporary config_t struct to copy ConfigData data into.
+  calibration_t defaultCal;  // The configuration defaults.
+  defaultOpt = SubmenuSelect(CalDataOpts, 9, defaultOpt);
+  switch (defaultOpt) {
+    case 0:  // Save current ConfigData struct to ConfigData non-volatile memory.
+      eeprom.CalDataWrite();
+      break;
+
+    case 1:
+      eeprom.CalDataDefaults();  // Restore defaults to ConfigData struct and refresh display.
+      break;
+
+    case 4:                                             // Copy ConfigData->SD.
+      EEPROM.get(CAL_BASE_ADDRESS + 4, tempCal);  // Read as one large chunk
+      json.saveCalibration(calFilename, tempCal, true);    // Save ConfigData struct to SD
+      break;
+
+    case 5:                                     // Copy SD->ConfigData
+      json.loadCalibration(calFilename, CalData);  // Copy from SD to struct in active memory (on the stack) ConfigData.
+      eeprom.CalDataWrite();                            // Write to ConfigData non-volatile memory.
+      initUserDefinedStuff();                   // Various things must be initialized.  This is normally done in setup().  KF5N February 21, 2024
+      tft.writeTo(L2);                          // This is specifically to clear the bandwidth indicator bar.  KF5N August 7, 2023
+      tft.clearMemory();
+      tft.writeTo(L1);
+      RedrawDisplayScreen();  // Assume there are lots of changes and do a heavy-duty refresh.  KF5N August 7, 2023
+      break;
+
+    case 6:  // CalData->Serial
+      {
+        Serial.println(F("\nBegin CalData from CalData"));
+        // Don't want to overwrite the stack.  Need a temporary struct, read the ConfigData data into that.
+        calibration_t CalData_temp;
+        EEPROM.get(CAL_BASE_ADDRESS + 4, CalData_temp);
+        json.saveCalibration(calFilename, CalData_temp, false);  // Write the temporary struct to the serial monitor.
+        Serial.println(F("\nEnd CalData from CalData\n"));
+      }
+      break;
+
+    case 7:  // Defaults->Serial
+      Serial.println(F("\nBegin CalData defaults"));
+      json.saveCalibration(calFilename, defaultCal, false);  // Write default ConfigData struct to the Serial monitor.
+      Serial.println(F("\nEnd CalData defaults\n"));
+      break;
+
+    case 8:  // Current->Serial
+      Serial.println(F("Begin CalData on the stack"));
+      json.saveCalibration(calFilename, CalData, false);  // Write current ConfigData struct to the Serial monitor.
+      Serial.println(F("\nEnd CalData on the stack\n"));
+      break;
+
+    case 9:  // SD CalData->Serial
+      Serial.println(F("Begin CalData on the SD card"));
+      json.printFile(calFilename);  // Write SD card CalData struct to the Serial monitor.
+      Serial.println(F("End CalData on the SD card\n"));
       break;
 
     default:

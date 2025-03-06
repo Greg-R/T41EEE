@@ -1,7 +1,7 @@
 // Button class
 #pragma once
 
-#define TOP_MENU_COUNT 10  // Changed to 10 after noise floor removed.  Greg KF5N February 14, 2025
+#define TOP_MENU_COUNT 11  // Changed to 10 after noise floor removed.  Greg KF5N February 14, 2025
 
 class Button {
 

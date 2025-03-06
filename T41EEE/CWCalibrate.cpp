@@ -1550,7 +1550,7 @@ void CWCalibrate::DoXmitCarrierCalibrate(int mode, bool radioCal, bool shortCal)
 #endif
 
 
-// Automatic calibration of all bands.  Greg KF5N June 4, 2024
+/* Automatic calibration of all bands.  Greg KF5N June 4, 2024
 void CWCalibrate::RadioCal(bool refineCal) {
   // Warn the user if the radio is not calibrated and refine cal is attempted.
   if (refineCal && not CalData.CWradioCalComplete) {
@@ -1598,6 +1598,95 @@ void CWCalibrate::RadioCal(bool refineCal) {
   CWCalibrate::DoXmitCalibrate(0, true, refineCal);
   CWCalibrate::DoReceiveCalibrate(0, true, refineCal);
   button.BandSet(BAND_10M);
+#ifdef QSE2
+  CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal);
+#endif
+  CWCalibrate::DoXmitCalibrate(0, true, refineCal);
+  CWCalibrate::DoReceiveCalibrate(0, true, refineCal);
+  // Set flag for initial calibration completed.
+  CalData.CWradioCalComplete = true;
+  eeprom.CalDataWrite();
+  return;
+}
+*/
+
+
+// Automatic calibration of all bands.  Greg KF5N June 4, 2024
+void CWCalibrate::RadioCal(bool refineCal) {
+  // Warn the user if the radio is not calibrated and refine cal is attempted.
+  if (refineCal && not CalData.CWradioCalComplete) {
+    tft.setFontScale((enum RA8875tsize)2);
+    tft.setTextColor(RA8875_RED);
+    tft.setCursor(20, 300);
+    tft.print("RADIO NOT CALIBRATED");
+    return;
+  }
+  //  IQChoice = 0;  // Global variable.
+  button.BandSet(BAND_80M);
+  TxRxFreq = CalData.calFrequencies[0][1];
+  ConfigData.centerFreq = TxRxFreq;
+  ShowFrequency();
+  SetFreq();
+#ifdef QSE2
+  CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal);
+#endif
+  CWCalibrate::DoXmitCalibrate(0, true, refineCal);
+  CWCalibrate::DoReceiveCalibrate(0, true, refineCal);
+  button.BandSet(BAND_40M);
+    TxRxFreq = CalData.calFrequencies[1][1];
+  ConfigData.centerFreq = TxRxFreq;
+  ShowFrequency();
+  SetFreq();
+#ifdef QSE2
+  CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal);
+#endif
+  CWCalibrate::DoXmitCalibrate(0, true, refineCal);
+  CWCalibrate::DoReceiveCalibrate(0, true, refineCal);
+  button.BandSet(BAND_20M);
+    TxRxFreq = CalData.calFrequencies[2][1];
+  ConfigData.centerFreq = TxRxFreq;
+  ShowFrequency();
+  SetFreq();
+#ifdef QSE2
+  CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal);
+#endif
+  CWCalibrate::DoXmitCalibrate(0, true, refineCal);
+  CWCalibrate::DoReceiveCalibrate(0, true, refineCal);
+  button.BandSet(BAND_17M);
+    TxRxFreq = CalData.calFrequencies[3][1];
+  ConfigData.centerFreq = TxRxFreq;
+  ShowFrequency();
+  SetFreq();
+#ifdef QSE2
+  CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal);
+#endif
+  CWCalibrate::DoXmitCalibrate(0, true, refineCal);
+  CWCalibrate::DoReceiveCalibrate(0, true, refineCal);
+  button.BandSet(BAND_15M);
+    TxRxFreq = CalData.calFrequencies[4][1];
+  ConfigData.centerFreq = TxRxFreq;
+  ShowFrequency();
+  SetFreq();
+#ifdef QSE2
+  CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal);
+#endif
+  CWCalibrate::DoXmitCalibrate(0, true, refineCal);
+  CWCalibrate::DoReceiveCalibrate(0, true, refineCal);
+  button.BandSet(BAND_12M);
+    TxRxFreq = CalData.calFrequencies[5][1];
+  ConfigData.centerFreq = TxRxFreq;
+  ShowFrequency();
+  SetFreq();
+#ifdef QSE2
+  CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal);
+#endif
+  CWCalibrate::DoXmitCalibrate(0, true, refineCal);
+  CWCalibrate::DoReceiveCalibrate(0, true, refineCal);
+  button.BandSet(BAND_10M);
+    TxRxFreq = CalData.calFrequencies[6][1];
+  ConfigData.centerFreq = TxRxFreq;
+  ShowFrequency();
+  SetFreq();
 #ifdef QSE2
   CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal);
 #endif

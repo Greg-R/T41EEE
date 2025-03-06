@@ -80,7 +80,7 @@ void ExciterIQData() {
     if (bands[ConfigData.currentBand].sideband == Sideband::UPPER) cessb1.setSideband(true);
 
     // Apply amplitude and phase corrections.
-    cessb1.setIQCorrections(true, ConfigData.IQSSBAmpCorrectionFactor[ConfigData.currentBandA], ConfigData.IQSSBPhaseCorrectionFactor[ConfigData.currentBandA], 0.0);
+    cessb1.setIQCorrections(true, CalData.IQSSBAmpCorrectionFactor[ConfigData.currentBandA], CalData.IQSSBPhaseCorrectionFactor[ConfigData.currentBandA], 0.0);
 
     //  This is the correct place in the data flow to inject the scaling for power.
 #ifdef QSE2
@@ -101,8 +101,8 @@ void ExciterIQData() {
     arm_float_to_q15(float_buffer_L_EX, q15_buffer_LTemp, 2048);
     arm_float_to_q15(float_buffer_R_EX, q15_buffer_RTemp, 2048);
 #ifdef QSE2
-    arm_offset_q15(q15_buffer_LTemp, ConfigData.iDCoffsetSSB[ConfigData.currentBand] + ConfigData.dacOffsetSSB, q15_buffer_LTemp, 2048);  // Carrier suppression offset.
-    arm_offset_q15(q15_buffer_RTemp, ConfigData.qDCoffsetSSB[ConfigData.currentBand] + ConfigData.dacOffsetSSB, q15_buffer_RTemp, 2048);
+    arm_offset_q15(q15_buffer_LTemp, CalData.iDCoffsetSSB[ConfigData.currentBand] + CalData.dacOffsetSSB, q15_buffer_LTemp, 2048);  // Carrier suppression offset.
+    arm_offset_q15(q15_buffer_RTemp, CalData.qDCoffsetSSB[ConfigData.currentBand] + CalData.dacOffsetSSB, q15_buffer_RTemp, 2048);
 #endif
     Q_out_L_Ex.play(q15_buffer_LTemp, 2048);  // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
     Q_out_R_Ex.play(q15_buffer_RTemp, 2048);  // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.

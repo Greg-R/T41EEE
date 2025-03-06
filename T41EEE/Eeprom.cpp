@@ -55,7 +55,7 @@ void Eeprom::ConfigDataWriteSize(int structSize) {
     void
 *****/
 void Eeprom::CalDataWrite() {
-  EEPROM.put(CALIBRATION_BASE_ADDRESS + 4, CalData);
+  EEPROM.put(CAL_BASE_ADDRESS + 4, CalData);
 }
 
 
@@ -69,7 +69,7 @@ void Eeprom::CalDataWrite() {
     void
 *****/
 void Eeprom::CalDataRead() {
-  EEPROM.get(CALIBRATION_BASE_ADDRESS + 4, CalData);  // Read as one large chunk
+  EEPROM.get(CAL_BASE_ADDRESS + 4, CalData);  // Read as one large chunk
 }
 
 
@@ -83,7 +83,7 @@ void Eeprom::CalDataRead() {
     void
 *****/
 void Eeprom::CalDataWriteSize(int structSize) {
-  EEPROM.put(CALIBRATION_BASE_ADDRESS, structSize);  // Read as one large chunk
+  EEPROM.put(CAL_BASE_ADDRESS, structSize);  // Read as one large chunk
 }
 
 
@@ -96,7 +96,7 @@ void Eeprom::CalDataWriteSize(int structSize) {
   Return value;
     void
 *****/
-int Eeprom::EEPROMReadSize(uint32_t address) {
+int Eeprom::EEPROMReadSize(uint32_t address ) {
   int structSize;
   EEPROM.get(address, structSize);  // Read as one large chunk
   return structSize;
@@ -312,6 +312,25 @@ void Eeprom::ConfigDataDefaults() {
 
 
 /*****
+  Purpose: To load into active memory the default settings for EEPROM variables.
+
+  Parameter list:
+    none
+
+  Return value;
+    void
+*****/
+
+void Eeprom::CalDataDefaults() {
+  struct calibration_t* defaultCal = new calibration_t;  // Create a copy of the default configuration.
+  CalData = *defaultCal;                    // Copy the defaults to ConfigData struct.
+  // Initialize the frequency setting based on the last used frequency stored to EEPROM.
+  TxRxFreq = ConfigData.centerFreq = ConfigData.lastFrequencies[ConfigData.currentBand][ConfigData.activeVFO];
+  RedrawDisplayScreen();  //  Need to refresh display here.
+}
+
+
+/*****
   Purpose: Manage EEPROM memory at radio start-up.
 
   Parameter list:
@@ -321,29 +340,32 @@ void Eeprom::ConfigDataDefaults() {
     void
 *****/
 void Eeprom::EEPROMStartup() {
-  int ConfigDataStructSize;
-  int ConfigDataStackStructSize;
-  int CalDataStructSize;
-  int CalDataStackStructSize;
+  int ConfigDataEEPROMSize;
+  int ConfigDataStackSize;
+  int CalDataEEPROMSize;
+  int CalDataStackSize;
 
   //  Determine if the struct ConfigData is compatible (same size) with the one stored in EEPROM.
 
-  ConfigDataStructSize = EEPROMReadSize(0);
-  ConfigDataStackStructSize = sizeof(ConfigData);
+  ConfigDataEEPROMSize = EEPROMReadSize(EEPROM_BASE_ADDRESS);
+  ConfigDataStackSize = sizeof(ConfigData);
 
-  CalDataStructSize = EEPROMReadSize(1024);
-  CalDataStackStructSize = sizeof(CalData);
+  CalDataEEPROMSize = EEPROMReadSize(CAL_BASE_ADDRESS);
+  CalDataStackSize = sizeof(CalData);
 
   // For minor revisions to the code, we don't want to overwrite the EEPROM.
-  // We will assume the switch matrix and other items are calibrated by the user, and not to be lost.
-  // However, if the ConfigData struct changes, it is necessary to overwrite the EEPROM with the new struct.
+  // We will assume the switch matrix and other items are calibrated or configured by the user, and are not to be lost.
+  // However, if the ConfigData or the CalData struct changes, it is necessary to overwrite the EEPROM with the new struct.
   // This decision is made by using a simple size comparison.  This is not fool-proof, but it will probably
-  // work most of the time.  The users should be instructed to always save the EEPROM to SD for later recovery
-  // of their calibration and custom settings.
-  // If all else fails, then the user should execute a FLASH erase.
+  // work most of the time.  The users should be instructed to always save the EEPROM (ConfigData and CalData) to SD for later recovery
+  // of their calibration and configuration settings.
+  // If all else fails, then the user should execute a FLASH erase.  The configuration and calibration can then be read from the SD card.
 
   // The case where struct sizes are the same, indicating no changes to the struct.  Nothing more to do, return.
-  if (ConfigDataStructSize == ConfigDataStackStructSize and CalDataStructSize == CalDataStackStructSize) {
+  if (ConfigDataEEPROMSize == ConfigDataStackSize and CalDataEEPROMSize == CalDataStackSize) {
+    Serial.printf("Got to stack versus EEPROM comparison\n");
+    Serial.printf("ConfigDataEEPROMSize = %d ConfigDataStackSize = %d\n", ConfigDataEEPROMSize, ConfigDataStackSize);
+    Serial.printf("CalDataEEPROMSize = %d CalDataStackSize = %d\n", CalDataEEPROMSize, CalDataStackSize);
     ConfigDataRead();  // Read the ConfigData into active memory.
     CalDataRead();  // Read the CalData into active memory.
     return;        // Done, begin radio operation.
@@ -353,8 +375,8 @@ void Eeprom::EEPROMStartup() {
   // The rest of the code will require a switch matrix calibration, and will write the ConfigData struct to EEPROM.
 
   SaveAnalogSwitchValues();          // Calibrate the switch matrix.
-  ConfigDataWriteSize(ConfigDataStackStructSize);  // Write the size of the struct to EEPROM.
+  ConfigDataWriteSize(ConfigDataStackSize);  // Write the size of the struct to EEPROM.
   ConfigDataWrite();  // Write the ConfigData struct to non-volatile memory.
-  CalDataWriteSize(CalDataStackStructSize);  // Write the size of the struct to EEPROM.
+  CalDataWriteSize(CalDataStackSize);  // Write the size of the struct to EEPROM.
   CalDataWrite();  // Write the ConfigData struct to non-volatile memory.
 }

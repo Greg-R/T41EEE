@@ -59,7 +59,7 @@ FLASHMEM void JSON::loadConfiguration(const char *filename, config_t &ConfigData
   // Deserialize the JSON document
   DeserializationError error = deserializeJson(doc, file);
   if (error) {
-    Serial.println(F("Failed to read configuration file."));
+    Serial.println(F("Failed to read calibration file."));
     return;
   }
 
@@ -96,7 +96,7 @@ FLASHMEM void JSON::loadConfiguration(const char *filename, config_t &ConfigData
   ConfigData.currentBandB = doc["currentBandB"];
   ConfigData.currentFreqA = doc["currentFreqA"];
   ConfigData.currentFreqB = doc["currentFreqB"];
-  ConfigData.freqCorrectionFactor = doc["freqCorrectionFactor"];
+//  ConfigData.freqCorrectionFactor = doc["freqCorrectionFactor"];
   for (int i = 0; i < 14; i++) ConfigData.equalizerRec[i] = doc["equalizerRec"][i];
   for (int i = 0; i < 14; i++) ConfigData.equalizerXmt[i] = doc["equalizerXmt"][i];
   ConfigData.equalizerXmt[0] = doc["equalizerXmt"][0];
@@ -105,7 +105,7 @@ FLASHMEM void JSON::loadConfiguration(const char *filename, config_t &ConfigData
   //ConfigData.currentMicAttack = doc["currentMicAttack"];
   //ConfigData.currentMicRelease = doc["currentMicRelease"];
   ConfigData.currentMicGain = doc["currentMicGain"];
-  for (int i = 0; i < 18; i++) ConfigData.switchValues[i] = doc["switchValues"][i];
+//  for (int i = 0; i < 18; i++) ConfigData.switchValues[i] = doc["switchValues"][i];
   ConfigData.LPFcoeff = doc["LPFcoeff"];
   ConfigData.NR_PSI = doc["NR_PSI"];
   ConfigData.NR_alpha = doc["NR_alpha"];
@@ -114,6 +114,7 @@ FLASHMEM void JSON::loadConfiguration(const char *filename, config_t &ConfigData
   ConfigData.pll_fmax = doc["pll_fmax"];
   ConfigData.powerOutCW[0] = doc["powerOutCW"][0];
   ConfigData.powerOutSSB[0] = doc["powerOutSSB"][0];
+  /*
   for (int i = 0; i < 7; i++) ConfigData.CWPowerCalibrationFactor[i] = doc["CWPowerCalibrationFactor"][i];
   for (int i = 0; i < 7; i++) ConfigData.SSBPowerCalibrationFactor[i] = doc["SSBPowerCalibrationFactor"][i];
   for (int i = 0; i < 7; i++) ConfigData.IQCWRXAmpCorrectionFactor[i] = doc["IQCWRXAmpCorrectionFactor"][i];
@@ -124,7 +125,7 @@ FLASHMEM void JSON::loadConfiguration(const char *filename, config_t &ConfigData
   for (int i = 0; i < 7; i++) ConfigData.IQSSBRXPhaseCorrectionFactor[i] = doc["IQSSBRXPhaseCorrectionFactor"][i];  
   for (int i = 0; i < 7; i++) ConfigData.IQSSBAmpCorrectionFactor[i] = doc["IQSSBAmpCorrectionFactor"][i];
   for (int i = 0; i < 7; i++) ConfigData.IQSSBPhaseCorrectionFactor[i] = doc["IQSSBPhaseCorrectionFactor"][i];
-
+  */
   for (int i = 0; i < 13; i++) ConfigData.favoriteFreqs[i] = doc["favoriteFreqs"][i];
   for (int i = 0; i < 7; i++) {
     for (int j = 0; j < 2; j++) ConfigData.lastFrequencies[i][j] = doc["lastFrequencies"][i][j];
@@ -142,25 +143,27 @@ FLASHMEM void JSON::loadConfiguration(const char *filename, config_t &ConfigData
   ConfigData.sdCardPresent = doc["sdCardPresent"];
   ConfigData.myLong = doc["myLong"];
   ConfigData.myLat = doc["myLat"];
-  for (int i = 0; i < 7; i++) ConfigData.currentNoiseFloor[i] = doc["currentNoiseFloor"][i];
+
   ConfigData.compressorFlag = doc["compressorFlag"];
   ConfigData.xmitEQFlag = doc["xmitEQFlag"];
   ConfigData.receiveEQFlag = doc["receiveEQFlag"];
 //  ConfigData.calFreq = doc["calFreq"];
-  ConfigData.buttonThresholdPressed = doc["buttonThresholdPressed"] | 944;
-  ConfigData.buttonThresholdReleased = doc["buttonThresholdReleased"] | 964;
-  ConfigData.buttonRepeatDelay = doc["buttonRepeatDelay"] | 300000;
+//  ConfigData.buttonThresholdPressed = doc["buttonThresholdPressed"] | 944;
+//  ConfigData.buttonThresholdReleased = doc["buttonThresholdReleased"] | 964;
+//  ConfigData.buttonRepeatDelay = doc["buttonRepeatDelay"] | 300000;
   ConfigData.autoGain = doc["autoGain"] | true;
-  #ifdef QSE2
-  for (int i = 0; i < 7; i++) ConfigData.iDCoffsetCW[i] = doc["iDCoffsetCW"][i];
-  for (int i = 0; i < 7; i++) ConfigData.qDCoffsetCW[i] = doc["qDCoffsetCW"][i];
-  for (int i = 0; i < 7; i++) ConfigData.iDCoffsetSSB[i] = doc["iDCoffsetSSB"][i];
-  for (int i = 0; i < 7; i++) ConfigData.qDCoffsetSSB[i] = doc["qDCoffsetSSB"][i];  
-  ConfigData.dacOffsetCW = doc["dacOffsetCW"] | 0;
-  ConfigData.dacOffsetSSB = doc["dacOffsetSSB"] | 0; 
-  #endif
-  ConfigData.CWradioCalComplete = doc["CWradioCalComplete"] | false;
-  ConfigData.SSBradioCalComplete = doc["SSBradioCalComplete"] | false;
+
+//  #ifdef QSE2
+//  for (int i = 0; i < 7; i++) ConfigData.iDCoffsetCW[i] = doc["iDCoffsetCW"][i];
+//  for (int i = 0; i < 7; i++) ConfigData.qDCoffsetCW[i] = doc["qDCoffsetCW"][i];
+//  for (int i = 0; i < 7; i++) ConfigData.iDCoffsetSSB[i] = doc["iDCoffsetSSB"][i];
+//  for (int i = 0; i < 7; i++) ConfigData.qDCoffsetSSB[i] = doc["qDCoffsetSSB"][i];  
+//  ConfigData.dacOffsetCW = doc["dacOffsetCW"] | 0;
+//  ConfigData.dacOffsetSSB = doc["dacOffsetSSB"] | 0; 
+//  #endif
+
+//  ConfigData.CWradioCalComplete = doc["CWradioCalComplete"] | false;
+//  ConfigData.SSBradioCalComplete = doc["SSBradioCalComplete"] | false;
 
   // How to copy strings:
   //  strlcpy(ConfigData.myCall,                  // <- destination
@@ -214,7 +217,7 @@ FLASHMEM void JSON::saveConfiguration(const char *filename, const config_t &Conf
   doc["currentBandB"] = ConfigData.currentBandB;
   doc["currentFreqA"] = ConfigData.currentFreqA;
   doc["currentFreqB"] = ConfigData.currentFreqB;
-  doc["freqCorrectionFactor"] = ConfigData.freqCorrectionFactor;
+//  doc["freqCorrectionFactor"] = ConfigData.freqCorrectionFactor;
   for (int i = 0; i < 14; i++) doc["equalizerRec"][i] = ConfigData.equalizerRec[i];
   for (int i = 0; i < 14; i++) doc["equalizerXmt"][i] = ConfigData.equalizerXmt[i];
   doc["currentMicThreshold"] = ConfigData.currentMicThreshold;
@@ -222,7 +225,7 @@ FLASHMEM void JSON::saveConfiguration(const char *filename, const config_t &Conf
 //  doc["currentMicAttack"] = ConfigData.currentMicAttack;
 //  doc["currentMicRelease"] = ConfigData.currentMicRelease;
   doc["currentMicGain"] = ConfigData.currentMicGain;
-  for (int i = 0; i < 18; i++) doc["switchValues"][i] = ConfigData.switchValues[i];
+//  for (int i = 0; i < 18; i++) doc["switchValues"][i] = ConfigData.switchValues[i];
   doc["LPFcoeff"] = ConfigData.LPFcoeff;
   doc["NR_PSI"] = ConfigData.NR_PSI;
   doc["NR_alpha"] = ConfigData.NR_alpha;
@@ -231,9 +234,8 @@ FLASHMEM void JSON::saveConfiguration(const char *filename, const config_t &Conf
   doc["pll_fmax"] = ConfigData.pll_fmax;
   for (int i = 0; i < 7; i++) doc["powerOutCW"][i] = ConfigData.powerOutCW[i];
   for (int i = 0; i < 7; i++) doc["powerOutSSB"][i] = ConfigData.powerOutSSB[i];
-  for (int i = 0; i < 7; i++) {
-    doc["CWPowerCalibrationFactor"][i] = ConfigData.CWPowerCalibrationFactor[i];
-  }
+  /*
+  for (int i = 0; i < 7; i++) {doc["CWPowerCalibrationFactor"][i] = ConfigData.CWPowerCalibrationFactor[i];}
   for (int i = 0; i < 7; i++) doc["SSBPowerCalibrationFactor"][i] = ConfigData.SSBPowerCalibrationFactor[i];
   for (int i = 0; i < 7; i++) doc["IQCWRXAmpCorrectionFactor"][i] =   ConfigData.IQCWRXAmpCorrectionFactor[i];
   for (int i = 0; i < 7; i++) doc["IQCWRXPhaseCorrectionFactor"][i] = ConfigData.IQCWRXPhaseCorrectionFactor[i];
@@ -242,7 +244,8 @@ FLASHMEM void JSON::saveConfiguration(const char *filename, const config_t &Conf
   for (int i = 0; i < 7; i++) doc["IQSSBRXAmpCorrectionFactor"][i] =   ConfigData.IQSSBRXAmpCorrectionFactor[i];
   for (int i = 0; i < 7; i++) doc["IQSSBRXPhaseCorrectionFactor"][i] = ConfigData.IQSSBRXPhaseCorrectionFactor[i];
   for (int i = 0; i < 7; i++) doc["IQSSBAmpCorrectionFactor"][i] =   ConfigData.IQSSBAmpCorrectionFactor[i];
-  for (int i = 0; i < 7; i++) doc["IQSSBPhaseCorrectionFactor"][i] = ConfigData.IQSSBPhaseCorrectionFactor[i];  
+  for (int i = 0; i < 7; i++) doc["IQSSBPhaseCorrectionFactor"][i] = ConfigData.IQSSBPhaseCorrectionFactor[i];
+  */
   for (int i = 0; i < 13; i++) doc["favoriteFreqs"][i] = ConfigData.favoriteFreqs[i];
   for (int i = 0; i < 7; i++) {
   for (int j = 0; j < 2; j++) doc["lastFrequencies"][i][j] = ConfigData.lastFrequencies[i][j];
@@ -257,15 +260,16 @@ FLASHMEM void JSON::saveConfiguration(const char *filename, const config_t &Conf
   doc["sdCardPresent"] = ConfigData.sdCardPresent;
   doc["myLong"] = ConfigData.myLong;
   doc["myLat"] = ConfigData.myLat;
-  for (int i = 0; i < 7; i++) doc["currentNoiseFloor"][i] = ConfigData.currentNoiseFloor[i];
+  
   doc["compressorFlag"] = ConfigData.compressorFlag;
   doc["xmitEQFlag"] = ConfigData.xmitEQFlag;
   doc["receiveEQFlag"] = ConfigData.receiveEQFlag;
 //  doc["calFreq"] = ConfigData.calFreq;
-  doc["buttonThresholdPressed"] = ConfigData.buttonThresholdPressed;
-  doc["buttonThresholdReleased"] = ConfigData.buttonThresholdReleased;
-  doc["buttonRepeatDelay"] = ConfigData.buttonRepeatDelay;
+//  doc["buttonThresholdPressed"] = ConfigData.buttonThresholdPressed;
+//  doc["buttonThresholdReleased"] = ConfigData.buttonThresholdReleased;
+//  doc["buttonRepeatDelay"] = ConfigData.buttonRepeatDelay;
   doc["autoGain"] = ConfigData.autoGain;
+  /*
   #ifdef QSE2
   for (int i = 0; i < 7; i++) doc["iDCoffsetCW"][i] = ConfigData.iDCoffsetCW[i];
   for (int i = 0; i < 7; i++) doc["qDCoffsetCW"][i] = ConfigData.qDCoffsetCW[i];
@@ -276,6 +280,128 @@ FLASHMEM void JSON::saveConfiguration(const char *filename, const config_t &Conf
   #endif
   doc["CWradioCalComplete"] = ConfigData.CWradioCalComplete;
   doc["SSBradioCalComplete"] = ConfigData.SSBradioCalComplete;
+*/
+  if (toFile) {
+    // Delete existing file, otherwise ConfigData is appended to the file
+    SD.remove(filename);
+    // Open file for writing
+    File file = SD.open(filename, FILE_WRITE);
+    if (!file) {
+      Serial.println(F("Failed to create file"));
+      return;
+    }
+    // Serialize JSON to file
+    if (serializeJsonPretty(doc, file) == 0) {
+      Serial.println(F("Failed to write to file"));
+    }
+    // Close the file
+    file.close();
+  } else {
+    // Write to the serial port.
+
+    serializeJsonPretty(doc, Serial);
+  }
+}
+
+
+// Loads the ConfigData configuration from a file
+FLASHMEM void JSON::loadCalibration(const char *filename, calibration_t &CalData) {
+  // Open file for reading
+  File file = SD.open(filename);
+
+  // Allocate a temporary JsonDocument
+  // Don't forget to change the capacity to match your requirements.
+  // Use https://arduinojson.org/v6/assistant to compute the capacity.
+  // StaticJsonDocument<512> doc;
+  JsonDocument doc;  // This uses the heap.
+
+  // Deserialize the JSON document
+  DeserializationError error = deserializeJson(doc, file);
+  if (error) {
+    Serial.println(F("Failed to read calibration file."));
+    return;
+  }
+
+  // Copy values from the JsonDocument to the CalData
+
+  CalData.freqCorrectionFactor = doc["freqCorrectionFactor"];
+
+//  ConfigData.powerOutCW[0] = doc["powerOutCW"][0];
+//  ConfigData.powerOutSSB[0] = doc["powerOutSSB"][0];
+  for (int i = 0; i < 7; i++) CalData.CWPowerCalibrationFactor[i] = doc["CWPowerCalibrationFactor"][i];
+  for (int i = 0; i < 7; i++) CalData.SSBPowerCalibrationFactor[i] = doc["SSBPowerCalibrationFactor"][i];
+  for (int i = 0; i < 7; i++) CalData.IQCWRXAmpCorrectionFactor[i] = doc["IQCWRXAmpCorrectionFactor"][i];
+  for (int i = 0; i < 7; i++) CalData.IQCWRXPhaseCorrectionFactor[i] = doc["IQCWRXPhaseCorrectionFactor"][i];
+  for (int i = 0; i < 7; i++) CalData.IQCWAmpCorrectionFactor[i] = doc["IQCWAmpCorrectionFactor"][i];
+  for (int i = 0; i < 7; i++) CalData.IQCWPhaseCorrectionFactor[i] = doc["IQCWPhaseCorrectionFactor"][i];
+  for (int i = 0; i < 7; i++) CalData.IQSSBRXAmpCorrectionFactor[i] = doc["IQSSBRXAmpCorrectionFactor"][i];
+  for (int i = 0; i < 7; i++) CalData.IQSSBRXPhaseCorrectionFactor[i] = doc["IQSSBRXPhaseCorrectionFactor"][i];  
+  for (int i = 0; i < 7; i++) CalData.IQSSBAmpCorrectionFactor[i] = doc["IQSSBAmpCorrectionFactor"][i];
+  for (int i = 0; i < 7; i++) CalData.IQSSBPhaseCorrectionFactor[i] = doc["IQSSBPhaseCorrectionFactor"][i];
+
+  CalData.buttonThresholdPressed = doc["buttonThresholdPressed"] | 944;
+  CalData.buttonThresholdReleased = doc["buttonThresholdReleased"] | 964;
+  CalData.buttonRepeatDelay = doc["buttonRepeatDelay"] | 300000;
+  for (int i = 0; i < 18; i++) CalData.switchValues[i] = doc["switchValues"][i];
+
+  #ifdef QSE2
+  for (int i = 0; i < 7; i++) CalData.iDCoffsetCW[i] = doc["iDCoffsetCW"][i];
+  for (int i = 0; i < 7; i++) CalData.qDCoffsetCW[i] = doc["qDCoffsetCW"][i];
+  for (int i = 0; i < 7; i++) CalData.iDCoffsetSSB[i] = doc["iDCoffsetSSB"][i];
+  for (int i = 0; i < 7; i++) CalData.qDCoffsetSSB[i] = doc["qDCoffsetSSB"][i];  
+  CalData.dacOffsetCW = doc["dacOffsetCW"] | 0;
+  CalData.dacOffsetSSB = doc["dacOffsetSSB"] | 0; 
+  #endif
+  CalData.CWradioCalComplete = doc["CWradioCalComplete"] | false;
+  CalData.SSBradioCalComplete = doc["SSBradioCalComplete"] | false;
+
+  // Close the file (Curiously, File's destructor doesn't close the file)
+  file.close();
+}
+
+
+// Saves the configuration CalData to a file or writes to serial.  toFile == true for file, false for serial.
+FLASHMEM void JSON::saveCalibration(const char *filename, const calibration_t &ConfigData, bool toFile) {
+
+  // Allocate a temporary JsonDocument
+  // Don't forget to change the capacity to match your requirements.
+  // Use https://arduinojson.org/assistant to compute the capacity.
+  //StaticJsonDocument<256> doc;  // This uses the stack.
+  JsonDocument doc;  // This uses the heap.
+
+  // Set the values in the document
+
+  doc["freqCorrectionFactor"] = CalData.freqCorrectionFactor;
+
+//  for (int i = 0; i < 7; i++) doc["powerOutCW"][i] = ConfigData.powerOutCW[i];
+//  for (int i = 0; i < 7; i++) doc["powerOutSSB"][i] = ConfigData.powerOutSSB[i];
+  for (int i = 0; i < 7; i++) doc["CWPowerCalibrationFactor"][i] = CalData.CWPowerCalibrationFactor[i];
+  for (int i = 0; i < 7; i++) doc["SSBPowerCalibrationFactor"][i] = CalData.SSBPowerCalibrationFactor[i];
+  for (int i = 0; i < 7; i++) doc["IQCWRXAmpCorrectionFactor"][i] =   CalData.IQCWRXAmpCorrectionFactor[i];
+  for (int i = 0; i < 7; i++) doc["IQCWRXPhaseCorrectionFactor"][i] = CalData.IQCWRXPhaseCorrectionFactor[i];
+  for (int i = 0; i < 7; i++) doc["IQCWAmpCorrectionFactor"][i] =   CalData.IQCWAmpCorrectionFactor[i];
+  for (int i = 0; i < 7; i++) doc["IQCWPhaseCorrectionFactor"][i] = CalData.IQCWPhaseCorrectionFactor[i];
+  for (int i = 0; i < 7; i++) doc["IQSSBRXAmpCorrectionFactor"][i] =   CalData.IQSSBRXAmpCorrectionFactor[i];
+  for (int i = 0; i < 7; i++) doc["IQSSBRXPhaseCorrectionFactor"][i] = CalData.IQSSBRXPhaseCorrectionFactor[i];
+  for (int i = 0; i < 7; i++) doc["IQSSBAmpCorrectionFactor"][i] =   CalData.IQSSBAmpCorrectionFactor[i];
+  for (int i = 0; i < 7; i++) doc["IQSSBPhaseCorrectionFactor"][i] = CalData.IQSSBPhaseCorrectionFactor[i];  
+
+
+  doc["buttonThresholdPressed"] = CalData.buttonThresholdPressed;
+  doc["buttonThresholdReleased"] = CalData.buttonThresholdReleased;
+  doc["buttonRepeatDelay"] = CalData.buttonRepeatDelay;
+  for (int i = 0; i < 18; i++) doc["switchValues"][i] = CalData.switchValues[i];
+
+  #ifdef QSE2
+  for (int i = 0; i < 7; i++) doc["iDCoffsetCW"][i] = CalData.iDCoffsetCW[i];
+  for (int i = 0; i < 7; i++) doc["qDCoffsetCW"][i] = CalData.qDCoffsetCW[i];
+  for (int i = 0; i < 7; i++) doc["iDCoffsetSSB"][i] = CalData.iDCoffsetSSB[i];
+  for (int i = 0; i < 7; i++) doc["qDCoffsetSSB"][i] = CalData.qDCoffsetSSB[i];
+  doc["dacOffsetCW"] = CalData.dacOffsetCW;
+  doc["dacOffsetSSB"] = CalData.dacOffsetSSB;
+  #endif
+  doc["CWradioCalComplete"] = CalData.CWradioCalComplete;
+  doc["SSBradioCalComplete"] = CalData.SSBradioCalComplete;
 
   if (toFile) {
     // Delete existing file, otherwise ConfigData is appended to the file
