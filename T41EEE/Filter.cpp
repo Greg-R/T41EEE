@@ -214,8 +214,8 @@ void FilterBandwidth()
 {
   AudioNoInterrupts();
 
-Serial.printf("bands[ConfigData.currentBand].FHiCut = %d bands[ConfigData.currentBand].FLoCut = %d\n", bands[ConfigData.currentBand].FHiCut, bands[ConfigData.currentBand].FLoCut);
-Serial.printf("bands[ConfigData.currentBand].FAMCut = %d\n", bands[ConfigData.currentBand].FAMCut);
+//Serial.printf("bands[ConfigData.currentBand].FHiCut = %d bands[ConfigData.currentBand].FLoCut = %d\n", bands[ConfigData.currentBand].FHiCut, bands[ConfigData.currentBand].FLoCut);
+//Serial.printf("bands[ConfigData.currentBand].FAMCut = %d\n", bands[ConfigData.currentBand].FAMCut);
 
 // The filter must be set up differently for AM and SAM modes.
 if(bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE or bands[ConfigData.currentBand].mode == RadioMode::CW_MODE or bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) {

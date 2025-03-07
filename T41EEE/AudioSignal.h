@@ -12,7 +12,7 @@ AudioOutputI2SQuad i2s_quadOut;
 // Transmitter
 AudioControlSGTL5000 sgtl5000_1;      // Controller for the Teensy Audio Adapter.
 // It is unclear that this is actually required.
-AudioControlSGTL5000 sgtl5000_2;  // This is not a 2nd Audio Adapter.  It is I2S to the PCM1808 (ADC I and Q receiver in) and PCM5102 (DAC audio out).
+//AudioControlSGTL5000 sgtl5000_2;  // This is not a 2nd Audio Adapter.  It is I2S to the PCM1808 (ADC I and Q receiver in) and PCM5102 (DAC audio out).
 AudioConvert_I16toF32 int2Float1;              // Converts Int16 to Float.  See class in AudioStream_F32.h
 //AudioEffectGain_F32 micGain(audio_settings);                   // Microphone gain control.
 AudioEffectGain_F32 micGain;                   // Microphone gain control.
@@ -70,6 +70,7 @@ AudioEffectCompressor2_F32 compressor2_1;  // Used for audio AGC.
 AudioEffectCompressor2_F32 *pc1 = &compressor2_1;
 //AudioAmplifier volumeAdjust;
 AudioEffectGain_F32 speakerVolume, speakerScale, headphoneVolume, headphoneScale, compGain;
+AudioAmplifier testGain;
 AudioMixer4_F32 mixer4;
 AudioSwitch4_OA_F32 switch4;
 AudioConvert_F32toI16 float2Int5, float2Int6;
@@ -85,7 +86,7 @@ AudioConvert_I16toF32 int2Float2;
 AudioConnection patchCord1(i2s_quadIn, 2, ADC_RX_I, 0);  // Receiver I and Q channel data stream.
 AudioConnection patchCord2(i2s_quadIn, 3, ADC_RX_Q, 0);  // This data stream goes to sketch code for processing.
 
-AudioConnection patchCord3(Q_out_L, 0, int2Float2, 0);  // Audio data stream from sketch code.  Receiver audio or CW sidetone.
+//AudioConnection patchCord3(Q_out_L, 0, int2Float2, 0);  // Audio data stream from sketch code.  Receiver audio or CW sidetone.
 AudioConnection_F32 patchCord4(int2Float2, 0, switch4, 0);  // Used to bypass compressor2_1.
 
 AudioConnection_F32 patchCord5(switch4, 0, compressor2_1, 0);  // Compressor used as audio AGC.
@@ -95,17 +96,21 @@ AudioConnection_F32 patchCord7(switch4, 1, compGain, 0);  // Bypass compressor2_
 AudioConnection_F32 patchCord8(compGain, 0, mixer4, 1);
 
 // Speaker path
-AudioConnection_F32 patchCord9(mixer4, 0, speakerScale, 0);  // speakerScale is used to adjust for different audio amplifier gains.
-AudioConnection_F32 patchCord10(speakerScale, 0, speakerVolume, 0);
-AudioConnection_F32 patchCord11(speakerVolume, 0, float2Int3, 0);
-AudioConnection patchCord12(float2Int3, 0, i2s_quadOut, 2);  //  Speaker audio to PCM5102 via Teensy pin 32.
+//AudioConnection_F32 patchCord9(mixer4, 0, speakerScale, 0);  // speakerScale is used to adjust for different audio amplifier gains.
+//AudioConnection_F32 patchCord10(speakerScale, 0, speakerVolume, 0);
+//AudioConnection_F32 patchCord11(speakerVolume, 0, float2Int3, 0);
+//AudioConnection patchCord12(float2Int3, 0, i2s_quadOut, 2);  //  Speaker audio to PCM5102 via Teensy pin 32.
 
 // Headphone path
 AudioConnection_F32 patchCord13(mixer4, 0, headphoneScale, 0);
 AudioConnection_F32 patchCord14(headphoneScale, 0, headphoneVolume, 0);
 AudioConnection_F32 patchCord15(headphoneVolume, 0, float2Int4, 0);
-AudioConnection patchCord16(float2Int4, 0, i2s_quadOut, 0);  // To Audio Adapter via via Teensy pin 7.  Headphones.
-AudioConnection patchCord17(float2Int4, 0, i2s_quadOut, 1);  // To Audio Adapter via via Teensy pin 7.  Headphones (other side).
+
+AudioConnection patchCord16(Q_out_L, 0, testGain, 0);
+AudioConnection patchCord17(testGain, 0, i2s_quadOut, 0);
+AudioConnection patchCord18(testGain, 0, i2s_quadOut, 1);
+//AudioConnection patchCord16(Q_out_L, 0, i2s_quadOut, 0);  // To Audio Adapter via via Teensy pin 7.  Headphones.
+//AudioConnection patchCord17(Q_out_L, 0, i2s_quadOut, 1);  // To Audio Adapter via via Teensy pin 7.  Headphones (other side).
 // end F32 code
 
 
@@ -197,6 +202,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       SampleRate = SAMPLE_RATE_192K;
       SetI2SFreq(SR[SampleRate].rate);
       sgtl5000_1.muteLineout();
+
       initializeAudioPaths();
       // Deactivate microphone and 1 kHz test tone.
       mixer1.gain(0, 0.0);
@@ -215,7 +221,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       // Deactivate TX audio output path.
 //      patchCord15.disconnect();  // Disconnect transmitter I and Q channel outputs.
 
-      patchCord16.disconnect();
+//      patchCord16.disconnect();
       if (ConfigData.AGCMode == 1) {  // Activate compressor2_1 path.
         switch4.setChannel(0);
         mixer4.gain(0, 1.0);
@@ -234,7 +240,13 @@ void SetAudioOperatingState(RadioState operatingState) {
       ADC_RX_Q.begin();                                        // Receiver Q channel
 //      patchCord9.connect();                                  // Receiver I channel
 //      patchCord10.connect();                                 // Receiver Q channel
-      patchCord17.connect();                                 // Receiver audio channel
+
+
+//      patchCord13.connect();
+//      patchCord14.connect();
+//      patchCord15.connect();
+//      patchCord16.connect();
+//      patchCord17.connect();                                 // Receiver audio channel
 //      patchCord18.connect();
 //      patchCord19.connect();
 //      patchCord20.connect();  // Experimental USB output. 
@@ -250,8 +262,10 @@ void SetAudioOperatingState(RadioState operatingState) {
       headphoneScale.setGain(HEADPHONESCALE);
       speakerVolume.setGain(volumeLog[ConfigData.audioVolume]);    // Set volume because sidetone may have changed it.
       headphoneVolume.setGain(volumeLog[ConfigData.audioVolume]);  // Set volume because sidetone may have changed it.
-      sgtl5000_1.volume(0.8);
+      testGain.gain(1);
       controlAudioOut(ConfigData.audioOut, false);  // Configure audio out; don't mute all.
+      sgtl5000_1.volume(0.8);
+      sgtl5000_1.unmuteHeadphone();
 //      sgtl5000_1.unmuteHeadphone();
       break;
     case RadioState::SSB_TRANSMIT_STATE:
@@ -260,7 +274,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       sgtl5000_1.unmuteLineout();
 //      patchCord9.disconnect();   // Receiver I channel
 //      patchCord10.disconnect();  // Receiver Q channel
-      patchCord17.disconnect();  // CW sidetone
+//      patchCord17.disconnect();  // CW sidetone
 //      patchCord18.disconnect();
 //      patchCord19.disconnect();
 //      patchCord20.disconnect();
@@ -294,7 +308,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       }
 
 //      patchCord15.connect();  // Transmitter I channel
-      patchCord16.connect();  // Transmitter Q channel
+//      patchCord16.connect();  // Transmitter Q channel
 
       Q_in_L_Ex.begin();  // I channel Microphone audio
       Q_in_R_Ex.begin();  // Q channel Microphone audio
@@ -307,7 +321,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       sgtl5000_1.unmuteLineout();
 //      patchCord9.disconnect();   // Receiver I channel
 //      patchCord10.disconnect();  // Receiver Q channel
-      patchCord17.disconnect();  // CW sidetone
+//      patchCord17.disconnect();  // CW sidetone
 //      patchCord18.disconnect();
 //      patchCord19.disconnect();
 //      patchCord20.disconnect();
@@ -336,7 +350,7 @@ void SetAudioOperatingState(RadioState operatingState) {
 
 //      cessb1.getLevels(0);  // Initialize the CESSB information struct.
 //      patchCord15.connect();  // Transmitter I channel
-      patchCord16.connect();  // Transmitter Q channel
+//      patchCord16.connect();  // Transmitter Q channel
 
       Q_in_L_Ex.begin();  // I channel Microphone audio
       Q_in_R_Ex.begin();  // Q channel Microphone audio
@@ -351,7 +365,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       sgtl5000_1.unmuteLineout();
 //      patchCord9.connect();   // Receiver I channel
 //      patchCord10.connect();  // Receiver Q channel
-      patchCord17.disconnect();  // Receiver audio and CW sidetone
+//      patchCord17.disconnect();  // Receiver audio and CW sidetone
 //      patchCord18.disconnect();
 //      patchCord19.disconnect();
 //      patchCord20.disconnect();
@@ -390,7 +404,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       ADC_RX_I.begin();     // Calibration is full duplex!  Activate receiver data.  No demodulation during calibrate, spectrum only.
       ADC_RX_Q.begin();
 //      patchCord15.connect();  // Transmitter I channel
-      patchCord16.connect();  // Transmitter Q channel
+//      patchCord16.connect();  // Transmitter Q channel
 
       break;
 
@@ -414,7 +428,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       sgtl5000_1.volume(0.3);  // This is for sidetone in the headphone output.  Hardcoding for now.
 //      patchCord9.disconnect();
 //      patchCord10.disconnect();
-      patchCord17.disconnect();
+//      patchCord17.disconnect();
 //      speakerScale.gain(0.0);
  //     headphoneScale.gain(0.0);
 //      patchCord18.disconnect();
@@ -424,8 +438,8 @@ void SetAudioOperatingState(RadioState operatingState) {
 //      patchCord22.disconnect();     
 
 //      patchCord15.connect();  // Connect I and Q transmitter output channels.
-      patchCord16.connect();
-      patchCord17.connect();                                    // Sidetone goes into receiver audio path.
+//      patchCord16.connect();
+//      patchCord17.connect();                                    // Sidetone goes into receiver audio path.
 //      patchCord21.connect();
 //      patchCord22.connect(); 
       speakerVolume.setGain(volumeLog[ConfigData.sidetoneVolume]);  // Adjust sidetone volume.
@@ -441,7 +455,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       sgtl5000_1.unmuteLineout();
 //      patchCord9.connect();   // Receiver I channel
 //      patchCord10.connect();  // Receiver Q channel
-      patchCord17.disconnect();  // CW sidetone
+//      patchCord17.disconnect();  // CW sidetone
 //      patchCord18.disconnect();
 //      patchCord19.disconnect();
 //      patchCord20.disconnect();
@@ -469,7 +483,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       ADC_RX_Q.begin();
       //  Transmitter back-end needs to be active during CW calibration.
 //      patchCord15.connect();  // Transmitter I channel
-      patchCord16.connect();  // Transmitter Q channel
+//      patchCord16.connect();  // Transmitter Q channel
 
       break;
 
@@ -492,7 +506,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       Q_in_R_Ex.end();  // Clear Q channel.
       Q_in_R_Ex.clear();
 
-      patchCord17.connect();                                    // Sidetone goes into receiver audio path.
+//      patchCord17.connect();                                    // Sidetone goes into receiver audio path.
 
       break;
 

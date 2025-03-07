@@ -849,7 +849,7 @@ FLASHMEM void setup() {
   AudioMemory_F32(20);
   sgtl5000_1.inputSelect(AUDIO_INPUT_MIC);
   sgtl5000_1.volume(1.0);
-  sgtl5000_1.muteHeadphone();  // Make the headphone output active.
+  sgtl5000_1.unmuteHeadphone();  // Make the headphone output active.
 
   sgtl5000_1.micGain(0);
   sgtl5000_1.lineInLevel(0);  // Line-in is not used.  Can't turn it off though.
@@ -1273,7 +1273,7 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   if (lastState != radioState) {  // G0ORX 09012023
     lastState = radioState;
     ShowTransmitReceiveStatus();
-    Serial.printf("End of loop state machine. radioState = %d lastState = %d\n", radioState, lastState);
+//    Serial.printf("End of loop state machine. radioState = %d lastState = %d\n", radioState, lastState);
   }
 
 #ifdef DEBUG1
