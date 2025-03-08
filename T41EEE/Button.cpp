@@ -897,6 +897,8 @@ void Button::ButtonMode()  //====== Changed AFP 10-05-22  =================
 
   SetupMode(bands[ConfigData.currentBand].mode, bands[ConfigData.currentBand].sideband);  // Setup mode and sideband(s);
   SetFreq();  // Required due to RX LO shift from CW to SSB modes.  KF5N
+
+  // Why is all of this other stuff necessary?
   DrawSpectrumDisplayContainer();
   DrawFrequencyBarValue();
   DrawInfoWindowFrame();
