@@ -198,6 +198,7 @@ void SetAudioOperatingState(RadioState operatingState) {
 
       break;
     case RadioState::SSB_TRANSMIT_STATE:
+    case RadioState::FT8_TRANSMIT_STATE:
 
       SampleRate = SAMPLE_RATE_48K;
       InitializeDataArrays();  // I2S sample rate set in this function.
@@ -289,7 +290,7 @@ connect0.connect();
 */
 
       break;
-
+/*
     case RadioState::FT8_TRANSMIT_STATE:
       // QSD disabled and disconnected
       controlAudioOut(ConfigData.audioOut, false);  // FT8 audio should be headphone only.
@@ -331,6 +332,7 @@ connect0.connect();
       Q_in_R_Ex.begin();  // Q channel Microphone audio
 
       break;
+*/
 
     case RadioState::SSB_CALIBRATE_STATE:
       SampleRate = SAMPLE_RATE_48K;

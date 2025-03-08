@@ -211,8 +211,8 @@ float32_t pixel_per_khz = ((1 << ConfigData.spectrum_zoom) * SPECTRUM_RES * 1000
 int pos_left = centerLine - (int)(bands[ConfigData.currentBand].FLoCut / 1000.0 * pixel_per_khz);
 
 int centerLine = (MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2;
-int16_t fftOffset = 125;
-int16_t audioFFToffset = 100;
+int16_t fftOffset = 0;
+int16_t audioFFToffset = 0;
 int fLoCutOld;
 int fHiCutOld;
 int filterWidth = (int)((bands[ConfigData.currentBand].FHiCut - bands[ConfigData.currentBand].FLoCut) / 1000.0 * pixel_per_khz);

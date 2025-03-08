@@ -1037,7 +1037,7 @@ void VFOSelect() {
     int           the user's choice
 *****/
 void ConfigDataOptions() {  // 0               1                2               3               4                  5                  6                  7                   8                  9
-  const char *ConfigDataOpts[] = { "Save Current", "Load Defaults", "Get Favorite", "Set Favorite", "Copy ConfigData->SD", "Copy SD->ConfigData", "ConfigData->Serial", "Default->Serial", "Stack->Serial", "SD->Serial", "Cancel" };
+  const char *ConfigDataOpts[] = { "Save Current", "Load Defaults", "Get Favorite", "Set Favorite", "Copy Config->SD", "Copy SD->Config", "Config->Serial", "Default->Serial", "Stack->Serial", "SD->Serial", "Cancel" };
   int defaultOpt = 0;
   config_t tempConfig;     // A temporary config_t struct to copy ConfigData data into.
   config_t defaultConfig;  // The configuration defaults.
@@ -1121,7 +1121,7 @@ void ConfigDataOptions() {  // 0               1                2               
     int           the user's choice
 *****/
 void CalDataOptions() {  // 0               1                2               3               4                  5                  6                  7                   8                  9
-  const char *CalDataOpts[] = { "Save Current", "Load Defaults", "Copy CalData->SD", "Copy SD->CalData", "CalData->Serial", "Default->Serial", "Stack->Serial", "SD->Serial", "Cancel" };
+  const char *CalDataOpts[] = { "Save Current", "Load Defaults", "Copy Cal->SD", "Copy SD->Cal", "Cal->Serial", "Default->Serial", "Stack->Serial", "SD->Serial", "Cancel" };
   int defaultOpt = 0;
   calibration_t tempCal;     // A temporary config_t struct to copy ConfigData data into.
   calibration_t defaultCal;  // The configuration defaults.
