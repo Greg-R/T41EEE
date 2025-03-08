@@ -215,7 +215,7 @@ int16_t fftOffset = 0;
 int16_t audioFFToffset = 0;
 int fLoCutOld;
 int fHiCutOld;
-int filterWidth = (int)((bands[ConfigData.currentBand].FHiCut - bands[ConfigData.currentBand].FLoCut) / 1000.0 * pixel_per_khz);
+int filterWidth = static_cast<int>((bands[ConfigData.currentBand].FHiCut - bands[ConfigData.currentBand].FLoCut) / 1000.0 * pixel_per_khz);
 int h = SPECTRUM_HEIGHT + 3;
 bool ANR_notch = false;
 uint8_t auto_codec_gain = 1;
@@ -983,7 +983,7 @@ FLASHMEM void setup() {
      start local oscillator Si5351
   ****************************************************************************************/
   si5351.reset();                                                                           // KF5N.  Moved Si5351 start-up to setup. JJP  7/14/23
-  si5351.init(SI5351_CRYSTAL_LOAD_10PF, Si_5351_crystal, ConfigData.freqCorrectionFactor);  // JJP  7/14/23
+  si5351.init(SI5351_CRYSTAL_LOAD_10PF, Si_5351_crystal, CalData.freqCorrectionFactor);  // JJP  7/14/23
   si5351.set_ms_source(SI5351_CLK2, SI5351_PLLB);                                           // Allows CLK1 and CLK2 to exceed 100 MHz simultaneously.
 #ifdef PLLMODULE
   si5351.drive_strength(SI5351_CLK0, SI5351_DRIVE_8MA);
@@ -1098,7 +1098,7 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   if (lastState != radioState) {
     SetAudioOperatingState(radioState);
     SetFreq();  // Update frequencies if the radio state has changed.
-    Serial.printf("Set audio state, begin loop. radioState = %d lastState = %d\n", radioState, lastState);
+//    Serial.printf("Set audio state, begin loop. radioState = %d lastState = %d\n", radioState, lastState);
   }
 
    if(powerUp) {
@@ -1125,7 +1125,7 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       if (lastState != radioState) {      // G0ORX 01092023
 //        digitalWrite(MUTE, UNMUTEAUDIO);  // Audio Mute off
         digitalWrite(RXTX, LOW);          //xmit off
-                                          //        if (keyPressedOn == 1) {  //// Unnecessary here?  Greg KF5N January 26, 2025
+                                          ////        if (keyPressedOn == 1) {  //// Unnecessary here?  Greg KF5N January 26, 2025
                                           //          return;
                                           //        }
         ShowTransmitReceiveStatus();

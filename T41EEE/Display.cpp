@@ -142,44 +142,43 @@ void ShowSpectrum() {
   for (x1 = 1; x1 < MAX_WATERFALL_WIDTH - 1; x1++)  //AFP, JJP changed init from 0 to 1 for x1: out of bounds addressing in line 112
   //Draws the main Spectrum, Waterfall and Audio displays
   {
-    updateDisplayFlag = 0;
+    updateDisplayFlag = false;
     if ((ConfigData.spectrum_zoom == 0) && (static_cast<uint32_t>(ADC_RX_I.available()) > N_BLOCKS + 0 && static_cast<uint32_t>(ADC_RX_Q.available()) > N_BLOCKS + 0)) {
       updateDisplayCounter = updateDisplayCounter + 1;
-      if (updateDisplayCounter == 1) updateDisplayFlag = 1;
+      if (updateDisplayCounter == 1) updateDisplayFlag = true;
     }
     if ((ConfigData.spectrum_zoom == 1) && (static_cast<uint32_t>(ADC_RX_I.available()) > N_BLOCKS + 0 && static_cast<uint32_t>(ADC_RX_Q.available()) > N_BLOCKS + 0)) {
       updateDisplayCounter = updateDisplayCounter + 1;
-      if (updateDisplayCounter == 1) updateDisplayFlag = 1;
+      if (updateDisplayCounter == 1) updateDisplayFlag = true;
     }
     if ((ConfigData.spectrum_zoom == 2) && (static_cast<uint32_t>(ADC_RX_I.available()) > N_BLOCKS + 0 && static_cast<uint32_t>(ADC_RX_Q.available()) > N_BLOCKS + 0)) {
       updateDisplayCounter = updateDisplayCounter + 1;
-      if (updateDisplayCounter == 1) updateDisplayFlag = 1;
+      if (updateDisplayCounter == 1) updateDisplayFlag = true;
     }
     if ((ConfigData.spectrum_zoom == 3) && (static_cast<uint32_t>(ADC_RX_I.available()) > N_BLOCKS + 0 && static_cast<uint32_t>(ADC_RX_Q.available()) > N_BLOCKS + 0)) {
       updateDisplayCounter = updateDisplayCounter + 1;
-      if (updateDisplayCounter == 3) updateDisplayFlag = 1;
+      if (updateDisplayCounter == 3) updateDisplayFlag = true;
     }
     if ((ConfigData.spectrum_zoom == 4) && (static_cast<uint32_t>(ADC_RX_I.available()) > N_BLOCKS + 0 && static_cast<uint32_t>(ADC_RX_Q.available()) > N_BLOCKS + 0)) {
       updateDisplayCounter = updateDisplayCounter + 1;
-      if (updateDisplayCounter == 7) updateDisplayFlag = 1;
+      if (updateDisplayCounter == 7) updateDisplayFlag = true;
     }
 
     // Don't call this function unless the filter bandwidth has been adjusted.  This requires 2 global variables.
     if (filter_pos != last_filter_pos) FilterSetSSB();
 
-//    if (bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE or radioMode == RadioMode::FT8_MODE or radioMode == RadioMode::CW_MODE or radioMode == RadioMode::AM_MODE or radioMode == RadioMode::SAM_MODE) {  // AFP 08-24-22
-      process.ProcessIQData();                                        // Call the Audio process from within the display routine to eliminate conflicts with drawing the spectrum and waterfall displays
-//    }
+    process.ProcessIQData();                                        // Call the Audio process from within the display routine to eliminate conflicts with drawing the spectrum and waterfall displays
+
     EncoderCenterTune();  //Moved the tuning encoder to reduce lag times and interference during tuning.
     y_new = pixelnew[x1];
     y1_new = pixelnew[x1 - 1];
     y_old = pixelold[x1];  // pixelold spectrum is saved by the FFT function prior to a new FFT which generates the pixelnew spectrum.  KF5N
     y_old2 = pixelold[x1 - 1];
 
-    y_new_plot = 247 - y_new - ConfigData.currentNoiseFloor[ConfigData.currentBand];
-    y1_new_plot = 247 - y1_new - ConfigData.currentNoiseFloor[ConfigData.currentBand];
-    y_old_plot = 247 - y_old - ConfigData.currentNoiseFloor[ConfigData.currentBand];
-    y_old2_plot = 247 - y_old2 - ConfigData.currentNoiseFloor[ConfigData.currentBand];
+    y_new_plot = 247 - y_new;
+    y1_new_plot = 247 - y1_new;
+    y_old_plot = 247 - y_old;
+    y_old2_plot = 247 - y_old2;
 
     // Collect a histogram of RF spectrum values.  This is used in AutoGain and AutoSpectrum.
     // 247 is the spectral display bottom.  120 is the spectral display top.

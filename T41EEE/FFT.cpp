@@ -173,8 +173,8 @@ void ZoomFFTExe(uint32_t blockSize) {
     for (int i = 0; i < fftWidth; i++) {
       pixelold[i] = pixelCurrent[i];
     }
-    // perform complex FFT
-    // calculation is performed in-place the FFT_buffer [re, im, re, im, re, im . . .]
+    // Perform complex FFT
+    // Calculation is performed in-place the FFT_buffer [re, im, re, im, re, im . . .]
     arm_cfft_f32(spec_FFT, buffer_spec_FFT, 0, 1);  // spec_FFT is width 512
     // calculate mag = I*I + Q*Q,
     // and simultaneously put them into the right order

@@ -79,16 +79,16 @@ void CalibrateOptions() {
   switch (IQChoice) {
 
     case 0:  // Calibrate Frequency  - uses WWV
-      ConfigData.freqCorrectionFactor = GetEncoderValueLive(-200000, 200000, ConfigData.freqCorrectionFactor, increment, freqCal, false);
-      if (ConfigData.freqCorrectionFactor != freqCorrectionFactorOld) {
-        si5351.set_correction(ConfigData.freqCorrectionFactor, SI5351_PLL_INPUT_XO);
-        freqCorrectionFactorOld = ConfigData.freqCorrectionFactor;
+      CalData.freqCorrectionFactor = GetEncoderValueLive(-200000, 200000, CalData.freqCorrectionFactor, increment, freqCal, false);
+      if (CalData.freqCorrectionFactor != freqCorrectionFactorOld) {
+        si5351.set_correction(CalData.freqCorrectionFactor, SI5351_PLL_INPUT_XO);
+        freqCorrectionFactorOld = CalData.freqCorrectionFactor;
       }
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X - 1, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT + 1, RA8875_BLACK);
-          eeprom.ConfigDataWrite();
+          eeprom.CalDataWrite();
           calibrateFlag = 0;
         }
       }
@@ -102,6 +102,7 @@ void CalibrateOptions() {
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
           eeprom.ConfigDataWrite();
+          eeprom.CalDataWrite();
           calibrateFlag = 0;
         }
       }

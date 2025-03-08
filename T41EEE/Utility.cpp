@@ -672,7 +672,7 @@ FLASHMEM void initUserDefinedStuff() {
   SetTransmitDitLength(ConfigData.currentWPM);
   // Initialize buffers used by the CW transmitter and CW decoder.
   sineTone(ConfigData.CWOffset + 6);  // This function takes "number of cycles" which is the offset + 6.
-  si5351.set_correction(ConfigData.freqCorrectionFactor, SI5351_PLL_INPUT_XO);
+  si5351.set_correction(CalData.freqCorrectionFactor, SI5351_PLL_INPUT_XO);
   initCWShaping();
   initPowerCoefficients();
   ResetHistograms();  // KF5N February 20, 2024

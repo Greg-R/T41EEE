@@ -170,7 +170,7 @@ void Process::ProcessIQData() {
     **********************************************************************************/
     // X1 zoom must be done before the frequency shift!
     if ((ConfigData.spectrum_zoom == 0) && (updateDisplayCounter == 1)) {
-      updateDisplayFlag = 1;
+      updateDisplayFlag = true;
       CalcZoom1Magn();
     }
 
@@ -294,7 +294,7 @@ void Process::ProcessIQData() {
     arm_cmplx_mult_cmplx_f32(FFT_buffer, FIR_filter_mask, iFFT_buffer, FFT_length);
 
     // Create audio spectrum.
-    if (updateDisplayFlag == 1) {
+    if (updateDisplayFlag == true) {
       for (int k = 0; k < 1024; k++) {
         audioSpectBuffer[1024 - k] = (iFFT_buffer[k] * iFFT_buffer[k]);
       }

@@ -238,101 +238,12 @@ void SetAudioOperatingState(RadioState operatingState) {
       Q_out_R_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
       Q_in_L_Ex.begin();         // I channel Microphone audio
       Q_in_R_Ex.begin();         // Q channel Microphone audio
-                                 //      ADC_RX_I.begin();     // Calibration is full duplex!  Activate receiver data.  No demodulation during calibrate, spectrum only.
-                                 //      ADC_RX_Q.begin();
       patchCord25.disconnect();  // Disconnect headphone.
       patchCord26.disconnect();
       connect15.connect();  // Transmitter I channel
       connect16.connect();  // Transmitter Q channel
 
-
-
-      /* QSD disabled and disconnected
-      patchCord1.disconnect();
-      patchCord2.disconnect();
-      patchCord3.disconnect();  // Disconnect receiver audio.
-      ADC_RX_I.end();
-      ADC_RX_I.clear();
-      ADC_RX_Q.end();
-      ADC_RX_Q.clear();
-      controlAudioOut(ConfigData.audioOut, true);  // Mute all audio.
-      sgtl5000_1.unmuteLineout();
-      SampleRate = SAMPLE_RATE_48K;
-      SetI2SFreq(SR[SampleRate].rate);
-      toneSSBCal.end();
-      updateMic();
-      mixer1.gain(0, 1.0);    // Connect microphone audio to transmit chain.
-      mixer1.gain(1, 0.0);    // Disconnect 1 kHz test tone.
-      switch1.setChannel(0);  // Connect microphone path.
-      switch2.setChannel(1);  //  Disconnect 1 kHz test tone path.
-
-      if(ConfigData.compressorFlag) {
-      switch3.setChannel(0);  // Enable compressor path!
-      mixer2.gain(0, 1.0);
-      mixer2.gain(1, 0.0);
-      cessb1.getLevels(0);
-      updateMic();
-      } else {
-      switch3.setChannel(1);  // Disable compressor path!
-      mixer2.gain(0, 0.0);
-      mixer2.gain(1, 1.0);
-      }
-
-connect0.connect();
-      connect13.connect();  // Transmitter I channel
-      connect14.connect();  // Transmitter Q channel
-      connect15.connect();  // Transmitter I channel
-      connect16.connect();  // Transmitter Q channel
-      Q_out_L_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);  // Need this as CW will put into wrong mode.  Greg KF5N August 4, 2024.
-      Q_out_R_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
-      Q_in_L_Ex.begin();  // I channel Microphone audio
-      Q_in_R_Ex.begin();  // Q channel Microphone audio
-*/
-
       break;
-/*
-    case RadioState::FT8_TRANSMIT_STATE:
-      // QSD disabled and disconnected
-      controlAudioOut(ConfigData.audioOut, false);  // FT8 audio should be headphone only.
-      sgtl5000_1.unmuteLineout();
-      //      patchCord9.disconnect();   // Receiver I channel
-      //      patchCord10.disconnect();  // Receiver Q channel
-      //      patchCord17.disconnect();  // CW sidetone
-      //      patchCord18.disconnect();
-      //      patchCord19.disconnect();
-      //      patchCord20.disconnect();
-      //      patchCord21.disconnect();
-      //      patchCord22.disconnect();
-
-      ADC_RX_I.end();
-      ADC_RX_I.clear();
-      ADC_RX_Q.end();
-      ADC_RX_Q.clear();
-
-      SampleRate = SAMPLE_RATE_48K;
-      SetI2SFreq(SR[SampleRate].rate);
-      toneSSBCal.end();
-      //      updateMic();    Not needed here?
-      mixer1.gain(0, 0.0);    // Disonnect microphone audio to transmit chain.
-      mixer1.gain(1, 0.0);    // Disconnect 1 kHz test tone.
-      mixer1.gain(2, 1.0);    // Connect USB audio from WSJTX on PC.
-      switch1.setChannel(1);  // Disconnect microphone path.
-      switch2.setChannel(1);  //  Disconnect 1 kHz test tone path.
-                              //      switch4.setChannel(0);  //  Connect USB audio from WSJTX on PC.
-
-      switch3.setChannel(1);  // Don't use compressor with FT8!
-      mixer2.gain(0, 0.0);
-      mixer2.gain(1, 1.0);
-
-      //      cessb1.getLevels(0);  // Initialize the CESSB information struct.
-      //      patchCord15.connect();  // Transmitter I channel
-      //      patchCord16.connect();  // Transmitter Q channel
-
-      Q_in_L_Ex.begin();  // I channel Microphone audio
-      Q_in_R_Ex.begin();  // Q channel Microphone audio
-
-      break;
-*/
 
     case RadioState::SSB_CALIBRATE_STATE:
       SampleRate = SAMPLE_RATE_48K;

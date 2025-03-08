@@ -329,13 +329,6 @@ struct config_t {
   uint32_t currentFreqA = 7200000;
 #endif
   uint32_t currentFreqB = 7030000;
-  //DB2OO, 23-AUG-23: with TCXO needs to be 0
-#ifdef TCXO_25MHZ
-  int freqCorrectionFactor = 0;  //68000;
-#else
-  //Conventional crystal with freq offset needs a correction factor
-  int freqCorrectionFactor = 100000;
-#endif
 
   int equalizerRec[EQUALIZER_CELL_COUNT] = { 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100 };
   int equalizerXmt[EQUALIZER_CELL_COUNT] = { 0, 0, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 0, 0 };  // Provide equalizer optimized for SSB voice based on Neville's tests.  KF5N November 2, 2023
@@ -389,7 +382,7 @@ Sideband lastSideband[NUMBER_OF_BANDS] = {Sideband::LOWER, Sideband::LOWER, Side
   int sdCardPresent = 0;               //   JJP  7/18/23
   float myLong = MY_LON;
   float myLat = MY_LAT;
-  int currentNoiseFloor[NUMBER_OF_BANDS]{ 0 };
+//  int currentNoiseFloor[NUMBER_OF_BANDS]{ 0 };
   int compressorFlag = 0;  // Compressor is currently deactivated.
   bool xmitEQFlag = false;
   bool receiveEQFlag = false;
