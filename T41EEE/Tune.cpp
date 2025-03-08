@@ -81,7 +81,7 @@ uint32_t IFFreq = SR[SampleRate].rate / 4;  // IF (intermediate) frequency
 
   if (radioState == RadioState::SSB_TRANSMIT_STATE or radioState == RadioState::FT8_TRANSMIT_STATE or radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE or radioState == RadioState::CW_TRANSMIT_KEYER_STATE) {  // Transmit state
     si5351.set_freq(Clk2SetFreq, SI5351_CLK2);
-    si5351.output_enable(SI5351_CLK0, 0);  // CLK0 (receive) off during transmit to prevent spurious outputs
+    si5351.output_enable(SI5351_CLK0, 1);  // CLK0 (receive) off during transmit to prevent spurious outputs
     si5351.output_enable(SI5351_CLK2, 1);
   }
   //=====================  AFP 10-03-22 =================
@@ -163,7 +163,7 @@ uint32_t IFFreq = SR[SampleRate].rate / 4;  // IF (intermediate) frequency
 
   if (radioState == RadioState::SSB_TRANSMIT_STATE or radioState == RadioState::FT8_TRANSMIT_STATE or radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE or radioState == RadioState::CW_TRANSMIT_KEYER_STATE) {  // Transmit state
     si5351.set_freq(Clk1SetFreq, SI5351_CLK1);
-    si5351.output_enable(SI5351_CLK2, 0);  // CLK2 (receive) off during transmit to prevent spurious outputs
+    si5351.output_enable(SI5351_CLK2, 1);  // CLK2 (receive) off during transmit to prevent spurious outputs
     si5351.output_enable(SI5351_CLK1, 1);
   }
   //=====================  AFP 10-03-22 =================

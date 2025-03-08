@@ -76,11 +76,8 @@
 
 // If using an external amplifier, the gain may need to be adjusted for the best volume range.
 #define SPEAKERSCALE  2.0    // A typical value is 20.  Increase or decrease this value depending on your amplifier gain.
-#define HEADPHONESCALE 2.0
-//#define DSPGAINSCALE 1.0  // A typical value for a V10/V11 radio is in the range of 5 to 15.
-                           // Adjust this value for visible noise in the audio spectrum window with antenna connected
-                           // and RF Gain set to 0 dB.
-//#define AUDIOSPECTRUMSCALE 65
+#define HEADPHONESCALE 10.0
+
 
 
 

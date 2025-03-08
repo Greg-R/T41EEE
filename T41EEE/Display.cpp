@@ -306,7 +306,7 @@ void ShowSpectrum() {
     if (AudioH_max_box < 28) {  // LOWERPIXTARGET = 13
         audioFFToffset = audioFFToffset + 1;
       }
-
+//Serial.printf("fftOffset = %d audioFFToffset = %d\n", fftOffset, audioFFToffset);
 
   // Report the current RF "gain" setting.
   tft.fillRect(SPECTRUM_LEFT_X + 125, SPECTRUM_TOP_Y + 2, 33, tft.getFontHeight(), RA8875_BLACK);

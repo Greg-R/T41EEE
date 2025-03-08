@@ -211,8 +211,8 @@ float32_t pixel_per_khz = ((1 << ConfigData.spectrum_zoom) * SPECTRUM_RES * 1000
 int pos_left = centerLine - (int)(bands[ConfigData.currentBand].FLoCut / 1000.0 * pixel_per_khz);
 
 int centerLine = (MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2;
-int16_t fftOffset = 0;
-int16_t audioFFToffset = 0;
+int16_t fftOffset = 125;
+int16_t audioFFToffset = 100;
 int fLoCutOld;
 int fHiCutOld;
 int filterWidth = (int)((bands[ConfigData.currentBand].FHiCut - bands[ConfigData.currentBand].FLoCut) / 1000.0 * pixel_per_khz);
@@ -816,7 +816,8 @@ MenuSelect readButton() {
   return menu;
 }
 
-
+bool powerUp = false;
+int afterPowerUp = 0;
 /*****
   Purpose: program entry point that sets the environment for program
 
@@ -827,6 +828,7 @@ MenuSelect readButton() {
     void
 *****/
 FLASHMEM void setup() {
+  powerUp = true;
   Serial.begin(115200);  // Use this serial for Teensy programming.
   SerialUSB1.begin(115200);  // Use this serial for FT8 keying.
 
@@ -835,6 +837,7 @@ FLASHMEM void setup() {
   Teensy3Clock.set(now());  // set the RTC
   T4_rtc_set(Teensy3Clock.get());
 
+// Configure Audio Adapter
   sgtl5000_1.enable();
   sgtl5000_1.setAddress(LOW);  // This sets to one of two possible I2C addresses, controlled by a jumper on the Audio Adapter.
 
@@ -868,6 +871,8 @@ FLASHMEM void setup() {
   //  sgtl5000_2.muteHeadphone();                  // This one controls the headphone.  Why???
 
   //sgtl5000_2.muteLineout();
+        speakerScale.setGain(SPEAKERSCALE);      
+      headphoneScale.setGain(HEADPHONESCALE);
 
   updateMic();  // This updates the transmit signal chain settings.  Located in SSB_Exciter.cpp.
 
@@ -981,14 +986,13 @@ FLASHMEM void setup() {
   si5351.init(SI5351_CRYSTAL_LOAD_10PF, Si_5351_crystal, ConfigData.freqCorrectionFactor);  // JJP  7/14/23
   si5351.set_ms_source(SI5351_CLK2, SI5351_PLLB);                                           // Allows CLK1 and CLK2 to exceed 100 MHz simultaneously.
 #ifdef PLLMODULE
-  si5351.drive_strength(SI5351_CLK0, SI5351_DRIVE_8MA);  // AFP 10-13-22
+  si5351.drive_strength(SI5351_CLK0, SI5351_DRIVE_8MA);
+  si5351.output_enable(SI5351_CLK2, 1);
 #else
   si5351.drive_strength(SI5351_CLK1, SI5351_DRIVE_8MA);
+    si5351.output_enable(SI5351_CLK1, 1);
 #endif
   si5351.drive_strength(SI5351_CLK2, SI5351_DRIVE_8MA);  // CWP AFP 10-13-22
-  // Turn off LOs.  Should be default state after init, so probably not really necessary here.
-  si5351.output_enable(SI5351_CLK2, 0);
-  si5351.output_enable(SI5351_CLK1, 0);
 
   InitializeDataArrays();
   // Initialize user defined stuff
@@ -1097,6 +1101,17 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
     Serial.printf("Set audio state, begin loop. radioState = %d lastState = %d\n", radioState, lastState);
   }
 
+   if(powerUp) {
+   afterPowerUp = afterPowerUp + 1;
+      speakerScale.setGain(0);
+      headphoneScale.setGain(0);
+   if(afterPowerUp > 12) { 
+    powerUp = false;
+//    patchCord3.connect();
+      speakerScale.setGain(SPEAKERSCALE);
+      headphoneScale.setGain(HEADPHONESCALE);
+ }}
+
 //Serial.printf("bands[ConfigData.currentBand].sideband = %d\n", bands[ConfigData.currentBand].sideband);
 
   //  Begin radio state machines
@@ -1148,6 +1163,7 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
         }
 #endif
       }
+      
       break;
 
     case RadioState::FT8_TRANSMIT_STATE:
