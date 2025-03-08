@@ -146,7 +146,7 @@ void ZoomFFTExe(uint32_t blockSize) {
   // Nuttall window
   // zoom_sample_ptr points to the oldest sample now
 
-  float32_t multiplier = (float32_t)ConfigData.spectrum_zoom * (float32_t)ConfigData.spectrum_zoom;
+  float32_t multiplier = static_cast<float32_t>(ConfigData.spectrum_zoom) * static_cast<float32_t>(ConfigData.spectrum_zoom);
 
   for (int idx = 0; idx < fftWidth; idx++) {
     //   buffer_spec_FFT[idx * 2 + 0] =  multiplier * FFT_ring_buffer_x[zoom_sample_ptr] * nuttallWindow256[idx];

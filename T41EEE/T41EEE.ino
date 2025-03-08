@@ -871,8 +871,8 @@ FLASHMEM void setup() {
   //  sgtl5000_2.muteHeadphone();                  // This one controls the headphone.  Why???
 
   //sgtl5000_2.muteLineout();
-        speakerScale.setGain(SPEAKERSCALE);      
-      headphoneScale.setGain(HEADPHONESCALE);
+  //      speakerScale.setGain(SPEAKERSCALE);      
+  //    headphoneScale.setGain(HEADPHONESCALE);
 
   updateMic();  // This updates the transmit signal chain settings.  Located in SSB_Exciter.cpp.
 
