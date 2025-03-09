@@ -363,9 +363,9 @@ void Eeprom::EEPROMStartup() {
 
   // The case where struct sizes are the same, indicating no changes to the struct.  Nothing more to do, return.
   if (ConfigDataEEPROMSize == ConfigDataStackSize and CalDataEEPROMSize == CalDataStackSize) {
-    Serial.printf("Got to stack versus EEPROM comparison\n");
-    Serial.printf("ConfigDataEEPROMSize = %d ConfigDataStackSize = %d\n", ConfigDataEEPROMSize, ConfigDataStackSize);
-    Serial.printf("CalDataEEPROMSize = %d CalDataStackSize = %d\n", CalDataEEPROMSize, CalDataStackSize);
+//    Serial.printf("Got to stack versus EEPROM comparison\n");
+//    Serial.printf("ConfigDataEEPROMSize = %d ConfigDataStackSize = %d\n", ConfigDataEEPROMSize, ConfigDataStackSize);
+//    Serial.printf("CalDataEEPROMSize = %d CalDataStackSize = %d\n", CalDataEEPROMSize, CalDataStackSize);
     ConfigDataRead();  // Read the ConfigData into active memory.
     CalDataRead();  // Read the CalData into active memory.
     return;        // Done, begin radio operation.

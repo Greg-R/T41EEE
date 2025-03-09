@@ -170,6 +170,7 @@ void ZoomFFTExe(uint32_t blockSize) {
   // The rest of the function is activated when the buffers are full and ready.
   // Save old pixels for lowpass filter.
   if (updateDisplayFlag == true) {
+//    Serial.printf("UpdateDisplayFlag\n");
     for (int i = 0; i < fftWidth; i++) {
       pixelold[i] = pixelCurrent[i];
     }

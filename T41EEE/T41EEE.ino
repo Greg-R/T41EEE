@@ -211,8 +211,8 @@ float32_t pixel_per_khz = ((1 << ConfigData.spectrum_zoom) * SPECTRUM_RES * 1000
 int pos_left = centerLine - (int)(bands[ConfigData.currentBand].FLoCut / 1000.0 * pixel_per_khz);
 
 int centerLine = (MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2;
-int16_t fftOffset = 0;
-int16_t audioFFToffset = 0;
+int16_t fftOffset = 100;
+int16_t audioFFToffset = 100;
 int fLoCutOld;
 int fHiCutOld;
 int filterWidth = static_cast<int>((bands[ConfigData.currentBand].FHiCut - bands[ConfigData.currentBand].FLoCut) / 1000.0 * pixel_per_khz);
@@ -596,9 +596,9 @@ FLASHMEM void InitializeDataArrays() {
   Serial.println();
 #endif
   //  CLEAR_VAR(FFT_spec_old);             //memset(FFT_spec_old, 0, 4096);            // SPECTRUM_RES = 512 * 4 = 2048
-  CLEAR_VAR(pixelnew);                 //memset(pixelnew, 0, 1024);                // 512 * 2
-  CLEAR_VAR(pixelold);                 //memset(pixelold, 0, 1024);                // 512 * 2
-  CLEAR_VAR(pixelCurrent);             //memset(pixelCurrent, 0, 1024);            // 512 * 2  KF5N JJP  7/14/23
+//  CLEAR_VAR(pixelnew);                 //memset(pixelnew, 0, 1024);                // 512 * 2
+//  CLEAR_VAR(pixelold);                 //memset(pixelold, 0, 1024);                // 512 * 2
+//  CLEAR_VAR(pixelCurrent);             //memset(pixelCurrent, 0, 1024);            // 512 * 2  KF5N JJP  7/14/23
   CLEAR_VAR(buffer_spec_FFT);          //memset(buffer_spec_FFT, 0, 4096);         // SPECTRUM_RES = 512 * 2 = 1024
   CLEAR_VAR(NR_FFT_buffer);            //memset(NR_FFT_buffer, 0, 2048);           // NR_FFT_L * sizeof(NR_FFT_buffer[0]));
   CLEAR_VAR(NR_output_audio_buffer);   //memset(NR_output_audio_buffer, 0, 1024);  // 256 * sizeof(NR_output_audio_buffer[0]));
@@ -865,14 +865,6 @@ FLASHMEM void setup() {
   sgtl5000_1.adcHighPassFilterEnable();
   //sgtl5000_1.adcHighPassFilterDisable();  //reduces noise.  https://forum.pjrc.com/threads/27215-24-bit-audio-boards?p=78831&viewfull=1#post78831
   //sgtl5000_1.adcHighPassFilterFreeze();
-//  sgtl5000_2.inputSelect(AUDIO_INPUT_LINEIN);  // Why is a second sgtl5000 device used???  This is the receiver ADCs, PCM1808?
-
-  //  sgtl5000_2.volume(0.8);   //  Headphone volume???  Not required as headphone is muted.
-  //  sgtl5000_2.muteHeadphone();                  // This one controls the headphone.  Why???
-
-  //sgtl5000_2.muteLineout();
-  //      speakerScale.setGain(SPEAKERSCALE);      
-  //    headphoneScale.setGain(HEADPHONESCALE);
 
   updateMic();  // This updates the transmit signal chain settings.  Located in SSB_Exciter.cpp.
 
@@ -898,10 +890,10 @@ FLASHMEM void setup() {
   pinMode(BUSY_ANALOG_PIN, INPUT);  // Pin 39.  Switch matrix output connects to this pin.
   pinMode(KEYER_DIT_INPUT_TIP, INPUT_PULLUP);
   pinMode(KEYER_DAH_INPUT_RING, INPUT_PULLUP);
-  if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) {
-    pinMode(RESET, OUTPUT);  // Reset pulse to QSD2/QSE2.
-    digitalWrite(RESET, HIGH);
-  }
+//  if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) {
+//    pinMode(RESET, OUTPUT);  // Reset pulse to QSD2/QSE2.
+//    digitalWrite(RESET, HIGH);
+//  }
 
   // SPI bus to display.
   pinMode(TFT_MOSI, OUTPUT);

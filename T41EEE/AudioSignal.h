@@ -148,6 +148,7 @@ void SetAudioOperatingState(RadioState operatingState) {
     case RadioState::SAM_RECEIVE_STATE:
     case RadioState::CW_RECEIVE_STATE:
       SampleRate = SAMPLE_RATE_192K;
+//      SetI2SFreq(SR[SampleRate].rate);
       InitializeDataArrays();  // I2S sample rate set in this function.
       sgtl5000_1.muteLineout();
 
@@ -201,6 +202,7 @@ void SetAudioOperatingState(RadioState operatingState) {
     case RadioState::FT8_TRANSMIT_STATE:
 
       SampleRate = SAMPLE_RATE_48K;
+//        SetI2SFreq(SR[SampleRate].rate);
       InitializeDataArrays();  // I2S sample rate set in this function.
       // QSD disabled and disconnected
       controlAudioOut(ConfigData.audioOut, true);  // Mute all audio.

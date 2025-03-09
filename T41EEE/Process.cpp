@@ -190,10 +190,6 @@ void Process::ProcessIQData() {
     if ((ConfigData.spectrum_zoom == 3) && (updateDisplayCounter < 4)) ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
     if ((ConfigData.spectrum_zoom == 4) && (updateDisplayCounter < 8)) ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
 
-    /**********************************************************************************  AFP 12-31-20
-        S-Meter & dBm-display ?? not usually called
-     **********************************************************************************/
-    //============================== AFP 10-22-22  Begin new
     if (calibrateFlag == true) {
       CalibrateOptions();
     }
