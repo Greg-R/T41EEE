@@ -76,7 +76,7 @@
 
 // If using an external amplifier, the gain may need to be adjusted for the best volume range.
 #define SPEAKERSCALE  2.0    // A typical value is 20.  Increase or decrease this value depending on your amplifier gain.
-#define HEADPHONESCALE 5.0
+#define HEADPHONESCALE 10.0
 
 
 
