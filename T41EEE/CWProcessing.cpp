@@ -120,7 +120,7 @@ void JackClusteredArrayMax(int32_t *array, int32_t elements, int32_t *maxCount, 
     void
 *****/
 FLASHMEM void SelectCWFilter() {
-  const char *CWFilter[] = { "0.8kHz", "1.0kHz", "1.3kHz", "1.8kHz", "2.0kHz", " Off " };
+  const std::string CWFilter[] = { "0.8kHz", "1.0kHz", "1.3kHz", "1.8kHz", "2.0kHz", " Off " };
   ConfigData.CWFilterIndex = SubmenuSelect(CWFilter, 6, ConfigData.CWFilterIndex);  // CWFilter is an array of strings.
   // Clear the current CW filter graphics and then restore the bandwidth indicator bar.  KF5N July 30, 2023
   tft.writeTo(L2);
@@ -142,7 +142,7 @@ FLASHMEM void SelectCWFilter() {
     void
 *****/
 FLASHMEM void SelectCWOffset() {
-  const char *CWOffsets[] = { "562.5 Hz", "656.5 Hz", "750 Hz", "843.75 Hz", " Cancel " };
+  const std::string CWOffsets[] = { "562.5 Hz", "656.5 Hz", "750 Hz", "843.75 Hz", " Cancel " };
   const int numCycles[4] = { 6, 7, 8, 9 };
   ConfigData.CWOffset = SubmenuSelect(CWOffsets, 5, ConfigData.CWOffset);  // CWFilter is an array of strings.
   // Now generate the values for the buffer which is used to create the CW tone.  The values are discrete because there must be whole cycles.
@@ -274,7 +274,7 @@ void SetTransmitDitLength(int wpm) {
     void
 *****/
 void SetKeyType() {
-  const char *keyChoice[] = { "Straight Key", "Keyer" };
+  const std::string keyChoice[] = { "Straight Key", "Keyer" };
 
   ConfigData.keyType = SubmenuSelect(keyChoice, 2, ConfigData.keyType);
   // Make sure the ConfigData.paddleDit and ConfigData.paddleDah variables are set correctly for straight key.

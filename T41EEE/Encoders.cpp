@@ -228,6 +228,8 @@ void EncoderVolume()  //============================== AFP 10-22-22  Begin new
 
 /*****
   Purpose: Use the encoder to change the value of a number in some other function
+           This function does not have a while loop.  Thus it must be used inside
+           some other loop.
 
   Parameter list:
     int minValue                the lowest value allowed
@@ -275,7 +277,9 @@ float GetEncoderValueLive(float minValue, float maxValue, float startValue, floa
 
 
 /*****
-  Purpose: Use the encoder to change the value of a number in some other function
+  Purpose: Use the encoder to change the value of a number in some other function.
+           This function does not have a while loop.  Thus it must be used inside
+           some other loop.
 
   Parameter list:
     int minValue                the lowest value allowed
@@ -324,6 +328,8 @@ float GetEncoderValueLiveString(float minValue, float maxValue, float startValue
 
 /*****
   Purpose: Use the encoder to change the value of a number in some other function
+           This function does not have a while loop.  Thus it must be used inside
+           some other loop.
 
   Parameter list:
     int minValue                the lowest value allowed
@@ -370,7 +376,8 @@ q15_t GetEncoderValueLiveQ15t(int minValue, int maxValue, int startValue, int in
 
 
 /*****
-  Purpose: Use the encoder to change the value of a number in some other function
+  Purpose: Use the encoder to change the value of a number in some other function.
+           This function has a while loop, and it can be used independently.
 
   Parameter list:
     int minValue                the lowest value allowed
@@ -381,7 +388,8 @@ q15_t GetEncoderValueLiveQ15t(int minValue, int maxValue, int startValue, int in
   Return value;
     int                         the new value
 *****/
-int GetEncoderValue(int minValue, int maxValue, int startValue, int increment, char prompt[]) {
+//int GetEncoderValue(int minValue, int maxValue, int startValue, int increment, char prompt[]) {
+int GetEncoderValue(int minValue, int maxValue, int startValue, int increment, std::string prompt) {
   int currentValue = startValue;
 //  int val;
   MenuSelect menu;
@@ -391,7 +399,7 @@ int GetEncoderValue(int minValue, int maxValue, int startValue, int increment, c
   tft.setTextColor(RA8875_WHITE);
   tft.fillRect(250, 0, 280, CHAR_HEIGHT, RA8875_MAGENTA);
   tft.setCursor(257, 1);
-  tft.print(prompt);
+  tft.print(prompt.c_str());
   tft.setCursor(470, 1);
   tft.print(startValue);
 

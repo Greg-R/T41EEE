@@ -73,7 +73,7 @@ void CalibrateOptions() {
   // Select the type of calibration, and then skip this during the loop() function.
   // Note that some calibrate options run inside the loop() function!
   if (calibrateFlag == 0) {   //    0             1           2               3                4              5             6              7                  8                  9               10                11               12                13               14               15              16          17           18
-    const char *IQOptions[19]{ "Freq Cal", "CW PA Cal", "CW Rec Cal", "CW Carrier Cal", "CW Xmit Cal", "SSB PA Cal", "SSB Rec Cal", "SSB Carrier Cal", "SSB Transmit Cal", "CW Radio Cal", "CW Refine Cal", "SSB Radio Cal", "SSB Refine Cal", "dBm Level Cal", "DAC Offset CW", "DAC Offset SSB", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
+    const std::string IQOptions[]{ "Freq Cal", "CW PA Cal", "CW Rec Cal", "CW Carrier Cal", "CW Xmit Cal", "SSB PA Cal", "SSB Rec Cal", "SSB Carrier Cal", "SSB Transmit Cal", "CW Radio Cal", "CW Refine Cal", "SSB Radio Cal", "SSB Refine Cal", "dBm Level Cal", "DAC Offset CW", "DAC Offset SSB", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
     IQChoice = SubmenuSelect(IQOptions, 19, 0);                                                                                                                                                                                                                                                                      //AFP 10-21-22
   }
   calibrateFlag = 1;
@@ -505,11 +505,11 @@ void SpectrumOptions() { /*
     {"10 dB/", 20.0, 10},  // JJP 7/14/23
   };
   */
-  const char *spectrumChoices[] = { "20 dB/unit", "10 dB/unit", "Cancel" };
+  const std::string spectrumChoices[] = { "20 dB/unit", "10 dB/unit", "Cancel" };
   int spectrumSet = ConfigData.currentScale;  // JJP 7/14/23
 
   spectrumSet = SubmenuSelect(spectrumChoices, 3, spectrumSet);
-  if (strcmp(spectrumChoices[spectrumSet], "Cancel") == 0) {
+  if (strcmp(spectrumChoices[spectrumSet].c_str(), "Cancel") == 0) {
     return;
   }
   ConfigData.currentScale = spectrumSet;  // Yep...
@@ -559,7 +559,7 @@ SetAudioOperatingState(radioState);
 
 
 void AGCOptions() {
-  const char *AGCChoices[] = { "AGC On", "AGC Off", "AGC Threshold", "Cancel" };  // G0ORX (Added Long) September 5, 2023
+  const std::string AGCChoices[] = { "AGC On", "AGC Off", "AGC Threshold", "Cancel" };  // G0ORX (Added Long) September 5, 2023
   int agcSet = 0;
 
 agcSet = SubmenuSelect(AGCChoices, 4, ConfigData.AGCMode);  // G0ORX
@@ -580,7 +580,9 @@ agcSet = SubmenuSelect(AGCChoices, 4, ConfigData.AGCMode);  // G0ORX
 
     case 2:  // Set AGC threshold
 //      ConfigData.AGCThreshold = static_cast<float32_t>(GetEncoderValue(-60, -20, ConfigData.AGCThreshold, 1, "AGC Threshold"));
-      ConfigData.AGCThreshold = GetEncoderValueLiveString(-60.0, -20.0, ConfigData.AGCThreshold, 1.0, "AGC Thr ", false);
+//      ConfigData.AGCThreshold = GetEncoderValueLiveString(-60.0, -20.0, ConfigData.AGCThreshold, 1.0, "AGC Thr ", false);
+        ConfigData.AGCThreshold = static_cast<float32_t>(GetEncoderValue(-60, -20, ConfigData.AGCThreshold, 1, "AGC Thr "));    
+
       initializeAudioPaths();
       break;
 
@@ -753,7 +755,7 @@ void ProcessEqualizerChoices(int EQType, char *title) {
     int           an index into the band array
 *****/
 void EqualizerRecOptions() {
-  const char *RecEQChoices[] = { "RX EQ On", "RX EQ Off", "RX EQSet", "Cancel" };  // Add code practice oscillator
+  const std::string RecEQChoices[] = { "RX EQ On", "RX EQ Off", "RX EQSet", "Cancel" };  // Add code practice oscillator
   int EQChoice = 0;
 
   EQChoice = SubmenuSelect(RecEQChoices, 4, 0);
@@ -774,7 +776,6 @@ void EqualizerRecOptions() {
   eeprom.ConfigDataWrite();
   RedrawDisplayScreen();
   UpdateEqualizerField(ConfigData.receiveEQFlag);
-  //  return 0;
 }
 
 
@@ -827,7 +828,7 @@ void SSBOptions()  // AFP 09-22-22 All new
 {
 static int micChoice = 0;
   //  const char *micChoices[] = { "Mic Comp On", "Mic Comp Off", "Set Threshold", "Set Comp_Ratio", "Set Attack", "Set Decay", "Cancel" };
-  const char *micChoices[] = { "CESSB", "SSB", "FT8", "Comp On", "Comp Off", "Mic Gain", "Comp Threshold", "Comp Ratio", "Cancel" };
+  const std::string micChoices[] = { "CESSB", "SSB", "FT8", "Comp On", "Comp Off", "Mic Gain", "Comp Threshold", "Comp Ratio", "Cancel" };
 
   micChoice = SubmenuSelect(micChoices, 9, micChoice);
   switch (micChoice) {
@@ -905,14 +906,14 @@ static int micChoice = 0;
     int           an index into the band array
 *****/
 void RFOptions() {
-  const char *rfOptions[] = { "TX Power Set", "RF Gain Set", "RF Auto-Gain On", "RF Auto-Gain Off", "Auto-Spectrum On", "AutoSpectrum Off", "Cancel" };
+//  const char *rfOptions[] = { "TX Power Set", "RF Gain Set", "RF Auto-Gain On", "RF Auto-Gain Off", "Auto-Spectrum On", "AutoSpectrum Off", "Cancel" };
+  const std::string rfOptions[] = { "TX Power Set", "RF Gain Set", "RF Auto-Gain On", "RF Auto-Gain Off", "Auto-Spectrum On", "AutoSpectrum Off", "Cancel" };
   int rfSet = 0;
-
   rfSet = SubmenuSelect(rfOptions, 7, rfSet);
 
   switch (rfSet) {
     case 0:  // TX Power Set.  AFP 10-21-22
-      ConfigData.transmitPowerLevel = (float)GetEncoderValue(1, 20, ConfigData.transmitPowerLevel, 1, (char *)"Power: ");
+      ConfigData.transmitPowerLevel = static_cast<float32_t>(GetEncoderValue(1, 20, ConfigData.transmitPowerLevel, 1, "Power: "));
       // When the transmit power level is set, this means ALL of the power coefficients must be revised!
       // powerOutCW and powerOutSSB must be updated.
       initPowerCoefficients();
@@ -1023,7 +1024,7 @@ void DoPaddleFlip() {
     int             // the currently active VFO, A = 1, B = 0
 *****/
 void VFOSelect() {
-  const char *VFOOptions[] = { "VFO A", "VFO B", "VFO Split", "Cancel" };
+  const std::string VFOOptions[] = { "VFO A", "VFO B", "VFO Split", "Cancel" };
   int toggle;
   int choice, lastChoice;
 
@@ -1033,7 +1034,7 @@ void VFOSelect() {
   tft.setTextColor(RA8875_BLACK);
   tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH, CHAR_HEIGHT, RA8875_GREEN);
   tft.setCursor(SECONDARY_MENU_X + 7, MENUS_Y + 1);
-  tft.print(VFOOptions[choice]);  // Show the default (right paddle = dah
+  tft.print(VFOOptions[choice].c_str());  // Show the default (right paddle = dah
 
   choice = SubmenuSelect(VFOOptions, 4, 0);
   delay(10);
@@ -1094,7 +1095,7 @@ void VFOSelect() {
     void
 *****/
 void ConfigDataOptions() {  //           0               1                2               3               4                  5                  6                  7                  8              9           10
-  const char *ConfigDataOpts[] = { "Save Current", "Load Defaults", "Get Favorite", "Set Favorite", "Copy Config->SD", "Copy SD->Config", "Config->Serial", "Default->Serial", "Stack->Serial", "SD->Serial", "Cancel" };
+  const std::string ConfigDataOpts[] = { "Save Current", "Load Defaults", "Get Favorite", "Set Favorite", "Copy Config->SD", "Copy SD->Config", "Config->Serial", "Default->Serial", "Stack->Serial", "SD->Serial", "Cancel" };
   int defaultOpt = 0;
   config_t tempConfig;     // A temporary config_t struct to copy ConfigData data into.
   config_t defaultConfig;  // The configuration defaults.
@@ -1177,8 +1178,8 @@ void ConfigDataOptions() {  //           0               1                2     
   Return value
     void
 *****/
-void CalDataOptions() {  //           0               1                2               3               4               5                  6               7          8          
-  const char *CalDataOpts[] = { "Save Current", "Load Defaults", "Copy Cal->SD", "Copy SD->Cal", "Cal->Serial", "Default->Serial", "Stack->Serial", "SD->Serial", "Cancel" };
+void CalDataOptions() {        //           0               1                2               3               4               5                  6               7          8          
+  const std::string CalDataOpts[] = { "Save Current", "Load Defaults", "Copy Cal->SD", "Copy SD->Cal", "Cal->Serial", "Default->Serial", "Stack->Serial", "SD->Serial", "Cancel" };
   int defaultOpt = 0;
   calibration_t tempCal;     // A temporary calibration_t struct to copy CalData data into.
   calibration_t defaultCal;  // The configuration defaults.
@@ -1255,7 +1256,8 @@ void CalDataOptions() {  //           0               1                2        
   Return value
     int           an index into the band array
 *****/
-int SubmenuSelect(const char *options[], int numberOfChoices, int defaultStart) {
+//int SubmenuSelect(const char *options[], int numberOfChoices, int defaultStart) {
+int SubmenuSelect(const std::string options[], int numberOfChoices, int defaultStart) {
   int refreshFlag = 0;
   MenuSelect menu;
   int encoderReturnValue;
@@ -1267,7 +1269,7 @@ int SubmenuSelect(const char *options[], int numberOfChoices, int defaultStart) 
   if (refreshFlag == 0) {
     tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH, CHAR_HEIGHT, RA8875_GREEN);  // Show the option in the second field
     tft.setCursor(SECONDARY_MENU_X + 1, MENUS_Y + 1);
-    tft.print(options[encoderReturnValue]);  // Secondary Menu
+    tft.print(options[encoderReturnValue].c_str());  // Secondary Menu
     refreshFlag = 1;
   }
 //  delay(150L);
@@ -1305,7 +1307,7 @@ int SubmenuSelect(const char *options[], int numberOfChoices, int defaultStart) 
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH, CHAR_HEIGHT, RA8875_GREEN);  // Show the option in the second field
           tft.setTextColor(RA8875_BLACK);
           tft.setCursor(SECONDARY_MENU_X + 1, MENUS_Y + 1);
-          tft.print(options[encoderReturnValue]);
+          tft.print(options[encoderReturnValue].c_str());
 //          delay(50L);
           refreshFlag = 0;
         }
