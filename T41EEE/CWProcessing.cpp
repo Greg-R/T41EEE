@@ -55,6 +55,54 @@ enum states { state0,
               state6 };
 states decodeStates = state0;
 
+
+/*****
+  Purpose: This function replaces the arm_max_float32() function that finds the maximum element in an array.
+           The histograms are "fuzzy" in the sense that dits and dahs "cluster" around a maximum value rather
+           than having a single max value. This algorithm looks at a given cell and the adds in the previous
+           (index - 1) and next (index + 1) cells to get the total for that index.
+
+  Parameter list:
+    int32_t *array         the base address of the array to search
+    int32_t elements       the number of elements of the array to examine
+    int32_t *maxCount      the largest clustered value found
+    int32_t *maxIndex      the index of the center of the cluster
+    int32_t *firstNonZero  the first cell that has a non-zero value
+    int32_t clusterSpread  tells how far previous and ahead elements are to be included in the measure.
+                            Must be an odd integer > 1.
+
+  Return value;
+    void
+*****/
+void JackClusteredArrayMax(int32_t *array, int32_t elements, int32_t *maxCount, int32_t *maxIndex, int32_t *firstNonZero, int32_t spread) {
+  int32_t i, j, clusteredIndex;
+  int32_t clusteredMax, temp;
+
+  *maxCount = '\0';  // Reset to empty
+  *maxIndex = '\0';
+
+  clusteredMax = 0;
+  clusteredIndex = -1;  // Now we can check for an error
+
+  for (i = spread; i < elements - spread; i++) {  // Start with 1 so we can look at the previous element's value
+    temp = 0;
+    for (j = i - spread; j <= i + spread; j++) {
+      temp += array[j];
+      ;  // Include adjacent elements
+    }
+
+    if (temp >= clusteredMax) {
+      clusteredMax = temp;
+      clusteredIndex = i;
+    }
+  }
+  if (clusteredIndex > 0) {
+    *maxCount = array[clusteredIndex];
+    *maxIndex = clusteredIndex;
+  }
+}
+
+
 //=================  AFP10-18-22 ================
 /*****
   Purpose: Select CW Filter. ConfigData.CWFilterIndex has these values:
@@ -151,10 +199,10 @@ void DoCWReceiveProcessing() {  // All New AFP 09-19-22
     goertzelMagnitude1 = goertzel_mag(256, freq[ConfigData.CWOffset], 24000, float_buffer_L_CW);  //AFP 10-25-22
     goertzelMagnitude2 = goertzel_mag(256, freq[ConfigData.CWOffset], 24000, float_buffer_R_CW);  //AFP 10-25-22
     goertzelMagnitude = (goertzelMagnitude1 + goertzelMagnitude2) / 2;
-    //Combine Correlation and Gowetzel Coefficients
+    //Combine Correlation and Gowetzel Coefficients.  Tuning coefficient added.  Greg KF5N March 9, 2025
     combinedCoeff = static_cast<float32_t>(ConfigData.morseDecodeSensitivity) * aveCorrResult * goertzelMagnitude;
     //    Serial.printf("combinedCoeff = %f\n", combinedCoeff);  // Use this to tune decoder.
-    // ==========  Changed CW decode "lock" indicator
+    //  Changed CW decode "lock" indicator
     if (combinedCoeff > 50) {  // AFP 10-26-22
       tft.fillRect(700, 442, 15, 15, RA8875_GREEN);
     } else if (combinedCoeff < 50) {  // AFP 10-26-22
@@ -584,53 +632,6 @@ FASTRUN void DoGapHistogram(long gapLen) {
   }
   if (charIndex) {
     gapChar = charIndex;
-  }
-}
-
-
-/*****
-  Purpose: This function replaces the arm_max_float32() function that finds the maximum element in an array.
-           The histograms are "fuzzy" in the sense that dits and dahs "cluster" around a maximum value rather
-           than having a single max value. This algorithm looks at a given cell and the adds in the previous
-           (index - 1) and next (index + 1) cells to get the total for that index.
-
-  Parameter list:
-    int32_t *array         the base address of the array to search
-    int32_t elements       the number of elements of the array to examine
-    int32_t *maxCount      the largest clustered value found
-    int32_t *maxIndex      the index of the center of the cluster
-    int32_t *firstNonZero  the first cell that has a non-zero value
-    int32_t clusterSpread  tells how far previous and ahead elements are to be included in the measure.
-                            Must be an odd integer > 1.
-
-  Return value;
-    void
-*****/
-void JackClusteredArrayMax(int32_t *array, int32_t elements, int32_t *maxCount, int32_t *maxIndex, int32_t *firstNonZero, int32_t spread) {
-  int32_t i, j, clusteredIndex;
-  int32_t clusteredMax, temp;
-
-  *maxCount = '\0';  // Reset to empty
-  *maxIndex = '\0';
-
-  clusteredMax = 0;
-  clusteredIndex = -1;  // Now we can check for an error
-
-  for (i = spread; i < elements - spread; i++) {  // Start with 1 so we can look at the previous element's value
-    temp = 0;
-    for (j = i - spread; j <= i + spread; j++) {
-      temp += array[j];
-      ;  // Include adjacent elements
-    }
-
-    if (temp >= clusteredMax) {
-      clusteredMax = temp;
-      clusteredIndex = i;
-    }
-  }
-  if (clusteredIndex > 0) {
-    *maxCount = array[clusteredIndex];
-    *maxIndex = clusteredIndex;
   }
 }
 

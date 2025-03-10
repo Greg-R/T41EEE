@@ -305,9 +305,9 @@ void Process::ProcessIQData() {
         if (audioYPixel[k] < 0)
           audioYPixel[k] = 0;
       }
-      arm_max_f32(audioSpectBuffer, 1024, &audioMaxSquared, &AudioMaxIndex);  // AFP 09-18-22 Max value of squared abin magnitued in audio
+      arm_max_f32(audioSpectBuffer, 1024, &audioMaxSquared, &AudioMaxIndex);  // AFP 09-18-22 Max value of squared abin magnitude in audio
       audioMaxSquaredAve = .5 * audioMaxSquared + .5 * audioMaxSquaredAve;    //AFP 09-18-22Running averaged values
-//      DisplaydbM();
+      DisplaydbM();
 //      DisplayAGC();
     }
 

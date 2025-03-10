@@ -3,25 +3,18 @@
 
 //int micGainChoice;
 
-
+// This function sets the microphone gain and compressor parameters.  Greg KF5N March 9, 2025.
 void updateMic() {
 
-  //  This is using the compression after the kneeDB[0] only.
-  //  struct compressionCurve crv = { -6.0f, ConfigData.currentMicGain,           // margin, offset
-  //     {0.0f, -20.0f, -1000.0f, -1000.0f, -1000.0f},           // kneeDB[]
-  //     {  ConfigData.currentMicCompRatio, 1.0f, 1.0f, 1.0, 1.0} };   // compressionRatio
-
-  micGain.setGain_dB(ConfigData.currentMicGain);  // Set the microphone gain.
+  micGain.setGain_dB(ConfigData.micGain);  // Set the microphone gain.
 
   struct compressionCurve crv = { -3.0, 0.0,  // margin, offset
-                                                //   {0.0f, -7.0f, -10.0f, -1000.0f, -1000.0f},           // kneeDB[]
-                                  { 0.0, -10.0, ConfigData.currentMicThreshold, -1000.0f, -1000.0f },
-                                  //     {  100.0, 100.0f, 1.0f, 1.0, 1.0} };   // compressionRatio
-                                  { 10.0, ConfigData.currentMicCompRatio, 1.0f, 1.0, 1.0 } };
+                                  { 0.0, -10.0, ConfigData.micThreshold, -1000.0f, -1000.0f },  
+                                  { 10.0, ConfigData.micCompRatio, 1.0f, 1.0, 1.0 } };
 
   int16_t delaySize = 256;                    // Any power of 2, i.e., 256, 128, 64, etc.
   compressor1.setDelayBufferSize(delaySize);  // Improves transient response of compressor.
-  compressor1.setAttackReleaseSec(0.005f, 2.0f);
+  compressor1.setAttackReleaseSec(0.005f, 2.0f);  // Same as used in Tiny Ten by Bob W7PUA.
   compressor1.setCompressionCurve(&crv);
   compressor1.begin();
 }
@@ -146,19 +139,19 @@ void SetCompressionThreshold() {
   tft.setCursor(SECONDARY_MENU_X - 48, MENUS_Y + 1);
   tft.print("Comp Thresh dB:");
   tft.setCursor(SECONDARY_MENU_X + 195, MENUS_Y + 1);
-  tft.print(ConfigData.currentMicThreshold, 0);
+  tft.print(ConfigData.micThreshold, 0);
 
   while (true) {
     if (filterEncoderMove != 0) {
-      ConfigData.currentMicThreshold += ((float)filterEncoderMove);
-      if (ConfigData.currentMicThreshold < -60)
-        ConfigData.currentMicThreshold = -60;
-      else if (ConfigData.currentMicThreshold > 0)  // 100% max
-        ConfigData.currentMicThreshold = 0;
+      ConfigData.micThreshold += ((float)filterEncoderMove);
+      if (ConfigData.micThreshold < -60)
+        ConfigData.micThreshold = -60;
+      else if (ConfigData.micThreshold > 0)  // 100% max
+        ConfigData.micThreshold = 0;
 
       tft.fillRect(SECONDARY_MENU_X + 195, MENUS_Y, 80, CHAR_HEIGHT, RA8875_MAGENTA);
       tft.setCursor(SECONDARY_MENU_X + 195, MENUS_Y + 1);
-      tft.print(ConfigData.currentMicThreshold, 0);
+      tft.print(ConfigData.micThreshold, 0);
       filterEncoderMove = 0;
     }
     /*
@@ -197,19 +190,19 @@ void SetCompressionRatio() {
   tft.setCursor(SECONDARY_MENU_X - 48, MENUS_Y + 1);
   tft.print("Comp Ratio:");
   tft.setCursor(SECONDARY_MENU_X + 180, MENUS_Y + 1);
-  tft.print(ConfigData.currentMicCompRatio, 0);
+  tft.print(ConfigData.micCompRatio, 0);
 
   while (true) {
     if (filterEncoderMove != 0) {
-      ConfigData.currentMicCompRatio += ((float)filterEncoderMove * 1.0);
-      if (ConfigData.currentMicCompRatio > 1000)
-        ConfigData.currentMicCompRatio = 1000;
-      else if (ConfigData.currentMicCompRatio < 1)  // 100% max
-        ConfigData.currentMicCompRatio = 1;
+      ConfigData.micCompRatio += ((float)filterEncoderMove * 1.0);
+      if (ConfigData.micCompRatio > 1000)
+        ConfigData.micCompRatio = 1000;
+      else if (ConfigData.micCompRatio < 1)  // 100% max
+        ConfigData.micCompRatio = 1;
 
       tft.fillRect(SECONDARY_MENU_X + 180, MENUS_Y, 80, CHAR_HEIGHT, RA8875_MAGENTA);
       tft.setCursor(SECONDARY_MENU_X + 180, MENUS_Y + 1);
-      tft.print(ConfigData.currentMicCompRatio, 0);
+      tft.print(ConfigData.micCompRatio, 0);
       filterEncoderMove = 0;
     }
 menu = readButton(lastUsedTask);
@@ -220,7 +213,7 @@ menu = readButton(lastUsedTask);
     */
 
     if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
-      // ConfigData.ConfigData.currentMicCompRatio = ConfigData.currentMicCompRatio;
+      // ConfigData.ConfigData.micCompRatio = ConfigData.micCompRatio;
       updateMic();  // This updates the compression ratio and the threshold.
       eeprom.ConfigDataWrite();
       break;
@@ -247,17 +240,17 @@ void MicGainSet() {
   tft.setCursor(SECONDARY_MENU_X - 48, MENUS_Y + 1);
   tft.print("Mic Gain dB:");
   tft.setCursor(SECONDARY_MENU_X + 160, MENUS_Y + 1);
-  tft.print(ConfigData.currentMicGain, 1);
+  tft.print(ConfigData.micGain, 1);
   while (true) {
     if (filterEncoderMove != 0) {
-      ConfigData.currentMicGain += ((float)filterEncoderMove);
-      if (ConfigData.currentMicGain < -20)
-        ConfigData.currentMicGain = -20;
-      else if (ConfigData.currentMicGain > 20)  // 100% max
-        ConfigData.currentMicGain = 20;
+      ConfigData.micGain += ((float)filterEncoderMove);
+      if (ConfigData.micGain < -20)
+        ConfigData.micGain = -20;
+      else if (ConfigData.micGain > 20)  // 100% max
+        ConfigData.micGain = 20;
       tft.fillRect(SECONDARY_MENU_X + 160, MENUS_Y, 80, CHAR_HEIGHT, RA8875_MAGENTA);
       tft.setCursor(SECONDARY_MENU_X + 160, MENUS_Y + 1);
-      tft.print(ConfigData.currentMicGain, 1);
+      tft.print(ConfigData.micGain, 1);
       filterEncoderMove = 0;
     }
     /*
@@ -367,7 +360,7 @@ void SetCompressionRelease()
     delay(150L);
 
     if (val == MENU_OPTION_SELECT) {                             // Make a choice??
-      //ConfigData.ConfigData.currentMicCompRatio = ConfigData.currentMicCompRatio;
+      //ConfigData.ConfigData.micCompRatio = ConfigData.micCompRatio;
       EEPROMWrite();
 
       break;

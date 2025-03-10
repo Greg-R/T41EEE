@@ -867,7 +867,7 @@ FLASHMEM void setup() {
   //sgtl5000_1.adcHighPassFilterFreeze();
 
   updateMic();  // This updates the transmit signal chain settings.  Located in SSB_Exciter.cpp.
-
+  initializeAudioPaths();
   // Set up "Controlled Envelope Single Side Band" from the Open Audio Library.
   cessb1.setSampleRate_Hz(48000);
   cessb1.setGains(3.5f, 1.4f, 0.5f);  // gainIn, gainCompensate, gainOut
@@ -1313,5 +1313,7 @@ headphoneVolume.setGain(volumeLog[ConfigData.audioVolume]);
 //    Serial.printf("ConfigData.audioVolume = %d\n", ConfigData.audioVolume);
 //    Serial.printf("audioGainCompensate = %d\n", process.audioGainCompensate);
   }
+
+//  DisplaydbM();
 
 }  // end loop()

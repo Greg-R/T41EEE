@@ -9,6 +9,7 @@
 // SSB Options
 // RF Options
 // ConfigData Options
+// CalData Options
 
 #include "SDT.h"
 
@@ -110,14 +111,17 @@ void CalibrateOptions() {
 
     case 2:                                         // CW IQ Receive Cal - Gain and Phase
       cwcalibrater.DoReceiveCalibrate(0, false, false);  // This function was significantly revised.  KF5N August 16, 2023
+      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 3:                                         // CW Xmit Carrier calibration.
       cwcalibrater.DoXmitCarrierCalibrate(0, false, false);
+      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 4:                                         // CW IQ Transmit Cal - Gain and Phase  //AFP 2-21-23
       cwcalibrater.DoXmitCalibrate(0, false, false);  // This function was significantly revised.  KF5N August 16, 2023
+      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 5:                                         // SSB PA Cal
@@ -127,7 +131,7 @@ void CalibrateOptions() {
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-          eeprom.ConfigDataWrite();
+          eeprom.CalDataWrite();
           calibrateFlag = 0;
         }
       }
@@ -135,40 +139,47 @@ void CalibrateOptions() {
 
     case 6:                                         // SSB receive cal
       cwcalibrater.DoReceiveCalibrate(1, false, false);  // This function was significantly revised.  KF5N August 16, 2023
+      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 7:                                           // SSB Carrier Cal
       ssbcalibrater.DoXmitCarrierCalibrate(false, false);
+      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 8:                                          // SSB Transmit cal
       ssbcalibrater.DoXmitCalibrate(false, false);  // This function was significantly revised.  KF5N August 16, 2023
+      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 9:  // CW fully automatic radio calibration.
       cwcalibrater.RadioCal(false);
       calibrateFlag = 0;
+      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 10:  // CW full automatic calibration refinement.
       cwcalibrater.RadioCal(true);
       calibrateFlag = 0;
+      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 11:  // SSB fully automatic radio calibration.
       ssbcalibrater.RadioCal(false);
       calibrateFlag = 0;
+      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 12:  // SSB fully automatic calibration refinement.
       ssbcalibrater.RadioCal(true);
       calibrateFlag = 0;
+      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 13:  // dBm level cal.  Was choose CW calibration tone frequency.
 //      calibrater.SelectCalFreq();
 //      calibrateFlag = 0;
-      CalData.dBm_calibration = GetEncoderValueLive(0, 50, CalData.dBm_calibration, 1, (char *)"dBm Cal: ", false);
+      CalData.dBm_calibration = GetEncoderValueLive(0, 100, CalData.dBm_calibration, 1, (char *)"dBm Cal: ", false);
       if (CalData.dBm_calibration != freqCorrectionFactorOld) {
 //        si5351.set_correction(ConfigData.freqCorrectionFactor, SI5351_PLL_INPUT_XO);
         freqCorrectionFactorOld = CalData.dBm_calibration;
@@ -177,7 +188,7 @@ void CalibrateOptions() {
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X - 1, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT + 1, RA8875_BLACK);
-          eeprom.ConfigDataWrite();
+          eeprom.CalDataWrite();
           calibrateFlag = 0;
         }
       }
@@ -193,6 +204,7 @@ void CalibrateOptions() {
           calibrateFlag = 0;
         }
       }
+      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 15:  // Set DAC offset for SSB carrier cancellation.
@@ -205,6 +217,7 @@ void CalibrateOptions() {
           calibrateFlag = 0;
         }
       }
+      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 16:  // Calibrate buttons
@@ -213,6 +226,7 @@ void CalibrateOptions() {
       RedrawDisplayScreen();
       ShowFrequency();
       DrawFrequencyBarValue();
+      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 17:  // Set button repeat rate
@@ -221,7 +235,7 @@ void CalibrateOptions() {
       if (menu != MenuSelect::BOGUS_PIN_READ) {
         if (menu == MenuSelect::MENU_OPTION_SELECT) {
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-          eeprom.ConfigDataWrite();
+          eeprom.CalDataWrite();
           calibrateFlag = 0;
         }
       }
@@ -258,40 +272,44 @@ void CalibrateOptions() {
   switch (IQChoice) {
 
     case 0:  // Calibrate Frequency  - uses WWV
-      ConfigData.freqCorrectionFactor = GetEncoderValueLive(-200000, 200000, ConfigData.freqCorrectionFactor, increment, (char *)"Freq Cal: ", false);
-      if (ConfigData.freqCorrectionFactor != freqCorrectionFactorOld) {
-        si5351.set_correction(ConfigData.freqCorrectionFactor, SI5351_PLL_INPUT_XO);
-        freqCorrectionFactorOld = ConfigData.freqCorrectionFactor;
+      CalData.freqCorrectionFactor = GetEncoderValueLive(-200000, 200000, CalData.freqCorrectionFactor, increment, (char *)"Freq Cal: ", false);
+      if (CalData.freqCorrectionFactor != freqCorrectionFactorOld) {
+        si5351.set_correction(CalData.freqCorrectionFactor, SI5351_PLL_INPUT_XO);
+        freqCorrectionFactorOld = CalData.freqCorrectionFactor;
       }
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X - 1, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT + 1, RA8875_BLACK);
-          ConfigData.ConfigDataWrite();
+          CalData.ConfigDataWrite();
           calibrateFlag = false;
         }
       }
       break;
 
     case 1:  // CW PA Cal
-      ConfigData.CWPowerCalibrationFactor[ConfigData.currentBand] = GetEncoderValueLive(0.0, 1.0, ConfigData.CWPowerCalibrationFactor[ConfigData.currentBand], 0.01, (char *)"CW PA Cal: ", false);
-      ConfigData.powerOutCW[ConfigData.currentBand] = sqrt(ConfigData.transmitPowerLevel / 20.0) * ConfigData.CWPowerCalibrationFactor[ConfigData.currentBand];
+      CalData.CWPowerCalibrationFactor[ConfigData.currentBand] = GetEncoderValueLive(0.0, 1.0, CalData.CWPowerCalibrationFactor[ConfigData.currentBand], 0.01, (char *)"CW PA Cal: ", false);
+      ConfigData.powerOutCW[ConfigData.currentBand] = sqrt(ConfigData.transmitPowerLevel / 20.0) * CalData.CWPowerCalibrationFactor[ConfigData.currentBand];
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-          ConfigData.ConfigDataWrite();
+          eeprom.ConfigDataWrite();
+          eeprom.CalDataWrite();
           calibrateFlag = 0;
         }
       }
+      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 2:                                         // CW IQ Receive Cal - Gain and Phase
       cwcalibrater.DoReceiveCalibrate(0, false, false);  // This function was significantly revised.  KF5N August 16, 2023
+      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 3:                                         // CW IQ Transmit Cal - Gain and Phase  //AFP 2-21-23
       cwcalibrater.DoXmitCalibrate(0, false, false);  // This function was significantly revised.  KF5N August 16, 2023
+      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 4:  // SSB PA Cal
@@ -305,14 +323,18 @@ void CalibrateOptions() {
           calibrateFlag = 0;
         }
       }
+      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
+
       break;  // Missing break.  KF5N August 12, 2023
 
     case 5:                                         // SSB IQ Receive Cal - Gain and Phase
             cwcalibrater.DoReceiveCalibrate(1, false, false);  // This function was significantly revised.  KF5N August 16, 2023
+            eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break; 
 
     case 6:
       ssbcalibrater.DoXmitCalibrate(false, false);  // SSB Transmit cal
+      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 7:  //  CW fully automatic radio calibration.
@@ -338,7 +360,7 @@ void CalibrateOptions() {
     case 11:  // dBm level cal.  Was choose CW calibration tone frequency.
 //      calibrater.SelectCalFreq();
 //      calibrateFlag = 0;
-      ConfigData.dBm_calibration = GetEncoderValueLive(0, 50, ConfigData.dBm_calibration, 1, (char *)"dBm Cal: ", false);
+      ConfigData.dBm_calibration = GetEncoderValueLive(0, 100, ConfigData.dBm_calibration, 1, (char *)"dBm Cal: ", false);
       if (ConfigData.dBm_calibration != freqCorrectionFactorOld) {
 //        si5351.set_correction(ConfigData.freqCorrectionFactor, SI5351_PLL_INPUT_XO);
         freqCorrectionFactorOld = ConfigData.dBm_calibration;
@@ -404,7 +426,6 @@ void CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
 {
   // const char *cwChoices[]{ "Decode Sens", "CW Filter", "CW Offset", "WPM", "Sidetone Volume", "Key Type", "Paddle Flip", "Transmit Delay", "Cancel" };  // AFP 10-18-22
   std::string cwChoices[]{ "Decode Sens", "CW Filter", "CW Offset", "WPM", "Sidetone Volume", "Key Type", "Paddle Flip", "Transmit Delay", "Cancel" };  // AFP 10-18-22
-  std::string test = "bullshit";
   int CWChoice = 0;
   uint32_t morseDecodeSensitivityOld = 0;
   uint32_t increment = 10;
@@ -519,23 +540,58 @@ void AGCOptions() {
   ConfigData.ConfigDataWrite();    // ...save it
   UpdateAGCField();
 }
-*/
-
-
 void AGCOptions() {
 //  const char *AGCChoices[] = { "AGC Off", "AGC Long", "AGC Slow", "AGC Medium", "AGC Fast", "Cancel" };  // G0ORX (Added Long) September 5, 2023
   const char *AGCChoices[] = { "AGC Off", "AGC On", "Cancel" };  // AGC revised.  Greg KF5N February 26, 2025
 
 //  ConfigData.AGCMode = SubmenuSelect(AGCChoices, 6, ConfigData.AGCMode);  // G0ORX
     ConfigData.AGCMode = SubmenuSelect(AGCChoices, 3, ConfigData.AGCMode);  // AGC revised.  Greg KF5N February 26, 2025
-//      if (ConfigData.AGCMode == 5) {
+
   if (ConfigData.AGCMode == 2) {
     return;
   }
 SetAudioOperatingState(radioState);
-//  AGCPrep();         //
+
   eeprom.ConfigDataWrite();    // ...save it
   UpdateAGCField();
+}
+*/
+
+
+void AGCOptions() {
+  const char *AGCChoices[] = { "AGC On", "AGC Off", "AGC Threshold", "Cancel" };  // G0ORX (Added Long) September 5, 2023
+  int agcSet = 0;
+
+agcSet = SubmenuSelect(AGCChoices, 4, ConfigData.AGCMode);  // G0ORX
+
+
+  switch (agcSet) {
+    case 0:  // AGC On
+    ConfigData.AGCMode = true;
+    SetAudioOperatingState(radioState);
+    UpdateAGCField();
+      break;
+
+    case 1:  // AGC Off
+    ConfigData.AGCMode = false;
+    SetAudioOperatingState(radioState);
+    UpdateAGCField();
+      break;
+
+    case 2:  // Set AGC threshold
+//      ConfigData.AGCThreshold = static_cast<float32_t>(GetEncoderValue(-60, -20, ConfigData.AGCThreshold, 1, "AGC Threshold"));
+      ConfigData.AGCThreshold = GetEncoderValueLiveString(-60.0, -20.0, ConfigData.AGCThreshold, 1.0, "AGC Thr ", false);
+      initializeAudioPaths();
+      break;
+
+    case 4:  // Cancel
+      return;
+      break;
+
+    default:
+      break;
+  }
+    eeprom.ConfigDataWrite();
 }
 
 
@@ -1029,15 +1085,15 @@ void VFOSelect() {
 
 
 /*****
-  Purpose: Allow user to set current ConfigData values or restore default settings
+  Purpose: Allow user to set current user configuration values or restore default settings.
 
   Parameter list:
     void
 
   Return value
-    int           the user's choice
+    void
 *****/
-void ConfigDataOptions() {  // 0               1                2               3               4                  5                  6                  7                   8                  9
+void ConfigDataOptions() {  //           0               1                2               3               4                  5                  6                  7                  8              9           10
   const char *ConfigDataOpts[] = { "Save Current", "Load Defaults", "Get Favorite", "Set Favorite", "Copy Config->SD", "Copy SD->Config", "Config->Serial", "Default->Serial", "Stack->Serial", "SD->Serial", "Cancel" };
   int defaultOpt = 0;
   config_t tempConfig;     // A temporary config_t struct to copy ConfigData data into.
@@ -1113,35 +1169,35 @@ void ConfigDataOptions() {  // 0               1                2               
 
 
 /*****
-  Purpose: Allow user to set current ConfigData values or restore default settings
+  Purpose: Allow user to set restore calibration values or restore default settings.
 
   Parameter list:
     void
 
   Return value
-    int           the user's choice
+    void
 *****/
-void CalDataOptions() {  // 0               1                2               3               4                  5                  6                  7                   8                  9
+void CalDataOptions() {  //           0               1                2               3               4               5                  6               7          8          
   const char *CalDataOpts[] = { "Save Current", "Load Defaults", "Copy Cal->SD", "Copy SD->Cal", "Cal->Serial", "Default->Serial", "Stack->Serial", "SD->Serial", "Cancel" };
   int defaultOpt = 0;
-  calibration_t tempCal;     // A temporary config_t struct to copy ConfigData data into.
+  calibration_t tempCal;     // A temporary calibration_t struct to copy CalData data into.
   calibration_t defaultCal;  // The configuration defaults.
   defaultOpt = SubmenuSelect(CalDataOpts, 9, defaultOpt);
   switch (defaultOpt) {
-    case 0:  // Save current ConfigData struct to ConfigData non-volatile memory.
+    case 0:  // Save current CalData struct to ConfigData non-volatile memory.
       eeprom.CalDataWrite();
       break;
 
     case 1:
-      eeprom.CalDataDefaults();  // Restore defaults to ConfigData struct and refresh display.
+      eeprom.CalDataDefaults();  // Restore defaults to CalData struct and refresh display.
       break;
 
-    case 4:                                             // Copy ConfigData->SD.
+    case 2:                                             // Copy CalData->SD.
       EEPROM.get(CAL_BASE_ADDRESS + 4, tempCal);  // Read as one large chunk
       json.saveCalibration(calFilename, tempCal, true);    // Save ConfigData struct to SD
       break;
 
-    case 5:                                     // Copy SD->ConfigData
+    case 3:                                     // Copy SD->CalData
       json.loadCalibration(calFilename, CalData);  // Copy from SD to struct in active memory (on the stack) ConfigData.
       eeprom.CalDataWrite();                            // Write to ConfigData non-volatile memory.
       initUserDefinedStuff();                   // Various things must be initialized.  This is normally done in setup().  KF5N February 21, 2024
@@ -1151,10 +1207,10 @@ void CalDataOptions() {  // 0               1                2               3  
       RedrawDisplayScreen();  // Assume there are lots of changes and do a heavy-duty refresh.  KF5N August 7, 2023
       break;
 
-    case 6:  // CalData->Serial
+    case 4:  // CalData->Serial
       {
         Serial.println(F("\nBegin CalData from CalData"));
-        // Don't want to overwrite the stack.  Need a temporary struct, read the ConfigData data into that.
+        // Don't want to overwrite the stack.  Need a temporary struct, read the CalData data into that.
         calibration_t CalData_temp;
         EEPROM.get(CAL_BASE_ADDRESS + 4, CalData_temp);
         json.saveCalibration(calFilename, CalData_temp, false);  // Write the temporary struct to the serial monitor.
@@ -1162,19 +1218,19 @@ void CalDataOptions() {  // 0               1                2               3  
       }
       break;
 
-    case 7:  // Defaults->Serial
+    case 5:  // Defaults->Serial
       Serial.println(F("\nBegin CalData defaults"));
-      json.saveCalibration(calFilename, defaultCal, false);  // Write default ConfigData struct to the Serial monitor.
+      json.saveCalibration(calFilename, defaultCal, false);  // Write default CalData struct to the Serial monitor.
       Serial.println(F("\nEnd CalData defaults\n"));
       break;
 
-    case 8:  // Current->Serial
+    case 6:  // Current->Serial
       Serial.println(F("Begin CalData on the stack"));
-      json.saveCalibration(calFilename, CalData, false);  // Write current ConfigData struct to the Serial monitor.
+      json.saveCalibration(calFilename, CalData, false);  // Write current CalData struct to the Serial monitor.
       Serial.println(F("\nEnd CalData on the stack\n"));
       break;
 
-    case 9:  // SD CalData->Serial
+    case 7:  // SD CalData->Serial
       Serial.println(F("Begin CalData on the SD card"));
       json.printFile(calFilename);  // Write SD card CalData struct to the Serial monitor.
       Serial.println(F("End CalData on the SD card\n"));

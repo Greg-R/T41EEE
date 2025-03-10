@@ -289,15 +289,17 @@ struct maps {
 };
 extern struct maps myMapFiles[];
 
+// Configuration data structure.
 struct config_t {
 
   char versionSettings[10] = "T41EEE.9";  // This is required to be the first!  See EEPROMRead() function.
-  int AGCMode = 1;
+  bool AGCMode = true;
+  float32_t AGCThreshold = -40.0;
   int audioVolume = 30;  // 4 bytes
   int rfGainCurrent = 0;
   int rfGain[NUMBER_OF_BANDS]{ 0 };
   bool autoGain = false;
-  bool autoSpectrum = false;
+  bool autoSpectrum = true;
   int spectrumNoiseFloor = SPECTRUM_NOISE_FLOOR;       // 247  This is a constant.  Eliminate from this struct at next opportunity.
   uint32_t centerTuneStep = CENTER_TUNE_DEFAULT;       // JJP 7-3-23
   uint32_t fineTuneStep = FINE_TUNE_DEFAULT;           // JJP 7-3-23
@@ -311,7 +313,7 @@ struct config_t {
   int paddleDit = KEYER_DIT_INPUT_TIP;
   int paddleDah = KEYER_DAH_INPUT_RING;
   int decoderFlag = false;                // JJP 7-3-23
-  uint32_t morseDecodeSensitivity = 200;  // Greg KF5N February 19, 2025
+  uint32_t morseDecodeSensitivity = 1000;  // Greg KF5N February 19, 2025
   int keyType = STRAIGHT_KEY_OR_PADDLES;  // straight key = 0, keyer = 1  JJP 7-3-23
   int currentWPM = DEFAULT_KEYER_WPM;     // 4 bytes default = 15 JJP 7-3-23
   int CWOffset = 2;                       // Default is 750 Hz.
@@ -332,17 +334,11 @@ struct config_t {
 
   int equalizerRec[EQUALIZER_CELL_COUNT] = { 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100 };
   int equalizerXmt[EQUALIZER_CELL_COUNT] = { 0, 0, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 0, 0 };  // Provide equalizer optimized for SSB voice based on Neville's tests.  KF5N November 2, 2023
-  float currentMicThreshold = -15.0;                                                                              // 4 bytes       AFP 09-22-22
-  float currentMicCompRatio = 2.0;
+  float micThreshold = -15.0;                                                                              // 4 bytes       AFP 09-22-22
+  float micCompRatio = 5.0;
 //  float currentMicAttack = 0.1;
 //  float currentMicRelease = 0.1;
-  float currentMicGain = 0.0;  // Open Audio gain element.  Gain is in dB.
-//  int switchValues[18] = { 924, 870, 817,
-//                           769, 713, 669,
-//                           616, 565, 513,
-//                           459, 407, 356,
-//                           298, 242, 183,
-//                           131, 67, 10 };
+  float micGain = 0.0;  // Open Audio gain element.  Gain is in dB.
   float LPFcoeff = 0.0;                                                                     // 4 bytes
   float NR_PSI = 0.0;                                                                       // 4 bytes
   float NR_alpha = 0.95;                                                                    // 4 bytes
@@ -351,16 +347,6 @@ struct config_t {
   float pll_fmax = 4000.0;                                                                  // 4 bytes
   float powerOutCW[NUMBER_OF_BANDS] = { 0.035, 0.035, 0.035, 0.035, 0.035, 0.035, 0.035 };  // powerOutCW and powerOutSSB are derived from the TX power setting and calibration factors.
   float powerOutSSB[NUMBER_OF_BANDS] = { 0.035, 0.035, 0.035, 0.035, 0.035, 0.035, 0.035 };
-//  float CWPowerCalibrationFactor[NUMBER_OF_BANDS] =  { 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 };        // Increased to 0.04, was 0.019; KF5N February 20, 2024
-//  float SSBPowerCalibrationFactor[NUMBER_OF_BANDS] = { 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 };  // Increased to 0.04, was 0.008; KF5N February 21, 2024
- // float IQCWRXAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
-//  float IQCWRXPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-//  float IQCWAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
-//  float IQCWPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-//  float IQSSBRXAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
-//  float IQSSBRXPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };  
-//  float IQSSBAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
-//  float IQSSBPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
   uint32_t favoriteFreqs[13] = { 3560000, 3690000, 7030000, 7200000, 14060000, 14200000, 21060000, 21285000, 28060000, 28365000, 5000000, 10000000, 15000000 };
 
   //DB2OO, 23-AUG-23: Region 1 freqs (from https://qrper.com/qrp-calling-frequencies/)
@@ -371,8 +357,6 @@ struct config_t {
 #endif
 
 Sideband lastSideband[NUMBER_OF_BANDS] = {Sideband::LOWER, Sideband::LOWER, Sideband::UPPER, Sideband::UPPER, Sideband::UPPER, Sideband::UPPER, Sideband::UPPER};
-//Sideband lastSidebandSSB[NUMBER_OF_BANDS] = {Sideband::LOWER, Sideband::LOWER, Sideband::UPPER, Sideband::UPPER, Sideband::UPPER, Sideband::UPPER, Sideband::UPPER};
-
   uint32_t centerFreq = 7030000;  // 4 bytes
   // New user config data                                JJP 7-3-23
   char mapFileName[50] = MAP_FILE_NAME;
@@ -382,166 +366,16 @@ Sideband lastSideband[NUMBER_OF_BANDS] = {Sideband::LOWER, Sideband::LOWER, Side
   int sdCardPresent = 0;               //   JJP  7/18/23
   float myLong = MY_LON;
   float myLat = MY_LAT;
-//  int currentNoiseFloor[NUMBER_OF_BANDS]{ 0 };
-  int compressorFlag = 0;  // Compressor is currently deactivated.
+  bool compressorFlag = false;
   bool xmitEQFlag = false;
   bool receiveEQFlag = false;
-//  int calFreq = 0;                    // This is an index into an array of tone frequencies, for example:  {750, 3000}.  Default to 750 Hz. KF5N March 12, 2024
-//  int buttonThresholdPressed = 944;   // switchValues[0] + WIGGLE_ROOM
-//  int buttonThresholdReleased = 964;  // buttonThresholdPressed + WIGGLE_ROOM
-//  uint32_t buttonRepeatDelay = 300000;     // Increased to 300000 from 200000 to better handle cheap, wornout buttons.
-//#ifdef QSE2
-//  q15_t iDCoffsetCW[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-//  q15_t qDCoffsetCW[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-//  q15_t iDCoffsetSSB[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-//  q15_t qDCoffsetSSB[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-//  q15_t dacOffsetCW = 1500;  // This must be "tuned" for each radio and/or Audio Adapter board.
-//  q15_t dacOffsetSSB = 1500;  // This must be "tuned" for each radio and/or Audio Adapter board.
-//#endif
-//  bool CWradioCalComplete = false;
-//  bool SSBradioCalComplete = false;
   bool cessb = false;
-//  float32_t dBm_calibration = 22.0;  // This parameter is adjusted in the calibration menu.
 };
 
 extern struct config_t ConfigData;
 extern config_t defaultConfig;
-extern config_t ConfigData_temp;
 
-
-/*
-
-struct configData_t {
-
-  char versionSettings[10] = "T41EEE.9";  // This is required to be the first!  See EEPROMRead() function.
-  int AGCMode = 1;
-  int audioVolume = 30;  // 4 bytes
-  int rfGainCurrent = 0;
-  int rfGain[NUMBER_OF_BANDS]{ 0 };
-  bool autoGain = false;
-  bool autoSpectrum = false;
-  int spectrumNoiseFloor = SPECTRUM_NOISE_FLOOR;       // 247  This is a constant.  Eliminate from this struct at next opportunity.
-  uint32_t centerTuneStep = CENTER_TUNE_DEFAULT;       // JJP 7-3-23
-  uint32_t fineTuneStep = FINE_TUNE_DEFAULT;           // JJP 7-3-23
-  float32_t transmitPowerLevel = DEFAULT_POWER_LEVEL;  // Changed from int to float; Greg KF5N February 12, 2024
-  RadioMode xmtMode = RadioMode::SSB_MODE;             //
-  AudioState audioOut = AudioState::SPEAKER;                       // Default audio output is speaker.
-  int nrOptionSelect = 0;                              // 1 byte
-  int currentScale = 1;
-  long spectrum_zoom = SPECTRUM_ZOOM_2;
-  int CWFilterIndex = 5;                // Off
-  int paddleDit = KEYER_DIT_INPUT_TIP;
-  int paddleDah = KEYER_DAH_INPUT_RING;
-  int decoderFlag = false;                // JJP 7-3-23
-  uint32_t morseDecodeSensitivity = 200;  // Greg KF5N February 19, 2025
-  int keyType = STRAIGHT_KEY_OR_PADDLES;  // straight key = 0, keyer = 1  JJP 7-3-23
-  int currentWPM = DEFAULT_KEYER_WPM;     // 4 bytes default = 15 JJP 7-3-23
-  int CWOffset = 2;                       // Default is 750 Hz.
-  int sidetoneVolume = 40;                // 4 bytes
-  uint32_t cwTransmitDelay = 1000;
-  int activeVFO = 0;                // 2 bytes
-  int currentBand = STARTUP_BAND;   // 4 bytes   JJP 7-3-23
-  int currentBandA = STARTUP_BAND;  // 4 bytes   JJP 7-3-23
-  int currentBandB = STARTUP_BAND;  // 4 bytes   JJP 7-3-23
-
-  //DB2OO, 23-AUG-23 7.1MHz for Region 1
-#if defined(ITU_REGION) && ITU_REGION == 1
-  uint32_t currentFreqA = 7100000;
-#else
-  uint32_t currentFreqA = 7200000;
-#endif
-  uint32_t currentFreqB = 7030000;
-  //DB2OO, 23-AUG-23: with TCXO needs to be 0
-#ifdef TCXO_25MHZ
-  int freqCorrectionFactor = 0;  //68000;
-#else
-  //Conventional crystal with freq offset needs a correction factor
-  int freqCorrectionFactor = 100000;
-#endif
-
-  int equalizerRec[EQUALIZER_CELL_COUNT] = { 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100 };
-  int equalizerXmt[EQUALIZER_CELL_COUNT] = { 0, 0, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 0, 0 };  // Provide equalizer optimized for SSB voice based on Neville's tests.  KF5N November 2, 2023
-  float currentMicThreshold = -15.0;                                                                              // 4 bytes       AFP 09-22-22
-  float currentMicCompRatio = 2.0;
-//  float currentMicAttack = 0.1;
-//  float currentMicRelease = 0.1;
-  float currentMicGain = 0.0;  // Open Audio gain element.  Gain is in dB.
-  int switchValues[18] = { 924, 870, 817,
-                           769, 713, 669,
-                           616, 565, 513,
-                           459, 407, 356,
-                           298, 242, 183,
-                           131, 67, 10 };
-  float LPFcoeff = 0.0;                                                                     // 4 bytes
-  float NR_PSI = 0.0;                                                                       // 4 bytes
-  float NR_alpha = 0.95;                                                                    // 4 bytes
-  float NR_beta = 0.85;                                                                     // 4 bytes
-  float omegaN = 200.0;                                                                     // 4 bytes
-  float pll_fmax = 4000.0;                                                                  // 4 bytes
-  float powerOutCW[NUMBER_OF_BANDS] = { 0.035, 0.035, 0.035, 0.035, 0.035, 0.035, 0.035 };  // powerOutCW and powerOutSSB are derived from the TX power setting and calibration factors.
-  float powerOutSSB[NUMBER_OF_BANDS] = { 0.035, 0.035, 0.035, 0.035, 0.035, 0.035, 0.035 };
-  float CWPowerCalibrationFactor[NUMBER_OF_BANDS] =  { 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 };        // Increased to 0.04, was 0.019; KF5N February 20, 2024
-  float SSBPowerCalibrationFactor[NUMBER_OF_BANDS] = { 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 };  // Increased to 0.04, was 0.008; KF5N February 21, 2024
-  float IQCWRXAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
-  float IQCWRXPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-  float IQCWAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
-  float IQCWPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-  float IQSSBRXAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
-  float IQSSBRXPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };  
-  float IQSSBAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
-  float IQSSBPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-  uint32_t favoriteFreqs[13] = { 3560000, 3690000, 7030000, 7200000, 14060000, 14200000, 21060000, 21285000, 28060000, 28365000, 5000000, 10000000, 15000000 };
-
-  //DB2OO, 23-AUG-23: Region 1 freqs (from https://qrper.com/qrp-calling-frequencies/)
-#if defined(ITU_REGION) && ITU_REGION == 1
-  uint32_t lastFrequencies[NUMBER_OF_BANDS][2] = { { 3690000, 3560000 }, { 7090000, 7030000 }, { 14285000, 14060000 }, { 18130000, 18096000 }, { 21285000, 21060000 }, { 24950000, 24906000 }, { 28365000, 28060000 } };
-#else
-  uint32_t lastFrequencies[NUMBER_OF_BANDS][2] = { { 3985000, 3560000 }, { 7200000, 7030000 }, { 14285000, 14060000 }, { 18130000, 18096000 }, { 21385000, 21060000 }, { 24950000, 24906000 }, { 28385000, 28060000 } };
-#endif
-
-Sideband lastSideband[NUMBER_OF_BANDS] = {Sideband::LOWER, Sideband::LOWER, Sideband::UPPER, Sideband::UPPER, Sideband::UPPER, Sideband::UPPER, Sideband::UPPER};
-//Sideband lastSidebandSSB[NUMBER_OF_BANDS] = {Sideband::LOWER, Sideband::LOWER, Sideband::UPPER, Sideband::UPPER, Sideband::UPPER, Sideband::UPPER, Sideband::UPPER};
-
-  uint32_t centerFreq = 7030000;  // 4 bytes
-  // New user config data                                JJP 7-3-23
-  char mapFileName[50] = MAP_FILE_NAME;
-  char myTimeZone[10] = MY_TIMEZONE;
-  int separationCharacter = (int)'.';  // JJP 7/25/23
-  int paddleFlip = PADDLE_FLIP;        // 0 = right paddle = DAH, 1 = DIT
-  int sdCardPresent = 0;               //   JJP  7/18/23
-  float myLong = MY_LON;
-  float myLat = MY_LAT;
-  int currentNoiseFloor[NUMBER_OF_BANDS]{ 0 };
-  int compressorFlag = 0;  // Compressor is currently deactivated.
-  bool xmitEQFlag = false;
-  bool receiveEQFlag = false;
-//  int calFreq = 0;                    // This is an index into an array of tone frequencies, for example:  {750, 3000}.  Default to 750 Hz. KF5N March 12, 2024
-  int buttonThresholdPressed = 944;   // switchValues[0] + WIGGLE_ROOM
-  int buttonThresholdReleased = 964;  // buttonThresholdPressed + WIGGLE_ROOM
-  uint32_t buttonRepeatDelay = 300000;     // Increased to 300000 from 200000 to better handle cheap, wornout buttons.
-#ifdef QSE2
-  q15_t iDCoffsetCW[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-  q15_t qDCoffsetCW[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-  q15_t iDCoffsetSSB[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-  q15_t qDCoffsetSSB[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-  q15_t dacOffsetCW = 1500;  // This must be "tuned" for each radio and/or Audio Adapter board.
-  q15_t dacOffsetSSB = 1500;  // This must be "tuned" for each radio and/or Audio Adapter board.
-#endif
-  bool CWradioCalComplete = false;
-  bool SSBradioCalComplete = false;
-  bool cessb = false;
-  float32_t dBm_calibration = 22.0;  // This parameter is adjusted in the calibration menu.
-};
-
-extern struct configData_t ConfigData;
-extern struct configData_t defaultConfigData;
-extern configData_t ConfigData_temp;
-
-//extern struct config_t ConfigData;
-//extern config_t defaultConfig;
-//extern config_t ConfigData_temp;
-*/
-
+// Calibration data structure.
 struct calibration_t {
 
 #ifdef TCXO_25MHZ
@@ -558,8 +392,6 @@ struct calibration_t {
                            298, 242, 183,
                            131, 67, 10 };
 
-//  float powerOutCW[NUMBER_OF_BANDS] = { 0.035, 0.035, 0.035, 0.035, 0.035, 0.035, 0.035 };  // powerOutCW and powerOutSSB are derived from the TX power setting and calibration factors.
-//  float powerOutSSB[NUMBER_OF_BANDS] = { 0.035, 0.035, 0.035, 0.035, 0.035, 0.035, 0.035 };
   float CWPowerCalibrationFactor[NUMBER_OF_BANDS] =  { 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 };        // Increased to 0.04, was 0.019; KF5N February 20, 2024
   float SSBPowerCalibrationFactor[NUMBER_OF_BANDS] = { 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 };  // Increased to 0.04, was 0.008; KF5N February 21, 2024
   float IQCWRXAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
@@ -1150,6 +982,7 @@ float GetEncoderValueLiveString(float minValue, float maxValue, float startValue
 q15_t GetEncoderValueLiveQ15t(int minValue, int maxValue, int startValue, int increment, char prompt[], bool left);
 void GetFavoriteFrequency();
 float HaversineDistance(float dxLat, float dxLon);
+void initializeAudioPaths();  // Greg KF5N March 9, 2025
 void InitializeDataArrays();
 int InitializeSDCard();
 void InitFilterMask();
@@ -1159,7 +992,7 @@ void initTempMon(uint16_t freq, uint32_t lowAlarmTemp, uint32_t highAlarmTemp, u
 void initUserDefinedStuff();  // KF5N February 21, 2024
 void IQPhaseCorrection(float32_t *I_buffer, float32_t *Q_buffer, float32_t factor, uint32_t blocksize);
 float32_t Izero(float32_t x);
-void JackClusteredArrayMax(int32_t *array, int32_t elements, int32_t *maxCount, int32_t *maxIndex, int32_t *firstDit, int32_t spread);
+//void JackClusteredArrayMax(int32_t *array, int32_t elements, int32_t *maxCount, int32_t *maxIndex, int32_t *firstDit, int32_t spread);
 void Kim1_NR();
 void KeyOn();
 void KeyRingOn();

@@ -100,11 +100,11 @@ FLASHMEM void JSON::loadConfiguration(const char *filename, config_t &ConfigData
   for (int i = 0; i < 14; i++) ConfigData.equalizerRec[i] = doc["equalizerRec"][i];
   for (int i = 0; i < 14; i++) ConfigData.equalizerXmt[i] = doc["equalizerXmt"][i];
   ConfigData.equalizerXmt[0] = doc["equalizerXmt"][0];
-  ConfigData.currentMicThreshold = doc["currentMicThreshold"];
-  ConfigData.currentMicCompRatio = doc["currentMicCompRatio"];
+  ConfigData.micThreshold = doc["micThreshold"];
+  ConfigData.micCompRatio = doc["micCompRatio"];
   //ConfigData.currentMicAttack = doc["currentMicAttack"];
   //ConfigData.currentMicRelease = doc["currentMicRelease"];
-  ConfigData.currentMicGain = doc["currentMicGain"];
+  ConfigData.micGain = doc["micGain"];
 //  for (int i = 0; i < 18; i++) ConfigData.switchValues[i] = doc["switchValues"][i];
   ConfigData.LPFcoeff = doc["LPFcoeff"];
   ConfigData.NR_PSI = doc["NR_PSI"];
@@ -220,11 +220,11 @@ FLASHMEM void JSON::saveConfiguration(const char *filename, const config_t &Conf
 //  doc["freqCorrectionFactor"] = ConfigData.freqCorrectionFactor;
   for (int i = 0; i < 14; i++) doc["equalizerRec"][i] = ConfigData.equalizerRec[i];
   for (int i = 0; i < 14; i++) doc["equalizerXmt"][i] = ConfigData.equalizerXmt[i];
-  doc["currentMicThreshold"] = ConfigData.currentMicThreshold;
-  doc["currentMicCompRatio"] = ConfigData.currentMicCompRatio;
+  doc["micThreshold"] = ConfigData.micThreshold;
+  doc["micCompRatio"] = ConfigData.micCompRatio;
 //  doc["currentMicAttack"] = ConfigData.currentMicAttack;
 //  doc["currentMicRelease"] = ConfigData.currentMicRelease;
-  doc["currentMicGain"] = ConfigData.currentMicGain;
+  doc["micGain"] = ConfigData.micGain;
 //  for (int i = 0; i < 18; i++) doc["switchValues"][i] = ConfigData.switchValues[i];
   doc["LPFcoeff"] = ConfigData.LPFcoeff;
   doc["NR_PSI"] = ConfigData.NR_PSI;
@@ -354,6 +354,7 @@ FLASHMEM void JSON::loadCalibration(const char *filename, calibration_t &CalData
   #endif
   CalData.CWradioCalComplete = doc["CWradioCalComplete"] | false;
   CalData.SSBradioCalComplete = doc["SSBradioCalComplete"] | false;
+  CalData.dBm_calibration = doc["dBm_calibration"];
 
   // Close the file (Curiously, File's destructor doesn't close the file)
   file.close();
@@ -361,7 +362,7 @@ FLASHMEM void JSON::loadCalibration(const char *filename, calibration_t &CalData
 
 
 // Saves the configuration CalData to a file or writes to serial.  toFile == true for file, false for serial.
-FLASHMEM void JSON::saveCalibration(const char *filename, const calibration_t &ConfigData, bool toFile) {
+FLASHMEM void JSON::saveCalibration(const char *filename, const calibration_t &CalData, bool toFile) {
 
   // Allocate a temporary JsonDocument
   // Don't forget to change the capacity to match your requirements.
@@ -402,6 +403,7 @@ FLASHMEM void JSON::saveCalibration(const char *filename, const calibration_t &C
   #endif
   doc["CWradioCalComplete"] = CalData.CWradioCalComplete;
   doc["SSBradioCalComplete"] = CalData.SSBradioCalComplete;
+  doc["dBm_calibration"] = CalData.dBm_calibration;
 
   if (toFile) {
     // Delete existing file, otherwise ConfigData is appended to the file

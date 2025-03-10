@@ -5,13 +5,11 @@
 const float sample_rate_Hz = 48000.0f;
 const int audio_block_samples = 128;  // Always 128
 AudioSettings_F32 audio_settings(sample_rate_Hz, audio_block_samples);
-AudioInputI2SQuad i2s_quadIn;  // 4 inputs/outputs available only in Teensy audio not Open Audio library.
+AudioInputI2SQuad i2s_quadIn;  // 4 inputs/outputs available only in Teensy audio and not Open Audio library.
 AudioOutputI2SQuad i2s_quadOut;
 
 // Transmitter
 AudioControlSGTL5000 sgtl5000_1;  // Controller for the Teensy Audio Adapter.
-// It is unclear that this is actually required.
-//AudioControlSGTL5000 sgtl5000_2;  // This is not a 2nd Audio Adapter.  It is I2S to the PCM1808 (ADC I and Q receiver in) and PCM5102 (DAC audio out).
 AudioConvert_I16toF32 int2Float1;             // Converts Int16 to Float.  See class in AudioStream_F32.h
 AudioEffectGain_F32 micGain(audio_settings);  // Microphone gain control.
 AudioEffectCompressor2_F32 compressor1;       // Open Audio Compressor
@@ -101,6 +99,7 @@ AudioConnection patchCord26(float2Int4, 0, i2s_quadOut, 1);  // Headphone
 
 void controlAudioOut(AudioState audioState, bool mute);
 
+// Configure basic compressor macro.  This is used in the audio path as a form of AGC.
 void initializeAudioPaths() {
   // pc1 is global pointer to compressor2_1 object for receiver AGC
   int16_t delaySize = 256;  // Any power of 2, i.e., 256, 128, 64, etc.
@@ -113,7 +112,7 @@ void initializeAudioPaths() {
   // an input -10 dB where it is almost limited, with an increase of output level of 1 dB
   // for a 10 dB increase in input level. The output level at full input is 1 dB below
   // full output.
-  basicCompressorBegin(pc1, -40, 10.0f);
+  basicCompressorBegin(pc1, ConfigData.AGCThreshold, 10.0f);
 }
 
 
@@ -148,11 +147,8 @@ void SetAudioOperatingState(RadioState operatingState) {
     case RadioState::SAM_RECEIVE_STATE:
     case RadioState::CW_RECEIVE_STATE:
       SampleRate = SAMPLE_RATE_192K;
-//      SetI2SFreq(SR[SampleRate].rate);
       InitializeDataArrays();  // I2S sample rate set in this function.
       sgtl5000_1.muteLineout();
-
-      initializeAudioPaths();
       // Deactivate microphone and 1 kHz test tone.
       mixer1.gain(0, 0.0);
       mixer1.gain(1, 0.0);
@@ -171,16 +167,17 @@ void SetAudioOperatingState(RadioState operatingState) {
       connect15.disconnect();
       connect16.disconnect();
       // Connect audio paths
-      patchCord25.connect();
-      patchCord26.connect();
       patchCord1.connect();
       patchCord2.connect();
       patchCord3.connect();
+      patchCord25.connect();
+      patchCord26.connect();
       // Configure audio compressor (AGC)
-      if (ConfigData.AGCMode == 1) {  // Activate compressor2_1 path.
+      if (ConfigData.AGCMode == true) {  // Activate compressor2_1 path.
         switch4.setChannel(0);
         mixer4.gain(0, 1.0);
         mixer4.gain(1, 0.0);
+        initializeAudioPaths();
       } else {
         switch4.setChannel(1);  // Bypass compressor2_1.
         mixer4.gain(0, 0.0);
