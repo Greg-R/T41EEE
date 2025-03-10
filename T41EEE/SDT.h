@@ -239,13 +239,6 @@ const int RESET = 0;  // QSD2/QSE2 reset pin
 #define SAMPLE_RATE_281K 16  // ??
 #define SAMPLE_RATE_353K 17
 
-//#define DEMOD_MIN 0
-//#define DEMOD_USB 0
-//#define DEMOD_LSB 1
-//#define DEMOD_AM 2
-//#define DEMOD_SAM 3
-//#define DEMOD_MAX 3  // AFP 11-03-22
-//#define DEMOD_IQ 4
 #define HAM_BAND 1
 
 #define BUFFER_SIZE 128

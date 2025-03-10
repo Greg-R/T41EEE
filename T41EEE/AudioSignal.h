@@ -182,7 +182,7 @@ void SetAudioOperatingState(RadioState operatingState) {
         switch4.setChannel(1);  // Bypass compressor2_1.
         mixer4.gain(0, 0.0);
         mixer4.gain(1, 1.0);
-        compGain.setGain_dB(27.0);  // Set the gain equal to the compressor2_1 nominal gain (below threshold).
+        compGain.setGain_dB(30.0);  // Set the gain equal to the compressor2_1 nominal gain (below threshold).
       }
 
       // QSD connected and enabled
@@ -191,6 +191,7 @@ void SetAudioOperatingState(RadioState operatingState) {
 
       speakerVolume.setGain(volumeLog[ConfigData.audioVolume]);    // Set volume because sidetone may have changed it.
       headphoneVolume.setGain(volumeLog[ConfigData.audioVolume]);  // Set volume because sidetone may have changed it.
+      sgtl5000_1.volume(0.8);  // Restore headphone volume after CW sidetone reduction.
 
       controlAudioOut(ConfigData.audioOut, false);  // Configure audio out; don't mute all.
 
@@ -311,7 +312,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       controlAudioOut(ConfigData.audioOut, false);  // FT8 audio should be headphone only.
       sgtl5000_1.unmuteLineout();
 
-      sgtl5000_1.volume(0.3);  // This is for sidetone in the headphone output.  Hardcoding for now.
+      sgtl5000_1.volume(0.3);  // This is for scaling the sidetone in the headphone output.
 
       patchCord25.disconnect();  // Disconnect headphone, which is shared with I and Q transmit.
       patchCord26.disconnect();
