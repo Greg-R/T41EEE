@@ -538,6 +538,7 @@ void Button::ButtonBandIncrease() {
   DrawFrequencyBarValue();
   UpdateDecoderField();
   FilterSetSSB();
+  Serial.printf("bands2.bands[ConfigData.currentBand].mode = %d\n", bands2.bands[ConfigData.currentBand].mode);
 }
 
 
@@ -855,47 +856,47 @@ void Button::ButtonSelectSideband() {
   Return value:
     void
 *****/
-void Button::ButtonMode()  //====== Changed AFP 10-05-22  =================
+void Button::ButtonMode()  //  Greg KF5N March 11, 2025
 {
-  //   Serial.printf("xmtMode = %d\n", ConfigData.xmtMode);
   // Toggle modes:
   switch (ConfigData.xmtMode) {
-    case RadioMode::SSB_MODE:
-      ConfigData.xmtMode = RadioMode::CW_MODE;
-      radioState = RadioState::CW_RECEIVE_STATE;
-      bands[ConfigData.currentBand].mode = RadioMode::CW_MODE;
-      bands[ConfigData.currentBand].sideband = ConfigData.lastSideband[ConfigData.currentBand];
-      break;
+
     case RadioMode::CW_MODE:  // Toggle the current mode
+      ConfigData.xmtMode = RadioMode::SSB_MODE;
+      radioState = RadioState::SSB_RECEIVE_STATE;
+      bands2.bands[ConfigData.currentBand].mode = RadioMode::SSB_MODE;
+      bands2.bands[ConfigData.currentBand].sideband = ConfigData.lastSideband[ConfigData.currentBand];
+      break;
+    case RadioMode::SSB_MODE:
       ConfigData.xmtMode = RadioMode::FT8_MODE;
       radioState = RadioState::FT8_RECEIVE_STATE;
-      bands[ConfigData.currentBand].mode = RadioMode::FT8_MODE;
-      bands[ConfigData.currentBand].sideband = Sideband::UPPER;
+      bands2.bands[ConfigData.currentBand].mode = RadioMode::FT8_MODE;
+      bands2.bands[ConfigData.currentBand].sideband = Sideband::UPPER;
       break;
     case RadioMode::FT8_MODE:  // Toggle the current mode
       ConfigData.xmtMode = RadioMode::AM_MODE;
       radioState = RadioState::AM_RECEIVE_STATE;
-      bands[ConfigData.currentBand].mode = RadioMode::AM_MODE;
-      bands[ConfigData.currentBand].sideband = Sideband::BOTH_AM;
+      bands2.bands[ConfigData.currentBand].mode = RadioMode::AM_MODE;
+      bands2.bands[ConfigData.currentBand].sideband = Sideband::BOTH_AM;
       break;
     case RadioMode::AM_MODE:  // Toggle the current mode
       ConfigData.xmtMode = RadioMode::SAM_MODE;
       radioState = RadioState::SAM_RECEIVE_STATE;
-      bands[ConfigData.currentBand].mode = RadioMode::SAM_MODE;
-      bands[ConfigData.currentBand].sideband = Sideband::BOTH_SAM;
+      bands2.bands[ConfigData.currentBand].mode = RadioMode::SAM_MODE;
+      bands2.bands[ConfigData.currentBand].sideband = Sideband::BOTH_SAM;
       Serial.printf("Selected SAM\n");
       break;
     case RadioMode::SAM_MODE:  // Toggle the current mode
-      ConfigData.xmtMode = RadioMode::SSB_MODE;
-      radioState = RadioState::SSB_RECEIVE_STATE;
-      bands[ConfigData.currentBand].mode = RadioMode::SSB_MODE;
-      bands[ConfigData.currentBand].sideband = ConfigData.lastSideband[ConfigData.currentBand];
+      ConfigData.xmtMode = RadioMode::CW_MODE;
+      radioState = RadioState::CW_RECEIVE_STATE;
+      bands2.bands[ConfigData.currentBand].mode = RadioMode::CW_MODE;
+      bands2.bands[ConfigData.currentBand].sideband = ConfigData.lastSideband[ConfigData.currentBand];
       break;
     default:
       break;
   }
 
-  SetupMode(bands[ConfigData.currentBand].mode, bands[ConfigData.currentBand].sideband);  // Setup mode and sideband(s);
+  SetupMode(bands2.bands[ConfigData.currentBand].mode, bands2.bands[ConfigData.currentBand].sideband);  // Setup mode and sideband(s);
   SetFreq();  // Required due to RX LO shift from CW to SSB modes.  KF5N
 
   // Why is all of this other stuff necessary?
@@ -924,6 +925,8 @@ void Button::ButtonMode()  //====== Changed AFP 10-05-22  =================
   } else BandInformation();
   DrawBandWidthIndicatorBar();
   FilterSetSSB();
+  eeprom.BandsWrite();  // Write the bands array to EEPROM.
+  Serial.printf("bands[ConfigData.currentBand].mode = %d\n", bands2.bands[ConfigData.currentBand].mode);
 }
 
 

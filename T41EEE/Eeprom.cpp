@@ -6,7 +6,7 @@
            Skip 4 bytes to allow for the struct size variable.
 
   Parameter list:
-    struct ConfigData       pointer to the EEPROM structure
+    none
 
   Return value;
     void
@@ -49,7 +49,7 @@ void Eeprom::ConfigDataWriteSize(int structSize) {
            Skip 4 bytes to allow for the struct size variable.
 
   Parameter list:
-    struct ConfigData       pointer to the EEPROM structure
+   none
 
   Return value;
     void
@@ -88,22 +88,22 @@ void Eeprom::CalDataWriteSize(int structSize) {
 
 
 /*****
-  Purpose: To save the configuration data (working variables) to EEPROM.
+  Purpose: To save the bands array to EEPROM.
            Skip 4 bytes to allow for the struct size variable.
 
   Parameter list:
-    struct ConfigData       pointer to the EEPROM structure
+    none
 
   Return value;
     void
 *****/
 void Eeprom::BandsWrite() {
-  EEPROM.put(BANDS_BASE_ADDRESS + 4, CalData);
+  EEPROM.put(BANDS_BASE_ADDRESS + 4, bands2);
 }
 
 
 /*****
-  Purpose: This is nothing more than an alias for EEPROM.get(CAL_BASE_ADDRESS + 4, ConfigData).
+  Purpose: This is nothing more than an alias for EEPROM.get(BANDS_BASE_ADDRESS + 4, bands[NUMBER_OF_BANDS]).
 
   Parameter list:
   None
@@ -112,7 +112,7 @@ void Eeprom::BandsWrite() {
     void
 *****/
 void Eeprom::BandsRead() {
-  EEPROM.get(BANDS_BASE_ADDRESS + 4, CalData);  // Read as one large chunk
+  EEPROM.get(BANDS_BASE_ADDRESS + 4, bands2);  // Read as one large chunk
 }
 
 
@@ -387,6 +387,8 @@ void Eeprom::EEPROMStartup() {
   int ConfigDataStackSize;
   int CalDataEEPROMSize;
   int CalDataStackSize;
+  int BandsEEPROMSize;
+  int BandsStackSize;
 
   //  Determine if the struct ConfigData is compatible (same size) with the one stored in EEPROM.
 
@@ -395,6 +397,10 @@ void Eeprom::EEPROMStartup() {
 
   CalDataEEPROMSize = EEPROMReadSize(CAL_BASE_ADDRESS);
   CalDataStackSize = sizeof(CalData);
+
+  BandsEEPROMSize = EEPROMReadSize(BANDS_BASE_ADDRESS);
+  BandsStackSize = sizeof(band) * NUMBER_OF_BANDS;
+  Serial.printf("BandsStackSize = %d\n", BandsStackSize);
 
   // For minor revisions to the code, we don't want to overwrite the EEPROM.
   // We will assume the switch matrix and other items are calibrated or configured by the user, and are not to be lost.
@@ -405,12 +411,13 @@ void Eeprom::EEPROMStartup() {
   // If all else fails, then the user should execute a FLASH erase.  The configuration and calibration can then be read from the SD card.
 
   // The case where struct sizes are the same, indicating no changes to the struct.  Nothing more to do, return.
-  if (ConfigDataEEPROMSize == ConfigDataStackSize and CalDataEEPROMSize == CalDataStackSize) {
+  if (ConfigDataEEPROMSize == ConfigDataStackSize and CalDataEEPROMSize == CalDataStackSize and BandsEEPROMSize == BandsStackSize) {
 //    Serial.printf("Got to stack versus EEPROM comparison\n");
 //    Serial.printf("ConfigDataEEPROMSize = %d ConfigDataStackSize = %d\n", ConfigDataEEPROMSize, ConfigDataStackSize);
 //    Serial.printf("CalDataEEPROMSize = %d CalDataStackSize = %d\n", CalDataEEPROMSize, CalDataStackSize);
     ConfigDataRead();  // Read the ConfigData into active memory.
     CalDataRead();  // Read the CalData into active memory.
+    BandsRead();    // Read the bands array into active memory.
     return;        // Done, begin radio operation.
   }
 
@@ -422,4 +429,8 @@ void Eeprom::EEPROMStartup() {
   ConfigDataWrite();  // Write the ConfigData struct to non-volatile memory.
   CalDataWriteSize(CalDataStackSize);  // Write the size of the struct to EEPROM.
   CalDataWrite();  // Write the ConfigData struct to non-volatile memory.
+  BandsWriteSize(BandsStackSize);  // Write the size of the bands array to EEPROM.
+  BandsWrite();  // Write the bands array to non-volatile memory.
+
+//  Serial.printf("")
 }

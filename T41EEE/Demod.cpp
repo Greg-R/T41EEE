@@ -35,86 +35,88 @@ void SetupMode(RadioMode mode, Sideband sideband) {
 // First, determine flow and fhigh, which are the audio filter settings.
 // This is confusing, because of lower and upper sidebands make them different.
 
-if(bands[ConfigData.currentBand].FHiCut < 0 and bands[ConfigData.currentBand].FLoCut < 0) {  // Indicates LSB.
-fhigh = -bands[ConfigData.currentBand].FLoCut;
-flow = -bands[ConfigData.currentBand].FHiCut;
+if(bands2.bands[ConfigData.currentBand].FHiCut < 0 and bands2.bands[ConfigData.currentBand].FLoCut < 0) {  // Indicates LSB.
+fhigh = -bands2.bands[ConfigData.currentBand].FLoCut;
+flow = -bands2.bands[ConfigData.currentBand].FHiCut;
 }
 
-if(bands[ConfigData.currentBand].FHiCut > 0 and bands[ConfigData.currentBand].FLoCut > 0) {  // Indicates USB.
-fhigh = bands[ConfigData.currentBand].FHiCut;
-flow = bands[ConfigData.currentBand].FLoCut;
+if(bands2.bands[ConfigData.currentBand].FHiCut > 0 and bands2.bands[ConfigData.currentBand].FLoCut > 0) {  // Indicates USB.
+fhigh = bands2.bands[ConfigData.currentBand].FHiCut;
+flow = bands2.bands[ConfigData.currentBand].FLoCut;
 }
 
-if(bands[ConfigData.currentBand].FHiCut > 0 and bands[ConfigData.currentBand].FLoCut < 0) {  // Indicates AM or SAM.
-fhigh = bands[ConfigData.currentBand].FHiCut;
-flow = bands[ConfigData.currentBand].FLoCut;
+if(bands2.bands[ConfigData.currentBand].FHiCut > 0 and bands2.bands[ConfigData.currentBand].FLoCut < 0) {  // Indicates AM or SAM.
+fhigh = bands2.bands[ConfigData.currentBand].FHiCut;
+flow = bands2.bands[ConfigData.currentBand].FLoCut;
 }
 
 if(mode == RadioMode::SSB_MODE or mode == RadioMode::CW_MODE) {
   if(sideband == Sideband::UPPER) {
-bands[ConfigData.currentBand].FHiCut = fhigh;
-bands[ConfigData.currentBand].FLoCut =  flow;
+bands2.bands[ConfigData.currentBand].FHiCut = fhigh;
+bands2.bands[ConfigData.currentBand].FLoCut =  flow;
   }
     if(sideband == Sideband::LOWER) {
-bands[ConfigData.currentBand].FHiCut =  -flow;
-bands[ConfigData.currentBand].FLoCut = -fhigh;
+bands2.bands[ConfigData.currentBand].FHiCut =  -flow;
+bands2.bands[ConfigData.currentBand].FLoCut = -fhigh;
   }
 }
 
 if(mode == RadioMode::FT8_MODE) {
-bands[ConfigData.currentBand].FHiCut = fhigh;
-bands[ConfigData.currentBand].FLoCut =  flow;
+bands2.bands[ConfigData.currentBand].FHiCut = fhigh;
+bands2.bands[ConfigData.currentBand].FLoCut =  flow;
 }
 
 if(mode == RadioMode::AM_MODE or mode == RadioMode::SAM_MODE) {
-//bands[ConfigData.currentBand].FHiCut =  fhigh;
-//bands[ConfigData.currentBand].FLoCut = -fhigh;
-if(mode == RadioMode::AM_MODE)  bands[ConfigData.currentBand].sideband = Sideband::BOTH_AM;
-if(mode == RadioMode::SAM_MODE) bands[ConfigData.currentBand].sideband = Sideband::BOTH_SAM;
+//bands2.bands[ConfigData.currentBand].FHiCut =  fhigh;
+//bands2.bands[ConfigData.currentBand].FLoCut = -fhigh;
+bands2.bands[ConfigData.currentBand].FHiCut =  bands2.bands[ConfigData.currentBand].FAMCut;
+bands2.bands[ConfigData.currentBand].FLoCut = -bands2.bands[ConfigData.currentBand].FAMCut;
+if(mode == RadioMode::AM_MODE)  bands2.bands[ConfigData.currentBand].sideband = Sideband::BOTH_AM;
+if(mode == RadioMode::SAM_MODE) bands2.bands[ConfigData.currentBand].sideband = Sideband::BOTH_SAM;
 }
 
 lastState = RadioState::NOSTATE;  // This is to force a change in the main loop if the mode changes.
 
 /*
-if(bands[ConfigData.currentBand].FHiCut < 0 and bands[ConfigData.currentBand].FLoCut < 0) {
-flow = -bands[ConfigData.currentBand].FHiCut;
-fhigh = -bands[ConfigData.currentBand].FLoCut;
+if(bands2.bands[ConfigData.currentBand].FHiCut < 0 and bands2.bands[ConfigData.currentBand].FLoCut < 0) {
+flow = -bands2.bands[ConfigData.currentBand].FHiCut;
+fhigh = -bands2.bands[ConfigData.currentBand].FLoCut;
 }
 
-if(bands[ConfigData.currentBand].FHiCut > 0 and bands[ConfigData.currentBand].FLoCut > 0) {
-flow = bands[ConfigData.currentBand].FLoCut;
-fhigh = bands[ConfigData.currentBand].FHiCut;
+if(bands2.bands[ConfigData.currentBand].FHiCut > 0 and bands2.bands[ConfigData.currentBand].FLoCut > 0) {
+flow = bands2.bands[ConfigData.currentBand].FLoCut;
+fhigh = bands2.bands[ConfigData.currentBand].FHiCut;
 }
   {
     switch (sideband) {
       case Sideband::LOWER:
-//        temp = bands[ConfigData.currentBand].FHiCut;
-        bands[ConfigData.currentBand].FHiCut = -flow;
-        bands[ConfigData.currentBand].FLoCut = -fhigh;
+//        temp = bands2.bands[ConfigData.currentBand].FHiCut;
+        bands2.bands[ConfigData.currentBand].FHiCut = -flow;
+        bands2.bands[ConfigData.currentBand].FLoCut = -fhigh;
         break;
       case Sideband::UPPER:
-//        temp = bands[ConfigData.currentBand].FHiCut;
-        bands[ConfigData.currentBand].FHiCut = fhigh;
-        bands[ConfigData.currentBand].FLoCut = flow;
+//        temp = bands2.bands[ConfigData.currentBand].FHiCut;
+        bands2.bands[ConfigData.currentBand].FHiCut = fhigh;
+        bands2.bands[ConfigData.currentBand].FLoCut = flow;
         break;
       case Sideband::BOTH_AM:
       case Sideband::BOTH_SAM:
-      if(abs(bands[ConfigData.currentBand].FHiCut) > abs(bands[ConfigData.currentBand].FLoCut)) {
-fhigh = bands[ConfigData.currentBand].FHiCut;
-} else fhigh = bands[ConfigData.currentBand].FLoCut;
-        bands[ConfigData.currentBand].FHiCut = fhigh;
-        bands[ConfigData.currentBand].FLoCut = -fhigh;
+      if(abs(bands2.bands[ConfigData.currentBand].FHiCut) > abs(bands2.bands[ConfigData.currentBand].FLoCut)) {
+fhigh = bands2.bands[ConfigData.currentBand].FHiCut;
+} else fhigh = bands2.bands[ConfigData.currentBand].FLoCut;
+        bands2.bands[ConfigData.currentBand].FHiCut = fhigh;
+        bands2.bands[ConfigData.currentBand].FLoCut = -fhigh;
         break;
     }
 //  }
 */
 
   ShowBandwidth();
-//  Serial.printf("bands[ConfigData.currentBand].FLoCut = %d\n",bands[ConfigData.currentBand].FLoCut);
-//  Serial.printf("bands[ConfigData.currentBand].FHiCut = %d\n",bands[ConfigData.currentBand].FHiCut);  
+//  Serial.printf("bands2.bands[ConfigData.currentBand].FLoCut = %d\n",bands2.bands[ConfigData.currentBand].FLoCut);
+//  Serial.printf("bands2.bands[ConfigData.currentBand].FHiCut = %d\n",bands2.bands[ConfigData.currentBand].FHiCut);  
   // tft.fillRect(pos_x_frequency + 10, pos_y_frequency + 24, 210, 16, RA8875_BLACK);
   //tft.fillRect(OPERATION_STATS_X + 170, FREQUENCY_Y + 30, tft.getFontWidth() * 5, tft.getFontHeight(), RA8875_BLACK);        // Clear top-left menu area
-////  old_demod_mode = bands[ConfigData.currentBand].mode;  // set old_mode flag for next time, at the moment only used for first time radio is switched on . . .
+////  old_demod_mode = bands2.bands[ConfigData.currentBand].mode;  // set old_mode flag for next time, at the moment only used for first time radio is switched on . . .
 }  // end void setup_mode
 
 

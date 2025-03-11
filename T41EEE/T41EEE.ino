@@ -139,6 +139,32 @@ band bands[NUMBER_OF_BANDS] {  // Revised band struct with mode and sideband.  G
   }
 };
 
+Bands bands2 = {{  // Revised band struct with mode and sideband.  Greg KF5N February 14, 2025
+//freq    band low   band hi   name    mode                  sideband         FHiCut FLoCut FAMCut  Gain  type    gain  AGC
+//                                             filter filter             correct     offset
+//DB2OO, 29-AUG-23: take ITU_REGION into account for band limits
+// and changed "gainCorrection" to see the correct dBm value on all bands.
+// Calibration done with TinySA as signal generator with -73dBm levels (S9) at the FT8 frequencies
+// with V010 QSD with the 12V mod of the pre-amp
+#if defined(ITU_REGION) && ITU_REGION == 1
+  { 3700000UL, 3500000, 3800000, "80M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 5000, 15, HAM_BAND, 1.0, 20 },
+    { 7150000, 7000000, 7200000, "40M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 5000, 15, HAM_BAND, 1.0, 20 },
+#elif defined(ITU_REGION) && ITU_REGION == 2
+  { 3700000UL, 3500000, 4000000, "80M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 5000, 15, HAM_BAND, 1.0, 20 },
+    { 7150000, 7000000, 7300000, "40M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 5000, 15, HAM_BAND, 1.0, 20 },
+#elif defined(ITU_REGION) && ITU_REGION == 3
+  { 3700000UL, 3500000, 3900000, "80M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 5000, 15, HAM_BAND, 1.0, 20 },
+    { 7150000, 7000000, 7200000, "40M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 5000, 15, HAM_BAND, 1.0, 20 },
+#endif
+    { 14200000, 14000000, 14350000, "20M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 60 },  //// KF5N experiment with AGC
+    { 18100000, 18068000, 18168000, "17M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
+    { 21200000, 21000000, 21450000, "15M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
+    { 24920000, 24890000, 24990000, "12M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
+  {
+    28350000, 28000000, 29700000, "10M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20
+  }
+}};
+
 const struct SR_Descriptor SR[18] = {
   //   SR_n,        rate,  text
   { SAMPLE_RATE_8K, 8000, "  8k" },      // not OK
@@ -1072,16 +1098,16 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   if (menu != MenuSelect::BOGUS_PIN_READ and (radioState != RadioState::SSB_TRANSMIT_STATE) and (radioState != RadioState::FT8_TRANSMIT_STATE) and (radioState != RadioState::CW_TRANSMIT_STRAIGHT_STATE) and (radioState != RadioState::CW_TRANSMIT_KEYER_STATE)) {
     button.ExecuteButtonPress(menu);
   }
-  //  State detection
-  if (ConfigData.xmtMode == RadioMode::SSB_MODE and digitalRead(PTT) == HIGH) radioState = RadioState::SSB_RECEIVE_STATE;
-  if (ConfigData.xmtMode == RadioMode::SSB_MODE && digitalRead(PTT) == LOW) radioState = RadioState::SSB_TRANSMIT_STATE;
+  //  State detection for modes which can transmit.  AM and SAM don't transmit, so there is not a state transition required.
+  if (bands2.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE and digitalRead(PTT) == HIGH) radioState = RadioState::SSB_RECEIVE_STATE;
+  if (bands2.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE && digitalRead(PTT) == LOW) radioState = RadioState::SSB_TRANSMIT_STATE;
 
-  if (ConfigData.xmtMode == RadioMode::FT8_MODE and SerialUSB1.rts() == LOW) radioState = RadioState::FT8_RECEIVE_STATE;
-  if (ConfigData.xmtMode == RadioMode::FT8_MODE and SerialUSB1.rts() == HIGH) radioState = RadioState::FT8_TRANSMIT_STATE;
+  if (bands2.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE and SerialUSB1.rts() == LOW) radioState = RadioState::FT8_RECEIVE_STATE;
+  if (bands2.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE and SerialUSB1.rts() == HIGH) radioState = RadioState::FT8_TRANSMIT_STATE;
 
-  if (ConfigData.xmtMode == RadioMode::CW_MODE && (digitalRead(ConfigData.paddleDit) == HIGH && digitalRead(ConfigData.paddleDah) == HIGH)) radioState = RadioState::CW_RECEIVE_STATE;  // Was using symbolic constants. Also changed in code below.  KF5N August 8, 2023
-  if (ConfigData.xmtMode == RadioMode::CW_MODE && (digitalRead(ConfigData.paddleDit) == LOW && ConfigData.xmtMode == RadioMode::CW_MODE && ConfigData.keyType == 0)) radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;
-  if (ConfigData.xmtMode == RadioMode::CW_MODE && (keyPressedOn == 1 && ConfigData.xmtMode == RadioMode::CW_MODE && ConfigData.keyType == 1)) radioState = RadioState::CW_TRANSMIT_KEYER_STATE;
+  if (bands2.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE && (digitalRead(ConfigData.paddleDit) == HIGH && digitalRead(ConfigData.paddleDah) == HIGH)) radioState = RadioState::CW_RECEIVE_STATE;  // Was using symbolic constants. Also changed in code below.  KF5N August 8, 2023
+  if (bands2.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE && (digitalRead(ConfigData.paddleDit) == LOW && ConfigData.xmtMode == RadioMode::CW_MODE && ConfigData.keyType == 0)) radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;
+  if (bands2.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE && (keyPressedOn == 1 && ConfigData.xmtMode == RadioMode::CW_MODE && ConfigData.keyType == 1)) radioState = RadioState::CW_TRANSMIT_KEYER_STATE;
  // if (bands[ConfigData.currentBand].mode > 1) {
  //   radioState = RadioState::AM_RECEIVE_STATE;  // Inhibit transmit in AM demod modes.  KF5N March 21, 2024
  //   radioMode = RadioMode::AM_MODE;             // AM is currently receive only.

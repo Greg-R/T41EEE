@@ -301,14 +301,16 @@ struct band {
 
 extern band bands[];
 
+struct Bands {
+ band bands[NUMBER_OF_BANDS];
+};
+
+extern Bands bands2;
+
 // Configuration data structure.
 struct config_t {
 
 char versionSettings[10] = "T41EEE.9";  // This is required to be the first!  See EEPROMRead() function.
-
-
-
-
 
   bool AGCMode = true;
   float32_t AGCThreshold = -40.0;
@@ -440,7 +442,7 @@ struct calibration_t {
 #endif
   bool CWradioCalComplete = false;
   bool SSBradioCalComplete = false;
-  float32_t dBm_calibration = 22.0;  // This parameter is adjusted in the calibration menu.
+  float32_t dBm_calibration = 50.0;  // This parameter is adjusted in the calibration menu.
 };  // end calibration struct
 
 extern struct calibration_t CalData;
