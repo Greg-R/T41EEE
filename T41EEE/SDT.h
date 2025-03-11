@@ -68,6 +68,7 @@ const int YPIXELS = 480;
 const int CHAR_HEIGHT = 32;
 #define EEPROM_BASE_ADDRESS 0
 #define CAL_BASE_ADDRESS 1024
+#define BANDS_BASE_ADDRESS 2048
 #define PIXELS_PER_EQUALIZER_DELTA 10  // Number of pixels per detent of encoder for equalizer changes
 #define SPECTRUM_LEFT_X 3              // Used to plot left edge of spectrum display  AFP 12-14-21
 #define WATERFALL_LEFT_X SPECTRUM_LEFT_X
@@ -282,10 +283,33 @@ struct maps {
 };
 extern struct maps myMapFiles[];
 
+struct band {
+  uint32_t freq;       // Current frequency in Hz * 100
+  uint32_t fBandLow;   // Lower band edge
+  uint32_t fBandHigh;  // Upper band edge
+  const char name[4];  // name of band, 3 characters + terminator.
+  RadioMode mode;
+  Sideband sideband;
+  int FHiCut;
+  int FLoCut;
+  int FAMCut;  // Used for AM and SAM modes.
+  float32_t RFgain;  // This is not being used.  Greg KF5N February 14, 2024
+  uint32_t band_type;
+  float32_t gainCorrection;  // is hardware dependent and has to be calibrated ONCE and hardcoded in the table below
+  int AGC_thresh;
+};
+
+extern band bands[];
+
 // Configuration data structure.
 struct config_t {
 
-  char versionSettings[10] = "T41EEE.9";  // This is required to be the first!  See EEPROMRead() function.
+char versionSettings[10] = "T41EEE.9";  // This is required to be the first!  See EEPROMRead() function.
+
+
+
+
+
   bool AGCMode = true;
   float32_t AGCThreshold = -40.0;
   int audioVolume = 30;  // 4 bytes
@@ -471,8 +495,6 @@ extern int centerTuneFlag;
 
 //================== Global Excite Variables =================
 
-
-
 extern float32_t HP_DC_Butter_state2[2];                  //AFP 11-04-22
 extern float32_t HP_DC_Butter_state[6];                   //AFP 09-23-22
 extern arm_biquad_cascade_df2T_instance_f32 s1_Receive;   //AFP 09-23-22
@@ -620,23 +642,6 @@ extern arm_fir_interpolate_instance_f32 FIR_int2_I;
 extern arm_fir_interpolate_instance_f32 FIR_int2_Q;
 extern arm_lms_norm_instance_f32 LMS_Norm_instance;
 extern elapsedMicros usec;
-
-struct band {
-  uint32_t freq;       // Current frequency in Hz * 100
-  uint32_t fBandLow;   // Lower band edge
-  uint32_t fBandHigh;  // Upper band edge
-  const char name[4];  // name of band, 3 characters + terminator.
-  RadioMode mode;
-  Sideband sideband;
-  int FHiCut;
-  int FLoCut;
-  int FAMCut;  // Used for AM and SAM modes.
-  float32_t RFgain;  // This is not being used.  Greg KF5N February 14, 2024
-  uint32_t band_type;
-  float32_t gainCorrection;  // is hardware dependent and has to be calibrated ONCE and hardcoded in the table below
-  int AGC_thresh;
-};
-extern struct band bands[];
 
 typedef struct DEMOD_Descriptor {
   const uint8_t DEMOD_n;

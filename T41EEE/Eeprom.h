@@ -20,6 +20,9 @@ void ConfigDataWriteSize(int structSize);
 void CalDataWrite();
 void CalDataRead();
 void CalDataWriteSize(int structSize);
+void BandsWrite();
+void BandsRead();
+void BandsWriteSize(int structSize);
 
 int EEPROMReadSize(uint32_t address);
 void EEPROMStuffFavorites(unsigned long current[]);

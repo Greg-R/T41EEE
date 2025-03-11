@@ -60,7 +60,7 @@ void Eeprom::CalDataWrite() {
 
 
 /*****
-  Purpose: This is nothing more than an alias for EEPROM.get(EEPROM_BASE_ADDRESS + 4, ConfigData).
+  Purpose: This is nothing more than an alias for EEPROM.get(CAL_BASE_ADDRESS + 4, ConfigData).
 
   Parameter list:
   None
@@ -84,6 +84,49 @@ void Eeprom::CalDataRead() {
 *****/
 void Eeprom::CalDataWriteSize(int structSize) {
   EEPROM.put(CAL_BASE_ADDRESS, structSize);  // Read as one large chunk
+}
+
+
+/*****
+  Purpose: To save the configuration data (working variables) to EEPROM.
+           Skip 4 bytes to allow for the struct size variable.
+
+  Parameter list:
+    struct ConfigData       pointer to the EEPROM structure
+
+  Return value;
+    void
+*****/
+void Eeprom::BandsWrite() {
+  EEPROM.put(BANDS_BASE_ADDRESS + 4, CalData);
+}
+
+
+/*****
+  Purpose: This is nothing more than an alias for EEPROM.get(CAL_BASE_ADDRESS + 4, ConfigData).
+
+  Parameter list:
+  None
+
+  Return value;
+    void
+*****/
+void Eeprom::BandsRead() {
+  EEPROM.get(BANDS_BASE_ADDRESS + 4, CalData);  // Read as one large chunk
+}
+
+
+/*****
+  Purpose: Write the struct size stored to the EEPROM.
+
+  Parameter list:
+  None
+
+  Return value;
+    void
+*****/
+void Eeprom::BandsWriteSize(int structSize) {
+  EEPROM.put(BANDS_BASE_ADDRESS, structSize);  // Read as one large chunk
 }
 
 

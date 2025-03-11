@@ -20,31 +20,7 @@ struct maps myMapFiles[10] = {
   { "", 0.0, 0.0 }
 };
 
-struct band bands[NUMBER_OF_BANDS] {  // Revised band struct with mode and sideband.  Greg KF5N February 14, 2025
-//freq    band low   band hi   name    mode                  sideband         FHiCut FLoCut FAMCut  Gain  type    gain  AGC
-//                                             filter filter             correct     offset
-//DB2OO, 29-AUG-23: take ITU_REGION into account for band limits
-// and changed "gainCorrection" to see the correct dBm value on all bands.
-// Calibration done with TinySA as signal generator with -73dBm levels (S9) at the FT8 frequencies
-// with V010 QSD with the 12V mod of the pre-amp
-#if defined(ITU_REGION) && ITU_REGION == 1
-  { 3700000UL, 3500000, 3800000, "80M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 5000, 15, HAM_BAND, 1.0, 20 },
-    { 7150000, 7000000, 7200000, "40M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 5000, 15, HAM_BAND, 1.0, 20 },
-#elif defined(ITU_REGION) && ITU_REGION == 2
-  { 3700000UL, 3500000, 4000000, "80M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 5000, 15, HAM_BAND, 1.0, 20 },
-    { 7150000, 7000000, 7300000, "40M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 5000, 15, HAM_BAND, 1.0, 20 },
-#elif defined(ITU_REGION) && ITU_REGION == 3
-  { 3700000UL, 3500000, 3900000, "80M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 5000, 15, HAM_BAND, 1.0, 20 },
-    { 7150000, 7000000, 7200000, "40M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 5000, 15, HAM_BAND, 1.0, 20 },
-#endif
-    { 14200000, 14000000, 14350000, "20M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 60 },  //// KF5N experiment with AGC
-    { 18100000, 18068000, 18168000, "17M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
-    { 21200000, 21000000, 21450000, "15M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
-    { 24920000, 24890000, 24990000, "12M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
-  {
-    28350000, 28000000, 29700000, "10M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20
-  }
-};
+
 
 
 
@@ -137,6 +113,31 @@ float32_t DMAMEM float_buffer_RTemp[2048];
 
 config_t ConfigData;
 calibration_t CalData;
+band bands[NUMBER_OF_BANDS] {  // Revised band struct with mode and sideband.  Greg KF5N February 14, 2025
+//freq    band low   band hi   name    mode                  sideband         FHiCut FLoCut FAMCut  Gain  type    gain  AGC
+//                                             filter filter             correct     offset
+//DB2OO, 29-AUG-23: take ITU_REGION into account for band limits
+// and changed "gainCorrection" to see the correct dBm value on all bands.
+// Calibration done with TinySA as signal generator with -73dBm levels (S9) at the FT8 frequencies
+// with V010 QSD with the 12V mod of the pre-amp
+#if defined(ITU_REGION) && ITU_REGION == 1
+  { 3700000UL, 3500000, 3800000, "80M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 5000, 15, HAM_BAND, 1.0, 20 },
+    { 7150000, 7000000, 7200000, "40M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 5000, 15, HAM_BAND, 1.0, 20 },
+#elif defined(ITU_REGION) && ITU_REGION == 2
+  { 3700000UL, 3500000, 4000000, "80M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 5000, 15, HAM_BAND, 1.0, 20 },
+    { 7150000, 7000000, 7300000, "40M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 5000, 15, HAM_BAND, 1.0, 20 },
+#elif defined(ITU_REGION) && ITU_REGION == 3
+  { 3700000UL, 3500000, 3900000, "80M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 5000, 15, HAM_BAND, 1.0, 20 },
+    { 7150000, 7000000, 7200000, "40M", RadioMode::SSB_MODE, Sideband::LOWER, -200, -3000, 5000, 15, HAM_BAND, 1.0, 20 },
+#endif
+    { 14200000, 14000000, 14350000, "20M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 60 },  //// KF5N experiment with AGC
+    { 18100000, 18068000, 18168000, "17M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
+    { 21200000, 21000000, 21450000, "15M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
+    { 24920000, 24890000, 24990000, "12M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
+  {
+    28350000, 28000000, 29700000, "10M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20
+  }
+};
 
 const struct SR_Descriptor SR[18] = {
   //   SR_n,        rate,  text
