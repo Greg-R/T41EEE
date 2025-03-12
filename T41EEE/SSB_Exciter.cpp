@@ -69,8 +69,8 @@ void ExciterIQData() {
     }
 
     // Set the sideband.
-    if (bands[ConfigData.currentBand].sideband == Sideband::LOWER) cessb1.setSideband(false);
-    if (bands[ConfigData.currentBand].sideband == Sideband::UPPER) cessb1.setSideband(true);
+    if (bands2.bands[ConfigData.currentBand].sideband == Sideband::LOWER) cessb1.setSideband(false);
+    if (bands2.bands[ConfigData.currentBand].sideband == Sideband::UPPER) cessb1.setSideband(true);
 
     // Apply amplitude and phase corrections.
     cessb1.setIQCorrections(true, CalData.IQSSBAmpCorrectionFactor[ConfigData.currentBandA], CalData.IQSSBPhaseCorrectionFactor[ConfigData.currentBandA], 0.0);

@@ -214,13 +214,31 @@ void FilterBandwidth()
 {
   AudioNoInterrupts();
 
-//Serial.printf("bands2.bands[ConfigData.currentBand].FHiCut = %d bands2.bands[ConfigData.currentBand].FLoCut = %d\n", bands2.bands[ConfigData.currentBand].FHiCut, bands2.bands[ConfigData.currentBand].FLoCut);
-//Serial.printf("bands2.bands[ConfigData.currentBand].FAMCut = %d\n", bands2.bands[ConfigData.currentBand].FAMCut);
+Serial.printf("FilterBandwidth()\n");
+Serial.printf("bands2.bands[ConfigData.currentBand].FHiCut = %d bands2.bands[ConfigData.currentBand].FLoCut = %d\n", bands2.bands[ConfigData.currentBand].FHiCut, bands2.bands[ConfigData.currentBand].FLoCut);
+Serial.printf("bands2.bands[ConfigData.currentBand].FAMCut = %d\n", bands2.bands[ConfigData.currentBand].FAMCut);
+Serial.printf("bands2.bands[ConfigData.currentBand].sideband = %d\n", bands2.bands[ConfigData.currentBand].sideband);
+
 
 // The filter must be set up differently for AM and SAM modes.
 if(bands2.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE or bands2.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE or bands2.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) {
-  CalcCplxFIRCoeffs(FIR_Coef_I, FIR_Coef_Q, m_NumTaps, static_cast<float>(bands2.bands[ConfigData.currentBand].FLoCut), static_cast<float>(bands2.bands[ConfigData.currentBand].FHiCut), static_cast<float>(SR[SampleRate].rate / DF));
+
+switch(bands2.bands[ConfigData.currentBand].sideband) {
+
+case Sideband::LOWER:
+  CalcCplxFIRCoeffs(FIR_Coef_I, FIR_Coef_Q, m_NumTaps, static_cast<float>(-bands2.bands[ConfigData.currentBand].FHiCut), static_cast<float>(-bands2.bands[ConfigData.currentBand].FLoCut), static_cast<float>(SR[SampleRate].rate / DF));
+break;
+
+case Sideband::UPPER:
+CalcCplxFIRCoeffs(FIR_Coef_I, FIR_Coef_Q, m_NumTaps, static_cast<float>(bands2.bands[ConfigData.currentBand].FLoCut), static_cast<float>(bands2.bands[ConfigData.currentBand].FHiCut), static_cast<float>(SR[SampleRate].rate / DF));
+break;
+
+default:
+break;
+
 }
+}
+
 if(bands2.bands[ConfigData.currentBand].mode == RadioMode::AM_MODE or bands2.bands[ConfigData.currentBand].mode == RadioMode::SAM_MODE) {
   CalcCplxFIRCoeffs(FIR_Coef_I, FIR_Coef_Q, m_NumTaps, static_cast<float>(-bands2.bands[ConfigData.currentBand].FAMCut), static_cast<float>(bands2.bands[ConfigData.currentBand].FAMCut), static_cast<float>(SR[SampleRate].rate / DF));
 }

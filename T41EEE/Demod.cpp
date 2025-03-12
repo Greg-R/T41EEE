@@ -30,50 +30,47 @@ float32_t Cos = 0.0;
     void
 *****/
 void SetupMode(RadioMode mode, Sideband sideband) {
-  int flow = 0, fhigh = 0;
+//  int flow = 0, fhigh = 0;
 
 // First, determine flow and fhigh, which are the audio filter settings.
 // This is confusing, because of lower and upper sidebands make them different.
 
-if(bands2.bands[ConfigData.currentBand].FHiCut < 0 and bands2.bands[ConfigData.currentBand].FLoCut < 0) {  // Indicates LSB.
-fhigh = -bands2.bands[ConfigData.currentBand].FLoCut;
-flow = -bands2.bands[ConfigData.currentBand].FHiCut;
-}
+//if(bands2.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {  // Indicates LSB.
+//fhigh = -bands2.bands[ConfigData.currentBand].FLoCut;
+//flow = -bands2.bands[ConfigData.currentBand].FHiCut;
+//}
 
-if(bands2.bands[ConfigData.currentBand].FHiCut > 0 and bands2.bands[ConfigData.currentBand].FLoCut > 0) {  // Indicates USB.
-fhigh = bands2.bands[ConfigData.currentBand].FHiCut;
-flow = bands2.bands[ConfigData.currentBand].FLoCut;
-}
+//if(bands2.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {  // Indicates USB.
+//fhigh = bands2.bands[ConfigData.currentBand].FHiCut;
+//flow = bands2.bands[ConfigData.currentBand].FLoCut;
+//}
 
-if(bands2.bands[ConfigData.currentBand].FHiCut > 0 and bands2.bands[ConfigData.currentBand].FLoCut < 0) {  // Indicates AM or SAM.
-fhigh = bands2.bands[ConfigData.currentBand].FHiCut;
-flow = bands2.bands[ConfigData.currentBand].FLoCut;
-}
+//if(bands2.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands2.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {  // Indicates AM or SAM.
+//fhigh = bands2.bands[ConfigData.currentBand].FAMCut;
+//flow = bands2.bands[ConfigData.currentBand].FAMCut;
+//}
 
-if(mode == RadioMode::SSB_MODE or mode == RadioMode::CW_MODE) {
-  if(sideband == Sideband::UPPER) {
-bands2.bands[ConfigData.currentBand].FHiCut = fhigh;
-bands2.bands[ConfigData.currentBand].FLoCut =  flow;
-  }
-    if(sideband == Sideband::LOWER) {
-bands2.bands[ConfigData.currentBand].FHiCut =  -flow;
-bands2.bands[ConfigData.currentBand].FLoCut = -fhigh;
-  }
-}
-
-if(mode == RadioMode::FT8_MODE) {
-bands2.bands[ConfigData.currentBand].FHiCut = fhigh;
-bands2.bands[ConfigData.currentBand].FLoCut =  flow;
-}
-
-if(mode == RadioMode::AM_MODE or mode == RadioMode::SAM_MODE) {
-//bands2.bands[ConfigData.currentBand].FHiCut =  fhigh;
+//if(mode == RadioMode::SSB_MODE or mode == RadioMode::CW_MODE) {
+//  if(sideband == Sideband::UPPER) {
+//bands2.bands[ConfigData.currentBand].FHiCut = fhigh;
+//bands2.bands[ConfigData.currentBand].FLoCut =  flow;
+//  }
+//    if(sideband == Sideband::LOWER) {
+//bands2.bands[ConfigData.currentBand].FHiCut =  -flow;
 //bands2.bands[ConfigData.currentBand].FLoCut = -fhigh;
-bands2.bands[ConfigData.currentBand].FHiCut =  bands2.bands[ConfigData.currentBand].FAMCut;
-bands2.bands[ConfigData.currentBand].FLoCut = -bands2.bands[ConfigData.currentBand].FAMCut;
-if(mode == RadioMode::AM_MODE)  bands2.bands[ConfigData.currentBand].sideband = Sideband::BOTH_AM;
-if(mode == RadioMode::SAM_MODE) bands2.bands[ConfigData.currentBand].sideband = Sideband::BOTH_SAM;
-}
+//  }
+//}
+
+// FT8 is always upper sideband.
+//if(mode == RadioMode::FT8_MODE) {
+//bands2.bands[ConfigData.currentBand].FHiCut = fhigh;
+//bands2.bands[ConfigData.currentBand].FLoCut =  flow;
+//}
+
+//if(mode == RadioMode::AM_MODE or mode == RadioMode::SAM_MODE) {
+//bands2.bands[ConfigData.currentBand].FHiCut =  bands2.bands[ConfigData.currentBand].FAMCut;
+//bands2.bands[ConfigData.currentBand].FLoCut = -bands2.bands[ConfigData.currentBand].FAMCut;
+//}
 
 lastState = RadioState::NOSTATE;  // This is to force a change in the main loop if the mode changes.
 
@@ -111,7 +108,7 @@ fhigh = bands2.bands[ConfigData.currentBand].FHiCut;
 //  }
 */
 
-  ShowBandwidth();
+ // ShowBandwidth();  // Prints the FLoCut and FHiCut frequencies at the top of the spectrum window?
 //  Serial.printf("bands2.bands[ConfigData.currentBand].FLoCut = %d\n",bands2.bands[ConfigData.currentBand].FLoCut);
 //  Serial.printf("bands2.bands[ConfigData.currentBand].FHiCut = %d\n",bands2.bands[ConfigData.currentBand].FHiCut);  
   // tft.fillRect(pos_x_frequency + 10, pos_y_frequency + 24, 210, 16, RA8875_BLACK);

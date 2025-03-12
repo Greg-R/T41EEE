@@ -39,6 +39,7 @@ void ButtonNR();
 void ButtonNotchFilter();
 void ButtonMuteAudio();
 int DrawNewFloor(int floor);
+void ExecuteModeChange();
 void ResetZoom(int zoomIndex1);
 void ButtonFrequencyEntry();
 

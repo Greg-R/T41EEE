@@ -24,7 +24,7 @@ const int FT_step = 500;  // Hz step in Fast Tune
   Return value;
     void
     Modified AFP21-12-15
-*****/
+*****
 void FilterSetSSB() {
 int32_t filter_change;
   if (filter_pos != last_filter_pos) {  // This decision is required as this function is required to be used in many locations.  KF5N April 21, 2024
@@ -99,6 +99,55 @@ int32_t filter_change;
     }
       volumeChangeFlag = true;
   }
+*/
+
+// A major change to this function.  It only sets FHiCut and FLoCut variables in the bands2 struct/array.
+// No other functions are performed.  Filter settings, demodulation, and graphics changes are delegated to other functions.
+// This version limits the result to an fhigh and an flow number.  Note that this function works in concert with EncoderFilter()
+// which is attached to an interrupt.
+void FilterSetSSB() {
+Serial.printf("Encoder first bands2.bands[ConfigData.currentBand].FLoCut = %d\n", bands2.bands[ConfigData.currentBand].FLoCut);
+Serial.printf("Encoder first bands2.bands[ConfigData.currentBand].FHiCut = %d\n", bands2.bands[ConfigData.currentBand].FHiCut);
+int32_t filter_change;
+  if (filter_pos != last_filter_pos) {  // This decision is required as this function is required to be used in many locations.  KF5N April 21, 2024
+    tft.writeTo(L2);  // Clear layer 2.  KF5N July 31, 2023
+    tft.clearMemory();
+    if(ConfigData.xmtMode == RadioMode::CW_MODE) BandInformation(); 
+    tft.fillRect((MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2 - filterWidth, SPECTRUM_TOP_Y + 17, filterWidth, SPECTRUM_HEIGHT - 20, RA8875_BLACK);  // Erase old filter background
+    filter_change = (filter_pos - last_filter_pos);
+    if (filter_change >= 1) {
+      filterWidth--;           // filterWidth is used in graphics only!
+      if (filterWidth < 10)
+        filterWidth = 10;
+    }
+    if (filter_change <= -1) {
+      filterWidth++;
+      if (filterWidth > 100)
+        filterWidth = 50;
+    }
+    last_filter_pos = filter_pos;
+    // Change the FLoCut and FhiCut variables which adjust the DSP filters.
+
+
+        if (switchFilterSideband == true) { // Adjust and limit FLoCut
+          bands2.bands[ConfigData.currentBand].FLoCut = bands2.bands[ConfigData.currentBand].FLoCut + filterEncoderMove * 100 * ENCODER_FACTOR;  
+          // Don't allow FLoCut to be less than 100 Hz below FHiCut.
+          if(bands2.bands[ConfigData.currentBand].FLoCut >= (bands2.bands[ConfigData.currentBand].FHiCut - 100)) bands2.bands[ConfigData.currentBand].FLoCut = bands2.bands[ConfigData.currentBand].FHiCut - 100;          
+        } else {  // Adjust and limit FHiCut.
+          bands2.bands[ConfigData.currentBand].FHiCut = bands2.bands[ConfigData.currentBand].FHiCut + filterEncoderMove * 100 * ENCODER_FACTOR;
+          // Don't allow FHiCut to be less than 100 Hz above FLoCut.
+          if(bands2.bands[ConfigData.currentBand].FHiCut <= (bands2.bands[ConfigData.currentBand].FLoCut + 100)) bands2.bands[ConfigData.currentBand].FHiCut = bands2.bands[ConfigData.currentBand].FLoCut + 100;
+        }
+
+
+      FilterBandwidth();
+      volumeChangeFlag = true;
+  }
+
+Serial.printf("filterEncoderMove = %d\n", filterEncoderMove);
+Serial.printf("Encoder bands2.bands[ConfigData.currentBand].FLoCut = %d\n", bands2.bands[ConfigData.currentBand].FLoCut);
+Serial.printf("Encoder bands2.bands[ConfigData.currentBand].FHiCut = %d\n", bands2.bands[ConfigData.currentBand].FHiCut);
+
     // =============  AFP 10-27-22
 
     //ControlFilterF();
@@ -113,18 +162,24 @@ int32_t filter_change;
         int filterLoPositionMarker{0};
         int filterHiPositionMarker{0};
         int temp{0};
+        if (bands2.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
         filterLoPositionMarker = map(bands2.bands[ConfigData.currentBand].FLoCut, 0, 6000, 0, 256);
         filterHiPositionMarker = map(bands2.bands[ConfigData.currentBand].FHiCut, 0, 6000, 0, 256);
+        } else {
+        filterLoPositionMarker = map(bands2.bands[ConfigData.currentBand].FLoCut, 0, 6000, 0, 256);
+        filterHiPositionMarker = map(bands2.bands[ConfigData.currentBand].FHiCut, 0, 6000, 0, 256);
+        }
 
-//Serial.printf("filterLoPositionMarker = %d\n", filterLoPositionMarker);
-//Serial.printf("filterHiPositionMarker = %d\n", filterHiPositionMarker);
+
+Serial.printf("filterLoPositionMarker = %d\n", filterLoPositionMarker);
+Serial.printf("filterHiPositionMarker = %d\n", filterHiPositionMarker);
 
         // Flip positions if LSB so that correct delimiter is highlighted.
-        if (bands2.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-           temp = filterLoPositionMarker;
-           filterLoPositionMarker = filterHiPositionMarker;
-           filterHiPositionMarker = temp;
-        }
+//        if (bands2.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
+//           temp = filterLoPositionMarker;
+//           filterLoPositionMarker = filterHiPositionMarker;
+//           filterHiPositionMarker = temp;
+//        }
         //Draw Filter indicator lines on audio plot to Layer 2.
         tft.writeTo(L2);
         if(not switchFilterSideband) {

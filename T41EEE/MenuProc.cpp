@@ -1064,7 +1064,7 @@ void VFOSelect() {
     default:  // Cancel
       break;
   }
-  bands[ConfigData.currentBand].freq = TxRxFreq;
+  bands2.bands[ConfigData.currentBand].freq = TxRxFreq;
   SetBand();           // KF5N July 12, 2023
   SetBandRelay(HIGH);  // Required when switching VFOs. KF5N July 12, 2023
   SetFreq();

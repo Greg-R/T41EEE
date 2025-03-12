@@ -333,7 +333,6 @@ void ShowSpectrum() {
         // AudioNoInterrupts();
         // M = demod_mode, FU & FL upper & lower frequency
         // this routine prints the frequency bars under the spectrum display
-        // and displays the bandwidth bar indicating demodulation bandwidth
 *****/
 void ShowBandwidth() {
   char buff[10];
@@ -344,7 +343,7 @@ void ShowBandwidth() {
     spectrum_pos_centre_f = 128 * xExpand - 1;  //AFP
   else
     spectrum_pos_centre_f = 64 * xExpand;  //AFP
-  pos_left = centerLine + ((int)(bands2.bands[ConfigData.currentBand].FLoCut / 1000.0 * pixel_per_khz));
+  pos_left = centerLine + static_cast<int>(bands2.bands[ConfigData.currentBand].FLoCut / 1000.0 * pixel_per_khz);
   if (pos_left < spectrum_x) {
     pos_left = spectrum_x;
   }
@@ -360,14 +359,14 @@ void ShowBandwidth() {
   else if (switchFilterSideband == true)
     tft.setTextColor(RA8875_LIGHT_GREY);
 
-  MyDrawFloat((float)(bands2.bands[ConfigData.currentBand].FLoCut / 1000.0f), 1, FILTER_PARAMETERS_X, FILTER_PARAMETERS_Y, buff);
+  MyDrawFloat(static_cast<float>(bands2.bands[ConfigData.currentBand].FLoCut / 1000.0f), 1, FILTER_PARAMETERS_X, FILTER_PARAMETERS_Y, buff);
 
   tft.print("kHz");
   if (switchFilterSideband == true)
     tft.setTextColor(RA8875_WHITE);
   else if (switchFilterSideband == false)
     tft.setTextColor(RA8875_LIGHT_GREY);
-  MyDrawFloat((float)(bands2.bands[ConfigData.currentBand].FHiCut / 1000.0f), 1, FILTER_PARAMETERS_X + 80, FILTER_PARAMETERS_Y, buff);
+  MyDrawFloat(static_cast<float>(bands2.bands[ConfigData.currentBand].FHiCut / 1000.0f), 1, FILTER_PARAMETERS_X + 80, FILTER_PARAMETERS_Y, buff);
   tft.print("kHz");
 
   tft.setTextColor(RA8875_WHITE);  // set text color to white for other print routines not to get confused ;-)

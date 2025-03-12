@@ -110,16 +110,16 @@ void Kim1_NR()
     uint8_t VAD_high = 127;
     float32_t lf_freq; // = (offset - width/2) / (12000 / NR_FFT_L); // bin BW is 46.9Hz [12000Hz / 256 bins] @96kHz
     float32_t uf_freq;
-    if (bands[ConfigData.currentBand].FLoCut <= 0 && bands[ConfigData.currentBand].FHiCut >= 0) {
+    if (bands2.bands[ConfigData.currentBand].FLoCut <= 0 && bands2.bands[ConfigData.currentBand].FHiCut >= 0) {
       lf_freq = 0.0;
-      uf_freq = fmax(-(float32_t)bands[ConfigData.currentBand].FLoCut, (float32_t)bands[ConfigData.currentBand].FHiCut);
+      uf_freq = fmax(-(float32_t)bands2.bands[ConfigData.currentBand].FLoCut, (float32_t)bands2.bands[ConfigData.currentBand].FHiCut);
     } else {
-      if (bands[ConfigData.currentBand].FLoCut > 0) {
-        lf_freq = (float32_t)bands[ConfigData.currentBand].FLoCut;
-        uf_freq = (float32_t)bands[ConfigData.currentBand].FHiCut;
+      if (bands2.bands[ConfigData.currentBand].FLoCut > 0) {
+        lf_freq = (float32_t)bands2.bands[ConfigData.currentBand].FLoCut;
+        uf_freq = (float32_t)bands2.bands[ConfigData.currentBand].FHiCut;
       } else {
-        uf_freq = -(float32_t)bands[ConfigData.currentBand].FLoCut;
-        lf_freq = -(float32_t)bands[ConfigData.currentBand].FHiCut;
+        uf_freq = -(float32_t)bands2.bands[ConfigData.currentBand].FLoCut;
+        lf_freq = -(float32_t)bands2.bands[ConfigData.currentBand].FHiCut;
       }
     }
     lf_freq /= ((SR[SampleRate].rate / DF) / NR_FFT_L); // bin BW is 46.9Hz [12000Hz / 256 bins] @96kHz
@@ -391,16 +391,16 @@ void SpectralNoiseReduction()
   float32_t ph1y[NR_FFT_L / 2];
   static int NR_first_time_2 = 1;
 
-  if (bands[ConfigData.currentBand].FLoCut <= 0 && bands[ConfigData.currentBand].FHiCut >= 0) {
+  if (bands2.bands[ConfigData.currentBand].FLoCut <= 0 && bands2.bands[ConfigData.currentBand].FHiCut >= 0) {
     lf_freq = 0.0;
-    uf_freq = fmax(-(float32_t)bands[ConfigData.currentBand].FLoCut, (float32_t)bands[ConfigData.currentBand].FHiCut);
+    uf_freq = fmax(-(float32_t)bands2.bands[ConfigData.currentBand].FLoCut, (float32_t)bands2.bands[ConfigData.currentBand].FHiCut);
   } else {
-    if (bands[ConfigData.currentBand].FLoCut > 0) {
-      lf_freq = (float32_t)bands[ConfigData.currentBand].FLoCut;
-      uf_freq = (float32_t)bands[ConfigData.currentBand].FHiCut;
+    if (bands2.bands[ConfigData.currentBand].FLoCut > 0) {
+      lf_freq = (float32_t)bands2.bands[ConfigData.currentBand].FLoCut;
+      uf_freq = (float32_t)bands2.bands[ConfigData.currentBand].FHiCut;
     } else {
-      uf_freq = -(float32_t)bands[ConfigData.currentBand].FLoCut;
-      lf_freq = -(float32_t)bands[ConfigData.currentBand].FHiCut;
+      uf_freq = -(float32_t)bands2.bands[ConfigData.currentBand].FLoCut;
+      lf_freq = -(float32_t)bands2.bands[ConfigData.currentBand].FHiCut;
     }
   }
   // / rate DF SR[SampleRate].rate/DF

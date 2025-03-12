@@ -401,7 +401,7 @@ struct calibration_t {
   int freqCorrectionFactor = 0;  //68000;
 #else
   //Conventional crystal with freq offset needs a correction factor
-  int freqCorrectionFactor = 100000;
+  int freqCorrectionFactor = FREQUENCYCAL;  // Set in MyConfigurationFile.h.  Greg KF5N March 12, 2025
 #endif
 
   int switchValues[18] = { 924, 870, 817,

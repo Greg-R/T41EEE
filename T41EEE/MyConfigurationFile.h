@@ -78,6 +78,6 @@
 #define SPEAKERSCALE  2.0    // A typical value is 20.  Increase or decrease this value depending on your amplifier gain.
 #define HEADPHONESCALE 10.0
 
-
+#define FREQUENCYCAL 130000
 
 
