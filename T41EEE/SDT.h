@@ -1041,7 +1041,7 @@ void SetKeyPowerUp();
 void SetSideToneVolume();  // This function uses encoder to set sidetone volume.  KF5N August 29, 2023
 uint32_t SetTransmitDelay();
 void SetTransmitDitLength(int wpm);  // JJP 8/19/23
-void SetupMode(RadioMode mode, Sideband sideband);
+//void SetupMode(RadioMode mode, Sideband sideband);
 int SetWPM();
 void ShowAutoStatus();
 void ShowBandwidth();

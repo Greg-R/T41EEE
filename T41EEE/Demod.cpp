@@ -29,7 +29,7 @@ float32_t Cos = 0.0;
   Return value;
     void
 *****/
-void SetupMode(RadioMode mode, Sideband sideband) {
+//void SetupMode(RadioMode mode, Sideband sideband) {
 //  int flow = 0, fhigh = 0;
 
 // First, determine flow and fhigh, which are the audio filter settings.
@@ -72,7 +72,7 @@ void SetupMode(RadioMode mode, Sideband sideband) {
 //bands2.bands[ConfigData.currentBand].FLoCut = -bands2.bands[ConfigData.currentBand].FAMCut;
 //}
 
-lastState = RadioState::NOSTATE;  // This is to force a change in the main loop if the mode changes.
+//lastState = RadioState::NOSTATE;  // This is to force a change in the main loop if the mode changes.
 
 /*
 if(bands2.bands[ConfigData.currentBand].FHiCut < 0 and bands2.bands[ConfigData.currentBand].FLoCut < 0) {
@@ -114,7 +114,7 @@ fhigh = bands2.bands[ConfigData.currentBand].FHiCut;
   // tft.fillRect(pos_x_frequency + 10, pos_y_frequency + 24, 210, 16, RA8875_BLACK);
   //tft.fillRect(OPERATION_STATS_X + 170, FREQUENCY_Y + 30, tft.getFontWidth() * 5, tft.getFontHeight(), RA8875_BLACK);        // Clear top-left menu area
 ////  old_demod_mode = bands2.bands[ConfigData.currentBand].mode;  // set old_mode flag for next time, at the moment only used for first time radio is switched on . . .
-}  // end void setup_mode
+//}  // end void setup_mode
 
 
 /*****  AFP 11-03-22

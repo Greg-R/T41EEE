@@ -611,7 +611,7 @@ FLASHMEM void InitializeDataArrays() {
   uint16_t temp_check_frequency;
   uint32_t highAlarmTemp, lowAlarmTemp, panicAlarmTemp;
   int LP_F_help;
-  uint32_t m_NumTaps = (FFT_LENGTH / 2) + 1;
+//  uint32_t m_NumTaps = (FFT_LENGTH / 2) + 1;
   //DB2OO, 11-SEP-23: don't use the fixed sizes, but use the caculated ones, otherwise a code change will create very difficult to find problems
 #define CLEAR_VAR(x) memset(x, 0, sizeof(x))
   memset(FFT_spec_old, 0, sizeof(FFT_spec_old));
@@ -641,7 +641,7 @@ FLASHMEM void InitializeDataArrays() {
   CLEAR_VAR(NR_Gts);                   //memset(NR_Gts, 0, 1024);
   CLEAR_VAR(NR_E);                     //memset(NR_E, 0, 7680);
 
-  CalcCplxFIRCoeffs(FIR_Coef_I, FIR_Coef_Q, m_NumTaps, (float32_t)bands2.bands[ConfigData.currentBand].FLoCut, (float32_t)bands2.bands[ConfigData.currentBand].FHiCut, (float)SR[SampleRate].rate / DF);
+//  CalcCplxFIRCoeffs(FIR_Coef_I, FIR_Coef_Q, m_NumTaps, (float32_t)bands2.bands[ConfigData.currentBand].FLoCut, (float32_t)bands2.bands[ConfigData.currentBand].FHiCut, (float)SR[SampleRate].rate / DF);
 
   /****************************************************************************************
      init complex FFTs
@@ -671,7 +671,7 @@ FLASHMEM void InitializeDataArrays() {
   /****************************************************************************************
      Calculate the FFT of the FIR filter coefficients once to produce the FIR filter mask
   ****************************************************************************************/
-  InitFilterMask();
+//  InitFilterMask();
 
   /****************************************************************************************
      Set sample rate

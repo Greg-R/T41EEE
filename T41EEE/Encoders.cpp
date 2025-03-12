@@ -139,6 +139,10 @@ int32_t filter_change;
           if(bands2.bands[ConfigData.currentBand].FHiCut <= (bands2.bands[ConfigData.currentBand].FLoCut + 100)) bands2.bands[ConfigData.currentBand].FHiCut = bands2.bands[ConfigData.currentBand].FLoCut + 100;
         }
 
+if (bands2.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands2.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
+          bands2.bands[ConfigData.currentBand].FAMCut = bands2.bands[ConfigData.currentBand].FAMCut + filterEncoderMove * 100 * ENCODER_FACTOR;
+}
+
 
       FilterBandwidth();
       volumeChangeFlag = true;
@@ -161,13 +165,16 @@ Serial.printf("Encoder bands2.bands[ConfigData.currentBand].FHiCut = %d\n", band
 //  The following code was moved from ShowSpectrum() in Display.cpp.
         int filterLoPositionMarker{0};
         int filterHiPositionMarker{0};
-        int temp{0};
+//        int temp{0};
         if (bands2.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
         filterLoPositionMarker = map(bands2.bands[ConfigData.currentBand].FLoCut, 0, 6000, 0, 256);
         filterHiPositionMarker = map(bands2.bands[ConfigData.currentBand].FHiCut, 0, 6000, 0, 256);
-        } else {
+        } else if (bands2.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
         filterLoPositionMarker = map(bands2.bands[ConfigData.currentBand].FLoCut, 0, 6000, 0, 256);
         filterHiPositionMarker = map(bands2.bands[ConfigData.currentBand].FHiCut, 0, 6000, 0, 256);
+        }  else if (bands2.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands2.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
+//        filterLoPositionMarker = map(bands2.bands[ConfigData.currentBand].FLoCut, 0, 6000, 0, 256);
+        filterHiPositionMarker = map(bands2.bands[ConfigData.currentBand].FAMCut, 0, 6000, 0, 256);
         }
 
 
@@ -182,6 +189,8 @@ Serial.printf("filterHiPositionMarker = %d\n", filterHiPositionMarker);
 //        }
         //Draw Filter indicator lines on audio plot to Layer 2.
         tft.writeTo(L2);
+
+if (bands2.bands[ConfigData.currentBand].sideband == Sideband::LOWER or bands2.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {        
         if(not switchFilterSideband) {
         tft.drawLine(BAND_INDICATOR_X - 6 + abs(filterLoPositionMarker), SPECTRUM_BOTTOM - 3, BAND_INDICATOR_X - 6 + abs(filterLoPositionMarker), SPECTRUM_BOTTOM - 112, RA8875_LIGHT_GREY);
         tft.drawLine(BAND_INDICATOR_X - 7 + abs(filterHiPositionMarker), SPECTRUM_BOTTOM - 3, BAND_INDICATOR_X - 7 + abs(filterHiPositionMarker), SPECTRUM_BOTTOM - 112, RA8875_RED);
@@ -189,6 +198,18 @@ Serial.printf("filterHiPositionMarker = %d\n", filterHiPositionMarker);
         tft.drawLine(BAND_INDICATOR_X - 6 + abs(filterLoPositionMarker), SPECTRUM_BOTTOM - 3, BAND_INDICATOR_X - 6 + abs(filterLoPositionMarker), SPECTRUM_BOTTOM - 112, RA8875_RED);
         tft.drawLine(BAND_INDICATOR_X - 7 + abs(filterHiPositionMarker), SPECTRUM_BOTTOM - 3, BAND_INDICATOR_X - 7 + abs(filterHiPositionMarker), SPECTRUM_BOTTOM - 112, RA8875_LIGHT_GREY);
         }
+}
+
+// In AM modes draw high delimiter only and always make it red (active);
+if (bands2.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands2.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {        
+//        if(not switchFilterSideband) {
+//        tft.drawLine(BAND_INDICATOR_X - 6 + abs(filterLoPositionMarker), SPECTRUM_BOTTOM - 3, BAND_INDICATOR_X - 6 + abs(filterLoPositionMarker), SPECTRUM_BOTTOM - 112, RA8875_LIGHT_GREY);
+        tft.drawLine(BAND_INDICATOR_X - 7 + abs(filterHiPositionMarker), SPECTRUM_BOTTOM - 3, BAND_INDICATOR_X - 7 + abs(filterHiPositionMarker), SPECTRUM_BOTTOM - 112, RA8875_RED);
+        } // else {
+//        tft.drawLine(BAND_INDICATOR_X - 6 + abs(filterLoPositionMarker), SPECTRUM_BOTTOM - 3, BAND_INDICATOR_X - 6 + abs(filterLoPositionMarker), SPECTRUM_BOTTOM - 112, RA8875_RED);
+//        tft.drawLine(BAND_INDICATOR_X - 7 + abs(filterHiPositionMarker), SPECTRUM_BOTTOM - 3, BAND_INDICATOR_X - 7 + abs(filterHiPositionMarker), SPECTRUM_BOTTOM - 112, RA8875_LIGHT_GREY);
+//        }
+
 
     tft.writeTo(L1);    
     DrawFrequencyBarValue();  // This calls ShowBandwidth().  YES, this function is useful here.
