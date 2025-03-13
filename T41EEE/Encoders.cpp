@@ -128,7 +128,7 @@ int32_t filter_change;
     last_filter_pos = filter_pos;
     // Change the FLoCut and FhiCut variables which adjust the DSP filters.
 
-
+if (bands2.bands[ConfigData.currentBand].sideband == Sideband::LOWER or bands2.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
         if (switchFilterSideband == true) { // Adjust and limit FLoCut
           bands2.bands[ConfigData.currentBand].FLoCut = bands2.bands[ConfigData.currentBand].FLoCut + filterEncoderMove * 100 * ENCODER_FACTOR;  
           // Don't allow FLoCut to be less than 100 Hz below FHiCut.
@@ -138,6 +138,7 @@ int32_t filter_change;
           // Don't allow FHiCut to be less than 100 Hz above FLoCut.
           if(bands2.bands[ConfigData.currentBand].FHiCut <= (bands2.bands[ConfigData.currentBand].FLoCut + 100)) bands2.bands[ConfigData.currentBand].FHiCut = bands2.bands[ConfigData.currentBand].FLoCut + 100;
         }
+}
 
 if (bands2.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands2.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
           bands2.bands[ConfigData.currentBand].FAMCut = bands2.bands[ConfigData.currentBand].FAMCut + filterEncoderMove * 100 * ENCODER_FACTOR;
@@ -151,7 +152,7 @@ if (bands2.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands2
 Serial.printf("filterEncoderMove = %d\n", filterEncoderMove);
 Serial.printf("Encoder bands2.bands[ConfigData.currentBand].FLoCut = %d\n", bands2.bands[ConfigData.currentBand].FLoCut);
 Serial.printf("Encoder bands2.bands[ConfigData.currentBand].FHiCut = %d\n", bands2.bands[ConfigData.currentBand].FHiCut);
-
+Serial.printf(" just before Encoder bands2.bands[ConfigData.currentBand].sideband = %d\n", bands2.bands[ConfigData.currentBand].sideband);
     // =============  AFP 10-27-22
 
     //ControlFilterF();
@@ -190,7 +191,8 @@ Serial.printf("filterHiPositionMarker = %d\n", filterHiPositionMarker);
         //Draw Filter indicator lines on audio plot to Layer 2.
         tft.writeTo(L2);
 
-if (bands2.bands[ConfigData.currentBand].sideband == Sideband::LOWER or bands2.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {        
+if (bands2.bands[ConfigData.currentBand].sideband == Sideband::LOWER or bands2.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
+  Serial.printf("Draw CW/SSB delimiters\n");
         if(not switchFilterSideband) {
         tft.drawLine(BAND_INDICATOR_X - 6 + abs(filterLoPositionMarker), SPECTRUM_BOTTOM - 3, BAND_INDICATOR_X - 6 + abs(filterLoPositionMarker), SPECTRUM_BOTTOM - 112, RA8875_LIGHT_GREY);
         tft.drawLine(BAND_INDICATOR_X - 7 + abs(filterHiPositionMarker), SPECTRUM_BOTTOM - 3, BAND_INDICATOR_X - 7 + abs(filterHiPositionMarker), SPECTRUM_BOTTOM - 112, RA8875_RED);

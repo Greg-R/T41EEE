@@ -1109,7 +1109,7 @@ void SSBCalibrate::DoXmitCarrierCalibrate(bool radioCal, bool shortCal) {
 // Automatic calibration of all bands.  Greg KF5N June 4, 2024
 void SSBCalibrate::RadioCal(bool refineCal) {
   // Warn the user if the radio is not calibrated and refine cal is attempted.
-  if (refineCal && not CalData.SSBradioCalComplete) {
+  if (refineCal and not CalData.SSBradioCalComplete) {
     tft.setFontScale((enum RA8875tsize)2);
     tft.setTextColor(RA8875_RED);
     tft.setCursor(20, 300);
@@ -1122,6 +1122,8 @@ void SSBCalibrate::RadioCal(bool refineCal) {
   ConfigData.centerFreq = TxRxFreq;
   ShowFrequency();
   SetFreq();
+
+
 #ifdef QSE2
   SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
 #endif

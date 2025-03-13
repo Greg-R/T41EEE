@@ -365,7 +365,7 @@ void CWCalibrate::CalibrateEpilogue() {
   Purpose: Combined input/output for the purpose of calibrating the receiver IQ.
 
    Parameter List:
-      int toneFreqIndex
+      int mode, bool radioCal, bool shortCal
 
    Return value:
       void

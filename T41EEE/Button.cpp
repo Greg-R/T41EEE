@@ -887,7 +887,7 @@ void Button::ButtonMode()  //  Greg KF5N March 11, 2025
       ConfigData.xmtMode = RadioMode::FT8_MODE;
       radioState = RadioState::FT8_RECEIVE_STATE;
       bands2.bands[ConfigData.currentBand].mode = RadioMode::FT8_MODE;
-      bands2.bands[ConfigData.currentBand].sideband = Sideband::UPPER;
+      bands2.bands[ConfigData.currentBand].sideband = Sideband::UPPER;  // FT8 always USB.
       break;
     case RadioMode::FT8_MODE:  // Toggle the current mode
       ConfigData.xmtMode = RadioMode::AM_MODE;
