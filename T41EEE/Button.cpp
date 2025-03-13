@@ -718,7 +718,7 @@ void Button::BandSet(int band) {
       break;
   }
   directFreqFlag = 0;
-  ExecuteModeChange();
+//  ExecuteModeChange();
   /*
   EraseSpectrumDisplayContainer();
   DrawSpectrumDisplayContainer();

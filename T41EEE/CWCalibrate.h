@@ -32,6 +32,9 @@ uint32_t count = 0;
 uint32_t warmup = 0;
 uint32_t adjdBMinIndex;
 bool corrChange = false;
+Sideband tempSideband;
+RadioMode tempMode;
+RadioState tempState;
 
 std::vector<float> sub_vectorAmp = std::vector<float>(21);
 std::vector<float> sub_vectorPhase = std::vector<float>(21);
@@ -60,7 +63,7 @@ void warmUpCal(int mode);
 void printCalType(int mode, int IQCalType, bool autoCal, bool autoCalDone);
 void CalibratePreamble(int setZoom);
 void CalibrateEpilogue();
-void DoReceiveCalibrate(int mode, bool radioCal, bool shortCal);
+void DoReceiveCalibrate(int mode, bool radioCal, bool shortCal);  // Mode determines CW versus SSB.
 void DoXmitCalibrate(int mode, bool radioCal, bool shortCal);
 #ifdef QSE2
 void DoXmitCarrierCalibrate(int mode, bool radioCal, bool shortCal);

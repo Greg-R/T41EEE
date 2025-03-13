@@ -60,7 +60,7 @@ void CWCalibrate::plotCalGraphics(int calType) {
       tft.fillRect(279, SPECTRUM_TOP_Y + 20, 20, 341, DARK_RED);  // Adjusted height due to other graphics changes.  KF5N August 3, 2023
       tft.fillRect(247, SPECTRUM_TOP_Y + 20, 20, 341, RA8875_BLUE);
     } else {
-      if (bands2.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {  //mode == DEMOD_LSB
+      if (bands2.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
         tft.fillRect(215, SPECTRUM_TOP_Y + 20, 20, 341, DARK_RED);
         tft.fillRect(247, SPECTRUM_TOP_Y + 20, 20, 341, RA8875_BLUE);
       }
@@ -112,7 +112,7 @@ void CWCalibrate::printCalType(int mode, int IQCalType, bool autoCal, bool autoC
   if(mode == 1) calName = "Receive SSB";
   tft.setFontScale((enum RA8875tsize)1);
   tft.setTextColor(RA8875_RED);
-  if ((bands2.bands[ConfigData.currentBand].sideband == Sideband::LOWER) && (calTypeFlag == 0)) {
+  if ((bands2.bands[ConfigData.currentBand].sideband == Sideband::LOWER) and (calTypeFlag == 0)) {
     tft.setCursor(35, 260);
     tft.print(calName);
     tft.setCursor(35, 295);
@@ -133,7 +133,7 @@ void CWCalibrate::printCalType(int mode, int IQCalType, bool autoCal, bool autoC
       tft.print("Manual Mode");
     }
   }
-  if ((bands2.bands[ConfigData.currentBand].sideband == Sideband::UPPER) && (calTypeFlag == 0)) {
+  if ((bands2.bands[ConfigData.currentBand].sideband == Sideband::UPPER) and (calTypeFlag == 0)) {
     tft.setCursor(275, 260);
     tft.print(calName);
     tft.setCursor(275, 295);
@@ -154,7 +154,7 @@ void CWCalibrate::printCalType(int mode, int IQCalType, bool autoCal, bool autoC
       tft.print("Manual Mode");
     }
   }
-  if ((bands2.bands[ConfigData.currentBand].sideband == Sideband::LOWER) && (calTypeFlag == 1)) {
+  if ((bands2.bands[ConfigData.currentBand].sideband == Sideband::LOWER) and (calTypeFlag == 1)) {
     tft.setCursor(30, 260);
     tft.print(calName);
     tft.setCursor(30, 295);
@@ -175,7 +175,7 @@ void CWCalibrate::printCalType(int mode, int IQCalType, bool autoCal, bool autoC
       tft.print("Manual Mode");
     }
   }
-  if ((bands2.bands[ConfigData.currentBand].sideband == Sideband::UPPER) && (calTypeFlag == 1)) {
+  if ((bands2.bands[ConfigData.currentBand].sideband == Sideband::UPPER) and (calTypeFlag == 1)) {
     tft.setCursor(290, 260);
     tft.print(calName);
     tft.setCursor(290, 295);
@@ -196,7 +196,7 @@ void CWCalibrate::printCalType(int mode, int IQCalType, bool autoCal, bool autoC
       tft.print("Manual Mode");
     }
   }
-  if ((bands2.bands[ConfigData.currentBand].sideband == Sideband::LOWER) && (calTypeFlag == 2)) {
+  if ((bands2.bands[ConfigData.currentBand].sideband == Sideband::LOWER) and (calTypeFlag == 2)) {
     tft.setCursor(30, 260);
     tft.print(calName);
     tft.setCursor(30, 295);
@@ -217,7 +217,7 @@ void CWCalibrate::printCalType(int mode, int IQCalType, bool autoCal, bool autoC
       tft.print("Manual Mode");
     }
   }
-  if ((bands2.bands[ConfigData.currentBand].sideband == Sideband::UPPER) && (calTypeFlag == 2)) {
+  if ((bands2.bands[ConfigData.currentBand].sideband == Sideband::UPPER) and (calTypeFlag == 2)) {
     tft.setCursor(290, 260);
     tft.print(calName);
     tft.setCursor(290, 295);
@@ -260,6 +260,15 @@ void CWCalibrate::CalibratePreamble(int setZoom) {
   //  radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;                 // KF5N
   transmitPowerLevelTemp = ConfigData.transmitPowerLevel;  //AFP 05-11-23
   cwFreqOffsetTemp = ConfigData.CWOffset;
+    // Remember the mode and state, and restore in the Epilogue.
+  tempMode = bands2.bands[ConfigData.currentBand].mode;
+  tempState = radioState;
+  // Calibrate requires upper or lower sideband.  Change if currently in an AM mode.  Put back in Epilogue.
+  if(bands2.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands2.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
+    tempSideband = bands2.bands[ConfigData.currentBand].sideband;
+    // Use the last upper or lower sideband.
+     bands2.bands[ConfigData.currentBand].sideband = ConfigData.lastSideband[ConfigData.currentBand];
+  }
   ConfigData.CWOffset = 2;                   // 750 Hz for TX calibration.  Epilogue restores user selected offset.
                                              //  userxmtMode = ConfigData.xmtMode;          // Store the user's mode setting.  KF5N July 22, 2023
   userZoomIndex = ConfigData.spectrum_zoom;  // Save the zoom index so it can be reset at the conclusion.  KF5N August 12, 2023
@@ -342,6 +351,12 @@ void CWCalibrate::CalibrateEpilogue() {
   ConfigData.currentScale = userScale;  //  Restore vertical scale to user preference.  KF5N
   ShowSpectrumdBScale();
   ConfigData.transmitPowerLevel = transmitPowerLevelTemp;  // Restore the user's transmit power level setting.  KF5N August 15, 2023
+
+  bands2.bands[ConfigData.currentBand].sideband = tempSideband;
+  bands2.bands[ConfigData.currentBand].mode = tempMode;
+  radioState = tempState;
+
+
   //EEPROMWrite();                                           // Save calibration numbers and configuration.  KF5N August 12, 2023
   zoomIndex = userZoomIndex - 1;
   button.ButtonZoom();          // Restore the user's zoom setting.  Note that this function also modifies ConfigData.spectrum_zoom.
@@ -352,7 +367,7 @@ void CWCalibrate::CalibrateEpilogue() {
   calOnFlag = false;
   RedrawDisplayScreen();
 //  IQChoice = 9;
-  radioState = RadioState::CW_RECEIVE_STATE;  // KF5N
+//  radioState = RadioState::CW_RECEIVE_STATE;  // KF5N
   fftOffset = 0;                              // Some reboots may be caused by large fftOffset values when Auto-Spectrum is on.
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreq();                        // Return Si5351 to normal operation mode.  KF5N

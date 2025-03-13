@@ -32,6 +32,9 @@ uint32_t count = 0;
 uint32_t warmup = 0;
 uint32_t adjdBMinIndex;
 bool corrChange = false;
+Sideband tempSideband;
+RadioMode tempMode;
+RadioState tempState;
 
 int Zoom_FFT_M1;
 //int Zoom_FFT_M2;
