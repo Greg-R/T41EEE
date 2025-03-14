@@ -106,8 +106,8 @@ int32_t filter_change;
 // This version limits the result to an fhigh and an flow number.  Note that this function works in concert with EncoderFilter()
 // which is attached to an interrupt.
 void FilterSetSSB() {
-Serial.printf("Encoder first bands2.bands[ConfigData.currentBand].FLoCut = %d\n", bands2.bands[ConfigData.currentBand].FLoCut);
-Serial.printf("Encoder first bands2.bands[ConfigData.currentBand].FHiCut = %d\n", bands2.bands[ConfigData.currentBand].FHiCut);
+//Serial.printf("Encoder first bands2.bands[ConfigData.currentBand].FLoCut = %d\n", bands2.bands[ConfigData.currentBand].FLoCut);
+//Serial.printf("Encoder first bands2.bands[ConfigData.currentBand].FHiCut = %d\n", bands2.bands[ConfigData.currentBand].FHiCut);
 int32_t filter_change;
   if (filter_pos != last_filter_pos) {  // This decision is required as this function is required to be used in many locations.  KF5N April 21, 2024
     tft.writeTo(L2);  // Clear layer 2.  KF5N July 31, 2023
@@ -149,10 +149,10 @@ if (bands2.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands2
       volumeChangeFlag = true;
   }
 
-Serial.printf("filterEncoderMove = %d\n", filterEncoderMove);
-Serial.printf("Encoder bands2.bands[ConfigData.currentBand].FLoCut = %d\n", bands2.bands[ConfigData.currentBand].FLoCut);
-Serial.printf("Encoder bands2.bands[ConfigData.currentBand].FHiCut = %d\n", bands2.bands[ConfigData.currentBand].FHiCut);
-Serial.printf(" just before Encoder bands2.bands[ConfigData.currentBand].sideband = %d\n", bands2.bands[ConfigData.currentBand].sideband);
+//Serial.printf("filterEncoderMove = %d\n", filterEncoderMove);
+//Serial.printf("Encoder bands2.bands[ConfigData.currentBand].FLoCut = %d\n", bands2.bands[ConfigData.currentBand].FLoCut);
+//Serial.printf("Encoder bands2.bands[ConfigData.currentBand].FHiCut = %d\n", bands2.bands[ConfigData.currentBand].FHiCut);
+//Serial.printf(" just before Encoder bands2.bands[ConfigData.currentBand].sideband = %d\n", bands2.bands[ConfigData.currentBand].sideband);
     // =============  AFP 10-27-22
 
     //ControlFilterF();
@@ -179,8 +179,8 @@ Serial.printf(" just before Encoder bands2.bands[ConfigData.currentBand].sideban
         }
 
 
-Serial.printf("filterLoPositionMarker = %d\n", filterLoPositionMarker);
-Serial.printf("filterHiPositionMarker = %d\n", filterHiPositionMarker);
+//Serial.printf("filterLoPositionMarker = %d\n", filterLoPositionMarker);
+//Serial.printf("filterHiPositionMarker = %d\n", filterHiPositionMarker);
 
         // Flip positions if LSB so that correct delimiter is highlighted.
 //        if (bands2.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
@@ -192,7 +192,7 @@ Serial.printf("filterHiPositionMarker = %d\n", filterHiPositionMarker);
         tft.writeTo(L2);
 
 if (bands2.bands[ConfigData.currentBand].sideband == Sideband::LOWER or bands2.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-  Serial.printf("Draw CW/SSB delimiters\n");
+//  Serial.printf("Draw CW/SSB delimiters\n");
         if(not switchFilterSideband) {
         tft.drawLine(BAND_INDICATOR_X - 6 + abs(filterLoPositionMarker), SPECTRUM_BOTTOM - 3, BAND_INDICATOR_X - 6 + abs(filterLoPositionMarker), SPECTRUM_BOTTOM - 112, RA8875_LIGHT_GREY);
         tft.drawLine(BAND_INDICATOR_X - 7 + abs(filterHiPositionMarker), SPECTRUM_BOTTOM - 3, BAND_INDICATOR_X - 7 + abs(filterHiPositionMarker), SPECTRUM_BOTTOM - 112, RA8875_RED);

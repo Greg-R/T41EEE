@@ -12,6 +12,7 @@ AudioOutputI2SQuad i2s_quadOut;
 AudioControlSGTL5000 sgtl5000_1;  // Controller for the Teensy Audio Adapter.
 AudioConvert_I16toF32 int2Float1;             // Converts Int16 to Float.  See class in AudioStream_F32.h
 AudioEffectGain_F32 micGain(audio_settings);  // Microphone gain control.
+AudioFilterEqualizer_F32 txEqualizer(audio_settings);
 AudioEffectCompressor2_F32 compressor1;       // Open Audio Compressor
 radioCESSB_Z_transmit_F32 cessb1;
 AudioConvert_F32toI16 float2Int1, float2Int2, float2Int3, float2Int4;  // Converts Float to Int16.  See class in AudioStream_F32.h
@@ -34,7 +35,11 @@ AudioConnection_F32 connect3(switch1, 0, mixer1, 0);  // Connect microphone mixe
 AudioConnection_F32 connect4(switch2, 0, mixer1, 1);  // Connect tone for SSB calibration.
 
 AudioConnection_F32 connect5(mixer1, 0, micGain, 0);
-AudioConnection_F32 connect6(micGain, 0, switch3, 0);
+//AudioConnection_F32 connect6(micGain, 0, switch3, 0);
+
+// Audio Equalizer
+AudioConnection_F32 patchCord30(micGain, 0, txEqualizer, 0);
+AudioConnection_F32 patchCord31(txEqualizer, 0, switch3, 0);
 
 AudioConnection_F32 connect7(switch3, 0, compressor1, 0);
 AudioConnection_F32 connect8(compressor1, 0, mixer2, 0);
@@ -57,6 +62,8 @@ AudioConnection connect16(Q_out_R_Ex, 0, i2s_quadOut, 1);  // Q channel to line 
 // Receiver data flow
 AudioEffectCompressor2_F32 compressor2_1;  // Used for audio AGC.
 AudioEffectCompressor2_F32 *pc1 = &compressor2_1;
+//AudioSettings_F32 audio_settings2(192000.0, 128);
+
 AudioEffectGain_F32 speakerVolume, speakerScale, headphoneVolume, headphoneScale, compGain;
 AudioAmplifier testGain;
 AudioMixer4_F32 mixer4;
@@ -72,7 +79,10 @@ AudioConvert_I16toF32 int2Float2;
 AudioConnection patchCord1(i2s_quadIn, 2, ADC_RX_I, 0);  // Receiver I and Q channel data stream.
 AudioConnection patchCord2(i2s_quadIn, 3, ADC_RX_Q, 0);  // This data stream goes to sketch code for processing.
 
-AudioConnection patchCord3(Q_out_L, 0, int2Float2, 0);      // Audio data stream from sketch code.  Receiver audio or CW sidetone.
+AudioConnection patchCord3(Q_out_L, 0, int2Float2, 0);      // 192ksps Audio data stream from sketch code.  Receiver audio or CW sidetone.
+
+
+
 AudioConnection_F32 patchCord4(int2Float2, 0, switch4, 0);  // Used to bypass compressor2_1.
 
 AudioConnection_F32 patchCord5(switch4, 0, compressor2_1, 0);  // Compressor used as audio AGC.
@@ -95,6 +105,15 @@ AudioConnection_F32 patchCord15(headphoneVolume, 0, float2Int4, 0);
 AudioConnection patchCord25(float2Int4, 0, i2s_quadOut, 0);  // Headphone
 AudioConnection patchCord26(float2Int4, 0, i2s_quadOut, 1);  // Headphone
 
+// Some sort of octave band equalizer as a one alternative, 10 bands
+//float32_t fBand1[] = {    40.0,  80.0,   160.0,   320.0,  640.0,  1280.0,   2560.0,   5120.0, 10240.0, 22058.5};
+//float32_t fBand1[] = {    187.5,  375.0,   750.0,   1500.0,  3000.0,  6000.0,   12000.0,   24000.0, 48000, 96000.0};
+float32_t fBand1[] = {    50.0,  70.711,   100.0,   141.421,  200.0,  282.843,   400.0,   565.685, 800.0,   1131.371, 1600.0, 2262.742, 3200.0, 4525.483, 6400.0, 24000.0};
+//float32_t dbBand1[] = {10.0,  2.0, -2.0,  -5.0, -2.0,  -4.0,   -10.0,   6.0,    10.0,    -100};
+//float32_t dbBand1[] = {-100.0,  -100.0, -100.0,  0.0, -100.0,  -100.0,   -100.0,   -100.0, -100.0,   -100};
+float32_t dbBand1[] = {-100.0,  -100.0,    -100.0,   -100.0,  -100.0,  -100.0,   0.0,    0.0,    0.0,      0.0,      0.0,  -100.0,  -100.0, -100.0,  -100.0, -100.0};
+float32_t equalizeCoeffs[249];
+
 // End dataflow code
 
 void controlAudioOut(AudioState audioState, bool mute);
@@ -113,6 +132,8 @@ void initializeAudioPaths() {
   // for a 10 dB increase in input level. The output level at full input is 1 dB below
   // full output.
   basicCompressorBegin(pc1, ConfigData.AGCThreshold, 10.0f);
+
+//  rxEqualizer.equalizerNew(10, &fBand1[0], &dbBand1[0], 30, &equalizeCoeffs[0], 60.0);
 }
 
 
@@ -195,6 +216,9 @@ void SetAudioOperatingState(RadioState operatingState) {
 
       controlAudioOut(ConfigData.audioOut, false);  // Configure audio out; don't mute all.
 
+
+
+
       break;
     case RadioState::SSB_TRANSMIT_STATE:
     case RadioState::FT8_TRANSMIT_STATE:
@@ -240,6 +264,12 @@ void SetAudioOperatingState(RadioState operatingState) {
       Q_in_R_Ex.begin();         // Q channel Microphone audio
       patchCord25.disconnect();  // Disconnect headphone.
       patchCord26.disconnect();
+
+      // Update equalizer.  Update first 14 only.  Last two are constant.
+      for(int i = 0; i < 14; i = i + 1) dbBand1[i] = ConfigData.equalizerXmt[i];
+      
+      txEqualizer.equalizerNew(16, &fBand1[0], &dbBand1[0], 249, &equalizeCoeffs[0], 65.0f);
+      updateMic();
       connect15.connect();  // Transmitter I channel
       connect16.connect();  // Transmitter Q channel
 

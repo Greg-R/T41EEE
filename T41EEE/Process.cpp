@@ -400,7 +400,7 @@ void Process::ProcessIQData() {
 
     //============================  Receive EQ  ========================  AFP 08-08-22
     if (ConfigData.receiveEQFlag) {
-      DoReceiveEQ();
+            DoReceiveEQ();
       arm_copy_f32(float_buffer_L, float_buffer_R, FFT_length / 2);
     }
     //============================ End Receive EQ

@@ -42,13 +42,13 @@ Button button;
 
 const char *topMenus[] = { "CW Options", "RF Set", "VFO Select",
                            "Config EEPROM", "Cal EEPROM", "AGC", "Spectrum Options",
-                           "SSB Options",                         // Noise floor removed.  Greg KF5N February 14, 2025
+                           "SSB Options", "EQ Tx Set",                    // Noise floor removed.  Greg KF5N February 14, 2025
                            "EQ Rec Set", "Calibrate", "Bearing" };
 // Pointers to functions which execute the menu options.  Do these functions used the returned integer???
 void (*functionPtr[])() = { &CWOptions, &RFOptions, &VFOSelect,
                             &ConfigDataOptions, &CalDataOptions, &AGCOptions, &SpectrumOptions,
                             //                            button.ButtonMuteAudio, &SSBOptions,
-                            &SSBOptions,
+                            &SSBOptions, &EqualizerXmtOptions,
                             &EqualizerRecOptions, &CalibrateOptions, &BearingMaps };
 
 Rotary volumeEncoder = Rotary(VOLUME_ENCODER_A, VOLUME_ENCODER_B);        //( 2,  3)
@@ -1064,7 +1064,7 @@ FLASHMEM void setup() {
   ConfigData.sdCardPresent = SDPresentCheck();  // JJP 7/18/23
   UpdateDecoderField();                         // Adjust graphics for Morse decoder.
 //  FilterSetSSB();
-  UpdateEqualizerField(ConfigData.receiveEQFlag);
+  UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
   ConfigData.rfGainCurrent = 0;                                                  // Start with lower gain so you don't get blasted.
   button.ExecuteModeChange();
 

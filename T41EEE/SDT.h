@@ -352,7 +352,7 @@ char versionSettings[10] = "T41EEE.9";  // This is required to be the first!  Se
   uint32_t currentFreqB = 7030000;
 
   int equalizerRec[EQUALIZER_CELL_COUNT] = { 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100 };
-  int equalizerXmt[EQUALIZER_CELL_COUNT] = { 0, 0, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 0, 0 };  // Provide equalizer optimized for SSB voice based on Neville's tests.  KF5N November 2, 2023
+  int equalizerXmt[EQUALIZER_CELL_COUNT] = { -50, -50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };  // Provide equalizer optimized for SSB voice based on Neville's tests.  KF5N November 2, 2023
   float micThreshold = -15.0;                                                                              // 4 bytes       AFP 09-22-22
   float micCompRatio = 5.0;
 //  float currentMicAttack = 0.1;
@@ -1074,7 +1074,7 @@ void UpdateAGCField();
 void UpdateAudioField();
 void UpdateCompressionField();
 void UpdateDecoderField();
-void UpdateEqualizerField(bool rxEqState);
+void UpdateEqualizerField(bool rxEqState, bool txEqState);
 void updateMic();  // This updates the Open Audio compressor.
 void UpdateNoiseField();
 void UpdateNotchField();

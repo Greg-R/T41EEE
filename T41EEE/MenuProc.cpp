@@ -253,7 +253,7 @@ void CalibrateOptions() {
     default:
       break;
   }
-  UpdateEqualizerField(ConfigData.receiveEQFlag);
+  UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
 }
 #else  // Not using QSE2 (No carrier calibration)
 void CalibrateOptions() {
@@ -609,8 +609,10 @@ agcSet = SubmenuSelect(AGCChoices, 4, ConfigData.AGCMode);  // G0ORX
 void ProcessEqualizerChoices(int EQType, char *title) {
 //  for (int i = 0; i < EQUALIZER_CELL_COUNT; i++) {
 //  }
-  const char *eqFreq[] = { " 200", " 250", " 315", " 400", " 500", " 630", " 800",
-                           "1000", "1250", "1600", "2000", "2500", "3150", "4000" };
+
+std::string rXeqFreq[14]  { " 200", " 250", " 315", " 400", " 500", " 630", " 800", "1000", "1250", "1600", "2000", "2500", "3150", "4000" };
+std::string tXeqFreq[14]  { "  50", "  71", " 100", " 141", " 200", " 283", " 400", " 566", " 800", "1131", "1600", "2263", "3200", "4526" };
+
   int yLevel[EQUALIZER_CELL_COUNT];  // EQUALIZER_CELL_COUNT 14
 
   int columnIndex;
@@ -664,7 +666,7 @@ void ProcessEqualizerChoices(int EQType, char *title) {
   for (iFreq = 0; iFreq < EQUALIZER_CELL_COUNT; iFreq++) {
     tft.fillRect(xOrigin + (barWidth + 4) * iFreq, barTopY - (yLevel[iFreq] - DEFAULT_EQUALIZER_BAR), barWidth, yLevel[iFreq], RA8875_CYAN);
     tft.setCursor(xOrigin + (barWidth + 4) * iFreq, yOrigin + high - tft.getFontHeight() * 2);
-    tft.print(eqFreq[iFreq]);
+    if(EQType == 0) tft.print(rXeqFreq[iFreq].c_str()); else tft.print(tXeqFreq[iFreq].c_str());
     tft.setCursor(xOrigin + (barWidth + 4) * iFreq + tft.getFontWidth() * 1.5, yOrigin + high + tft.getFontHeight() * 2);
     tft.print(yLevel[iFreq]);
   }
@@ -775,7 +777,7 @@ void EqualizerRecOptions() {
   }
   eeprom.ConfigDataWrite();
   RedrawDisplayScreen();
-  UpdateEqualizerField(ConfigData.receiveEQFlag);
+  UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
 }
 
 
@@ -787,9 +789,9 @@ void EqualizerRecOptions() {
 
   Return value
     int           an index into the band array
-*****
+*****/
 void EqualizerXmtOptions() {
-  const char *XmtEQChoices[] = { "TX EQ On", "TX EQ Off", "TX EQSet", "Cancel" };  // Add code practice oscillator
+  const std::string XmtEQChoices[] = { "TX EQ On", "TX EQ Off", "TX EQSet", "Cancel" };  // Add code practice oscillator
   int EQChoice = 0;
 
   EQChoice = SubmenuSelect(XmtEQChoices, 4, 0);
@@ -807,12 +809,11 @@ void EqualizerXmtOptions() {
     case 3:  // Do nothing and exit.
       break;
   }
-  ConfigDataWrite();
+  eeprom.ConfigDataWrite();
   RedrawDisplayScreen();
   UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
-  //  return 0;
 }
-*/
+
 
 
 /*****
