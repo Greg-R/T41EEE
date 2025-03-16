@@ -214,23 +214,23 @@ void FilterBandwidth()
 {
   AudioNoInterrupts();
 
-Serial.printf("FilterBandwidth()\n");
-Serial.printf("bands2.bands[ConfigData.currentBand].FHiCut = %d bands2.bands[ConfigData.currentBand].FLoCut = %d\n", bands2.bands[ConfigData.currentBand].FHiCut, bands2.bands[ConfigData.currentBand].FLoCut);
-Serial.printf("bands2.bands[ConfigData.currentBand].FAMCut = %d\n", bands2.bands[ConfigData.currentBand].FAMCut);
-Serial.printf("bands2.bands[ConfigData.currentBand].sideband = %d\n", bands2.bands[ConfigData.currentBand].sideband);
+//Serial.printf("FilterBandwidth()\n");
+//Serial.printf("bands.bands[ConfigData.currentBand].FHiCut = %d bands.bands[ConfigData.currentBand].FLoCut = %d\n", bands.bands[ConfigData.currentBand].FHiCut, bands.bands[ConfigData.currentBand].FLoCut);
+//Serial.printf("bands.bands[ConfigData.currentBand].FAMCut = %d\n", bands.bands[ConfigData.currentBand].FAMCut);
+//Serial.printf("bands.bands[ConfigData.currentBand].sideband = %d\n", bands.bands[ConfigData.currentBand].sideband);
 
 
 // The filter must be set up differently for AM and SAM modes.
-if(bands2.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE or bands2.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE or bands2.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) {
+if(bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE or bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE or bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) {
 
-switch(bands2.bands[ConfigData.currentBand].sideband) {
+switch(bands.bands[ConfigData.currentBand].sideband) {
 
 case Sideband::LOWER:
-  CalcCplxFIRCoeffs(FIR_Coef_I, FIR_Coef_Q, m_NumTaps, static_cast<float>(-bands2.bands[ConfigData.currentBand].FHiCut), static_cast<float>(-bands2.bands[ConfigData.currentBand].FLoCut), static_cast<float>(SR[SampleRate].rate / DF));
+  CalcCplxFIRCoeffs(FIR_Coef_I, FIR_Coef_Q, m_NumTaps, static_cast<float>(-bands.bands[ConfigData.currentBand].FHiCut), static_cast<float>(-bands.bands[ConfigData.currentBand].FLoCut), static_cast<float>(SR[SampleRate].rate / DF));
 break;
 
 case Sideband::UPPER:
-CalcCplxFIRCoeffs(FIR_Coef_I, FIR_Coef_Q, m_NumTaps, static_cast<float>(bands2.bands[ConfigData.currentBand].FLoCut), static_cast<float>(bands2.bands[ConfigData.currentBand].FHiCut), static_cast<float>(SR[SampleRate].rate / DF));
+CalcCplxFIRCoeffs(FIR_Coef_I, FIR_Coef_Q, m_NumTaps, static_cast<float>(bands.bands[ConfigData.currentBand].FLoCut), static_cast<float>(bands.bands[ConfigData.currentBand].FHiCut), static_cast<float>(SR[SampleRate].rate / DF));
 break;
 
 default:
@@ -238,15 +238,15 @@ break;
 }
 }
 
-if(bands2.bands[ConfigData.currentBand].mode == RadioMode::AM_MODE or bands2.bands[ConfigData.currentBand].mode == RadioMode::SAM_MODE) {
-  CalcCplxFIRCoeffs(FIR_Coef_I, FIR_Coef_Q, m_NumTaps, static_cast<float>(-bands2.bands[ConfigData.currentBand].FAMCut), static_cast<float>(bands2.bands[ConfigData.currentBand].FAMCut), static_cast<float>(SR[SampleRate].rate / DF));
+if(bands.bands[ConfigData.currentBand].mode == RadioMode::AM_MODE or bands.bands[ConfigData.currentBand].mode == RadioMode::SAM_MODE) {
+  CalcCplxFIRCoeffs(FIR_Coef_I, FIR_Coef_Q, m_NumTaps, static_cast<float>(-bands.bands[ConfigData.currentBand].FAMCut), static_cast<float>(bands.bands[ConfigData.currentBand].FAMCut), static_cast<float>(SR[SampleRate].rate / DF));
 }
 InitFilterMask();
 
   // also adjust IIR AM filter
-  //int filter_BW_highest = bands2.bands[ConfigData.currentBand].FHiCut;
-  //if (filter_BW_highest < -bands2.bands[ConfigData.currentBand].FLoCut) {
-  // filter_BW_highest = -bands2.bands[ConfigData.currentBand].FLoCut;
+  //int filter_BW_highest = bands.bands[ConfigData.currentBand].FHiCut;
+  //if (filter_BW_highest < -bands.bands[ConfigData.currentBand].FLoCut) {
+  // filter_BW_highest = -bands.bands[ConfigData.currentBand].FLoCut;
   // }
   //SetIIRCoeffs((float32_t)filter_BW_highest, 1.3, (float32_t)SR[SampleRate].rate / DF, 0); // 1st stage
 
@@ -309,28 +309,28 @@ void ControlFilterF()
   // low Fcut must never be larger than high Fcut and vice versa
 
   //== AFP 10-27-22
-  switch (bands2.bands[ConfigData.currentBand].sideband) {
+  switch (bands.bands[ConfigData.currentBand].sideband) {
 //    case DEMOD_IQ:
-//      bands2.bands[ConfigData.currentBand].FLoCut = - bands2.bands[ConfigData.currentBand].FHiCut;
+//      bands.bands[ConfigData.currentBand].FLoCut = - bands.bands[ConfigData.currentBand].FHiCut;
 //      break;
     case Sideband::LOWER:
-      if (bands2.bands[ConfigData.currentBand].FHiCut > 0) bands2.bands[ConfigData.currentBand].FHiCut = -100;
+      if (bands.bands[ConfigData.currentBand].FHiCut > 0) bands.bands[ConfigData.currentBand].FHiCut = -100;
 
       break;
     case Sideband::UPPER:
-      if (bands2.bands[ConfigData.currentBand].FLoCut < 0) bands2.bands[ConfigData.currentBand].FLoCut = 100;  // AFP 10-27-22
+      if (bands.bands[ConfigData.currentBand].FLoCut < 0) bands.bands[ConfigData.currentBand].FLoCut = 100;  // AFP 10-27-22
       break;
     case Sideband::BOTH_AM:
-      bands2.bands[ConfigData.currentBand].FLoCut = - bands2.bands[ConfigData.currentBand].FHiCut;
-      //bands2.bands[ConfigData.currentBand].FHiCut= 4000;
+      bands.bands[ConfigData.currentBand].FLoCut = - bands.bands[ConfigData.currentBand].FHiCut;
+      //bands.bands[ConfigData.currentBand].FHiCut= 4000;
       break;
     case Sideband::BOTH_SAM:               //== AFP 11-04-22
-      bands2.bands[ConfigData.currentBand].FLoCut = - bands2.bands[ConfigData.currentBand].FHiCut;
+      bands.bands[ConfigData.currentBand].FLoCut = - bands.bands[ConfigData.currentBand].FHiCut;
       break;
   }   //== AFP 10-27-22
 
-  Serial.printf("bands2.bands[ConfigData.currentBand].FLoCut = %d\n", bands2.bands[ConfigData.currentBand].FLoCut);
-  Serial.printf("bands2.bands[ConfigData.currentBand].FHiCut = %d\n", bands2.bands[ConfigData.currentBand].FHiCut);
+  Serial.printf("bands.bands[ConfigData.currentBand].FLoCut = %d\n", bands.bands[ConfigData.currentBand].FLoCut);
+  Serial.printf("bands.bands[ConfigData.currentBand].FHiCut = %d\n", bands.bands[ConfigData.currentBand].FHiCut);
 }
 */
 
@@ -347,10 +347,10 @@ void SetDecIntFilters()
      Recalculate decimation and interpolation FIR filters
   ****************************************************************************************/
   int LP_F_help;
-  int filter_BW_highest = bands2.bands[ConfigData.currentBand].FHiCut;
+  int filter_BW_highest = bands.bands[ConfigData.currentBand].FHiCut;
 
-  if (filter_BW_highest < - bands2.bands[ConfigData.currentBand].FLoCut) {
-    filter_BW_highest = - bands2.bands[ConfigData.currentBand].FLoCut;
+  if (filter_BW_highest < - bands.bands[ConfigData.currentBand].FLoCut) {
+    filter_BW_highest = - bands.bands[ConfigData.currentBand].FLoCut;
   }
  LP_F_help = filter_BW_highest;
 

@@ -299,13 +299,12 @@ struct band {
   int AGC_thresh;
 };
 
-extern band bands[];
-
+// Because of the way the Arduino EEPROM write works, it was necessary to wrap the bands[] array in a struct.
 struct Bands {
  band bands[NUMBER_OF_BANDS];
 };
 
-extern Bands bands2;
+extern Bands bands;
 
 // Configuration data structure.
 struct config_t {
@@ -457,12 +456,6 @@ extern calibration_t CalData_temp;
 #include "Process.h"
 
 //------------------------- Global CW Filter declarations ----------
-
-//extern float32_t CW_AudioFilterCoeffs1[];  //AFP 10-18-22
-//extern float32_t CW_AudioFilterCoeffs2[];  //AFP 10-18-22
-//extern float32_t CW_AudioFilterCoeffs3[];  //AFP 10-18-22
-//extern float32_t CW_AudioFilterCoeffs4[];  //AFP 10-18-22
-//extern float32_t CW_AudioFilterCoeffs5[];  //AFP 10-18-22
 
 #define IIR_CW_NUMSTAGES 4
 extern float32_t CW_Filter_Coeffs[];

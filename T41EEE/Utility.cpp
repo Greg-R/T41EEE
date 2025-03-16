@@ -280,11 +280,10 @@ void Calculatedbm() {
     posbin = 64;
   }
 
-  //  determine Lbin and Ubin from ts.dmod_mode and FilterInfo.width
-  //  = determine bandwith separately for lower and upper sideband
-
-  bw_LSB = bands[ConfigData.currentBand].FLoCut;
-  bw_USB = bands[ConfigData.currentBand].FHiCut;
+  //  Determine Lbin and Ubin from ts.dmod_mode and FilterInfo.width.
+  //  LSB and USB filter bandwidth calculated the same way due to mode changes.  Greg KF5N March 16, 2025.
+  bw_LSB = bands.bands[ConfigData.currentBand].FHiCut - bands.bands[ConfigData.currentBand].FLoCut;;
+  bw_USB = bw_LSB;
   // calculate upper and lower limit for determination of signal strength
   // = filter passband is between the lower bin Lbin and the upper bin Ubin
   Lbin = (float32_t)posbin + roundf(bw_LSB / bin_bandwidth);  // bin on the lower/left side
@@ -310,7 +309,7 @@ void Calculatedbm() {
     //#ifdef USE_LOG10FAST
     switch (display_dbm) {
       case DISPLAY_S_METER_DBM:
-        dbm = CalData.dBm_calibration + bands[ConfigData.currentBand].gainCorrection + static_cast<float32_t>(attenuator) + slope * log10f_fast(sum_db) + cons - static_cast<float32_t>(bands[ConfigData.currentBand].RFgain) * 1.5;
+        dbm = CalData.dBm_calibration + bands.bands[ConfigData.currentBand].gainCorrection + static_cast<float32_t>(attenuator) + slope * log10f_fast(sum_db) + cons - static_cast<float32_t>(bands.bands[ConfigData.currentBand].RFgain) * 1.5;
         dbmhz = 0;
         break;
       case DISPLAY_S_METER_DBMHZ:

@@ -1065,7 +1065,7 @@ void VFOSelect() {
     default:  // Cancel
       break;
   }
-  bands2.bands[ConfigData.currentBand].freq = TxRxFreq;
+  bands.bands[ConfigData.currentBand].freq = TxRxFreq;
   SetBand();           // KF5N July 12, 2023
   SetBandRelay(HIGH);  // Required when switching VFOs. KF5N July 12, 2023
   SetFreq();
@@ -1102,8 +1102,9 @@ void ConfigDataOptions() {  //           0               1                2     
   config_t defaultConfig;  // The configuration defaults.
   defaultOpt = SubmenuSelect(ConfigDataOpts, 11, defaultOpt);
   switch (defaultOpt) {
-    case 0:  // Save current ConfigData struct to ConfigData non-volatile memory.
+    case 0:  // Save current ConfigData struct to ConfigData non-volatile memory.  Also save the bands struct at the same time!
       eeprom.ConfigDataWrite();
+      eeprom.BandsWrite();
       break;
 
     case 1:

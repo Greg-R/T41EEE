@@ -45,35 +45,35 @@ int32_t filter_change;
     }
     last_filter_pos = filter_pos;
     // Change the FLoCut and FhiCut variables which adjust the DSP filters.
-    switch (bands2.bands[ConfigData.currentBand].sideband) {
+    switch (bands.bands[ConfigData.currentBand].sideband) {
       case Sideband::LOWER:
         if (switchFilterSideband == false)  // LSB "0" = normal, "1" means change opposite filter.  ButtonFilter() function swaps this.
         {  // Adjust FLoCut and limit FLoCut based on the current frequency of FHiCut.
-          bands2.bands[ConfigData.currentBand].FLoCut = bands2.bands[ConfigData.currentBand].FLoCut - filterEncoderMove * 100 * ENCODER_FACTOR;  
+          bands.bands[ConfigData.currentBand].FLoCut = bands.bands[ConfigData.currentBand].FLoCut - filterEncoderMove * 100 * ENCODER_FACTOR;  
           // Don't allow FLoCut to be less than 100 Hz below FHiCut.
-          if(bands2.bands[ConfigData.currentBand].FLoCut >= (bands2.bands[ConfigData.currentBand].FHiCut - 100)) bands2.bands[ConfigData.currentBand].FLoCut = bands2.bands[ConfigData.currentBand].FHiCut - 100;          
+          if(bands.bands[ConfigData.currentBand].FLoCut >= (bands.bands[ConfigData.currentBand].FHiCut - 100)) bands.bands[ConfigData.currentBand].FLoCut = bands.bands[ConfigData.currentBand].FHiCut - 100;          
         } else if (switchFilterSideband == true) {  // Adjust and limit FHiCut.
-          bands2.bands[ConfigData.currentBand].FHiCut = bands2.bands[ConfigData.currentBand].FHiCut - filterEncoderMove * 100 * ENCODER_FACTOR;
-          if(bands2.bands[ConfigData.currentBand].FHiCut >= -100) bands2.bands[ConfigData.currentBand].FHiCut = -100;  // Don't allow FLoCut to go above -100.
+          bands.bands[ConfigData.currentBand].FHiCut = bands.bands[ConfigData.currentBand].FHiCut - filterEncoderMove * 100 * ENCODER_FACTOR;
+          if(bands.bands[ConfigData.currentBand].FHiCut >= -100) bands.bands[ConfigData.currentBand].FHiCut = -100;  // Don't allow FLoCut to go above -100.
           // Don't allow FHiCut to be less than 100 Hz above FLoCut.
-          if(bands2.bands[ConfigData.currentBand].FHiCut <= (bands2.bands[ConfigData.currentBand].FLoCut + 100)) bands2.bands[ConfigData.currentBand].FHiCut = bands2.bands[ConfigData.currentBand].FLoCut + 100;
+          if(bands.bands[ConfigData.currentBand].FHiCut <= (bands.bands[ConfigData.currentBand].FLoCut + 100)) bands.bands[ConfigData.currentBand].FHiCut = bands.bands[ConfigData.currentBand].FLoCut + 100;
         }
         FilterBandwidth();
         break;
       case Sideband::UPPER:
       if (switchFilterSideband == false)
  {  // Adjust and limit FHiCut.
-          bands2.bands[ConfigData.currentBand].FHiCut = bands2.bands[ConfigData.currentBand].FHiCut + filterEncoderMove * 100 * ENCODER_FACTOR;
+          bands.bands[ConfigData.currentBand].FHiCut = bands.bands[ConfigData.currentBand].FHiCut + filterEncoderMove * 100 * ENCODER_FACTOR;
           // Don't allow FHiCut to be less than 100 Hz above FLoCut.
-          if(bands2.bands[ConfigData.currentBand].FHiCut <= (bands2.bands[ConfigData.currentBand].FLoCut + 100)) bands2.bands[ConfigData.currentBand].FHiCut = bands2.bands[ConfigData.currentBand].FLoCut + 100;
+          if(bands.bands[ConfigData.currentBand].FHiCut <= (bands.bands[ConfigData.currentBand].FLoCut + 100)) bands.bands[ConfigData.currentBand].FHiCut = bands.bands[ConfigData.currentBand].FLoCut + 100;
         }        
         else if         (switchFilterSideband == true)
         {  // Adjust FLoCut and limit FLoCut based on the current frequency of FHiCut.
-          bands2.bands[ConfigData.currentBand].FLoCut = bands2.bands[ConfigData.currentBand].FLoCut + filterEncoderMove * 100 * ENCODER_FACTOR;  
+          bands.bands[ConfigData.currentBand].FLoCut = bands.bands[ConfigData.currentBand].FLoCut + filterEncoderMove * 100 * ENCODER_FACTOR;  
           // Don't allow FLoCut to go below 100.
-          if(bands2.bands[ConfigData.currentBand].FLoCut <= 100) bands2.bands[ConfigData.currentBand].FLoCut = 100;  
+          if(bands.bands[ConfigData.currentBand].FLoCut <= 100) bands.bands[ConfigData.currentBand].FLoCut = 100;  
           // Don't allow FLoCut to be less than 100 Hz below FHiCut.
-          if(bands2.bands[ConfigData.currentBand].FLoCut >= (bands2.bands[ConfigData.currentBand].FHiCut - 100)) bands2.bands[ConfigData.currentBand].FLoCut = bands2.bands[ConfigData.currentBand].FHiCut - 100;          
+          if(bands.bands[ConfigData.currentBand].FLoCut >= (bands.bands[ConfigData.currentBand].FHiCut - 100)) bands.bands[ConfigData.currentBand].FLoCut = bands.bands[ConfigData.currentBand].FHiCut - 100;          
         } 
         FilterBandwidth();
         break;
@@ -81,16 +81,16 @@ int32_t filter_change;
 //        break;
 //    }
 
-//      switch (bands2.bands[ConfigData.currentBand].mode) {
+//      switch (bands.bands[ConfigData.currentBand].mode) {
     case Sideband::BOTH_AM:
-        bands2.bands[ConfigData.currentBand].FHiCut = bands2.bands[ConfigData.currentBand].FHiCut - filter_change * 50 * ENCODER_FACTOR;
-        bands2.bands[ConfigData.currentBand].FLoCut = -bands2.bands[ConfigData.currentBand].FHiCut;
+        bands.bands[ConfigData.currentBand].FHiCut = bands.bands[ConfigData.currentBand].FHiCut - filter_change * 50 * ENCODER_FACTOR;
+        bands.bands[ConfigData.currentBand].FLoCut = -bands.bands[ConfigData.currentBand].FHiCut;
         FilterBandwidth();
 //        InitFilterMask();  This function is called by FilterBandwidth().  Greg KF5N April 21, 2024
         break;
       case Sideband::BOTH_SAM:  // AFP 11-03-22
-        bands2.bands[ConfigData.currentBand].FHiCut = bands2.bands[ConfigData.currentBand].FHiCut - filter_change * 50 * ENCODER_FACTOR;
-        bands2.bands[ConfigData.currentBand].FLoCut = -bands2.bands[ConfigData.currentBand].FHiCut;
+        bands.bands[ConfigData.currentBand].FHiCut = bands.bands[ConfigData.currentBand].FHiCut - filter_change * 50 * ENCODER_FACTOR;
+        bands.bands[ConfigData.currentBand].FLoCut = -bands.bands[ConfigData.currentBand].FHiCut;
         FilterBandwidth();
 //        InitFilterMask();
         break;
@@ -106,8 +106,8 @@ int32_t filter_change;
 // This version limits the result to an fhigh and an flow number.  Note that this function works in concert with EncoderFilter()
 // which is attached to an interrupt.
 void FilterSetSSB() {
-//Serial.printf("Encoder first bands2.bands[ConfigData.currentBand].FLoCut = %d\n", bands2.bands[ConfigData.currentBand].FLoCut);
-//Serial.printf("Encoder first bands2.bands[ConfigData.currentBand].FHiCut = %d\n", bands2.bands[ConfigData.currentBand].FHiCut);
+//Serial.printf("Encoder first bands.bands[ConfigData.currentBand].FLoCut = %d\n", bands.bands[ConfigData.currentBand].FLoCut);
+//Serial.printf("Encoder first bands.bands[ConfigData.currentBand].FHiCut = %d\n", bands.bands[ConfigData.currentBand].FHiCut);
 int32_t filter_change;
   if (filter_pos != last_filter_pos) {  // This decision is required as this function is required to be used in many locations.  KF5N April 21, 2024
     tft.writeTo(L2);  // Clear layer 2.  KF5N July 31, 2023
@@ -128,20 +128,20 @@ int32_t filter_change;
     last_filter_pos = filter_pos;
     // Change the FLoCut and FhiCut variables which adjust the DSP filters.
 
-if (bands2.bands[ConfigData.currentBand].sideband == Sideband::LOWER or bands2.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
+if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER or bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
         if (switchFilterSideband == true) { // Adjust and limit FLoCut
-          bands2.bands[ConfigData.currentBand].FLoCut = bands2.bands[ConfigData.currentBand].FLoCut + filterEncoderMove * 100 * ENCODER_FACTOR;  
+          bands.bands[ConfigData.currentBand].FLoCut = bands.bands[ConfigData.currentBand].FLoCut + filterEncoderMove * 100 * ENCODER_FACTOR;  
           // Don't allow FLoCut to be less than 100 Hz below FHiCut.
-          if(bands2.bands[ConfigData.currentBand].FLoCut >= (bands2.bands[ConfigData.currentBand].FHiCut - 100)) bands2.bands[ConfigData.currentBand].FLoCut = bands2.bands[ConfigData.currentBand].FHiCut - 100;          
+          if(bands.bands[ConfigData.currentBand].FLoCut >= (bands.bands[ConfigData.currentBand].FHiCut - 100)) bands.bands[ConfigData.currentBand].FLoCut = bands.bands[ConfigData.currentBand].FHiCut - 100;          
         } else {  // Adjust and limit FHiCut.
-          bands2.bands[ConfigData.currentBand].FHiCut = bands2.bands[ConfigData.currentBand].FHiCut + filterEncoderMove * 100 * ENCODER_FACTOR;
+          bands.bands[ConfigData.currentBand].FHiCut = bands.bands[ConfigData.currentBand].FHiCut + filterEncoderMove * 100 * ENCODER_FACTOR;
           // Don't allow FHiCut to be less than 100 Hz above FLoCut.
-          if(bands2.bands[ConfigData.currentBand].FHiCut <= (bands2.bands[ConfigData.currentBand].FLoCut + 100)) bands2.bands[ConfigData.currentBand].FHiCut = bands2.bands[ConfigData.currentBand].FLoCut + 100;
+          if(bands.bands[ConfigData.currentBand].FHiCut <= (bands.bands[ConfigData.currentBand].FLoCut + 100)) bands.bands[ConfigData.currentBand].FHiCut = bands.bands[ConfigData.currentBand].FLoCut + 100;
         }
 }
 
-if (bands2.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands2.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
-          bands2.bands[ConfigData.currentBand].FAMCut = bands2.bands[ConfigData.currentBand].FAMCut + filterEncoderMove * 100 * ENCODER_FACTOR;
+if (bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
+          bands.bands[ConfigData.currentBand].FAMCut = bands.bands[ConfigData.currentBand].FAMCut + filterEncoderMove * 100 * ENCODER_FACTOR;
 }
 
 
@@ -150,9 +150,9 @@ if (bands2.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands2
   }
 
 //Serial.printf("filterEncoderMove = %d\n", filterEncoderMove);
-//Serial.printf("Encoder bands2.bands[ConfigData.currentBand].FLoCut = %d\n", bands2.bands[ConfigData.currentBand].FLoCut);
-//Serial.printf("Encoder bands2.bands[ConfigData.currentBand].FHiCut = %d\n", bands2.bands[ConfigData.currentBand].FHiCut);
-//Serial.printf(" just before Encoder bands2.bands[ConfigData.currentBand].sideband = %d\n", bands2.bands[ConfigData.currentBand].sideband);
+//Serial.printf("Encoder bands.bands[ConfigData.currentBand].FLoCut = %d\n", bands.bands[ConfigData.currentBand].FLoCut);
+//Serial.printf("Encoder bands.bands[ConfigData.currentBand].FHiCut = %d\n", bands.bands[ConfigData.currentBand].FHiCut);
+//Serial.printf(" just before Encoder bands.bands[ConfigData.currentBand].sideband = %d\n", bands.bands[ConfigData.currentBand].sideband);
     // =============  AFP 10-27-22
 
     //ControlFilterF();
@@ -167,15 +167,15 @@ if (bands2.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands2
         int filterLoPositionMarker{0};
         int filterHiPositionMarker{0};
 //        int temp{0};
-        if (bands2.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-        filterLoPositionMarker = map(bands2.bands[ConfigData.currentBand].FLoCut, 0, 6000, 0, 256);
-        filterHiPositionMarker = map(bands2.bands[ConfigData.currentBand].FHiCut, 0, 6000, 0, 256);
-        } else if (bands2.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-        filterLoPositionMarker = map(bands2.bands[ConfigData.currentBand].FLoCut, 0, 6000, 0, 256);
-        filterHiPositionMarker = map(bands2.bands[ConfigData.currentBand].FHiCut, 0, 6000, 0, 256);
-        }  else if (bands2.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands2.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
-//        filterLoPositionMarker = map(bands2.bands[ConfigData.currentBand].FLoCut, 0, 6000, 0, 256);
-        filterHiPositionMarker = map(bands2.bands[ConfigData.currentBand].FAMCut, 0, 6000, 0, 256);
+        if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
+        filterLoPositionMarker = map(bands.bands[ConfigData.currentBand].FLoCut, 0, 6000, 0, 256);
+        filterHiPositionMarker = map(bands.bands[ConfigData.currentBand].FHiCut, 0, 6000, 0, 256);
+        } else if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
+        filterLoPositionMarker = map(bands.bands[ConfigData.currentBand].FLoCut, 0, 6000, 0, 256);
+        filterHiPositionMarker = map(bands.bands[ConfigData.currentBand].FHiCut, 0, 6000, 0, 256);
+        }  else if (bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
+//        filterLoPositionMarker = map(bands.bands[ConfigData.currentBand].FLoCut, 0, 6000, 0, 256);
+        filterHiPositionMarker = map(bands.bands[ConfigData.currentBand].FAMCut, 0, 6000, 0, 256);
         }
 
 
@@ -183,7 +183,7 @@ if (bands2.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands2
 //Serial.printf("filterHiPositionMarker = %d\n", filterHiPositionMarker);
 
         // Flip positions if LSB so that correct delimiter is highlighted.
-//        if (bands2.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
+//        if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
 //           temp = filterLoPositionMarker;
 //           filterLoPositionMarker = filterHiPositionMarker;
 //           filterHiPositionMarker = temp;
@@ -191,7 +191,7 @@ if (bands2.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands2
         //Draw Filter indicator lines on audio plot to Layer 2.
         tft.writeTo(L2);
 
-if (bands2.bands[ConfigData.currentBand].sideband == Sideband::LOWER or bands2.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
+if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER or bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
 //  Serial.printf("Draw CW/SSB delimiters\n");
         if(not switchFilterSideband) {
         tft.drawLine(BAND_INDICATOR_X - 6 + abs(filterLoPositionMarker), SPECTRUM_BOTTOM - 3, BAND_INDICATOR_X - 6 + abs(filterLoPositionMarker), SPECTRUM_BOTTOM - 112, RA8875_LIGHT_GREY);
@@ -203,7 +203,7 @@ if (bands2.bands[ConfigData.currentBand].sideband == Sideband::LOWER or bands2.b
 }
 
 // In AM modes draw high delimiter only and always make it red (active);
-if (bands2.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands2.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {        
+if (bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {        
 //        if(not switchFilterSideband) {
 //        tft.drawLine(BAND_INDICATOR_X - 6 + abs(filterLoPositionMarker), SPECTRUM_BOTTOM - 3, BAND_INDICATOR_X - 6 + abs(filterLoPositionMarker), SPECTRUM_BOTTOM - 112, RA8875_LIGHT_GREY);
         tft.drawLine(BAND_INDICATOR_X - 7 + abs(filterHiPositionMarker), SPECTRUM_BOTTOM - 3, BAND_INDICATOR_X - 7 + abs(filterHiPositionMarker), SPECTRUM_BOTTOM - 112, RA8875_RED);

@@ -98,12 +98,13 @@ void Eeprom::CalDataWriteSize(int structSize) {
     void
 *****/
 void Eeprom::BandsWrite() {
-  EEPROM.put(BANDS_BASE_ADDRESS + 4, bands2);
+  EEPROM.put(BANDS_BASE_ADDRESS + 4, bands);
+  Serial.printf("bands write!\n");
 }
 
 
 /*****
-  Purpose: This is nothing more than an alias for EEPROM.get(BANDS_BASE_ADDRESS + 4, bands2.bands[NUMBER_OF_BANDS]).
+  Purpose: This is nothing more than an alias for EEPROM.get(BANDS_BASE_ADDRESS + 4, bands.bands[NUMBER_OF_BANDS]).
 
   Parameter list:
   None
@@ -112,7 +113,7 @@ void Eeprom::BandsWrite() {
     void
 *****/
 void Eeprom::BandsRead() {
-  EEPROM.get(BANDS_BASE_ADDRESS + 4, bands2);  // Read as one large chunk
+  EEPROM.get(BANDS_BASE_ADDRESS + 4, bands);  // Read as one large chunk
 }
 
 
@@ -265,25 +266,25 @@ MenuSelect menu = MenuSelect::DEFAULT;
 //    delay(150L);
     menu = readButton();
 
-    if (ConfigData.centerFreq >= bands2.bands[BAND_80M].fBandLow && ConfigData.centerFreq <= bands2.bands[BAND_80M].fBandHigh) {
+    if (ConfigData.centerFreq >= bands.bands[BAND_80M].fBandLow && ConfigData.centerFreq <= bands.bands[BAND_80M].fBandHigh) {
       currentBand2 = BAND_80M;
-    } else if (ConfigData.centerFreq >= bands2.bands[BAND_80M].fBandHigh && ConfigData.centerFreq <= 7000000L) {  // covers 5MHz WWV AFP 11-03-22
+    } else if (ConfigData.centerFreq >= bands.bands[BAND_80M].fBandHigh && ConfigData.centerFreq <= 7000000L) {  // covers 5MHz WWV AFP 11-03-22
       currentBand2 = BAND_80M;
-    } else if (ConfigData.centerFreq >= bands2.bands[BAND_40M].fBandLow && ConfigData.centerFreq <= bands2.bands[BAND_40M].fBandHigh) {
+    } else if (ConfigData.centerFreq >= bands.bands[BAND_40M].fBandLow && ConfigData.centerFreq <= bands.bands[BAND_40M].fBandHigh) {
       currentBand2 = BAND_40M;
-    } else if (ConfigData.centerFreq >= bands2.bands[BAND_40M].fBandHigh && ConfigData.centerFreq <= 14000000L) {  // covers 10MHz WWV AFP 11-03-22
+    } else if (ConfigData.centerFreq >= bands.bands[BAND_40M].fBandHigh && ConfigData.centerFreq <= 14000000L) {  // covers 10MHz WWV AFP 11-03-22
       currentBand2 = BAND_40M;
-    } else if (ConfigData.centerFreq >= bands2.bands[BAND_20M].fBandLow && ConfigData.centerFreq <= bands2.bands[BAND_20M].fBandHigh) {
+    } else if (ConfigData.centerFreq >= bands.bands[BAND_20M].fBandLow && ConfigData.centerFreq <= bands.bands[BAND_20M].fBandHigh) {
       currentBand2 = BAND_20M;
     } else if (ConfigData.centerFreq >= 14000000L && ConfigData.centerFreq <= 18000000L) {  // covers 15MHz WWV AFP 11-03-22
       currentBand2 = BAND_20M;
-    } else if (ConfigData.centerFreq >= bands2.bands[BAND_17M].fBandLow && ConfigData.centerFreq <= bands2.bands[BAND_17M].fBandHigh) {
+    } else if (ConfigData.centerFreq >= bands.bands[BAND_17M].fBandLow && ConfigData.centerFreq <= bands.bands[BAND_17M].fBandHigh) {
       currentBand2 = BAND_17M;
-    } else if (ConfigData.centerFreq >= bands2.bands[BAND_15M].fBandLow && ConfigData.centerFreq <= bands2.bands[BAND_15M].fBandHigh) {
+    } else if (ConfigData.centerFreq >= bands.bands[BAND_15M].fBandLow && ConfigData.centerFreq <= bands.bands[BAND_15M].fBandHigh) {
       currentBand2 = BAND_15M;
-    } else if (ConfigData.centerFreq >= bands2.bands[BAND_12M].fBandLow && ConfigData.centerFreq <= bands2.bands[BAND_12M].fBandHigh) {
+    } else if (ConfigData.centerFreq >= bands.bands[BAND_12M].fBandLow && ConfigData.centerFreq <= bands.bands[BAND_12M].fBandHigh) {
       currentBand2 = BAND_12M;
-    } else if (ConfigData.centerFreq >= bands2.bands[BAND_10M].fBandLow && ConfigData.centerFreq <= bands2.bands[BAND_10M].fBandHigh) {
+    } else if (ConfigData.centerFreq >= bands.bands[BAND_10M].fBandLow && ConfigData.centerFreq <= bands.bands[BAND_10M].fBandHigh) {
       currentBand2 = BAND_10M;
     }
     ConfigData.currentBand = currentBand2;
@@ -311,7 +312,7 @@ MenuSelect menu = MenuSelect::DEFAULT;
     }
     if (menu == MenuSelect::MENU_OPTION_SELECT) {
       EraseSpectrumDisplayContainer();
-//      currentMode = bands2.bands[ConfigData.currentBand].mode;
+//      currentMode = bands.bands[ConfigData.currentBand].mode;
       DrawSpectrumDisplayContainer();
       DrawFrequencyBarValue();
       SetBand();
@@ -328,7 +329,7 @@ MenuSelect menu = MenuSelect::DEFAULT;
       SetFreq();
       ShowSpectrumdBScale();
       ShowSpectrum();
-      //bands2.bands[currentBand].mode = currentBand;
+      //bands.bands[currentBand].mode = currentBand;
       return;
     }
   }
@@ -399,8 +400,8 @@ void Eeprom::EEPROMStartup() {
   CalDataStackSize = sizeof(CalData);
 
   BandsEEPROMSize = EEPROMReadSize(BANDS_BASE_ADDRESS);
-  BandsStackSize = sizeof(band) * NUMBER_OF_BANDS;
-  Serial.printf("BandsStackSize = %d\n", BandsStackSize);
+  BandsStackSize = sizeof(bands);
+//  Serial.printf("BandsStackSize = %d\n", BandsStackSize);
 
   // For minor revisions to the code, we don't want to overwrite the EEPROM.
   // We will assume the switch matrix and other items are calibrated or configured by the user, and are not to be lost.

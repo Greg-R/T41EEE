@@ -521,7 +521,7 @@ void Button::ButtonBandIncrease() {
   directFreqFlag = 0;
   ExecuteModeChange();
   /*
-  SetupMode(bands2.bands[ConfigData.currentBand].mode, bands2.bands[ConfigData.currentBand].sideband);
+  SetupMode(bands.bands[ConfigData.currentBand].mode, bands.bands[ConfigData.currentBand].sideband);
   EraseSpectrumDisplayContainer();
   DrawSpectrumDisplayContainer();
   SetBand();
@@ -540,7 +540,7 @@ void Button::ButtonBandIncrease() {
   DrawFrequencyBarValue();
   UpdateDecoderField();
   FilterSetSSB();
-  Serial.printf("bands2.bands[ConfigData.currentBand].mode = %d\n", bands2.bands[ConfigData.currentBand].mode);
+  Serial.printf("bands.bands[ConfigData.currentBand].mode = %d\n", bands.bands[ConfigData.currentBand].mode);
   */
 }
 
@@ -625,7 +625,7 @@ void Button::ButtonBandDecrease() {
   directFreqFlag = 0;
   ExecuteModeChange();
   /*
-  SetupMode(bands2.bands[ConfigData.currentBand].mode, bands2.bands[ConfigData.currentBand].sideband);
+  SetupMode(bands.bands[ConfigData.currentBand].mode, bands.bands[ConfigData.currentBand].sideband);
   EraseSpectrumDisplayContainer();
   DrawSpectrumDisplayContainer();
   SetBand();
@@ -788,7 +788,7 @@ void Button::ButtonZoom() {
 void Button::ButtonFilter() {
   switchFilterSideband = not switchFilterSideband;
   FilterSetSSB();  // Call this so the delimiter is set to the correct color.
-////  SetupMode(radioMode, bands2.bands[ConfigData.currentBand].sideband);  // No required here?
+////  SetupMode(radioMode, bands.bands[ConfigData.currentBand].sideband);  // No required here?
 ////  ControlFilterF();
 //  FilterBandwidth();
 //  ShowFrequency();
@@ -805,22 +805,22 @@ void Button::ButtonFilter() {
     void
 *****/
 void Button::ButtonSelectSideband() {
-  //if (bands2.bands[ConfigData.currentBand].mode > RadioMode::AM_MODE) {
-  //  bands2.bands[ConfigData.currentBand].mode = RadioMode::SSB_MODE;  // cycle thru demod modes
+  //if (bands.bands[ConfigData.currentBand].mode > RadioMode::AM_MODE) {
+  //  bands.bands[ConfigData.currentBand].mode = RadioMode::SSB_MODE;  // cycle thru demod modes
   //}
-  //  if(bands2.bands[ConfigData.currentBand].mode == 0) radioMode = RadioMode::AM_MODE;
-  //  if(bands2.bands[ConfigData.currentBand].mode > 1) radioMode = RadioMode::AM_MODE;
+  //  if(bands.bands[ConfigData.currentBand].mode == 0) radioMode = RadioMode::AM_MODE;
+  //  if(bands.bands[ConfigData.currentBand].mode > 1) radioMode = RadioMode::AM_MODE;
 
-  switch (bands2.bands[ConfigData.currentBand].sideband) {
+  switch (bands.bands[ConfigData.currentBand].sideband) {
     case Sideband::LOWER:                            // Switch to USB.
-      bands2.bands[ConfigData.currentBand].sideband = Sideband::UPPER;
+      bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER;
       ConfigData.lastSideband[ConfigData.currentBand] = Sideband::UPPER;
 
       break;
     case Sideband::UPPER:                             // Switch to LSB.
     // Leave FT8 in USB.
-    if(bands2.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) bands2.bands[ConfigData.currentBand].sideband = Sideband::UPPER;
-      bands2.bands[ConfigData.currentBand].sideband = Sideband::LOWER;
+    if(bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER;
+      bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER;
       ConfigData.lastSideband[ConfigData.currentBand] = Sideband::LOWER;
 
       break;
@@ -833,7 +833,7 @@ void Button::ButtonSelectSideband() {
       break;
   }
 
-//  SetupMode(bands2.bands[ConfigData.currentBand].mode, bands2.bands[ConfigData.currentBand].sideband);
+//  SetupMode(bands.bands[ConfigData.currentBand].mode, bands.bands[ConfigData.currentBand].sideband);
   ExecuteModeChange();
   /*
   tft.writeTo(L2);  // Destroy the bandwidth indicator bar.  KF5N July 30, 2023
@@ -844,21 +844,21 @@ void Button::ButtonSelectSideband() {
   ShowFrequency();
 ////  ControlFilterF();
 
-  if (bands2.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) BandInformation();
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) BandInformation();
   DrawBandWidthIndicatorBar();  // Restory the bandwidth indicator bar.  KF5N July 30, 2023
 //  FilterBandwidth();
   DrawSMeterContainer();
   AudioInterrupts();
   SetFreq();  // Must update frequency, for example moving from SSB to CW, the RX LO is shifted.  KF5N
-  if ((bands2.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) && (ConfigData.decoderFlag == 1)) {
-  //  bands2.bands[ConfigData.currentBand].mode = RadioMode::CW_MODE;
+  if ((bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) && (ConfigData.decoderFlag == 1)) {
+  //  bands.bands[ConfigData.currentBand].mode = RadioMode::CW_MODE;
     UpdateDecoderField();  // KF5N December 28 2023.
   }
 
   BandInformation();
 
-//  Serial.printf("bands2.bands[ConfigData.currentBand].FLoCut = %d\n", bands2.bands[ConfigData.currentBand].FLoCut);
-//  Serial.printf("bands2.bands[ConfigData.currentBand].FHiCut = %d\n", bands2.bands[ConfigData.currentBand].FHiCut);
+//  Serial.printf("bands.bands[ConfigData.currentBand].FLoCut = %d\n", bands.bands[ConfigData.currentBand].FLoCut);
+//  Serial.printf("bands.bands[ConfigData.currentBand].FHiCut = %d\n", bands.bands[ConfigData.currentBand].FHiCut);
 */
 }
 
@@ -880,38 +880,38 @@ void Button::ButtonMode()  //  Greg KF5N March 11, 2025
     case RadioMode::CW_MODE:  // Toggle the current mode
       ConfigData.xmtMode = RadioMode::SSB_MODE;
       radioState = RadioState::SSB_RECEIVE_STATE;
-      bands2.bands[ConfigData.currentBand].mode = RadioMode::SSB_MODE;
-      bands2.bands[ConfigData.currentBand].sideband = ConfigData.lastSideband[ConfigData.currentBand];
+      bands.bands[ConfigData.currentBand].mode = RadioMode::SSB_MODE;
+      bands.bands[ConfigData.currentBand].sideband = ConfigData.lastSideband[ConfigData.currentBand];
       break;
     case RadioMode::SSB_MODE:
       ConfigData.xmtMode = RadioMode::FT8_MODE;
       radioState = RadioState::FT8_RECEIVE_STATE;
-      bands2.bands[ConfigData.currentBand].mode = RadioMode::FT8_MODE;
-      bands2.bands[ConfigData.currentBand].sideband = Sideband::UPPER;  // FT8 always USB.
+      bands.bands[ConfigData.currentBand].mode = RadioMode::FT8_MODE;
+      bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER;  // FT8 always USB.
       break;
     case RadioMode::FT8_MODE:  // Toggle the current mode
       ConfigData.xmtMode = RadioMode::AM_MODE;
       radioState = RadioState::AM_RECEIVE_STATE;
-      bands2.bands[ConfigData.currentBand].mode = RadioMode::AM_MODE;
-      bands2.bands[ConfigData.currentBand].sideband = Sideband::BOTH_AM;
+      bands.bands[ConfigData.currentBand].mode = RadioMode::AM_MODE;
+      bands.bands[ConfigData.currentBand].sideband = Sideband::BOTH_AM;
       break;
     case RadioMode::AM_MODE:  // Toggle the current mode
       ConfigData.xmtMode = RadioMode::SAM_MODE;
       radioState = RadioState::SAM_RECEIVE_STATE;
-      bands2.bands[ConfigData.currentBand].mode = RadioMode::SAM_MODE;
-      bands2.bands[ConfigData.currentBand].sideband = Sideband::BOTH_SAM;
+      bands.bands[ConfigData.currentBand].mode = RadioMode::SAM_MODE;
+      bands.bands[ConfigData.currentBand].sideband = Sideband::BOTH_SAM;
       break;
     case RadioMode::SAM_MODE:  // Toggle the current mode
       ConfigData.xmtMode = RadioMode::CW_MODE;
       radioState = RadioState::CW_RECEIVE_STATE;
-      bands2.bands[ConfigData.currentBand].mode = RadioMode::CW_MODE;
-      bands2.bands[ConfigData.currentBand].sideband = ConfigData.lastSideband[ConfigData.currentBand];
+      bands.bands[ConfigData.currentBand].mode = RadioMode::CW_MODE;
+      bands.bands[ConfigData.currentBand].sideband = ConfigData.lastSideband[ConfigData.currentBand];
       break;
     default:
       break;
   }
 
-//  SetupMode(bands2.bands[ConfigData.currentBand].mode, bands2.bands[ConfigData.currentBand].sideband);  // Setup mode and sideband(s);
+//  SetupMode(bands.bands[ConfigData.currentBand].mode, bands.bands[ConfigData.currentBand].sideband);  // Setup mode and sideband(s);
   ExecuteModeChange();
   /*
   FilterSetSSB();
@@ -945,7 +945,7 @@ void Button::ButtonMode()  //  Greg KF5N March 11, 2025
   DrawBandWidthIndicatorBar();
 //  lastState = RadioState::NOSTATE;  // This is to force a change in the main loop if the mode changes.
   eeprom.BandsWrite();  // Write the bands array to EEPROM.
-  Serial.printf("bands[ConfigData.currentBand].mode = %d\n", bands2.bands[ConfigData.currentBand].mode);
+  Serial.printf("bands[ConfigData.currentBand].mode = %d\n", bands.bands[ConfigData.currentBand].mode);
   */
 }
 
@@ -1402,17 +1402,17 @@ void Button::ExecuteModeChange() {
   ShowFrequency();
 ////  ControlFilterF();
 
-  if (bands2.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) BandInformation();
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) BandInformation();
   DrawBandWidthIndicatorBar();  // Restory the bandwidth indicator bar.  KF5N July 30, 2023
 //  FilterBandwidth();
   DrawSMeterContainer();
   AudioInterrupts();
   SetFreq();  // Must update frequency, for example moving from SSB to CW, the RX LO is shifted.  KF5N
-  if ((bands2.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) && (ConfigData.decoderFlag == 1)) {
-  //  bands2.bands[ConfigData.currentBand].mode = RadioMode::CW_MODE;
+  if ((bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) && (ConfigData.decoderFlag == 1)) {
+  //  bands.bands[ConfigData.currentBand].mode = RadioMode::CW_MODE;
     UpdateDecoderField();  // KF5N December 28 2023.
   }
 
   BandInformation();
-  eeprom.BandsWrite();
+//  eeprom.BandsWrite();
 }

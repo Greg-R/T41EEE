@@ -122,8 +122,8 @@ void FreqShift2()
   
     if (ConfigData.xmtMode == RadioMode::CW_MODE ) {
       cwFreqOffset = (ConfigData.CWOffset + 6) * 24000 / 256;
-        if (bands2.bands[ConfigData.currentBand].sideband == Sideband::UPPER) sideToneShift = -cwFreqOffset;
-        if (bands2.bands[ConfigData.currentBand].sideband == Sideband::LOWER) sideToneShift =  cwFreqOffset;
+        if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) sideToneShift = -cwFreqOffset;
+        if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) sideToneShift =  cwFreqOffset;
         }
 
   NCO_INC = 2.0 * PI * (NCOFreq + sideToneShift) / SR[SampleRate].rate; // 192000 SPS is the actual sample rate used in the Receive ADC

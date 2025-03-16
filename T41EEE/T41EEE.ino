@@ -109,35 +109,8 @@ float32_t DMAMEM float_buffer_RTemp[2048];
 
 config_t ConfigData;
 calibration_t CalData;
-/*
-band bands[NUMBER_OF_BANDS] {  // Revised band struct with mode and sideband.  Greg KF5N February 14, 2025
-//freq    band low   band hi   name    mode                  sideband         FHiCut FLoCut FAMCut  Gain  type    gain  AGC
-//                                             filter filter             correct     offset
-//DB2OO, 29-AUG-23: take ITU_REGION into account for band limits
-// and changed "gainCorrection" to see the correct dBm value on all bands.
-// Calibration done with TinySA as signal generator with -73dBm levels (S9) at the FT8 frequencies
-// with V010 QSD with the 12V mod of the pre-amp
-#if defined(ITU_REGION) && ITU_REGION == 1
-  { 3700000UL, 3500000, 3800000, "80M", RadioMode::SSB_MODE, Sideband::LOWER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
-    { 7150000, 7000000, 7200000, "40M", RadioMode::SSB_MODE, Sideband::LOWER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
-#elif defined(ITU_REGION) && ITU_REGION == 2
-  { 3700000UL, 3500000, 4000000, "80M", RadioMode::SSB_MODE, Sideband::LOWER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
-    { 7150000, 7000000, 7300000, "40M", RadioMode::SSB_MODE, Sideband::LOWER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
-#elif defined(ITU_REGION) && ITU_REGION == 3
-  { 3700000UL, 3500000, 3900000, "80M", RadioMode::SSB_MODE, Sideband::LOWER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
-    { 7150000, 7000000, 7200000, "40M", RadioMode::SSB_MODE, Sideband::LOWER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
-#endif
-    { 14200000, 14000000, 14350000, "20M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 60 },  //// KF5N experiment with AGC
-    { 18100000, 18068000, 18168000, "17M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
-    { 21200000, 21000000, 21450000, "15M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
-    { 24920000, 24890000, 24990000, "12M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
-  {
-    28350000, 28000000, 29700000, "10M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20
-  }
-};
-*/
 
-Bands bands2 = {{  // Revised band struct with mode and sideband.  Greg KF5N February 14, 2025
+Bands bands = {{  // Revised band struct with mode and sideband.  Greg KF5N February 14, 2025
 //freq    band low   band hi   name    mode                  sideband         FHiCut FLoCut FAMCut  Gain  type    gain  AGC
 //                                             filter filter             correct     offset
 //DB2OO, 29-AUG-23: take ITU_REGION into account for band limits
@@ -204,13 +177,6 @@ arm_fir_interpolate_instance_f32 FIR_int2_I;
 arm_fir_interpolate_instance_f32 FIR_int2_Q;
 arm_lms_norm_instance_f32 LMS_Norm_instance;
 
-//const DEMOD_Descriptor DEMOD[3] = {
-//  //   DEMOD_n, name
-//  { DEMOD_USB, "(USB)" },
-//  { DEMOD_LSB, "(LSB)" },
-//  { DEMOD_AM, "(AM)" },  //AFP09-22-22
-//};
-
 dispSc displayScale[] =  // dbText, dBScale, baseOffset
   {
     { "20 dB/", 10.0, 24 },
@@ -233,14 +199,14 @@ const char *tune_text = "Fast Tune";
 const char *zoomOptions[] = { "1x ", "2x ", "4x ", "8x ", "16x" };
 
 float32_t pixel_per_khz = ((1 << ConfigData.spectrum_zoom) * SPECTRUM_RES * 1000.0 / SR[SampleRate].rate);
-int pos_left = centerLine - (int)(bands2.bands[ConfigData.currentBand].FLoCut / 1000.0 * pixel_per_khz);
+int pos_left = centerLine - (int)(bands.bands[ConfigData.currentBand].FLoCut / 1000.0 * pixel_per_khz);
 
 int centerLine = (MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2;
 int16_t fftOffset = 100;
 int16_t audioFFToffset = 100;
 int fLoCutOld;
 int fHiCutOld;
-int filterWidth = static_cast<int>((bands2.bands[ConfigData.currentBand].FHiCut - bands2.bands[ConfigData.currentBand].FLoCut) / 1000.0 * pixel_per_khz);
+int filterWidth = static_cast<int>((bands.bands[ConfigData.currentBand].FHiCut - bands.bands[ConfigData.currentBand].FLoCut) / 1000.0 * pixel_per_khz);
 int h = SPECTRUM_HEIGHT + 3;
 bool ANR_notch = false;
 uint8_t auto_codec_gain = 1;
@@ -641,7 +607,7 @@ FLASHMEM void InitializeDataArrays() {
   CLEAR_VAR(NR_Gts);                   //memset(NR_Gts, 0, 1024);
   CLEAR_VAR(NR_E);                     //memset(NR_E, 0, 7680);
 
-//  CalcCplxFIRCoeffs(FIR_Coef_I, FIR_Coef_Q, m_NumTaps, (float32_t)bands2.bands[ConfigData.currentBand].FLoCut, (float32_t)bands2.bands[ConfigData.currentBand].FHiCut, (float)SR[SampleRate].rate / DF);
+//  CalcCplxFIRCoeffs(FIR_Coef_I, FIR_Coef_Q, m_NumTaps, (float32_t)bands.bands[ConfigData.currentBand].FLoCut, (float32_t)bands.bands[ConfigData.currentBand].FHiCut, (float)SR[SampleRate].rate / DF);
 
   /****************************************************************************************
      init complex FFTs
@@ -691,9 +657,9 @@ FLASHMEM void InitializeDataArrays() {
   ****************************************************************************************/
   // also adjust IIR AM filter
   // calculate IIR coeffs
-  LP_F_help = bands2.bands[ConfigData.currentBand].FHiCut;
-  if (LP_F_help < -bands2.bands[ConfigData.currentBand].FLoCut)
-    LP_F_help = -bands2.bands[ConfigData.currentBand].FLoCut;
+  LP_F_help = bands.bands[ConfigData.currentBand].FHiCut;
+  if (LP_F_help < -bands.bands[ConfigData.currentBand].FLoCut)
+    LP_F_help = -bands.bands[ConfigData.currentBand].FLoCut;
   SetIIRCoeffs((float32_t)LP_F_help, 1.3, (float32_t)SR[SampleRate].rate / DF, 0);  // 1st stage
   for (int i = 0; i < 5; i++) {                                                     // fill coefficients into the right file
     biquad_lowpass1_coeffs[i] = coefficient_set[i];
@@ -1023,27 +989,27 @@ FLASHMEM void setup() {
   lastState = RadioState::NOSTATE;  // To make sure the receiver will be configured on the first pass through.  KF5N September 3, 2023
   if (ConfigData.xmtMode == RadioMode::CW_MODE) {
     radioState = RadioState::CW_RECEIVE_STATE;
-    bands2.bands[ConfigData.currentBand].mode = RadioMode::CW_MODE;
+    bands.bands[ConfigData.currentBand].mode = RadioMode::CW_MODE;
   //  SetupMode(RadioMode::CW_MODE, bands[ConfigData.currentBand].sideband);
   }
   if (ConfigData.xmtMode == RadioMode::SSB_MODE) {
     radioState = RadioState::SSB_RECEIVE_STATE;
-    bands2.bands[ConfigData.currentBand].mode = RadioMode::SSB_MODE;
+    bands.bands[ConfigData.currentBand].mode = RadioMode::SSB_MODE;
   //  SetupMode(RadioMode::SSB_MODE, bands[ConfigData.currentBand].sideband);
   }
   if (ConfigData.xmtMode == RadioMode::FT8_MODE) {
     radioState = RadioState::FT8_RECEIVE_STATE;
-    bands2.bands[ConfigData.currentBand].mode = RadioMode::FT8_MODE;
+    bands.bands[ConfigData.currentBand].mode = RadioMode::FT8_MODE;
   //  SetupMode(RadioMode::FT8_MODE, Sideband::UPPER);
   }
   if (ConfigData.xmtMode == RadioMode::AM_MODE) {
     radioState = RadioState::AM_RECEIVE_STATE;
-    bands2.bands[ConfigData.currentBand].mode = RadioMode::AM_MODE;
+    bands.bands[ConfigData.currentBand].mode = RadioMode::AM_MODE;
   //  SetupMode(RadioMode::AM_MODE, Sideband::BOTH_AM);
   }
   if (ConfigData.xmtMode == RadioMode::SAM_MODE) {
     radioState = RadioState::SAM_RECEIVE_STATE;
-    bands2.bands[ConfigData.currentBand].mode = RadioMode::SAM_MODE;
+    bands.bands[ConfigData.currentBand].mode = RadioMode::SAM_MODE;
   //  SetupMode(RadioMode::SAM_MODE, Sideband::BOTH_SAM);
   }
 //button.ExecuteModeChange();
@@ -1101,15 +1067,15 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
     button.ExecuteButtonPress(menu);
   }
   //  State detection for modes which can transmit.  AM and SAM don't transmit, so there is not a state transition required.
-  if (bands2.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE and digitalRead(PTT) == HIGH) radioState = RadioState::SSB_RECEIVE_STATE;
-  if (bands2.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE && digitalRead(PTT) == LOW) radioState = RadioState::SSB_TRANSMIT_STATE;
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE and digitalRead(PTT) == HIGH) radioState = RadioState::SSB_RECEIVE_STATE;
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE && digitalRead(PTT) == LOW) radioState = RadioState::SSB_TRANSMIT_STATE;
 
-  if (bands2.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE and SerialUSB1.rts() == LOW) radioState = RadioState::FT8_RECEIVE_STATE;
-  if (bands2.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE and SerialUSB1.rts() == HIGH) radioState = RadioState::FT8_TRANSMIT_STATE;
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE and SerialUSB1.rts() == LOW) radioState = RadioState::FT8_RECEIVE_STATE;
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE and SerialUSB1.rts() == HIGH) radioState = RadioState::FT8_TRANSMIT_STATE;
 
-  if (bands2.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE && (digitalRead(ConfigData.paddleDit) == HIGH && digitalRead(ConfigData.paddleDah) == HIGH)) radioState = RadioState::CW_RECEIVE_STATE;  // Was using symbolic constants. Also changed in code below.  KF5N August 8, 2023
-  if (bands2.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE && (digitalRead(ConfigData.paddleDit) == LOW && ConfigData.xmtMode == RadioMode::CW_MODE && ConfigData.keyType == 0)) radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;
-  if (bands2.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE && (keyPressedOn == 1 && ConfigData.xmtMode == RadioMode::CW_MODE && ConfigData.keyType == 1)) radioState = RadioState::CW_TRANSMIT_KEYER_STATE;
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE && (digitalRead(ConfigData.paddleDit) == HIGH && digitalRead(ConfigData.paddleDah) == HIGH)) radioState = RadioState::CW_RECEIVE_STATE;  // Was using symbolic constants. Also changed in code below.  KF5N August 8, 2023
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE && (digitalRead(ConfigData.paddleDit) == LOW && ConfigData.xmtMode == RadioMode::CW_MODE && ConfigData.keyType == 0)) radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE && (keyPressedOn == 1 && ConfigData.xmtMode == RadioMode::CW_MODE && ConfigData.keyType == 1)) radioState = RadioState::CW_TRANSMIT_KEYER_STATE;
  // if (bands[ConfigData.currentBand].mode > 1) {
  //   radioState = RadioState::AM_RECEIVE_STATE;  // Inhibit transmit in AM demod modes.  KF5N March 21, 2024
  //   radioMode = RadioMode::AM_MODE;             // AM is currently receive only.
@@ -1324,7 +1290,7 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
     // Compensate for audio filter setting.
     // Nominal bandwidth is 2.8kHz.  This will be the 0 dB reference.
     // The upper and lower frequency limits are bands[ConfigData.currentBand].FLoCut and bands[ConfigData.currentBand].FHiCut.
-    audioBW = bands2.bands[ConfigData.currentBand].FHiCut - bands2.bands[ConfigData.currentBand].FLoCut;
+    audioBW = bands.bands[ConfigData.currentBand].FHiCut - bands.bands[ConfigData.currentBand].FLoCut;
     // How many dB between reference and current setting?  Round to integer.
     //    dBoffset = static_cast<int>(40.0 * log10f_fast(audioBW/2800.0));
 //    process.audioGainCompensate = 4 * 2800.0 / audioBW;
