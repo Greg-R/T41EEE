@@ -71,7 +71,7 @@ FLASHMEM void JSON::loadConfiguration(const char *filename, config_t &ConfigData
   for (int i = 0; i < NUMBER_OF_BANDS; i++) ConfigData.rfGain[i] = doc["rfGain"][i];
   ConfigData.autoGain = doc["autoGain"];
   ConfigData.autoSpectrum = doc["autoSpectrum"];
-  ConfigData.spectrumNoiseFloor = doc["spectrumNoiseFloor"];  // This is a constant.  This does not need to be included in user data.
+//  ConfigData.spectrumNoiseFloor = doc["spectrumNoiseFloor"];  // This is a constant.  This does not need to be included in user data.
   ConfigData.centerTuneStep = doc["centerTuneStep"];
   ConfigData.fineTuneStep = doc["fineTuneStep"];
   ConfigData.transmitPowerLevel = doc["transmitPowerLevel"];
@@ -192,7 +192,7 @@ FLASHMEM void JSON::saveConfiguration(const char *filename, const config_t &Conf
   for (int i = 0; i < NUMBER_OF_BANDS; i++) doc["rfGain"][i] = ConfigData.rfGain[i];
   doc["autoGain"] = ConfigData.autoGain;
   doc["autoSpectrum"] = ConfigData.autoSpectrum;
-  doc["spectrumNoiseFloor"] = ConfigData.spectrumNoiseFloor;
+//  doc["spectrumNoiseFloor"] = ConfigData.spectrumNoiseFloor;
   doc["centerTuneStep"] = ConfigData.centerTuneStep;
   doc["fineTuneStep"] = ConfigData.fineTuneStep;
   doc["transmitPowerLevel"] = ConfigData.transmitPowerLevel;

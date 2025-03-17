@@ -1370,7 +1370,7 @@ void Button::ButtonFrequencyEntry() {
   SetFreq();
   ShowFrequency();
   ShowSpectrumdBScale();
-  AudioInterrupts();
+//  AudioInterrupts();
   eeprom.ConfigDataWrite();
   // Draw or not draw CW filter graphics to audio spectrum area.  KF5N July 30, 2023
   tft.writeTo(L2);
@@ -1406,7 +1406,7 @@ void Button::ExecuteModeChange() {
   DrawBandWidthIndicatorBar();  // Restory the bandwidth indicator bar.  KF5N July 30, 2023
 //  FilterBandwidth();
   DrawSMeterContainer();
-  AudioInterrupts();
+//  AudioInterrupts();
   SetFreq();  // Must update frequency, for example moving from SSB to CW, the RX LO is shifted.  KF5N
   if ((bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) && (ConfigData.decoderFlag == 1)) {
   //  bands.bands[ConfigData.currentBand].mode = RadioMode::CW_MODE;
@@ -1414,5 +1414,9 @@ void Button::ExecuteModeChange() {
   }
 
   BandInformation();
+  fftOffset = 140;
 //  eeprom.BandsWrite();
+// Clear buffers to reduce audio transients.
+      ADC_RX_I.clear();
+            ADC_RX_Q.clear();
 }

@@ -13,6 +13,7 @@
 *****/
 void Eeprom::ConfigDataWrite() {
   EEPROM.put(EEPROM_BASE_ADDRESS + 4, ConfigData);
+  Serial.printf("config write!\n");
 }
 
 
@@ -56,6 +57,7 @@ void Eeprom::ConfigDataWriteSize(int structSize) {
 *****/
 void Eeprom::CalDataWrite() {
   EEPROM.put(CAL_BASE_ADDRESS + 4, CalData);
+    Serial.printf("cal write!\n");
 }
 
 

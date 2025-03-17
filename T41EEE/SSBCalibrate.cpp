@@ -348,6 +348,7 @@ void SSBCalibrate::CalibrateEpilogue() {
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreq();                        // Return Si5351 to normal operation mode.  KF5N
   lastState = RadioState::NOSTATE;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 16, 2023
+  powerUp = true;
   return;
 }
 
@@ -1140,7 +1141,7 @@ void SSBCalibrate::RadioCal(bool refineCal) {
   SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
 #endif
   SSBCalibrate::DoXmitCalibrate(true, refineCal);
-  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal);
+  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
 
   button.BandSet(BAND_40M);
 //  bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER;
@@ -1152,7 +1153,7 @@ void SSBCalibrate::RadioCal(bool refineCal) {
   SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
 #endif
   SSBCalibrate::DoXmitCalibrate(true, refineCal);
-  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal);
+  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
 
 
   button.BandSet(BAND_20M);
@@ -1165,7 +1166,7 @@ void SSBCalibrate::RadioCal(bool refineCal) {
   SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
 #endif
   SSBCalibrate::DoXmitCalibrate(true, refineCal);
-  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal);
+  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
 
   button.BandSet(BAND_17M);
 //  bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER;
@@ -1177,7 +1178,7 @@ void SSBCalibrate::RadioCal(bool refineCal) {
   SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
 #endif
   SSBCalibrate::DoXmitCalibrate(true, refineCal);
-  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal);
+  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
 
   button.BandSet(BAND_15M);
 //  bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER;
@@ -1189,7 +1190,7 @@ void SSBCalibrate::RadioCal(bool refineCal) {
   SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
 #endif
   SSBCalibrate::DoXmitCalibrate(true, refineCal);
-  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal);
+  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
 
   button.BandSet(BAND_12M);
 //  bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER;
@@ -1201,7 +1202,7 @@ void SSBCalibrate::RadioCal(bool refineCal) {
   SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
 #endif
   SSBCalibrate::DoXmitCalibrate(true, refineCal);
-  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal);
+  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
 
   button.BandSet(BAND_10M);
 //  bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER;
@@ -1213,7 +1214,7 @@ void SSBCalibrate::RadioCal(bool refineCal) {
   SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
 #endif
   SSBCalibrate::DoXmitCalibrate(true, refineCal);
-  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal);
+  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
 
   // Set flag for initial calibration completed.
   CalData.SSBradioCalComplete = true;

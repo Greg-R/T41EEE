@@ -110,17 +110,19 @@ void Process::ProcessIQData() {
       (band change, mode change, frequency change, the audio chain runs and fills the buffers.
       If the buffers are full, the Teensy needs much more time.
       In that case, we clear the buffers to keep the whole audio chain running smoothly.
-      **********************************************************************************/
+      **********************************************************************************
     if (ADC_RX_I.available() > 25) {
       ADC_RX_I.clear();
       //  n_clear++; // just for debugging to check how often this occurs
       AudioInterrupts();
+      Serial.printf("interrupt\n");
     }
     if (ADC_RX_Q.available() > 25) {
       ADC_RX_Q.clear();
       //  n_clear++; // just for debugging to check how often this occurs
       AudioInterrupts();
     }
+*/
     /**********************************************************************************  AFP 12-31-20
       IQ amplitude and phase correction.  For this scaled down version the I an Q chnnels are
       equalized and phase corrected manually. This is done by applying a correction, which is the difference, to
@@ -390,7 +392,6 @@ void Process::ProcessIQData() {
         arm_copy_f32(float_buffer_R, float_buffer_L, FFT_length / 2);
         break;
       case Sideband::BOTH_SAM:  //AFP 11-03-22
-//      Serial.printf("Decode SAM\n");
         AMDecodeSAM();
         break;
         default:

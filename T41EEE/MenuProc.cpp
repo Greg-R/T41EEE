@@ -110,17 +110,17 @@ void CalibrateOptions() {
       break;
 
     case 2:                                         // CW IQ Receive Cal - Gain and Phase
-      cwcalibrater.DoReceiveCalibrate(0, false, false);  // This function was significantly revised.  KF5N August 16, 2023
+      cwcalibrater.DoReceiveCalibrate(0, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
       eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 3:                                         // CW Xmit Carrier calibration.
-      cwcalibrater.DoXmitCarrierCalibrate(0, false, false);
+      cwcalibrater.DoXmitCarrierCalibrate(0, false, false, true);
       eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 4:                                         // CW IQ Transmit Cal - Gain and Phase  //AFP 2-21-23
-      cwcalibrater.DoXmitCalibrate(0, false, false);  // This function was significantly revised.  KF5N August 16, 2023
+      cwcalibrater.DoXmitCalibrate(0, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
       eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
@@ -138,7 +138,7 @@ void CalibrateOptions() {
       break;  // Missing break.  KF5N August 12, 2023
 
     case 6:                                         // SSB receive cal
-      cwcalibrater.DoReceiveCalibrate(1, false, false);  // This function was significantly revised.  KF5N August 16, 2023
+      cwcalibrater.DoReceiveCalibrate(1, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
       eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
@@ -155,25 +155,25 @@ void CalibrateOptions() {
     case 9:  // CW fully automatic radio calibration.
       cwcalibrater.RadioCal(false);
       calibrateFlag = 0;
-      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
+//      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 10:  // CW full automatic calibration refinement.
       cwcalibrater.RadioCal(true);
       calibrateFlag = 0;
-      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
+//      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 11:  // SSB fully automatic radio calibration.
       ssbcalibrater.RadioCal(false);
       calibrateFlag = 0;
-      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
+//      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 12:  // SSB fully automatic calibration refinement.
       ssbcalibrater.RadioCal(true);
       calibrateFlag = 0;
-      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
+//      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 13:  // dBm level cal.  Was choose CW calibration tone frequency.
@@ -514,8 +514,9 @@ void SpectrumOptions() { /*
   }
   ConfigData.currentScale = spectrumSet;  // Yep...
   eeprom.ConfigDataWrite();
-  RedrawDisplayScreen();
+//  RedrawDisplayScreen();
   ShowSpectrumdBScale();
+  lastState = RadioState::NOSTATE; // Force update of operating state.
 }
 
 
@@ -744,6 +745,7 @@ std::string tXeqFreq[14]  { "  50", "  71", " 100", " 141", " 200", " 283", " 40
   }    // end outer while
   eeprom.ConfigDataWrite();
 }
+  lastState = RadioState::NOSTATE;  // Force update of operating state.
 }
 
 
@@ -765,9 +767,11 @@ void EqualizerRecOptions() {
   switch (EQChoice) {
     case 0:
       ConfigData.receiveEQFlag = true;
+      button.ExecuteModeChange();
       break;
     case 1:
       ConfigData.receiveEQFlag = false;
+      button.ExecuteModeChange();
       break;
     case 2:
       ProcessEqualizerChoices(0, (char *)"Receive Equalizer");
@@ -930,7 +934,7 @@ void RFOptions() {
     case 2:  // Auto-Gain On
       ConfigData.autoGain = true;
       ConfigData.autoSpectrum = false;  // Make sure Auto-Spectrum is off.
-      fftOffset = 0;
+//      fftOffset = 0;
       ShowAutoStatus();
       eeprom.ConfigDataWrite();
       break;
@@ -950,7 +954,7 @@ void RFOptions() {
 
     case 5:  // Auto-Spectrum Off
       ConfigData.autoSpectrum = false;
-      fftOffset = 0;
+//      fftOffset = 0;
       ShowAutoStatus();
       eeprom.ConfigDataWrite();
       break;

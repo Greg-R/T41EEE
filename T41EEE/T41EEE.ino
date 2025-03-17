@@ -1065,6 +1065,9 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   menu = readButton();
   if (menu != MenuSelect::BOGUS_PIN_READ and (radioState != RadioState::SSB_TRANSMIT_STATE) and (radioState != RadioState::FT8_TRANSMIT_STATE) and (radioState != RadioState::CW_TRANSMIT_STRAIGHT_STATE) and (radioState != RadioState::CW_TRANSMIT_KEYER_STATE)) {
     button.ExecuteButtonPress(menu);
+//    Clear the audio queues because they filled up during command.
+      ADC_RX_I.clear();
+      ADC_RX_Q.clear();
   }
   //  State detection for modes which can transmit.  AM and SAM don't transmit, so there is not a state transition required.
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE and digitalRead(PTT) == HIGH) radioState = RadioState::SSB_RECEIVE_STATE;
@@ -1085,15 +1088,17 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   if (lastState != radioState) {
     SetAudioOperatingState(radioState);
     SetFreq();  // Update frequencies if the radio state has changed.
-//    Serial.printf("Set audio state, begin loop. radioState = %d lastState = %d\n", radioState, lastState);
+    button.ExecuteModeChange();
+    Serial.printf("Set audio state, begin loop. radioState = %d lastState = %d\n", radioState, lastState);
   }
 
    if(powerUp) {
    afterPowerUp = afterPowerUp + 1;
       speakerScale.setGain(0);
       headphoneScale.setGain(0);
-   if(afterPowerUp > 12) { 
+   if(afterPowerUp > 10) { 
     powerUp = false;
+    afterPowerUp = 0;
 //    patchCord3.connect();
       speakerScale.setGain(SPEAKERSCALE);
       headphoneScale.setGain(HEADPHONESCALE);
@@ -1290,25 +1295,20 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
     // Compensate for audio filter setting.
     // Nominal bandwidth is 2.8kHz.  This will be the 0 dB reference.
     // The upper and lower frequency limits are bands[ConfigData.currentBand].FLoCut and bands[ConfigData.currentBand].FHiCut.
+    if(bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE or bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE or bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE)
     audioBW = bands.bands[ConfigData.currentBand].FHiCut - bands.bands[ConfigData.currentBand].FLoCut;
-    // How many dB between reference and current setting?  Round to integer.
-    //    dBoffset = static_cast<int>(40.0 * log10f_fast(audioBW/2800.0));
-//    process.audioGainCompensate = 4 * 2800.0 / audioBW;
-        process.audioGainCompensate = 1.0;
- //   volumeAdjust.gain(volumeLog[ConfigData.audioVolume]);
+    else if (bands.bands[ConfigData.currentBand].mode == RadioMode::AM_MODE or bands.bands[ConfigData.currentBand].mode == RadioMode::SAM_MODE)
+    audioBW = bands.bands[ConfigData.currentBand].FAMCut;
+
+    process.audioGainCompensate = 4 * 2800.0 / audioBW;
 
 speakerVolume.setGain(volumeLog[ConfigData.audioVolume]);
 headphoneVolume.setGain(volumeLog[ConfigData.audioVolume]);
 
-    //    int gainAdjust = ConfigData.audioVolume - dBoffset;
     volumeChangeFlag = false;
     UpdateVolumeField();
-    //    Serial.printf("audioBW = %d\n", static_cast<int>(audioBW));
-    //    Serial.printf("ConfigData.audioVolume = %d\n", ConfigData.audioVolume);
-//    Serial.printf("ConfigData.audioVolume = %d\n", ConfigData.audioVolume);
-//    Serial.printf("audioGainCompensate = %d\n", process.audioGainCompensate);
-  }
+        Serial.printf("fftOffset = %d\n", fftOffset);
 
-//  DisplaydbM();
+  }
 
 }  // end loop()

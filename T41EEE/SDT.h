@@ -318,7 +318,7 @@ char versionSettings[10] = "T41EEE.9";  // This is required to be the first!  Se
   int rfGain[NUMBER_OF_BANDS]{ 0 };
   bool autoGain = false;
   bool autoSpectrum = true;
-  int spectrumNoiseFloor = SPECTRUM_NOISE_FLOOR;       // 247  This is a constant.  Eliminate from this struct at next opportunity.
+//  int spectrumNoiseFloor = SPECTRUM_NOISE_FLOOR;       // 247  This is a constant.  Eliminate from this struct at next opportunity.
   uint32_t centerTuneStep = CENTER_TUNE_DEFAULT;       // JJP 7-3-23
   uint32_t fineTuneStep = FINE_TUNE_DEFAULT;           // JJP 7-3-23
   float32_t transmitPowerLevel = DEFAULT_POWER_LEVEL;  // Changed from int to float; Greg KF5N February 12, 2024
@@ -877,6 +877,7 @@ extern const float32_t n_fstop2;
 extern const float32_t n_samplerate;  // samplerate before decimation
 extern double elapsed_micros_idx_t;
 extern double elapsed_micros_sum;
+extern bool powerUp;
 
 //======================================== Function prototypes =========================================================
 

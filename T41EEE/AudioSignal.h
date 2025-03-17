@@ -253,6 +253,16 @@ void SetAudioOperatingState(RadioState operatingState) {
         mixer3_tx.gain(1, 1.0);
       }
 
+      if (ConfigData.xmitEQFlag and bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE) {
+        switch3_tx.setChannel(0);
+        mixer2_tx.gain(0, 1.0);
+        mixer2_tx.gain(1, 0.0);
+      } else {
+        switch3_tx.setChannel(1);  // Bypass compressor.  Must bypass for FT8.
+        mixer2_tx.gain(0, 0.0);
+        mixer2_tx.gain(1, 1.0);
+      }
+
       Q_out_L_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);  // Need this as CW will put into wrong mode.  Greg KF5N August 4, 2024.
       Q_out_R_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
       Q_in_L_Ex.begin();         // I channel Microphone audio
@@ -294,7 +304,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       switch1_tx.setChannel(1);  // Disconnect microphone path.
       switch2_tx.setChannel(0);  // Connect 1 kHz test tone path.
 
-      if (ConfigData.compressorFlag) {
+        if (ConfigData.compressorFlag) {
         switch4_tx.setChannel(0);
         mixer3_tx.gain(0, 1.0);
         mixer3_tx.gain(1, 0.0);
@@ -302,6 +312,16 @@ void SetAudioOperatingState(RadioState operatingState) {
         switch4_tx.setChannel(1);  // Bypass compressor.
         mixer3_tx.gain(0, 0.0);
         mixer3_tx.gain(1, 1.0);
+      }
+
+      if (ConfigData.xmitEQFlag and bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE) {
+        switch3_tx.setChannel(0);
+        mixer2_tx.gain(0, 1.0);
+        mixer2_tx.gain(1, 0.0);
+      } else {
+        switch3_tx.setChannel(1);  // Bypass compressor.  Must bypass for FT8.
+        mixer2_tx.gain(0, 0.0);
+        mixer2_tx.gain(1, 1.0);
       }
 
       Q_out_L_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);  // Need this as CW will put into wrong mode.  Greg KF5N August 4, 2024.

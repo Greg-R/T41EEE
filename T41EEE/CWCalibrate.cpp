@@ -319,7 +319,7 @@ void CWCalibrate::CalibratePreamble(int setZoom) {
    Return value:
       void
  *****/
-void CWCalibrate::CalibrateEpilogue() {
+void CWCalibrate::CalibrateEpilogue(bool saveToEeprom) {
   /*
   Serial.printf("lastState=%d radioState=%d memory_used=%d memory_used_max=%d f32_memory_used=%d f32_memory_used_max=%d\n",
                 lastState,
@@ -355,12 +355,9 @@ void CWCalibrate::CalibrateEpilogue() {
   bands.bands[ConfigData.currentBand].sideband = tempSideband;
   bands.bands[ConfigData.currentBand].mode = tempMode;
   radioState = tempState;
-
-
-  //EEPROMWrite();                                           // Save calibration numbers and configuration.  KF5N August 12, 2023
   zoomIndex = userZoomIndex - 1;
   button.ButtonZoom();          // Restore the user's zoom setting.  Note that this function also modifies ConfigData.spectrum_zoom.
-  eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
+  if(saveToEeprom) eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
   tft.writeTo(L2);       // Clear layer 2.  KF5N July 31, 2023
   tft.clearMemory();
   tft.writeTo(L1);  // Exit function in layer 1.  KF5N August 3, 2023
@@ -372,6 +369,7 @@ void CWCalibrate::CalibrateEpilogue() {
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreq();                        // Return Si5351 to normal operation mode.  KF5N
   lastState = RadioState::NOSTATE;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 16, 2023
+  powerUp = true; // Clip off transient.
   return;
 }
 
@@ -385,7 +383,7 @@ void CWCalibrate::CalibrateEpilogue() {
    Return value:
       void
  *****/
-void CWCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal) {
+void CWCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom) {
   MenuSelect task, lastUsedTask = MenuSelect::DEFAULT;
   //  int lastUsedTask = -2;
   int calFreqShift;
@@ -540,7 +538,7 @@ phaseCal = CalData.IQSSBRXPhaseCorrectionFactor[ConfigData.currentBand];
       case MenuSelect::MENU_OPTION_SELECT:  // Save values and exit calibration.
         tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
 //        IQChoice = 6;
-          CWCalibrate::CalibrateEpilogue();
+          CWCalibrate::CalibrateEpilogue(saveToEeprom);
           return;
         break;
       default:
@@ -772,7 +770,7 @@ CalData.IQSSBRXPhaseCorrectionFactor[ConfigData.currentBand] = phaseCal;
               state = State::exit;
               break;
             } else {
-              CalibrateEpilogue();
+              CalibrateEpilogue(saveToEeprom);
               return;
             }
           }
@@ -810,14 +808,14 @@ CalData.IQSSBRXPhaseCorrectionFactor[ConfigData.currentBand] = phaseCal;
    Return value:
       void
  *****/
-void CWCalibrate::DoXmitCalibrate(int mode, bool radioCal, bool shortCal) {
+void CWCalibrate::DoXmitCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom) {
   //  int task = -1;
   //  int lastUsedTask = -2;
   int freqOffset;
   //  bool corrChange = false;
   float correctionIncrement = 0.001;
   CWCalibrate::State state = State::warmup;  // Start calibration state machine in warmup state.
-  float maxSweepAmp = 0.35;
+  float maxSweepAmp = 0.1;
   float maxSweepPhase = 0.1;
   float increment = 0.002;
   int averageCount = 0;
@@ -943,7 +941,7 @@ void CWCalibrate::DoXmitCalibrate(int mode, bool radioCal, bool shortCal) {
       case MenuSelect::MENU_OPTION_SELECT:  // Save values and exit calibration.
         tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
 //        IQChoice = 6;  // AFP 2-11-23
-  CWCalibrate::CalibrateEpilogue();
+  CWCalibrate::CalibrateEpilogue(saveToEeprom);
   return;
         break;
       default:
@@ -1160,7 +1158,7 @@ void CWCalibrate::DoXmitCalibrate(int mode, bool radioCal, bool shortCal) {
               state = State::exit;
               break;
             } else {
-              CalibrateEpilogue();
+              CalibrateEpilogue(saveToEeprom);
               return;
             }
           }
@@ -1195,7 +1193,7 @@ void CWCalibrate::DoXmitCalibrate(int mode, bool radioCal, bool shortCal) {
       void
  *****/
 #ifdef QSE2
-void CWCalibrate::DoXmitCarrierCalibrate(int mode, bool radioCal, bool shortCal) {
+void CWCalibrate::DoXmitCarrierCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom) {
   MenuSelect task, lastUsedTask = MenuSelect::DEFAULT;
   int freqOffset;
   int correctionIncrement = 10;
@@ -1322,7 +1320,7 @@ void CWCalibrate::DoXmitCarrierCalibrate(int mode, bool radioCal, bool shortCal)
       case MenuSelect::MENU_OPTION_SELECT:  // Save values and exit calibration.
         tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
 //        IQChoice = 6;  // AFP 2-11-23
-  CWCalibrate::CalibrateEpilogue();
+  CWCalibrate::CalibrateEpilogue(saveToEeprom);
   return;
 
         break;
@@ -1539,7 +1537,7 @@ void CWCalibrate::DoXmitCarrierCalibrate(int mode, bool radioCal, bool shortCal)
               state = State::exit;
               break;
             } else {
-              CalibrateEpilogue();
+              CalibrateEpilogue(saveToEeprom);
               return;
             }
           }
@@ -1643,70 +1641,70 @@ void CWCalibrate::RadioCal(bool refineCal) {
   ShowFrequency();
   SetFreq();
 #ifdef QSE2
-  CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal);
+  CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal, false);
 #endif
-  CWCalibrate::DoXmitCalibrate(0, true, refineCal);
-  CWCalibrate::DoReceiveCalibrate(0, true, refineCal);
+  CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
+  CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
   button.BandSet(BAND_40M);
     TxRxFreq = CalData.calFrequencies[1][1];
   ConfigData.centerFreq = TxRxFreq;
   ShowFrequency();
   SetFreq();
 #ifdef QSE2
-  CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal);
+  CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal, false);
 #endif
-  CWCalibrate::DoXmitCalibrate(0, true, refineCal);
-  CWCalibrate::DoReceiveCalibrate(0, true, refineCal);
+  CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
+  CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
   button.BandSet(BAND_20M);
     TxRxFreq = CalData.calFrequencies[2][1];
   ConfigData.centerFreq = TxRxFreq;
   ShowFrequency();
   SetFreq();
 #ifdef QSE2
-  CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal);
+  CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal, false);
 #endif
-  CWCalibrate::DoXmitCalibrate(0, true, refineCal);
-  CWCalibrate::DoReceiveCalibrate(0, true, refineCal);
+  CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
+  CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
   button.BandSet(BAND_17M);
     TxRxFreq = CalData.calFrequencies[3][1];
   ConfigData.centerFreq = TxRxFreq;
   ShowFrequency();
   SetFreq();
 #ifdef QSE2
-  CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal);
+  CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal, false);
 #endif
-  CWCalibrate::DoXmitCalibrate(0, true, refineCal);
-  CWCalibrate::DoReceiveCalibrate(0, true, refineCal);
+  CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
+  CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
   button.BandSet(BAND_15M);
     TxRxFreq = CalData.calFrequencies[4][1];
   ConfigData.centerFreq = TxRxFreq;
   ShowFrequency();
   SetFreq();
 #ifdef QSE2
-  CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal);
+  CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal, false);
 #endif
-  CWCalibrate::DoXmitCalibrate(0, true, refineCal);
-  CWCalibrate::DoReceiveCalibrate(0, true, refineCal);
+  CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
+  CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
   button.BandSet(BAND_12M);
     TxRxFreq = CalData.calFrequencies[5][1];
   ConfigData.centerFreq = TxRxFreq;
   ShowFrequency();
   SetFreq();
 #ifdef QSE2
-  CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal);
+  CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal, false);
 #endif
-  CWCalibrate::DoXmitCalibrate(0, true, refineCal);
-  CWCalibrate::DoReceiveCalibrate(0, true, refineCal);
+  CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
+  CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
   button.BandSet(BAND_10M);
     TxRxFreq = CalData.calFrequencies[6][1];
   ConfigData.centerFreq = TxRxFreq;
   ShowFrequency();
   SetFreq();
 #ifdef QSE2
-  CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal);
+  CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal, false);
 #endif
-  CWCalibrate::DoXmitCalibrate(0, true, refineCal);
-  CWCalibrate::DoReceiveCalibrate(0, true, refineCal);
+  CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
+  CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
   // Set flag for initial calibration completed.
   CalData.CWradioCalComplete = true;
   eeprom.CalDataWrite();

@@ -212,7 +212,7 @@ void DoExciterEQ() //AFP 10-02-22
 *****/
 void FilterBandwidth()
 {
-  AudioNoInterrupts();
+//  AudioNoInterrupts();
 
 //Serial.printf("FilterBandwidth()\n");
 //Serial.printf("bands.bands[ConfigData.currentBand].FHiCut = %d bands.bands[ConfigData.currentBand].FLoCut = %d\n", bands.bands[ConfigData.currentBand].FHiCut, bands.bands[ConfigData.currentBand].FLoCut);
@@ -257,7 +257,7 @@ InitFilterMask();
   // And adjust decimation and interpolation filters
   SetDecIntFilters();
   ShowBandwidth();
-  AudioInterrupts();
+//  AudioInterrupts();
 } // end filter_bandwidth
 
 

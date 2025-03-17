@@ -62,11 +62,11 @@ void ProcessIQData2(int mode);
 void warmUpCal(int mode);
 void printCalType(int mode, int IQCalType, bool autoCal, bool autoCalDone);
 void CalibratePreamble(int setZoom);
-void CalibrateEpilogue();
-void DoReceiveCalibrate(int mode, bool radioCal, bool shortCal);  // Mode determines CW versus SSB.
-void DoXmitCalibrate(int mode, bool radioCal, bool shortCal);
+void CalibrateEpilogue(bool saveToEeprom);
+void DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom);  // Mode determines CW versus SSB.
+void DoXmitCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom);
 #ifdef QSE2
-void DoXmitCarrierCalibrate(int mode, bool radioCal, bool shortCal);
+void DoXmitCarrierCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom);
 #endif
 //const char *calFreqs[2]{ "750 Hz", "3.0 kHz" };
 //void SelectCalFreq();
