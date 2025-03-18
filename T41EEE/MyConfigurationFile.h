@@ -68,16 +68,16 @@
 #define FINE_TUNE_ARRAY           { 10, 20, 50, 100, 200, 500 }
 
 // Uncomment for the original T41 audio mute control.
-//#define UNMUTEAUDIO LOW
-//#define MUTEAUDIO   HIGH
+#define UNMUTEAUDIO LOW
+#define MUTEAUDIO   HIGH
 // Use this for external amp with mute LOW, unmute HIGH.
-#define UNMUTEAUDIO HIGH
-#define MUTEAUDIO   LOW
+//#define UNMUTEAUDIO HIGH
+//#define MUTEAUDIO   LOW
 
 // If using an external amplifier, the gain may need to be adjusted for the best volume range.
 #define SPEAKERSCALE  2.0    // A typical value is 20.  Increase or decrease this value depending on your amplifier gain.
 #define HEADPHONESCALE 10.0
 
-#define FREQUENCYCAL 130000  // The nominal frequency calibrato
+#define FREQUENCYCAL 130000  // The nominal frequency calibration.
 
 
