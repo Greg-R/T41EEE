@@ -244,6 +244,7 @@ void SSBCalibrate::CalibratePreamble(int setZoom) {
   // Remember the mode and state, and restore in the Epilogue.
   tempMode = bands.bands[ConfigData.currentBand].mode;
   tempState = radioState;
+  bands.bands[ConfigData.currentBand].mode = RadioMode::SSB_MODE;
   // Calibrate requires upper or lower sideband.  Change if currently in an AM mode.  Put back in Epilogue.
   if(bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
     tempSideband = bands.bands[ConfigData.currentBand].sideband;
@@ -300,7 +301,7 @@ void SSBCalibrate::CalibratePreamble(int setZoom) {
    Return value:
       void
  *****/
-void SSBCalibrate::CalibrateEpilogue() {
+void SSBCalibrate::CalibrateEpilogue(bool saveToEeprom) {
   /*
   Serial.printf("lastState=%d radioState=%d memory_used=%d memory_used_max=%d f32_memory_used=%d f32_memory_used_max=%d\n",
                 lastState,
@@ -334,10 +335,10 @@ void SSBCalibrate::CalibrateEpilogue() {
   ConfigData.currentScale = userScale;     //  Restore vertical scale to user preference.  KF5N
   ShowSpectrumdBScale();
   ConfigData.transmitPowerLevel = transmitPowerLevelTemp;  // Restore the user's transmit power level setting.  KF5N August 15, 2023
-  eeprom.CalDataWrite();                                    // Save calibration numbers and configuration.  KF5N August 12, 2023
+//  eeprom.CalDataWrite();                                    // Save calibration numbers and configuration.  KF5N August 12, 2023
   zoomIndex = userZoomIndex - 1;
   button.ButtonZoom();          // Restore the user's zoom setting.  Note that this function also modifies ConfigData.spectrum_zoom.
-//  eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
+if(saveToEeprom) eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
   tft.writeTo(L2);       // Clear layer 2.  KF5N July 31, 2023
   tft.clearMemory();
   tft.writeTo(L1);  // Exit function in layer 1.  KF5N August 3, 2023
@@ -362,7 +363,7 @@ void SSBCalibrate::CalibrateEpilogue() {
    Return value:
       void
  *****/
-void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal) {
+void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal, bool saveToEeprom) {
   bool exit = false;
   int freqOffset;
   //  bool corrChange = false;
@@ -709,7 +710,7 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal) {
               state = State::exit;
               break;
             } else {
-              CalibrateEpilogue();
+              CalibrateEpilogue(saveToEeprom);
               return;
             }
           }
@@ -730,7 +731,7 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal) {
     }
     if (exit) break;  //  Exit the while loop.
   }                   // end while
-  SSBCalibrate::CalibrateEpilogue();
+//  SSBCalibrate::CalibrateEpilogue();
 }  // End Transmit calibration
 
 
@@ -744,7 +745,7 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal) {
       void
  *****/
 #ifdef QSE2
-void SSBCalibrate::DoXmitCarrierCalibrate(bool radioCal, bool shortCal) {
+void SSBCalibrate::DoXmitCarrierCalibrate(bool radioCal, bool shortCal, bool saveToEeprom) {
   //  int task = -1;
   //  int lastUsedTask = -2;
   MenuSelect task, lastUsedTask = MenuSelect::DEFAULT;
@@ -1091,7 +1092,7 @@ void SSBCalibrate::DoXmitCarrierCalibrate(bool radioCal, bool shortCal) {
               state = State::exit;
               break;
             } else {
-              SSBCalibrate::CalibrateEpilogue();
+//              SSBCalibrate::CalibrateEpilogue(true);
               return;
             }
           }
@@ -1113,7 +1114,7 @@ void SSBCalibrate::DoXmitCarrierCalibrate(bool radioCal, bool shortCal) {
     //    if (IQChoice == 6) break;  //  Exit the while loop.
     if (exit) break;
   }  // end while
-  SSBCalibrate::CalibrateEpilogue();
+  SSBCalibrate::CalibrateEpilogue(saveToEeprom);
 }  // End carrier calibration
 #endif
 
@@ -1138,9 +1139,9 @@ void SSBCalibrate::RadioCal(bool refineCal) {
 
 
 #ifdef QSE2
-  SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
+  SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal, false);
 #endif
-  SSBCalibrate::DoXmitCalibrate(true, refineCal);
+  SSBCalibrate::DoXmitCalibrate(true, refineCal, false);
   cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
 
   button.BandSet(BAND_40M);
@@ -1150,9 +1151,9 @@ void SSBCalibrate::RadioCal(bool refineCal) {
   ShowFrequency();
   SetFreq();
 #ifdef QSE2
-  SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
+  SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal, false);
 #endif
-  SSBCalibrate::DoXmitCalibrate(true, refineCal);
+  SSBCalibrate::DoXmitCalibrate(true, refineCal, false);
   cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
 
 
@@ -1163,9 +1164,9 @@ void SSBCalibrate::RadioCal(bool refineCal) {
   ShowFrequency();
   SetFreq();
 #ifdef QSE2
-  SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
+  SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal, false);
 #endif
-  SSBCalibrate::DoXmitCalibrate(true, refineCal);
+  SSBCalibrate::DoXmitCalibrate(true, refineCal, false);
   cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
 
   button.BandSet(BAND_17M);
@@ -1175,9 +1176,9 @@ void SSBCalibrate::RadioCal(bool refineCal) {
   ShowFrequency();
   SetFreq();
 #ifdef QSE2
-  SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
+  SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal, false);
 #endif
-  SSBCalibrate::DoXmitCalibrate(true, refineCal);
+  SSBCalibrate::DoXmitCalibrate(true, refineCal, false);
   cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
 
   button.BandSet(BAND_15M);
@@ -1187,9 +1188,9 @@ void SSBCalibrate::RadioCal(bool refineCal) {
   ShowFrequency();
   SetFreq();
 #ifdef QSE2
-  SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
+  SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal, false);
 #endif
-  SSBCalibrate::DoXmitCalibrate(true, refineCal);
+  SSBCalibrate::DoXmitCalibrate(true, refineCal, false);
   cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
 
   button.BandSet(BAND_12M);
@@ -1199,9 +1200,9 @@ void SSBCalibrate::RadioCal(bool refineCal) {
   ShowFrequency();
   SetFreq();
 #ifdef QSE2
-  SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
+  SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal, false);
 #endif
-  SSBCalibrate::DoXmitCalibrate(true, refineCal);
+  SSBCalibrate::DoXmitCalibrate(true, refineCal, false);
   cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
 
   button.BandSet(BAND_10M);
@@ -1211,9 +1212,9 @@ void SSBCalibrate::RadioCal(bool refineCal) {
   ShowFrequency();
   SetFreq();
 #ifdef QSE2
-  SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
+  SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal, false);
 #endif
-  SSBCalibrate::DoXmitCalibrate(true, refineCal);
+  SSBCalibrate::DoXmitCalibrate(true, refineCal, false);
   cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
 
   // Set flag for initial calibration completed.

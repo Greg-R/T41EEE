@@ -41,7 +41,7 @@ AudioConnection_F32 connect6(micGain, 0, switch3_tx, 0);
 AudioConnection_F32 connect7(switch3_tx, 0, txEqualizer, 0);
 AudioConnection_F32 connect8(txEqualizer, 0, mixer2_tx, 0);
 // Bypass equalizer
-AudioConnection_F32 connect9(switch3_tx, 0, mixer2_tx, 1);
+AudioConnection_F32 connect9(switch3_tx, 1, mixer2_tx, 1);
 
 AudioConnection_F32 connect10(mixer2_tx, 0, switch4_tx, 0);
 
@@ -67,7 +67,6 @@ AudioConnection connect20(Q_out_R_Ex, 0, i2s_quadOut, 1);  // Q channel to line 
 // Receiver data flow
 AudioEffectCompressor2_F32 compressor2_1;  // Used for audio AGC.
 AudioEffectCompressor2_F32 *pc1 = &compressor2_1;
-//AudioSettings_F32 audio_settings2(192000.0, 128);
 
 AudioEffectGain_F32 speakerVolume, speakerScale, headphoneVolume, headphoneScale, compGain;
 AudioAmplifier testGain;
@@ -101,7 +100,7 @@ AudioConnection_F32 patchCord11(speakerVolume, 0, float2Int3, 0);
 AudioConnection patchCord12(float2Int3, 0, i2s_quadOut, 2);  //  Speaker audio to PCM5102 via Teensy pin 32.
 
 // Headphone path
-AudioConnection_F32 patchCord13(mixer4, 0, headphoneScale, 0);
+AudioConnection_F32 patchCord13(mixer4, 0, headphoneScale, 0);  // headphoneScale is user centering of headphone volume.
 AudioConnection_F32 patchCord14(headphoneScale, 0, headphoneVolume, 0);
 AudioConnection_F32 patchCord15(headphoneVolume, 0, float2Int4, 0);
 
@@ -191,6 +190,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord3.connect();
       patchCord25.connect();
       patchCord26.connect();
+
       // Configure audio compressor (AGC)
       if (ConfigData.AGCMode == true) {  // Activate compressor2_1 path.
         switch4.setChannel(0);
@@ -238,10 +238,10 @@ void SetAudioOperatingState(RadioState operatingState) {
       //      toneSSBCal.amplitude(0.3);
       //      toneSSBCal.frequency(750.0);
       //      toneSSBCal.begin();
-      mixer1_tx.gain(0, 1);      // microphone audio off.
-      mixer1_tx.gain(1, 0);      // testTone on.
-      switch1_tx.setChannel(0);  // Disconnect microphone path.
-      switch2_tx.setChannel(1);  // Connect 1 kHz test tone path.
+      mixer1_tx.gain(0, 1);      // microphone audio on.
+      mixer1_tx.gain(1, 0);      // testTone off.
+      switch1_tx.setChannel(0);  // Connect microphone path.
+      switch2_tx.setChannel(1);  // Disonnect 1 kHz test tone path.
 
       if (ConfigData.compressorFlag) {
         switch4_tx.setChannel(0);
@@ -258,7 +258,7 @@ void SetAudioOperatingState(RadioState operatingState) {
         mixer2_tx.gain(0, 1.0);
         mixer2_tx.gain(1, 0.0);
       } else {
-        switch3_tx.setChannel(1);  // Bypass compressor.  Must bypass for FT8.
+        switch3_tx.setChannel(1);  // Bypass equalizer.  Must bypass for FT8.
         mixer2_tx.gain(0, 0.0);
         mixer2_tx.gain(1, 1.0);
       }
@@ -277,6 +277,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       updateMic();
       connect17.connect();  // Transmitter I channel
       connect18.connect();  // Transmitter Q channel
+      connect19.connect();  // Transmitter I channel
+      connect20.connect();  // Transmitter Q channel
 
       break;
 
@@ -332,6 +334,14 @@ void SetAudioOperatingState(RadioState operatingState) {
       ADC_RX_Q.begin();
       patchCord25.disconnect();
       patchCord26.disconnect();
+
+            // Update equalizer.  Update first 14 only.  Last two are constant.
+      for(int i = 0; i < 14; i = i + 1) dbBand1[i] = ConfigData.equalizerXmt[i];
+      
+      txEqualizer.equalizerNew(16, &fBand1[0], &dbBand1[0], 249, &equalizeCoeffs[0], 65.0f);
+      updateMic();
+      connect17.connect();  // Transmitter I channel
+      connect18.connect();  // Transmitter Q channel
       connect19.connect();  // Transmitter I channel
       connect20.connect();  // Transmitter Q channel
 
@@ -357,15 +367,15 @@ void SetAudioOperatingState(RadioState operatingState) {
       controlAudioOut(ConfigData.audioOut, false);  // FT8 audio should be headphone only.
       sgtl5000_1.unmuteLineout();
 
-      sgtl5000_1.volume(0.3);  // This is for scaling the sidetone in the headphone output.
-
+      sgtl5000_1.volume(static_cast<float32_t>(ConfigData.sidetoneSpeaker)/100.0);  // This is for scaling the sidetone in the headphone output.  This is
+                               // the only way to adjust sidetone volume in the headphone.
       patchCord25.disconnect();  // Disconnect headphone, which is shared with I and Q transmit.
       patchCord26.disconnect();
       connect19.connect();  // Connect I and Q transmitter output channels.
       connect20.connect();
 
-      speakerVolume.setGain(volumeLog[ConfigData.sidetoneVolume]);    // Adjust sidetone volume.
-      headphoneVolume.setGain(volumeLog[ConfigData.sidetoneVolume]);  // Adjust sidetone volume.
+      speakerVolume.setGain(volumeLog[ConfigData.sidetoneSpeaker]);    // Adjust sidetone volume.
+//      headphoneVolume.setGain(volumeLog[ConfigData.sidetoneVolume]);  // Adjust sidetone volume.
 
       break;
 
@@ -403,18 +413,14 @@ void SetAudioOperatingState(RadioState operatingState) {
       connect19.connect();  // Transmitter I channel
       connect20.connect();  // Transmitter Q channel
 
-
-      //      patchCord3.connect();  // Sidetone
       break;
 
     case RadioState::SET_CW_SIDETONE:
       SampleRate = SAMPLE_RATE_192K;
       SetI2SFreq(SR[SampleRate].rate);
-      //// Speaker and headphones should be unmuted according to current audio out state!!!!!!!!
-      controlAudioOut(ConfigData.audioOut, false);  // Unmute according to audio state for sidetone.
-                                                    ////      patchCord9.disconnect();
-                                                    ////      patchCord10.disconnect();
-      // Baseband CESSB data cleared and ended.
+      sgtl5000_1.muteLineout();
+      // Speaker and headphones should be unmuted according to current audio out state.
+      controlAudioOut(ConfigData.audioOut, false);
 
       ADC_RX_I.end();
       ADC_RX_I.clear();
@@ -426,7 +432,12 @@ void SetAudioOperatingState(RadioState operatingState) {
       Q_in_R_Ex.end();  // Clear Q channel.
       Q_in_R_Ex.clear();
 
-      //      patchCord17.connect();                                    // Sidetone goes into receiver audio path.
+      patchCord25.disconnect();  // Disconnect receiver headphone path, which is shared with I and Q transmit.
+      patchCord26.disconnect();
+
+      //  Disconnect 
+      connect19.connect();  // Transmitter I channel
+      connect20.connect();  // Transmitter Q channel
 
       break;
 

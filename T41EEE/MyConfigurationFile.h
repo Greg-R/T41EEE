@@ -52,14 +52,14 @@
 //#define                           FOURSQRP
 
 // Set multiplication factors for your QSD and QSE boards.
-#define MASTER_CLK_MULT_RX 2
-#define MASTER_CLK_MULT_TX 2
+#define MASTER_CLK_MULT_RX 4
+#define MASTER_CLK_MULT_TX 4
 
 // Uncomment this line for QSE2.
-#define QSE2
+//#define QSE2
 
 // Uncomment this line if using an external PLL module.
-#define PLLMODULE
+//#define PLLMODULE
 
 // Customizable definitions for center and fine tune defaults and increments.  Larry K3PTO June 24, 2024
 #define CENTER_TUNE_DEFAULT		      1000                           // Set to the desired default in the CENTER_TUNE_ARRAY.
@@ -78,6 +78,6 @@
 #define SPEAKERSCALE  2.0    // A typical value is 20.  Increase or decrease this value depending on your amplifier gain.
 #define HEADPHONESCALE 10.0
 
-#define FREQUENCYCAL 130000
+#define FREQUENCYCAL 130000  // The nominal frequency calibrato
 
 

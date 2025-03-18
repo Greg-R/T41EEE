@@ -136,7 +136,7 @@ powerScale = 30.0 * ConfigData.powerOutCW[ConfigData.currentBand];
       Q_out_R_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);  // The process will stall due to disconnection of I and Q patchcords.
       Q_out_L_Ex.play(q15_buffer_LTemp, 2048); // Transmitter
       Q_out_R_Ex.play(q15_buffer_RTemp, 2048); // Transmitter
-      Q_out_L.play(q15_buffer_Sidetone, 2048); // CW sidetone.  Connected to receiver audio path durint transmit.
+      Q_out_L.play(q15_buffer_Sidetone, 2048); // CW sidetone.  Connected to receiver audio path during transmit.
 
 /*
     for (unsigned  i = 0; i < N_BLOCKS_EX; i++) {  //N_BLOCKS_EX=16  BUFFER_SIZE=128 16x128=2048

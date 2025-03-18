@@ -335,7 +335,8 @@ char versionSettings[10] = "T41EEE.9";  // This is required to be the first!  Se
   int keyType = STRAIGHT_KEY_OR_PADDLES;  // straight key = 0, keyer = 1  JJP 7-3-23
   int currentWPM = DEFAULT_KEYER_WPM;     // 4 bytes default = 15 JJP 7-3-23
   int CWOffset = 2;                       // Default is 750 Hz.
-  int sidetoneVolume = 40;                // 4 bytes
+  uint32_t sidetoneSpeaker = 40;                // 4 bytes
+  uint32_t sidetoneHeadphone = 40;
   uint32_t cwTransmitDelay = 1000;
   int activeVFO = 0;                // 2 bytes
   int currentBand = STARTUP_BAND;   // 4 bytes   JJP 7-3-23
@@ -1032,7 +1033,7 @@ int SetI2SFreq(int freq);
 void SetIIRCoeffs(float32_t f0, float32_t Q, float32_t sample_rate, uint8_t filter_type);
 void SetKeyType();
 void SetKeyPowerUp();
-void SetSideToneVolume();  // This function uses encoder to set sidetone volume.  KF5N August 29, 2023
+void SetSideToneVolume(bool speaker);  // This function uses encoder to set sidetone volume.  KF5N August 29, 2023
 uint32_t SetTransmitDelay();
 void SetTransmitDitLength(int wpm);  // JJP 8/19/23
 //void SetupMode(RadioMode mode, Sideband sideband);

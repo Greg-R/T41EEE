@@ -316,12 +316,12 @@ FLASHMEM void SetKeyPowerUp() {
   Purpose: Allow user to set the sidetone volume.  KF5N August 31, 2023
 
   Parameter list:
-    void
+    bool speaker (true for speaker, false for headphone)
 
   Return value;
     void
 *****/
-void SetSideToneVolume() {
+void SetSideToneVolume(bool speaker) {
   int sidetoneDisplay;
   bool keyDown;
   MenuSelect menu;
@@ -333,11 +333,12 @@ void SetSideToneVolume() {
   tft.setCursor(SECONDARY_MENU_X - 48, MENUS_Y + 1);
   tft.print("Sidetone Volume:");
   tft.setCursor(SECONDARY_MENU_X + 220, MENUS_Y + 1);
-  sidetoneDisplay = ConfigData.sidetoneVolume;
+  if(speaker) sidetoneDisplay = ConfigData.sidetoneSpeaker;
+  else sidetoneDisplay = ConfigData.sidetoneHeadphone;
   keyDown = false;
   tft.print(sidetoneDisplay);  // Display in range of 0 to 100.
 
-  digitalWrite(MUTE, UNMUTEAUDIO);  // unmutes audio
+//  digitalWrite(MUTE, UNMUTEAUDIO);  // unmutes audio
 
   while (true) {
     if (digitalRead(ConfigData.paddleDit) == LOW || digitalRead(ConfigData.paddleDah) == LOW) {
@@ -363,13 +364,15 @@ void SetSideToneVolume() {
         sidetoneDisplay = 100;
       tft.fillRect(SECONDARY_MENU_X + 200, MENUS_Y, 70, CHAR_HEIGHT, RA8875_MAGENTA);
       tft.setCursor(SECONDARY_MENU_X + 220, MENUS_Y + 1);
-      ConfigData.sidetoneVolume = sidetoneDisplay;
+      if(speaker) ConfigData.sidetoneSpeaker = sidetoneDisplay;
+      else ConfigData.sidetoneHeadphone = sidetoneDisplay;
       tft.setTextColor(RA8875_WHITE);
       tft.print(sidetoneDisplay);
       filterEncoderMove = 0;
     }
-    speakerVolume.setGain(volumeLog[ConfigData.sidetoneVolume]);  // Sidetone  AFP 10-01-22
-    headphoneVolume.setGain(volumeLog[ConfigData.sidetoneVolume]);                                                               //    modeSelectOutR.gain(1, volumeLog[(int)ConfigData.sidetoneVolume]);  // Right side not used.  KF5N September 1, 2023
+    speakerVolume.setGain(volumeLog[ConfigData.sidetoneSpeaker]);
+    sgtl5000_1.volume(static_cast<float32_t>(ConfigData.sidetoneHeadphone)/100.0);  // This control has a range of 0.0 to 1.0.
+//    headphoneVolume.setGain(volumeLog[ConfigData.sidetoneVolume]);
 //    val = ReadSelectedPushButton();                           // Read pin that controls all switches
     menu = readButton();
     if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
@@ -477,7 +480,7 @@ void ResetHistograms() {
 bool charProcessFlag, blankFlag;
 int currentTime, interElementGap, noSignalTimeStamp;
 char *bigMorseCodeTree = (char *)"-EISH5--4--V---3--UF--------?-2--ARL---------.--.WP------J---1--TNDB6--.--X/-----KC------Y------MGZ7----,Q------O-8------9--0----";
-FASTRUN void DoCWDecoding(int audioValue) {
+void DoCWDecoding(int audioValue) {
 
   for (int i = 0; i < 2; i = i + 1) {
     switch (decodeStates) {
@@ -589,7 +592,7 @@ FASTRUN void DoCWDecoding(int audioValue) {
   Return value;
     void
 *****/
-FASTRUN void DoGapHistogram(long gapLen) {
+void DoGapHistogram(long gapLen) {
   int32_t tempAtom, tempChar;
   int32_t atomIndex, charIndex, firstDit, temp;
   uint32_t offset;
@@ -649,7 +652,7 @@ FASTRUN void DoGapHistogram(long gapLen) {
   void
 
 *****/
-FASTRUN void DoSignalHistogram(long val) {
+void DoSignalHistogram(long val) {
   float compareFactor = 2.0;
   int32_t firstNonEmpty;
   int32_t tempDit, tempDah;

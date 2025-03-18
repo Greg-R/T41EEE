@@ -88,7 +88,8 @@ FLASHMEM void JSON::loadConfiguration(const char *filename, config_t &ConfigData
   ConfigData.keyType = doc["keyType"];
   ConfigData.currentWPM = doc["currentWPM"];
   ConfigData.CWOffset = doc["CWOffset"];  
-  ConfigData.sidetoneVolume = doc["sidetoneVolume"];
+  ConfigData.sidetoneSpeaker = doc["sidetoneSpeaker"];
+  ConfigData.sidetoneHeadphone = doc["sidetoneHeadphone"];
   ConfigData.cwTransmitDelay = doc["cwTransmitDelay"];
   ConfigData.activeVFO = doc["activeVFO"];
   ConfigData.currentBand = doc["currentBand"];
@@ -96,7 +97,6 @@ FLASHMEM void JSON::loadConfiguration(const char *filename, config_t &ConfigData
   ConfigData.currentBandB = doc["currentBandB"];
   ConfigData.currentFreqA = doc["currentFreqA"];
   ConfigData.currentFreqB = doc["currentFreqB"];
-//  ConfigData.freqCorrectionFactor = doc["freqCorrectionFactor"];
   for (int i = 0; i < 14; i++) ConfigData.equalizerRec[i] = doc["equalizerRec"][i];
   for (int i = 0; i < 14; i++) ConfigData.equalizerXmt[i] = doc["equalizerXmt"][i];
   ConfigData.equalizerXmt[0] = doc["equalizerXmt"][0];
@@ -105,7 +105,6 @@ FLASHMEM void JSON::loadConfiguration(const char *filename, config_t &ConfigData
   //ConfigData.currentMicAttack = doc["currentMicAttack"];
   //ConfigData.currentMicRelease = doc["currentMicRelease"];
   ConfigData.micGain = doc["micGain"];
-//  for (int i = 0; i < 18; i++) ConfigData.switchValues[i] = doc["switchValues"][i];
   ConfigData.LPFcoeff = doc["LPFcoeff"];
   ConfigData.NR_PSI = doc["NR_PSI"];
   ConfigData.NR_alpha = doc["NR_alpha"];
@@ -114,18 +113,6 @@ FLASHMEM void JSON::loadConfiguration(const char *filename, config_t &ConfigData
   ConfigData.pll_fmax = doc["pll_fmax"];
   ConfigData.powerOutCW[0] = doc["powerOutCW"][0];
   ConfigData.powerOutSSB[0] = doc["powerOutSSB"][0];
-  /*
-  for (int i = 0; i < 7; i++) ConfigData.CWPowerCalibrationFactor[i] = doc["CWPowerCalibrationFactor"][i];
-  for (int i = 0; i < 7; i++) ConfigData.SSBPowerCalibrationFactor[i] = doc["SSBPowerCalibrationFactor"][i];
-  for (int i = 0; i < 7; i++) ConfigData.IQCWRXAmpCorrectionFactor[i] = doc["IQCWRXAmpCorrectionFactor"][i];
-  for (int i = 0; i < 7; i++) ConfigData.IQCWRXPhaseCorrectionFactor[i] = doc["IQCWRXPhaseCorrectionFactor"][i];
-  for (int i = 0; i < 7; i++) ConfigData.IQCWAmpCorrectionFactor[i] = doc["IQCWAmpCorrectionFactor"][i];
-  for (int i = 0; i < 7; i++) ConfigData.IQCWPhaseCorrectionFactor[i] = doc["IQCWPhaseCorrectionFactor"][i];
-  for (int i = 0; i < 7; i++) ConfigData.IQSSBRXAmpCorrectionFactor[i] = doc["IQSSBRXAmpCorrectionFactor"][i];
-  for (int i = 0; i < 7; i++) ConfigData.IQSSBRXPhaseCorrectionFactor[i] = doc["IQSSBRXPhaseCorrectionFactor"][i];  
-  for (int i = 0; i < 7; i++) ConfigData.IQSSBAmpCorrectionFactor[i] = doc["IQSSBAmpCorrectionFactor"][i];
-  for (int i = 0; i < 7; i++) ConfigData.IQSSBPhaseCorrectionFactor[i] = doc["IQSSBPhaseCorrectionFactor"][i];
-  */
   for (int i = 0; i < 13; i++) ConfigData.favoriteFreqs[i] = doc["favoriteFreqs"][i];
   for (int i = 0; i < 7; i++) {
     for (int j = 0; j < 2; j++) ConfigData.lastFrequencies[i][j] = doc["lastFrequencies"][i][j];
@@ -147,23 +134,7 @@ FLASHMEM void JSON::loadConfiguration(const char *filename, config_t &ConfigData
   ConfigData.compressorFlag = doc["compressorFlag"];
   ConfigData.xmitEQFlag = doc["xmitEQFlag"];
   ConfigData.receiveEQFlag = doc["receiveEQFlag"];
-//  ConfigData.calFreq = doc["calFreq"];
-//  ConfigData.buttonThresholdPressed = doc["buttonThresholdPressed"] | 944;
-//  ConfigData.buttonThresholdReleased = doc["buttonThresholdReleased"] | 964;
-//  ConfigData.buttonRepeatDelay = doc["buttonRepeatDelay"] | 300000;
   ConfigData.autoGain = doc["autoGain"] | true;
-
-//  #ifdef QSE2
-//  for (int i = 0; i < 7; i++) ConfigData.iDCoffsetCW[i] = doc["iDCoffsetCW"][i];
-//  for (int i = 0; i < 7; i++) ConfigData.qDCoffsetCW[i] = doc["qDCoffsetCW"][i];
-//  for (int i = 0; i < 7; i++) ConfigData.iDCoffsetSSB[i] = doc["iDCoffsetSSB"][i];
-//  for (int i = 0; i < 7; i++) ConfigData.qDCoffsetSSB[i] = doc["qDCoffsetSSB"][i];  
-//  ConfigData.dacOffsetCW = doc["dacOffsetCW"] | 0;
-//  ConfigData.dacOffsetSSB = doc["dacOffsetSSB"] | 0; 
-//  #endif
-
-//  ConfigData.CWradioCalComplete = doc["CWradioCalComplete"] | false;
-//  ConfigData.SSBradioCalComplete = doc["SSBradioCalComplete"] | false;
 
   // How to copy strings:
   //  strlcpy(ConfigData.myCall,                  // <- destination
@@ -209,7 +180,8 @@ FLASHMEM void JSON::saveConfiguration(const char *filename, const config_t &Conf
   doc["keyType"] = ConfigData.keyType;
   doc["currentWPM"] = ConfigData.currentWPM;
   doc["CWOffset"] = ConfigData.CWOffset;  
-  doc["sidetoneVolume"] = ConfigData.sidetoneVolume;
+  doc["sidetoneSpeaker"] = ConfigData.sidetoneSpeaker;
+  doc["sidetoneHeadphone"] = ConfigData.sidetoneHeadphone;  
   doc["cwTransmitDelay"] = ConfigData.cwTransmitDelay;
   doc["activeVFO"] = ConfigData.activeVFO;
   doc["currentBand"] = ConfigData.currentBand;
