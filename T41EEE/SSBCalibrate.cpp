@@ -371,6 +371,8 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal, bool saveToEepr
   State state = State::warmup;  // Start calibration state machine in warmup state.
   float maxSweepAmp = 0.1;
   float maxSweepPhase = 0.1;
+//  float32_t amplitude = 0.0;  // Variables to hold amplitude and phase values
+//  float32_t phase = 0.0;      // during the calibration process.
   float increment = 0.002;
   int averageCount = 0;
   IQCalType = 0;  // Begin with gain optimization.
@@ -408,8 +410,17 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal, bool saveToEepr
   }
   SetFreqCal(freqOffset);
   printCalType(calTypeFlag, autoCal, false);
-  // Run this so Phase shows from begining.
-  GetEncoderValueLive(-2.0, 2.0, CalData.IQSSBPhaseCorrectionFactor[ConfigData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
+  // Get current values into the amplitude and phase working variables:
+  if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
+amplitude = CalData.IQSSBAmpCorrectionFactorLSB[ConfigData.currentBand];
+phase = CalData.IQSSBPhaseCorrectionFactorLSB[ConfigData.currentBand];
+  }
+  else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
+amplitude = CalData.IQSSBAmpCorrectionFactorLSB[ConfigData.currentBand];
+phase = CalData.IQSSBPhaseCorrectionFactorUSB[ConfigData.currentBand];
+  }
+  // Run this so Phase shows from begining.  Get the value for the current sideband.
+  GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, (char *)"IQ Phase", false);
   warmUpCal();
 
   if (radioCal) {
@@ -452,8 +463,8 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal, bool saveToEepr
         averageCount = 0;
         std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
         std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
-        iOptimal = CalData.IQSSBAmpCorrectionFactor[ConfigData.currentBand];
-        qOptimal = CalData.IQSSBPhaseCorrectionFactor[ConfigData.currentBand];
+        iOptimal = amplitude;
+        qOptimal = phase;
         state = State::warmup;
         break;
       // Automatic calibration using previously stored values.
@@ -468,8 +479,8 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal, bool saveToEepr
         IQCalType = 0;
         std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
         std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
-        iOptimal = CalData.IQSSBAmpCorrectionFactor[ConfigData.currentBand];
-        qOptimal = CalData.IQSSBPhaseCorrectionFactor[ConfigData.currentBand];
+        iOptimal = amplitude;
+        qOptimal = phase;
         state = State::warmup;
         averageFlag = false;
         refineCal = true;
@@ -511,8 +522,8 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal, bool saveToEepr
           std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
           warmup = warmup + 1;
           if (not refineCal) {
-            CalData.IQSSBPhaseCorrectionFactor[ConfigData.currentBand] = 0.0 + maxSweepPhase;  //  Need to use these values during warmup
-            CalData.IQSSBAmpCorrectionFactor[ConfigData.currentBand] = 1.0 + maxSweepAmp;      //  so adjdB and adjdB_avg are forced upwards.
+            phase = 0.0 + maxSweepPhase;  //  Need to use these values during warmup
+            amplitude = 1.0 + maxSweepAmp;      //  so adjdB and adjdB_avg are forced upwards.
           }
           state = State::warmup;
           if (warmup == 10) state = State::state0;
@@ -531,9 +542,9 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal, bool saveToEepr
           break;
         case State::state0:
           // Starting values for sweeps.  First sweep is amplitude (gain).
-          CalData.IQSSBPhaseCorrectionFactor[ConfigData.currentBand] = 0.0;
-          CalData.IQSSBAmpCorrectionFactor[ConfigData.currentBand] = 1.0 - maxSweepAmp;  // Begin sweep at low end and move upwards.
-          GetEncoderValueLive(-2.0, 2.0, CalData.IQSSBPhaseCorrectionFactor[ConfigData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
+          phase = 0.0;
+          amplitude = 1.0 - maxSweepAmp;  // Begin sweep at low end and move upwards.
+          GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, (char *)"IQ Phase", false);
           adjdB = 0;
           adjdB_avg = 0;
           index = 0;
@@ -541,25 +552,25 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal, bool saveToEepr
           state = State::initialSweepAmp;  // Let this fall through.
 
         case State::initialSweepAmp:
-          sweepVectorValue[index] = CalData.IQSSBAmpCorrectionFactor[ConfigData.currentBand];
+          sweepVectorValue[index] = amplitude;
           sweepVector[index] = adjdB;
           index = index + 1;
           // Increment for next measurement.
-          CalData.IQSSBAmpCorrectionFactor[ConfigData.currentBand] = CalData.IQSSBAmpCorrectionFactor[ConfigData.currentBand] + increment;  // Next one!
+          amplitude = amplitude + increment;  // Next one!
           // Go to Q channel when I channel sweep is finished.
           //    if (index > 20) {
           //      if (sweepVector[index - 1] > (sweepVector[index - 11] + 3.0)) stopSweep = true;  // Stop sweep if past the null.
           //    }
-          if (abs(CalData.IQSSBAmpCorrectionFactor[ConfigData.currentBand] - 1.0) > maxSweepAmp) {  // Needs to be subtracted from 1.0.
+          if (abs(amplitude - 1.0) > maxSweepAmp) {  // Needs to be subtracted from 1.0.
             IQCalType = 1;                                                                             // Get ready for phase.
             result = std::min_element(sweepVector.begin(), sweepVector.end());                         // Value of the minimum.
             adjdBMinIndex = std::distance(sweepVector.begin(), result);                                // Find the index.
             iOptimal = sweepVectorValue[adjdBMinIndex];                                                // Set to the discovered minimum.
                                                                                                        //            Serial.printf("Init The optimal amplitude = %.3f at index %d with value %.1f count = %d\n", sweepVectorValue[adjdBMinIndex], adjdBMinIndex, *result, count);
-            CalData.IQSSBPhaseCorrectionFactor[ConfigData.currentBand] = -maxSweepPhase;            // The starting value for phase.
-            CalData.IQSSBAmpCorrectionFactor[ConfigData.currentBand] = iOptimal;                    // Reset for next sweep.
+            phase = -maxSweepPhase;            // The starting value for phase.
+            amplitude = iOptimal;                    // Reset for next sweep.
             // Update display to optimal value.
-            GetEncoderValueLive(-2.0, 2.0, CalData.IQSSBAmpCorrectionFactor[ConfigData.currentBand], correctionIncrement, (char *)"IQ Gain", true);
+            GetEncoderValueLive(-2.0, 2.0, amplitude, correctionIncrement, (char *)"IQ Gain", true);
             count = count + 1;
             // Save the sub_vector which will be used to refine the optimal result.
             for (int i = 0; i < 21; i = i + 1) {
@@ -581,21 +592,21 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal, bool saveToEepr
           break;
 
         case State::initialSweepPhase:
-          sweepVectorValue[index] = CalData.IQSSBPhaseCorrectionFactor[ConfigData.currentBand];
+          sweepVectorValue[index] = phase;
           sweepVector[index] = adjdB;
           index = index + 1;
           // Increment for the next measurement.
-          CalData.IQSSBPhaseCorrectionFactor[ConfigData.currentBand] = CalData.IQSSBPhaseCorrectionFactor[ConfigData.currentBand] + increment;
+          phase = phase + increment;
           //     if (index > 20) {
           //       if (sweepVector[index - 1] > (sweepVector[index - 11] + 3.0)) stopSweep = true;  // Stop sweep if past the null.
           //     }
-          if (CalData.IQSSBPhaseCorrectionFactor[ConfigData.currentBand] > maxSweepPhase) {
+          if (phase > maxSweepPhase) {
             result = std::min_element(sweepVector.begin(), sweepVector.end());
             adjdBMinIndex = std::distance(sweepVector.begin(), result);
             qOptimal = sweepVectorValue[adjdBMinIndex];                                // Set to the discovered minimum.
-            CalData.IQSSBPhaseCorrectionFactor[ConfigData.currentBand] = qOptimal;  // Set to the discovered minimum.
+            phase = qOptimal;  // Set to the discovered minimum.
 
-            GetEncoderValueLive(-2.0, 2.0, CalData.IQSSBPhaseCorrectionFactor[ConfigData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
+            GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, (char *)"IQ Phase", false);
             // Serial.printf("Init The optimal phase = %.5f at index %d with value %.1f count = %d\n", sweepVectorValue[adjdBMinIndex], adjdBMinIndex, *result, count);
             // Save the sub_vector which will be used to refine the optimal result.
             for (int i = 0; i < 21; i = i + 1) {
@@ -615,7 +626,7 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal, bool saveToEepr
 
         case State::refineAmp:
           // Now sweep over the entire sub_vectorAmp array with averaging on. index starts at 0.
-          CalData.IQSSBAmpCorrectionFactor[ConfigData.currentBand] = sub_vectorAmp[index];  // Starting value.
+          amplitude = sub_vectorAmp[index];  // Starting value.
           // Don't record this until there is data.  So that will be AFTER this pass.
           if (averageFlag) {
             sub_vectorAmpResult[index] = adjdB_avg;
@@ -628,8 +639,8 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal, bool saveToEepr
             adjdBMinIndex = std::distance(sub_vectorAmpResult.begin(), result);
             // iOptimal is simply the value of sub_vectorAmp[adjdBMinIndex].
             iOptimal = sub_vectorAmp[adjdBMinIndex];                                 // -.001;
-            CalData.IQSSBAmpCorrectionFactor[ConfigData.currentBand] = iOptimal;  // Set to optimal value before refining phase.
-            GetEncoderValueLive(-2.0, 2.0, CalData.IQSSBAmpCorrectionFactor[ConfigData.currentBand], correctionIncrement, (char *)"IQ Gain", true);
+            amplitude = iOptimal;  // Set to optimal value before refining phase.
+            GetEncoderValueLive(-2.0, 2.0, amplitude, correctionIncrement, (char *)"IQ Gain", true);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorAmp[i] = (iOptimal - 10 * 0.001) + (0.001 * i);  // The next array to sweep.
             }
@@ -648,7 +659,7 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal, bool saveToEepr
 
         case State::refinePhase:
           // Now sweep over the entire sub_vectorAmp array with averaging on. index starts at 0.
-          CalData.IQSSBPhaseCorrectionFactor[ConfigData.currentBand] = sub_vectorPhase[index];  // Starting value.
+          phase = sub_vectorPhase[index];  // Starting value.
           // Don't record this until there is data.  So that will be AFTER this pass.
           if (averageFlag) {
             sub_vectorPhaseResult[index] = adjdB_avg;
@@ -662,8 +673,8 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal, bool saveToEepr
             // qOptimal is simply the value of sub_vectorAmp[adjdBMinIndex].
             index = 0;
             qOptimal = sub_vectorPhase[adjdBMinIndex];  // - .001;
-            CalData.IQSSBPhaseCorrectionFactor[ConfigData.currentBand] = qOptimal;
-            GetEncoderValueLive(-2.0, 2.0, CalData.IQSSBPhaseCorrectionFactor[ConfigData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
+            phase = qOptimal;
+            GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, (char *)"IQ Phase", false);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorPhase[i] = (qOptimal - 10 * 0.001) + (0.001 * i);
             }
@@ -697,8 +708,8 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal, bool saveToEepr
 
         case State::setOptimal:
           count = 0;  // In case automatic calibration is run again.
-          CalData.IQSSBAmpCorrectionFactor[ConfigData.currentBand] = iOptimal;
-          CalData.IQSSBPhaseCorrectionFactor[ConfigData.currentBand] = qOptimal;
+          amplitude = iOptimal;
+          phase = qOptimal;
           //       Serial.printf("iOptimal = %.3f qOptimal = %.3f\n", iOptimal, qOptimal);
           state = State::exit;
           viewTime = fiveSeconds;  // Start result view timer.
@@ -725,12 +736,22 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal, bool saveToEepr
     task = MenuSelect::DEFAULT;                            // Reset task after it is used.
     //  Read encoder and update values.
     if (IQCalType == 0) {
-      CalData.IQSSBAmpCorrectionFactor[ConfigData.currentBand] = GetEncoderValueLive(-2.0, 2.0, CalData.IQSSBAmpCorrectionFactor[ConfigData.currentBand], correctionIncrement, (char *)"IQ Gain", true);
+      amplitude = GetEncoderValueLive(-2.0, 2.0, amplitude, correctionIncrement, (char *)"IQ Gain", true);
+  if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER)
+CalData.IQSSBAmpCorrectionFactorLSB[ConfigData.currentBand] = amplitude;
+  else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER)
+CalData.IQSSBAmpCorrectionFactorUSB[ConfigData.currentBand] = amplitude;
     } else {
-      CalData.IQSSBPhaseCorrectionFactor[ConfigData.currentBand] = GetEncoderValueLive(-2.0, 2.0, CalData.IQSSBPhaseCorrectionFactor[ConfigData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
+      phase = GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, (char *)"IQ Phase", false);
+  if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER)
+CalData.IQSSBPhaseCorrectionFactorLSB[ConfigData.currentBand] = phase;
+  else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER)
+CalData.IQSSBPhaseCorrectionFactorUSB[ConfigData.currentBand] = phase;
     }
     if (exit) break;  //  Exit the while loop.
   }                   // end while
+//CalData.IQSSBAmpCorrectionFactor[ConfigData.currentBand]
+//CalData.IQSSBPhaseCorrectionFactor[ConfigData.currentBand]
   SSBCalibrate::CalibrateEpilogue(saveToEeprom);
 }  // End Transmit calibration
 
@@ -1343,7 +1364,8 @@ void SSBCalibrate::ProcessIQData2() {
     if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) cessb1.setSideband(true);
 
     // Apply amplitude and phase corrections.
-    cessb1.setIQCorrections(true, CalData.IQSSBAmpCorrectionFactor[ConfigData.currentBandA], CalData.IQSSBPhaseCorrectionFactor[ConfigData.currentBandA], 0.0);
+//    cessb1.setIQCorrections(true, CalData.IQSSBAmpCorrectionFactor[ConfigData.currentBandA], CalData.IQSSBPhaseCorrectionFactor[ConfigData.currentBandA], 0.0);
+    cessb1.setIQCorrections(true, amplitude, phase, 0.0);
 
     //  This is the correct place in the data stream to inject the scaling for power.
 #ifdef QSE2

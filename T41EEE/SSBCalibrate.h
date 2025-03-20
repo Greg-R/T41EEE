@@ -35,6 +35,8 @@ bool corrChange = false;
 Sideband tempSideband;
 RadioMode tempMode;
 RadioState tempState;
+float32_t amplitude = 0;
+float32_t phase = 0;
 
 int Zoom_FFT_M1;
 //int Zoom_FFT_M2;

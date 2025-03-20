@@ -302,6 +302,7 @@ FLASHMEM void JSON::loadCalibration(const char *filename, calibration_t &CalData
 //  ConfigData.powerOutSSB[0] = doc["powerOutSSB"][0];
   for (int i = 0; i < 7; i++) CalData.CWPowerCalibrationFactor[i] = doc["CWPowerCalibrationFactor"][i];
   for (int i = 0; i < 7; i++) CalData.SSBPowerCalibrationFactor[i] = doc["SSBPowerCalibrationFactor"][i];
+
   for (int i = 0; i < 7; i++) CalData.IQCWRXAmpCorrectionFactor[i] = doc["IQCWRXAmpCorrectionFactor"][i];
   for (int i = 0; i < 7; i++) CalData.IQCWRXPhaseCorrectionFactor[i] = doc["IQCWRXPhaseCorrectionFactor"][i];
   for (int i = 0; i < 7; i++) CalData.IQCWAmpCorrectionFactor[i] = doc["IQCWAmpCorrectionFactor"][i];
@@ -310,6 +311,24 @@ FLASHMEM void JSON::loadCalibration(const char *filename, calibration_t &CalData
   for (int i = 0; i < 7; i++) CalData.IQSSBRXPhaseCorrectionFactor[i] = doc["IQSSBRXPhaseCorrectionFactor"][i];  
   for (int i = 0; i < 7; i++) CalData.IQSSBAmpCorrectionFactor[i] = doc["IQSSBAmpCorrectionFactor"][i];
   for (int i = 0; i < 7; i++) CalData.IQSSBPhaseCorrectionFactor[i] = doc["IQSSBPhaseCorrectionFactor"][i];
+
+  for (int i = 0; i < 7; i++) CalData.IQCWRXAmpCorrectionFactorLSB[i] = doc["IQCWRXAmpCorrectionFactorLSB"][i];
+  for (int i = 0; i < 7; i++) CalData.IQCWRXPhaseCorrectionFactorLSB[i] = doc["IQCWRXPhaseCorrectionFactorLSB"][i];
+  for (int i = 0; i < 7; i++) CalData.IQCWAmpCorrectionFactorLSB[i] = doc["IQCWAmpCorrectionFactorLSB"][i];
+  for (int i = 0; i < 7; i++) CalData.IQCWPhaseCorrectionFactorLSB[i] = doc["IQCWPhaseCorrectionFactorLSB"][i];
+  for (int i = 0; i < 7; i++) CalData.IQSSBRXAmpCorrectionFactorLSB[i] = doc["IQSSBRXAmpCorrectionFactorLSB"][i];
+  for (int i = 0; i < 7; i++) CalData.IQSSBRXPhaseCorrectionFactorLSB[i] = doc["IQSSBRXPhaseCorrectionFactorLSB"][i];  
+  for (int i = 0; i < 7; i++) CalData.IQSSBAmpCorrectionFactorLSB[i] = doc["IQSSBAmpCorrectionFactorLSB"][i];
+  for (int i = 0; i < 7; i++) CalData.IQSSBPhaseCorrectionFactorLSB[i] = doc["IQSSBPhaseCorrectionFactorLSB"][i];
+
+  for (int i = 0; i < 7; i++) CalData.IQCWRXAmpCorrectionFactorUSB[i] = doc["IQCWRXAmpCorrectionFactorUSB"][i];
+  for (int i = 0; i < 7; i++) CalData.IQCWRXPhaseCorrectionFactorUSB[i] = doc["IQCWRXPhaseCorrectionFactorUSB"][i];
+  for (int i = 0; i < 7; i++) CalData.IQCWAmpCorrectionFactorUSB[i] = doc["IQCWAmpCorrectionFactorUSB"][i];
+  for (int i = 0; i < 7; i++) CalData.IQCWPhaseCorrectionFactorUSB[i] = doc["IQCWPhaseCorrectionFactorUSB"][i];
+  for (int i = 0; i < 7; i++) CalData.IQSSBRXAmpCorrectionFactorUSB[i] = doc["IQSSBRXAmpCorrectionFactorUSB"][i];
+  for (int i = 0; i < 7; i++) CalData.IQSSBRXPhaseCorrectionFactorUSB[i] = doc["IQSSBRXPhaseCorrectionFactorUSB"][i];  
+  for (int i = 0; i < 7; i++) CalData.IQSSBAmpCorrectionFactorUSB[i] = doc["IQSSBAmpCorrectionFactorLUSB"][i];
+  for (int i = 0; i < 7; i++) CalData.IQSSBPhaseCorrectionFactorUSB[i] = doc["IQSSBPhaseCorrectionFactorUSB"][i];
 
   CalData.buttonThresholdPressed = doc["buttonThresholdPressed"] | 944;
   CalData.buttonThresholdReleased = doc["buttonThresholdReleased"] | 964;
@@ -350,6 +369,7 @@ FLASHMEM void JSON::saveCalibration(const char *filename, const calibration_t &C
 //  for (int i = 0; i < 7; i++) doc["powerOutSSB"][i] = ConfigData.powerOutSSB[i];
   for (int i = 0; i < 7; i++) doc["CWPowerCalibrationFactor"][i] = CalData.CWPowerCalibrationFactor[i];
   for (int i = 0; i < 7; i++) doc["SSBPowerCalibrationFactor"][i] = CalData.SSBPowerCalibrationFactor[i];
+
   for (int i = 0; i < 7; i++) doc["IQCWRXAmpCorrectionFactor"][i] =   CalData.IQCWRXAmpCorrectionFactor[i];
   for (int i = 0; i < 7; i++) doc["IQCWRXPhaseCorrectionFactor"][i] = CalData.IQCWRXPhaseCorrectionFactor[i];
   for (int i = 0; i < 7; i++) doc["IQCWAmpCorrectionFactor"][i] =   CalData.IQCWAmpCorrectionFactor[i];
@@ -359,6 +379,23 @@ FLASHMEM void JSON::saveCalibration(const char *filename, const calibration_t &C
   for (int i = 0; i < 7; i++) doc["IQSSBAmpCorrectionFactor"][i] =   CalData.IQSSBAmpCorrectionFactor[i];
   for (int i = 0; i < 7; i++) doc["IQSSBPhaseCorrectionFactor"][i] = CalData.IQSSBPhaseCorrectionFactor[i];  
 
+  for (int i = 0; i < 7; i++) doc["IQCWRXAmpCorrectionFactorLSB"][i] =   CalData.IQCWRXAmpCorrectionFactorLSB[i];
+  for (int i = 0; i < 7; i++) doc["IQCWRXPhaseCorrectionFactorLSB"][i] = CalData.IQCWRXPhaseCorrectionFactorLSB[i];
+  for (int i = 0; i < 7; i++) doc["IQCWAmpCorrectionFactorLSB"][i] =   CalData.IQCWAmpCorrectionFactorLSB[i];
+  for (int i = 0; i < 7; i++) doc["IQCWPhaseCorrectionFactorLSB"][i] = CalData.IQCWPhaseCorrectionFactorLSB[i];
+  for (int i = 0; i < 7; i++) doc["IQSSBRXAmpCorrectionFactorLSB"][i] =   CalData.IQSSBRXAmpCorrectionFactorLSB[i];
+  for (int i = 0; i < 7; i++) doc["IQSSBRXPhaseCorrectionFactorLSB"][i] = CalData.IQSSBRXPhaseCorrectionFactorLSB[i];
+  for (int i = 0; i < 7; i++) doc["IQSSBAmpCorrectionFactorLSB"][i] =   CalData.IQSSBAmpCorrectionFactorLSB[i];
+  for (int i = 0; i < 7; i++) doc["IQSSBPhaseCorrectionFactorLSB"][i] = CalData.IQSSBPhaseCorrectionFactorLSB[i];
+
+  for (int i = 0; i < 7; i++) doc["IQCWRXAmpCorrectionFactorUSB"][i] =   CalData.IQCWRXAmpCorrectionFactorUSB[i];
+  for (int i = 0; i < 7; i++) doc["IQCWRXPhaseCorrectionFactorUSB"][i] = CalData.IQCWRXPhaseCorrectionFactorUSB[i];
+  for (int i = 0; i < 7; i++) doc["IQCWAmpCorrectionFactorUSB"][i] =   CalData.IQCWAmpCorrectionFactorUSB[i];
+  for (int i = 0; i < 7; i++) doc["IQCWPhaseCorrectionFactorUSB"][i] = CalData.IQCWPhaseCorrectionFactorUSB[i];
+  for (int i = 0; i < 7; i++) doc["IQSSBRXAmpCorrectionFactorUSB"][i] =   CalData.IQSSBRXAmpCorrectionFactorUSB[i];
+  for (int i = 0; i < 7; i++) doc["IQSSBRXPhaseCorrectionFactorUSB"][i] = CalData.IQSSBRXPhaseCorrectionFactorUSB[i];
+  for (int i = 0; i < 7; i++) doc["IQSSBAmpCorrectionFactorUSB"][i] =   CalData.IQSSBAmpCorrectionFactorUSB[i];
+  for (int i = 0; i < 7; i++) doc["IQSSBPhaseCorrectionFactorUSB"][i] = CalData.IQSSBPhaseCorrectionFactorUSB[i];
 
   doc["buttonThresholdPressed"] = CalData.buttonThresholdPressed;
   doc["buttonThresholdReleased"] = CalData.buttonThresholdReleased;

@@ -413,6 +413,7 @@ struct calibration_t {
 
   float CWPowerCalibrationFactor[NUMBER_OF_BANDS] =  { 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 };        // Increased to 0.04, was 0.019; KF5N February 20, 2024
   float SSBPowerCalibrationFactor[NUMBER_OF_BANDS] = { 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 };  // Increased to 0.04, was 0.008; KF5N February 21, 2024
+
   float IQCWRXAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
   float IQCWRXPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
   float IQCWAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
@@ -421,6 +422,24 @@ struct calibration_t {
   float IQSSBRXPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };  
   float IQSSBAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
   float IQSSBPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+
+  float IQCWRXAmpCorrectionFactorLSB[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+  float IQCWRXPhaseCorrectionFactorLSB[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+  float IQCWAmpCorrectionFactorLSB[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+  float IQCWPhaseCorrectionFactorLSB[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+  float IQSSBRXAmpCorrectionFactorLSB[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+  float IQSSBRXPhaseCorrectionFactorLSB[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };  
+  float IQSSBAmpCorrectionFactorLSB[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+  float IQSSBPhaseCorrectionFactorLSB[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+
+  float IQCWRXAmpCorrectionFactorUSB[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+  float IQCWRXPhaseCorrectionFactorUSB[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+  float IQCWAmpCorrectionFactorUSB[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+  float IQCWPhaseCorrectionFactorUSB[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+  float IQSSBRXAmpCorrectionFactorUSB[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+  float IQSSBRXPhaseCorrectionFactorUSB[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };  
+  float IQSSBAmpCorrectionFactorUSB[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+  float IQSSBPhaseCorrectionFactorUSB[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
 
   //DB2OO, 23-AUG-23: Region 1 freqs (from https://qrper.com/qrp-calling-frequencies/)
 #if defined(ITU_REGION) && ITU_REGION == 1
