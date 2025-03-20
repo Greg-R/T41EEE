@@ -222,7 +222,7 @@ void SetAudioOperatingState(RadioState operatingState) {
 //        SetI2SFreq(SR[SampleRate].rate);
       InitializeDataArrays();  // I2S sample rate set in this function.
       // QSD disabled and disconnected
-      controlAudioOut(ConfigData.audioOut, true);  // Mute all audio.
+      controlAudioOut(ConfigData.audioOut, true);  // Mute all receiver audio.
       sgtl5000_1.unmuteLineout();
       patchCord1.disconnect();  // Receiver I channel
       patchCord2.disconnect();  // Receiver Q channel
@@ -298,7 +298,7 @@ void SetAudioOperatingState(RadioState operatingState) {
 
       // Test tone enabled and connected
       toneSSBCal.setSampleRate_Hz(48000);
-      toneSSBCal.amplitude(0.3);
+      toneSSBCal.amplitude(0.2);
       toneSSBCal.frequency(750.0);
       toneSSBCal.begin();
       mixer1_tx.gain(0, 0);      // microphone audio off.

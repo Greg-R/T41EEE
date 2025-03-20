@@ -266,8 +266,8 @@ void CWCalibrate::CalibratePreamble(int setZoom) {
   // Calibrate requires upper or lower sideband.  Change if currently in an AM mode.  Put back in Epilogue.
   if(bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
     tempSideband = bands.bands[ConfigData.currentBand].sideband;
-    // Use the last upper or lower sideband.
-     bands.bands[ConfigData.currentBand].sideband = ConfigData.lastSideband[ConfigData.currentBand];
+    // Use the last upper or lower sideband (CW, SSB, or FT8) during calibration.
+   bands.bands[ConfigData.currentBand].sideband = ConfigData.lastSideband[ConfigData.currentBand];
   }
   ConfigData.CWOffset = 2;                   // 750 Hz for TX calibration.  Epilogue restores user selected offset.
                                              //  userxmtMode = ConfigData.xmtMode;          // Store the user's mode setting.  KF5N July 22, 2023
@@ -351,8 +351,7 @@ void CWCalibrate::CalibrateEpilogue(bool saveToEeprom) {
   ConfigData.currentScale = userScale;  //  Restore vertical scale to user preference.  KF5N
   ShowSpectrumdBScale();
   ConfigData.transmitPowerLevel = transmitPowerLevelTemp;  // Restore the user's transmit power level setting.  KF5N August 15, 2023
-
-  bands.bands[ConfigData.currentBand].sideband = tempSideband;
+if(bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) bands.bands[ConfigData.currentBand].sideband = tempSideband;
   bands.bands[ConfigData.currentBand].mode = tempMode;
   radioState = tempState;
   zoomIndex = userZoomIndex - 1;

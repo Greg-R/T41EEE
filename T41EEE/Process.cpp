@@ -351,8 +351,8 @@ void Process::ProcessIQData() {
 
     for (unsigned i = 0; i < FFT_length / 2; i++)
     {
-      iFFT_buffer[FFT_length + 2 * i + 0] = 1024.0 * iFFT_buffer[FFT_length + 2 * i + 0];
-      iFFT_buffer[FFT_length + 2 * i + 1] = 1024.0 * iFFT_buffer[FFT_length + 2 * i + 1];
+      iFFT_buffer[FFT_length + 2 * i + 0] = RFGAINSCALE * iFFT_buffer[FFT_length + 2 * i + 0];
+      iFFT_buffer[FFT_length + 2 * i + 1] = RFGAINSCALE * iFFT_buffer[FFT_length + 2 * i + 1];
     }
 
     /**********************************************************************************

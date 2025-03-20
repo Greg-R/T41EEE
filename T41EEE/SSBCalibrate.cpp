@@ -322,7 +322,7 @@ void SSBCalibrate::CalibrateEpilogue(bool saveToEeprom) {
   InitializeDataArrays();  // Re-initialize the filters back to 192ksps.
   ShowTransmitReceiveStatus();
   // Clear queues to reduce transient.
-  bands.bands[ConfigData.currentBand].sideband = tempSideband;
+  if(bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) bands.bands[ConfigData.currentBand].sideband = tempSideband;
   bands.bands[ConfigData.currentBand].mode = tempMode;
   radioState = tempState;
 //  SetAudioOperatingState(radioState);
@@ -358,7 +358,7 @@ if(saveToEeprom) eeprom.CalDataWrite();  // Save calibration numbers and configu
   Purpose: Combined input/output for the purpose of calibrating the transmit IQ.
 
    Parameter List:
-      int toneFreqIndex, bool radioCal, bool shortCal
+      int toneFreqIndex, bool radioCal, bool shortCal, bool saveToEeprom
 
    Return value:
       void
@@ -731,7 +731,7 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal, bool saveToEepr
     }
     if (exit) break;  //  Exit the while loop.
   }                   // end while
-//  SSBCalibrate::CalibrateEpilogue();
+  SSBCalibrate::CalibrateEpilogue(saveToEeprom);
 }  // End Transmit calibration
 
 

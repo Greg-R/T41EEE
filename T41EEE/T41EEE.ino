@@ -5,7 +5,7 @@
 #include "SDT.h"
 #include <charconv>
 
-const char *configFilename = "/config.txt";  // <- SD library uses 8.3 filenames
+const char *configFilename = "/config.txt";    // <- SD library uses 8.3 filenames
 const char *calFilename = "/calibration.txt";  // <- SD library uses 8.3 filenames
 
 struct maps myMapFiles[10] = {
@@ -42,7 +42,7 @@ Button button;
 
 const char *topMenus[] = { "CW Options", "RF Set", "VFO Select",
                            "Config EEPROM", "Cal EEPROM", "AGC", "Spectrum Options",
-                           "SSB Options", "EQ Tx Set",                    // Noise floor removed.  Greg KF5N February 14, 2025
+                           "SSB Options", "EQ Tx Set",  // Noise floor removed.  Greg KF5N February 14, 2025
                            "EQ Rec Set", "Calibrate", "Bearing" };
 // Pointers to functions which execute the menu options.  Do these functions used the returned integer???
 void (*functionPtr[])() = { &CWOptions, &RFOptions, &VFOSelect,
@@ -110,7 +110,7 @@ float32_t DMAMEM float_buffer_RTemp[2048];
 config_t ConfigData;
 calibration_t CalData;
 
-Bands bands = {{  // Revised band struct with mode and sideband.  Greg KF5N February 14, 2025
+Bands bands = { { // Revised band struct with mode and sideband.  Greg KF5N February 14, 2025
 //freq    band low   band hi   name    mode                  sideband         FHiCut FLoCut FAMCut  Gain  type    gain  AGC
 //                                             filter filter             correct     offset
 //DB2OO, 29-AUG-23: take ITU_REGION into account for band limits
@@ -118,23 +118,20 @@ Bands bands = {{  // Revised band struct with mode and sideband.  Greg KF5N Febr
 // Calibration done with TinySA as signal generator with -73dBm levels (S9) at the FT8 frequencies
 // with V010 QSD with the 12V mod of the pre-amp
 #if defined(ITU_REGION) && ITU_REGION == 1
-  { 3700000UL, 3500000, 3800000, "80M", RadioMode::SSB_MODE, Sideband::LOWER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
-    { 7150000, 7000000, 7200000, "40M", RadioMode::SSB_MODE, Sideband::LOWER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
+                  { 3700000UL, 3500000, 3800000, "80M", RadioMode::SSB_MODE, Sideband::LOWER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
+                  { 7150000, 7000000, 7200000, "40M", RadioMode::SSB_MODE, Sideband::LOWER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
 #elif defined(ITU_REGION) && ITU_REGION == 2
-  { 3700000UL, 3500000, 4000000, "80M", RadioMode::SSB_MODE, Sideband::LOWER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
-    { 7150000, 7000000, 7300000, "40M", RadioMode::SSB_MODE, Sideband::LOWER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
+                  { 3700000UL, 3500000, 4000000, "80M", RadioMode::SSB_MODE, Sideband::LOWER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
+                  { 7150000, 7000000, 7300000, "40M", RadioMode::SSB_MODE, Sideband::LOWER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
 #elif defined(ITU_REGION) && ITU_REGION == 3
-  { 3700000UL, 3500000, 3900000, "80M", RadioMode::SSB_MODE, Sideband::LOWER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
-    { 7150000, 7000000, 7200000, "40M", RadioMode::SSB_MODE, Sideband::LOWER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
+                  { 3700000UL, 3500000, 3900000, "80M", RadioMode::SSB_MODE, Sideband::LOWER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
+                  { 7150000, 7000000, 7200000, "40M", RadioMode::SSB_MODE, Sideband::LOWER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
 #endif
-    { 14200000, 14000000, 14350000, "20M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 60 },  //// KF5N experiment with AGC
-    { 18100000, 18068000, 18168000, "17M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
-    { 21200000, 21000000, 21450000, "15M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
-    { 24920000, 24890000, 24990000, "12M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
-  {
-    28350000, 28000000, 29700000, "10M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20
-  }
-}};
+                  { 14200000, 14000000, 14350000, "20M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 60 },  //// KF5N experiment with AGC
+                  { 18100000, 18068000, 18168000, "17M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
+                  { 21200000, 21000000, 21450000, "15M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
+                  { 24920000, 24890000, 24990000, "12M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
+                  { 28350000, 28000000, 29700000, "10M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 } } };
 
 const struct SR_Descriptor SR[18] = {
   //   SR_n,        rate,  text
@@ -578,7 +575,7 @@ FLASHMEM void InitializeDataArrays() {
   uint32_t highAlarmTemp, lowAlarmTemp, panicAlarmTemp;
   int LP_F_help;
 //  uint32_t m_NumTaps = (FFT_LENGTH / 2) + 1;
-  //DB2OO, 11-SEP-23: don't use the fixed sizes, but use the caculated ones, otherwise a code change will create very difficult to find problems
+//DB2OO, 11-SEP-23: don't use the fixed sizes, but use the caculated ones, otherwise a code change will create very difficult to find problems
 #define CLEAR_VAR(x) memset(x, 0, sizeof(x))
   memset(FFT_spec_old, 0, sizeof(FFT_spec_old));
 #ifdef DEBUG
@@ -587,9 +584,9 @@ FLASHMEM void InitializeDataArrays() {
   Serial.println();
 #endif
   //  CLEAR_VAR(FFT_spec_old);             //memset(FFT_spec_old, 0, 4096);            // SPECTRUM_RES = 512 * 4 = 2048
-//  CLEAR_VAR(pixelnew);                 //memset(pixelnew, 0, 1024);                // 512 * 2
-//  CLEAR_VAR(pixelold);                 //memset(pixelold, 0, 1024);                // 512 * 2
-//  CLEAR_VAR(pixelCurrent);             //memset(pixelCurrent, 0, 1024);            // 512 * 2  KF5N JJP  7/14/23
+  //  CLEAR_VAR(pixelnew);                 //memset(pixelnew, 0, 1024);                // 512 * 2
+  //  CLEAR_VAR(pixelold);                 //memset(pixelold, 0, 1024);                // 512 * 2
+  //  CLEAR_VAR(pixelCurrent);             //memset(pixelCurrent, 0, 1024);            // 512 * 2  KF5N JJP  7/14/23
   CLEAR_VAR(buffer_spec_FFT);          //memset(buffer_spec_FFT, 0, 4096);         // SPECTRUM_RES = 512 * 2 = 1024
   CLEAR_VAR(NR_FFT_buffer);            //memset(NR_FFT_buffer, 0, 2048);           // NR_FFT_L * sizeof(NR_FFT_buffer[0]));
   CLEAR_VAR(NR_output_audio_buffer);   //memset(NR_output_audio_buffer, 0, 1024);  // 256 * sizeof(NR_output_audio_buffer[0]));
@@ -607,7 +604,7 @@ FLASHMEM void InitializeDataArrays() {
   CLEAR_VAR(NR_Gts);                   //memset(NR_Gts, 0, 1024);
   CLEAR_VAR(NR_E);                     //memset(NR_E, 0, 7680);
 
-//  CalcCplxFIRCoeffs(FIR_Coef_I, FIR_Coef_Q, m_NumTaps, (float32_t)bands.bands[ConfigData.currentBand].FLoCut, (float32_t)bands.bands[ConfigData.currentBand].FHiCut, (float)SR[SampleRate].rate / DF);
+  //  CalcCplxFIRCoeffs(FIR_Coef_I, FIR_Coef_Q, m_NumTaps, (float32_t)bands.bands[ConfigData.currentBand].FLoCut, (float32_t)bands.bands[ConfigData.currentBand].FHiCut, (float)SR[SampleRate].rate / DF);
 
   /****************************************************************************************
      init complex FFTs
@@ -637,7 +634,7 @@ FLASHMEM void InitializeDataArrays() {
   /****************************************************************************************
      Calculate the FFT of the FIR filter coefficients once to produce the FIR filter mask
   ****************************************************************************************/
-//  InitFilterMask();
+  //  InitFilterMask();
 
   /****************************************************************************************
      Set sample rate
@@ -807,10 +804,11 @@ MenuSelect readButton() {
   return menu;
 }
 
+
 bool powerUp = false;
-int afterPowerUp = 0;
+uint32_t afterPowerUp = 0;
 /*****
-  Purpose: program entry point that sets the environment for program
+  Purpose: Program entry point for configuration prior to running the main loop() function.
 
   Parameter list:
     void
@@ -820,7 +818,7 @@ int afterPowerUp = 0;
 *****/
 FLASHMEM void setup() {
   powerUp = true;
-  Serial.begin(115200);  // Use this serial for Teensy programming.
+  Serial.begin(115200);      // Use this serial for Teensy programming.
   SerialUSB1.begin(115200);  // Use this serial for FT8 keying.
 
   setSyncProvider(getTeensy3Time);  // get TIME from real time clock with 3V backup battery
@@ -828,12 +826,12 @@ FLASHMEM void setup() {
   Teensy3Clock.set(now());  // set the RTC
   T4_rtc_set(Teensy3Clock.get());
 
-// Configure Audio Adapter
+  // Configure Audio Adapter
   sgtl5000_1.enable();
   sgtl5000_1.setAddress(LOW);  // This sets to one of two possible I2C addresses, controlled by a jumper on the Audio Adapter.
 
-//  sgtl5000_2.enable();
-//  sgtl5000_2.setAddress(HIGH);  // T41 has only a single Audio Adaptor.  This is being used essentially as a 2nd I2S port.
+  //  sgtl5000_2.enable();
+  //  sgtl5000_2.setAddress(HIGH);  // T41 has only a single Audio Adaptor.  This is being used essentially as a 2nd I2S port.
 
   //  Don't use the audio pre-processor.  This causes a spurious signal in the SSB transmit output.
   //  sgtl5000_1.audioPreProcessorEnable();  // Need to use one of the equalizers.
@@ -842,8 +840,8 @@ FLASHMEM void setup() {
   AudioMemory(200);  //  Increased to 450 from 400.  Memory was hitting max.  KF5N August 31, 2023
   AudioMemory_F32(10);
   sgtl5000_1.inputSelect(AUDIO_INPUT_MIC);
-  sgtl5000_1.volume(0.8);
-  sgtl5000_1.unmuteHeadphone();  // Make the headphone output active.
+  sgtl5000_1.volume(0.8);  // Set headphone volume.
+                           //  sgtl5000_1.unmuteHeadphone();  // Make the headphone output active.
 
   sgtl5000_1.micGain(0);
   sgtl5000_1.lineInLevel(0);  // Line-in is not used.  Can't turn it off though.
@@ -857,8 +855,8 @@ FLASHMEM void setup() {
   //sgtl5000_1.adcHighPassFilterDisable();  //reduces noise.  https://forum.pjrc.com/threads/27215-24-bit-audio-boards?p=78831&viewfull=1#post78831
   //sgtl5000_1.adcHighPassFilterFreeze();
 
-  updateMic();  // This updates the transmit signal chain settings.  Located in SSB_Exciter.cpp.
-  initializeAudioPaths();
+  updateMic();             // This updates the transmit signal chain settings.  Located in SSB_Exciter.cpp.
+  initializeAudioPaths();  // Updates the AGC (compressor) in the receiver.
   // Set up "Controlled Envelope Single Side Band" from the Open Audio Library.
   cessb1.setSampleRate_Hz(48000);
   cessb1.setGains(3.5f, 1.4f, 0.5f);  // gainIn, gainCompensate, gainOut
@@ -881,10 +879,6 @@ FLASHMEM void setup() {
   pinMode(BUSY_ANALOG_PIN, INPUT);  // Pin 39.  Switch matrix output connects to this pin.
   pinMode(KEYER_DIT_INPUT_TIP, INPUT_PULLUP);
   pinMode(KEYER_DAH_INPUT_RING, INPUT_PULLUP);
-//  if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) {
-//    pinMode(RESET, OUTPUT);  // Reset pulse to QSD2/QSE2.
-//    digitalWrite(RESET, HIGH);
-//  }
 
   // SPI bus to display.
   pinMode(TFT_MOSI, OUTPUT);
@@ -956,63 +950,57 @@ FLASHMEM void setup() {
 #endif
 
   // ========================  End set up of Parameters from EEPROM data ===============
-//  Q_out_L_Ex.setMaxBuffers(32);  // Put a constraint on the number of blockss to decrease audio memory.  Greg KF5N August 15, 2024
-//  Q_out_R_Ex.setMaxBuffers(32);
+  //  Q_out_L_Ex.setMaxBuffers(32);  // Put a constraint on the number of blockss to decrease audio memory.  Greg KF5N August 15, 2024
+  //  Q_out_R_Ex.setMaxBuffers(32);
   h = 135;
   NCOFreq = 0;
-  h = 135;
 
   /****************************************************************************************
      start local oscillator Si5351
   ****************************************************************************************/
-  si5351.reset();                                                                           // KF5N.  Moved Si5351 start-up to setup. JJP  7/14/23
+  si5351.reset();                                                                        // KF5N.  Moved Si5351 start-up to setup. JJP  7/14/23
   si5351.init(SI5351_CRYSTAL_LOAD_10PF, Si_5351_crystal, CalData.freqCorrectionFactor);  // JJP  7/14/23
-  si5351.set_ms_source(SI5351_CLK2, SI5351_PLLB);                                           // Allows CLK1 and CLK2 to exceed 100 MHz simultaneously.
+  si5351.set_ms_source(SI5351_CLK2, SI5351_PLLB);                                        // Allows CLK1 and CLK2 to exceed 100 MHz simultaneously.
 #ifdef PLLMODULE
   si5351.drive_strength(SI5351_CLK0, SI5351_DRIVE_8MA);
   si5351.output_enable(SI5351_CLK2, 1);
 #else
   si5351.drive_strength(SI5351_CLK1, SI5351_DRIVE_8MA);
-    si5351.output_enable(SI5351_CLK1, 1);
+  si5351.output_enable(SI5351_CLK1, 1);
 #endif
   si5351.drive_strength(SI5351_CLK2, SI5351_DRIVE_8MA);  // CWP AFP 10-13-22
 
   InitializeDataArrays();
   // Initialize user defined stuff
   initUserDefinedStuff();
-  speakerVolume.setGain(0.0);   // Set volume to zero at power-up.
+  speakerVolume.setGain(0.0);  // Set volume to zero at power-up.
   headphoneVolume.setGain(0.0);
-  volumeChangeFlag = true;  // Adjust volume so saved value.
+  volumeChangeFlag = true;  // Adjust volume to saved value.
   filterEncoderMove = 0;
-  fineTuneEncoderMove = 0L;
+  fineTuneEncoderMove = 0;
 
   lastState = RadioState::NOSTATE;  // To make sure the receiver will be configured on the first pass through.  KF5N September 3, 2023
+  // Set up the initial state/mode.
   if (ConfigData.xmtMode == RadioMode::CW_MODE) {
     radioState = RadioState::CW_RECEIVE_STATE;
     bands.bands[ConfigData.currentBand].mode = RadioMode::CW_MODE;
-  //  SetupMode(RadioMode::CW_MODE, bands[ConfigData.currentBand].sideband);
   }
   if (ConfigData.xmtMode == RadioMode::SSB_MODE) {
     radioState = RadioState::SSB_RECEIVE_STATE;
     bands.bands[ConfigData.currentBand].mode = RadioMode::SSB_MODE;
-  //  SetupMode(RadioMode::SSB_MODE, bands[ConfigData.currentBand].sideband);
   }
   if (ConfigData.xmtMode == RadioMode::FT8_MODE) {
     radioState = RadioState::FT8_RECEIVE_STATE;
     bands.bands[ConfigData.currentBand].mode = RadioMode::FT8_MODE;
-  //  SetupMode(RadioMode::FT8_MODE, Sideband::UPPER);
   }
   if (ConfigData.xmtMode == RadioMode::AM_MODE) {
     radioState = RadioState::AM_RECEIVE_STATE;
     bands.bands[ConfigData.currentBand].mode = RadioMode::AM_MODE;
-  //  SetupMode(RadioMode::AM_MODE, Sideband::BOTH_AM);
   }
   if (ConfigData.xmtMode == RadioMode::SAM_MODE) {
     radioState = RadioState::SAM_RECEIVE_STATE;
     bands.bands[ConfigData.currentBand].mode = RadioMode::SAM_MODE;
-  //  SetupMode(RadioMode::SAM_MODE, Sideband::BOTH_SAM);
   }
-//button.ExecuteModeChange();
 
   // Write graphics to display.
   UpdateInfoWindow();
@@ -1021,7 +1009,6 @@ FLASHMEM void setup() {
   mainMenuIndex = 0;  // Changed from middle to first. Do Menu Down to get to Calibrate quickly
   ShowName();
   ShowBandwidth();
-//  FilterBandwidth();
   ShowFrequency();
   ShowAutoStatus();
   zoomIndex = ConfigData.spectrum_zoom - 1;  // ButtonZoom() increments zoomIndex, so this cancels it so the read from EEPROM is accurately restored.  KF5N August 3, 2023
@@ -1029,18 +1016,17 @@ FLASHMEM void setup() {
 
   ConfigData.sdCardPresent = SDPresentCheck();  // JJP 7/18/23
   UpdateDecoderField();                         // Adjust graphics for Morse decoder.
-//  FilterSetSSB();
   UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
-  ConfigData.rfGainCurrent = 0;                                                  // Start with lower gain so you don't get blasted.
+  ConfigData.rfGainCurrent = 0;  // Start with lower gain so you don't get blasted.
   button.ExecuteModeChange();
+  FilterSetSSB();
 
-FilterSetSSB();
-//  FilterBandwidth();
   if ((MASTER_CLK_MULT_RX == 2) or (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();  // Required only for QSD2/QSE2.
 }
 //============================================================== END setup() =================================================================
 
 elapsedMicros usec = 0;  // Automatically increases as time passes; no ++ necessary.
+
 
 /*****
   Purpose: Code here executes forever, or until: 1) power is removed, 2) user does a reset, 3) a component
@@ -1053,8 +1039,8 @@ elapsedMicros usec = 0;  // Automatically increases as time passes; no ++ necess
     void
 *****/
 float audioBW{ 0.0 };
-
-void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
+uint32_t receiverMute = 10;
+void loop()
 {
   MenuSelect menu;
   long ditTimerOff;  //AFP 09-22-22
@@ -1065,9 +1051,9 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   menu = readButton();
   if (menu != MenuSelect::BOGUS_PIN_READ and (radioState != RadioState::SSB_TRANSMIT_STATE) and (radioState != RadioState::FT8_TRANSMIT_STATE) and (radioState != RadioState::CW_TRANSMIT_STRAIGHT_STATE) and (radioState != RadioState::CW_TRANSMIT_KEYER_STATE)) {
     button.ExecuteButtonPress(menu);
-//    Clear the audio queues because they filled up during command.
-      ADC_RX_I.clear();
-      ADC_RX_Q.clear();
+    //    Clear the audio queues because they filled up during command.
+    ADC_RX_I.clear();
+    ADC_RX_Q.clear();
   }
   //  State detection for modes which can transmit.  AM and SAM don't transmit, so there is not a state transition required.
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE and digitalRead(PTT) == HIGH) radioState = RadioState::SSB_RECEIVE_STATE;
@@ -1079,11 +1065,7 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE && (digitalRead(ConfigData.paddleDit) == HIGH && digitalRead(ConfigData.paddleDah) == HIGH)) radioState = RadioState::CW_RECEIVE_STATE;  // Was using symbolic constants. Also changed in code below.  KF5N August 8, 2023
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE && (digitalRead(ConfigData.paddleDit) == LOW && ConfigData.xmtMode == RadioMode::CW_MODE && ConfigData.keyType == 0)) radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE && (keyPressedOn == 1 && ConfigData.xmtMode == RadioMode::CW_MODE && ConfigData.keyType == 1)) radioState = RadioState::CW_TRANSMIT_KEYER_STATE;
- // if (bands[ConfigData.currentBand].mode > 1) {
- //   radioState = RadioState::AM_RECEIVE_STATE;  // Inhibit transmit in AM demod modes.  KF5N March 21, 2024
- //   radioMode = RadioMode::AM_MODE;             // AM is currently receive only.
- //   keyPressedOn = 0;
- // }
+
 
   if (lastState != radioState) {
     SetAudioOperatingState(radioState);
@@ -1092,19 +1074,20 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
     Serial.printf("Set audio state, begin loop. radioState = %d lastState = %d\n", radioState, lastState);
   }
 
-   if(powerUp) {
-   afterPowerUp = afterPowerUp + 1;
-      speakerScale.setGain(0);
-      headphoneScale.setGain(0);
-   if(afterPowerUp > 10) { 
-    powerUp = false;
-    afterPowerUp = 0;
-//    patchCord3.connect();
+  if (powerUp) {
+    afterPowerUp = afterPowerUp + 1;
+    speakerScale.setGain(0);
+    headphoneScale.setGain(0);
+    if (afterPowerUp > receiverMute) {
+      powerUp = false;
+      afterPowerUp = 0;
+      receiverMute = 1;
       speakerScale.setGain(SPEAKERSCALE);
       headphoneScale.setGain(HEADPHONESCALE);
- }}
+    }
+  }
 
-//Serial.printf("bands[ConfigData.currentBand].sideband = %d\n", bands[ConfigData.currentBand].sideband);
+  //Serial.printf("bands[ConfigData.currentBand].sideband = %d\n", bands[ConfigData.currentBand].sideband);
 
   //  Begin radio state machines
 
@@ -1114,19 +1097,19 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
     case RadioState::SAM_RECEIVE_STATE:
     case RadioState::FT8_RECEIVE_STATE:
     case RadioState::SSB_RECEIVE_STATE:
-      if (lastState != radioState) {      // G0ORX 01092023
-//        digitalWrite(MUTE, UNMUTEAUDIO);  // Audio Mute off
-        digitalWrite(RXTX, LOW);          //xmit off
-                                          ////        if (keyPressedOn == 1) {  //// Unnecessary here?  Greg KF5N January 26, 2025
-                                          //          return;
-                                          //        }
+      if (lastState != radioState) {  // G0ORX 01092023
+                                      //        digitalWrite(MUTE, UNMUTEAUDIO);  // Audio Mute off
+        digitalWrite(RXTX, LOW);      //xmit off
+                                      ////        if (keyPressedOn == 1) {  //// Unnecessary here?  Greg KF5N January 26, 2025
+                                      //          return;
+                                      //        }
         ShowTransmitReceiveStatus();
       }
       ShowSpectrum();
       break;
     case RadioState::SSB_TRANSMIT_STATE:
-//      digitalWrite(MUTE, MUTEAUDIO);  //  Mute Audio  (HIGH=Mute)
-      digitalWrite(RXTX, HIGH);       //xmit on
+      //      digitalWrite(MUTE, MUTEAUDIO);  //  Mute Audio  (HIGH=Mute)
+      digitalWrite(RXTX, HIGH);  //xmit on
 
       ShowTransmitReceiveStatus();
       while (digitalRead(PTT) == LOW) {
@@ -1155,12 +1138,12 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
         }
 #endif
       }
-      
+
       break;
 
     case RadioState::FT8_TRANSMIT_STATE:
-//      digitalWrite(MUTE, MUTEAUDIO);  //  Mute Audio  (HIGH=Mute)
-      digitalWrite(RXTX, HIGH);       //xmit on
+      //      digitalWrite(MUTE, MUTEAUDIO);  //  Mute Audio  (HIGH=Mute)
+      digitalWrite(RXTX, HIGH);  //xmit on
 
       ShowTransmitReceiveStatus();
       while (SerialUSB1.rts() == HIGH) {
@@ -1177,8 +1160,8 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
 
   switch (radioState) {
     case RadioState::CW_RECEIVE_STATE:
-      if (lastState != radioState) {      // G0ORX 01092023
-//        digitalWrite(MUTE, UNMUTEAUDIO);  //turn off mute
+      if (lastState != radioState) {  // G0ORX 01092023
+                                      //        digitalWrite(MUTE, UNMUTEAUDIO);  //turn off mute
         ShowTransmitReceiveStatus();
         keyPressedOn = 0;
       }
@@ -1186,8 +1169,8 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
       break;
     case RadioState::CW_TRANSMIT_STRAIGHT_STATE:
       ShowTransmitReceiveStatus();
-//      digitalWrite(MUTE, UNMUTEAUDIO);  // unmutes audio for sidetone
-      cwKeyDown = false;                // false initiates CW_SHAPING_RISE.
+      //      digitalWrite(MUTE, UNMUTEAUDIO);  // unmutes audio for sidetone
+      cwKeyDown = false;  // false initiates CW_SHAPING_RISE.
       cwTimer = millis();
       while (millis() - cwTimer <= ConfigData.cwTransmitDelay) {  //Start CW transmit timer on
         digitalWrite(RXTX, HIGH);
@@ -1210,12 +1193,12 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
           }
         }
       }
-//      digitalWrite(MUTE, MUTEAUDIO);  // mutes audio
-      digitalWrite(RXTX, LOW);        // End Straight Key Mode
+      //      digitalWrite(MUTE, MUTEAUDIO);  // mutes audio
+      digitalWrite(RXTX, LOW);  // End Straight Key Mode
       break;
     case RadioState::CW_TRANSMIT_KEYER_STATE:
       ShowTransmitReceiveStatus();
-//      digitalWrite(MUTE, UNMUTEAUDIO);  // unmutes audio for sidetone
+      //      digitalWrite(MUTE, UNMUTEAUDIO);  // unmutes audio for sidetone
       cwTimer = millis();
       while (millis() - cwTimer <= ConfigData.cwTransmitDelay) {
         digitalWrite(RXTX, HIGH);
@@ -1268,8 +1251,8 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
         keyPressedOn = 0;  // Fix for keyer click-clack.  KF5N August 16, 2023
       }                    //End Relay timer
 
-//      digitalWrite(MUTE, MUTEAUDIO);  // mutes audio
-      digitalWrite(RXTX, LOW);        // End Straight Key Mode
+      //      digitalWrite(MUTE, MUTEAUDIO);  // mutes audio
+      digitalWrite(RXTX, LOW);  // End Straight Key Mode
       break;
     case RadioState::NOSTATE:
       break;
@@ -1281,7 +1264,7 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
   if (lastState != radioState) {  // G0ORX 09012023
     lastState = radioState;
     ShowTransmitReceiveStatus();
-//    Serial.printf("End of loop state machine. radioState = %d lastState = %d\n", radioState, lastState);
+    //    Serial.printf("End of loop state machine. radioState = %d lastState = %d\n", radioState, lastState);
   }
 
 #ifdef DEBUG1
@@ -1295,20 +1278,19 @@ void loop()  // Replaced entire loop() with Greg's code  JJP  7/14/23
     // Compensate for audio filter setting.
     // Nominal bandwidth is 2.8kHz.  This will be the 0 dB reference.
     // The upper and lower frequency limits are bands[ConfigData.currentBand].FLoCut and bands[ConfigData.currentBand].FHiCut.
-    if(bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE or bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE or bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE)
-    audioBW = bands.bands[ConfigData.currentBand].FHiCut - bands.bands[ConfigData.currentBand].FLoCut;
+    if (bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE or bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE or bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE)
+      audioBW = bands.bands[ConfigData.currentBand].FHiCut - bands.bands[ConfigData.currentBand].FLoCut;
     else if (bands.bands[ConfigData.currentBand].mode == RadioMode::AM_MODE or bands.bands[ConfigData.currentBand].mode == RadioMode::SAM_MODE)
-    audioBW = bands.bands[ConfigData.currentBand].FAMCut;
+      audioBW = bands.bands[ConfigData.currentBand].FAMCut;
 
     process.audioGainCompensate = 4 * 2800.0 / audioBW;
 
-speakerVolume.setGain(volumeLog[ConfigData.audioVolume]);
-headphoneVolume.setGain(volumeLog[ConfigData.audioVolume]);
+    speakerVolume.setGain(volumeLog[ConfigData.audioVolume]);
+    headphoneVolume.setGain(volumeLog[ConfigData.audioVolume]);
 
     volumeChangeFlag = false;
     UpdateVolumeField();
-        Serial.printf("fftOffset = %d\n", fftOffset);
-
+    Serial.printf("fftOffset = %d\n", fftOffset);
   }
 
 }  // end loop()
