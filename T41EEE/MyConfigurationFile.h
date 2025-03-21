@@ -78,9 +78,9 @@
 #define SPEAKERSCALE   5.0     // Increase or decrease this value depending on your amplifier gain.
 #define HEADPHONESCALE 10.0    // Same as for the speaker.  Adjust to your preference for volume range.
 
-#define RFGAINSCALE 1000.0   // This adjusts for RF gain differences in the QSD.  QSD2 should use a value of 1000.0.
+#define RFGAINSCALE 1000.0   // This adjusts for RF gain differences in the QSD.  QSD should use a value of 3000.  QSD2 should use a value of 1000.0.
 
-#define FREQUENCYCAL 130000  // The nominal frequency calibration.  This can be set here permanently after determining
+#define FREQUENCYCAL 130100  // The nominal frequency calibration.  This can be set here permanently after determining
                              // the unique value for your radio.
 
 

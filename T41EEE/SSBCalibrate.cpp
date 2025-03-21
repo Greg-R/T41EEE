@@ -819,6 +819,16 @@ void SSBCalibrate::DoXmitCarrierCalibrate(bool radioCal, bool shortCal, bool sav
   radioState = RadioState::SSB_TRANSMIT_STATE;
   SetFreqCal(freqOffset);
   printCalType(calTypeFlag, autoCal, false);
+  // Get current values into the amplitude and phase working variables.
+  // Done here only to get correct sideband suppression during carrier calibration.
+  if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
+amplitude = CalData.IQSSBAmpCorrectionFactorLSB[ConfigData.currentBand];
+phase = CalData.IQSSBPhaseCorrectionFactorLSB[ConfigData.currentBand];
+  }
+  else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
+amplitude = CalData.IQSSBAmpCorrectionFactorUSB[ConfigData.currentBand];
+phase = CalData.IQSSBPhaseCorrectionFactorUSB[ConfigData.currentBand];
+  }
   // Run this so Phase shows from begining.
   GetEncoderValueLiveQ15t(-1000, 1000, CalData.qDCoffsetSSB[ConfigData.currentBand], correctionIncrement, (char *)"Q Offset", false);
   warmUpCal();
@@ -1453,12 +1463,12 @@ void SSBCalibrate::ProcessIQData2() {
 
       // Manual IQ amplitude correction
       if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-        arm_scale_f32(float_buffer_L, -CalData.IQSSBRXAmpCorrectionFactor[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
-        IQPhaseCorrection(float_buffer_L, float_buffer_R, CalData.IQSSBRXPhaseCorrectionFactor[ConfigData.currentBand], BUFFER_SIZE * N_BLOCKS);
+        arm_scale_f32(float_buffer_L, -CalData.IQSSBRXAmpCorrectionFactorLSB[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
+        IQPhaseCorrection(float_buffer_L, float_buffer_R, CalData.IQSSBRXPhaseCorrectionFactorLSB[ConfigData.currentBand], BUFFER_SIZE * N_BLOCKS);
       } else {
         if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-          arm_scale_f32(float_buffer_L, -CalData.IQSSBRXAmpCorrectionFactor[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22 KF5N changed sign
-          IQPhaseCorrection(float_buffer_L, float_buffer_R, CalData.IQSSBRXPhaseCorrectionFactor[ConfigData.currentBand], BUFFER_SIZE * N_BLOCKS);
+          arm_scale_f32(float_buffer_L, -CalData.IQSSBRXAmpCorrectionFactorUSB[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22 KF5N changed sign
+          IQPhaseCorrection(float_buffer_L, float_buffer_R, CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand], BUFFER_SIZE * N_BLOCKS);
         }
       }
       FreqShift1();  // Why done here? KF5N

@@ -413,7 +413,7 @@ struct calibration_t {
 
   float CWPowerCalibrationFactor[NUMBER_OF_BANDS] =  { 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 };        // Increased to 0.04, was 0.019; KF5N February 20, 2024
   float SSBPowerCalibrationFactor[NUMBER_OF_BANDS] = { 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 };  // Increased to 0.04, was 0.008; KF5N February 21, 2024
-
+/*
   float IQCWRXAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
   float IQCWRXPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
   float IQCWAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
@@ -422,7 +422,7 @@ struct calibration_t {
   float IQSSBRXPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };  
   float IQSSBAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
   float IQSSBPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-
+*/
   float IQCWRXAmpCorrectionFactorLSB[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
   float IQCWRXPhaseCorrectionFactorLSB[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
   float IQCWAmpCorrectionFactorLSB[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };

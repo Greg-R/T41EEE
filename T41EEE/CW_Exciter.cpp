@@ -64,12 +64,12 @@ void CW_ExciterIQData(int shaping) //AFP 08-20-22
   //  Apply amplitude and phase corrections.
 
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-    arm_scale_f32(float_buffer_L_EX, -CalData.IQCWAmpCorrectionFactor[ConfigData.currentBand], float_buffer_L_EX, 256);       //Adjust level of L buffer KF5N flipped sign, original was +.
-    IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, CalData.IQCWPhaseCorrectionFactor[ConfigData.currentBand], 256);  // Adjust phase
+    arm_scale_f32(float_buffer_L_EX, -CalData.IQCWAmpCorrectionFactorLSB[ConfigData.currentBand], float_buffer_L_EX, 256);       //Adjust level of L buffer KF5N flipped sign, original was +.
+    IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, CalData.IQCWPhaseCorrectionFactorLSB[ConfigData.currentBand], 256);  // Adjust phase
   } else {
     if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-      arm_scale_f32 (float_buffer_L_EX, + CalData.IQCWAmpCorrectionFactor[ConfigData.currentBand], float_buffer_L_EX, 256);   // KF5N flipped sign, original was minus.
-      IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, CalData.IQCWPhaseCorrectionFactor[ConfigData.currentBand], 256); // Adjust phase
+      arm_scale_f32 (float_buffer_L_EX, + CalData.IQCWAmpCorrectionFactorUSB[ConfigData.currentBand], float_buffer_L_EX, 256);   // KF5N flipped sign, original was minus.
+      IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand], 256); // Adjust phase
     }
   }
 

@@ -302,7 +302,7 @@ FLASHMEM void JSON::loadCalibration(const char *filename, calibration_t &CalData
 //  ConfigData.powerOutSSB[0] = doc["powerOutSSB"][0];
   for (int i = 0; i < 7; i++) CalData.CWPowerCalibrationFactor[i] = doc["CWPowerCalibrationFactor"][i];
   for (int i = 0; i < 7; i++) CalData.SSBPowerCalibrationFactor[i] = doc["SSBPowerCalibrationFactor"][i];
-
+/*
   for (int i = 0; i < 7; i++) CalData.IQCWRXAmpCorrectionFactor[i] = doc["IQCWRXAmpCorrectionFactor"][i];
   for (int i = 0; i < 7; i++) CalData.IQCWRXPhaseCorrectionFactor[i] = doc["IQCWRXPhaseCorrectionFactor"][i];
   for (int i = 0; i < 7; i++) CalData.IQCWAmpCorrectionFactor[i] = doc["IQCWAmpCorrectionFactor"][i];
@@ -311,7 +311,7 @@ FLASHMEM void JSON::loadCalibration(const char *filename, calibration_t &CalData
   for (int i = 0; i < 7; i++) CalData.IQSSBRXPhaseCorrectionFactor[i] = doc["IQSSBRXPhaseCorrectionFactor"][i];  
   for (int i = 0; i < 7; i++) CalData.IQSSBAmpCorrectionFactor[i] = doc["IQSSBAmpCorrectionFactor"][i];
   for (int i = 0; i < 7; i++) CalData.IQSSBPhaseCorrectionFactor[i] = doc["IQSSBPhaseCorrectionFactor"][i];
-
+*/
   for (int i = 0; i < 7; i++) CalData.IQCWRXAmpCorrectionFactorLSB[i] = doc["IQCWRXAmpCorrectionFactorLSB"][i];
   for (int i = 0; i < 7; i++) CalData.IQCWRXPhaseCorrectionFactorLSB[i] = doc["IQCWRXPhaseCorrectionFactorLSB"][i];
   for (int i = 0; i < 7; i++) CalData.IQCWAmpCorrectionFactorLSB[i] = doc["IQCWAmpCorrectionFactorLSB"][i];
@@ -369,7 +369,7 @@ FLASHMEM void JSON::saveCalibration(const char *filename, const calibration_t &C
 //  for (int i = 0; i < 7; i++) doc["powerOutSSB"][i] = ConfigData.powerOutSSB[i];
   for (int i = 0; i < 7; i++) doc["CWPowerCalibrationFactor"][i] = CalData.CWPowerCalibrationFactor[i];
   for (int i = 0; i < 7; i++) doc["SSBPowerCalibrationFactor"][i] = CalData.SSBPowerCalibrationFactor[i];
-
+/*
   for (int i = 0; i < 7; i++) doc["IQCWRXAmpCorrectionFactor"][i] =   CalData.IQCWRXAmpCorrectionFactor[i];
   for (int i = 0; i < 7; i++) doc["IQCWRXPhaseCorrectionFactor"][i] = CalData.IQCWRXPhaseCorrectionFactor[i];
   for (int i = 0; i < 7; i++) doc["IQCWAmpCorrectionFactor"][i] =   CalData.IQCWAmpCorrectionFactor[i];
@@ -378,7 +378,7 @@ FLASHMEM void JSON::saveCalibration(const char *filename, const calibration_t &C
   for (int i = 0; i < 7; i++) doc["IQSSBRXPhaseCorrectionFactor"][i] = CalData.IQSSBRXPhaseCorrectionFactor[i];
   for (int i = 0; i < 7; i++) doc["IQSSBAmpCorrectionFactor"][i] =   CalData.IQSSBAmpCorrectionFactor[i];
   for (int i = 0; i < 7; i++) doc["IQSSBPhaseCorrectionFactor"][i] = CalData.IQSSBPhaseCorrectionFactor[i];  
-
+*/
   for (int i = 0; i < 7; i++) doc["IQCWRXAmpCorrectionFactorLSB"][i] =   CalData.IQCWRXAmpCorrectionFactorLSB[i];
   for (int i = 0; i < 7; i++) doc["IQCWRXPhaseCorrectionFactorLSB"][i] = CalData.IQCWRXPhaseCorrectionFactorLSB[i];
   for (int i = 0; i < 7; i++) doc["IQCWAmpCorrectionFactorLSB"][i] =   CalData.IQCWAmpCorrectionFactorLSB[i];
