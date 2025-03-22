@@ -116,11 +116,11 @@ void FreqShift2()
   //  ShowFrequency();
   //  DrawBandWidthIndicatorBar();
   //}
-  if (ConfigData.xmtMode == RadioMode::SSB_MODE ) {
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE ) {
     sideToneShift = 0;
   } 
   
-    if (ConfigData.xmtMode == RadioMode::CW_MODE ) {
+    if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE ) {
       cwFreqOffset = (ConfigData.CWOffset + 6) * 24000 / 256;
         if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) sideToneShift = -cwFreqOffset;
         if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) sideToneShift =  cwFreqOffset;

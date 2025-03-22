@@ -1402,7 +1402,7 @@ FLASHMEM void UpdateDecoderField() {
     tft.print("Off");
 //  }
   // Update text and graphics.
-  if (ConfigData.xmtMode == RadioMode::CW_MODE and ConfigData.decoderFlag) {
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and ConfigData.decoderFlag) {
     tft.setCursor(FIELD_OFFSET_X, DECODER_Y - 5);
     tft.print("    WPM");
     tft.writeTo(L2);
@@ -1436,8 +1436,8 @@ FLASHMEM void UpdateDecoderField() {
   }
 */
 // Erase graphics when decoder is off or non-CW modes.
-  if ((ConfigData.xmtMode == RadioMode::CW_MODE && not ConfigData.decoderFlag) or ConfigData.xmtMode == RadioMode::SSB_MODE
-       or ConfigData.xmtMode == RadioMode::FT8_MODE or ConfigData.xmtMode == RadioMode::AM_MODE or ConfigData.xmtMode == RadioMode::SAM_MODE) {
+  if ((bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE && not ConfigData.decoderFlag) or bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE
+       or bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE or bands.bands[ConfigData.currentBand].mode == RadioMode::AM_MODE or bands.bands[ConfigData.currentBand].mode == RadioMode::SAM_MODE) {
     tft.print("Off");
     tft.writeTo(L2);
     // Draw delimiter bars for CW offset frequency.  This depends on the user selected offset.

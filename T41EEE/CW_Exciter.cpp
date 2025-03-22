@@ -16,7 +16,7 @@
 *****/
 void KeyTipOn()
 {
-  if (digitalRead(KEYER_DIT_INPUT_TIP) == LOW && ConfigData.xmtMode == RadioMode::CW_MODE ) {
+  if (digitalRead(KEYER_DIT_INPUT_TIP) == LOW and bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE ) {
     keyPressedOn = 1;
   }
 }
@@ -33,7 +33,7 @@ void KeyTipOn()
 void KeyRingOn() //AFP 09-25-22
 {
   if (ConfigData.keyType == 1) {
-    if (digitalRead(KEYER_DAH_INPUT_RING) == LOW && ConfigData.xmtMode == RadioMode::CW_MODE ) {
+    if (digitalRead(KEYER_DAH_INPUT_RING) == LOW and bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE ) {
       keyPressedOn = 1;
     }
   }

@@ -981,23 +981,23 @@ FLASHMEM void setup() {
 
   lastState = RadioState::NOSTATE;  // To make sure the receiver will be configured on the first pass through.  KF5N September 3, 2023
   // Set up the initial state/mode.
-  if (ConfigData.xmtMode == RadioMode::CW_MODE) {
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) {
     radioState = RadioState::CW_RECEIVE_STATE;
     bands.bands[ConfigData.currentBand].mode = RadioMode::CW_MODE;
   }
-  if (ConfigData.xmtMode == RadioMode::SSB_MODE) {
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE) {
     radioState = RadioState::SSB_RECEIVE_STATE;
     bands.bands[ConfigData.currentBand].mode = RadioMode::SSB_MODE;
   }
-  if (ConfigData.xmtMode == RadioMode::FT8_MODE) {
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) {
     radioState = RadioState::FT8_RECEIVE_STATE;
     bands.bands[ConfigData.currentBand].mode = RadioMode::FT8_MODE;
   }
-  if (ConfigData.xmtMode == RadioMode::AM_MODE) {
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::AM_MODE) {
     radioState = RadioState::AM_RECEIVE_STATE;
     bands.bands[ConfigData.currentBand].mode = RadioMode::AM_MODE;
   }
-  if (ConfigData.xmtMode == RadioMode::SAM_MODE) {
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::SAM_MODE) {
     radioState = RadioState::SAM_RECEIVE_STATE;
     bands.bands[ConfigData.currentBand].mode = RadioMode::SAM_MODE;
   }
@@ -1060,8 +1060,8 @@ void loop()
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE and SerialUSB1.rts() == HIGH) radioState = RadioState::FT8_TRANSMIT_STATE;
 
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE && (digitalRead(ConfigData.paddleDit) == HIGH && digitalRead(ConfigData.paddleDah) == HIGH)) radioState = RadioState::CW_RECEIVE_STATE;  // Was using symbolic constants. Also changed in code below.  KF5N August 8, 2023
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE && (digitalRead(ConfigData.paddleDit) == LOW && ConfigData.xmtMode == RadioMode::CW_MODE && ConfigData.keyType == 0)) radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE && (keyPressedOn == 1 && ConfigData.xmtMode == RadioMode::CW_MODE && ConfigData.keyType == 1)) radioState = RadioState::CW_TRANSMIT_KEYER_STATE;
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE && (digitalRead(ConfigData.paddleDit) == LOW && bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE && ConfigData.keyType == 0)) radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE && (keyPressedOn == 1 && bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE && ConfigData.keyType == 1)) radioState = RadioState::CW_TRANSMIT_KEYER_STATE;
 
 
   if (lastState != radioState) {

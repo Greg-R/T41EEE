@@ -75,7 +75,7 @@ FLASHMEM void JSON::loadConfiguration(const char *filename, config_t &ConfigData
   ConfigData.centerTuneStep = doc["centerTuneStep"];
   ConfigData.fineTuneStep = doc["fineTuneStep"];
   ConfigData.transmitPowerLevel = doc["transmitPowerLevel"];
-  ConfigData.xmtMode = doc["xmtMode"];
+//  ConfigData.xmtMode = doc["xmtMode"];
   ConfigData.audioOut = doc["audioOut"];
   ConfigData.nrOptionSelect = doc["nrOptionSelect"];
   ConfigData.currentScale = doc["currentScale"];
@@ -167,7 +167,7 @@ FLASHMEM void JSON::saveConfiguration(const char *filename, const config_t &Conf
   doc["centerTuneStep"] = ConfigData.centerTuneStep;
   doc["fineTuneStep"] = ConfigData.fineTuneStep;
   doc["transmitPowerLevel"] = ConfigData.transmitPowerLevel;
-  doc["xmtMode"] = ConfigData.xmtMode;
+//  doc["xmtMode"] = ConfigData.xmtMode;
   doc["audioOut"] = ConfigData.audioOut;
   doc["nrOptionSelect"] = ConfigData.nrOptionSelect;
   doc["currentScale"] = ConfigData.currentScale;
