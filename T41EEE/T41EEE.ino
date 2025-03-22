@@ -837,7 +837,7 @@ FLASHMEM void setup() {
   //  sgtl5000_1.audioPreProcessorEnable();  // Need to use one of the equalizers.
   //  sgtl5000_1.eqSelect(3);
   //  sgtl5000_1.eqBands(-1.0, 0.0, 1.0, 1.0, -1.0);
-  AudioMemory(200);  //  Increased to 450 from 400.  Memory was hitting max.  KF5N August 31, 2023
+  AudioMemory(250);
   AudioMemory_F32(10);
   sgtl5000_1.inputSelect(AUDIO_INPUT_MIC);
   sgtl5000_1.volume(0.8);  // Set headphone volume.
@@ -1051,9 +1051,6 @@ void loop()
   menu = readButton();
   if (menu != MenuSelect::BOGUS_PIN_READ and (radioState != RadioState::SSB_TRANSMIT_STATE) and (radioState != RadioState::FT8_TRANSMIT_STATE) and (radioState != RadioState::CW_TRANSMIT_STRAIGHT_STATE) and (radioState != RadioState::CW_TRANSMIT_KEYER_STATE)) {
     button.ExecuteButtonPress(menu);
-    //    Clear the audio queues because they filled up during command.
-    ADC_RX_I.clear();
-    ADC_RX_Q.clear();
   }
   //  State detection for modes which can transmit.  AM and SAM don't transmit, so there is not a state transition required.
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE and digitalRead(PTT) == HIGH) radioState = RadioState::SSB_RECEIVE_STATE;
@@ -1081,7 +1078,7 @@ void loop()
     if (afterPowerUp > receiverMute) {
       powerUp = false;
       afterPowerUp = 0;
-      receiverMute = 1;
+      receiverMute = 4;
       speakerScale.setGain(SPEAKERSCALE);
       headphoneScale.setGain(HEADPHONESCALE);
     }
@@ -1290,7 +1287,10 @@ void loop()
 
     volumeChangeFlag = false;
     UpdateVolumeField();
-    Serial.printf("fftOffset = %d\n", fftOffset);
+  //  Serial.printf("fftOffset = %d\n", fftOffset);
+  Serial.printf("Max audio blocks = %d\n", AudioMemoryUsageMax());
+  AudioMemoryUsageMaxReset();
+  Serial.printf("ADC_RX_I = %d\n", ADC_RX_I.available());
   }
 
 }  // end loop()

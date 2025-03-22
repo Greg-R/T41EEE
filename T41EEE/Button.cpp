@@ -906,7 +906,7 @@ void Button::ButtonMode()  //  Greg KF5N March 11, 2025
   }
 
   //  SetupMode(bands.bands[ConfigData.currentBand].mode, bands.bands[ConfigData.currentBand].sideband);  // Setup mode and sideband(s);
-//  ExecuteModeChange();
+  //  ExecuteModeChange();
   /*
   FilterSetSSB();
   FilterBandwidth();
@@ -1388,10 +1388,10 @@ void Button::ButtonFrequencyEntry() {
     void
 *****/
 void Button::ExecuteModeChange() {
-     ADC_RX_I.end();
-  ADC_RX_Q.end(); 
-    ADC_RX_I.clear();
-  ADC_RX_Q.clear();
+//  ADC_RX_I.end();
+//  ADC_RX_Q.end();
+//  ADC_RX_I.clear();
+//  ADC_RX_Q.clear();
   tft.writeTo(L2);  // Destroy the bandwidth indicator bar.  KF5N July 30, 2023
   tft.clearMemory();
   tft.writeTo(L1);
@@ -1400,7 +1400,7 @@ void Button::ExecuteModeChange() {
   ShowBandwidth();
   ShowFrequency();
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) BandInformation();
-  DrawBandWidthIndicatorBar();  // Restory the bandwidth indicator bar.  KF5N July 30, 2023
+  DrawBandWidthIndicatorBar();  // Restore the bandwidth indicator bar.  KF5N July 30, 2023
   DrawSMeterContainer();
   SetFreq();  // Must update frequency, for example moving from SSB to CW, the RX LO is shifted.  KF5N
   if ((bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) && (ConfigData.decoderFlag == 1)) {
@@ -1410,8 +1410,11 @@ void Button::ExecuteModeChange() {
   BandInformation();
   fftOffset = 140;
   // Clear buffers to reduce audio transients.
-  ADC_RX_I.begin();
-  ADC_RX_Q.begin();
+//  ADC_RX_I.begin();
+//  ADC_RX_Q.begin();
   Serial.printf("Execute Mode Change\n");
-//  powerUp = true;
+  Serial.printf("ConfigData.currentBand = %d\n", ConfigData.currentBand);
+  Serial.printf("bands.bands[ConfigData.currentBand].mode = %d\n", bands.bands[ConfigData.currentBand].mode);
+  Serial.printf("ConfigData.xmtMode = %d\n", ConfigData.xmtMode);
+  //  powerUp = true;
 }

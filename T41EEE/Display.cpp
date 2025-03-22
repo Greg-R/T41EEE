@@ -1394,15 +1394,17 @@ FLASHMEM void UpdateDecoderField() {
   //  tft.fillRect(DECODER_X + 90, DECODER_Y, tft.getFontWidth() * 20, tft.getFontHeight() + 2, RA8875_BLACK);
   tft.setCursor(FIELD_OFFSET_X, DECODER_Y - 5);
   tft.fillRect(FIELD_OFFSET_X, DECODER_Y - 5, 140, 17, RA8875_BLACK);  // Erase
-  if (ConfigData.decoderFlag) {                                        // AFP 09-27-22
-    tft.setCursor(FIELD_OFFSET_X, DECODER_Y - 5);
-    tft.print("    WPM");
-  } else {
+//  if (ConfigData.decoderFlag) {                                        // AFP 09-27-22
+//    tft.setCursor(FIELD_OFFSET_X, DECODER_Y - 5);
+//    tft.print("    WPM");
+//  } else {
     //    tft.fillRect(FIELD_OFFSET_X, DECODER_Y - 5, 140, 17, RA8875_BLACK);  // Erase
     tft.print("Off");
-  }
-  // Update graphics
-  if (ConfigData.xmtMode == RadioMode::CW_MODE && ConfigData.decoderFlag) {  // In CW mode with decoder on? AFP 09-27-22
+//  }
+  // Update text and graphics.
+  if (ConfigData.xmtMode == RadioMode::CW_MODE and ConfigData.decoderFlag) {
+    tft.setCursor(FIELD_OFFSET_X, DECODER_Y - 5);
+    tft.print("    WPM");
     tft.writeTo(L2);
     // Draw delimiter bars for CW offset frequency.  This depends on the user selected offset.
     if (ConfigData.CWOffset == 0) {
@@ -1433,9 +1435,11 @@ FLASHMEM void UpdateDecoderField() {
     tft.writeTo(L1);
   }
 */
-// Erase graphics when decoder is off.
-  if ((ConfigData.xmtMode == RadioMode::CW_MODE && not ConfigData.decoderFlag) || ConfigData.xmtMode == RadioMode::SSB_MODE) {  // In CW mode with decoder off.
-    tft.writeTo(L2);                                                                                                             // or SSB mode.
+// Erase graphics when decoder is off or non-CW modes.
+  if ((ConfigData.xmtMode == RadioMode::CW_MODE && not ConfigData.decoderFlag) or ConfigData.xmtMode == RadioMode::SSB_MODE
+       or ConfigData.xmtMode == RadioMode::FT8_MODE or ConfigData.xmtMode == RadioMode::AM_MODE or ConfigData.xmtMode == RadioMode::SAM_MODE) {
+    tft.print("Off");
+    tft.writeTo(L2);
     // Draw delimiter bars for CW offset frequency.  This depends on the user selected offset.
     if (ConfigData.CWOffset == 0) {
       tft.drawFastVLine(BAND_INDICATOR_X + 15, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_BLACK);  //CW lower freq indicator
