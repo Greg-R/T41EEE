@@ -219,7 +219,7 @@ void Button::ExecuteButtonPress(MenuSelect val) {
       break;
 
     case MenuSelect::ZOOM:  // 3
-      EraseMenus();
+//      EraseMenus();
       ButtonZoom();
       break;
 
@@ -258,7 +258,7 @@ void Button::ExecuteButtonPress(MenuSelect val) {
 
     case MenuSelect::NOISE_REDUCTION:  // 9
       ButtonNR();
-      UpdateNotchField();  // This is required because LMS NR must turn off AutoNotch.
+      UpdateNoiseField();  // This is required because LMS NR must turn off AutoNotch.
       break;
 
     case MenuSelect::NOTCH_FILTER:  // 10
@@ -276,10 +276,7 @@ void Button::ExecuteButtonPress(MenuSelect val) {
       break;
 
     case MenuSelect::DECODER_TOGGLE:  // 13
-      ConfigData.decoderFlag = !ConfigData.decoderFlag;
-      if ((bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) && (ConfigData.decoderFlag == 1)) {
-        //       radioMode = RadioMode::CW_MODE;
-      }
+      ConfigData.decoderFlag =  not ConfigData.decoderFlag;
       UpdateDecoderField();
       break;
 
@@ -767,7 +764,7 @@ void Button::ButtonZoom() {
   ShowSpectrumdBScale();
   DrawFrequencyBarValue();
   ShowFrequency();
-  ShowBandwidth();
+//  ShowBandwidth();
   ResetTuning();  // AFP 10-11-22
   FilterSetSSB();
 }
@@ -924,8 +921,6 @@ void Button::ButtonMode()  //  Greg KF5N March 11, 2025
   BandInformation();  // This updates display; at the line above spectrum.
 
   DrawSMeterContainer();
-  DrawAudioSpectContainer();
-  SpectralNoiseReductionInit();
   UpdateNoiseField();
   ShowSpectrumdBScale();
   ShowTransmitReceiveStatus();
@@ -1128,7 +1123,7 @@ void Button::ResetZoom(int zoomIndex1) {
   DrawBandWidthIndicatorBar();
   DrawFrequencyBarValue();
   ShowFrequency();
-  ShowBandwidth();
+//  ShowBandwidth();
   RedrawDisplayScreen();
 }
 

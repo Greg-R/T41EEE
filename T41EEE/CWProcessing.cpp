@@ -127,7 +127,7 @@ FLASHMEM void SelectCWFilter() {
   tft.clearMemory();
   BandInformation();
   DrawBandWidthIndicatorBar();
-  UpdateDecoderField();
+//  UpdateDecoderField();
   eeprom.ConfigDataWrite();
 }
 

@@ -161,9 +161,9 @@ void FilterSetSSB() {
   //ControlFilterF();
   //    Menu2 = MENU_F_LO_CUT;  // set Menu2 to MENU_F_LO_CUT
   //    FilterBandwidth();  // Do any of these functions do anything???
-  //    ShowBandwidth();
+
   //  Which function adjusts the frequency limit bars in the audio spectrum display???
-  //    DrawFrequencyBarValue();  // This calls ShowBandwidth().  YES, this function is useful here.
+
   //    UpdateDecoderField();   // Redraw Morse decoder graphics because they get erased due to filter graphics updates.
 
   //  The following code was moved from ShowSpectrum() in Display.cpp.
@@ -214,22 +214,13 @@ void FilterSetSSB() {
 //  UpdateDecoderField();     // Redraw Morse decoder graphics because they get erased due to filter graphics updates.
   DrawBandWidthIndicatorBar();
 
-//  ADC_RX_I.begin();
-//  ADC_RX_Q.begin();
+  ShowBandwidth();
 
-    if (ADC_RX_I.available() > 64) {
-      ADC_RX_I.clear();
-      ADC_RX_Q.clear();
-//    AudioInterrupts();
-    }
-//    if (ADC_RX_Q.available() > 64) {
+//    if (ADC_RX_I.available() > 64) {
+//      ADC_RX_I.clear();
 //      ADC_RX_Q.clear();
-      //  n_clear++; // just for debugging to check how often this occurs
-//      AudioInterrupts();
+//    AudioInterrupts();
 //    }
-//    ADC_RX_I.begin();
-//  ADC_RX_Q.begin();  
-//AudioInterrupts();
 }
 
 

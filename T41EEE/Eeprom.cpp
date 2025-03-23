@@ -220,7 +220,7 @@ menu = readButton();
       //      EEPROMWrite();
       SetFreq();
       BandInformation();
-      ShowBandwidth();
+//      ShowBandwidth();
       FilterBandwidth();
       ShowFrequency();
       break;

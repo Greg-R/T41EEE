@@ -192,7 +192,7 @@ void ResetTuning() {
   DrawBandWidthIndicatorBar();
   BandInformation();
   ShowFrequency();
-  UpdateDecoderField();  // Update Morse decoder if used.
+//  UpdateDecoderField();  // Update Morse decoder if used.
   FilterSetSSB();
 }
 
@@ -212,7 +212,7 @@ void CenterFastTune() {
 
 
 /*****
-  Purpose: Purpose is to sety VFOa to receive frequency and VFOb to the transmit frequency
+  Purpose: Purpose is to sety VFOA to receive frequency and VFOB to the transmit frequency
 
   Parameter list:
     void
@@ -256,7 +256,7 @@ int DoSplitVFO() {
 //    delay(150L);
     if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
       Clk1SetFreq += splitOffset;     // New transmit frequency // AFP 09-27-22
-      UpdateInfoWindow();
+//      UpdateInfoWindow();
       filterEncoderMove = 0L;
       break;
     }

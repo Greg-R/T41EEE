@@ -61,6 +61,8 @@ double elapsed_micros_mean;
 *****/
 void DrawAudioSpectContainer() {
   tft.drawRect(BAND_INDICATOR_X - 9, SPECTRUM_BOTTOM - 118, 255, 118, RA8875_GREEN);
+  tft.setFontScale((enum RA8875tsize)0);
+  tft.setTextColor(RA8875_WHITE);
   for (int k = 0; k < 6; k++) {
     tft.drawFastVLine(BAND_INDICATOR_X - 10 + k * 43.8, SPECTRUM_BOTTOM, 15, RA8875_GREEN);
     tft.setCursor(BAND_INDICATOR_X - 14 + k * 43.8, SPECTRUM_BOTTOM + 16);
@@ -418,7 +420,6 @@ void DrawSMeterContainer() {
   tft.drawFastVLine(SMETER_X + SMETER_BAR_LENGTH + 2, SMETER_Y - 1, SMETER_BAR_HEIGHT + 3, RA8875_GREEN);
 
   tft.setFontScale((enum RA8875tsize)0);
-
   tft.setTextColor(RA8875_WHITE);
   //DB2OO, 30-AUG-23: moved single digits a bit to the right, to align
   tft.setCursor(SMETER_X - 8, SMETER_Y - 25);
@@ -574,7 +575,7 @@ void DrawFrequencyBarValue() {
   }
   tft.writeTo(L1);  // Always leave on layer 1.  KF5N.  July 31, 2023
   tft.setFontScale((enum RA8875tsize)1);
-  ShowBandwidth();
+//  ShowBandwidth();
 }
 
 
@@ -777,7 +778,7 @@ tft.print("SAM");
       default:
       break;
   }
-  ShowCurrentPowerSetting();  // Why is this done here?
+//  ShowCurrentPowerSetting();  // Why is this done here?
 }
 
 
@@ -1089,10 +1090,11 @@ void MyDrawFloat(float val, int decimals, int x, int y, char *buff) {
   Return value;
     void
 *****/
-void UpdateInfoWindow() {
+FLASHMEM void UpdateInfoWindow() {
   tft.fillRect(INFORMATION_WINDOW_X - 8, INFORMATION_WINDOW_Y, 250, 170, RA8875_BLACK);    // Clear fields
   tft.drawRect(BAND_INDICATOR_X - 10, BAND_INDICATOR_Y - 2, 260, 200, RA8875_LIGHT_GREY);  // Redraw Info Window Box
 
+/*
   tft.setFontScale((enum RA8875tsize)1);
   UpdateVolumeField();
   UpdateAGCField();
@@ -1108,6 +1110,7 @@ void UpdateInfoWindow() {
   UpdateZoomField();
   UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
   UpdateAudioField();
+  */
 }
 
 
@@ -1595,7 +1598,6 @@ void DrawInfoWindowFrame() {
 void RedrawDisplayScreen() {
   tft.fillWindow();
   DisplayIncrementField();
-//  AGCPrep();
   UpdateAGCField();
   EncoderVolume();
   SetBand();
@@ -1604,20 +1606,18 @@ void RedrawDisplayScreen() {
   ShowFrequency();
 //  SetFreq();
   SetBandRelay(HIGH);
-  SpectralNoiseReductionInit();
   UpdateNoiseField();
   DrawBandWidthIndicatorBar();
   ShowName();
-  ShowTransmitReceiveStatus();
-  DrawSMeterContainer();
+//  ShowTransmitReceiveStatus();
+//  DrawSMeterContainer();
   DrawAudioSpectContainer();
   DrawSpectrumDisplayContainer();
   DrawFrequencyBarValue();
   ShowSpectrumdBScale();
   UpdateDecoderField();
-  UpdateInfoWindow();
+ShowAutoStatus();
   FilterSetSSB();
-  ShowAutoStatus();
 }
 
 

@@ -682,7 +682,7 @@ void InitLMSNoiseReduction()
   Return value;
     void
 *****/
-void SpectralNoiseReductionInit()
+FLASHMEM void SpectralNoiseReductionInit()
 {
   for (int bindx = 0; bindx < NR_FFT_L / 2; bindx++)
   {

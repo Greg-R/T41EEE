@@ -927,7 +927,24 @@ FLASHMEM void setup() {
   tft.clearMemory();
   tft.writeTo(L1);
 
+//  Graphics
   Splash();
+//  Things which need to be drawn once.
+DrawAudioSpectContainer();
+ShowName();
+UpdateInfoWindow();
+//  Initial values to display.
+ShowAutoStatus();
+UpdateAGCField();
+DisplayIncrementField();
+UpdateNotchField();
+UpdateNoiseField();
+UpdateZoomField();
+UpdateCompressionField();
+UpdateWPMField();
+UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
+UpdateAudioField();
+ShowCurrentPowerSetting();
 
   // =============== EEPROM section =================
   ConfigData.sdCardPresent = InitializeSDCard();  // Initialize mandatory SD card.
@@ -1003,20 +1020,19 @@ FLASHMEM void setup() {
   }
 
   // Write graphics to display.
-  UpdateInfoWindow();
+
   DrawSpectrumDisplayContainer();
-  RedrawDisplayScreen();
+////  RedrawDisplayScreen();
   mainMenuIndex = 0;  // Changed from middle to first. Do Menu Down to get to Calibrate quickly
-  ShowName();
-  ShowBandwidth();
-  ShowFrequency();
-  ShowAutoStatus();
+
+////  ShowFrequency();
+////  
   zoomIndex = ConfigData.spectrum_zoom - 1;  // ButtonZoom() increments zoomIndex, so this cancels it so the read from EEPROM is accurately restored.  KF5N August 3, 2023
-  button.ButtonZoom();                       // Restore zoom settings.  KF5N August 3, 2023
+////  button.ButtonZoom();                       // Restore zoom settings.  KF5N August 3, 2023
 
   ConfigData.sdCardPresent = SDPresentCheck();  // JJP 7/18/23
-  UpdateDecoderField();                         // Adjust graphics for Morse decoder.
-  UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
+////  UpdateDecoderField();                         // Adjust graphics for Morse decoder.
+////  UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
   ConfigData.rfGainCurrent = 0;  // Start with lower gain so you don't get blasted.
   button.ExecuteModeChange();
   FilterSetSSB();

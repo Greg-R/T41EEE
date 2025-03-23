@@ -253,7 +253,7 @@ void CalibrateOptions() {
     default:
       break;
   }
-  UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
+//  UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
 }
 #else  // Not using QSE2 (No carrier calibration)
 void CalibrateOptions() {
@@ -408,7 +408,7 @@ void CalibrateOptions() {
     default:
       break;
   }
-  UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
+//  UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
 }
 #endif
 
@@ -786,7 +786,7 @@ void EqualizerRecOptions() {
       break;
   }
   eeprom.ConfigDataWrite();
-  RedrawDisplayScreen();
+//  RedrawDisplayScreen();
   UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
 }
 
@@ -820,7 +820,7 @@ void EqualizerXmtOptions() {
       break;
   }
   eeprom.ConfigDataWrite();
-  RedrawDisplayScreen();
+//  RedrawDisplayScreen();
   UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
 }
 
@@ -1081,7 +1081,7 @@ void VFOSelect() {
   SetFreq();
   RedrawDisplayScreen();
   BandInformation();
-  ShowBandwidth();
+//  ShowBandwidth();
   FilterBandwidth();
   tft.fillRect(FREQUENCY_X_SPLIT, FREQUENCY_Y - 12, VFOB_PIXEL_LENGTH, FREQUENCY_PIXEL_HI, RA8875_BLACK);  // delete old digit
   tft.fillRect(FREQUENCY_X, FREQUENCY_Y - 12, VFOA_PIXEL_LENGTH, FREQUENCY_PIXEL_HI, RA8875_BLACK);        // delete old digit  tft.setFontScale( (enum RA8875tsize) 0);

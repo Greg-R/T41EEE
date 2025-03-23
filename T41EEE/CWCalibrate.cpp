@@ -276,7 +276,12 @@ void CWCalibrate::CalibratePreamble(int setZoom) {
 //  loadCalToneBuffers();  // Restore in the epilogue.  Move to specific cal function and use correct tone freq.
   button.ButtonZoom();
   tft.fillRect(0, 272, 517, 399, RA8875_BLACK);  // Erase waterfall.  KF5N August 14, 2023
-  RedrawDisplayScreen();                         // Erase any existing spectrum trace data.
+//  RedrawDisplayScreen();                         // Erase any existing spectrum trace data.
+
+  tft.fillWindow();
+  ShowFrequency();
+  BandInformation();
+
   tft.writeTo(L2);                               // Erase the bandwidth bar.  KF5N August 16, 2023
   tft.clearMemory();
   tft.writeTo(L1);
@@ -292,7 +297,7 @@ void CWCalibrate::CalibratePreamble(int setZoom) {
   tft.print("Filter - Refine-Cal");
   tft.setTextColor(RA8875_CYAN);
   tft.fillRect(350, 125, 100, tft.getFontHeight(), RA8875_BLACK);
-  tft.setCursor(400, 140);
+  tft.setCursor(400, 142);
   tft.print("dB");
   tft.setCursor(350, 125);
   tft.print("Incr = ");
@@ -303,6 +308,7 @@ void CWCalibrate::CalibratePreamble(int setZoom) {
   NCOFreq = 0L;
   digitalWrite(MUTE, MUTEAUDIO);  //  Mute Audio  (HIGH=Mute)
   digitalWrite(RXTX, HIGH);       // Turn on transmitter.
+  radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;
   ShowTransmitReceiveStatus();
   ShowSpectrumdBScale();
   rawSpectrumPeak = 0;
@@ -2012,10 +2018,9 @@ void CWCalibrate::ShowSpectrum2(int mode)  //AFP 2-10-23
     for (x1 = cal_bins[2] - capture_bins; x1 < cal_bins[2] + capture_bins; x1++) PlotCalSpectrum(mode, x1, cal_bins, capture_bins);  // Undesired sideband
   }
 
-  // Finish up:
-  //= AFP 2-11-23
-  tft.fillRect(350, 140, 50, tft.getFontHeight(), RA8875_BLACK);  // Erase old adjdB number.
-  tft.setCursor(350, 140);                                        // 350, 125
+  tft.setCursor(350, 142);
+  tft.setFontScale((enum RA8875tsize)0);
+  tft.fillRect(350, 142, 50, tft.getFontHeight(), RA8875_BLACK);  // Erase old adjdB number.                                       // 350, 125
   tft.print(adjdB, 1);
 
   delay(5);  // This requires "tuning" in order to get best response.
@@ -2047,7 +2052,7 @@ float CWCalibrate::PlotCalSpectrum(int mode, int x1, int cal_bins[3], int captur
   // The FFT should be performed only at the beginning of the sweep, and buffers must be full.
   if (x1 == (cal_bins[0] - capture_bins)) {  // Set flag at revised beginning.  KF5N
     updateDisplayFlag = true;                // This flag is used in ZoomFFTExe().
-    ShowBandwidth();                         // Without this call, the calibration value in dB will not be updated.  KF5N
+////    ShowBandwidth();                         // Without this call, the calibration value in dB will not be updated.  KF5N
   } else updateDisplayFlag = false;          //  Do not save the the display data for the remainder of the sweep.
 
   CWCalibrate::ProcessIQData2(mode);  // Call the Audio process from within the display routine to eliminate conflicts with drawing the spectrum.
