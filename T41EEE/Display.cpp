@@ -1602,7 +1602,7 @@ void RedrawDisplayScreen() {
   BandInformation();
   ShowCurrentPowerSetting();
   ShowFrequency();
-  SetFreq();
+//  SetFreq();
   SetBandRelay(HIGH);
   SpectralNoiseReductionInit();
   UpdateNoiseField();

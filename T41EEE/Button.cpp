@@ -210,13 +210,12 @@ void Button::ExecuteButtonPress(MenuSelect val) {
       ButtonBandIncrease();
       if (ConfigData.currentBand < 5) digitalWrite(bandswitchPins[ConfigData.currentBand], HIGH);
       ConfigData.rfGainCurrent = 10;
-      BandInformation();
+//      BandInformation();
       NCOFreq = 0L;
-      DrawBandWidthIndicatorBar();  // AFP 10-20-22
-      SetFreq();
-      ShowSpectrum();
-      UpdateDecoderField();
-      ShowAutoStatus();
+//      DrawBandWidthIndicatorBar();  // AFP 10-20-22
+//      ShowSpectrum();
+//      UpdateDecoderField();
+//     ShowAutoStatus();
       break;
 
     case MenuSelect::ZOOM:  // 3
@@ -235,11 +234,11 @@ void Button::ExecuteButtonPress(MenuSelect val) {
       if (ConfigData.currentBand < 5) digitalWrite(bandswitchPins[ConfigData.currentBand], LOW);
       ButtonBandDecrease();
       if (ConfigData.currentBand < 5) digitalWrite(bandswitchPins[ConfigData.currentBand], HIGH);
-      BandInformation();
+//      BandInformation();
       NCOFreq = 0L;
-      DrawBandWidthIndicatorBar();  //AFP 10-20-22
-      UpdateDecoderField();
-      ShowAutoStatus();
+//      DrawBandWidthIndicatorBar();  //AFP 10-20-22
+//      UpdateDecoderField();
+//      ShowAutoStatus();
       break;
 
     case MenuSelect::FILTER:  // 6
@@ -1402,7 +1401,7 @@ void Button::ExecuteModeChange() {
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) BandInformation();
   DrawBandWidthIndicatorBar();  // Restore the bandwidth indicator bar.  KF5N July 30, 2023
   DrawSMeterContainer();
-  SetFreq();  // Must update frequency, for example moving from SSB to CW, the RX LO is shifted.  KF5N
+
   if ((bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) && (ConfigData.decoderFlag == 1)) {
     //  bands.bands[ConfigData.currentBand].mode = RadioMode::CW_MODE;
     UpdateDecoderField();  // KF5N December 28 2023.
@@ -1413,8 +1412,9 @@ void Button::ExecuteModeChange() {
 //  ADC_RX_I.begin();
 //  ADC_RX_Q.begin();
   Serial.printf("Execute Mode Change\n");
-  Serial.printf("ConfigData.currentBand = %d\n", ConfigData.currentBand);
-  Serial.printf("bands.bands[ConfigData.currentBand].mode = %d\n", bands.bands[ConfigData.currentBand].mode);
-  Serial.printf("bands.bands[ConfigData.currentBand].mode = %d\n", bands.bands[ConfigData.currentBand].mode);
-  //  powerUp = true;
+//  Serial.printf("ConfigData.currentBand = %d\n", ConfigData.currentBand);
+//  Serial.printf("bands.bands[ConfigData.currentBand].mode = %d\n", bands.bands[ConfigData.currentBand].mode);
+//  Serial.printf("bands.bands[ConfigData.currentBand].mode = %d\n", bands.bands[ConfigData.currentBand].mode);
+  SetFreq();  // Must update frequency, for example moving from SSB to CW, the RX LO is shifted.  KF5N
+powerUp = true;
 }

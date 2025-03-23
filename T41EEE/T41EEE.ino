@@ -1066,19 +1066,20 @@ void loop()
 
   if (lastState != radioState) {
     SetAudioOperatingState(radioState);
-    SetFreq();  // Update frequencies if the radio state has changed.
+//    SetFreq();  // Update frequencies if the radio state has changed.
     button.ExecuteModeChange();
     Serial.printf("Set audio state, begin loop. radioState = %d lastState = %d\n", radioState, lastState);
   }
 
-  if (powerUp) {
+// Don't turn off audio in the case of CW for sidetone.
+  if (powerUp and not (radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE or radioState == RadioState::CW_TRANSMIT_KEYER_STATE)) {
     afterPowerUp = afterPowerUp + 1;
     speakerScale.setGain(0);
     headphoneScale.setGain(0);
     if (afterPowerUp > receiverMute) {
       powerUp = false;
       afterPowerUp = 0;
-      receiverMute = 4;
+      receiverMute = 3;  // Determines duration of mute.
       speakerScale.setGain(SPEAKERSCALE);
       headphoneScale.setGain(HEADPHONESCALE);
     }

@@ -115,12 +115,12 @@ void CalibrateOptions() {
 
     case 3:  // CW Xmit Carrier calibration.
       cwcalibrater.DoXmitCarrierCalibrate(0, false, false, true);
-      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
+      //      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 4:                                                 // CW IQ Transmit Cal - Gain and Phase  //AFP 2-21-23
       cwcalibrater.DoXmitCalibrate(0, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
-      eeprom.CalDataWrite();                                // Save calibration numbers and configuration.  KF5N August 12, 2023
+                                                            //      eeprom.CalDataWrite();                                // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 5:  // SSB PA Cal
@@ -139,7 +139,7 @@ void CalibrateOptions() {
 
     case 6:                                                    // SSB receive cal
       cwcalibrater.DoReceiveCalibrate(1, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
-      eeprom.CalDataWrite();                                   // Save calibration numbers and configuration.  KF5N August 12, 2023
+                                                               //      eeprom.CalDataWrite();                                   // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 7:  // SSB Carrier Cal
@@ -204,7 +204,7 @@ void CalibrateOptions() {
           calibrateFlag = 0;
         }
       }
-      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
+      //      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 15:  // Set DAC offset for SSB carrier cancellation.
@@ -217,7 +217,7 @@ void CalibrateOptions() {
           calibrateFlag = 0;
         }
       }
-      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
+      //      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 16:  // Calibrate buttons
@@ -266,7 +266,7 @@ void CalibrateOptions() {
   // Select the type of calibration, and then skip this during the loop() function.
   if (calibrateFlag == 0) {
     const std::string IQOptions[15]{ "Freq Cal", "CW PA Cal", "CW Rec Cal", "CW Xmit Cal", "SSB PA Cal", "SSB Rec Cal", "SSB Transmit Cal", "CW Radio Cal", "CW Refine Cal", "SSB Radio Cal", "SSB Refine Cal", "dBm Level Cal", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
-    IQChoice = SubmenuSelect(IQOptions, 15, 0);                                                                                                                                                                                                                  //AFP 10-21-22
+    IQChoice = SubmenuSelect(IQOptions, 15, 0);                                                                                                                                                                                                                        //AFP 10-21-22
   }
   calibrateFlag = true;
   switch (IQChoice) {
@@ -302,14 +302,14 @@ void CalibrateOptions() {
 
       break;
 
-    case 2:                                              // CW IQ Receive Cal - Gain and Phase
+    case 2:                                                    // CW IQ Receive Cal - Gain and Phase
       cwcalibrater.DoReceiveCalibrate(0, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
-      eeprom.CalDataWrite();                             // Save calibration numbers and configuration.  KF5N August 12, 2023
+                                                               //      eeprom.CalDataWrite();                             // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
-    case 3:                                           // CW IQ Transmit Cal - Gain and Phase  //AFP 2-21-23
+    case 3:                                                 // CW IQ Transmit Cal - Gain and Phase  //AFP 2-21-23
       cwcalibrater.DoXmitCalibrate(0, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
-      eeprom.CalDataWrite();                          // Save calibration numbers and configuration.  KF5N August 12, 2023
+                                                            //      eeprom.CalDataWrite();                          // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 4:  // SSB PA Cal
@@ -320,21 +320,21 @@ void CalibrateOptions() {
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
           eeprom.ConfigDataWrite();
-      eeprom.CalDataWrite();
+          eeprom.CalDataWrite();
           calibrateFlag = 0;
         }
       }
 
       break;  // Missing break.  KF5N August 12, 2023
 
-    case 5:                                              // SSB IQ Receive Cal - Gain and Phase
+    case 5:                                                    // SSB IQ Receive Cal - Gain and Phase
       cwcalibrater.DoReceiveCalibrate(1, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
-      eeprom.CalDataWrite();                             // Save calibration numbers and configuration.  KF5N August 12, 2023
+                                                               //      eeprom.CalDataWrite();                             // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 6:
       ssbcalibrater.DoXmitCalibrate(false, false, true);  // SSB Transmit cal
-      eeprom.CalDataWrite();                        // Save calibration numbers and configuration.  KF5N August 12, 2023
+                                                          //      eeprom.CalDataWrite();                        // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 7:  //  CW fully automatic radio calibration.
@@ -381,6 +381,7 @@ void CalibrateOptions() {
       RedrawDisplayScreen();
       ShowFrequency();
       DrawFrequencyBarValue();
+      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 13:  // Set button repeat rate

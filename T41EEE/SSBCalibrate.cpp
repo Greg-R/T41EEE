@@ -320,7 +320,7 @@ void SSBCalibrate::CalibrateEpilogue(bool saveToEeprom) {
   SampleRate = SAMPLE_RATE_192K;  // Return to receiver sample rate.
   SetI2SFreq(SR[SampleRate].rate);
   InitializeDataArrays();  // Re-initialize the filters back to 192ksps.
-  ShowTransmitReceiveStatus();
+//  ShowTransmitReceiveStatus();
   // Clear queues to reduce transient.
   if(bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) bands.bands[ConfigData.currentBand].sideband = tempSideband;
   bands.bands[ConfigData.currentBand].mode = tempMode;
@@ -333,7 +333,7 @@ void SSBCalibrate::CalibrateEpilogue(bool saveToEeprom) {
 //  ConfigData.calFreq = calFreqTemp;        // Return user selected calibration tone frequency.
   sineTone(ConfigData.CWOffset + 6);       // This function takes "number of cycles" which is the offset + 6.
   ConfigData.currentScale = userScale;     //  Restore vertical scale to user preference.  KF5N
-  ShowSpectrumdBScale();
+//  ShowSpectrumdBScale();
   ConfigData.transmitPowerLevel = transmitPowerLevelTemp;  // Restore the user's transmit power level setting.  KF5N August 15, 2023
 //  eeprom.CalDataWrite();                                    // Save calibration numbers and configuration.  KF5N August 12, 2023
   zoomIndex = userZoomIndex - 1;
@@ -343,11 +343,11 @@ if(saveToEeprom) eeprom.CalDataWrite();  // Save calibration numbers and configu
   tft.clearMemory();
   tft.writeTo(L1);  // Exit function in layer 1.  KF5N August 3, 2023
   calOnFlag = false;
-  RedrawDisplayScreen();
+//  RedrawDisplayScreen();
   //  radioState = RadioState::CW_RECEIVE_STATE;  // KF5N
   fftOffset = 0;  // Some reboots may be caused by large fftOffset values when Auto-Spectrum is on.
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
-  SetFreq();                        // Return Si5351 to normal operation mode.  KF5N
+//  SetFreq();                        // Return Si5351 to normal operation mode.  KF5N
   lastState = RadioState::NOSTATE;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 16, 2023
   powerUp = true;
   return;

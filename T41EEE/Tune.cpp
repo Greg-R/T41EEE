@@ -86,6 +86,7 @@ uint32_t IFFreq = SR[SampleRate].rate / 4;  // IF (intermediate) frequency
   }
   //=====================  AFP 10-03-22 =================
   DrawFrequencyBarValue();
+  Serial.printf("SetFreq\n");
 }
 #else
 /*****
@@ -187,7 +188,7 @@ void ResetTuning() {
   ConfigData.centerFreq = TxRxFreq = currentFreq;  //AFP 10-28-22  // currentFreqA changed to currentFreq.  KF5N August 7, 2023
   tft.writeTo(L2);                                 // Clear layer 2.  KF5N July 31, 2023
   tft.clearMemory();
-  SetFreq();  // For new tuning scheme.  KF5N July 22, 2023
+////  SetFreq();  // For new tuning scheme.  KF5N July 22, 2023
   DrawBandWidthIndicatorBar();
   BandInformation();
   ShowFrequency();
