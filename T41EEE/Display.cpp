@@ -438,8 +438,8 @@ void DrawSMeterContainer() {
   tft.setCursor(SMETER_X + 133, SMETER_Y - 25);
   tft.print("+20dB");
 
-  DrawFrequencyBarValue();
-  ShowSpectrumdBScale();
+////  DrawFrequencyBarValue();
+////  ShowSpectrumdBScale();
 }
 
 
@@ -1402,7 +1402,7 @@ FLASHMEM void UpdateDecoderField() {
 //    tft.print("    WPM");
 //  } else {
     //    tft.fillRect(FIELD_OFFSET_X, DECODER_Y - 5, 140, 17, RA8875_BLACK);  // Erase
-    tft.print("Off");
+//    tft.print("Off");
 //  }
   // Update text and graphics.
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and ConfigData.decoderFlag) {
@@ -1596,6 +1596,29 @@ void DrawInfoWindowFrame() {
     void
 *****/
 void RedrawDisplayScreen() {
+tft.fillWindow();  // Clear the display.
+DrawAudioSpectContainer();
+DrawSpectrumDisplayContainer();
+ShowSpectrumdBScale();
+DrawSMeterContainer();
+ShowName();
+UpdateInfoWindow();
+//  Initial values to display.
+ShowAutoStatus();
+UpdateAGCField();
+UpdateVolumeField();
+DisplayIncrementField();
+UpdateNotchField();
+UpdateNoiseField();
+UpdateZoomField();
+UpdateCompressionField();
+UpdateWPMField();
+UpdateDecoderField();
+UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
+UpdateAudioField();
+ShowCurrentPowerSetting();
+
+  /*
   tft.fillWindow();
   DisplayIncrementField();
   UpdateAGCField();
@@ -1616,8 +1639,8 @@ void RedrawDisplayScreen() {
   DrawFrequencyBarValue();
   ShowSpectrumdBScale();
   UpdateDecoderField();
-ShowAutoStatus();
-  FilterSetSSB();
+  ShowAutoStatus();
+  FilterSetSSB()*/
 }
 
 
@@ -1780,7 +1803,8 @@ void EraseSecondaryMenu() {
 void ShowTransmitReceiveStatus() {
   tft.setFontScale((enum RA8875tsize)1);
   tft.setTextColor(RA8875_BLACK);
-  if (radioState == RadioState::SSB_TRANSMIT_STATE or radioState == RadioState::FT8_TRANSMIT_STATE or radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE or radioState == RadioState::CW_TRANSMIT_KEYER_STATE) {
+  if (radioState == RadioState::SSB_TRANSMIT_STATE or radioState == RadioState::FT8_TRANSMIT_STATE or radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE
+      or radioState == RadioState::CW_TRANSMIT_KEYER_STATE or radioState == RadioState::CW_CALIBRATE_STATE or radioState == RadioState::SSB_CALIBRATE_STATE) {
     tft.fillRect(X_R_STATUS_X, X_R_STATUS_Y, 55, 25, RA8875_RED);
     tft.setCursor(X_R_STATUS_X + 4, X_R_STATUS_Y - 5);
     tft.print("XMT");

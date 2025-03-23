@@ -257,7 +257,13 @@ void SSBCalibrate::CalibratePreamble(int setZoom) {
   zoomIndex = setZoom - 1;
   button.ButtonZoom();
   tft.fillRect(0, 272, 517, 399, RA8875_BLACK);  // Erase waterfall.  KF5N August 14, 2023
-  RedrawDisplayScreen();                         // Erase any existing spectrum trace data.
+
+  tft.fillWindow();
+  DrawSpectrumDisplayContainer();
+  ShowFrequency();
+  BandInformation();
+
+////  RedrawDisplayScreen();                         // Erase any existing spectrum trace data.
   tft.writeTo(L2);                               // Erase the bandwidth bar.  KF5N August 16, 2023
   tft.clearMemory();
   tft.writeTo(L1);
@@ -284,10 +290,10 @@ void SSBCalibrate::CalibratePreamble(int setZoom) {
   NCOFreq = 0L;
   digitalWrite(MUTE, MUTEAUDIO);  //  Mute Audio  (HIGH=Mute)
   digitalWrite(RXTX, HIGH);       // Turn on transmitter.
-  ShowTransmitReceiveStatus();
   ShowSpectrumdBScale();
   rawSpectrumPeak = 0;
   radioState = RadioState::SSB_CALIBRATE_STATE;
+  ShowTransmitReceiveStatus();
   SetAudioOperatingState(radioState);  // Do this last!  This turns the queues on.
 }
 
@@ -343,7 +349,7 @@ if(saveToEeprom) eeprom.CalDataWrite();  // Save calibration numbers and configu
   tft.clearMemory();
   tft.writeTo(L1);  // Exit function in layer 1.  KF5N August 3, 2023
   calOnFlag = false;
-//  RedrawDisplayScreen();
+  RedrawDisplayScreen();
   //  radioState = RadioState::CW_RECEIVE_STATE;  // KF5N
   fftOffset = 0;  // Some reboots may be caused by large fftOffset values when Auto-Spectrum is on.
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();

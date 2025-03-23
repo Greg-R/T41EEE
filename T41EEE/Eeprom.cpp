@@ -353,7 +353,7 @@ void Eeprom::ConfigDataDefaults() {
   ConfigData = *defaultConfig;                    // Copy the defaults to ConfigData struct.
   // Initialize the frequency setting based on the last used frequency stored to EEPROM.
   TxRxFreq = ConfigData.centerFreq = ConfigData.lastFrequencies[ConfigData.currentBand][ConfigData.activeVFO];
-  RedrawDisplayScreen();  //  Need to refresh display here.
+////  RedrawDisplayScreen();  //  Need to refresh display here.
 }
 
 
@@ -372,7 +372,7 @@ void Eeprom::CalDataDefaults() {
   CalData = *defaultCal;                    // Copy the defaults to ConfigData struct.
   // Initialize the frequency setting based on the last used frequency stored to EEPROM.
   TxRxFreq = ConfigData.centerFreq = ConfigData.lastFrequencies[ConfigData.currentBand][ConfigData.activeVFO];
-  RedrawDisplayScreen();  //  Need to refresh display here.
+////  RedrawDisplayScreen();  //  Need to refresh display here.
 }
 
 

@@ -151,7 +151,7 @@ FLASHMEM void SelectCWOffset() {
   // Clear the current CW filter graphics and then restore the bandwidth indicator bar.  KF5N July 30, 2023
   tft.writeTo(L2);
   tft.clearMemory();
-  RedrawDisplayScreen();
+////  RedrawDisplayScreen();
 }
 
 

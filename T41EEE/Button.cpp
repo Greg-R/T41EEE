@@ -230,7 +230,7 @@ void Button::ExecuteButtonPress(MenuSelect val) {
 
     case MenuSelect::BAND_DN:  // 5
       EraseMenus();
-      ShowSpectrum();  //Now calls ProcessIQData and Encoders calls
+//      ShowSpectrum();  //Now calls ProcessIQData and Encoders calls
       if (ConfigData.currentBand < 5) digitalWrite(bandswitchPins[ConfigData.currentBand], LOW);
       ButtonBandDecrease();
       if (ConfigData.currentBand < 5) digitalWrite(bandswitchPins[ConfigData.currentBand], HIGH);
@@ -333,8 +333,8 @@ void Button::ExecuteButtonPress(MenuSelect val) {
         }
       }
       RedrawDisplayScreen();
-      ShowFrequency();
-      DrawFrequencyBarValue();
+//      ShowFrequency();
+//      DrawFrequencyBarValue();
 
       break;
 
@@ -761,7 +761,7 @@ void Button::ButtonZoom() {
   tft.clearMemory();
   tft.writeTo(L1);  // Always exit function in L1.  KF5N August 15, 2023
   DrawBandWidthIndicatorBar();
-  ShowSpectrumdBScale();
+//  ShowSpectrumdBScale();
   DrawFrequencyBarValue();
   ShowFrequency();
 //  ShowBandwidth();
@@ -837,7 +837,7 @@ void Button::ButtonSelectSideband() {
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) BandInformation();
   DrawBandWidthIndicatorBar();  // Restory the bandwidth indicator bar.  KF5N July 30, 2023
 //  FilterBandwidth();
-  DrawSMeterContainer();
+
   AudioInterrupts();
   SetFreq();  // Must update frequency, for example moving from SSB to CW, the RX LO is shifted.  KF5N
   if ((bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) && (ConfigData.decoderFlag == 1)) {
@@ -920,7 +920,7 @@ void Button::ButtonMode()  //  Greg KF5N March 11, 2025
 ////  ControlFilterF();
   BandInformation();  // This updates display; at the line above spectrum.
 
-  DrawSMeterContainer();
+
   UpdateNoiseField();
   ShowSpectrumdBScale();
   ShowTransmitReceiveStatus();
@@ -1124,7 +1124,7 @@ void Button::ResetZoom(int zoomIndex1) {
   DrawFrequencyBarValue();
   ShowFrequency();
 //  ShowBandwidth();
-  RedrawDisplayScreen();
+////  RedrawDisplayScreen();
 }
 
 
@@ -1395,12 +1395,11 @@ void Button::ExecuteModeChange() {
   ShowFrequency();
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) BandInformation();
   DrawBandWidthIndicatorBar();  // Restore the bandwidth indicator bar.  KF5N July 30, 2023
-  DrawSMeterContainer();
 
-  if ((bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) && (ConfigData.decoderFlag == 1)) {
+//  if ((bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) && (ConfigData.decoderFlag == 1)) {
     //  bands.bands[ConfigData.currentBand].mode = RadioMode::CW_MODE;
     UpdateDecoderField();  // KF5N December 28 2023.
-  }
+//  }
   BandInformation();
   fftOffset = 140;
   // Clear buffers to reduce audio transients.

@@ -279,6 +279,7 @@ void CWCalibrate::CalibratePreamble(int setZoom) {
 //  RedrawDisplayScreen();                         // Erase any existing spectrum trace data.
 
   tft.fillWindow();
+  DrawSpectrumDisplayContainer();
   ShowFrequency();
   BandInformation();
 
@@ -308,11 +309,11 @@ void CWCalibrate::CalibratePreamble(int setZoom) {
   NCOFreq = 0L;
   digitalWrite(MUTE, MUTEAUDIO);  //  Mute Audio  (HIGH=Mute)
   digitalWrite(RXTX, HIGH);       // Turn on transmitter.
-  radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;
+  radioState = RadioState::CW_CALIBRATE_STATE;
   ShowTransmitReceiveStatus();
-  ShowSpectrumdBScale();
+//  ShowSpectrumdBScale();
   rawSpectrumPeak = 0;
-  SetAudioOperatingState(RadioState::CW_CALIBRATE_STATE);  // Do this last!  This clears the queues.
+  SetAudioOperatingState(radioState);  // Do this last!  This clears the queues.
 }
 
 
@@ -367,7 +368,7 @@ if(bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands.ba
   tft.clearMemory();
   tft.writeTo(L1);  // Exit function in layer 1.  KF5N August 3, 2023
   calOnFlag = false;
-  RedrawDisplayScreen();
+  RedrawDisplayScreen();  // Redraw everything!
 //  IQChoice = 9;
 //  radioState = RadioState::CW_RECEIVE_STATE;  // KF5N
   fftOffset = 0;                              // Some reboots may be caused by large fftOffset values when Auto-Spectrum is on.
@@ -824,7 +825,7 @@ if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
     //  Read encoder and update values.
 
     if (IQCalType == 0) {
-      amplitude = GetEncoderValueLive(-2.0, 2.0, ampCal, correctionIncrement, (char *)"IQ Gain", true);
+      ampCal = GetEncoderValueLive(-2.0, 2.0, ampCal, correctionIncrement, (char *)"IQ Gain", true);
 if(mode == 0) {  // CW
   if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER)
 CalData.IQCWRXAmpCorrectionFactorLSB[ConfigData.currentBand] = ampCal;
@@ -838,7 +839,7 @@ CalData.IQSSBRXAmpCorrectionFactorLSB[ConfigData.currentBand] = ampCal;
 CalData.IQSSBRXAmpCorrectionFactorUSB[ConfigData.currentBand] = ampCal;
 }
     } else {
-      phase = GetEncoderValueLive(-2.0, 2.0, phaseCal, correctionIncrement, (char *)"IQ Phase", false);
+      phaseCal = GetEncoderValueLive(-2.0, 2.0, phaseCal, correctionIncrement, (char *)"IQ Phase", false);
 if(mode == 0) {  // CW
   if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER)
 CalData.IQCWRXPhaseCorrectionFactorLSB[ConfigData.currentBand] = phaseCal;
@@ -867,7 +868,7 @@ CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand] = phaseCal;
 
   }                            // end while
 
-}  // End Transmit calibration
+}  // End Receive calibration
 
 
 /*****
@@ -2146,6 +2147,6 @@ void CWCalibrate::SelectCalFreq() {
   eeprom.EEPROMWrite();  // Save selection to EEPROM.  Greg KF5N, June 5, 2024
   tft.writeTo(L2);
   tft.clearMemory();
-  RedrawDisplayScreen();
+////  RedrawDisplayScreen();
 }
 */

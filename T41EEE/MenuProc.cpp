@@ -224,8 +224,8 @@ void CalibrateOptions() {
       SaveAnalogSwitchValues();
       calibrateFlag = 0;
       RedrawDisplayScreen();
-      ShowFrequency();
-      DrawFrequencyBarValue();
+//      ShowFrequency();
+//      DrawFrequencyBarValue();
       eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
@@ -242,11 +242,11 @@ void CalibrateOptions() {
       break;
 
     case 18:  // Cancelled choice
-      RedrawDisplayScreen();
-      currentFreq = TxRxFreq = ConfigData.centerFreq + NCOFreq;
-      DrawBandWidthIndicatorBar();  // AFP 10-20-22
-      ShowFrequency();
-      BandInformation();
+//      RedrawDisplayScreen();
+//      currentFreq = TxRxFreq = ConfigData.centerFreq + NCOFreq;
+//      DrawBandWidthIndicatorBar();  // AFP 10-20-22
+//      ShowFrequency();
+//      BandInformation();
       calibrateFlag = 0;
       break;
 
@@ -379,8 +379,8 @@ void CalibrateOptions() {
       SaveAnalogSwitchValues();
       calibrateFlag = 0;
       RedrawDisplayScreen();
-      ShowFrequency();
-      DrawFrequencyBarValue();
+//      ShowFrequency();
+//      DrawFrequencyBarValue();
       eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
@@ -397,11 +397,11 @@ void CalibrateOptions() {
       break;
 
     case 14:  // Cancelled choice
-      RedrawDisplayScreen();
-      currentFreq = TxRxFreq = ConfigData.centerFreq + NCOFreq;
-      DrawBandWidthIndicatorBar();  // AFP 10-20-22
-      ShowFrequency();
-      BandInformation();
+//      RedrawDisplayScreen();
+//      currentFreq = TxRxFreq = ConfigData.centerFreq + NCOFreq;
+//      DrawBandWidthIndicatorBar();  // AFP 10-20-22
+//      ShowFrequency();
+//      BandInformation();
       calibrateFlag = 0;
       break;
 
@@ -1079,20 +1079,20 @@ void VFOSelect() {
   SetBand();           // KF5N July 12, 2023
   SetBandRelay(HIGH);  // Required when switching VFOs. KF5N July 12, 2023
   SetFreq();
-  RedrawDisplayScreen();
-  BandInformation();
+//  RedrawDisplayScreen();
+//  BandInformation();
 //  ShowBandwidth();
   FilterBandwidth();
   tft.fillRect(FREQUENCY_X_SPLIT, FREQUENCY_Y - 12, VFOB_PIXEL_LENGTH, FREQUENCY_PIXEL_HI, RA8875_BLACK);  // delete old digit
   tft.fillRect(FREQUENCY_X, FREQUENCY_Y - 12, VFOA_PIXEL_LENGTH, FREQUENCY_PIXEL_HI, RA8875_BLACK);        // delete old digit  tft.setFontScale( (enum RA8875tsize) 0);
-  ShowFrequency();
+//  ShowFrequency();
   // Draw or not draw CW filter graphics to audio spectrum area.  KF5N July 30, 2023
   tft.writeTo(L2);
   tft.clearMemory();
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) BandInformation();
-  DrawBandWidthIndicatorBar();
-  DrawFrequencyBarValue();
-  UpdateDecoderField();
+//  DrawBandWidthIndicatorBar();
+//  DrawFrequencyBarValue();
+//  UpdateDecoderField();
 }
 
 

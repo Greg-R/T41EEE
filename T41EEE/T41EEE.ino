@@ -181,7 +181,7 @@ dispSc displayScale[] =  // dbText, dBScale, baseOffset
   };
 
 //======================================== Global variables declarations for Quad Oscillator 2 ===============================================
-int32_t NCOFreq;
+int32_t NCOFreq = 0;
 
 //======================================== Global variables declarations ===============================================
 //================== Global CW Correlation and FFT Variables =================
@@ -929,8 +929,14 @@ FLASHMEM void setup() {
 
 //  Graphics
   Splash();
-//  Things which need to be drawn once.
+
+//  Draw objects to the display.
+RedrawDisplayScreen();
+/*
+tft.fillWindow();  // Clear the display.
 DrawAudioSpectContainer();
+DrawSpectrumDisplayContainer();
+DrawSMeterContainer();
 ShowName();
 UpdateInfoWindow();
 //  Initial values to display.
@@ -942,9 +948,11 @@ UpdateNoiseField();
 UpdateZoomField();
 UpdateCompressionField();
 UpdateWPMField();
+UpdateDecoderField();
 UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
 UpdateAudioField();
 ShowCurrentPowerSetting();
+*/
 
   // =============== EEPROM section =================
   ConfigData.sdCardPresent = InitializeSDCard();  // Initialize mandatory SD card.
@@ -966,12 +974,8 @@ ShowCurrentPowerSetting();
   eeprom.EEPROMStartup();
 #endif
 
-  // ========================  End set up of Parameters from EEPROM data ===============
-  //  Q_out_L_Ex.setMaxBuffers(32);  // Put a constraint on the number of blockss to decrease audio memory.  Greg KF5N August 15, 2024
-  //  Q_out_R_Ex.setMaxBuffers(32);
-  h = 135;
-  NCOFreq = 0;
-
+//  h = 135;
+//  NCOFreq = 0;
   /****************************************************************************************
      start local oscillator Si5351
   ****************************************************************************************/
@@ -1021,21 +1025,22 @@ ShowCurrentPowerSetting();
 
   // Write graphics to display.
 
-  DrawSpectrumDisplayContainer();
+////  DrawSpectrumDisplayContainer();
 ////  RedrawDisplayScreen();
   mainMenuIndex = 0;  // Changed from middle to first. Do Menu Down to get to Calibrate quickly
 
 ////  ShowFrequency();
-////  
+
   zoomIndex = ConfigData.spectrum_zoom - 1;  // ButtonZoom() increments zoomIndex, so this cancels it so the read from EEPROM is accurately restored.  KF5N August 3, 2023
-////  button.ButtonZoom();                       // Restore zoom settings.  KF5N August 3, 2023
+  button.ButtonZoom();                       // Restore zoom settings.  KF5N August 3, 2023
 
   ConfigData.sdCardPresent = SDPresentCheck();  // JJP 7/18/23
 ////  UpdateDecoderField();                         // Adjust graphics for Morse decoder.
 ////  UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
   ConfigData.rfGainCurrent = 0;  // Start with lower gain so you don't get blasted.
-  button.ExecuteModeChange();
-  FilterSetSSB();
+  lastState = RadioState::NOSTATE;  // Forces an update.
+//  button.ExecuteModeChange();
+
 
   if ((MASTER_CLK_MULT_RX == 2) or (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();  // Required only for QSD2/QSE2.
 }

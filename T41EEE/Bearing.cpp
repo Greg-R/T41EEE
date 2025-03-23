@@ -1476,7 +1476,7 @@ FLASHMEM void BearingMaps() {
 
   strcpy(ConfigData.mapFileName, (const char *)myMapFiles[selectedMapIndex].mapNames);
 
-  RedrawDisplayScreen();
+////  RedrawDisplayScreen();
   ShowFrequency();
   DrawFrequencyBarValue();
 
