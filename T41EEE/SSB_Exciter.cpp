@@ -126,13 +126,13 @@ void ExciterIQData() {
   Return value;
     void
 *****/
-void SetBandRelay(int state) {
+void SetBandRelay() {
   // There are 4 physical relays.  Turn all of them off.
   for (int i = 0; i < 4; i = i + 1) {
     digitalWrite(bandswitchPins[i], LOW);  // Set ALL band relays low.  KF5N July 21, 2023
   }
   // Set current band relay "on".  Ignore 12M and 10M.  15M and 17M use the same relay.  KF5N September 27, 2023.
-  if (ConfigData.currentBand < 5) digitalWrite(bandswitchPins[ConfigData.currentBand], state);
+  if (ConfigData.currentBand < 5) digitalWrite(bandswitchPins[ConfigData.currentBand], HIGH);
 }
 
 

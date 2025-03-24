@@ -1477,13 +1477,14 @@ FLASHMEM void UpdateDecoderField() {
 *****/
 FLASHMEM void UpdateEqualizerField(bool rxEqState, bool txEqState) {
   tft.setFontScale((enum RA8875tsize)0);
+  tft.fillRect(FIELD_OFFSET_X, DECODER_Y + 15, tft.getFontWidth() * 15, tft.getFontHeight() + 2, RA8875_BLACK);
   tft.setTextColor(RA8875_WHITE);  // Display zoom factor
   tft.setCursor(547, DECODER_Y + 15);
   tft.print("Equalizer:");
-  tft.setTextColor(RA8875_GREEN);
+//  tft.setTextColor(RA8875_GREEN);
   tft.setCursor(FIELD_OFFSET_X, DECODER_Y + 15);
   if (rxEqState) {
-    tft.setTextColor(RA8875_RED);
+    tft.setTextColor(RA8875_GREEN);
     tft.print("Rx");
     tft.setTextColor(RA8875_WHITE);
     tft.setCursor(FIELD_OFFSET_X + 25, DECODER_Y + 15);
@@ -1498,7 +1499,7 @@ FLASHMEM void UpdateEqualizerField(bool rxEqState, bool txEqState) {
   
   tft.setCursor(FIELD_OFFSET_X + 55, DECODER_Y + 15);
   if (txEqState) {
-    tft.setTextColor(RA8875_RED);
+    tft.setTextColor(RA8875_GREEN);
     tft.print("Tx");
     tft.setTextColor(RA8875_WHITE);
     tft.setCursor(FIELD_OFFSET_X + 80, DECODER_Y + 15);
@@ -1510,7 +1511,6 @@ FLASHMEM void UpdateEqualizerField(bool rxEqState, bool txEqState) {
     tft.setCursor(FIELD_OFFSET_X + 80, DECODER_Y + 15);
     tft.print("Off");
   }
-
 }
 
 
@@ -1621,6 +1621,8 @@ UpdateDecoderField();
 UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
 UpdateAudioField();
 ShowCurrentPowerSetting();
+SetBandRelay();
+lastState = RadioState::NOSTATE;  // Force an update.
 
   /*
   tft.fillWindow();

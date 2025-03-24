@@ -1357,12 +1357,12 @@ void Button::ButtonFrequencyEntry() {
   EraseSpectrumDisplayContainer();
   DrawSpectrumDisplayContainer();
   DrawFrequencyBarValue();
-  SetBand();
+//  SetBand();
   SetFreq();
   ShowFrequency();
   ShowSpectrumdBScale();
   //  AudioInterrupts();
-  eeprom.ConfigDataWrite();
+//  eeprom.ConfigDataWrite();
   // Draw or not draw CW filter graphics to audio spectrum area.  KF5N July 30, 2023
   tft.writeTo(L2);
   tft.clearMemory();

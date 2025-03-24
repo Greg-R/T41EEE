@@ -606,7 +606,7 @@ void DisplayClock() {
     void
   Return value;
     void
-*****/
+*****
 void SetBand() {
   old_demod_mode = -99;  // used in setup_mode and when changing bands, so that LoCut and HiCut are not changed!
 ////  SetupMode(radioMode, bands[ConfigData.currentBand].sideband);  // Not required here?
@@ -614,7 +614,7 @@ void SetBand() {
   ShowFrequency();
   FilterBandwidth();
 }
-
+*/
 
 /*****
   Purpose: Tries to open the EEPROM SD file to see if an SD card is present in the system

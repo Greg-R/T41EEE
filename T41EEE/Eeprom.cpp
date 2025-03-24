@@ -317,7 +317,7 @@ MenuSelect menu = MenuSelect::DEFAULT;
 //      currentMode = bands.bands[ConfigData.currentBand].mode;
       DrawSpectrumDisplayContainer();
       DrawFrequencyBarValue();
-      SetBand();
+      SetBandRelay();
       SetFreq();
       ShowFrequency();
       ShowSpectrumdBScale();

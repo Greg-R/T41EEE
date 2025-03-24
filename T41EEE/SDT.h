@@ -1042,8 +1042,8 @@ void MicGainSet();
 void SaveAnalogSwitchValues();
 void SelectCWFilter();  // AFP 10-18-22
 void SelectCWOffset();  // KF5N December 13, 2023
-void SetBand();
-void SetBandRelay(int state);
+//void SetBand();
+void SetBandRelay();
 void SetDecIntFilters();
 void SetDitLength(int wpm);
 void SetFavoriteFrequency();
