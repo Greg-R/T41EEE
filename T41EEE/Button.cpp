@@ -809,7 +809,10 @@ void Button::ButtonSelectSideband() {
       break;
     case Sideband::UPPER:  // Switch to LSB.
       // Leave FT8 in USB.
-      if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER;
+      if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) { 
+        bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER;
+        return;
+      }
       bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER;
       ConfigData.lastSideband[ConfigData.currentBand] = Sideband::LOWER;
 

@@ -327,7 +327,7 @@ FLASHMEM void JSON::loadCalibration(const char *filename, calibration_t &CalData
   for (int i = 0; i < 7; i++) CalData.IQCWPhaseCorrectionFactorUSB[i] = doc["IQCWPhaseCorrectionFactorUSB"][i];
   for (int i = 0; i < 7; i++) CalData.IQSSBRXAmpCorrectionFactorUSB[i] = doc["IQSSBRXAmpCorrectionFactorUSB"][i];
   for (int i = 0; i < 7; i++) CalData.IQSSBRXPhaseCorrectionFactorUSB[i] = doc["IQSSBRXPhaseCorrectionFactorUSB"][i];  
-  for (int i = 0; i < 7; i++) CalData.IQSSBAmpCorrectionFactorUSB[i] = doc["IQSSBAmpCorrectionFactorLUSB"][i];
+  for (int i = 0; i < 7; i++) CalData.IQSSBAmpCorrectionFactorUSB[i] = doc["IQSSBAmpCorrectionFactorUSB"][i];
   for (int i = 0; i < 7; i++) CalData.IQSSBPhaseCorrectionFactorUSB[i] = doc["IQSSBPhaseCorrectionFactorUSB"][i];
 
   CalData.buttonThresholdPressed = doc["buttonThresholdPressed"] | 944;

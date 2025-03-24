@@ -1607,6 +1607,7 @@ UpdateInfoWindow();
 ShowFrequency();
 ShowBandwidth();
 BandInformation();
+DrawBandWidthIndicatorBar();
 ShowAutoStatus();
 UpdateAGCField();
 UpdateVolumeField();

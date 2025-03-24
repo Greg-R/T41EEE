@@ -75,14 +75,14 @@ void ExciterIQData() {
     // Apply amplitude and phase corrections.  FT8 uses CW corrections and is always USB.
     if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
     if(bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE)
-    cessb1.setIQCorrections(true, CalData.IQSSBAmpCorrectionFactorLSB[ConfigData.currentBandA], CalData.IQSSBPhaseCorrectionFactorLSB[ConfigData.currentBandA], 0.0);
+    cessb1.setIQCorrections(true, CalData.IQSSBAmpCorrectionFactorLSB[ConfigData.currentBand], CalData.IQSSBPhaseCorrectionFactorLSB[ConfigData.currentBand], 0.0);
     else if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE)
-    cessb1.setIQCorrections(true, CalData.IQCWAmpCorrectionFactorUSB[ConfigData.currentBandA], CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBandA], 0.0);
+    cessb1.setIQCorrections(true, CalData.IQCWAmpCorrectionFactorUSB[ConfigData.currentBand], CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand], 0.0);
     } else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
     if(bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE)
-    cessb1.setIQCorrections(true, CalData.IQSSBAmpCorrectionFactorUSB[ConfigData.currentBandA], CalData.IQSSBPhaseCorrectionFactorUSB[ConfigData.currentBandA], 0.0);
+    cessb1.setIQCorrections(true, CalData.IQSSBAmpCorrectionFactorUSB[ConfigData.currentBand], CalData.IQSSBPhaseCorrectionFactorUSB[ConfigData.currentBand], 0.0);
     else if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE)
-    cessb1.setIQCorrections(true, CalData.IQCWAmpCorrectionFactorUSB[ConfigData.currentBandA], CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBandA], 0.0);
+    cessb1.setIQCorrections(true, CalData.IQCWAmpCorrectionFactorUSB[ConfigData.currentBand], CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand], 0.0);
     }
 
     //  This is the correct place in the data flow to inject the scaling for power.
