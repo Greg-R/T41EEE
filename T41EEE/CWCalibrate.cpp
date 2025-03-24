@@ -396,8 +396,6 @@ void CWCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, boo
   float correctionIncrement = 0.001;
   bool autoCal = false;
   bool refineCal = false;
-  float ampCal = 1.0;   // Amplitude calibration result.
-  float phaseCal = 0.0; // Phase calibration result.
   loadCalToneBuffers(3000.0);
   CalibratePreamble(0);                                                       // Set zoom to 1X.
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) calFreqShift = 24000;  //  LSB offset.  KF5N
@@ -434,23 +432,23 @@ void CWCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, boo
 if(mode == 0) {  // CW
   if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
   GetEncoderValueLive(-2.0, 2.0, CalData.IQCWRXPhaseCorrectionFactorLSB[ConfigData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
-ampCal = CalData.IQCWRXAmpCorrectionFactorLSB[ConfigData.currentBand];
-phaseCal = CalData.IQCWRXPhaseCorrectionFactorLSB[ConfigData.currentBand];
+amplitude = CalData.IQCWRXAmpCorrectionFactorLSB[ConfigData.currentBand];
+phase = CalData.IQCWRXPhaseCorrectionFactorLSB[ConfigData.currentBand];
   }   else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
   GetEncoderValueLive(-2.0, 2.0, CalData.IQCWRXPhaseCorrectionFactorUSB[ConfigData.currentBand], correctionIncrement, (char *)"IQ Phase", false);    
-ampCal = CalData.IQCWAmpCorrectionFactorUSB[ConfigData.currentBand];
-phaseCal = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
+amplitude = CalData.IQCWAmpCorrectionFactorUSB[ConfigData.currentBand];
+phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
   }
 }
 if(mode == 1) {  // SSB
   if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
   GetEncoderValueLive(-2.0, 2.0, CalData.IQSSBRXPhaseCorrectionFactorLSB[ConfigData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
-ampCal = CalData.IQSSBRXAmpCorrectionFactorLSB[ConfigData.currentBand];
-phaseCal = CalData.IQSSBRXPhaseCorrectionFactorLSB[ConfigData.currentBand];
+amplitude = CalData.IQSSBRXAmpCorrectionFactorLSB[ConfigData.currentBand];
+phase = CalData.IQSSBRXPhaseCorrectionFactorLSB[ConfigData.currentBand];
   }   else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
   GetEncoderValueLive(-2.0, 2.0, CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand], correctionIncrement, (char *)"IQ Phase", false);    
-ampCal = CalData.IQSSBAmpCorrectionFactorUSB[ConfigData.currentBand];
-phaseCal = CalData.IQSSBPhaseCorrectionFactorUSB[ConfigData.currentBand];
+amplitude = CalData.IQSSBAmpCorrectionFactorUSB[ConfigData.currentBand];
+phase = CalData.IQSSBPhaseCorrectionFactorUSB[ConfigData.currentBand];
   }
 }
 
@@ -474,19 +472,19 @@ phaseCal = CalData.IQSSBPhaseCorrectionFactorUSB[ConfigData.currentBand];
     // Update values before calculating spectrum.
     if(mode == 0) {
         if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-        CalData.IQCWRXAmpCorrectionFactorLSB[ConfigData.currentBand] = ampCal;
-        CalData.IQCWRXPhaseCorrectionFactorLSB[ConfigData.currentBand] = phaseCal;
+        CalData.IQCWRXAmpCorrectionFactorLSB[ConfigData.currentBand] = amplitude;
+        CalData.IQCWRXPhaseCorrectionFactorLSB[ConfigData.currentBand] = phase;
       }  else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-         CalData.IQCWRXAmpCorrectionFactorUSB[ConfigData.currentBand] = ampCal;
-        CalData.IQCWRXPhaseCorrectionFactorUSB[ConfigData.currentBand] = phaseCal;         
+         CalData.IQCWRXAmpCorrectionFactorUSB[ConfigData.currentBand] = amplitude;
+        CalData.IQCWRXPhaseCorrectionFactorUSB[ConfigData.currentBand] = phase;         
     }}
         if(mode == 1) {
             if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-        CalData.IQSSBRXAmpCorrectionFactorLSB[ConfigData.currentBand] = ampCal;
-        CalData.IQSSBRXPhaseCorrectionFactorLSB[ConfigData.currentBand] = phaseCal;
+        CalData.IQSSBRXAmpCorrectionFactorLSB[ConfigData.currentBand] = amplitude;
+        CalData.IQSSBRXPhaseCorrectionFactorLSB[ConfigData.currentBand] = phase;
        } else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-        CalData.IQSSBRXAmpCorrectionFactorUSB[ConfigData.currentBand] = ampCal;
-        CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand] = phaseCal;          
+        CalData.IQSSBRXAmpCorrectionFactorUSB[ConfigData.currentBand] = amplitude;
+        CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand] = phase;          
     }}
     CWCalibrate::ShowSpectrum2(mode);
     task = readButton(lastUsedTask);
@@ -505,12 +503,12 @@ phaseCal = CalData.IQSSBPhaseCorrectionFactorUSB[ConfigData.currentBand];
         std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
         /*
         if(mode == 0) {
-        iOptimal = ampCal = ConfigData.IQCWRXAmpCorrectionFactor[ConfigData.currentBand];;
-        qOptimal = phaseCal = ConfigData.IQCWRXPhaseCorrectionFactor[ConfigData.currentBand];
+        iOptimal = amplitude = ConfigData.IQCWRXAmpCorrectionFactor[ConfigData.currentBand];;
+        qOptimal = phase = ConfigData.IQCWRXPhaseCorrectionFactor[ConfigData.currentBand];
         }
         if(mode == 1) {
-        iOptimal = ampCal = ConfigData.IQSSBRXAmpCorrectionFactor[ConfigData.currentBand];;
-        qOptimal = phaseCal = ConfigData.IQSSBRXPhaseCorrectionFactor[ConfigData.currentBand];
+        iOptimal = amplitude = ConfigData.IQSSBRXAmpCorrectionFactor[ConfigData.currentBand];;
+        qOptimal = phase = ConfigData.IQSSBRXPhaseCorrectionFactor[ConfigData.currentBand];
         }
         */
         state = State::warmup;
@@ -531,19 +529,19 @@ phaseCal = CalData.IQSSBPhaseCorrectionFactorUSB[ConfigData.currentBand];
         
         if(mode == 0) {
 if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-        iOptimal = ampCal = CalData.IQCWRXAmpCorrectionFactorLSB[ConfigData.currentBand];;
-        qOptimal = phaseCal = CalData.IQCWRXPhaseCorrectionFactorLSB[ConfigData.currentBand];
+        iOptimal = amplitude = CalData.IQCWRXAmpCorrectionFactorLSB[ConfigData.currentBand];;
+        qOptimal = phase = CalData.IQCWRXPhaseCorrectionFactorLSB[ConfigData.currentBand];
 } else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-        iOptimal = ampCal = CalData.IQCWRXAmpCorrectionFactorUSB[ConfigData.currentBand];;
-        qOptimal = phaseCal = CalData.IQCWRXPhaseCorrectionFactorUSB[ConfigData.currentBand];
+        iOptimal = amplitude = CalData.IQCWRXAmpCorrectionFactorUSB[ConfigData.currentBand];;
+        qOptimal = phase = CalData.IQCWRXPhaseCorrectionFactorUSB[ConfigData.currentBand];
 }}
         if(mode == 1) {
 if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-        iOptimal = ampCal = CalData.IQSSBRXAmpCorrectionFactorLSB[ConfigData.currentBand];;
-        qOptimal = phaseCal = CalData.IQSSBRXPhaseCorrectionFactorLSB[ConfigData.currentBand];
+        iOptimal = amplitude = CalData.IQSSBRXAmpCorrectionFactorLSB[ConfigData.currentBand];;
+        qOptimal = phase = CalData.IQSSBRXPhaseCorrectionFactorLSB[ConfigData.currentBand];
 } else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-        iOptimal = ampCal = CalData.IQSSBRXAmpCorrectionFactorUSB[ConfigData.currentBand];;
-        qOptimal = phaseCal = CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand];
+        iOptimal = amplitude = CalData.IQSSBRXAmpCorrectionFactorUSB[ConfigData.currentBand];;
+        qOptimal = phase = CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand];
 }}
         state = State::warmup;
         averageFlag = false;
@@ -592,8 +590,8 @@ if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
           std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
           warmup = warmup + 1;
           if (not refineCal) {
-            phaseCal = 0.0 + maxSweepPhase;  //  Need to use these values during warmup
-            ampCal = 1.0 + maxSweepAmp;      //  so adjdB and adjdB_avg are forced upwards.
+            phase = 0.0 + maxSweepPhase;  //  Need to use these values during warmup
+            amplitude = 1.0 + maxSweepAmp;      //  so adjdB and adjdB_avg are forced upwards.
           }
           state = State::warmup;
           if (warmup == 10) state = State::state0;
@@ -612,12 +610,12 @@ if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
           break;
         case State::state0:
           // Starting values for sweeps.  First sweep is amplitude (gain).
-          phaseCal = 0.0;
-          ampCal = 1.0 - maxSweepAmp;  // Begin sweep at low end and move upwards.
+          phase = 0.0;
+          amplitude = 1.0 - maxSweepAmp;  // Begin sweep at low end and move upwards.
           if(mode == 0)
-          GetEncoderValueLive(-2.0, 2.0, phaseCal, correctionIncrement, (char *)"IQ Phase", false);  // Display the phase value.
+          GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, (char *)"IQ Phase", false);  // Display the phase value.
           if(mode == 1)
-          GetEncoderValueLive(-2.0, 2.0, phaseCal, correctionIncrement, (char *)"IQ Phase", false);
+          GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, (char *)"IQ Phase", false);
           adjdB = 0;
           adjdB_avg = 0;
           index = 0;
@@ -625,25 +623,25 @@ if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
           state = State::initialSweepAmp;  // Let this fall through.
 
         case State::initialSweepAmp:
-          sweepVectorValue[index] = ampCal;
+          sweepVectorValue[index] = amplitude;
           sweepVector[index] = adjdB;
           index = index + 1;
           // Increment for next measurement.
-          ampCal = ampCal + increment;  // Next one!
+          amplitude = amplitude + increment;  // Next one!
           // Go to Q channel when I channel sweep is finished.
           //    if (index > 20) {
           //      if (sweepVector[index - 1] > (sweepVector[index - 11] + 3.0)) stopSweep = true;  // Stop sweep if past the null.
           //    }
-          if (abs(ampCal - 1.0) > maxSweepAmp) {  // Needs to be subtracted from 1.0.
+          if (abs(amplitude - 1.0) > maxSweepAmp) {  // Needs to be subtracted from 1.0.
             IQCalType = 1;                                                                            // Get ready for phase.
             result = std::min_element(sweepVector.begin(), sweepVector.end());                        // Value of the minimum.
             adjdBMinIndex = std::distance(sweepVector.begin(), result);                               // Find the index.
             iOptimal = sweepVectorValue[adjdBMinIndex];                                               // Set to the discovered minimum.
                                                                                                       //            Serial.printf("Init The optimal amplitude = %.3f at index %d with value %.1f count = %d\n", sweepVectorValue[adjdBMinIndex], adjdBMinIndex, *result, count);
-            phaseCal = -maxSweepPhase;            // The starting value for phase.
-            ampCal = iOptimal;                    // Reset for next sweep.
+            phase = -maxSweepPhase;            // The starting value for phase.
+            amplitude = iOptimal;                    // Reset for next sweep.
             // Update display to optimal value.
-            GetEncoderValueLive(-2.0, 2.0, ampCal, correctionIncrement, (char *)"IQ Gain", true);
+            GetEncoderValueLive(-2.0, 2.0, amplitude, correctionIncrement, (char *)"IQ Gain", true);
             count = count + 1;
             // Save the sub_vector which will be used to refine the optimal result.
             for (int i = 0; i < 21; i = i + 1) {
@@ -665,20 +663,20 @@ if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
           break;
 
         case State::initialSweepPhase:
-          sweepVectorValue[index] = phaseCal;
+          sweepVectorValue[index] = phase;
           sweepVector[index] = adjdB;
           index = index + 1;
           // Increment for the next measurement.
-          phaseCal = phaseCal + increment;
+          phase = phase + increment;
           //     if (index > 20) {
           //       if (sweepVector[index - 1] > (sweepVector[index - 11] + 3.0)) stopSweep = true;  // Stop sweep if past the null.
           //     }
-          if (phaseCal > maxSweepPhase) {
+          if (phase > maxSweepPhase) {
             result = std::min_element(sweepVector.begin(), sweepVector.end());
             adjdBMinIndex = std::distance(sweepVector.begin(), result);
             qOptimal = sweepVectorValue[adjdBMinIndex];                               // Set to the discovered minimum.
-            phaseCal = qOptimal;  // Set to the discovered minimum.
-            GetEncoderValueLive(-2.0, 2.0, phaseCal, correctionIncrement, (char *)"IQ Phase", false);
+            phase = qOptimal;  // Set to the discovered minimum.
+            GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, (char *)"IQ Phase", false);
             //            Serial.printf("Init The optimal phase = %.5f at index %d with value %.1f count = %d\n", sweepVectorValue[adjdBMinIndex], adjdBMinIndex, *result, count);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorPhase[i] = (qOptimal - 10 * 0.001) + (0.001 * i);
@@ -697,7 +695,7 @@ if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
 
         case State::refineAmp:
           // Now sweep over the entire sub_vectorAmp array with averaging on. index starts at 0.
-          ampCal = sub_vectorAmp[index];  // Starting value.
+          amplitude = sub_vectorAmp[index];  // Starting value.
           // Don't record this until there is data.  So that will be AFTER this pass.
           if (averageFlag) {
             sub_vectorAmpResult[index] = adjdB_avg;
@@ -710,8 +708,8 @@ if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
             adjdBMinIndex = std::distance(sub_vectorAmpResult.begin(), result);
             // iOptimal is simply the value of sub_vectorAmp[adjdBMinIndex].
             iOptimal = sub_vectorAmp[adjdBMinIndex];                                // -.001;
-            ampCal = iOptimal;  // Set to optimal value before refining phase.
-            GetEncoderValueLive(-2.0, 2.0, ampCal, correctionIncrement, (char *)"IQ Gain", true);
+            amplitude = iOptimal;  // Set to optimal value before refining phase.
+            GetEncoderValueLive(-2.0, 2.0, amplitude, correctionIncrement, (char *)"IQ Gain", true);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorAmp[i] = (iOptimal - 10 * 0.001) + (0.001 * i);  // The next array to sweep.
             }
@@ -730,7 +728,7 @@ if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
 
         case State::refinePhase:
           // Now sweep over the entire sub_vectorAmp array with averaging on. index starts at 0.
-          phaseCal = sub_vectorPhase[index];  // Starting value.
+          phase = sub_vectorPhase[index];  // Starting value.
           // Don't record this until there is data.  So that will be AFTER this pass.
           if (averageFlag) {
             sub_vectorPhaseResult[index] = adjdB_avg;
@@ -744,8 +742,8 @@ if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
             // qOptimal is simply the value of sub_vectorAmp[adjdBMinIndex].
             index = 0;
             qOptimal = sub_vectorPhase[adjdBMinIndex];  // - .001;
-            phaseCal = qOptimal;
-            GetEncoderValueLive(-2.0, 2.0, phaseCal, correctionIncrement, (char *)"IQ Phase", false);
+            phase = qOptimal;
+            GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, (char *)"IQ Phase", false);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorPhase[i] = (qOptimal - 10 * 0.001) + (0.001 * i);
             }
@@ -779,24 +777,24 @@ if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
 
         case State::setOptimal:
           count = 0;  // In case automatic calibration is run again.
-          ampCal = iOptimal;
-          phaseCal = qOptimal;
+          amplitude = iOptimal;
+          phase = qOptimal;
 
         if(mode == 0) {
 if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-        iOptimal = ampCal = CalData.IQCWRXAmpCorrectionFactorLSB[ConfigData.currentBand];;
-        qOptimal = phaseCal = CalData.IQCWRXPhaseCorrectionFactorLSB[ConfigData.currentBand];
+        iOptimal = amplitude = CalData.IQCWRXAmpCorrectionFactorLSB[ConfigData.currentBand];;
+        qOptimal = phase = CalData.IQCWRXPhaseCorrectionFactorLSB[ConfigData.currentBand];
 } else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-        iOptimal = ampCal = CalData.IQCWRXAmpCorrectionFactorUSB[ConfigData.currentBand];;
-        qOptimal = phaseCal = CalData.IQCWRXPhaseCorrectionFactorUSB[ConfigData.currentBand];
+        iOptimal = amplitude = CalData.IQCWRXAmpCorrectionFactorUSB[ConfigData.currentBand];;
+        qOptimal = phase = CalData.IQCWRXPhaseCorrectionFactorUSB[ConfigData.currentBand];
 }}
         if(mode == 1) {
 if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-        iOptimal = ampCal = CalData.IQSSBRXAmpCorrectionFactorLSB[ConfigData.currentBand];;
-        qOptimal = phaseCal = CalData.IQSSBRXPhaseCorrectionFactorLSB[ConfigData.currentBand];
+        iOptimal = amplitude = CalData.IQSSBRXAmpCorrectionFactorLSB[ConfigData.currentBand];;
+        qOptimal = phase = CalData.IQSSBRXPhaseCorrectionFactorLSB[ConfigData.currentBand];
 } else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-        iOptimal = ampCal = CalData.IQSSBRXAmpCorrectionFactorUSB[ConfigData.currentBand];;
-        qOptimal = phaseCal = CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand];
+        iOptimal = amplitude = CalData.IQSSBRXAmpCorrectionFactorUSB[ConfigData.currentBand];;
+        qOptimal = phase = CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand];
 }}
 
           state = State::exit;
@@ -825,44 +823,44 @@ if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
     //  Read encoder and update values.
 
     if (IQCalType == 0) {
-      ampCal = GetEncoderValueLive(-2.0, 2.0, ampCal, correctionIncrement, (char *)"IQ Gain", true);
+      amplitude = GetEncoderValueLive(-2.0, 2.0, amplitude, correctionIncrement, (char *)"IQ Gain", true);
 if(mode == 0) {  // CW
   if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER)
-CalData.IQCWRXAmpCorrectionFactorLSB[ConfigData.currentBand] = ampCal;
+CalData.IQCWRXAmpCorrectionFactorLSB[ConfigData.currentBand] = amplitude;
   else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER)
-CalData.IQCWRXAmpCorrectionFactorUSB[ConfigData.currentBand] = ampCal;
+CalData.IQCWRXAmpCorrectionFactorUSB[ConfigData.currentBand] = amplitude;
 }
 if(mode == 1) {  // SSB
   if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER)
-CalData.IQSSBRXAmpCorrectionFactorLSB[ConfigData.currentBand] = ampCal;
+CalData.IQSSBRXAmpCorrectionFactorLSB[ConfigData.currentBand] = amplitude;
   else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER)
-CalData.IQSSBRXAmpCorrectionFactorUSB[ConfigData.currentBand] = ampCal;
+CalData.IQSSBRXAmpCorrectionFactorUSB[ConfigData.currentBand] = amplitude;
 }
     } else {
-      phaseCal = GetEncoderValueLive(-2.0, 2.0, phaseCal, correctionIncrement, (char *)"IQ Phase", false);
+      phase = GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, (char *)"IQ Phase", false);
 if(mode == 0) {  // CW
   if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER)
-CalData.IQCWRXPhaseCorrectionFactorLSB[ConfigData.currentBand] = phaseCal;
+CalData.IQCWRXPhaseCorrectionFactorLSB[ConfigData.currentBand] = phase;
   else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER)
-CalData.IQCWRXPhaseCorrectionFactorUSB[ConfigData.currentBand] = phaseCal;
+CalData.IQCWRXPhaseCorrectionFactorUSB[ConfigData.currentBand] = phase;
     }
     if(mode == 1) {  // SSB
   if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER)
-CalData.IQSSBRXPhaseCorrectionFactorLSB[ConfigData.currentBand] = phaseCal;
+CalData.IQSSBRXPhaseCorrectionFactorLSB[ConfigData.currentBand] = phase;
   else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER)
-CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand] = phaseCal;
+CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand] = phase;
     }
     }
 
 /*
     if (IQCalType == 0) {
-      ampCal = GetEncoderValueLive(-2.0, 2.0, ampCal, correctionIncrement, (char *)"IQ Gain", true);
-      if(mode == 0) CalData.IQCWRXAmpCorrectionFactor[ConfigData.currentBand] = ampCal;
-      if(mode == 1) CalData.IQSSBRXAmpCorrectionFactor[ConfigData.currentBand] = ampCal;
+      amplitude = GetEncoderValueLive(-2.0, 2.0, amplitude, correctionIncrement, (char *)"IQ Gain", true);
+      if(mode == 0) CalData.IQCWRXAmpCorrectionFactor[ConfigData.currentBand] = amplitude;
+      if(mode == 1) CalData.IQSSBRXAmpCorrectionFactor[ConfigData.currentBand] = amplitude;
     } else {
-      phaseCal = GetEncoderValueLive(-2.0, 2.0, phaseCal, correctionIncrement, (char *)"IQ Phase", false);
-      if(mode == 0) CalData.IQCWRXPhaseCorrectionFactor[ConfigData.currentBand] = phaseCal;
-      if(mode == 1) CalData.IQSSBRXPhaseCorrectionFactor[ConfigData.currentBand] = phaseCal;
+      phase = GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, (char *)"IQ Phase", false);
+      if(mode == 0) CalData.IQCWRXPhaseCorrectionFactor[ConfigData.currentBand] = phase;
+      if(mode == 1) CalData.IQSSBRXPhaseCorrectionFactor[ConfigData.currentBand] = phase;
     }
 */
 

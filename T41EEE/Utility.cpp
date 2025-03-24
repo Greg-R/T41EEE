@@ -490,9 +490,9 @@ void SaveAnalogSwitchValues() {
   tft.setTextColor(RA8875_GREEN);
   tft.setCursor(10, 10);
   tft.print("Press button you");
-  tft.setCursor(10, 30);
+  tft.setCursor(10, 34);
   tft.print("have assigned to");
-  tft.setCursor(10, 50);
+  tft.setCursor(10, 58);
   tft.print("the switch shown.");
 
   // Disable button repeat for interrupt driven buttons

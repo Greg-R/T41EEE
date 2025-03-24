@@ -290,7 +290,7 @@ void SSBCalibrate::CalibratePreamble(int setZoom) {
   NCOFreq = 0L;
   digitalWrite(MUTE, MUTEAUDIO);  //  Mute Audio  (HIGH=Mute)
   digitalWrite(RXTX, HIGH);       // Turn on transmitter.
-  ShowSpectrumdBScale();
+//  ShowSpectrumdBScale();
   rawSpectrumPeak = 0;
   radioState = RadioState::SSB_CALIBRATE_STATE;
   ShowTransmitReceiveStatus();
@@ -348,6 +348,7 @@ if(saveToEeprom) eeprom.CalDataWrite();  // Save calibration numbers and configu
   tft.writeTo(L2);       // Clear layer 2.  KF5N July 31, 2023
   tft.clearMemory();
   tft.writeTo(L1);  // Exit function in layer 1.  KF5N August 3, 2023
+
   calOnFlag = false;
   RedrawDisplayScreen();
   //  radioState = RadioState::CW_RECEIVE_STATE;  // KF5N
@@ -356,7 +357,6 @@ if(saveToEeprom) eeprom.CalDataWrite();  // Save calibration numbers and configu
 //  SetFreq();                        // Return Si5351 to normal operation mode.  KF5N
   lastState = RadioState::NOSTATE;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 16, 2023
   powerUp = true;
-  return;
 }
 
 
@@ -1137,7 +1137,7 @@ phase = CalData.IQSSBPhaseCorrectionFactorUSB[ConfigData.currentBand];
               state = State::exit;
               break;
             } else {
-//              SSBCalibrate::CalibrateEpilogue(true);
+              SSBCalibrate::CalibrateEpilogue(true);
               return;
             }
           }

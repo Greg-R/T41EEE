@@ -1604,6 +1604,9 @@ DrawSMeterContainer();
 ShowName();
 UpdateInfoWindow();
 //  Initial values to display.
+ShowFrequency();
+ShowBandwidth();
+BandInformation();
 ShowAutoStatus();
 UpdateAGCField();
 UpdateVolumeField();

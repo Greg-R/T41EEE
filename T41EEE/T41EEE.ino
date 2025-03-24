@@ -204,7 +204,7 @@ int16_t audioFFToffset = 100;
 int fLoCutOld;
 int fHiCutOld;
 int filterWidth = static_cast<int>((bands.bands[ConfigData.currentBand].FHiCut - bands.bands[ConfigData.currentBand].FLoCut) / 1000.0 * pixel_per_khz);
-int h = SPECTRUM_HEIGHT + 3;
+int h = 135;  // SPECTRUM_HEIGHT + 3;
 bool ANR_notch = false;
 uint8_t auto_codec_gain = 1;
 uint8_t display_S_meter_or_spectrum_state = 0;
@@ -927,11 +927,7 @@ FLASHMEM void setup() {
   tft.clearMemory();
   tft.writeTo(L1);
 
-//  Graphics
-  Splash();
 
-//  Draw objects to the display.
-RedrawDisplayScreen();
 /*
 tft.fillWindow();  // Clear the display.
 DrawAudioSpectContainer();
@@ -973,6 +969,12 @@ ShowCurrentPowerSetting();
   button.EnableButtonInterrupts();
   eeprom.EEPROMStartup();
 #endif
+
+//  Graphics
+  Splash();
+
+//  Draw objects to the display.
+RedrawDisplayScreen();
 
 //  h = 135;
 //  NCOFreq = 0;

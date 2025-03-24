@@ -211,7 +211,7 @@ void FilterSetSSB() {
   tft.writeTo(L1);
 
   DrawFrequencyBarValue();  // This calls ShowBandwidth().  YES, this function is useful here.
-//  UpdateDecoderField();     // Redraw Morse decoder graphics because they get erased due to filter graphics updates.
+  UpdateDecoderField();     // Redraw Morse decoder graphics because they get erased due to filter graphics updates.
   DrawBandWidthIndicatorBar();
 
   ShowBandwidth();

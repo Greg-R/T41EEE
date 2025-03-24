@@ -167,13 +167,11 @@ void CalibrateOptions() {
     case 11:  // SSB fully automatic radio calibration.
       ssbcalibrater.RadioCal(false);
       calibrateFlag = 0;
-      //      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 12:  // SSB fully automatic calibration refinement.
       ssbcalibrater.RadioCal(true);
       calibrateFlag = 0;
-      //      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 13:  // dBm level cal.  Was choose CW calibration tone frequency.
@@ -224,8 +222,6 @@ void CalibrateOptions() {
       SaveAnalogSwitchValues();
       calibrateFlag = 0;
       RedrawDisplayScreen();
-//      ShowFrequency();
-//      DrawFrequencyBarValue();
       eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
