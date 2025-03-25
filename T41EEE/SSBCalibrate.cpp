@@ -406,6 +406,7 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal, bool saveToEepr
   calTypeFlag = 1;                     // TX cal
   plotCalGraphics(calTypeFlag);
   tft.setFontScale((enum RA8875tsize)0);
+  tft.setTextColor(RA8875_WHITE);
   tft.fillRect(405, 125, 50, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(405, 125);
   tft.print(correctionIncrement, 3);
@@ -816,6 +817,7 @@ void SSBCalibrate::DoXmitCarrierCalibrate(bool radioCal, bool shortCal, bool sav
   calTypeFlag = 2;                     // Carrier cal
   plotCalGraphics(calTypeFlag);
   tft.setFontScale((enum RA8875tsize)0);
+  tft.setTextColor(RA8875_WHITE);
   tft.fillRect(405, 125, 50, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(405, 125);
   tft.print(correctionIncrement);
@@ -1172,8 +1174,9 @@ void SSBCalibrate::RadioCal(bool refineCal) {
     return;
   }
 
-  button.BandSet(BAND_80M);
-
+//  button.BandSet(BAND_80M);
+  ConfigData.currentBand = ConfigData.currentBandA = BAND_80M;
+  SetBandRelay();
   TxRxFreq = CalData.calFrequencies[0][0];
   ConfigData.centerFreq = TxRxFreq;
   ShowFrequency();
@@ -1188,8 +1191,9 @@ void SSBCalibrate::RadioCal(bool refineCal) {
   SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal, false);
 #endif
 
-  button.BandSet(BAND_40M);
-
+//  button.BandSet(BAND_40M);
+  ConfigData.currentBand = ConfigData.currentBandA = BAND_40M;
+  SetBandRelay();
   TxRxFreq = CalData.calFrequencies[1][0];
   ConfigData.centerFreq = TxRxFreq;
   ShowFrequency();
@@ -1204,8 +1208,9 @@ void SSBCalibrate::RadioCal(bool refineCal) {
   SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal, false);
 #endif
 
-  button.BandSet(BAND_20M);
-
+//  button.BandSet(BAND_20M);
+  ConfigData.currentBand = ConfigData.currentBandA = BAND_20M;
+  SetBandRelay();
   TxRxFreq = CalData.calFrequencies[2][0];
   ConfigData.centerFreq = TxRxFreq;
   ShowFrequency();
@@ -1220,8 +1225,9 @@ void SSBCalibrate::RadioCal(bool refineCal) {
   SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal, false);
 #endif
 
-  button.BandSet(BAND_17M);
-
+//  button.BandSet(BAND_17M);
+  ConfigData.currentBand = ConfigData.currentBandA = BAND_17M;
+  SetBandRelay();
   TxRxFreq = CalData.calFrequencies[3][0];
   ConfigData.centerFreq = TxRxFreq;
   ShowFrequency();
@@ -1236,8 +1242,9 @@ void SSBCalibrate::RadioCal(bool refineCal) {
   SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal, false);
 #endif
 
-  button.BandSet(BAND_15M);
-
+//  button.BandSet(BAND_15M);
+  ConfigData.currentBand = ConfigData.currentBandA = BAND_15M;
+  SetBandRelay();
   TxRxFreq = CalData.calFrequencies[4][0];
   ConfigData.centerFreq = TxRxFreq;
   ShowFrequency();
@@ -1252,8 +1259,9 @@ void SSBCalibrate::RadioCal(bool refineCal) {
   SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal, false);
 #endif
 
-  button.BandSet(BAND_12M);
-
+//  button.BandSet(BAND_12M);
+  ConfigData.currentBand = ConfigData.currentBandA = BAND_12M;
+  SetBandRelay();
   TxRxFreq = CalData.calFrequencies[5][0];
   ConfigData.centerFreq = TxRxFreq;
   ShowFrequency();
@@ -1268,8 +1276,9 @@ void SSBCalibrate::RadioCal(bool refineCal) {
   SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal, false);
 #endif
 
-  button.BandSet(BAND_10M);
-
+//  button.BandSet(BAND_10M);
+  ConfigData.currentBand = ConfigData.currentBandA = BAND_10M;
+  SetBandRelay();
   TxRxFreq = CalData.calFrequencies[6][0];
   ConfigData.centerFreq = TxRxFreq;
   ShowFrequency();
@@ -1287,8 +1296,7 @@ void SSBCalibrate::RadioCal(bool refineCal) {
   // Set flag for initial calibration completed.
   CalData.SSBradioCalComplete = true;
   eeprom.CalDataWrite();
-
-  return;
+  RedrawDisplayScreen();
 }
 
 

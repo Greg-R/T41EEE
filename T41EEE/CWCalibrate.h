@@ -64,7 +64,7 @@ void ProcessIQData2(int mode);
 void warmUpCal(int mode);
 void printCalType(int mode, int IQCalType, bool autoCal, bool autoCalDone);
 void CalibratePreamble(int setZoom);
-void CalibrateEpilogue(bool saveToEeprom);
+void CalibrateEpilogue(bool radioCal, bool saveToEeprom);
 void DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom);  // Mode determines CW versus SSB.
 void DoXmitCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom);
 #ifdef QSE2

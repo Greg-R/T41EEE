@@ -206,10 +206,10 @@ void Button::ExecuteButtonPress(MenuSelect val) {
 
     case MenuSelect::BAND_UP:  // 2 Now calls ProcessIQData and Encoders calls
       EraseMenus();
-      if (ConfigData.currentBand < 5) digitalWrite(bandswitchPins[ConfigData.currentBand], LOW);  // Added if so unused GPOs will not be touched.  KF5N October 16, 2023.
+//      if (ConfigData.currentBand < 5) digitalWrite(bandswitchPins[ConfigData.currentBand], LOW);  // Added if so unused GPOs will not be touched.  KF5N October 16, 2023.
       ButtonBandIncrease();
-      if (ConfigData.currentBand < 5) digitalWrite(bandswitchPins[ConfigData.currentBand], HIGH);
-      ConfigData.rfGainCurrent = 10;
+//      if (ConfigData.currentBand < 5) digitalWrite(bandswitchPins[ConfigData.currentBand], HIGH);
+//      ConfigData.rfGainCurrent = 10;
 //      BandInformation();
       NCOFreq = 0L;
 //      DrawBandWidthIndicatorBar();  // AFP 10-20-22
@@ -231,9 +231,9 @@ void Button::ExecuteButtonPress(MenuSelect val) {
     case MenuSelect::BAND_DN:  // 5
       EraseMenus();
 //      ShowSpectrum();  //Now calls ProcessIQData and Encoders calls
-      if (ConfigData.currentBand < 5) digitalWrite(bandswitchPins[ConfigData.currentBand], LOW);
+//      if (ConfigData.currentBand < 5) digitalWrite(bandswitchPins[ConfigData.currentBand], LOW);
       ButtonBandDecrease();
-      if (ConfigData.currentBand < 5) digitalWrite(bandswitchPins[ConfigData.currentBand], HIGH);
+//      if (ConfigData.currentBand < 5) digitalWrite(bandswitchPins[ConfigData.currentBand], HIGH);
 //      BandInformation();
       NCOFreq = 0L;
 //      DrawBandWidthIndicatorBar();  //AFP 10-20-22
@@ -645,7 +645,7 @@ void Button::ButtonBandDecrease() {
 
 
 /*****
-  Purpose: Set the radio to a band using the band parameter.
+  Purpose: Set the radio to a band using the band parameter.  This function is probably obsolete thanks to the new modal states.
 
   Parameter list:
     int band
@@ -1412,6 +1412,7 @@ void Button::ExecuteModeChange() {
 //  Serial.printf("ConfigData.currentBand = %d\n", ConfigData.currentBand);
 //  Serial.printf("bands.bands[ConfigData.currentBand].mode = %d\n", bands.bands[ConfigData.currentBand].mode);
 //  Serial.printf("bands.bands[ConfigData.currentBand].mode = %d\n", bands.bands[ConfigData.currentBand].mode);
+SetBandRelay();  // Set relays in LPF for current band.
   SetFreq();  // Must update frequency, for example moving from SSB to CW, the RX LO is shifted.  KF5N
 powerUp = true;
 }

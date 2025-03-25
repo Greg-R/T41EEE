@@ -118,21 +118,25 @@ void ExciterIQData() {
 }
 
 /*****
-  Purpose: Set the current band relay ON or OFF
+  Purpose: Set the current band relay ON or OFF.  Reduce relay cycling.  Greg KF5N March 24, 2025
 
   Parameter list:
-    int state             OFF = 0, ON = 1
+    void
 
   Return value;
     void
 *****/
 void SetBandRelay() {
-  // There are 4 physical relays.  Turn all of them off.
-  for (int i = 0; i < 4; i = i + 1) {
-    digitalWrite(bandswitchPins[i], LOW);  // Set ALL band relays low.  KF5N July 21, 2023
+  // There are 4 physical relays in the case of the V10/V11 LPF board.
+  for (int i = 0; i < 5; i = i + 1) {
+    if(i == ConfigData.currentBand) {
+    digitalWrite(bandswitchPins[ConfigData.currentBand], HIGH);
+    }
+    else { 
+      if(bandswitchPins[i] != bandswitchPins[ConfigData.currentBand])  // Skip if the pins are the same.
+      digitalWrite(bandswitchPins[i], LOW);  // Set band relay low.
+    }
   }
-  // Set current band relay "on".  Ignore 12M and 10M.  15M and 17M use the same relay.  KF5N September 27, 2023.
-  if (ConfigData.currentBand < 5) digitalWrite(bandswitchPins[ConfigData.currentBand], HIGH);
 }
 
 

@@ -317,7 +317,7 @@ MenuSelect menu = MenuSelect::DEFAULT;
 //      currentMode = bands.bands[ConfigData.currentBand].mode;
       DrawSpectrumDisplayContainer();
       DrawFrequencyBarValue();
-      SetBandRelay();
+//      SetBandRelay();
       SetFreq();
       ShowFrequency();
       ShowSpectrumdBScale();
@@ -327,7 +327,7 @@ MenuSelect menu = MenuSelect::DEFAULT;
       BandInformation();
       NCOFreq = 0L;
       DrawBandWidthIndicatorBar();  // AFP 10-20-22
-      digitalWrite(bandswitchPins[ConfigData.currentBand], LOW);
+//      digitalWrite(bandswitchPins[ConfigData.currentBand], LOW);
       SetFreq();
       ShowSpectrumdBScale();
       ShowSpectrum();

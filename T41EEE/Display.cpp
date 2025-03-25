@@ -1481,7 +1481,6 @@ FLASHMEM void UpdateEqualizerField(bool rxEqState, bool txEqState) {
   tft.setTextColor(RA8875_WHITE);  // Display zoom factor
   tft.setCursor(547, DECODER_Y + 15);
   tft.print("Equalizer:");
-//  tft.setTextColor(RA8875_GREEN);
   tft.setCursor(FIELD_OFFSET_X, DECODER_Y + 15);
   if (rxEqState) {
     tft.setTextColor(RA8875_GREEN);
@@ -1621,7 +1620,7 @@ UpdateDecoderField();
 UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
 UpdateAudioField();
 ShowCurrentPowerSetting();
-SetBandRelay();
+SetBandRelay();  // Set LPF relays for current band.
 lastState = RadioState::NOSTATE;  // Force an update.
 
   /*
@@ -1634,7 +1633,7 @@ lastState = RadioState::NOSTATE;  // Force an update.
   ShowCurrentPowerSetting();
   ShowFrequency();
 //  SetFreq();
-  SetBandRelay(HIGH);
+//  SetBandRelay(HIGH);
   UpdateNoiseField();
   DrawBandWidthIndicatorBar();
   ShowName();

@@ -829,20 +829,12 @@ FLASHMEM void setup() {
   // Configure Audio Adapter
   sgtl5000_1.enable();
   sgtl5000_1.setAddress(LOW);  // This sets to one of two possible I2C addresses, controlled by a jumper on the Audio Adapter.
-
-  //  sgtl5000_2.enable();
-  //  sgtl5000_2.setAddress(HIGH);  // T41 has only a single Audio Adaptor.  This is being used essentially as a 2nd I2S port.
-
   //  Don't use the audio pre-processor.  This causes a spurious signal in the SSB transmit output.
   //  sgtl5000_1.audioPreProcessorEnable();  // Need to use one of the equalizers.
-  //  sgtl5000_1.eqSelect(3);
-  //  sgtl5000_1.eqBands(-1.0, 0.0, 1.0, 1.0, -1.0);
   AudioMemory(250);
   AudioMemory_F32(10);
   sgtl5000_1.inputSelect(AUDIO_INPUT_MIC);
   sgtl5000_1.volume(0.8);  // Set headphone volume.
-                           //  sgtl5000_1.unmuteHeadphone();  // Make the headphone output active.
-
   sgtl5000_1.micGain(0);
   sgtl5000_1.lineInLevel(0);  // Line-in is not used.  Can't turn it off though.
 #ifdef QSE2
@@ -850,7 +842,6 @@ FLASHMEM void setup() {
 #else
   sgtl5000_1.lineOutLevel(20);  // Setting of 20 limits line-out level to 2.14 volts p-p.
 #endif
-  //sgtl5000_1.muteLineout();  // This controls the Audio Adapter.  The Audio Adapter is sgtl5000_1.
   sgtl5000_1.adcHighPassFilterEnable();
   //sgtl5000_1.adcHighPassFilterDisable();  //reduces noise.  https://forum.pjrc.com/threads/27215-24-bit-audio-boards?p=78831&viewfull=1#post78831
   //sgtl5000_1.adcHighPassFilterFreeze();
@@ -927,29 +918,6 @@ FLASHMEM void setup() {
   tft.clearMemory();
   tft.writeTo(L1);
 
-
-/*
-tft.fillWindow();  // Clear the display.
-DrawAudioSpectContainer();
-DrawSpectrumDisplayContainer();
-DrawSMeterContainer();
-ShowName();
-UpdateInfoWindow();
-//  Initial values to display.
-ShowAutoStatus();
-UpdateAGCField();
-DisplayIncrementField();
-UpdateNotchField();
-UpdateNoiseField();
-UpdateZoomField();
-UpdateCompressionField();
-UpdateWPMField();
-UpdateDecoderField();
-UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
-UpdateAudioField();
-ShowCurrentPowerSetting();
-*/
-
   // =============== EEPROM section =================
   ConfigData.sdCardPresent = InitializeSDCard();  // Initialize mandatory SD card.
   // Push and hold a button at power up to activate switch matrix calibration.
@@ -970,14 +938,12 @@ ShowCurrentPowerSetting();
   eeprom.EEPROMStartup();
 #endif
 
-//  Graphics
+//  Entry graphics
   Splash();
 
 //  Draw objects to the display.
 RedrawDisplayScreen();
 
-//  h = 135;
-//  NCOFreq = 0;
   /****************************************************************************************
      start local oscillator Si5351
   ****************************************************************************************/
@@ -1025,24 +991,13 @@ RedrawDisplayScreen();
     bands.bands[ConfigData.currentBand].mode = RadioMode::SAM_MODE;
   }
 
-  // Write graphics to display.
-
-////  DrawSpectrumDisplayContainer();
-////  RedrawDisplayScreen();
   mainMenuIndex = 0;  // Changed from middle to first. Do Menu Down to get to Calibrate quickly
-
-////  ShowFrequency();
-
   zoomIndex = ConfigData.spectrum_zoom - 1;  // ButtonZoom() increments zoomIndex, so this cancels it so the read from EEPROM is accurately restored.  KF5N August 3, 2023
   button.ButtonZoom();                       // Restore zoom settings.  KF5N August 3, 2023
 
   ConfigData.sdCardPresent = SDPresentCheck();  // JJP 7/18/23
-////  UpdateDecoderField();                         // Adjust graphics for Morse decoder.
-////  UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
   ConfigData.rfGainCurrent = 0;  // Start with lower gain so you don't get blasted.
   lastState = RadioState::NOSTATE;  // Forces an update.
-//  button.ExecuteModeChange();
-
 
   if ((MASTER_CLK_MULT_RX == 2) or (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();  // Required only for QSD2/QSE2.
 }
