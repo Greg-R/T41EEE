@@ -276,7 +276,6 @@ void CWCalibrate::CalibratePreamble(int setZoom) {
 //  loadCalToneBuffers();  // Restore in the epilogue.  Move to specific cal function and use correct tone freq.
   button.ButtonZoom();
   tft.fillRect(0, 272, 517, 399, RA8875_BLACK);  // Erase waterfall.  KF5N August 14, 2023
-//  RedrawDisplayScreen();                         // Erase any existing spectrum trace data.
 
   tft.fillWindow();
   DrawSpectrumDisplayContainer();
@@ -436,8 +435,8 @@ amplitude = CalData.IQCWRXAmpCorrectionFactorLSB[ConfigData.currentBand];
 phase = CalData.IQCWRXPhaseCorrectionFactorLSB[ConfigData.currentBand];
   }   else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
   GetEncoderValueLive(-2.0, 2.0, CalData.IQCWRXPhaseCorrectionFactorUSB[ConfigData.currentBand], correctionIncrement, (char *)"IQ Phase", false);    
-amplitude = CalData.IQCWAmpCorrectionFactorUSB[ConfigData.currentBand];
-phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
+amplitude = CalData.IQCWRXAmpCorrectionFactorUSB[ConfigData.currentBand];
+phase = CalData.IQCWRXPhaseCorrectionFactorUSB[ConfigData.currentBand];
   }
 }
 if(mode == 1) {  // SSB
@@ -447,8 +446,8 @@ amplitude = CalData.IQSSBRXAmpCorrectionFactorLSB[ConfigData.currentBand];
 phase = CalData.IQSSBRXPhaseCorrectionFactorLSB[ConfigData.currentBand];
   }   else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
   GetEncoderValueLive(-2.0, 2.0, CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand], correctionIncrement, (char *)"IQ Phase", false);    
-amplitude = CalData.IQSSBAmpCorrectionFactorUSB[ConfigData.currentBand];
-phase = CalData.IQSSBPhaseCorrectionFactorUSB[ConfigData.currentBand];
+amplitude = CalData.IQSSBRXAmpCorrectionFactorUSB[ConfigData.currentBand];
+phase = CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand];
   }
 }
 
@@ -475,7 +474,7 @@ phase = CalData.IQSSBPhaseCorrectionFactorUSB[ConfigData.currentBand];
         CalData.IQCWRXAmpCorrectionFactorLSB[ConfigData.currentBand] = amplitude;
         CalData.IQCWRXPhaseCorrectionFactorLSB[ConfigData.currentBand] = phase;
       }  else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-         CalData.IQCWRXAmpCorrectionFactorUSB[ConfigData.currentBand] = amplitude;
+        CalData.IQCWRXAmpCorrectionFactorUSB[ConfigData.currentBand] = amplitude;
         CalData.IQCWRXPhaseCorrectionFactorUSB[ConfigData.currentBand] = phase;         
     }}
         if(mode == 1) {

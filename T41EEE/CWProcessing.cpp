@@ -4,8 +4,8 @@
 #include "SDT.h"
 
 #define HISTOGRAM_ELEMENTS 750
-#define MAX_DECODE_CHARS 32       // Max chars that can appear on decoder line.  Increased to 32.  KF5N October 29, 2023
-#define DECODER_BUFFER_SIZE 128   // Max chars in binary search string with , . ?
+#define MAX_DECODE_CHARS 32      // Max chars that can appear on decoder line.  Increased to 32.  KF5N October 29, 2023
+#define DECODER_BUFFER_SIZE 128  // Max chars in binary search string with , . ?
 
 byte currentDashJump = DECODER_BUFFER_SIZE;
 byte currentDecoderIndex = 0;
@@ -127,7 +127,7 @@ FLASHMEM void SelectCWFilter() {
   tft.clearMemory();
   BandInformation();
   DrawBandWidthIndicatorBar();
-//  UpdateDecoderField();
+  //  UpdateDecoderField();
   eeprom.ConfigDataWrite();
 }
 
@@ -142,16 +142,25 @@ FLASHMEM void SelectCWFilter() {
     void
 *****/
 FLASHMEM void SelectCWOffset() {
+  bool tempDecoderFlag;
+  int tempCWOffset;
   const std::string CWOffsets[] = { "562.5 Hz", "656.5 Hz", "750 Hz", "843.75 Hz", " Cancel " };
   const int numCycles[4] = { 6, 7, 8, 9 };
+
+  tempCWOffset = ConfigData.CWOffset;
+  tempDecoderFlag = ConfigData.decoderFlag;                                // Remember current status of decoder.
+  ConfigData.decoderFlag = false;                                          // Set to false to erase decoder delimiters.
+  UpdateDecoderField();                                                    // Erase graphics if they exist.
+  ConfigData.decoderFlag = tempDecoderFlag;                                // Restore the decoder flag value.
   ConfigData.CWOffset = SubmenuSelect(CWOffsets, 5, ConfigData.CWOffset);  // CWFilter is an array of strings.
+
+  //  If user selects cancel, CWOffset will be set to the bogus value of 4.  So keep the old value.
+  if (ConfigData.CWOffset == 4) ConfigData.CWOffset = tempCWOffset;
+
   // Now generate the values for the buffer which is used to create the CW tone.  The values are discrete because there must be whole cycles.
   if (ConfigData.CWOffset < 4) sineTone(numCycles[ConfigData.CWOffset]);
+  UpdateDecoderField();
   eeprom.ConfigDataWrite();  // Save to EEPROM.
-  // Clear the current CW filter graphics and then restore the bandwidth indicator bar.  KF5N July 30, 2023
-  tft.writeTo(L2);
-  tft.clearMemory();
-////  RedrawDisplayScreen();
 }
 
 
@@ -179,8 +188,8 @@ void DoCWReceiveProcessing() {  // All New AFP 09-19-22
 
   if (ConfigData.decoderFlag) {  // JJP 7/20/23
 
-  arm_fir_f32(&FIR_CW_DecodeL, float_buffer_L, float_buffer_L_CW, 256);  // AFP 10-25-22  Park McClellan FIR filter const Group delay
-  arm_fir_f32(&FIR_CW_DecodeR, float_buffer_R, float_buffer_R_CW, 256);  // AFP 10-25-22
+    arm_fir_f32(&FIR_CW_DecodeL, float_buffer_L, float_buffer_L_CW, 256);  // AFP 10-25-22  Park McClellan FIR filter const Group delay
+    arm_fir_f32(&FIR_CW_DecodeR, float_buffer_R, float_buffer_R_CW, 256);  // AFP 10-25-22
 
     // ----------------------  Correlation calculation  AFP 02-04-22 -------------------------
     //Calculate correlation between calc sine and incoming signal
@@ -333,12 +342,12 @@ void SetSideToneVolume(bool speaker) {
   tft.setCursor(SECONDARY_MENU_X - 48, MENUS_Y + 1);
   tft.print("Sidetone Volume:");
   tft.setCursor(SECONDARY_MENU_X + 220, MENUS_Y + 1);
-  if(speaker) sidetoneDisplay = ConfigData.sidetoneSpeaker;
+  if (speaker) sidetoneDisplay = ConfigData.sidetoneSpeaker;
   else sidetoneDisplay = ConfigData.sidetoneHeadphone;
   keyDown = false;
   tft.print(sidetoneDisplay);  // Display in range of 0 to 100.
 
-//  digitalWrite(MUTE, UNMUTEAUDIO);  // unmutes audio
+  //  digitalWrite(MUTE, UNMUTEAUDIO);  // unmutes audio
 
   while (true) {
     if (digitalRead(ConfigData.paddleDit) == LOW || digitalRead(ConfigData.paddleDah) == LOW) {
@@ -364,19 +373,19 @@ void SetSideToneVolume(bool speaker) {
         sidetoneDisplay = 100;
       tft.fillRect(SECONDARY_MENU_X + 200, MENUS_Y, 70, CHAR_HEIGHT, RA8875_MAGENTA);
       tft.setCursor(SECONDARY_MENU_X + 220, MENUS_Y + 1);
-      if(speaker) ConfigData.sidetoneSpeaker = sidetoneDisplay;
+      if (speaker) ConfigData.sidetoneSpeaker = sidetoneDisplay;
       else ConfigData.sidetoneHeadphone = sidetoneDisplay;
       tft.setTextColor(RA8875_WHITE);
       tft.print(sidetoneDisplay);
       filterEncoderMove = 0;
     }
     speakerVolume.setGain(volumeLog[ConfigData.sidetoneSpeaker]);
-    sgtl5000_1.volume(static_cast<float32_t>(ConfigData.sidetoneHeadphone)/100.0);  // This control has a range of 0.0 to 1.0.
-//    headphoneVolume.setGain(volumeLog[ConfigData.sidetoneVolume]);
-//    val = ReadSelectedPushButton();                           // Read pin that controls all switches
+    sgtl5000_1.volume(static_cast<float32_t>(ConfigData.sidetoneHeadphone) / 100.0);  // This control has a range of 0.0 to 1.0.
+                                                                                      //    headphoneVolume.setGain(volumeLog[ConfigData.sidetoneVolume]);
+                                                                                      //    val = ReadSelectedPushButton();                           // Read pin that controls all switches
     menu = readButton();
     if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
-                                      // ConfigData.ConfigData.sidetoneVolume = ConfigData.sidetoneVolume;
+                                                   // ConfigData.ConfigData.sidetoneVolume = ConfigData.sidetoneVolume;
       eeprom.ConfigDataWrite();
       break;
     }

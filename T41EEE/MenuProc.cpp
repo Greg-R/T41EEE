@@ -393,18 +393,12 @@ void CalibrateOptions() {
       break;
 
     case 14:  // Cancelled choice
-//      RedrawDisplayScreen();
-//      currentFreq = TxRxFreq = ConfigData.centerFreq + NCOFreq;
-//      DrawBandWidthIndicatorBar();  // AFP 10-20-22
-//      ShowFrequency();
-//      BandInformation();
       calibrateFlag = 0;
       break;
 
     default:
       break;
   }
-//  UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
 }
 #endif
 
@@ -635,7 +629,7 @@ void ProcessEqualizerChoices(int EQType, char *title) {
       yLevel[iFreq] = ConfigData.equalizerRec[iFreq];
     } else {
       if (EQType == 1) {
-        yLevel[iFreq] = ConfigData.equalizerXmt[iFreq];
+        yLevel[iFreq] = (ConfigData.equalizerXmt[iFreq] * 10) + 100;
       }
     }
   }
@@ -668,10 +662,10 @@ void ProcessEqualizerChoices(int EQType, char *title) {
   for (iFreq = 0; iFreq < EQUALIZER_CELL_COUNT; iFreq++) {
     tft.fillRect(xOrigin + (barWidth + 4) * iFreq, barTopY - (yLevel[iFreq] - DEFAULT_EQUALIZER_BAR), barWidth, yLevel[iFreq], RA8875_CYAN);
     tft.setCursor(xOrigin + (barWidth + 4) * iFreq, yOrigin + high - tft.getFontHeight() * 2);
-    if (EQType == 0) tft.print(rXeqFreq[iFreq].c_str());
-    else tft.print(tXeqFreq[iFreq].c_str());
+    if (EQType == 0) tft.print(rXeqFreq[iFreq].c_str()); else tft.print(tXeqFreq[iFreq].c_str());
     tft.setCursor(xOrigin + (barWidth + 4) * iFreq + tft.getFontWidth() * 1.5, yOrigin + high + tft.getFontHeight() * 2);
-    tft.print(yLevel[iFreq]);
+if (EQType == 0) tft.print(yLevel[iFreq]);
+if (EQType == 1) tft.print(ConfigData.equalizerXmt[iFreq]);
   }
 
   columnIndex = 0;  // Get ready to set values for columns
@@ -698,32 +692,28 @@ void ProcessEqualizerChoices(int EQType, char *title) {
         tft.fillRect(xOffset,                    // Indent to proper bar...
                      barBottomY - newValue - 1,  // Start at red line
                      barWidth,                   // Set bar width
-                     newValue + 1,               // Erase old bar
+                     yLevel[columnIndex] + 1,               // Erase old bar
                      RA8875_BLACK);
-        newValue += (PIXELS_PER_EQUALIZER_DELTA * filterEncoderMove);  // Find new bar height. OK since filterEncoderMove equals 1 or -1
+//        newValue += (PIXELS_PER_EQUALIZER_DELTA * filterEncoderMove);  // Find new bar height. OK since filterEncoderMove equals 1 or -1. PIXELS_PER_EQUALIZER_DELTA = 10
+          yLevel[columnIndex] += (PIXELS_PER_EQUALIZER_DELTA * filterEncoderMove);
         tft.fillRect(xOffset,                                          // Indent to proper bar...
-                     barBottomY - newValue,                            // Start at red line
+                     barBottomY - yLevel[columnIndex],                            // Start at red line
                      barWidth,                                         // Set bar width
-                     newValue,                                         // Draw new bar
+                     yLevel[columnIndex],                                         // Draw new bar
                      RA8875_MAGENTA);
-        yLevel[columnIndex] = newValue;
+//        yLevel[columnIndex] = newValue;
 
         tft.fillRect(xOffset + tft.getFontWidth() * 1.5 - 1, yOrigin + high + tft.getFontHeight() * 2,  // Update bottom number
                      barWidth, CHAR_HEIGHT, RA8875_BLACK);
         tft.setCursor(xOffset + tft.getFontWidth() * 1.5, yOrigin + high + tft.getFontHeight() * 2);
-        tft.print(yLevel[columnIndex]);
-        if (newValue < DEFAULT_EQUALIZER_BAR) {  // Repaint red center line if erased
-          tft.drawFastHLine(xOrigin - 4, yOrigin + (high / 2), wide + 4, RA8875_RED);
-          ;  // Clear hole in display center
+        if(EQType == 0) tft.print(yLevel[columnIndex]); else tft.print((yLevel[columnIndex] - 100) / 10);
+        if (yLevel[columnIndex] < DEFAULT_EQUALIZER_BAR) {  // Repaint red center line if erased
+          tft.drawFastHLine(xOrigin - 4, yOrigin + (high / 2), wide + 4, RA8875_RED);  // Clear hole in display center
         }
       }
       filterEncoderMove = 0;
-      //      delay(200L);
       menu = readButton();  // Read the ladder value
       if (menu != MenuSelect::BOGUS_PIN_READ) {
-        //    MenuSelect menu = MenuSelect::DEFAULT;
-        //        menu = readButton();  // Use ladder value to get menu choice
-        //        delay(100L);
 
         tft.fillRect(xOffset,                // Indent to proper bar...
                      barBottomY - newValue,  // Start at red line
@@ -735,18 +725,18 @@ void ProcessEqualizerChoices(int EQType, char *title) {
           ConfigData.equalizerRec[columnIndex] = newValue;
         } else {
           if (EQType == 1) {
-            ConfigData.equalizerXmt[columnIndex] = newValue;
+            ConfigData.equalizerXmt[columnIndex] = (yLevel[columnIndex] - 100) / 10;
           }
         }
 
         filterEncoderMove = 0;
         columnIndex++;
         break;
-        //  }
       }  // end inner while
     }    // end outer while
     eeprom.ConfigDataWrite();
   }
+  RedrawDisplayScreen();
   lastState = RadioState::NOSTATE;  // Force update of operating state.
 }
 

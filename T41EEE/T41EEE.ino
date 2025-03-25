@@ -1062,6 +1062,10 @@ void loop()
       headphoneScale.setGain(HEADPHONESCALE);
     }
   }
+  if(radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE or radioState == RadioState::CW_TRANSMIT_KEYER_STATE) {
+    speakerScale.setGain(SPEAKERSCALE);
+    headphoneScale.setGain(HEADPHONESCALE);
+  }
 
   //Serial.printf("bands[ConfigData.currentBand].sideband = %d\n", bands[ConfigData.currentBand].sideband);
 

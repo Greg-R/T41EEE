@@ -11,7 +11,7 @@ AudioOutputI2SQuad i2s_quadOut;
 // Transmitter
 AudioControlSGTL5000 sgtl5000_1;  // Controller for the Teensy Audio Adapter.
 AudioConvert_I16toF32 int2Float1_tx;             // Converts Int16 to Float.  See class in AudioStream_F32.h
-AudioEffectGain_F32 micGain(audio_settings);  // Microphone gain control.
+AudioEffectGain_F32 micGain(audio_settings), compGainCompensate(audio_settings);  // Microphone gain control.
 AudioFilterEqualizer_F32 txEqualizer(audio_settings);
 AudioEffectCompressor2_F32 compressor1;       // Open Audio Compressor
 radioCESSB_Z_transmit_F32 cessb1;
@@ -49,7 +49,8 @@ AudioConnection_F32 connect11(switch4_tx, 0, compressor1, 0);
 AudioConnection_F32 connect12(compressor1, 0, mixer3_tx, 0);
 
 // Compressor bypass path.
-AudioConnection_F32 connect13(switch4_tx, 1, mixer3_tx, 1);  // Compressor bypass path.
+AudioConnection_F32 connect13(switch4_tx, 1, compGainCompensate, 0);  // Compressor bypass path.
+AudioConnection_F32 connect23(compGainCompensate, 0, mixer3_tx, 1);
 
 AudioConnection_F32 connect14(mixer3_tx, 0, cessb1, 0);
 
@@ -251,6 +252,7 @@ void SetAudioOperatingState(RadioState operatingState) {
         switch4_tx.setChannel(1);  // Bypass compressor.
         mixer3_tx.gain(0, 0.0);
         mixer3_tx.gain(1, 1.0);
+        compGainCompensate.setGain_dB(10.0);  // Use compressor's below threshold gain.
       }
 
       if (ConfigData.xmitEQFlag and bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE) {
@@ -271,7 +273,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord26.disconnect();
 
       // Update equalizer.  Update first 14 only.  Last two are constant.
-      for(int i = 0; i < 14; i = i + 1) dbBand1[i] = ConfigData.equalizerXmt[i];
+      for(int i = 0; i < 14; i = i + 1) dbBand1[i] = static_cast<float32_t>(ConfigData.equalizerXmt[i]);
       
       txEqualizer.equalizerNew(16, &fBand1[0], &dbBand1[0], 249, &equalizeCoeffs[0], 65.0f);
       updateMic();
@@ -364,18 +366,17 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord2.disconnect();
       patchCord3.connect();  // Sidetone
       // Speaker and headphones should be unmuted according to current audio out state for sidetone.
-      controlAudioOut(ConfigData.audioOut, false);  // FT8 audio should be headphone only.
+      controlAudioOut(ConfigData.audioOut, false);
       sgtl5000_1.unmuteLineout();
 
-      sgtl5000_1.volume(static_cast<float32_t>(ConfigData.sidetoneSpeaker)/100.0);  // This is for scaling the sidetone in the headphone output.  This is
+      sgtl5000_1.volume(static_cast<float32_t>(ConfigData.sidetoneHeadphone)/100.0);  // This is for scaling the sidetone in the headphone output.  This is
                                // the only way to adjust sidetone volume in the headphone.
       patchCord25.disconnect();  // Disconnect headphone, which is shared with I and Q transmit.
       patchCord26.disconnect();
       connect19.connect();  // Connect I and Q transmitter output channels.
       connect20.connect();
 
-      speakerVolume.setGain(volumeLog[ConfigData.sidetoneSpeaker]);    // Adjust sidetone volume.
-//      headphoneVolume.setGain(volumeLog[ConfigData.sidetoneVolume]);  // Adjust sidetone volume.
+      speakerVolume.setGain(volumeLog[ConfigData.sidetoneSpeaker]);    // Adjust sidetone volume.  Headphone sidetone done in hardware.
 
       break;
 
