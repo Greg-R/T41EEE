@@ -1,4 +1,23 @@
 /*
+## Highlight of Changes included in T41EEE.9.  March 26, 2025.
+
+1.  The audio spectrum is automatically centered in the audio spectrum window.
+2.  The DSPGAINSCALE parameter is removed.
+3.  The Audio Adapter headphone output is activated.
+4.  The pixel adjustment button is removed.  This is replaced by audio output selection.
+5.  The mode button is now a sideband selection button.
+6.  The CW/SSB button is now a mode selection button.
+7.  SPEAKERSCALE and HEADPHONESCALE parameters are added to MyConfigurationFile.h.
+8.  Open Audio Library compressor and equalizer are added to the SSB signal chain.
+9.  Open Audio Library compressor replaces the original AGC.
+10.  And "FT8 Mode" is added which is intended to facilitate use of WSJTX software on an external computer.
+11. Upper and lower sidebands are calibrated during the radio calibration routines.
+12. The SD card files are now split into configuration files (config.txt) and calibration (calibration.txt).
+13. Modes are now remembered by band and stored in EEPROM.
+14. CW Decoder Sensitivity is Live Adjustable
+15. FREQUENCYCAL Parameter Added to MyConfigurationFile.h
+16. RFGAINSCALE Parameter Sdded to MyConfigurationFile.h
+
 ### Version T41EEE.8 T41 Software Defined Transceiver Arduino Sketch
 
 This is the "T41 Extreme Experimenter's Edition" software for the 
@@ -74,7 +93,7 @@ The instructions for performing a FLASH erase of the Teensy are here:
 
 The bullet "Memory Wipe & LED Blink Restore" has the instructions.
 
-## Highlight of Changes included in T41EEE.8
+## Highlight of Changes included in T41EEE.9
 
 1.  Changed default CW and SSB power calibration to 0.5.
 2.  Fixed problem with CW decoder graphics.

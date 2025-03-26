@@ -51,7 +51,7 @@
 #define                           NORM_ENCODER
 //#define                           FOURSQRP
 
-// Set multiplication factors for your QSD and QSE boards.
+// Set multiplication factors for your QSD and QSE boards.  Default values here and below are for V10/V11 boards.
 #define MASTER_CLK_MULT_RX 4
 #define MASTER_CLK_MULT_TX 4
 

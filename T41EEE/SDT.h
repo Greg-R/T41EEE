@@ -400,8 +400,8 @@ struct calibration_t {
                            298, 242, 183,
                            131, 67, 10 };
 
-  float CWPowerCalibrationFactor[NUMBER_OF_BANDS] =  { 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 };        // Increased to 0.04, was 0.019; KF5N February 20, 2024
-  float SSBPowerCalibrationFactor[NUMBER_OF_BANDS] = { 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 };  // Increased to 0.04, was 0.008; KF5N February 21, 2024
+  float CWPowerCalibrationFactor[NUMBER_OF_BANDS] =  { 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };        // Increased to 0.04, was 0.019; KF5N February 20, 2024
+  float SSBPowerCalibrationFactor[NUMBER_OF_BANDS] = { 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };  // Increased to 0.04, was 0.008; KF5N February 21, 2024
 
   float IQCWRXAmpCorrectionFactorLSB[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
   float IQCWRXPhaseCorrectionFactorLSB[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
