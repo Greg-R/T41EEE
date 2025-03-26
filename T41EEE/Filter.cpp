@@ -243,21 +243,12 @@ if(bands.bands[ConfigData.currentBand].mode == RadioMode::AM_MODE or bands.bands
 }
 InitFilterMask();
 
-  // also adjust IIR AM filter
-  //int filter_BW_highest = bands.bands[ConfigData.currentBand].FHiCut;
-  //if (filter_BW_highest < -bands.bands[ConfigData.currentBand].FLoCut) {
-  // filter_BW_highest = -bands.bands[ConfigData.currentBand].FLoCut;
-  // }
-  //SetIIRCoeffs((float32_t)filter_BW_highest, 1.3, (float32_t)SR[SampleRate].rate / DF, 0); // 1st stage
-
   for (int i = 0; i < 5; i++) {
     biquad_lowpass1_coeffs[i] = coefficient_set[i];
   }
 
   // And adjust decimation and interpolation filters
   SetDecIntFilters();
-////  ShowBandwidth();
-////  AudioInterrupts();
 } // end filter_bandwidth
 
 
@@ -296,43 +287,6 @@ void InitFilterMask()
 
 } // end init_filter_mask
 
-
-/*****
-  Purpose: void control_filter_f()
-  Parameter list:
-    void
-  Return value;
-    void
-*****
-void ControlFilterF()
-{
-  // low Fcut must never be larger than high Fcut and vice versa
-
-  //== AFP 10-27-22
-  switch (bands.bands[ConfigData.currentBand].sideband) {
-//    case DEMOD_IQ:
-//      bands.bands[ConfigData.currentBand].FLoCut = - bands.bands[ConfigData.currentBand].FHiCut;
-//      break;
-    case Sideband::LOWER:
-      if (bands.bands[ConfigData.currentBand].FHiCut > 0) bands.bands[ConfigData.currentBand].FHiCut = -100;
-
-      break;
-    case Sideband::UPPER:
-      if (bands.bands[ConfigData.currentBand].FLoCut < 0) bands.bands[ConfigData.currentBand].FLoCut = 100;  // AFP 10-27-22
-      break;
-    case Sideband::BOTH_AM:
-      bands.bands[ConfigData.currentBand].FLoCut = - bands.bands[ConfigData.currentBand].FHiCut;
-      //bands.bands[ConfigData.currentBand].FHiCut= 4000;
-      break;
-    case Sideband::BOTH_SAM:               //== AFP 11-04-22
-      bands.bands[ConfigData.currentBand].FLoCut = - bands.bands[ConfigData.currentBand].FHiCut;
-      break;
-  }   //== AFP 10-27-22
-
-  Serial.printf("bands.bands[ConfigData.currentBand].FLoCut = %d\n", bands.bands[ConfigData.currentBand].FLoCut);
-  Serial.printf("bands.bands[ConfigData.currentBand].FHiCut = %d\n", bands.bands[ConfigData.currentBand].FHiCut);
-}
-*/
 
 /*****
   Purpose: void SetDecIntFilters()

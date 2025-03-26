@@ -14,7 +14,6 @@
  *****/
 void CWCalibrate::loadCalToneBuffers(float toneFreq) {
   float theta;
-//  float32_t tones[2]{ 750.0, 3000.0 };
   // This loop creates the sinusoidal waveform for the tone.
   for (int kf = 0; kf < 256; kf++) {
     theta = kf * 2.0 * PI * toneFreq / 24000;
@@ -109,7 +108,7 @@ void CWCalibrate::printCalType(int mode, int IQCalType, bool autoCal, bool autoC
   const char *IQName[4] = { "Receive CW", "Transmit CW", "Carrier CW", "Calibrate" };
   tft.writeTo(L1);
   calName = IQName[calTypeFlag];
-  if(mode == 1) calName = "Receive SSB";
+  if (mode == 1) calName = "Receive SSB";
   tft.setFontScale((enum RA8875tsize)1);
   tft.setTextColor(RA8875_RED);
   if ((bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) and (calTypeFlag == 0)) {
@@ -257,23 +256,21 @@ void CWCalibrate::CalibratePreamble(int setZoom) {
   cessb1.processorUsageMaxReset();
   calOnFlag = true;
   IQCalType = 0;
-  //  radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;                 // KF5N
   transmitPowerLevelTemp = ConfigData.transmitPowerLevel;  //AFP 05-11-23
   cwFreqOffsetTemp = ConfigData.CWOffset;
-    // Remember the mode and state, and restore in the Epilogue.
+  // Remember the mode and state, and restore in the Epilogue.
   tempMode = bands.bands[ConfigData.currentBand].mode;
   tempState = radioState;
   // Calibrate requires upper or lower sideband.  Change if currently in an AM mode.  Put back in Epilogue.
-  if(bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
+  if (bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
     tempSideband = bands.bands[ConfigData.currentBand].sideband;
     // Use the last upper or lower sideband (CW, SSB, or FT8) during calibration.
-   bands.bands[ConfigData.currentBand].sideband = ConfigData.lastSideband[ConfigData.currentBand];
+    bands.bands[ConfigData.currentBand].sideband = ConfigData.lastSideband[ConfigData.currentBand];
   }
   ConfigData.CWOffset = 2;                   // 750 Hz for TX calibration.  Epilogue restores user selected offset.
                                              //  userxmtMode = ConfigData.xmtMode;          // Store the user's mode setting.  KF5N July 22, 2023
   userZoomIndex = ConfigData.spectrum_zoom;  // Save the zoom index so it can be reset at the conclusion.  KF5N August 12, 2023
   zoomIndex = setZoom - 1;
-//  loadCalToneBuffers();  // Restore in the epilogue.  Move to specific cal function and use correct tone freq.
   button.ButtonZoom();
   tft.fillRect(0, 272, 517, 399, RA8875_BLACK);  // Erase waterfall.  KF5N August 14, 2023
 
@@ -282,7 +279,7 @@ void CWCalibrate::CalibratePreamble(int setZoom) {
   ShowFrequency();
   BandInformation();
 
-  tft.writeTo(L2);                               // Erase the bandwidth bar.  KF5N August 16, 2023
+  tft.writeTo(L2);  // Erase the bandwidth bar.  KF5N August 16, 2023
   tft.clearMemory();
   tft.writeTo(L1);
   tft.setFontScale((enum RA8875tsize)0);
@@ -351,28 +348,26 @@ void CWCalibrate::CalibrateEpilogue(bool radioCal, bool saveToEeprom) {
   NCOFreq = 0L;
   calibrateFlag = 0;                       // KF5N
   ConfigData.CWOffset = cwFreqOffsetTemp;  // Return user selected CW offset frequency.
-//  ConfigData.calFreq = calFreqTemp;        // Return user selected calibration tone frequency.
   sineTone(ConfigData.CWOffset + 6);       // This function takes "number of cycles" which is the offset + 6.
-  //calFreqShift = 0;
-  ConfigData.currentScale = userScale;  //  Restore vertical scale to user preference.  KF5N
+  ConfigData.currentScale = userScale;     //  Restore vertical scale to user preference.  KF5N
   ShowSpectrumdBScale();
   ConfigData.transmitPowerLevel = transmitPowerLevelTemp;  // Restore the user's transmit power level setting.  KF5N August 15, 2023
-if(bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) bands.bands[ConfigData.currentBand].sideband = tempSideband;
+  if (bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) bands.bands[ConfigData.currentBand].sideband = tempSideband;
   bands.bands[ConfigData.currentBand].mode = tempMode;
   radioState = tempState;
   zoomIndex = userZoomIndex - 1;
-  button.ButtonZoom();          // Restore the user's zoom setting.  Note that this function also modifies ConfigData.spectrum_zoom.
-  if(saveToEeprom) eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
-  tft.writeTo(L2);       // Clear layer 2.  KF5N July 31, 2023
+  button.ButtonZoom();                      // Restore the user's zoom setting.  Note that this function also modifies ConfigData.spectrum_zoom.
+  if (saveToEeprom) eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
+  tft.writeTo(L2);                          // Clear layer 2.  KF5N July 31, 2023
   tft.clearMemory();
   tft.writeTo(L1);  // Exit function in layer 1.  KF5N August 3, 2023
   calOnFlag = false;
-if(not radioCal)  RedrawDisplayScreen();  // Redraw everything!
-else tft.fillWindow();  // Clear the display.
-  fftOffset = 0;                              // Some reboots may be caused by large fftOffset values when Auto-Spectrum is on.
+  if (not radioCal) RedrawDisplayScreen();  // Redraw everything!
+  else tft.fillWindow();                    // Clear the display.
+  fftOffset = 0;                            // Some reboots may be caused by large fftOffset values when Auto-Spectrum is on.
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   lastState = RadioState::NOSTATE;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 16, 2023
-  powerUp = true; // Clip off transient.
+  powerUp = true;                   // Clip off transient.
   return;
 }
 
@@ -393,7 +388,7 @@ void CWCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, boo
   bool autoCal = false;
   bool refineCal = false;
   loadCalToneBuffers(3000.0);
-  CalibratePreamble(0);                                                       // Set zoom to 1X.
+  CalibratePreamble(0);                                                                       // Set zoom to 1X.
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) calFreqShift = 24000;  //  LSB offset.  KF5N
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) calFreqShift = 24000;  //  USB offset.  KF5N
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
@@ -424,28 +419,28 @@ void CWCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, boo
   plotCalGraphics(calTypeFlag);
   printCalType(mode, calTypeFlag, autoCal, false);
   // Run this so Phase shows from begining.  Get the current values assigned to the local variables.
-if(mode == 0) {  // CW
-  if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-  GetEncoderValueLive(-2.0, 2.0, CalData.IQCWRXPhaseCorrectionFactorLSB[ConfigData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
-amplitude = CalData.IQCWRXAmpCorrectionFactorLSB[ConfigData.currentBand];
-phase = CalData.IQCWRXPhaseCorrectionFactorLSB[ConfigData.currentBand];
-  }   else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-  GetEncoderValueLive(-2.0, 2.0, CalData.IQCWRXPhaseCorrectionFactorUSB[ConfigData.currentBand], correctionIncrement, (char *)"IQ Phase", false);    
-amplitude = CalData.IQCWRXAmpCorrectionFactorUSB[ConfigData.currentBand];
-phase = CalData.IQCWRXPhaseCorrectionFactorUSB[ConfigData.currentBand];
+  if (mode == 0) {  // CW
+    if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
+      GetEncoderValueLive(-2.0, 2.0, CalData.IQCWRXPhaseCorrectionFactorLSB[ConfigData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
+      amplitude = CalData.IQCWRXAmpCorrectionFactorLSB[ConfigData.currentBand];
+      phase = CalData.IQCWRXPhaseCorrectionFactorLSB[ConfigData.currentBand];
+    } else if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
+      GetEncoderValueLive(-2.0, 2.0, CalData.IQCWRXPhaseCorrectionFactorUSB[ConfigData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
+      amplitude = CalData.IQCWRXAmpCorrectionFactorUSB[ConfigData.currentBand];
+      phase = CalData.IQCWRXPhaseCorrectionFactorUSB[ConfigData.currentBand];
+    }
   }
-}
-if(mode == 1) {  // SSB
-  if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-  GetEncoderValueLive(-2.0, 2.0, CalData.IQSSBRXPhaseCorrectionFactorLSB[ConfigData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
-amplitude = CalData.IQSSBRXAmpCorrectionFactorLSB[ConfigData.currentBand];
-phase = CalData.IQSSBRXPhaseCorrectionFactorLSB[ConfigData.currentBand];
-  }   else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-  GetEncoderValueLive(-2.0, 2.0, CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand], correctionIncrement, (char *)"IQ Phase", false);    
-amplitude = CalData.IQSSBRXAmpCorrectionFactorUSB[ConfigData.currentBand];
-phase = CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand];
+  if (mode == 1) {  // SSB
+    if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
+      GetEncoderValueLive(-2.0, 2.0, CalData.IQSSBRXPhaseCorrectionFactorLSB[ConfigData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
+      amplitude = CalData.IQSSBRXAmpCorrectionFactorLSB[ConfigData.currentBand];
+      phase = CalData.IQSSBRXPhaseCorrectionFactorLSB[ConfigData.currentBand];
+    } else if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
+      GetEncoderValueLive(-2.0, 2.0, CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand], correctionIncrement, (char *)"IQ Phase", false);
+      amplitude = CalData.IQSSBRXAmpCorrectionFactorUSB[ConfigData.currentBand];
+      phase = CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand];
+    }
   }
-}
 
   warmUpCal(mode);
 
@@ -455,7 +450,6 @@ phase = CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand];
     count = 0;
     warmup = 0;
     index = 1;
-    //  stopSweep = false;
     IQCalType = 0;
     std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
     std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
@@ -465,22 +459,24 @@ phase = CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand];
   // Receive Calibration Loop
   while (true) {
     // Update values before calculating spectrum.
-    if(mode == 0) {
-        if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
+    if (mode == 0) {
+      if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
         CalData.IQCWRXAmpCorrectionFactorLSB[ConfigData.currentBand] = amplitude;
         CalData.IQCWRXPhaseCorrectionFactorLSB[ConfigData.currentBand] = phase;
-      }  else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
+      } else if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
         CalData.IQCWRXAmpCorrectionFactorUSB[ConfigData.currentBand] = amplitude;
-        CalData.IQCWRXPhaseCorrectionFactorUSB[ConfigData.currentBand] = phase;         
-    }}
-        if(mode == 1) {
-            if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
+        CalData.IQCWRXPhaseCorrectionFactorUSB[ConfigData.currentBand] = phase;
+      }
+    }
+    if (mode == 1) {
+      if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
         CalData.IQSSBRXAmpCorrectionFactorLSB[ConfigData.currentBand] = amplitude;
         CalData.IQSSBRXPhaseCorrectionFactorLSB[ConfigData.currentBand] = phase;
-       } else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
+      } else if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
         CalData.IQSSBRXAmpCorrectionFactorUSB[ConfigData.currentBand] = amplitude;
-        CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand] = phase;          
-    }}
+        CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand] = phase;
+      }
+    }
     CWCalibrate::ShowSpectrum2(mode);
     task = readButton(lastUsedTask);
     if (shortCal) task = MenuSelect::FILTER;
@@ -509,23 +505,29 @@ phase = CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand];
         IQCalType = 0;
         std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
         std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
-        
-        if(mode == 0) {
-if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-        iOptimal = amplitude = CalData.IQCWRXAmpCorrectionFactorLSB[ConfigData.currentBand];;
-        qOptimal = phase = CalData.IQCWRXPhaseCorrectionFactorLSB[ConfigData.currentBand];
-} else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-        iOptimal = amplitude = CalData.IQCWRXAmpCorrectionFactorUSB[ConfigData.currentBand];;
-        qOptimal = phase = CalData.IQCWRXPhaseCorrectionFactorUSB[ConfigData.currentBand];
-}}
-        if(mode == 1) {
-if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-        iOptimal = amplitude = CalData.IQSSBRXAmpCorrectionFactorLSB[ConfigData.currentBand];;
-        qOptimal = phase = CalData.IQSSBRXPhaseCorrectionFactorLSB[ConfigData.currentBand];
-} else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-        iOptimal = amplitude = CalData.IQSSBRXAmpCorrectionFactorUSB[ConfigData.currentBand];;
-        qOptimal = phase = CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand];
-}}
+
+        if (mode == 0) {
+          if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
+            iOptimal = amplitude = CalData.IQCWRXAmpCorrectionFactorLSB[ConfigData.currentBand];
+            ;
+            qOptimal = phase = CalData.IQCWRXPhaseCorrectionFactorLSB[ConfigData.currentBand];
+          } else if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
+            iOptimal = amplitude = CalData.IQCWRXAmpCorrectionFactorUSB[ConfigData.currentBand];
+            ;
+            qOptimal = phase = CalData.IQCWRXPhaseCorrectionFactorUSB[ConfigData.currentBand];
+          }
+        }
+        if (mode == 1) {
+          if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
+            iOptimal = amplitude = CalData.IQSSBRXAmpCorrectionFactorLSB[ConfigData.currentBand];
+            ;
+            qOptimal = phase = CalData.IQSSBRXPhaseCorrectionFactorLSB[ConfigData.currentBand];
+          } else if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
+            iOptimal = amplitude = CalData.IQSSBRXAmpCorrectionFactorUSB[ConfigData.currentBand];
+            ;
+            qOptimal = phase = CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand];
+          }
+        }
         state = State::warmup;
         averageFlag = false;
         refineCal = true;
@@ -549,8 +551,8 @@ if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
         break;
       case MenuSelect::MENU_OPTION_SELECT:  // Save values and exit calibration.
         tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-          CWCalibrate::CalibrateEpilogue(radioCal, saveToEeprom);
-          return;
+        CWCalibrate::CalibrateEpilogue(radioCal, saveToEeprom);
+        return;
         break;
       default:
         break;
@@ -571,8 +573,8 @@ if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
           std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
           warmup = warmup + 1;
           if (not refineCal) {
-            phase = 0.0 + maxSweepPhase;  //  Need to use these values during warmup
-            amplitude = 1.0 + maxSweepAmp;      //  so adjdB and adjdB_avg are forced upwards.
+            phase = 0.0 + maxSweepPhase;    //  Need to use these values during warmup
+            amplitude = 1.0 + maxSweepAmp;  //  so adjdB and adjdB_avg are forced upwards.
           }
           state = State::warmup;
           if (warmup == 10) state = State::state0;
@@ -593,10 +595,10 @@ if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
           // Starting values for sweeps.  First sweep is amplitude (gain).
           phase = 0.0;
           amplitude = 1.0 - maxSweepAmp;  // Begin sweep at low end and move upwards.
-          if(mode == 0)
-          GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, (char *)"IQ Phase", false);  // Display the phase value.
-          if(mode == 1)
-          GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, (char *)"IQ Phase", false);
+          if (mode == 0)
+            GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, (char *)"IQ Phase", false);  // Display the phase value.
+          if (mode == 1)
+            GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, (char *)"IQ Phase", false);
           adjdB = 0;
           adjdB_avg = 0;
           index = 0;
@@ -610,13 +612,13 @@ if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
           // Increment for next measurement.
           amplitude = amplitude + increment;  // Next one!
           // Go to Q channel when I channel sweep is finished.
-          if (abs(amplitude - 1.0) > maxSweepAmp) {  // Needs to be subtracted from 1.0.
-            IQCalType = 1;                                                                            // Get ready for phase.
-            result = std::min_element(sweepVector.begin(), sweepVector.end());                        // Value of the minimum.
-            adjdBMinIndex = std::distance(sweepVector.begin(), result);                               // Find the index.
-            iOptimal = sweepVectorValue[adjdBMinIndex];                                               // Set to the discovered minimum.
-            phase = -maxSweepPhase;            // The starting value for phase.
-            amplitude = iOptimal;                    // Reset for next sweep.
+          if (abs(amplitude - 1.0) > maxSweepAmp) {                             // Needs to be subtracted from 1.0.
+            IQCalType = 1;                                                      // Get ready for phase.
+            result = std::min_element(sweepVector.begin(), sweepVector.end());  // Value of the minimum.
+            adjdBMinIndex = std::distance(sweepVector.begin(), result);         // Find the index.
+            iOptimal = sweepVectorValue[adjdBMinIndex];                         // Set to the discovered minimum.
+            phase = -maxSweepPhase;                                             // The starting value for phase.
+            amplitude = iOptimal;                                               // Reset for next sweep.
             // Update display to optimal value.
             GetEncoderValueLive(-2.0, 2.0, amplitude, correctionIncrement, (char *)"IQ Gain", true);
             count = count + 1;
@@ -647,8 +649,8 @@ if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
           if (phase > maxSweepPhase) {
             result = std::min_element(sweepVector.begin(), sweepVector.end());
             adjdBMinIndex = std::distance(sweepVector.begin(), result);
-            qOptimal = sweepVectorValue[adjdBMinIndex];                               // Set to the discovered minimum.
-            phase = qOptimal;  // Set to the discovered minimum.
+            qOptimal = sweepVectorValue[adjdBMinIndex];  // Set to the discovered minimum.
+            phase = qOptimal;                            // Set to the discovered minimum.
             GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, (char *)"IQ Phase", false);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorPhase[i] = (qOptimal - 10 * 0.001) + (0.001 * i);
@@ -679,8 +681,8 @@ if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
             result = std::min_element(sub_vectorAmpResult.begin(), sub_vectorAmpResult.end());
             adjdBMinIndex = std::distance(sub_vectorAmpResult.begin(), result);
             // iOptimal is simply the value of sub_vectorAmp[adjdBMinIndex].
-            iOptimal = sub_vectorAmp[adjdBMinIndex];                                // -.001;
-            amplitude = iOptimal;  // Set to optimal value before refining phase.
+            iOptimal = sub_vectorAmp[adjdBMinIndex];  // -.001;
+            amplitude = iOptimal;                     // Set to optimal value before refining phase.
             GetEncoderValueLive(-2.0, 2.0, amplitude, correctionIncrement, (char *)"IQ Gain", true);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorAmp[i] = (iOptimal - 10 * 0.001) + (0.001 * i);  // The next array to sweep.
@@ -750,22 +752,28 @@ if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
           amplitude = iOptimal;
           phase = qOptimal;
 
-        if(mode == 0) {
-if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-        iOptimal = amplitude = CalData.IQCWRXAmpCorrectionFactorLSB[ConfigData.currentBand];;
-        qOptimal = phase = CalData.IQCWRXPhaseCorrectionFactorLSB[ConfigData.currentBand];
-} else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-        iOptimal = amplitude = CalData.IQCWRXAmpCorrectionFactorUSB[ConfigData.currentBand];;
-        qOptimal = phase = CalData.IQCWRXPhaseCorrectionFactorUSB[ConfigData.currentBand];
-}}
-        if(mode == 1) {
-if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-        iOptimal = amplitude = CalData.IQSSBRXAmpCorrectionFactorLSB[ConfigData.currentBand];;
-        qOptimal = phase = CalData.IQSSBRXPhaseCorrectionFactorLSB[ConfigData.currentBand];
-} else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-        iOptimal = amplitude = CalData.IQSSBRXAmpCorrectionFactorUSB[ConfigData.currentBand];;
-        qOptimal = phase = CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand];
-}}
+          if (mode == 0) {
+            if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
+              iOptimal = amplitude = CalData.IQCWRXAmpCorrectionFactorLSB[ConfigData.currentBand];
+              ;
+              qOptimal = phase = CalData.IQCWRXPhaseCorrectionFactorLSB[ConfigData.currentBand];
+            } else if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
+              iOptimal = amplitude = CalData.IQCWRXAmpCorrectionFactorUSB[ConfigData.currentBand];
+              ;
+              qOptimal = phase = CalData.IQCWRXPhaseCorrectionFactorUSB[ConfigData.currentBand];
+            }
+          }
+          if (mode == 1) {
+            if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
+              iOptimal = amplitude = CalData.IQSSBRXAmpCorrectionFactorLSB[ConfigData.currentBand];
+              ;
+              qOptimal = phase = CalData.IQSSBRXPhaseCorrectionFactorLSB[ConfigData.currentBand];
+            } else if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
+              iOptimal = amplitude = CalData.IQSSBRXAmpCorrectionFactorUSB[ConfigData.currentBand];
+              ;
+              qOptimal = phase = CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand];
+            }
+          }
 
           state = State::exit;
           viewTime = fiveSeconds;  // Start result view timer.
@@ -794,34 +802,34 @@ if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
 
     if (IQCalType == 0) {
       amplitude = GetEncoderValueLive(-2.0, 2.0, amplitude, correctionIncrement, (char *)"IQ Gain", true);
-if(mode == 0) {  // CW
-  if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER)
-CalData.IQCWRXAmpCorrectionFactorLSB[ConfigData.currentBand] = amplitude;
-  else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER)
-CalData.IQCWRXAmpCorrectionFactorUSB[ConfigData.currentBand] = amplitude;
-}
-if(mode == 1) {  // SSB
-  if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER)
-CalData.IQSSBRXAmpCorrectionFactorLSB[ConfigData.currentBand] = amplitude;
-  else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER)
-CalData.IQSSBRXAmpCorrectionFactorUSB[ConfigData.currentBand] = amplitude;
-}
+      if (mode == 0) {  // CW
+        if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER)
+          CalData.IQCWRXAmpCorrectionFactorLSB[ConfigData.currentBand] = amplitude;
+        else if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER)
+          CalData.IQCWRXAmpCorrectionFactorUSB[ConfigData.currentBand] = amplitude;
+      }
+      if (mode == 1) {  // SSB
+        if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER)
+          CalData.IQSSBRXAmpCorrectionFactorLSB[ConfigData.currentBand] = amplitude;
+        else if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER)
+          CalData.IQSSBRXAmpCorrectionFactorUSB[ConfigData.currentBand] = amplitude;
+      }
     } else {
       phase = GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, (char *)"IQ Phase", false);
-if(mode == 0) {  // CW
-  if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER)
-CalData.IQCWRXPhaseCorrectionFactorLSB[ConfigData.currentBand] = phase;
-  else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER)
-CalData.IQCWRXPhaseCorrectionFactorUSB[ConfigData.currentBand] = phase;
+      if (mode == 0) {  // CW
+        if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER)
+          CalData.IQCWRXPhaseCorrectionFactorLSB[ConfigData.currentBand] = phase;
+        else if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER)
+          CalData.IQCWRXPhaseCorrectionFactorUSB[ConfigData.currentBand] = phase;
+      }
+      if (mode == 1) {  // SSB
+        if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER)
+          CalData.IQSSBRXPhaseCorrectionFactorLSB[ConfigData.currentBand] = phase;
+        else if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER)
+          CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand] = phase;
+      }
     }
-    if(mode == 1) {  // SSB
-  if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER)
-CalData.IQSSBRXPhaseCorrectionFactorLSB[ConfigData.currentBand] = phase;
-  else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER)
-CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand] = phase;
-    }
-    }
-  }                            // end while
+  }  // end while
 }  // End Receive calibration
 
 
@@ -854,8 +862,8 @@ void CWCalibrate::DoXmitCalibrate(int mode, bool radioCal, bool shortCal, bool s
   bool averageFlag = false;
   std::vector<float>::iterator result;
   MenuSelect task, lastUsedTask = MenuSelect::DEFAULT;
-    CWCalibrate::CalibratePreamble(4);  // Set zoom to 16X.
-    freqOffset = 0;                     // Calibration tone same as regular modulation tone.
+  CWCalibrate::CalibratePreamble(4);  // Set zoom to 16X.
+  freqOffset = 0;                     // Calibration tone same as regular modulation tone.
   loadCalToneBuffers(750.0);
   calTypeFlag = 1;  // TX cal
   plotCalGraphics(calTypeFlag);
@@ -871,14 +879,13 @@ void CWCalibrate::DoXmitCalibrate(int mode, bool radioCal, bool shortCal, bool s
   }
   SetFreqCal(freqOffset);
   printCalType(mode, calTypeFlag, autoCal, false);
-    // Get current values into the amplitude and phase working variables:
-  if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-amplitude = CalData.IQCWAmpCorrectionFactorLSB[ConfigData.currentBand];
-phase = CalData.IQCWPhaseCorrectionFactorLSB[ConfigData.currentBand];
-  }
-  else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-amplitude = CalData.IQCWAmpCorrectionFactorUSB[ConfigData.currentBand];
-phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
+  // Get current values into the amplitude and phase working variables:
+  if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
+    amplitude = CalData.IQCWAmpCorrectionFactorLSB[ConfigData.currentBand];
+    phase = CalData.IQCWPhaseCorrectionFactorLSB[ConfigData.currentBand];
+  } else if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
+    amplitude = CalData.IQCWAmpCorrectionFactorUSB[ConfigData.currentBand];
+    phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
   }
   // Run this so Phase shows from begining.
   GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, (char *)"IQ Phase", false);
@@ -955,8 +962,8 @@ phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
         break;
       case MenuSelect::MENU_OPTION_SELECT:  // Save values and exit calibration.
         tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-  CWCalibrate::CalibrateEpilogue(radioCal, saveToEeprom);
-  return;
+        CWCalibrate::CalibrateEpilogue(radioCal, saveToEeprom);
+        return;
         break;
       default:
         break;
@@ -973,8 +980,8 @@ phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
           std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
           warmup = warmup + 1;
           if (not refineCal) {
-            phase = 0.0 + maxSweepPhase;  //  Need to use these values during warmup
-            amplitude = 1.0 + maxSweepAmp;      //  so adjdB and adjdB_avg are forced upwards.
+            phase = 0.0 + maxSweepPhase;    //  Need to use these values during warmup
+            amplitude = 1.0 + maxSweepAmp;  //  so adjdB and adjdB_avg are forced upwards.
           }
           state = State::warmup;
           if (warmup == 10) state = State::state0;
@@ -1009,13 +1016,13 @@ phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
           // Increment for next measurement.
           amplitude = amplitude + increment;  // Next one!
           // Go to Q channel when I channel sweep is finished.
-          if (abs(amplitude - 1.0) > maxSweepAmp) {  // Needs to be subtracted from 1.0.
-            IQCalType = 1;                                                                            // Get ready for phase.
-            result = std::min_element(sweepVector.begin(), sweepVector.end());                        // Value of the minimum.
-            adjdBMinIndex = std::distance(sweepVector.begin(), result);                               // Find the index.
-            iOptimal = sweepVectorValue[adjdBMinIndex];                                               // Set to the discovered minimum.
-            phase = -maxSweepPhase;            // The starting value for phase.
-            amplitude = iOptimal;                    // Reset for next sweep.
+          if (abs(amplitude - 1.0) > maxSweepAmp) {                             // Needs to be subtracted from 1.0.
+            IQCalType = 1;                                                      // Get ready for phase.
+            result = std::min_element(sweepVector.begin(), sweepVector.end());  // Value of the minimum.
+            adjdBMinIndex = std::distance(sweepVector.begin(), result);         // Find the index.
+            iOptimal = sweepVectorValue[adjdBMinIndex];                         // Set to the discovered minimum.
+            phase = -maxSweepPhase;                                             // The starting value for phase.
+            amplitude = iOptimal;                                               // Reset for next sweep.
             // Update display to optimal value.
             GetEncoderValueLive(-2.0, 2.0, amplitude, correctionIncrement, (char *)"IQ Gain", true);
             count = count + 1;
@@ -1046,8 +1053,8 @@ phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
           if (phase > maxSweepPhase) {
             result = std::min_element(sweepVector.begin(), sweepVector.end());
             adjdBMinIndex = std::distance(sweepVector.begin(), result);
-            qOptimal = sweepVectorValue[adjdBMinIndex];                               // Set to the discovered minimum.
-            phase = qOptimal;  // Set to the discovered minimum.
+            qOptimal = sweepVectorValue[adjdBMinIndex];  // Set to the discovered minimum.
+            phase = qOptimal;                            // Set to the discovered minimum.
             GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, (char *)"IQ Phase", false);
             // Save the sub_vector which will be used to refine the optimal result.
             for (int i = 0; i < 21; i = i + 1) {
@@ -1079,8 +1086,8 @@ phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
             result = std::min_element(sub_vectorAmpResult.begin(), sub_vectorAmpResult.end());
             adjdBMinIndex = std::distance(sub_vectorAmpResult.begin(), result);
             // iOptimal is simply the value of sub_vectorAmp[adjdBMinIndex].
-            iOptimal = sub_vectorAmp[adjdBMinIndex];                                // -.001;
-            amplitude = iOptimal;  // Set to optimal value before refining phase.
+            iOptimal = sub_vectorAmp[adjdBMinIndex];  // -.001;
+            amplitude = iOptimal;                     // Set to optimal value before refining phase.
             GetEncoderValueLive(-2.0, 2.0, amplitude, correctionIncrement, (char *)"IQ Gain", true);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorAmp[i] = (iOptimal - 10 * 0.001) + (0.001 * i);  // The next array to sweep.
@@ -1149,14 +1156,13 @@ phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
           count = 0;  // In case automatic calibration is run again.
           amplitude = iOptimal;
           phase = qOptimal;
-  if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-CalData.IQCWAmpCorrectionFactorLSB[ConfigData.currentBand] = amplitude;
-CalData.IQCWPhaseCorrectionFactorLSB[ConfigData.currentBand] = phase;
-  }
-  else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-CalData.IQCWAmpCorrectionFactorUSB[ConfigData.currentBand] = amplitude;
-CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand] = phase;
-  }
+          if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
+            CalData.IQCWAmpCorrectionFactorLSB[ConfigData.currentBand] = amplitude;
+            CalData.IQCWPhaseCorrectionFactorLSB[ConfigData.currentBand] = phase;
+          } else if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
+            CalData.IQCWAmpCorrectionFactorUSB[ConfigData.currentBand] = amplitude;
+            CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand] = phase;
+          }
           state = State::exit;
           viewTime = fiveSeconds;  // Start result view timer.
           break;
@@ -1184,19 +1190,18 @@ CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand] = phase;
     //  Read encoder and update values within the while loop.
     if (IQCalType == 0) {
       amplitude = GetEncoderValueLive(-2.0, 2.0, amplitude, correctionIncrement, (char *)"IQ Gain", true);
-  if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER)
-CalData.IQCWAmpCorrectionFactorLSB[ConfigData.currentBand] = amplitude;
-  else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER)
-CalData.IQCWAmpCorrectionFactorUSB[ConfigData.currentBand] = amplitude;
+      if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER)
+        CalData.IQCWAmpCorrectionFactorLSB[ConfigData.currentBand] = amplitude;
+      else if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER)
+        CalData.IQCWAmpCorrectionFactorUSB[ConfigData.currentBand] = amplitude;
     } else {
       phase = GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, (char *)"IQ Phase", false);
-  if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER)
-CalData.IQCWPhaseCorrectionFactorLSB[ConfigData.currentBand] = phase;
-  else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER)
-CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand] = phase;
+      if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER)
+        CalData.IQCWPhaseCorrectionFactorLSB[ConfigData.currentBand] = phase;
+      else if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER)
+        CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand] = phase;
     }
-  }                            // end while
-
+  }  // end while
 }  // End Transmit calibration
 
 
@@ -1231,8 +1236,8 @@ void CWCalibrate::DoXmitCarrierCalibrate(int mode, bool radioCal, bool shortCal,
   bool refineCal = false;
   bool averageFlag = false;
   std::vector<float>::iterator result;
-    CWCalibrate::CalibratePreamble(4);  // Set zoom to 16X.
-    freqOffset = 0;                     // Calibration tone same as regular modulation tone.
+  CWCalibrate::CalibratePreamble(4);  // Set zoom to 16X.
+  freqOffset = 0;                     // Calibration tone same as regular modulation tone.
   loadCalToneBuffers(750.0);
   calTypeFlag = 2;  // Carrier cal
   plotCalGraphics(calTypeFlag);
@@ -1246,13 +1251,12 @@ void CWCalibrate::DoXmitCarrierCalibrate(int mode, bool radioCal, bool shortCal,
   printCalType(mode, calTypeFlag, autoCal, false);
   // Get current values into the amplitude and phase working variables.
   // Here this is only used to get the correct sideband phasing during carrier calibration.
-  if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-amplitude = CalData.IQCWAmpCorrectionFactorLSB[ConfigData.currentBand];
-phase = CalData.IQCWPhaseCorrectionFactorLSB[ConfigData.currentBand];
-  }
-  else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-amplitude = CalData.IQCWAmpCorrectionFactorUSB[ConfigData.currentBand];
-phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
+  if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
+    amplitude = CalData.IQCWAmpCorrectionFactorLSB[ConfigData.currentBand];
+    phase = CalData.IQCWPhaseCorrectionFactorLSB[ConfigData.currentBand];
+  } else if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
+    amplitude = CalData.IQCWAmpCorrectionFactorUSB[ConfigData.currentBand];
+    phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
   }
   // Run this so Phase shows from begining.
   GetEncoderValueLiveQ15t(-1000, 1000, CalData.qDCoffsetCW[ConfigData.currentBand], correctionIncrement, (char *)"Q Offset", false);
@@ -1301,7 +1305,6 @@ phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
         count = 0;
         warmup = 0;
         index = 0;
-        //stopSweep = false;
         IQCalType = 0;
         std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0);
         std::fill(sweepVector.begin(), sweepVector.end(), 0);
@@ -1330,8 +1333,8 @@ phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
         break;
       case MenuSelect::MENU_OPTION_SELECT:  // Save values and exit calibration.
         tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-  CWCalibrate::CalibrateEpilogue(radioCal, saveToEeprom);
-  return;
+        CWCalibrate::CalibrateEpilogue(radioCal, saveToEeprom);
+        return;
 
         break;
       default:
@@ -1344,7 +1347,6 @@ phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
         case State::warmup:
           autoCal = true;
           printCalType(mode, calTypeFlag, autoCal, false);
-          //  stopSweep = false;
           std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
           std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
           warmup = warmup + 1;
@@ -1387,12 +1389,12 @@ phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
           CalData.iDCoffsetCW[ConfigData.currentBand] = CalData.iDCoffsetCW[ConfigData.currentBand] + increment;  // Next one!
           // Go to Q channel when I channel sweep is finished.
           if (abs(CalData.iDCoffsetCW[ConfigData.currentBand] - 1.0) > maxSweepAmp) {  // Needs to be subtracted from 1.0.
-            IQCalType = 1;                                                                // Get ready for phase.
-            result = std::min_element(sweepVector.begin(), sweepVector.end());            // Value of the minimum.
-            adjdBMinIndex = std::distance(sweepVector.begin(), result);                   // Find the index.
-            iOptimal = sweepVectorValue[adjdBMinIndex];                                   // Set to the discovered minimum.
-            CalData.qDCoffsetCW[ConfigData.currentBand] = -maxSweepPhase;  // The starting value for phase.
-            CalData.iDCoffsetCW[ConfigData.currentBand] = iOptimal;        // Reset for next sweep.
+            IQCalType = 1;                                                             // Get ready for phase.
+            result = std::min_element(sweepVector.begin(), sweepVector.end());         // Value of the minimum.
+            adjdBMinIndex = std::distance(sweepVector.begin(), result);                // Find the index.
+            iOptimal = sweepVectorValue[adjdBMinIndex];                                // Set to the discovered minimum.
+            CalData.qDCoffsetCW[ConfigData.currentBand] = -maxSweepPhase;              // The starting value for phase.
+            CalData.iDCoffsetCW[ConfigData.currentBand] = iOptimal;                    // Reset for next sweep.
             // Update display to optimal value.
             GetEncoderValueLiveQ15t(-1000, 1000, CalData.iDCoffsetCW[ConfigData.currentBand], correctionIncrement, (char *)"I Offset", true);
             count = count + 1;
@@ -1400,7 +1402,6 @@ phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorIoffset[i] = (iOptimal - 10 * 5) + (5 * i);
             }
-            //          stopSweep = false;
             IQCalType = 1;  // Prepare for phase.
             index = 0;
             averageFlag = false;
@@ -1425,7 +1426,7 @@ phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
           if (CalData.qDCoffsetCW[ConfigData.currentBand] > maxSweepPhase) {
             result = std::min_element(sweepVector.begin(), sweepVector.end());
             adjdBMinIndex = std::distance(sweepVector.begin(), result);
-            qOptimal = sweepVectorValue[adjdBMinIndex];                 // Set to the discovered minimum.
+            qOptimal = sweepVectorValue[adjdBMinIndex];              // Set to the discovered minimum.
             CalData.qDCoffsetCW[ConfigData.currentBand] = qOptimal;  // Set to the discovered minimum.
             GetEncoderValueLiveQ15t(-1000, 1000, CalData.qDCoffsetCW[ConfigData.currentBand], correctionIncrement, (char *)"Q Offset", false);
             for (int i = 0; i < 21; i = i + 1) {
@@ -1457,7 +1458,7 @@ phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
             result = std::min_element(sub_vectorAmpResult.begin(), sub_vectorAmpResult.end());
             adjdBMinIndex = std::distance(sub_vectorAmpResult.begin(), result);
             // iOptimal is simply the value of sub_vectorAmp[adjdBMinIndex].
-            iOptimal = sub_vectorIoffset[adjdBMinIndex];                // -.001;
+            iOptimal = sub_vectorIoffset[adjdBMinIndex];             // -.001;
             CalData.iDCoffsetCW[ConfigData.currentBand] = iOptimal;  // Set to optimal value before refining phase.
             GetEncoderValueLiveQ15t(-1000, 1000, CalData.iDCoffsetCW[ConfigData.currentBand], correctionIncrement, (char *)"I Offset", true);
             for (int i = 0; i < 21; i = i + 1) {
@@ -1556,8 +1557,7 @@ phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
     } else {
       CalData.qDCoffsetCW[ConfigData.currentBand] = GetEncoderValueLiveQ15t(-1000, 1000, CalData.qDCoffsetCW[ConfigData.currentBand], correctionIncrement, (char *)"Q Offset", false);
     }
-  }                            // end while
-
+  }  // end while
 }  // End carrier calibration
 #endif
 
@@ -1573,119 +1573,119 @@ void CWCalibrate::RadioCal(bool refineCal) {
     return;
   }
 
-//  button.BandSet(BAND_80M);
+  //  80M
   ConfigData.currentBand = ConfigData.currentBandA = BAND_80M;
   SetBandRelay();
   TxRxFreq = CalData.calFrequencies[0][1];
   ConfigData.centerFreq = TxRxFreq;
   ShowFrequency();
   SetFreq();
-  bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER; // Do LSB first.
+  bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER;  // Do LSB first.
   CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
   CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
-  bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER; // For FT8.
+  bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER;  // For FT8.
   CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
   CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
 #ifdef QSE2
   CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal, false);
 #endif
 
-//  button.BandSet(BAND_40M);
+  //  40M
   ConfigData.currentBand = ConfigData.currentBandA = BAND_40M;
   SetBandRelay();
   TxRxFreq = CalData.calFrequencies[1][1];
   ConfigData.centerFreq = TxRxFreq;
   ShowFrequency();
   SetFreq();
-  bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER; // Do LSB first.
+  bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER;  // Do LSB first.
   CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
   CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
-  bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER; // For FT8.
+  bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER;  // For FT8.
   CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
   CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
 #ifdef QSE2
   CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal, false);
 #endif
 
-//  button.BandSet(BAND_20M);
+  //  20M
   ConfigData.currentBand = ConfigData.currentBandA = BAND_20M;
-    SetBandRelay();
+  SetBandRelay();
   TxRxFreq = CalData.calFrequencies[2][1];
   ConfigData.centerFreq = TxRxFreq;
   ShowFrequency();
   SetFreq();
-  bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER; // Do LSB first.
+  bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER;  // Do LSB first.
   CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
   CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
-  bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER; // For FT8.
+  bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER;  // For FT8.
   CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
   CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
 #ifdef QSE2
   CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal, false);
 #endif
 
-//  button.BandSet(BAND_17M);
+  //  17M
   ConfigData.currentBand = ConfigData.currentBandA = BAND_17M;
   SetBandRelay();
   TxRxFreq = CalData.calFrequencies[3][1];
   ConfigData.centerFreq = TxRxFreq;
   ShowFrequency();
   SetFreq();
-  bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER; // Do LSB first.
+  bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER;  // Do LSB first.
   CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
   CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
-  bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER; // For FT8.
+  bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER;  // For FT8.
   CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
   CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
 #ifdef QSE2
   CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal, false);
 #endif
 
-//  button.BandSet(BAND_15M);
+  //  15M
   ConfigData.currentBand = ConfigData.currentBandA = BAND_15M;
-    SetBandRelay();
+  SetBandRelay();
   TxRxFreq = CalData.calFrequencies[4][1];
   ConfigData.centerFreq = TxRxFreq;
   ShowFrequency();
   SetFreq();
-  bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER; // Do LSB first.
+  bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER;  // Do LSB first.
   CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
   CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
-  bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER; // For FT8.
+  bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER;  // For FT8.
   CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
   CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
 #ifdef QSE2
   CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal, false);
 #endif
 
-//  button.BandSet(BAND_12M);
+  //  12M
   ConfigData.currentBand = ConfigData.currentBandA = BAND_12M;
-    SetBandRelay();
+  SetBandRelay();
   TxRxFreq = CalData.calFrequencies[5][1];
   ConfigData.centerFreq = TxRxFreq;
   ShowFrequency();
   SetFreq();
-  bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER; // Do LSB first.
+  bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER;  // Do LSB first.
   CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
   CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
-  bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER; // For FT8.
+  bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER;  // For FT8.
   CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
   CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
 #ifdef QSE2
   CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal, false);
 #endif
 
-//  button.BandSet(BAND_10M);
+  //  10M
   ConfigData.currentBand = ConfigData.currentBandA = BAND_10M;
-    SetBandRelay();
+  SetBandRelay();
   TxRxFreq = CalData.calFrequencies[6][1];
   ConfigData.centerFreq = TxRxFreq;
   ShowFrequency();
   SetFreq();
-  bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER; // Do LSB first.
+  bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER;  // Do LSB first.
   CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
   CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
-  bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER; // For FT8.
+  bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER;  // For FT8.
   CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
   CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
 #ifdef QSE2
@@ -1724,30 +1724,16 @@ void CWCalibrate::ProcessIQData2(int mode) {
   arm_scale_f32(cosBuffer, 0.20, float_buffer_L_EX, 256);  // AFP 2-11-23 Use pre-calculated sin & cos instead of Hilbert
   arm_scale_f32(sinBuffer, 0.20, float_buffer_R_EX, 256);  // AFP 2-11-23 Sidetone = 3000
 
-//if(mode == 0) {
+  //if(mode == 0) {
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-    arm_scale_f32(float_buffer_L_EX, -amplitude, float_buffer_L_EX, 256);       //Adjust level of L buffer // AFP 2-11-23
-    IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, phase, 256);  // Adjust phase
+    arm_scale_f32(float_buffer_L_EX, -amplitude, float_buffer_L_EX, 256);  //Adjust level of L buffer // AFP 2-11-23
+    IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, phase, 256);   // Adjust phase
   } else {
     if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
       arm_scale_f32(float_buffer_L_EX, amplitude, float_buffer_L_EX, 256);  // AFP 2-11-23
       IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, phase, 256);
     }
   }
-//}
-/*
-if(mode == 1) {
-  if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-    arm_scale_f32(float_buffer_L_EX, -CalData.IQSSBAmpCorrectionFactor[ConfigData.currentBand], float_buffer_L_EX, 256);       //Adjust level of L buffer // AFP 2-11-23
-    IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, CalData.IQSSBPhaseCorrectionFactor[ConfigData.currentBand], 256);  // Adjust phase
-  } else {
-    if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-      arm_scale_f32(float_buffer_L_EX, CalData.IQSSBAmpCorrectionFactor[ConfigData.currentBand], float_buffer_L_EX, 256);  // AFP 2-11-23
-      IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, CalData.IQSSBPhaseCorrectionFactor[ConfigData.currentBand], 256);
-    }
-  }
-}
-*/
 
   //24KHz effective sample rate here
   arm_fir_interpolate_f32(&FIR_int1_EX_I, float_buffer_L_EX, float_buffer_LTemp, 256);
@@ -1771,8 +1757,8 @@ if(mode == 1) {
   // This code block was introduced after TeensyDuino 1.58 appeared.  It doesn't use a for loop, but processes the entire 2048 buffer in one pass.
   // Revised I and Q calibration signal generation using large buffers.  Greg KF5N June 4 2023
   if (static_cast<uint32_t>(ADC_RX_I.available()) > 16 && static_cast<uint32_t>(ADC_RX_Q.available()) > 16) {  // Audio Record Queues!!!
-    q15_t q15_buffer_LTemp[2048];                                                                          //KF5N
-    q15_t q15_buffer_RTemp[2048];                                                                          //KF5N
+    q15_t q15_buffer_LTemp[2048];                                                                              //KF5N
+    q15_t q15_buffer_RTemp[2048];                                                                              //KF5N
     Q_out_L_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
     Q_out_R_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
     arm_float_to_q15(float_buffer_L_EX, q15_buffer_LTemp, 2048);
@@ -1815,30 +1801,29 @@ if(mode == 1) {
     arm_scale_f32(float_buffer_R, recBandFactor[ConfigData.currentBand], float_buffer_R, BUFFER_SIZE * N_BLOCKS);  //AFP 2-11-23
 
     // Manual IQ amplitude correction
-    if(mode == 0) {
-    if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-      arm_scale_f32(float_buffer_L, -CalData.IQCWRXAmpCorrectionFactorLSB[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
-      IQPhaseCorrection(float_buffer_L, float_buffer_R, CalData.IQCWRXPhaseCorrectionFactorLSB[ConfigData.currentBand], BUFFER_SIZE * N_BLOCKS);
-    } else {
-      if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-        arm_scale_f32(float_buffer_L, -CalData.IQCWRXAmpCorrectionFactorUSB[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22 KF5N changed sign
-        IQPhaseCorrection(float_buffer_L, float_buffer_R, CalData.IQCWRXPhaseCorrectionFactorUSB[ConfigData.currentBand], BUFFER_SIZE * N_BLOCKS);
+    if (mode == 0) {
+      if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
+        arm_scale_f32(float_buffer_L, -CalData.IQCWRXAmpCorrectionFactorLSB[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
+        IQPhaseCorrection(float_buffer_L, float_buffer_R, CalData.IQCWRXPhaseCorrectionFactorLSB[ConfigData.currentBand], BUFFER_SIZE * N_BLOCKS);
+      } else {
+        if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
+          arm_scale_f32(float_buffer_L, -CalData.IQCWRXAmpCorrectionFactorUSB[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22 KF5N changed sign
+          IQPhaseCorrection(float_buffer_L, float_buffer_R, CalData.IQCWRXPhaseCorrectionFactorUSB[ConfigData.currentBand], BUFFER_SIZE * N_BLOCKS);
+        }
       }
     }
-    }
 
-    if(mode == 1) {
-    if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-      arm_scale_f32(float_buffer_L, -CalData.IQSSBRXAmpCorrectionFactorLSB[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
-      IQPhaseCorrection(float_buffer_L, float_buffer_R, CalData.IQSSBRXPhaseCorrectionFactorLSB[ConfigData.currentBand], BUFFER_SIZE * N_BLOCKS);
-    } else {
-      if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-        arm_scale_f32(float_buffer_L, -CalData.IQSSBRXAmpCorrectionFactorUSB[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22 KF5N changed sign
-        IQPhaseCorrection(float_buffer_L, float_buffer_R, CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand], BUFFER_SIZE * N_BLOCKS);
+    if (mode == 1) {
+      if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
+        arm_scale_f32(float_buffer_L, -CalData.IQSSBRXAmpCorrectionFactorLSB[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
+        IQPhaseCorrection(float_buffer_L, float_buffer_R, CalData.IQSSBRXPhaseCorrectionFactorLSB[ConfigData.currentBand], BUFFER_SIZE * N_BLOCKS);
+      } else {
+        if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
+          arm_scale_f32(float_buffer_L, -CalData.IQSSBRXAmpCorrectionFactorUSB[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22 KF5N changed sign
+          IQPhaseCorrection(float_buffer_L, float_buffer_R, CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand], BUFFER_SIZE * N_BLOCKS);
+        }
       }
     }
-    }    
-
 
     FreqShift1();  // Why done here? KF5N
 
@@ -1944,7 +1929,6 @@ void CWCalibrate::ShowSpectrum2(int mode)  //AFP 2-10-23
     float, returns the adjusted value in dB
 *****/
 float CWCalibrate::PlotCalSpectrum(int mode, int x1, int cal_bins[3], int capture_bins) {
-  //  float adjdB = 0.0;
   int16_t adjAmplitude = 0;  // Was float; cast to float in dB calculation.  KF5N
   int16_t refAmplitude = 0;  // Was float; cast to float in dB calculation.  KF5N
   float alpha = 0.01;
@@ -1955,7 +1939,6 @@ float CWCalibrate::PlotCalSpectrum(int mode, int x1, int cal_bins[3], int captur
   // The FFT should be performed only at the beginning of the sweep, and buffers must be full.
   if (x1 == (cal_bins[0] - capture_bins)) {  // Set flag at revised beginning.  KF5N
     updateDisplayFlag = true;                // This flag is used in ZoomFFTExe().
-////    ShowBandwidth();                         // Without this call, the calibration value in dB will not be updated.  KF5N
   } else updateDisplayFlag = false;          //  Do not save the the display data for the remainder of the sweep.
 
   CWCalibrate::ProcessIQData2(mode);  // Call the Audio process from within the display routine to eliminate conflicts with drawing the spectrum.
@@ -2017,38 +2000,13 @@ float CWCalibrate::PlotCalSpectrum(int mode, int x1, int cal_bins[3], int captur
 
   pixelCurrent[x1] = pixelnew[x1];  //  This is the actual "old" spectrum! Copied to pixelold by the FFT function.
 
-  adjdB = ((float)adjAmplitude - (float)refAmplitude) / (1.95 * 2.0);                            // Cast to float and calculate the dB level.  Needs further refinement for accuracy.  KF5N
+  adjdB = ((float)adjAmplitude - (float)refAmplitude) / (1.95 * 2.0);                                            // Cast to float and calculate the dB level.  Needs further refinement for accuracy.  KF5N
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER && not(calTypeFlag == 0)) adjdB = -adjdB;  // Flip sign for USB only for TX cal.
-  adjdB_avg = adjdB * alpha + adjdBold * (1.0 - alpha);                                          // Exponential average.
-                                                                                                 //  adjdB_avg = adjdB;     // TEMPORARY EXPERIMENT
+  adjdB_avg = adjdB * alpha + adjdBold * (1.0 - alpha);                                                          // Exponential average.
+                                                                                                                 //  adjdB_avg = adjdB;     // TEMPORARY EXPERIMENT
   adjdBold = adjdB_avg;
   adjdB_sample = adjdB;
-  //    if (bands.bands[ConfigData.currentBand].mode == DEMOD_USB && not(calTypeFlag == 0)) adjdB_avg = -adjdB_avg;  // Flip sign for USB only for TX cal.
 
   tft.writeTo(L1);
   return adjdB_avg;
 }
-
-
-/*****
-  Purpose: Function to select the transmit calibration tone frequency.  Possible values:
-           0 = 750 Hz
-           1 = 3 kHz
-
-  Parameter list:
-    void
-
-  Return value:
-    void
-*****
-void CWCalibrate::SelectCalFreq() {
-  const char *calFreqs[2]{ "750 Hz", "3.0 kHz" };
-  ConfigData.calFreq = SubmenuSelect(calFreqs, 2, ConfigData.calFreq);  // Returns the index of the array.
-  //  RedrawDisplayScreen();  Kills the bandwidth graphics in the audio display window, remove. KF5N July 30, 2023
-  // Clear the current CW filter graphics and then restore the bandwidth indicator bar.  KF5N July 30, 2023
-  eeprom.EEPROMWrite();  // Save selection to EEPROM.  Greg KF5N, June 5, 2024
-  tft.writeTo(L2);
-  tft.clearMemory();
-////  RedrawDisplayScreen();
-}
-*/

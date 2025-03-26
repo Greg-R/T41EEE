@@ -10,11 +10,9 @@ void ProcessIQData();
 
 char atom, currentAtom;
 int8_t first_block = 1;
-//uint8_t NB_on = 0;
 uint8_t wait_flag;
 float32_t audiotmp = 0.0f;
 float32_t audioSpectBuffer[1024]{ 0 };  // This can't be DMAMEM.  It will break the S-Meter.  KF5N October 10, 2023
-//float32_t* audioSpectBuffer = new float32_t[1024]{0};  // Assign to the heap.  Possibly breaking the S-meter?
 float32_t sample_meanL = 0.0;
 float32_t sample_meanR = 0.0;
 float32_t wold = 0.0f;

@@ -97,11 +97,6 @@ void ZoomFFTExe(uint32_t blockSize) {
   static float32_t FFT_ring_buffer_x[fftWidth * 2];
   static float32_t FFT_ring_buffer_y[fftWidth * 2];
 
-//  static int32_t flag_2nd_decimation = 0;
-  //static uint32_t high_Zoom_buffer_ptr = 0;
-//  uint8_t high_Zoom = 0;
-  //uint32_t high_Zoom_2nd_dec_rounds = (1 << (ConfigData.spectrum_zoom - 11));
-  //Serial.print("2nd dec rounds"); Serial.println(high_Zoom_2nd_dec_rounds);
   int sample_no = 256;
   // sample_no is 256, in high magnify modes it is smaller!
   // but it must never be > 256

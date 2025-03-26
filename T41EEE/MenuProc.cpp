@@ -17,8 +17,6 @@ int micChoice = 0;
 int splitOn = 0;
 int IQChoice = 0;
 
-#include "SDT.h"
-
 
 /*****
   Purpose: void ShowMenu()

@@ -88,7 +88,6 @@ void JackClusteredArrayMax(int32_t *array, int32_t elements, int32_t *maxCount, 
     temp = 0;
     for (j = i - spread; j <= i + spread; j++) {
       temp += array[j];
-      ;  // Include adjacent elements
     }
 
     if (temp >= clusteredMax) {
@@ -127,7 +126,6 @@ FLASHMEM void SelectCWFilter() {
   tft.clearMemory();
   BandInformation();
   DrawBandWidthIndicatorBar();
-  //  UpdateDecoderField();
   eeprom.ConfigDataWrite();
 }
 
@@ -347,8 +345,6 @@ void SetSideToneVolume(bool speaker) {
   keyDown = false;
   tft.print(sidetoneDisplay);  // Display in range of 0 to 100.
 
-  //  digitalWrite(MUTE, UNMUTEAUDIO);  // unmutes audio
-
   while (true) {
     if (digitalRead(ConfigData.paddleDit) == LOW || digitalRead(ConfigData.paddleDah) == LOW) {
       if (keyDown) {
@@ -365,7 +361,6 @@ void SetSideToneVolume(bool speaker) {
     }
 
     if (filterEncoderMove != 0) {
-      //      ConfigData.sidetoneVolume = ConfigData.sidetoneVolume + (float)filterEncoderMove * 0.001;  // ConfigData.sidetoneVolume range is 0.0 to 1.0 in 0.001 steps.  KF5N August 29, 2023
       sidetoneDisplay = sidetoneDisplay + filterEncoderMove;  // * 0.001;  // ConfigData.sidetoneVolume range is 0.0 to 1.0 in 0.001 steps.  KF5N August 29, 2023
       if (sidetoneDisplay < 0)
         sidetoneDisplay = 0;
@@ -381,8 +376,6 @@ void SetSideToneVolume(bool speaker) {
     }
     speakerVolume.setGain(volumeLog[ConfigData.sidetoneSpeaker]);
     sgtl5000_1.volume(static_cast<float32_t>(ConfigData.sidetoneHeadphone) / 100.0);  // This control has a range of 0.0 to 1.0.
-                                                                                      //    headphoneVolume.setGain(volumeLog[ConfigData.sidetoneVolume]);
-                                                                                      //    val = ReadSelectedPushButton();                           // Read pin that controls all switches
     menu = readButton();
     if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
                                                    // ConfigData.ConfigData.sidetoneVolume = ConfigData.sidetoneVolume;
@@ -503,14 +496,11 @@ void DoCWDecoding(int audioValue) {
           if (gapLength > LOWEST_ATOM_TIME && gapLength < (uint32_t)(thresholdGeometricMean * 3)) {  // range  LOWEST_ATOM_TIME = 20
             DoGapHistogram(gapLength);                                                               // Map the gap in the signal
           }
-          //        Serial.printf("gapLength = %d gapChar = %d gapAtom = %d\n", gapLength, gapChar, gapAtom);
           decodeStates = state1;  // Go to "signalStart" state.
           break;                  // Go to state1;
         }
-        // audioValue = 0, no signal:
         noSignalTimeStamp = millis();
         interElementGap = noSignalTimeStamp - signalEnd;
-        //      if ((interElementGap > ditLength * 1.5) && charProcessFlag) {  // use thresholdGeometricMean??? was ditLength. End of character!  65 * 2
         if ((interElementGap > (gapAtom * 2)) && charProcessFlag) {  // use thresholdGeometricMean??? was ditLength. End of character!  65 * 2
           decodeStates = state3;                                     // Character ended, print it!
           break;
@@ -577,7 +567,6 @@ void DoCWDecoding(int audioValue) {
         //        tft.print(" WPM)");
         tft.setTextColor(RA8875_WHITE);
         tft.setFontScale((enum RA8875tsize)3);
-        //Serial.printf("gapLength = %d thresholdGeometricMean = %f interElementGap = %d\n", gapLength, thresholdGeometricMean, interElementGap);
         blankFlag = true;
         decodeStates = state0;  // Start process for next incoming character.
         break;

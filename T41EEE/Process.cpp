@@ -65,16 +65,11 @@ void Process::ProcessIQData() {
 
     //  Set RFGain for all bands.
     if (ConfigData.autoGain) rfGain = ConfigData.rfGainCurrent;                          // Auto-gain
-    else rfGain = ConfigData.rfGain[ConfigData.currentBand] - 30;                             // Manual gain adjust.
-//        else rfGain = ConfigData.rfGain[ConfigData.currentBand];                             //// EXPERIMENT
-//    rfGainValue = pow(10, static_cast<float32_t>(rfGain) / 20) * 1.0 * DSPGAINSCALE;   // KF5N November 9 2024
-    rfGainValue = pow(10, static_cast<float32_t>(rfGain) / 20.0);  // DSPGAINSCALE removed in T41EEE.9.  Greg KF5N February 24, 2024
+    else rfGain = ConfigData.rfGain[ConfigData.currentBand] - 30;                        // Manual gain adjust.
+    rfGainValue = pow(10, static_cast<float32_t>(rfGain) / 20.0);                        // DSPGAINSCALE removed in T41EEE.9.  Greg KF5N February 24, 2024
     arm_scale_f32(float_buffer_L, rfGainValue, float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 09-27-22
     arm_scale_f32(float_buffer_R, rfGainValue, float_buffer_R, BUFFER_SIZE * N_BLOCKS);  //AFP 09-27-22
-//    arm_clip_f32(float_buffer_L, float_buffer_L, -1.0, 1.0, 2048);
-//    arm_clip_f32(float_buffer_R, float_buffer_R, -1.0, 1.0, 2048);
-    //    arm_max_f32(float_buffer_L, 2048, &dataMax, &dataMaxIndex);
-    //    Serial.printf("dataMax = %f\n", dataMax);
+
     /**********************************************************************************  AFP 12-31-20
         Remove DC offset to reduce central spike.  First read the Mean value of
         left and right channels.  Then fill L and R correction arrays with those Means
@@ -82,7 +77,7 @@ void Process::ProcessIQData() {
         to manipulate the arrays.  Arrays are all BUFFER_SIZE * N_BLOCKS long
     **********************************************************************************/
 
-    /*arm_mean_f32(float_buffer_L, BUFFER_SIZE * N_BLOCKS, &sample_meanL);
+/*    arm_mean_f32(float_buffer_L, BUFFER_SIZE * N_BLOCKS, &sample_meanL);
     arm_mean_f32(float_buffer_R, BUFFER_SIZE * N_BLOCKS, &sample_meanR);
 
     for (uint32_t j = 0; j < BUFFER_SIZE * N_BLOCKS  ; j++) {
@@ -92,17 +87,9 @@ void Process::ProcessIQData() {
     arm_add_f32(float_buffer_L , L_BufferOffset, float_buffer_L2 , BUFFER_SIZE * N_BLOCKS ) ;
     arm_add_f32(float_buffer_R , R_BufferOffset, float_buffer_R2 , BUFFER_SIZE * N_BLOCKS ) ;
 
-    arm_biquad_cascade_df2T_f32(&s1_Receive, float_buffer_L, float_buffer_L, 2048); //AFP 09-23-22
-    arm_biquad_cascade_df2T_f32(&s1_Receive, float_buffer_R, float_buffer_R, 2048); //AFP 09-23-22*/
     arm_biquad_cascade_df2T_f32(&s1_Receive2, float_buffer_L, float_buffer_L, 2048);  //AFP 11-03-22
     arm_biquad_cascade_df2T_f32(&s1_Receive2, float_buffer_R, float_buffer_R, 2048);  //AFP 11-03-22
-
-    /**********************************************************************************  AFP 12-31-20
-        Scale the data buffers by the RFgain value defined in bands.bands[ConfigData.currentBand] structure
-    **********************************************************************************/
-    // This gain scaling is not necessary.  It is assumed that Auto-gain and AGC will appropriately scale the incoming signal data.
-    //    arm_scale_f32 (float_buffer_L, bands.bands[ConfigData.currentBand].RFgain, float_buffer_L, BUFFER_SIZE * N_BLOCKS); //AFP 09-23-22
-    //    arm_scale_f32 (float_buffer_R, bands.bands[ConfigData.currentBand].RFgain, float_buffer_R, BUFFER_SIZE * N_BLOCKS); //AFP 09-23-22
+    */
 
     /**********************************************************************************  AFP 12-31-20
       Clear Buffers
@@ -113,7 +100,7 @@ void Process::ProcessIQData() {
       **********************************************************************************/
     if (ADC_RX_I.available() > 50) {
       ADC_RX_I.clear();
-            ADC_RX_Q.clear();
+      ADC_RX_Q.clear();
       Serial.printf("interrupt\n");
     }
 
@@ -124,27 +111,26 @@ void Process::ProcessIQData() {
     ***********************************************************************************************/
 
     // Manual IQ amplitude correction
-    if(radioState == RadioState::CW_RECEIVE_STATE or radioState == RadioState::AM_RECEIVE_STATE or radioState == RadioState::SAM_RECEIVE_STATE) {
-    if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
-      arm_scale_f32(float_buffer_L, -CalData.IQCWRXAmpCorrectionFactorLSB[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
-      IQPhaseCorrection(float_buffer_L, float_buffer_R, CalData.IQCWRXPhaseCorrectionFactorLSB[ConfigData.currentBand], BUFFER_SIZE * N_BLOCKS);
-    } else {
-      if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
-        arm_scale_f32(float_buffer_L, -CalData.IQCWRXAmpCorrectionFactorUSB[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
-        IQPhaseCorrection(float_buffer_L, float_buffer_R, CalData.IQCWRXPhaseCorrectionFactorUSB[ConfigData.currentBand], BUFFER_SIZE * N_BLOCKS);
+    if (radioState == RadioState::CW_RECEIVE_STATE or radioState == RadioState::AM_RECEIVE_STATE or radioState == RadioState::SAM_RECEIVE_STATE) {
+      if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
+        arm_scale_f32(float_buffer_L, -CalData.IQCWRXAmpCorrectionFactorLSB[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
+        IQPhaseCorrection(float_buffer_L, float_buffer_R, CalData.IQCWRXPhaseCorrectionFactorLSB[ConfigData.currentBand], BUFFER_SIZE * N_BLOCKS);
+      } else {
+        if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
+          arm_scale_f32(float_buffer_L, -CalData.IQCWRXAmpCorrectionFactorUSB[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
+          IQPhaseCorrection(float_buffer_L, float_buffer_R, CalData.IQCWRXPhaseCorrectionFactorUSB[ConfigData.currentBand], BUFFER_SIZE * N_BLOCKS);
+        }
       }
-    }
-    }
-    else if(radioState == RadioState::SSB_RECEIVE_STATE || radioState == RadioState::FT8_RECEIVE_STATE || radioState == RadioState::AM_RECEIVE_STATE) {
-    if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
-      arm_scale_f32(float_buffer_L, -CalData.IQSSBRXAmpCorrectionFactorLSB[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
-      IQPhaseCorrection(float_buffer_L, float_buffer_R, CalData.IQSSBRXPhaseCorrectionFactorLSB[ConfigData.currentBand], BUFFER_SIZE * N_BLOCKS);
-    } else {
-      if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
-        arm_scale_f32(float_buffer_L, -CalData.IQSSBRXAmpCorrectionFactorUSB[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
-        IQPhaseCorrection(float_buffer_L, float_buffer_R, CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand], BUFFER_SIZE * N_BLOCKS);
-      }      
-    }
+    } else if (radioState == RadioState::SSB_RECEIVE_STATE || radioState == RadioState::FT8_RECEIVE_STATE || radioState == RadioState::AM_RECEIVE_STATE) {
+      if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
+        arm_scale_f32(float_buffer_L, -CalData.IQSSBRXAmpCorrectionFactorLSB[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
+        IQPhaseCorrection(float_buffer_L, float_buffer_R, CalData.IQSSBRXPhaseCorrectionFactorLSB[ConfigData.currentBand], BUFFER_SIZE * N_BLOCKS);
+      } else {
+        if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
+          arm_scale_f32(float_buffer_L, -CalData.IQSSBRXAmpCorrectionFactorUSB[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
+          IQPhaseCorrection(float_buffer_L, float_buffer_R, CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand], BUFFER_SIZE * N_BLOCKS);
+        }
+      }
     }
 
     display_S_meter_or_spectrum_state++;
@@ -189,7 +175,7 @@ void Process::ProcessIQData() {
     if (calibrateFlag == true) {
       CalibrateOptions();
     }
-        if (morseDecodeAdjustFlag == true) {
+    if (morseDecodeAdjustFlag == true) {
       CWOptions();
     }
 
@@ -292,10 +278,8 @@ void Process::ProcessIQData() {
       }
       for (int k = 3; k < 256; k++) {
         if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {  //AFP 10-26-22
-          //audioYPixel[k] = 20+  map((int)displayScale[ConfigData.currentScale].dBScale * log10f((audioSpectBuffer[1024 - k] + audioSpectBuffer[1024 - k + 1] + audioSpectBuffer[1024 - k + 2]) / 3), 0, 100, 0, 120);
           audioYPixel[k] = 65 + map(15 * log10f((audioSpectBuffer[1024 - k] + audioSpectBuffer[1024 - k + 1] + audioSpectBuffer[1024 - k + 2]) / 3), 0, 100, 0, 120) + audioFFToffset;
         } else if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {  //AFP 10-26-22
-          //audioYPixel[k] = 20+   map((int)displayScale[ConfigData.currentScale].dBScale * log10f((audioSpectBuffer[k] + audioSpectBuffer[k + 1] + audioSpectBuffer[k + 2]) / 3), 0, 100, 0, 120);
           audioYPixel[k] = 65 + map(15 * log10f((audioSpectBuffer[k] + audioSpectBuffer[k + 1] + audioSpectBuffer[k + 2]) / 3), 0, 100, 0, 120) + audioFFToffset;
         }
         if (audioYPixel[k] < 0)
@@ -304,7 +288,6 @@ void Process::ProcessIQData() {
       arm_max_f32(audioSpectBuffer, 1024, &audioMaxSquared, &AudioMaxIndex);  // AFP 09-18-22 Max value of squared abin magnitude in audio
       audioMaxSquaredAve = .5 * audioMaxSquared + .5 * audioMaxSquaredAve;    //AFP 09-18-22Running averaged values
       DisplaydbM();
-//      DisplayAGC();
     }
 
     /**********************************************************************************
@@ -333,18 +316,10 @@ void Process::ProcessIQData() {
     arm_cfft_f32(iS, iFFT_buffer, 1, 1);
 
     // Adjust for level alteration because of filters.
-    /**********************************************************************************  AFP 12-31-20
-        AGC - automatic gain control
 
-        we´re back in time domain
-        AGC acts upon I & Q before demodulation on the decimated audio data in iFFT_buffer
-     **********************************************************************************/
-//    AGC();  //AGC function works with time domain I and Q data buffers created in the last step.
+    //  Need to scale iFFT_buffer[] here.
 
-//  Need to scale iFFT_buffer[] here?  To replace the scaling done by AGC()?
-
-    for (unsigned i = 0; i < FFT_length / 2; i++)
-    {
+    for (unsigned i = 0; i < FFT_length / 2; i++) {
       iFFT_buffer[FFT_length + 2 * i + 0] = RFGAINSCALE * iFFT_buffer[FFT_length + 2 * i + 0];
       iFFT_buffer[FFT_length + 2 * i + 1] = RFGAINSCALE * iFFT_buffer[FFT_length + 2 * i + 1];
     }
@@ -367,7 +342,6 @@ void Process::ProcessIQData() {
         break;
       case Sideband::UPPER:
         for (unsigned i = 0; i < FFT_length / 2; i++) {
-          // if (bands.bands[ConfigData.currentBand].mode == DEMOD_USB || bands.bands[ConfigData.currentBand].mode == DEMOD_LSB ) {  // for SSB copy real part in both outputs
           float_buffer_L[i] = iFFT_buffer[FFT_length + (i * 2)];
           float_buffer_R[i] = float_buffer_L[i];
           audiotmp = AlphaBetaMag(iFFT_buffer[FFT_length + (i * 2)], iFFT_buffer[FFT_length + (i * 2) + 1]);
@@ -388,14 +362,14 @@ void Process::ProcessIQData() {
       case Sideband::BOTH_SAM:  //AFP 11-03-22
         AMDecodeSAM();
         break;
-        default:
+      default:
         break;
     }
 
 
     //============================  Receive EQ  ========================  AFP 08-08-22
     if (ConfigData.receiveEQFlag) {
-            DoReceiveEQ();
+      DoReceiveEQ();
       arm_copy_f32(float_buffer_L, float_buffer_R, FFT_length / 2);
     }
     //============================ End Receive EQ
@@ -492,10 +466,9 @@ void Process::ProcessIQData() {
       Digital Volume Control
     **********************************************************************************/
 
-// Scale by 8 to compensate for interpolation.  Also compensate for audio filter bandwidth.
+    // Scale by 8 to compensate for interpolation.  Also compensate for audio filter bandwidth.
     arm_scale_f32(float_buffer_L, 8.0 * audioGainCompensate, float_buffer_L, BUFFER_SIZE * N_BLOCKS);
-                                                                                        //      arm_scale_f32(float_buffer_R, DF * volumeLog[ConfigData.audioVolume] * 4, float_buffer_R, BUFFER_SIZE * N_BLOCKS);
-                                                                                        //    }
+
     /**********************************************************************************  AFP 12-31-20
       CONVERT TO INTEGER AND PLAY AUDIO
     **********************************************************************************/
@@ -505,7 +478,6 @@ void Process::ProcessIQData() {
                                    //    Q_out_L.setBehaviour(AudioPlayQueue::NON_STALLING);
                                    //    Q_out_R.setBehaviour(AudioPlayQueue::NON_STALLING);
     arm_float_to_q15(float_buffer_L, q15_buffer_LTemp, 2048);
-    //    arm_float_to_q15 (float_buffer_R, q15_buffer_RTemp, 2048);  Unused audio channel deactivated.
     Q_out_L.play(q15_buffer_LTemp, 2048);
 
     elapsed_micros_sum = elapsed_micros_sum + usec;

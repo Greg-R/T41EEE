@@ -9,26 +9,26 @@ AudioInputI2SQuad i2s_quadIn;  // 4 inputs/outputs available only in Teensy audi
 AudioOutputI2SQuad i2s_quadOut;
 
 // Transmitter
-AudioControlSGTL5000 sgtl5000_1;  // Controller for the Teensy Audio Adapter.
-AudioConvert_I16toF32 int2Float1_tx;             // Converts Int16 to Float.  See class in AudioStream_F32.h
+AudioControlSGTL5000 sgtl5000_1;                                                  // Controller for the Teensy Audio Adapter.
+AudioConvert_I16toF32 int2Float1_tx;                                              // Converts Int16 to Float.  See class in AudioStream_F32.h
 AudioEffectGain_F32 micGain(audio_settings), compGainCompensate(audio_settings);  // Microphone gain control.
 AudioFilterEqualizer_F32 txEqualizer(audio_settings);
-AudioEffectCompressor2_F32 compressor1;       // Open Audio Compressor
+AudioEffectCompressor2_F32 compressor1;  // Open Audio Compressor
 radioCESSB_Z_transmit_F32 cessb1;
 AudioConvert_F32toI16 float2Int1_tx, float2Int2_tx;  // Converts Float to Int16.  See class in AudioStream_F32.h
 AudioSwitch4_OA_F32 switch1_tx, switch2_tx, switch3_tx, switch4_tx;
-AudioMixer4_F32 mixer1_tx, mixer2_tx, mixer3_tx;         // Used to switch in tone during calibration.
-AudioSynthWaveformSine_F32 toneSSBCal;  // Tone for SSB calibration.
-AudioRecordQueue Q_in_L_Ex;             // AudioRecordQueue for input Microphone channel.
-AudioRecordQueue Q_in_R_Ex;             // This 2nd channel is needed as we are bringing I and Q into the sketch instead of only microphone audio.
-AudioPlayQueue Q_out_L_Ex;              // AudioPlayQueue for driving the I channel (CW/SSB) to the QSE.
-AudioPlayQueue Q_out_R_Ex;              // AudioPlayQueue for driving the Q channel (CW/SSB) to the QSE.
+AudioMixer4_F32 mixer1_tx, mixer2_tx, mixer3_tx;  // Used to switch in tone during calibration.
+AudioSynthWaveformSine_F32 toneSSBCal;            // Tone for SSB calibration.
+AudioRecordQueue Q_in_L_Ex;                       // AudioRecordQueue for input Microphone channel.
+AudioRecordQueue Q_in_R_Ex;                       // This 2nd channel is needed as we are bringing I and Q into the sketch instead of only microphone audio.
+AudioPlayQueue Q_out_L_Ex;                        // AudioPlayQueue for driving the I channel (CW/SSB) to the QSE.
+AudioPlayQueue Q_out_R_Ex;                        // AudioPlayQueue for driving the Q channel (CW/SSB) to the QSE.
 
 //  Begin transmit signal chain.
 AudioConnection connect0(i2s_quadIn, 0, int2Float1_tx, 0);  // Microphone audio channel.  Must use int2Float because Open Audio does not have quad input.
 
 AudioConnection_F32 connect1(int2Float1_tx, 0, switch1_tx, 0);  // Used switches here because it appeared necessary to stop flow of data.
-AudioConnection_F32 connect2(toneSSBCal, 0, switch2_tx, 0);  // Tone used during SSB calibration.
+AudioConnection_F32 connect2(toneSSBCal, 0, switch2_tx, 0);     // Tone used during SSB calibration.
 
 // Need a mixer to switch in an audio tone during calibration.  Should be a nominal tone amplitude.
 AudioConnection_F32 connect3(switch1_tx, 0, mixer1_tx, 0);  // Connect microphone mixer1 output 0 via gain control.
@@ -84,7 +84,7 @@ AudioConvert_I16toF32 int2Float2;
 AudioConnection patchCord1(i2s_quadIn, 2, ADC_RX_I, 0);  // Receiver I and Q channel data stream.
 AudioConnection patchCord2(i2s_quadIn, 3, ADC_RX_Q, 0);  // This data stream goes to sketch code for processing.
 
-AudioConnection patchCord3(Q_out_L, 0, int2Float2, 0);      // 192ksps Audio data stream from sketch code.  Receiver audio or CW sidetone.
+AudioConnection patchCord3(Q_out_L, 0, int2Float2, 0);  // 192ksps Audio data stream from sketch code.  Receiver audio or CW sidetone.
 
 AudioConnection_F32 patchCord4(int2Float2, 0, switch4, 0);  // Used to bypass compressor2_1.
 
@@ -109,9 +109,9 @@ AudioConnection patchCord25(float2Int4, 0, i2s_quadOut, 0);  // Headphone
 AudioConnection patchCord26(float2Int4, 0, i2s_quadOut, 1);  // Headphone
 
 // Half-octave transmit band equalizer, 16 bands, but only the lower 14 are used.
-float32_t fBand1[] = {    50.0,  70.711,   100.0,   141.421,  200.0,  282.843,   400.0,   565.685, 800.0,   1131.371, 1600.0, 2262.742, 3200.0, 4525.483, 6400.0, 24000.0};
+float32_t fBand1[] = { 50.0, 70.711, 100.0, 141.421, 200.0, 282.843, 400.0, 565.685, 800.0, 1131.371, 1600.0, 2262.742, 3200.0, 4525.483, 6400.0, 24000.0 };
 // These are default values useful for SSB voice.  Bypass equalizer during FT8.
-float32_t dbBand1[] = {-100.0,  -100.0,    -100.0,   -100.0,  -100.0,  -100.0,   0.0,    0.0,    0.0,      0.0,      0.0,  -100.0,  -100.0, -100.0, -100.0, -100.0};
+float32_t dbBand1[] = { -100.0, -100.0, -100.0, -100.0, -100.0, -100.0, 0.0, 0.0, 0.0, 0.0, 0.0, -100.0, -100.0, -100.0, -100.0, -100.0 };
 float32_t equalizeCoeffs[249];
 
 // End dataflow code
@@ -211,7 +211,7 @@ void SetAudioOperatingState(RadioState operatingState) {
 
       speakerVolume.setGain(volumeLog[ConfigData.audioVolume]);    // Set volume because sidetone may have changed it.
       headphoneVolume.setGain(volumeLog[ConfigData.audioVolume]);  // Set volume because sidetone may have changed it.
-      sgtl5000_1.volume(0.8);  // Restore headphone volume after CW sidetone reduction.
+      sgtl5000_1.volume(0.8);                                      // Restore headphone volume after CW sidetone reduction.
 
       controlAudioOut(ConfigData.audioOut, false);  // Configure audio out; don't mute all.
 
@@ -220,7 +220,6 @@ void SetAudioOperatingState(RadioState operatingState) {
     case RadioState::FT8_TRANSMIT_STATE:
 
       SampleRate = SAMPLE_RATE_48K;
-//        SetI2SFreq(SR[SampleRate].rate);
       InitializeDataArrays();  // I2S sample rate set in this function.
       // QSD disabled and disconnected
       controlAudioOut(ConfigData.audioOut, true);  // Mute all receiver audio.
@@ -234,11 +233,6 @@ void SetAudioOperatingState(RadioState operatingState) {
       ADC_RX_Q.end();
       ADC_RX_Q.clear();
 
-      // Test tone enabled and connected
-      //      toneSSBCal.setSampleRate_Hz(48000);
-      //      toneSSBCal.amplitude(0.3);
-      //      toneSSBCal.frequency(750.0);
-      //      toneSSBCal.begin();
       mixer1_tx.gain(0, 1);      // microphone audio on.
       mixer1_tx.gain(1, 0);      // testTone off.
       switch1_tx.setChannel(0);  // Connect microphone path.
@@ -273,8 +267,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord26.disconnect();
 
       // Update equalizer.  Update first 14 only.  Last two are constant.
-      for(int i = 0; i < 14; i = i + 1) dbBand1[i] = static_cast<float32_t>(ConfigData.equalizerXmt[i]);
-      
+      for (int i = 0; i < 14; i = i + 1) dbBand1[i] = static_cast<float32_t>(ConfigData.equalizerXmt[i]);
+
       txEqualizer.equalizerNew(16, &fBand1[0], &dbBand1[0], 249, &equalizeCoeffs[0], 65.0f);
       updateMic();
       connect17.connect();  // Transmitter I channel
@@ -308,7 +302,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       switch1_tx.setChannel(1);  // Disconnect microphone path.
       switch2_tx.setChannel(0);  // Connect 1 kHz test tone path.
 
-        if (ConfigData.compressorFlag) {
+      if (ConfigData.compressorFlag) {
         switch4_tx.setChannel(0);
         mixer3_tx.gain(0, 1.0);
         mixer3_tx.gain(1, 0.0);
@@ -338,9 +332,9 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord25.disconnect();
       patchCord26.disconnect();
 
-            // Update equalizer.  Update first 14 only.  Last two are constant.
-      for(int i = 0; i < 14; i = i + 1) dbBand1[i] = ConfigData.equalizerXmt[i];
-      
+      // Update equalizer.  Update first 14 only.  Last two are constant.
+      for (int i = 0; i < 14; i = i + 1) dbBand1[i] = ConfigData.equalizerXmt[i];
+
       txEqualizer.equalizerNew(16, &fBand1[0], &dbBand1[0], 249, &equalizeCoeffs[0], 65.0f);
       updateMic();
       connect17.connect();  // Transmitter I channel
@@ -370,14 +364,14 @@ void SetAudioOperatingState(RadioState operatingState) {
       controlAudioOut(ConfigData.audioOut, false);
       sgtl5000_1.unmuteLineout();
 
-      sgtl5000_1.volume(static_cast<float32_t>(ConfigData.sidetoneHeadphone)/100.0);  // This is for scaling the sidetone in the headphone output.  This is
-                               // the only way to adjust sidetone volume in the headphone.
-      patchCord25.disconnect();  // Disconnect headphone, which is shared with I and Q transmit.
+      sgtl5000_1.volume(static_cast<float32_t>(ConfigData.sidetoneHeadphone) / 100.0);  // This is for scaling the sidetone in the headphone output.  This is
+                                                                                        // the only way to adjust sidetone volume in the headphone.
+      patchCord25.disconnect();                                                         // Disconnect headphone, which is shared with I and Q transmit.
       patchCord26.disconnect();
       connect19.connect();  // Connect I and Q transmitter output channels.
       connect20.connect();
 
-      speakerVolume.setGain(volumeLog[ConfigData.sidetoneSpeaker]);    // Adjust sidetone volume.  Headphone sidetone done in hardware.
+      speakerVolume.setGain(volumeLog[ConfigData.sidetoneSpeaker]);  // Adjust sidetone volume.  Headphone sidetone done in hardware.
 
       break;
 
@@ -437,7 +431,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord25.disconnect();  // Disconnect receiver headphone path, which is shared with I and Q transmit.
       patchCord26.disconnect();
 
-      //  Disconnect 
+      //  Disconnect
       connect19.connect();  // Transmitter I channel
       connect20.connect();  // Transmitter Q channel
 

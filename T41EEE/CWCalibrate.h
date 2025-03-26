@@ -70,8 +70,6 @@ void DoXmitCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom);
 #ifdef QSE2
 void DoXmitCarrierCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom);
 #endif
-//const char *calFreqs[2]{ "750 Hz", "3.0 kHz" };
-//void SelectCalFreq();
 void ShowSpectrum2(int mode);
 float PlotCalSpectrum(int mode, int x1, int cal_bins[3], int capture_bins);
 void RadioCal(bool refineCal);

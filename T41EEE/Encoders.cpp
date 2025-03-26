@@ -106,9 +106,9 @@ int32_t filter_change;
 // This version limits the result to an fhigh and an flow number.  Note that this function works in concert with EncoderFilter()
 // which is attached to an interrupt.
 void FilterSetSSB() {
-//  ADC_RX_I.end();
-//  ADC_RX_Q.end();
-//AudioNoInterrupts();
+  //  ADC_RX_I.end();
+  //  ADC_RX_Q.end();
+  //AudioNoInterrupts();
   //Serial.printf("Encoder first bands.bands[ConfigData.currentBand].FLoCut = %d\n", bands.bands[ConfigData.currentBand].FLoCut);
   //Serial.printf("Encoder first bands.bands[ConfigData.currentBand].FHiCut = %d\n", bands.bands[ConfigData.currentBand].FHiCut);
   int32_t filter_change;
@@ -152,42 +152,16 @@ void FilterSetSSB() {
     volumeChangeFlag = true;
   }
 
-  //Serial.printf("filterEncoderMove = %d\n", filterEncoderMove);
-  //Serial.printf("Encoder bands.bands[ConfigData.currentBand].FLoCut = %d\n", bands.bands[ConfigData.currentBand].FLoCut);
-  //Serial.printf("Encoder bands.bands[ConfigData.currentBand].FHiCut = %d\n", bands.bands[ConfigData.currentBand].FHiCut);
-  //Serial.printf(" just before Encoder bands.bands[ConfigData.currentBand].sideband = %d\n", bands.bands[ConfigData.currentBand].sideband);
-  // =============  AFP 10-27-22
-
-  //ControlFilterF();
-  //    Menu2 = MENU_F_LO_CUT;  // set Menu2 to MENU_F_LO_CUT
-  //    FilterBandwidth();  // Do any of these functions do anything???
-
-  //  Which function adjusts the frequency limit bars in the audio spectrum display???
-
-  //    UpdateDecoderField();   // Redraw Morse decoder graphics because they get erased due to filter graphics updates.
-
   //  The following code was moved from ShowSpectrum() in Display.cpp.
   int filterLoPositionMarker{ 0 };
   int filterHiPositionMarker{ 0 };
-  //        int temp{0};
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER or bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
     filterLoPositionMarker = map(bands.bands[ConfigData.currentBand].FLoCut, 0, 6000, 0, 256);
     filterHiPositionMarker = map(bands.bands[ConfigData.currentBand].FHiCut, 0, 6000, 0, 256);
   } else if (bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
-    //        filterLoPositionMarker = map(bands.bands[ConfigData.currentBand].FLoCut, 0, 6000, 0, 256);
     filterHiPositionMarker = map(bands.bands[ConfigData.currentBand].FAMCut, 0, 6000, 0, 256);
   }
 
-
-  //Serial.printf("filterLoPositionMarker = %d\n", filterLoPositionMarker);
-  //Serial.printf("filterHiPositionMarker = %d\n", filterHiPositionMarker);
-
-  // Flip positions if LSB so that correct delimiter is highlighted.
-  //        if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-  //           temp = filterLoPositionMarker;
-  //           filterLoPositionMarker = filterHiPositionMarker;
-  //           filterHiPositionMarker = temp;
-  //        }
   //Draw Filter indicator lines on audio plot to Layer 2.
   tft.writeTo(L2);
 
@@ -203,8 +177,6 @@ void FilterSetSSB() {
 
   // In AM modes draw high delimiter only and always make it red (active);
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
-    //        if(not switchFilterSideband) {
-    //        tft.drawLine(BAND_INDICATOR_X - 6 + abs(filterLoPositionMarker), SPECTRUM_BOTTOM - 3, BAND_INDICATOR_X - 6 + abs(filterLoPositionMarker), SPECTRUM_BOTTOM - 112, RA8875_LIGHT_GREY);
     tft.drawLine(BAND_INDICATOR_X - 7 + abs(filterHiPositionMarker), SPECTRUM_BOTTOM - 3, BAND_INDICATOR_X - 7 + abs(filterHiPositionMarker), SPECTRUM_BOTTOM - 112, RA8875_RED);
   }
 
@@ -215,12 +187,6 @@ void FilterSetSSB() {
   DrawBandWidthIndicatorBar();
 
   ShowBandwidth();
-
-//    if (ADC_RX_I.available() > 64) {
-//      ADC_RX_I.clear();
-//      ADC_RX_Q.clear();
-//    AudioInterrupts();
-//    }
 }
 
 
@@ -233,7 +199,6 @@ void FilterSetSSB() {
 *****/
 void EncoderCenterTune() {
   long tuneChange = 0L;
-  //  long oldFreq    = ConfigData.centerFreq;
 
   unsigned char result = tuneEncoder.process();  // Read the encoder
 
@@ -258,10 +223,8 @@ void EncoderCenterTune() {
   if (ConfigData.centerFreq < 300000) ConfigData.centerFreq = 300000;
   TxRxFreq = ConfigData.centerFreq + NCOFreq;
   ConfigData.lastFrequencies[ConfigData.currentBand][ConfigData.activeVFO] = TxRxFreq;
-  SetFreq();  //  Change to receiver tuning process.  KF5N July 22, 2023
-  //currentFreqA= ConfigData.centerFreq + NCOFreq;
+  SetFreq();                    //  Change to receiver tuning process.  KF5N July 22, 2023
   DrawBandWidthIndicatorBar();  // AFP 10-20-22
-  //FilterOverlay(); // AFP 10-20-22
   ShowFrequency();
   BandInformation();
 }
@@ -339,7 +302,6 @@ float GetEncoderValueLive(float minValue, float maxValue, float startValue, floa
   } else {
     tft.print(startValue, 3);
   }
-  //while (true) {
   if (filterEncoderMove != 0) {
     currentValue += filterEncoderMove * increment;  // Bump up or down...
     if (currentValue < minValue)
@@ -347,7 +309,6 @@ float GetEncoderValueLive(float minValue, float maxValue, float startValue, floa
     else if (currentValue > maxValue)
       currentValue = maxValue;
 
-    //  tft.fillRect(449, 0, 90, CHAR_HEIGHT, RA8875_BLACK);  // This is not required. KF5N August 12, 2023
     if (left) tft.setCursor(160, 1);
     else tft.setCursor(440, 1);
     if (abs(startValue) > 2) {
@@ -357,7 +318,6 @@ float GetEncoderValueLive(float minValue, float maxValue, float startValue, floa
     }
     filterEncoderMove = 0;
   }
-  //tft.setTextColor(RA8875_WHITE);
   return currentValue;
 }
 
@@ -393,7 +353,6 @@ float GetEncoderValueLiveString(float minValue, float maxValue, float startValue
   } else {
     tft.print(startValue, 3);
   }
-  //while (true) {
   if (filterEncoderMove != 0) {
     currentValue += filterEncoderMove * increment;  // Bump up or down...
     if (currentValue < minValue)
@@ -401,7 +360,6 @@ float GetEncoderValueLiveString(float minValue, float maxValue, float startValue
     else if (currentValue > maxValue)
       currentValue = maxValue;
 
-    //  tft.fillRect(449, 0, 90, CHAR_HEIGHT, RA8875_BLACK);  // This is not required. KF5N August 12, 2023
     if (left) tft.setCursor(160, 1);
     else tft.setCursor(440, 1);
     if (abs(startValue) > 2) {
@@ -411,7 +369,6 @@ float GetEncoderValueLiveString(float minValue, float maxValue, float startValue
     }
     filterEncoderMove = 0;
   }
-  //tft.setTextColor(RA8875_WHITE);
   return currentValue;
 }
 
@@ -455,7 +412,6 @@ q15_t GetEncoderValueLiveQ15t(int minValue, int maxValue, int startValue, int in
     else if (currentValue > maxValue)
       currentValue = maxValue;
 
-    //  tft.fillRect(449, 0, 90, CHAR_HEIGHT, RA8875_BLACK);  // This is not required. KF5N August 12, 2023
     if (left) tft.setCursor(160, 1);
     else tft.setCursor(440, 1);
     if (abs(startValue) > 2) {
@@ -485,7 +441,6 @@ q15_t GetEncoderValueLiveQ15t(int minValue, int maxValue, int startValue, int in
 //int GetEncoderValue(int minValue, int maxValue, int startValue, int increment, char prompt[]) {
 int GetEncoderValue(int minValue, int maxValue, int startValue, int increment, std::string prompt) {
   int currentValue = startValue;
-  //  int val;
   MenuSelect menu;
 
   tft.setFontScale((enum RA8875tsize)1);
@@ -511,9 +466,6 @@ int GetEncoderValue(int minValue, int maxValue, int startValue, int increment, s
       filterEncoderMove = 0;
     }
 
-    //    val = ReadSelectedPushButton();  // Read the ladder value
-    //MyDelay(100L); //AFP 09-22-22
-    //    if (val != -1 && val < (ConfigData.switchValues[0] + WIGGLE_ROOM)) {
     menu = readButton();                           // Use ladder value to get menu choice
     if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
       return currentValue;
@@ -560,11 +512,9 @@ int SetWPM() {
       filterEncoderMove = 0;
     }
 
-    //    val = ReadSelectedPushButton();  // Read pin that controls all switches
     menu = readButton();
     if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
       ConfigData.currentWPM = lastWPM;
-      //ConfigData.ConfigData.currentWPM = ConfigData.currentWPM;
       UpdateWPMField();
       break;
     }
@@ -587,7 +537,6 @@ int SetWPM() {
 *****/
 uint32_t SetTransmitDelay()  // new function JJP 9/1/22
 {
-  //  int val;
   MenuSelect menu;
   long lastDelay = ConfigData.cwTransmitDelay;
   long increment = 250;  // Means a quarter second change per detent
@@ -613,9 +562,7 @@ uint32_t SetTransmitDelay()  // new function JJP 9/1/22
       filterEncoderMove = 0;
     }
 
-    //    val = ReadSelectedPushButton();  // Read pin that controls all switches
     menu = readButton();
-    //MyDelay(150L);  //ALF 09-22-22
     if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
       ConfigData.cwTransmitDelay = lastDelay;
       eeprom.ConfigDataWrite();

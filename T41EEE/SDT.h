@@ -26,13 +26,7 @@
 #include <EEPROM.h>
 #include <vector>
 #include <algorithm>
-
-// These #includes are apparently not required.
-//#include "Fonts/FreeMono24pt7b.h"
-//#include <Audio.h>
 #include <string.h>
-//#include <string_view>
-//#include <util/crc16.h>
 
 // Constants and #defines first:
 //======================================== Symbolic Constants for the T41 ===================================================
@@ -155,7 +149,6 @@ const int FFT_LENGTH = 512;
 #define ORANGE 0xFD20          /* 255, 165,   0 */
 #define FILTER_WIN 0x10        // Color of SSB filter width
 
-
 #define MAX_WPM 60
 #define ENCODER_FACTOR 0.25F  // Use 0.25f with cheap encoders that have 4 detents per step.
                               // For other encoders or libs we use 1.0f.
@@ -208,8 +201,6 @@ const int RESET = 0;  // QSD2/QSE2 reset pin
 //========================================================= End Pin Assignments =================================
 #define TMS0_POWER_DOWN_MASK (0x1U)
 #define TMS1_MEASURE_FREQ(x) (((uint32_t)(((uint32_t)(x)) << 0U)) & 0xFFFFU)
-//#undef TWO_PI
-//#define TWO_PI 6.283185307179586476925286766559f
 #define PIH 1.5707963267948966192313216916398f
 #define FOURPI (2.0f * TWO_PI)
 #define SIXPI (3.0f * TWO_PI)
@@ -295,7 +286,7 @@ struct band {
   int FAMCut;  // Used for AM and SAM modes.
   float32_t RFgain;  // This is not being used.  Greg KF5N February 14, 2024
   uint32_t band_type;
-  float32_t gainCorrection;  // is hardware dependent and has to be calibrated ONCE and hardcoded in the table below
+  float32_t gainCorrection;  // This is probably not required if the gain across frequency is flat enough.
   int AGC_thresh;
 };
 
@@ -318,11 +309,9 @@ char versionSettings[10] = "T41EEE.9";  // This is required to be the first!  Se
   int rfGain[NUMBER_OF_BANDS]{ 0 };
   bool autoGain = false;
   bool autoSpectrum = true;
-//  int spectrumNoiseFloor = SPECTRUM_NOISE_FLOOR;       // 247  This is a constant.  Eliminate from this struct at next opportunity.
   uint32_t centerTuneStep = CENTER_TUNE_DEFAULT;       // JJP 7-3-23
   uint32_t fineTuneStep = FINE_TUNE_DEFAULT;           // JJP 7-3-23
   float32_t transmitPowerLevel = DEFAULT_POWER_LEVEL;  // Changed from int to float; Greg KF5N February 12, 2024
-//  RadioMode xmtMode = RadioMode::SSB_MODE;             //
   AudioState audioOut = AudioState::SPEAKER;                       // Default audio output is speaker.
   int nrOptionSelect = 0;                              // 1 byte
   int currentScale = 1;
@@ -413,16 +402,7 @@ struct calibration_t {
 
   float CWPowerCalibrationFactor[NUMBER_OF_BANDS] =  { 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 };        // Increased to 0.04, was 0.019; KF5N February 20, 2024
   float SSBPowerCalibrationFactor[NUMBER_OF_BANDS] = { 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8 };  // Increased to 0.04, was 0.008; KF5N February 21, 2024
-/*
-  float IQCWRXAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
-  float IQCWRXPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-  float IQCWAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
-  float IQCWPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-  float IQSSBRXAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
-  float IQSSBRXPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };  
-  float IQSSBAmpCorrectionFactor[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
-  float IQSSBPhaseCorrectionFactor[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-*/
+
   float IQCWRXAmpCorrectionFactorLSB[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
   float IQCWRXPhaseCorrectionFactorLSB[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
   float IQCWAmpCorrectionFactorLSB[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
@@ -490,7 +470,6 @@ extern float32_t HP_DC_Filter_Coeffs2[];  // AFP 11-02-22
 #define MAX_LMS_TAPS 96
 #define MAX_LMS_DELAY 256
 #define NR_FFT_L 256
-//#define NB_FFT_SIZE FFT_LENGTH / 2
 
 //================== Global CW Correlation and FFT Variables =================
 extern float32_t audioMaxSquaredAve;
@@ -549,10 +528,6 @@ extern arm_fir_interpolate_instance_f32 FIR_int1_EX_Q;
 extern arm_fir_interpolate_instance_f32 FIR_int2_EX_I;
 extern arm_fir_interpolate_instance_f32 FIR_int2_EX_Q;
 
-//extern float32_t FIR_dec1_EX_I_state[];  //48 + (uint16_t) BUFFER_SIZE * (uint32_t) N_B - 1
-//extern float32_t FIR_dec1_EX_Q_state[];
-//extern float32_t FIR_dec2_EX_I_state[];  //DEC2STATESIZE
-//extern float32_t FIR_dec2_EX_Q_state[];
 extern float32_t FIR_int2_EX_I_state[];
 extern float32_t FIR_int2_EX_Q_state[];
 extern float32_t FIR_int1_EX_I_state[];
@@ -676,7 +651,6 @@ typedef struct Menu_Descriptor {
   const uint8_t no;         // Menu ID
   const char *const text1;  // upper text
   const char *text2;        // lower text
-  //  const uint8_t menu2;      // 0 = belongs to Menu, 1 = belongs to Menu2
 } Menu_D;
 extern Menu_D Menus[];
 
@@ -707,7 +681,6 @@ extern const uint32_t IIR_biquad_Zoom_FFT_N_stages;
 extern const uint32_t N_stages_biquad_lowpass1;
 extern const uint16_t n_dec1_taps;
 extern const uint16_t n_dec2_taps;
-//extern bool agc_action;
 extern int attenuator;
 extern int audioYPixel[];
 extern int bandswitchPins[];
@@ -721,13 +694,11 @@ extern volatile long fineTuneEncoderMove;
 extern int freqIncrement;
 extern void (*functionPtr[])();
 extern int idx;
-//extern bool buttonInterruptsEnabled;
 extern int n_L;
 extern int n_R;
 extern int newCursorPosition;
 extern int NR_Index;
 extern int oldCursorPosition;
-//extern RadioMode radioMode;
 extern RadioState radioState, lastState;  // Used by the loop to monitor current state.
 
 extern int resetTuningFlag;        // Experimental flag for ResetTuning() due to possible timing issues.  KF5N July 31, 2023
@@ -790,7 +761,6 @@ extern float32_t corr[];
 extern float32_t *cosBuffer;  // Was cosBuffer2[]; this is a pointer to an array. Greg KF5N February 7, 2024
 extern float32_t d[];
 extern float32_t dbm;
-//extern float32_t dbm_calibration;
 extern float32_t /*DMAMEM*/ FFT_buffer[];
 extern float32_t /*DMAMEM*/ FFT_spec[];
 extern float32_t /*DMAMEM*/ FFT_spec_old[];
@@ -901,12 +871,8 @@ extern bool powerUp;
 
 //======================================== Function prototypes =========================================================
 
-//void AGC();
-//void AGCLoadValues();  // AGC fix.  G0ORX September 5, 2023
 void AGCOptions();
-//void AGCPrep();
 float32_t AlphaBetaMag(float32_t inphase, float32_t quadrature);
-//void AltNoiseBlanking(float *insamp, int Nsam, float *E);
 void AMDecodeSAM();  // AFP 11-03-22
 void arm_clip_f32(const float32_t *pSrc,
                   float32_t *pDst,
@@ -914,23 +880,9 @@ void arm_clip_f32(const float32_t *pSrc,
                   float32_t high,
                   uint32_t numSamples);
 int BandOptions();
-//void BandSet(int band);  // Used in RadioCal().  Greg KF5N June 4, 2024.
 float BearingHeading(char *dxCallPrefix);
 void BearingMaps();
 void bmpDraw(const char *filename, int x, int y);
-//void ButtonBandDecrease();
-//void ButtonBandIncrease();
-//int ButtonDemod();
-//void ButtonDemodMode();
-//void ButtonFilter();
-//void ButtonFrequencyEntry();
-//void ButtonMenuIncrease();
-//void ButtonMenuDecrease();
-//void ButtonMode();
-//void ButtonNotchFilter();
-//void ButtonNR();
-//void ButtonSetNoiseFloor();
-//void ButtonZoom();
 void CalDataOptions();  // Resides in MenuProc.cpp.
 void CalcZoom1Magn();
 void CalcFIRCoeffs(float *coeffs_I, int numCoeffs, float32_t fc, float32_t Astop, int type, float dfc, float Fsamprate);
@@ -939,7 +891,6 @@ void CaptureKeystrokes();
 void CalibrateOptions();  // AFP 10-22-22, changed JJP 2/3/23
 uint16_t Color565(uint8_t r, uint8_t g, uint8_t b);
 void ConfigDataOptions();  // Resides in MenuProc.cpp.
-void ControlFilterF();
 int CreateMapList(char ptrMaps[10][50], int *count);
 void CWOptions();
 
@@ -949,7 +900,6 @@ void CWOptions();
 #define CW_SHAPING_ZERO 3
 
 void CW_ExciterIQData(int shaping);  // AFP 08-18-22
-//void DisplayAGC();
 void DisplayClock();
 void DisplaydbM();
 void DisplayIncrementField();
@@ -966,7 +916,6 @@ void DrawBandWidthIndicatorBar();  // AFP 03-27-22 Layers
 void DrawFrequencyBarValue();
 void DrawInfoWindowFrame();
 void DrawKeyboard();
-//int DrawNewFloor(int floor);
 void DrawSMeterContainer();
 void DrawSpectrumDisplayContainer();
 void DrawAudioSpectContainer();
@@ -981,7 +930,6 @@ void EraseMenus();
 void ErasePrimaryMenu();
 void EraseSpectrumDisplayContainer();
 void EraseSpectrumWindow();
-//void ExecuteButtonPress(MenuSelect val);
 void FilterBandwidth();
 void FilterOverlay();
 void FilterSetSSB();
@@ -1006,7 +954,6 @@ void initTempMon(uint16_t freq, uint32_t lowAlarmTemp, uint32_t highAlarmTemp, u
 void initUserDefinedStuff();  // KF5N February 21, 2024
 void IQPhaseCorrection(float32_t *I_buffer, float32_t *Q_buffer, float32_t factor, uint32_t blocksize);
 float32_t Izero(float32_t x);
-//void JackClusteredArrayMax(int32_t *array, int32_t elements, int32_t *maxCount, int32_t *maxIndex, int32_t *firstDit, int32_t spread);
 void Kim1_NR();
 void KeyOn();
 void KeyRingOn();
@@ -1019,30 +966,22 @@ void MorseCharacterDisplay(char currentLetter);
 void MyDrawFloat(float val, int decimals, int x, int y, char *buff);
 float MSinc(int m, float fc);
 void printFile(const char *filename);
-//void EnableButtonInterrupts();
 void playTransmitData();  // KF5N February 23, 2024
-//MenuSelect ProcessButtonPress(int valPin);
 void ProcessEqualizerChoices(int EQType, char *title);
-//void ProcessIQData();
 MenuSelect readButton(MenuSelect lastUsedTask);
 MenuSelect readButton();
-//int ReadSelectedPushButton();
 void RedrawDisplayScreen();
 void ResetFlipFlops();
 void ResetHistograms();
 void ResetTuning();  // AFP 10-11-22
 void RFOptions();
-//void ResetZoom(int zoomIndex1);  // AFP 11-06-22
 int SDPresentCheck();
 void SetCompressionThreshold();
 void SetCompressionRatio();
-//void SetCompressionAttack();
-//void SetCompressionRelease();
 void MicGainSet();
 void SaveAnalogSwitchValues();
 void SelectCWFilter();  // AFP 10-18-22
 void SelectCWOffset();  // KF5N December 13, 2023
-//void SetBand();
 void SetBandRelay();
 void SetDecIntFilters();
 void SetDitLength(int wpm);
@@ -1055,7 +994,6 @@ void SetKeyPowerUp();
 void SetSideToneVolume(bool speaker);  // This function uses encoder to set sidetone volume.  KF5N August 29, 2023
 uint32_t SetTransmitDelay();
 void SetTransmitDitLength(int wpm);  // JJP 8/19/23
-//void SetupMode(RadioMode mode, Sideband sideband);
 int SetWPM();
 void ShowAutoStatus();
 void ShowBandwidth();
@@ -1078,7 +1016,6 @@ void SpectralNoiseReduction(void);
 void SpectralNoiseReductionInit();
 void Splash();
 void SSBOptions();
-//int SubmenuSelect(const char *options[], int numberOfChoices, int defaultStart);
 int SubmenuSelect(const std::string options[], int numberOfChoices, int defaultStart);
 int SubmenuSelectString(std::string options[], int numberOfChoices, int defaultStart);
 void T4_rtc_set(unsigned long t);
@@ -1092,7 +1029,6 @@ void UpdateEqualizerField(bool rxEqState, bool txEqState);
 void updateMic();  // This updates the Open Audio compressor.
 void UpdateNoiseField();
 void UpdateNotchField();
-void UpdateSDIndicator(int present);
 void UpdateVolumeField();
 void UpdateWPMField();
 void UpdateZoomField();
