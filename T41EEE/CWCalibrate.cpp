@@ -325,6 +325,7 @@ void CWCalibrate::CalibratePreamble(int setZoom) {
       void
  *****/
 void CWCalibrate::CalibrateEpilogue(bool radioCal, bool saveToEeprom) {
+  Serial.printf("CW epilogue\n");
   /*
   Serial.printf("lastState=%d radioState=%d memory_used=%d memory_used_max=%d f32_memory_used=%d f32_memory_used_max=%d\n",
                 lastState,
@@ -368,11 +369,8 @@ if(bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands.ba
   calOnFlag = false;
 if(not radioCal)  RedrawDisplayScreen();  // Redraw everything!
 else tft.fillWindow();  // Clear the display.
-//  IQChoice = 9;
-//  radioState = RadioState::CW_RECEIVE_STATE;  // KF5N
   fftOffset = 0;                              // Some reboots may be caused by large fftOffset values when Auto-Spectrum is on.
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
-//  SetFreq();                        // Return Si5351 to normal operation mode.  KF5N
   lastState = RadioState::NOSTATE;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 16, 2023
   powerUp = true; // Clip off transient.
   return;
@@ -390,7 +388,6 @@ else tft.fillWindow();  // Clear the display.
  *****/
 void CWCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom) {
   MenuSelect task, lastUsedTask = MenuSelect::DEFAULT;
-  //  int lastUsedTask = -2;
   int calFreqShift;
   float correctionIncrement = 0.001;
   bool autoCal = false;
@@ -423,7 +420,6 @@ void CWCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, boo
   int viewTime = 0;
   bool averageFlag = false;
   std::vector<float>::iterator result;
-  // bool stopSweep = false;
 
   plotCalGraphics(calTypeFlag);
   printCalType(mode, calTypeFlag, autoCal, false);
@@ -496,20 +492,9 @@ phase = CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand];
         count = 0;
         warmup = 0;
         index = 1;
-        //stopSweep = false;
         IQCalType = 0;
         std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
         std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
-        /*
-        if(mode == 0) {
-        iOptimal = amplitude = ConfigData.IQCWRXAmpCorrectionFactor[ConfigData.currentBand];;
-        qOptimal = phase = ConfigData.IQCWRXPhaseCorrectionFactor[ConfigData.currentBand];
-        }
-        if(mode == 1) {
-        iOptimal = amplitude = ConfigData.IQSSBRXAmpCorrectionFactor[ConfigData.currentBand];;
-        qOptimal = phase = ConfigData.IQSSBRXPhaseCorrectionFactor[ConfigData.currentBand];
-        }
-        */
         state = State::warmup;
         averageFlag = false;
         break;
@@ -521,7 +506,6 @@ phase = CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand];
         count = 0;
         warmup = 0;
         index = 1;
-        //stopSweep = false;
         IQCalType = 0;
         std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
         std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
@@ -565,7 +549,6 @@ if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
         break;
       case MenuSelect::MENU_OPTION_SELECT:  // Save values and exit calibration.
         tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-//        IQChoice = 6;
           CWCalibrate::CalibrateEpilogue(radioCal, saveToEeprom);
           return;
         break;
@@ -581,7 +564,6 @@ if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
           printCalType(mode, calTypeFlag, autoCal, false);
           count = 0;
           index = 0;
-          //  stopSweep = false;
           IQCalType = 0;
           averageFlag = false;
           averageCount = 0;
@@ -628,15 +610,11 @@ if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
           // Increment for next measurement.
           amplitude = amplitude + increment;  // Next one!
           // Go to Q channel when I channel sweep is finished.
-          //    if (index > 20) {
-          //      if (sweepVector[index - 1] > (sweepVector[index - 11] + 3.0)) stopSweep = true;  // Stop sweep if past the null.
-          //    }
           if (abs(amplitude - 1.0) > maxSweepAmp) {  // Needs to be subtracted from 1.0.
             IQCalType = 1;                                                                            // Get ready for phase.
             result = std::min_element(sweepVector.begin(), sweepVector.end());                        // Value of the minimum.
             adjdBMinIndex = std::distance(sweepVector.begin(), result);                               // Find the index.
             iOptimal = sweepVectorValue[adjdBMinIndex];                                               // Set to the discovered minimum.
-                                                                                                      //            Serial.printf("Init The optimal amplitude = %.3f at index %d with value %.1f count = %d\n", sweepVectorValue[adjdBMinIndex], adjdBMinIndex, *result, count);
             phase = -maxSweepPhase;            // The starting value for phase.
             amplitude = iOptimal;                    // Reset for next sweep.
             // Update display to optimal value.
@@ -646,7 +624,6 @@ if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorAmp[i] = (iOptimal - 10 * 0.001) + (0.001 * i);
             }
-            //          stopSweep = false;
             IQCalType = 1;  // Prepare for phase.
             index = 0;
             averageFlag = false;
@@ -667,16 +644,12 @@ if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
           index = index + 1;
           // Increment for the next measurement.
           phase = phase + increment;
-          //     if (index > 20) {
-          //       if (sweepVector[index - 1] > (sweepVector[index - 11] + 3.0)) stopSweep = true;  // Stop sweep if past the null.
-          //     }
           if (phase > maxSweepPhase) {
             result = std::min_element(sweepVector.begin(), sweepVector.end());
             adjdBMinIndex = std::distance(sweepVector.begin(), result);
             qOptimal = sweepVectorValue[adjdBMinIndex];                               // Set to the discovered minimum.
             phase = qOptimal;  // Set to the discovered minimum.
             GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, (char *)"IQ Phase", false);
-            //            Serial.printf("Init The optimal phase = %.5f at index %d with value %.1f count = %d\n", sweepVectorValue[adjdBMinIndex], adjdBMinIndex, *result, count);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorPhase[i] = (qOptimal - 10 * 0.001) + (0.001 * i);
             }
@@ -712,7 +685,6 @@ if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorAmp[i] = (iOptimal - 10 * 0.001) + (0.001 * i);  // The next array to sweep.
             }
-            //            Serial.printf("Refine The optimal amplitude = %.3f at index %d with value %.1f\n", iOptimal, adjdBMinIndex, *result);
             IQCalType = 1;
             index = 0;
             averageFlag = false;
@@ -746,7 +718,6 @@ if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorPhase[i] = (qOptimal - 10 * 0.001) + (0.001 * i);
             }
-            //            Serial.printf("Refine The optimal phase = %.3f at index %d with value %.1f\n", qOptimal, adjdBMinIndex, *result);
             IQCalType = 0;
             averageFlag = 0;
             averageCount = 0;
@@ -850,21 +821,7 @@ CalData.IQSSBRXPhaseCorrectionFactorLSB[ConfigData.currentBand] = phase;
 CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand] = phase;
     }
     }
-
-/*
-    if (IQCalType == 0) {
-      amplitude = GetEncoderValueLive(-2.0, 2.0, amplitude, correctionIncrement, (char *)"IQ Gain", true);
-      if(mode == 0) CalData.IQCWRXAmpCorrectionFactor[ConfigData.currentBand] = amplitude;
-      if(mode == 1) CalData.IQSSBRXAmpCorrectionFactor[ConfigData.currentBand] = amplitude;
-    } else {
-      phase = GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, (char *)"IQ Phase", false);
-      if(mode == 0) CalData.IQCWRXPhaseCorrectionFactor[ConfigData.currentBand] = phase;
-      if(mode == 1) CalData.IQSSBRXPhaseCorrectionFactor[ConfigData.currentBand] = phase;
-    }
-*/
-
   }                            // end while
-
 }  // End Receive calibration
 
 
@@ -878,10 +835,7 @@ CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand] = phase;
       void
  *****/
 void CWCalibrate::DoXmitCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom) {
-  //  int task = -1;
-  //  int lastUsedTask = -2;
   int freqOffset;
-  //  bool corrChange = false;
   float correctionIncrement = 0.001;
   CWCalibrate::State state = State::warmup;  // Start calibration state machine in warmup state.
   float maxSweepAmp = 0.1;
@@ -900,14 +854,8 @@ void CWCalibrate::DoXmitCalibrate(int mode, bool radioCal, bool shortCal, bool s
   bool averageFlag = false;
   std::vector<float>::iterator result;
   MenuSelect task, lastUsedTask = MenuSelect::DEFAULT;
-//  if (toneFreqIndex == 0) {             // 750 Hz
     CWCalibrate::CalibratePreamble(4);  // Set zoom to 16X.
     freqOffset = 0;                     // Calibration tone same as regular modulation tone.
-//  }
-//  if (toneFreqIndex == 1) {             // 3 kHz
-//    CWCalibrate::CalibratePreamble(2);  // Set zoom to 4X.
-//    freqOffset = 2250;                  // Need 750 + 2250 = 3 kHz
-//  }
   loadCalToneBuffers(750.0);
   calTypeFlag = 1;  // TX cal
   plotCalGraphics(calTypeFlag);
@@ -951,14 +899,6 @@ phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
   // Transmit Calibration Loop
   while (true) {
     CWCalibrate::ShowSpectrum2(mode);
-    /*
-    val = ReadSelectedPushButton();
-    if (val != BOGUS_PIN_READ) {
-      menu = ProcessButtonPress(val);
-      if (menu != lastUsedTask && task == MenuSelect::DEFAULT) task = menu;
-      else task = MenuSelect::BOGUS_PIN_READ;
-    }
-    */
     task = readButton(lastUsedTask);
     if (shortCal) task = MenuSelect::FILTER;
     switch (task) {
@@ -970,7 +910,6 @@ phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
         warmup = 0;
         index = 0;
         IQCalType = 0;
-        //stopSweep = false;
         averageFlag = false;
         averageCount = 0;
         std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
@@ -1016,7 +955,6 @@ phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
         break;
       case MenuSelect::MENU_OPTION_SELECT:  // Save values and exit calibration.
         tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-//        IQChoice = 6;  // AFP 2-11-23
   CWCalibrate::CalibrateEpilogue(radioCal, saveToEeprom);
   return;
         break;
@@ -1071,15 +1009,11 @@ phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
           // Increment for next measurement.
           amplitude = amplitude + increment;  // Next one!
           // Go to Q channel when I channel sweep is finished.
-          //    if (index > 20) {
-          //      if (sweepVector[index - 1] > (sweepVector[index - 11] + 3.0)) stopSweep = true;  // Stop sweep if past the null.
-          //    }
           if (abs(amplitude - 1.0) > maxSweepAmp) {  // Needs to be subtracted from 1.0.
             IQCalType = 1;                                                                            // Get ready for phase.
             result = std::min_element(sweepVector.begin(), sweepVector.end());                        // Value of the minimum.
             adjdBMinIndex = std::distance(sweepVector.begin(), result);                               // Find the index.
             iOptimal = sweepVectorValue[adjdBMinIndex];                                               // Set to the discovered minimum.
-                                                                                                      //            Serial.printf("Init The optimal amplitude = %.3f at index %d with value %.1f count = %d\n", sweepVectorValue[adjdBMinIndex], adjdBMinIndex, *result, count);
             phase = -maxSweepPhase;            // The starting value for phase.
             amplitude = iOptimal;                    // Reset for next sweep.
             // Update display to optimal value.
@@ -1089,7 +1023,6 @@ phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorAmp[i] = (iOptimal - 10 * 0.001) + (0.001 * i);
             }
-            //          stopSweep = false;
             IQCalType = 1;  // Prepare for phase.
             index = 0;
             averageFlag = false;
@@ -1110,17 +1043,12 @@ phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
           index = index + 1;
           // Increment for the next measurement.
           phase = phase + increment;
-          //     if (index > 20) {
-          //       if (sweepVector[index - 1] > (sweepVector[index - 11] + 3.0)) stopSweep = true;  // Stop sweep if past the null.
-          //     }
           if (phase > maxSweepPhase) {
             result = std::min_element(sweepVector.begin(), sweepVector.end());
             adjdBMinIndex = std::distance(sweepVector.begin(), result);
             qOptimal = sweepVectorValue[adjdBMinIndex];                               // Set to the discovered minimum.
             phase = qOptimal;  // Set to the discovered minimum.
-
             GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, (char *)"IQ Phase", false);
-            // Serial.printf("Init The optimal phase = %.5f at index %d with value %.1f count = %d\n", sweepVectorValue[adjdBMinIndex], adjdBMinIndex, *result, count);
             // Save the sub_vector which will be used to refine the optimal result.
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorPhase[i] = (qOptimal - 10 * 0.001) + (0.001 * i);
@@ -1157,7 +1085,6 @@ phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorAmp[i] = (iOptimal - 10 * 0.001) + (0.001 * i);  // The next array to sweep.
             }
-            //            Serial.printf("Refine The optimal amplitude = %.3f at index %d with value %.1f\n", iOptimal, adjdBMinIndex, *result);
             IQCalType = 1;
             index = 0;
             averageFlag = false;
@@ -1191,7 +1118,6 @@ phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorPhase[i] = (qOptimal - 10 * 0.001) + (0.001 * i);
             }
-            //            Serial.printf("Refine The optimal phase = %.3f at index %d with value %.1f\n", qOptimal, adjdBMinIndex, *result);
             IQCalType = 0;
             averageFlag = 0;
             averageCount = 0;
@@ -1220,7 +1146,6 @@ phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
           break;
 
         case State::setOptimal:
-        Serial.printf("setOptimal\n");
           count = 0;  // In case automatic calibration is run again.
           amplitude = iOptimal;
           phase = qOptimal;
@@ -1270,7 +1195,6 @@ CalData.IQCWPhaseCorrectionFactorLSB[ConfigData.currentBand] = phase;
   else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER)
 CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand] = phase;
     }
-//    if (IQChoice == 6) break;  //  Exit the while loop.
   }                            // end while
 
 }  // End Transmit calibration
@@ -1307,16 +1231,8 @@ void CWCalibrate::DoXmitCarrierCalibrate(int mode, bool radioCal, bool shortCal,
   bool refineCal = false;
   bool averageFlag = false;
   std::vector<float>::iterator result;
-  // bool stopSweep = false;
-
-//  if (toneFreqIndex == 0) {             // 750 Hz
     CWCalibrate::CalibratePreamble(4);  // Set zoom to 16X.
     freqOffset = 0;                     // Calibration tone same as regular modulation tone.
-//  }
-//  if (toneFreqIndex == 1) {             // 3 kHz
-//    CWCalibrate::CalibratePreamble(2);  // Set zoom to 4X.
-//    freqOffset = 2250;                  // Need 750 + 2250 = 3 kHz
-//  }
   loadCalToneBuffers(750.0);
   calTypeFlag = 2;  // Carrier cal
   plotCalGraphics(calTypeFlag);
@@ -1358,14 +1274,6 @@ phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
   // Transmit Calibration Loop
   while (true) {
     CWCalibrate::ShowSpectrum2(mode);
-    /*
-    val = ReadSelectedPushButton();
-    if (val != BOGUS_PIN_READ) {
-      menu = ProcessButtonPress(val);
-      if (menu != lastUsedTask && task == MenuSelect::DEFAULT) task = menu;
-      else task = MenuSelect::DEFAULT;
-    }
-    */
     task = readButton(lastUsedTask);
     if (shortCal) task = MenuSelect::FILTER;  // Jump to refineCal.
     switch (task) {
@@ -1379,7 +1287,6 @@ phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
         IQCalType = 0;
         averageFlag = false;
         averageCount = 0;
-        //stopSweep = false;
         std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0);
         std::fill(sweepVector.begin(), sweepVector.end(), 0);
         iOptimal = CalData.iDCoffsetCW[ConfigData.currentBand];
@@ -1423,7 +1330,6 @@ phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
         break;
       case MenuSelect::MENU_OPTION_SELECT:  // Save values and exit calibration.
         tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-//        IQChoice = 6;  // AFP 2-11-23
   CWCalibrate::CalibrateEpilogue(radioCal, saveToEeprom);
   return;
 
@@ -1480,15 +1386,11 @@ phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
           // Increment for next measurement.
           CalData.iDCoffsetCW[ConfigData.currentBand] = CalData.iDCoffsetCW[ConfigData.currentBand] + increment;  // Next one!
           // Go to Q channel when I channel sweep is finished.
-          //    if (index > 20) {
-          //      if (sweepVector[index - 1] > (sweepVector[index - 11] + 3.0)) stopSweep = true;  // Stop sweep if past the null.
-          //    }
           if (abs(CalData.iDCoffsetCW[ConfigData.currentBand] - 1.0) > maxSweepAmp) {  // Needs to be subtracted from 1.0.
             IQCalType = 1;                                                                // Get ready for phase.
             result = std::min_element(sweepVector.begin(), sweepVector.end());            // Value of the minimum.
             adjdBMinIndex = std::distance(sweepVector.begin(), result);                   // Find the index.
             iOptimal = sweepVectorValue[adjdBMinIndex];                                   // Set to the discovered minimum.
-            // Serial.printf("Init The optimal I offset = %d at index %d with value %.1f count = %d\n", sweepVectorValue[adjdBMinIndex], adjdBMinIndex, *result, count);
             CalData.qDCoffsetCW[ConfigData.currentBand] = -maxSweepPhase;  // The starting value for phase.
             CalData.iDCoffsetCW[ConfigData.currentBand] = iOptimal;        // Reset for next sweep.
             // Update display to optimal value.
@@ -1520,16 +1422,12 @@ phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
           index = index + 1;
           // Increment for the next measurement.
           CalData.qDCoffsetCW[ConfigData.currentBand] = CalData.qDCoffsetCW[ConfigData.currentBand] + increment;
-          //     if (index > 20) {
-          //       if (sweepVector[index - 1] > (sweepVector[index - 11] + 3.0)) stopSweep = true;  // Stop sweep if past the null.
-          //     }
           if (CalData.qDCoffsetCW[ConfigData.currentBand] > maxSweepPhase) {
             result = std::min_element(sweepVector.begin(), sweepVector.end());
             adjdBMinIndex = std::distance(sweepVector.begin(), result);
             qOptimal = sweepVectorValue[adjdBMinIndex];                 // Set to the discovered minimum.
             CalData.qDCoffsetCW[ConfigData.currentBand] = qOptimal;  // Set to the discovered minimum.
             GetEncoderValueLiveQ15t(-1000, 1000, CalData.qDCoffsetCW[ConfigData.currentBand], correctionIncrement, (char *)"Q Offset", false);
-            //            Serial.printf("Init The optimal Q offset = %d at index %d with value %.1f count = %d\n", sweepVectorValue[adjdBMinIndex], adjdBMinIndex, *result, count);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorQoffset[i] = (qOptimal - 10 * 5) + (5 * i);
             }
@@ -1565,7 +1463,6 @@ phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorIoffset[i] = (iOptimal - 10 * 5) + (5 * i);  // The next array to sweep.
             }
-            // Serial.printf("Refine The optimal I offset = %d at index %d with value %.1f\n", iOptimal, adjdBMinIndex, *result);
             IQCalType = 1;
             index = 0;
             averageFlag = false;
@@ -1599,7 +1496,6 @@ phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorQoffset[i] = (qOptimal - 10 * 5) + (5 * i);
             }
-            // Serial.printf("Refine The optimal Q offset = %d at index %d with value %.1f\n", qOptimal, adjdBMinIndex, *result);
             IQCalType = 0;
             averageFlag = 0;
             averageCount = 0;
@@ -1660,7 +1556,6 @@ phase = CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand];
     } else {
       CalData.qDCoffsetCW[ConfigData.currentBand] = GetEncoderValueLiveQ15t(-1000, 1000, CalData.qDCoffsetCW[ConfigData.currentBand], correctionIncrement, (char *)"Q Offset", false);
     }
-//    if (IQChoice == 6) break;  //  Exit the while loop.
   }                            // end while
 
 }  // End carrier calibration

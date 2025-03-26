@@ -61,7 +61,6 @@ Metro ms_500 = Metro(500);  // Set up a Metro
 Si5351 si5351;  // Instantiate the PLL device.
 
 RadioState radioState, lastState;  // KF5N
-//RadioMode radioMode;               // Greg KF5N August 1, 2024
 int resetTuningFlag = 0;
 #ifndef RA8875_DISPLAY
 ILI9488_t3 tft = ILI9488_t3(&SPI, TFT_CS, TFT_DC, TFT_RST);  // Instantiate the display.
@@ -111,12 +110,8 @@ config_t ConfigData;
 calibration_t CalData;
 
 Bands bands = { { // Revised band struct with mode and sideband.  Greg KF5N February 14, 2025
-//freq    band low   band hi   name    mode                  sideband         FHiCut FLoCut FAMCut  Gain  type    gain  AGC
-//                                             filter filter             correct     offset
-//DB2OO, 29-AUG-23: take ITU_REGION into account for band limits
-// and changed "gainCorrection" to see the correct dBm value on all bands.
-// Calibration done with TinySA as signal generator with -73dBm levels (S9) at the FT8 frequencies
-// with V010 QSD with the 12V mod of the pre-amp
+//                  band low   band hi   name          mode                  sideband         FHiCut FLoCut FAMCut  Gain  type gain  AGC
+//DB2OO, 29-AUG-23: take ITU_REGION into account for band limits.
 #if defined(ITU_REGION) && ITU_REGION == 1
                   { 3700000UL, 3500000, 3800000, "80M", RadioMode::SSB_MODE, Sideband::LOWER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
                   { 7150000, 7000000, 7200000, "40M", RadioMode::SSB_MODE, Sideband::LOWER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
@@ -127,7 +122,7 @@ Bands bands = { { // Revised band struct with mode and sideband.  Greg KF5N Febr
                   { 3700000UL, 3500000, 3900000, "80M", RadioMode::SSB_MODE, Sideband::LOWER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
                   { 7150000, 7000000, 7200000, "40M", RadioMode::SSB_MODE, Sideband::LOWER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
 #endif
-                  { 14200000, 14000000, 14350000, "20M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 60 },  //// KF5N experiment with AGC
+                  { 14200000, 14000000, 14350000, "20M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
                   { 18100000, 18068000, 18168000, "17M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
                   { 21200000, 21000000, 21450000, "15M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
                   { 24920000, 24890000, 24990000, "12M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
@@ -367,8 +362,6 @@ float32_t DMAMEM Fir_Zoom_FFT_Decimate_Q_state[4 + BUFFER_SIZE * N_B - 1];
 float32_t DMAMEM Fir_Zoom_FFT_Decimate_coeffs[4];
 float32_t DMAMEM float_buffer_L[BUFFER_SIZE * N_B];
 float32_t DMAMEM float_buffer_R[BUFFER_SIZE * N_B];
-//float32_t DMAMEM float_buffer_L2[BUFFER_SIZE * N_B];
-//float32_t DMAMEM float_buffer_R2[BUFFER_SIZE * N_B];
 float32_t DMAMEM float_buffer_L_CW[256];       //AFP 09-01-22
 float32_t DMAMEM float_buffer_R_CW[256];       //AFP 09-01-22
 float32_t DMAMEM float_buffer_R_AudioCW[256];  //AFP 10-18-22
@@ -435,7 +428,6 @@ time_t getTeensy3Time() {
 }
 
 // is added in Teensyduino 1.52 beta-4, so this can be deleted !?
-
 /*****
   Purpose: To set the real time clock
 
@@ -504,14 +496,13 @@ float TGetTemp() {
   while (!(TEMPMON_TEMPSENSE0 & 0x4U)) {
     ;
   }
-  /* ready to read temperature code value */
+  // ready to read temperature code value
   nmeas = (TEMPMON_TEMPSENSE0 & 0xFFF00U) >> 8U;
   tmeas = s_hotTemp - (float)((nmeas - s_hotCount) * s_hotT_ROOM / s_roomC_hotC);  // Calculate temperature
   return tmeas;
 }
 
 
-// Teensy 4.0, 4.1
 /*****
   Purpose: To set the I2S frequency
 
@@ -842,9 +833,8 @@ FLASHMEM void setup() {
 #else
   sgtl5000_1.lineOutLevel(20);  // Setting of 20 limits line-out level to 2.14 volts p-p.
 #endif
-  sgtl5000_1.adcHighPassFilterEnable();
-  //sgtl5000_1.adcHighPassFilterDisable();  //reduces noise.  https://forum.pjrc.com/threads/27215-24-bit-audio-boards?p=78831&viewfull=1#post78831
-  //sgtl5000_1.adcHighPassFilterFreeze();
+  sgtl5000_1.adcHighPassFilterEnable();   // This is required for QSE2DC, specifically for carrier calibration.
+//  sgtl5000_1.adcHighPassFilterDisable();  //reduces noise.  https://forum.pjrc.com/threads/27215-24-bit-audio-boards?p=78831&viewfull=1#post78831
 
   updateMic();             // This updates the transmit signal chain settings.  Located in SSB_Exciter.cpp.
   initializeAudioPaths();  // Updates the AGC (compressor) in the receiver.
@@ -1044,7 +1034,6 @@ void loop()
 
   if (lastState != radioState) {
     SetAudioOperatingState(radioState);
-//    SetFreq();  // Update frequencies if the radio state has changed.
     button.ExecuteModeChange();
     Serial.printf("Set audio state, begin loop. radioState = %d lastState = %d\n", radioState, lastState);
   }
@@ -1067,8 +1056,6 @@ void loop()
     headphoneScale.setGain(HEADPHONESCALE);
   }
 
-  //Serial.printf("bands[ConfigData.currentBand].sideband = %d\n", bands[ConfigData.currentBand].sideband);
-
   //  Begin radio state machines
 
   //  Begin SSB Mode state machine
@@ -1078,17 +1065,12 @@ void loop()
     case RadioState::FT8_RECEIVE_STATE:
     case RadioState::SSB_RECEIVE_STATE:
       if (lastState != radioState) {  // G0ORX 01092023
-                                      //        digitalWrite(MUTE, UNMUTEAUDIO);  // Audio Mute off
         digitalWrite(RXTX, LOW);      //xmit off
-                                      ////        if (keyPressedOn == 1) {  //// Unnecessary here?  Greg KF5N January 26, 2025
-                                      //          return;
-                                      //        }
         ShowTransmitReceiveStatus();
       }
       ShowSpectrum();
       break;
     case RadioState::SSB_TRANSMIT_STATE:
-      //      digitalWrite(MUTE, MUTEAUDIO);  //  Mute Audio  (HIGH=Mute)
       digitalWrite(RXTX, HIGH);  //xmit on
 
       ShowTransmitReceiveStatus();
@@ -1122,7 +1104,6 @@ void loop()
       break;
 
     case RadioState::FT8_TRANSMIT_STATE:
-      //      digitalWrite(MUTE, MUTEAUDIO);  //  Mute Audio  (HIGH=Mute)
       digitalWrite(RXTX, HIGH);  //xmit on
 
       ShowTransmitReceiveStatus();
@@ -1141,7 +1122,6 @@ void loop()
   switch (radioState) {
     case RadioState::CW_RECEIVE_STATE:
       if (lastState != radioState) {  // G0ORX 01092023
-                                      //        digitalWrite(MUTE, UNMUTEAUDIO);  //turn off mute
         ShowTransmitReceiveStatus();
         keyPressedOn = 0;
       }
@@ -1149,7 +1129,6 @@ void loop()
       break;
     case RadioState::CW_TRANSMIT_STRAIGHT_STATE:
       ShowTransmitReceiveStatus();
-      //      digitalWrite(MUTE, UNMUTEAUDIO);  // unmutes audio for sidetone
       cwKeyDown = false;  // false initiates CW_SHAPING_RISE.
       cwTimer = millis();
       while (millis() - cwTimer <= ConfigData.cwTransmitDelay) {  //Start CW transmit timer on
@@ -1231,7 +1210,6 @@ void loop()
         keyPressedOn = 0;  // Fix for keyer click-clack.  KF5N August 16, 2023
       }                    //End Relay timer
 
-      //      digitalWrite(MUTE, MUTEAUDIO);  // mutes audio
       digitalWrite(RXTX, LOW);  // End Straight Key Mode
       break;
     case RadioState::NOSTATE:
@@ -1244,7 +1222,6 @@ void loop()
   if (lastState != radioState) {  // G0ORX 09012023
     lastState = radioState;
     ShowTransmitReceiveStatus();
-    //    Serial.printf("End of loop state machine. radioState = %d lastState = %d\n", radioState, lastState);
   }
 
 #ifdef DEBUG1
@@ -1270,10 +1247,6 @@ void loop()
 
     volumeChangeFlag = false;
     UpdateVolumeField();
-  //  Serial.printf("fftOffset = %d\n", fftOffset);
-  Serial.printf("Max audio blocks = %d\n", AudioMemoryUsageMax());
-  AudioMemoryUsageMaxReset();
-  Serial.printf("ADC_RX_I = %d\n", ADC_RX_I.available());
   }
 
 }  // end loop()

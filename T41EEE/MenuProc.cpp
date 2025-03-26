@@ -110,17 +110,14 @@ void CalibrateOptions() {
 
     case 2:                                                    // CW IQ Receive Cal - Gain and Phase
       cwcalibrater.DoReceiveCalibrate(0, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
-      eeprom.CalDataWrite();                                   // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 3:  // CW Xmit Carrier calibration.
       cwcalibrater.DoXmitCarrierCalibrate(0, false, false, true);
-      //      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 4:                                                 // CW IQ Transmit Cal - Gain and Phase  //AFP 2-21-23
       cwcalibrater.DoXmitCalibrate(0, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
-                                                            //      eeprom.CalDataWrite();                                // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 5:  // SSB PA Cal

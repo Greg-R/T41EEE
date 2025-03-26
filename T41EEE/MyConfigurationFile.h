@@ -74,7 +74,7 @@
 #define UNMUTEAUDIO HIGH
 #define MUTEAUDIO   LOW
 
-// If using an external amplifier, the gain may need to be adjusted for the best volume range.
+// The audio amplifier gain may need to be adjusted for the best volume range.
 #define SPEAKERSCALE   5.0     // Increase or decrease this value depending on your amplifier gain.
 #define HEADPHONESCALE 10.0    // Same as for the speaker.  Adjust to your preference for volume range.
 

@@ -316,6 +316,7 @@ void SetAudioOperatingState(RadioState operatingState) {
         switch4_tx.setChannel(1);  // Bypass compressor.
         mixer3_tx.gain(0, 0.0);
         mixer3_tx.gain(1, 1.0);
+        compGainCompensate.setGain_dB(10.0);  // Use compressor's below threshold gain.
       }
 
       if (ConfigData.xmitEQFlag and bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE) {
@@ -323,7 +324,7 @@ void SetAudioOperatingState(RadioState operatingState) {
         mixer2_tx.gain(0, 1.0);
         mixer2_tx.gain(1, 0.0);
       } else {
-        switch3_tx.setChannel(1);  // Bypass compressor.  Must bypass for FT8.
+        switch3_tx.setChannel(1);  // Bypass equalizer.  Must bypass for FT8.
         mixer2_tx.gain(0, 0.0);
         mixer2_tx.gain(1, 1.0);
       }

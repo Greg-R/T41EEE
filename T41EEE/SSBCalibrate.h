@@ -69,7 +69,7 @@ void ProcessIQData2();
 void warmUpCal();
 void printCalType(int IQCalType, bool autoCal, bool autoCalDone);
 void CalibratePreamble(int setZoom);
-void CalibrateEpilogue(bool saveToEeprom);
+void CalibrateEpilogue(bool radioCal, bool saveToEeprom);
 //void DoReceiveCalibrate(bool radioCal, bool shortCal);
 void DoXmitCalibrate(bool radioCal, bool shortCal, bool saveToEeprom);
 void DoXmitCarrierCalibrate(bool radioCal, bool shortCal, bool saveToEeprom);

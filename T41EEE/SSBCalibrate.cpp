@@ -290,7 +290,6 @@ void SSBCalibrate::CalibratePreamble(int setZoom) {
   NCOFreq = 0L;
   digitalWrite(MUTE, MUTEAUDIO);  //  Mute Audio  (HIGH=Mute)
   digitalWrite(RXTX, HIGH);       // Turn on transmitter.
-                                  //  ShowSpectrumdBScale();
   rawSpectrumPeak = 0;
   radioState = RadioState::SSB_CALIBRATE_STATE;
   ShowTransmitReceiveStatus();
@@ -307,7 +306,8 @@ void SSBCalibrate::CalibratePreamble(int setZoom) {
    Return value:
       void
  *****/
-void SSBCalibrate::CalibrateEpilogue(bool saveToEeprom) {
+void SSBCalibrate::CalibrateEpilogue(bool radioCal, bool saveToEeprom) {
+    Serial.printf("SSB epilogue\n");
   /*
   Serial.printf("lastState=%d radioState=%d memory_used=%d memory_used_max=%d f32_memory_used=%d f32_memory_used_max=%d\n",
                 lastState,
@@ -326,35 +326,27 @@ void SSBCalibrate::CalibrateEpilogue(bool saveToEeprom) {
   SampleRate = SAMPLE_RATE_192K;  // Return to receiver sample rate.
   SetI2SFreq(SR[SampleRate].rate);
   InitializeDataArrays();  // Re-initialize the filters back to 192ksps.
-                           //  ShowTransmitReceiveStatus();
-  // Clear queues to reduce transient.
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) bands.bands[ConfigData.currentBand].sideband = tempSideband;
   bands.bands[ConfigData.currentBand].mode = tempMode;
   radioState = tempState;
-  //  SetAudioOperatingState(radioState);
   ConfigData.centerFreq = TxRxFreq;
   NCOFreq = 0L;
   calibrateFlag = 0;                                       // KF5N
   ConfigData.CWOffset = cwFreqOffsetTemp;                  // Return user selected CW offset frequency.
-                                                           //  ConfigData.calFreq = calFreqTemp;        // Return user selected calibration tone frequency.
   sineTone(ConfigData.CWOffset + 6);                       // This function takes "number of cycles" which is the offset + 6.
   ConfigData.currentScale = userScale;                     //  Restore vertical scale to user preference.  KF5N
-                                                           //  ShowSpectrumdBScale();
   ConfigData.transmitPowerLevel = transmitPowerLevelTemp;  // Restore the user's transmit power level setting.  KF5N August 15, 2023
-                                                           //  eeprom.CalDataWrite();                                    // Save calibration numbers and configuration.  KF5N August 12, 2023
   zoomIndex = userZoomIndex - 1;
   button.ButtonZoom();                      // Restore the user's zoom setting.  Note that this function also modifies ConfigData.spectrum_zoom.
   if (saveToEeprom) eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
   tft.writeTo(L2);                          // Clear layer 2.  KF5N July 31, 2023
   tft.clearMemory();
   tft.writeTo(L1);  // Exit function in layer 1.  KF5N August 3, 2023
-
   calOnFlag = false;
-  RedrawDisplayScreen();
-  //  radioState = RadioState::CW_RECEIVE_STATE;  // KF5N
+  if(not radioCal)  RedrawDisplayScreen();  // Redraw everything!
+else tft.fillWindow();  // Clear the display.
   fftOffset = 0;  // Some reboots may be caused by large fftOffset values when Auto-Spectrum is on.
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
-  //  SetFreq();                        // Return Si5351 to normal operation mode.  KF5N
   lastState = RadioState::NOSTATE;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 16, 2023
   powerUp = true;
 }
@@ -372,13 +364,10 @@ void SSBCalibrate::CalibrateEpilogue(bool saveToEeprom) {
 void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal, bool saveToEeprom) {
   bool exit = false;
   int freqOffset;
-  //  bool corrChange = false;
   float correctionIncrement = 0.001;
   State state = State::warmup;  // Start calibration state machine in warmup state.
   float maxSweepAmp = 0.1;
   float maxSweepPhase = 0.1;
-  //  float32_t amplitude = 0.0;  // Variables to hold amplitude and phase values
-  //  float32_t phase = 0.0;      // during the calibration process.
   float increment = 0.002;
   int averageCount = 0;
   IQCalType = 0;  // Begin with gain optimization.
@@ -393,16 +382,8 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal, bool saveToEepr
   bool averageFlag = false;
   std::vector<float>::iterator result;
   MenuSelect task, lastUsedTask = MenuSelect::DEFAULT;
-  // bool stopSweep = false;
-
-  //  if (toneFreqIndex == 0) {              // 750 Hz
   SSBCalibrate::CalibratePreamble(2);  // Set zoom to 4X.
   freqOffset = 0;                      // Calibration tone same as regular modulation tone.
-                                       //  }
-                                       //  if (toneFreqIndex == 1) {              // 3 kHz
-                                       //    SSBCalibrate::CalibratePreamble(2);  // Set zoom to 4X.
-                                       //    freqOffset = 2250;                   // Need 750 + 2250 = 3 kHz
-                                       //  }
   calTypeFlag = 1;                     // TX cal
   plotCalGraphics(calTypeFlag);
   tft.setFontScale((enum RA8875tsize)0);
@@ -435,7 +416,6 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal, bool saveToEepr
     count = 0;
     warmup = 0;
     index = 1;
-    //  stopSweep = false;
     IQCalType = 0;
     std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
     std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
@@ -445,14 +425,6 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal, bool saveToEepr
   // Transmit Calibration Loop
   while (true) {
     SSBCalibrate::ShowSpectrum2();
-    /*
-    val = ReadSelectedPushButton();
-    if (val != BOGUS_PIN_READ) {
-      menu = ProcessButtonPress(val);
-      if (menu != lastUsedTask && task == MenuSelect::DEFAULT) task = menu;
-      else task = MenuSelect::BOGUS_PIN_READ;
-    }
-    */
     task = readButton(lastUsedTask);
     if (shortCal) task = MenuSelect::FILTER;
     switch (task) {
@@ -464,7 +436,6 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal, bool saveToEepr
         warmup = 0;
         index = 0;
         IQCalType = 0;
-        //stopSweep = false;
         averageFlag = false;
         averageCount = 0;
         std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
@@ -481,7 +452,6 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal, bool saveToEepr
         count = 0;
         warmup = 0;
         index = 1;
-        //stopSweep = false;
         IQCalType = 0;
         std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
         std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
@@ -510,8 +480,9 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal, bool saveToEepr
         break;
       case MenuSelect::MENU_OPTION_SELECT:  // Save values and exit calibration.
         tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-        //        IQChoice = 6;  // AFP 2-11-23
-        exit = true;
+        CalibrateEpilogue(radioCal, saveToEeprom);
+        return;
+//        exit = true;
         break;
       default:
         break;
@@ -523,7 +494,6 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal, bool saveToEepr
         case State::warmup:
           autoCal = true;
           printCalType(calTypeFlag, autoCal, false);
-          //  stopSweep = false;
           std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
           std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
           warmup = warmup + 1;
@@ -563,10 +533,6 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal, bool saveToEepr
           index = index + 1;
           // Increment for next measurement.
           amplitude = amplitude + increment;  // Next one!
-          // Go to Q channel when I channel sweep is finished.
-          //    if (index > 20) {
-          //      if (sweepVector[index - 1] > (sweepVector[index - 11] + 3.0)) stopSweep = true;  // Stop sweep if past the null.
-          //    }
           if (abs(amplitude - 1.0) > maxSweepAmp) {                             // Needs to be subtracted from 1.0.
             IQCalType = 1;                                                      // Get ready for phase.
             result = std::min_element(sweepVector.begin(), sweepVector.end());  // Value of the minimum.
@@ -582,7 +548,6 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal, bool saveToEepr
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorAmp[i] = (iOptimal - 10 * 0.001) + (0.001 * i);
             }
-            //          stopSweep = false;
             IQCalType = 1;  // Prepare for phase.
             index = 0;
             averageFlag = false;
@@ -603,9 +568,6 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal, bool saveToEepr
           index = index + 1;
           // Increment for the next measurement.
           phase = phase + increment;
-          //     if (index > 20) {
-          //       if (sweepVector[index - 1] > (sweepVector[index - 11] + 3.0)) stopSweep = true;  // Stop sweep if past the null.
-          //     }
           if (phase > maxSweepPhase) {
             result = std::min_element(sweepVector.begin(), sweepVector.end());
             adjdBMinIndex = std::distance(sweepVector.begin(), result);
@@ -613,7 +575,6 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal, bool saveToEepr
             phase = qOptimal;                            // Set to the discovered minimum.
 
             GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, (char *)"IQ Phase", false);
-            // Serial.printf("Init The optimal phase = %.5f at index %d with value %.1f count = %d\n", sweepVectorValue[adjdBMinIndex], adjdBMinIndex, *result, count);
             // Save the sub_vector which will be used to refine the optimal result.
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorPhase[i] = (qOptimal - 10 * 0.001) + (0.001 * i);
@@ -650,7 +611,6 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal, bool saveToEepr
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorAmp[i] = (iOptimal - 10 * 0.001) + (0.001 * i);  // The next array to sweep.
             }
-            // Serial.printf("Refine The optimal amplitude = %.3f at index %d with value %.1f\n", iOptimal, adjdBMinIndex, *result);
             IQCalType = 1;
             index = 0;
             averageFlag = false;
@@ -684,7 +644,6 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal, bool saveToEepr
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorPhase[i] = (qOptimal - 10 * 0.001) + (0.001 * i);
             }
-            //            Serial.printf("Refine The optimal phase = %.3f at index %d with value %.1f\n", qOptimal, adjdBMinIndex, *result);
             IQCalType = 0;
             averageFlag = 0;
             averageCount = 0;
@@ -734,7 +693,7 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal, bool saveToEepr
               state = State::exit;
               break;
             } else {
-              CalibrateEpilogue(saveToEeprom);  // After 5 seconds.
+              CalibrateEpilogue(true, saveToEeprom);  // After 5 seconds.
               return;
             }
           }
@@ -763,9 +722,7 @@ void SSBCalibrate::DoXmitCalibrate(bool radioCal, bool shortCal, bool saveToEepr
     }
     if (exit) break;  //  Exit the while loop.
   }                   // end while
-                      //CalData.IQSSBAmpCorrectionFactor[ConfigData.currentBand]
-                      //CalData.IQSSBPhaseCorrectionFactor[ConfigData.currentBand]
-  SSBCalibrate::CalibrateEpilogue(saveToEeprom);
+
 }  // End Transmit calibration
 
 
@@ -920,8 +877,9 @@ void SSBCalibrate::DoXmitCarrierCalibrate(bool radioCal, bool shortCal, bool sav
         break;
       case MenuSelect::MENU_OPTION_SELECT:  // Save values and exit calibration.
         tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-        //        IQChoice = 6;  // AFP 2-11-23
-        exit = true;
+        CalibrateEpilogue(radioCal, saveToEeprom);
+        return;
+//        exit = true;
         break;
       default:
         break;
@@ -1136,7 +1094,7 @@ void SSBCalibrate::DoXmitCarrierCalibrate(bool radioCal, bool shortCal, bool sav
               state = State::exit;
               break;
             } else {
-              SSBCalibrate::CalibrateEpilogue(true);
+              SSBCalibrate::CalibrateEpilogue(true, saveToEeprom);
               return;
             }
           }
@@ -1158,7 +1116,7 @@ void SSBCalibrate::DoXmitCarrierCalibrate(bool radioCal, bool shortCal, bool sav
     //    if (IQChoice == 6) break;  //  Exit the while loop.
     if (exit) break;
   }  // end while
-  SSBCalibrate::CalibrateEpilogue(saveToEeprom);
+
 }  // End carrier calibration
 #endif
 
