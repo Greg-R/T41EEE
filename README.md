@@ -129,6 +129,11 @@ CW sidetone now has an adjustment for both headphone and speaker sidetone levels
 The headphone output is also useful for interfacing to the WSJTX program running on an external computer.
 More on this below.
 
+Note that the headphone output has a "virtual ground".  This thread at the PJRC discussion forum has information
+on this potential problem:
+
+<https://forum.pjrc.com/index.php?threads/shorted-or-dead-audio-adapter.76159/>
+
 ## The Mode Button Now Selects Upper or Lower Sideband
 
 The mode button (column 2, row 3) toggles between upper and lower sideband.  This is only relevant
