@@ -221,6 +221,10 @@ routines only accomodated lower sideband on 80M and 40M and upper sideband in al
 other bands.  Thus it was necessary to expand the radio calibration routines to
 both lower and upper sidebands on all bands.
 
+The calibration frequencies used in the radio calibration functions are hard-coded in
+the calibration data structure.  Single-band manual calibration uses the current radio
+frequency.
+
 It takes a long time.  But why not?  It's automated.  Set it up, and let it run to completion.
 The calibration numbers are automatically saved to EEPROM.  Don't forget to also save
 them to the SD card (not automatic)!
