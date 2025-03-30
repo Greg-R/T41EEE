@@ -646,7 +646,7 @@ void BandInformation()  // SSB or CW
   // Write SSB mode to display
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE) {
     if (ConfigData.cessb) tft.print("CESSB");  // Which mode
-    if (not ConfigData.cessb) tft.print("SSB Data");
+    if (not ConfigData.cessb) tft.print("SSB");
   }
 
   // Write FT8 mode to display.

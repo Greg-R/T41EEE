@@ -922,9 +922,9 @@ FLASHMEM void setup() {
     tft.setCursor(10, 10);
     tft.print("Release button to start calibration.");
     delay(2000);
-    EnableButtonInterrupts();
-    SaveAnalogSwitchValues();
-    eeprom.EEPROMWrite();  // Call to reset switch matrix values
+    button.EnableButtonInterrupts();
+    SaveAnalogSwitchValues();  // Call to reset switch matrix values
+    eeprom.CalDataWrite();
   }                        // KD0RC end
 #else
   button.EnableButtonInterrupts();
