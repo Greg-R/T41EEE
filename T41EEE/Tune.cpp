@@ -192,7 +192,7 @@ void ResetTuning() {
   DrawBandWidthIndicatorBar();
   BandInformation();
   ShowFrequency();
-//  UpdateDecoderField();  // Update Morse decoder if used.
+//  UpdateAudioGraphics();  // Update Morse decoder if used.
   FilterSetSSB();
 }
 

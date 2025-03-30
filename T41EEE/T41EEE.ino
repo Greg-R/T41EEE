@@ -257,6 +257,9 @@ const uint16_t n_dec2_taps = (1 + (uint16_t)(n_att / (22.0 * (n_fstop2 - n_fpass
 int attenuator = 0;
 
 int audioYPixel[256]{ 0 };  // Will int16_t save memory here???  DMAMEM not working here.  Causes audio spectrum glitch.  KF5N February 26, 2024.
+int audioYPixelnew[256]{ 0 };
+int audioYPixelold[256]{ 0 };
+int audioYPixelcurrent[256]{ 0 };
 
 int bandswitchPins[] = {
   30,  // 80M

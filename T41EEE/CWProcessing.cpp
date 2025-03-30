@@ -121,11 +121,10 @@ void JackClusteredArrayMax(int32_t *array, int32_t elements, int32_t *maxCount, 
 FLASHMEM void SelectCWFilter() {
   const std::string CWFilter[] = { "0.8kHz", "1.0kHz", "1.3kHz", "1.8kHz", "2.0kHz", " Off " };
   ConfigData.CWFilterIndex = SubmenuSelect(CWFilter, 6, ConfigData.CWFilterIndex);  // CWFilter is an array of strings.
-  // Clear the current CW filter graphics and then restore the bandwidth indicator bar.  KF5N July 30, 2023
-  tft.writeTo(L2);
-  tft.clearMemory();
-  BandInformation();
-  DrawBandWidthIndicatorBar();
+//  BandInformation();
+
+if(ConfigData.CWFilterIndex != 5) switchFilterSideband = true;  // Sets current delimiter to FLow.
+  UpdateAudioGraphics();  // This draws decoder delimiters and CW bandwidth box (red);
   eeprom.ConfigDataWrite();
 }
 
@@ -148,7 +147,7 @@ FLASHMEM void SelectCWOffset() {
   tempCWOffset = ConfigData.CWOffset;
   tempDecoderFlag = ConfigData.decoderFlag;                                // Remember current status of decoder.
   ConfigData.decoderFlag = false;                                          // Set to false to erase decoder delimiters.
-  UpdateDecoderField();                                                    // Erase graphics if they exist.
+  UpdateAudioGraphics();                                                    // Erase graphics if they exist.
   ConfigData.decoderFlag = tempDecoderFlag;                                // Restore the decoder flag value.
   ConfigData.CWOffset = SubmenuSelect(CWOffsets, 5, ConfigData.CWOffset);  // CWFilter is an array of strings.
 
@@ -157,7 +156,7 @@ FLASHMEM void SelectCWOffset() {
 
   // Now generate the values for the buffer which is used to create the CW tone.  The values are discrete because there must be whole cycles.
   if (ConfigData.CWOffset < 4) sineTone(numCycles[ConfigData.CWOffset]);
-  UpdateDecoderField();
+  UpdateAudioGraphics();
   eeprom.ConfigDataWrite();  // Save to EEPROM.
 }
 

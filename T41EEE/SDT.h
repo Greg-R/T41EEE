@@ -333,10 +333,12 @@ char versionSettings[10] = "T41EEE.9";  // This is required to be the first!  Se
   int currentBandB = STARTUP_BAND;  // 4 bytes   JJP 7-3-23
 
   //DB2OO, 23-AUG-23 7.1MHz for Region 1
-#if defined(ITU_REGION) && ITU_REGION == 1
+#if ITU_REGION == 1
   uint32_t currentFreqA = 7100000;
-#else
+#elif ITU_REGION == 2
   uint32_t currentFreqA = 7200000;
+#elif ITU_REGION == 3
+  uint32_t currentFreqA = 7100000;
 #endif
   uint32_t currentFreqB = 7030000;
 
@@ -357,11 +359,13 @@ char versionSettings[10] = "T41EEE.9";  // This is required to be the first!  Se
   float powerOutSSB[NUMBER_OF_BANDS] = { 0.035, 0.035, 0.035, 0.035, 0.035, 0.035, 0.035 };
   uint32_t favoriteFreqs[13] = { 3560000, 3690000, 7030000, 7200000, 14060000, 14200000, 21060000, 21285000, 28060000, 28365000, 5000000, 10000000, 15000000 };
 
-  //DB2OO, 23-AUG-23: Region 1 freqs (from https://qrper.com/qrp-calling-frequencies/)
-#if defined(ITU_REGION) && ITU_REGION == 1
-  uint32_t lastFrequencies[NUMBER_OF_BANDS][2] = { { 3690000, 3560000 }, { 7090000, 7030000 }, { 14285000, 14060000 }, { 18130000, 18096000 }, { 21285000, 21060000 }, { 24950000, 24906000 }, { 28365000, 28060000 } };
-#else
-  uint32_t lastFrequencies[NUMBER_OF_BANDS][2] = { { 3985000, 3560000 }, { 7200000, 7030000 }, { 14285000, 14060000 }, { 18130000, 18096000 }, { 21385000, 21060000 }, { 24950000, 24906000 }, { 28385000, 28060000 } };
+  // Using ARRL table: https://www.arrl.org/frequency-bands.
+#if ITU_REGION == 1
+  uint32_t lastFrequencies[NUMBER_OF_BANDS][2] = { { 3590000, 3560000 }, { 7190000, 7030000 }, { 14285000, 14060000 }, { 18130000, 18096000 }, { 21400000, 21060000 }, { 24950000, 24906000 }, { 28365000, 28060000 } };
+#elif ITU_REGION == 2
+  uint32_t lastFrequencies[NUMBER_OF_BANDS][2] = { { 3985000, 3560000 }, { 7290000, 7030000 }, { 14285000, 14060000 }, { 18130000, 18096000 }, { 21400000, 21060000 }, { 24950000, 24906000 }, { 28385000, 28060000 } };
+#elif ITU_REGION == 3
+  uint32_t lastFrequencies[NUMBER_OF_BANDS][2] = { { 3885000, 3560000 }, { 7190000, 7030000 }, { 14285000, 14060000 }, { 18130000, 18096000 }, { 21400000, 21060000 }, { 24950000, 24906000 }, { 28385000, 28060000 } };
 #endif
 
 Sideband lastSideband[NUMBER_OF_BANDS] = {Sideband::LOWER, Sideband::LOWER, Sideband::UPPER, Sideband::UPPER, Sideband::UPPER, Sideband::UPPER, Sideband::UPPER};
@@ -421,11 +425,13 @@ struct calibration_t {
   float IQSSBAmpCorrectionFactorUSB[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
   float IQSSBPhaseCorrectionFactorUSB[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
 
-  //DB2OO, 23-AUG-23: Region 1 freqs (from https://qrper.com/qrp-calling-frequencies/)
-#if defined(ITU_REGION) && ITU_REGION == 1
-  uint32_t calFrequencies[NUMBER_OF_BANDS][2] = { { 3690000, 3560000 }, { 7090000, 7030000 }, { 14285000, 14060000 }, { 18130000, 18096000 }, { 21285000, 21060000 }, { 24950000, 24906000 }, { 28365000, 28060000 } };
-#else
-  uint32_t calFrequencies[NUMBER_OF_BANDS][2] = { { 3985000, 3560000 }, { 7200000, 7030000 }, { 14285000, 14060000 }, { 18130000, 18096000 }, { 21385000, 21060000 }, { 24950000, 24906000 }, { 28385000, 28060000 } };
+  // Using ARRL table: https://www.arrl.org/frequency-bands.
+#if ITU_REGION == 1
+  uint32_t calFrequencies[NUMBER_OF_BANDS][2] = { { 3590000, 3560000 }, { 7190000, 7030000 }, { 14285000, 14060000 }, { 18130000, 18096000 }, { 21400000, 21060000 }, { 24950000, 24906000 }, { 28365000, 28060000 } };
+#elif ITU_REGION == 2
+  uint32_t calFrequencies[NUMBER_OF_BANDS][2] = { { 3985000, 3560000 }, { 7290000, 7030000 }, { 14285000, 14060000 }, { 18130000, 18096000 }, { 21400000, 21060000 }, { 24950000, 24906000 }, { 28385000, 28060000 } };
+#elif ITU_REGION == 3
+  uint32_t calFrequencies[NUMBER_OF_BANDS][2] = { { 3885000, 3560000 }, { 7190000, 7030000 }, { 14285000, 14060000 }, { 18130000, 18096000 }, { 21400000, 21060000 }, { 24950000, 24906000 }, { 28385000, 28060000 } };
 #endif
 
   int buttonThresholdPressed = 944;   // switchValues[0] + WIGGLE_ROOM
@@ -682,7 +688,12 @@ extern const uint32_t N_stages_biquad_lowpass1;
 extern const uint16_t n_dec1_taps;
 extern const uint16_t n_dec2_taps;
 extern int attenuator;
+
 extern int audioYPixel[];
+extern int audioYPixelnew[];
+extern int audioYPixelold[];
+extern int audioYPixelcurrent[];
+
 extern int bandswitchPins[];
 extern bool calibrateFlag;
 extern bool morseDecodeAdjustFlag;
@@ -1024,7 +1035,7 @@ float TGetTemp();
 void UpdateAGCField();
 void UpdateAudioField();
 void UpdateCompressionField();
-void UpdateDecoderField();
+void UpdateAudioGraphics();
 void UpdateEqualizerField(bool rxEqState, bool txEqState);
 void updateMic();  // This updates the Open Audio compressor.
 void UpdateNoiseField();

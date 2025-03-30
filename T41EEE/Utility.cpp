@@ -3,7 +3,7 @@
 
 #include "SDT.h"
 
-#define TIME_X (XPIXELS * 0.73)                                      // Upper-left corner for time
+#define TIME_X 550                                      // Upper-left corner for time
 #define TIME_Y (YPIXELS * 0.07)
 #define TABLE_SIZE_64 64
 
@@ -593,8 +593,8 @@ void DisplayClock() {
 
   tft.setFontScale((enum RA8875tsize)1);
 
-  tft.fillRect(TIME_X - 20, TIME_Y, XPIXELS - TIME_X - 1, CHAR_HEIGHT, RA8875_BLACK);
-  tft.setCursor(TIME_X - 20, TIME_Y);
+  tft.fillRect(TIME_X, TIME_Y, XPIXELS - TIME_X - 1, CHAR_HEIGHT, RA8875_BLACK);
+  tft.setCursor(TIME_X, TIME_Y);
   tft.setTextColor(RA8875_WHITE);
   tft.print(timeBuffer);
 }  // end function displayTime

@@ -104,19 +104,13 @@ int32_t filter_change;
 // A major change to this function.  It only sets FHiCut and FLoCut variables in the bands2 struct/array.
 // No other functions are performed.  Filter settings, demodulation, and graphics changes are delegated to other functions.
 // This version limits the result to an fhigh and an flow number.  Note that this function works in concert with EncoderFilter()
-// which is attached to an interrupt.
+// which is attached to an interrupt.  Graphics changes are handled by UpdateAudioGraphics() in Display.cpp.
 void FilterSetSSB() {
-  //  ADC_RX_I.end();
-  //  ADC_RX_Q.end();
-  //AudioNoInterrupts();
-  //Serial.printf("Encoder first bands.bands[ConfigData.currentBand].FLoCut = %d\n", bands.bands[ConfigData.currentBand].FLoCut);
-  //Serial.printf("Encoder first bands.bands[ConfigData.currentBand].FHiCut = %d\n", bands.bands[ConfigData.currentBand].FHiCut);
+  Serial.printf("FilterSetSSB\n");
   int32_t filter_change;
   if (filter_pos != last_filter_pos) {  // This decision is required as this function is required to be used in many locations.  KF5N April 21, 2024
-    tft.writeTo(L2);                    // Clear layer 2.  KF5N July 31, 2023
-    tft.clearMemory();
     if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) BandInformation();
-    tft.fillRect((MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2 - filterWidth, SPECTRUM_TOP_Y + 17, filterWidth, SPECTRUM_HEIGHT - 20, RA8875_BLACK);  // Erase old filter background
+//    tft.fillRect((MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2 - filterWidth, SPECTRUM_TOP_Y + 17, filterWidth, SPECTRUM_HEIGHT - 20, RA8875_BLACK);  // Erase old filter background
     filter_change = (filter_pos - last_filter_pos);
     if (filter_change >= 1) {
       filterWidth--;  // filterWidth is used in graphics only!
@@ -152,7 +146,7 @@ void FilterSetSSB() {
     volumeChangeFlag = true;
   }
 
-  //  The following code was moved from ShowSpectrum() in Display.cpp.
+  /*  The following code was moved from ShowSpectrum() in Display.cpp.
   int filterLoPositionMarker{ 0 };
   int filterHiPositionMarker{ 0 };
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER or bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
@@ -181,12 +175,11 @@ void FilterSetSSB() {
   }
 
   tft.writeTo(L1);
+  */
 
+  UpdateAudioGraphics();     // Redraw Morse decoder graphics because they get erased due to filter graphics updates.
   DrawFrequencyBarValue();  // This calls ShowBandwidth().  YES, this function is useful here.
-  UpdateDecoderField();     // Redraw Morse decoder graphics because they get erased due to filter graphics updates.
   DrawBandWidthIndicatorBar();
-
-  ShowBandwidth();
 }
 
 

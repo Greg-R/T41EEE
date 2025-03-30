@@ -1073,7 +1073,7 @@ void VFOSelect() {
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) BandInformation();
 //  DrawBandWidthIndicatorBar();
 //  DrawFrequencyBarValue();
-//  UpdateDecoderField();
+//  UpdateAudioGraphics();
 }
 
 
