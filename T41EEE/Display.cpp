@@ -60,6 +60,7 @@ double elapsed_micros_mean;
     void
 *****/
 void DrawAudioSpectContainer() {
+  tft.writeTo(L1);
   tft.drawRect(BAND_INDICATOR_X - 9, SPECTRUM_BOTTOM - 118, 255, 118, RA8875_GREEN);
   tft.setFontScale((enum RA8875tsize)0);
   tft.setTextColor(RA8875_WHITE);
@@ -601,13 +602,14 @@ void ShowAutoStatus() {
 *****/
 void BandInformation()  // SSB or CW
 {
-//  float CWFilterPosition = 0.0;
   std::string CWFilter[] = { "0.8kHz", "1.0kHz", "1.3kHz", "1.8kHz", "2.0kHz", " Off " };
 
   tft.setFontScale((enum RA8875tsize)0);
   tft.setTextColor(RA8875_GREEN);
   tft.setCursor(5, FREQUENCY_Y + 30);
   tft.setTextColor(RA8875_WHITE);
+
+  tft.writeTo(L1);
 
   tft.print("Center Freq");                                    // This is static, never changes.
   tft.fillRect(100, FREQUENCY_Y + 31, 290, 15, RA8875_BLACK);  // Clear frequency, band, and mode.  This should be the only erase required.
@@ -636,32 +638,8 @@ void BandInformation()  // SSB or CW
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) {
     tft.print("CW ");
     tft.setCursor(OPERATION_STATS_X + 111, FREQUENCY_Y + 30);  //AFP 10-18-22
-//    tft.writeTo(L2);                                           // Moved to L2 here to properly refresh the CW filter bandwidth.  KF5N July 30, 2023
     tft.print(CWFilter[ConfigData.CWFilterIndex].c_str());             //AFP 10-18-22
-/*    switch (ConfigData.CWFilterIndex) {
-      case 0:
-        CWFilterPosition = 35.7;  // 0.84 * 42.5;
-        break;
-      case 1:
-        CWFilterPosition = 42.5;
-        break;
-      case 2:
-        CWFilterPosition = 55.25;  // 1.3 * 42.5;
-        break;
-      case 3:
-        CWFilterPosition = 76.5;  // 1.8 * 42.5;
-        break;
-      case 4:
-        CWFilterPosition = 85.0;  // 2.0 * 42.5;
-        break;
-      case 5:
-        CWFilterPosition = 0.0;
-        break;
-    }
-    tft.fillRect(BAND_INDICATOR_X - 8, AUDIO_SPECTRUM_TOP, CWFilterPosition, 120, MAROON);
-    tft.drawFastVLine(BAND_INDICATOR_X - 8 + CWFilterPosition, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_LIGHT_GREY);
-    */
-    tft.writeTo(L1);
+
     //================  AFP 10-19-22 =========
   }
 
@@ -1308,6 +1286,7 @@ FLASHMEM void UpdateAudioGraphics() {
     tft.writeTo(L2);  // This has to be written to L2 or it will be erased by the audio spectrum eraser.
     tft.clearMemory();
 
+// Update CW decoder status in information window.
   if (ConfigData.decoderFlag) {        
     tft.setCursor(FIELD_OFFSET_X, DECODER_Y - 5);
     tft.print("    WPM");
@@ -1373,7 +1352,6 @@ if(bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and ConfigData
     tft.writeTo(L2);  // This has to be written to L2 or it will be erased by the audio spectrum eraser.
     tft.fillRect(BAND_INDICATOR_X - 6 + abs(filterLoPositionMarker), AUDIO_SPECTRUM_TOP, CWFilterPosition - abs(filterLoPositionMarker), 120, MAROON);
     tft.drawFastVLine(BAND_INDICATOR_X - 8 + CWFilterPosition, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_LIGHT_GREY);
-        Serial.printf("Draw CW box\n");
   }
 
 // Draw decoder delimiters if the decoder is on.
@@ -1398,6 +1376,7 @@ if(bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and ConfigData
   }
 
 // Update stuff including graphics that got erase by this function.
+BandInformation();
   ShowBandwidth();
   DrawFrequencyBarValue();  // This calls ShowBandwidth().  YES, this function is useful here.
   DrawBandWidthIndicatorBar();
