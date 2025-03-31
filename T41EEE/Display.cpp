@@ -236,7 +236,11 @@ void ShowSpectrum() {
         return;                                                                                  //AFP 09-01-22
       } else {                                                                                   //AFP 09-01-22
 //        tft.drawFastVLine(BAND_INDICATOR_X - 8 + x1, SPECTRUM_BOTTOM - 116, 115, RA8875_BLACK);  //  This is a vertical line from top to bottom!
-tft.drawFastVLine(BAND_INDICATOR_X - 8 + x1, 247 - audioYPixelold[x1] - 1, audioYPixelold[x1] - 2, RA8875_BLACK);
+  
+          if (audioYPixelold[x1] > CLIP_AUDIO_PEAK) audioYPixelold[x1] = CLIP_AUDIO_PEAK;  // audioSpectrumHeight = 118
+            
+tft.drawFastVLine(532 + x1, 245 - audioYPixelold[x1] - 0, audioYPixelold[x1], RA8875_BLACK);
+//tft.drawFastVLine(BAND_INDICATOR_X - 8 + x1, SPECTRUM_BOTTOM - 116, audioYPixelold[x1] - 2, RA8875_BLACK);
         if (audioYPixel[x1] != 0) {
           if (audioYPixel[x1] > CLIP_AUDIO_PEAK)  // audioSpectrumHeight = 118
             audioYPixel[x1] = CLIP_AUDIO_PEAK;
@@ -246,7 +250,8 @@ tft.drawFastVLine(BAND_INDICATOR_X - 8 + x1, 247 - audioYPixelold[x1] - 1, audio
           // Draw a vertical line with the audio spectrum magnitude.  AUDIO_SPECTRUM_BOTTOM = 247
 //          tft.drawFastVLine(BAND_INDICATOR_X - 8 + x1, AUDIO_SPECTRUM_BOTTOM - audioYPixel[x1] - 1, audioYPixel[x1] - 2, RA8875_MAGENTA);  //AFP draw new AUDIO spectrum line
                          //         x coordinate              y1                        y2
-          tft.drawFastVLine(BAND_INDICATOR_X - 8 + x1, 247 - audioYPixel[x1] - 1, audioYPixel[x1] - 2, RA8875_MAGENTA);
+          tft.drawFastVLine(532 + x1, 245 - audioYPixel[x1] - 0, audioYPixel[x1], RA8875_MAGENTA);
+//          tft.drawFastVLine(BAND_INDICATOR_X - 8 + x1, SPECTRUM_BOTTOM - 116, audioYPixel[x1] - 2, RA8875_MAGENTA);
         }
       }
     }
