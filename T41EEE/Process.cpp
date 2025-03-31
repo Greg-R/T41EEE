@@ -101,7 +101,6 @@ void Process::ProcessIQData() {
     if (ADC_RX_I.available() > 50) {
       ADC_RX_I.clear();
       ADC_RX_Q.clear();
-      Serial.printf("interrupt\n");
     }
 
     /**********************************************************************************  AFP 12-31-20

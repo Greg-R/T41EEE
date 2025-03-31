@@ -1172,7 +1172,7 @@ void Button::ExecuteModeChange() {
   DrawBandWidthIndicatorBar();  // Restore the bandwidth indicator bar.  KF5N July 30, 2023
   BandInformation();
   fftOffset = 140;
-  Serial.printf("Execute Mode Change\n");
+//  Serial.printf("Execute Mode Change\n");
   SetBandRelay();  // Set relays in LPF for current band.
   SetFreq();       // Must update frequency, for example moving from SSB to CW, the RX LO is shifted.  KF5N
   powerUp = true;

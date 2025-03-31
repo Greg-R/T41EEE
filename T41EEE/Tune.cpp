@@ -17,8 +17,8 @@ uint64_t Clk2SetFreq = 0;
 
   CAUTION: SI5351_FREQ_MULT is set in the si5253.h header file and is 100UL
 *****/
-void SetFreqCal(int calFreqShift) {  // July 7 2023 KF5N
-uint32_t IFFreq = SR[SampleRate].rate / 4;  // IF (intermediate) frequency
+void SetFreqCal(int calFreqShift) {           // July 7 2023 KF5N
+  uint32_t IFFreq = SR[SampleRate].rate / 4;  // IF (intermediate) frequency
   // NEVER USE AUDIONOINTERRUPTS HERE: that introduces annoying clicking noise with every frequency change
   // SI5351_FREQ_MULT is 100ULL, MASTER_CLK_MULT is 4;
   int cwFreqOffset = (ConfigData.CWOffset + 6) * 24000 / 256;  // Calculate the CW offset based on user selected CW offset frequency.
@@ -51,8 +51,8 @@ uint32_t IFFreq = SR[SampleRate].rate / 4;  // IF (intermediate) frequency
 
   CAUTION: SI5351_FREQ_MULT is set in the si5253.h header file and is 100UL
 *****/
-void SetFreq() {  //AFP 09-22-22   Revised July 7 KF5N
-uint32_t IFFreq = SR[SampleRate].rate / 4;  // IF (intermediate) frequency
+void SetFreq() {                              //AFP 09-22-22   Revised July 7 KF5N
+  uint32_t IFFreq = SR[SampleRate].rate / 4;  // IF (intermediate) frequency
   // NEVER USE AUDIONOINTERRUPTS HERE: that introduces annoying clicking noise with every frequency change
   // SI5351_FREQ_MULT is 100ULL, MASTER_CLK_MULT is 4;
   int cwFreqOffset = (ConfigData.CWOffset + 6) * 24000 / 256;  // Calculate the CW offset based on user selected CW offset frequency.
@@ -86,7 +86,6 @@ uint32_t IFFreq = SR[SampleRate].rate / 4;  // IF (intermediate) frequency
   }
   //=====================  AFP 10-03-22 =================
   DrawFrequencyBarValue();
-  Serial.printf("SetFreq\n");
 }
 #else
 /*****
@@ -100,8 +99,8 @@ uint32_t IFFreq = SR[SampleRate].rate / 4;  // IF (intermediate) frequency
 
   CAUTION: SI5351_FREQ_MULT is set in the si5253.h header file and is 100UL
 *****/
-void SetFreqCal(int calFreqShift) {  // July 7 2023 KF5N
-uint32_t IFFreq = SR[SampleRate].rate / 4;  // IF (intermediate) frequency
+void SetFreqCal(int calFreqShift) {           // July 7 2023 KF5N
+  uint32_t IFFreq = SR[SampleRate].rate / 4;  // IF (intermediate) frequency
   // NEVER USE AUDIONOINTERRUPTS HERE: that introduces annoying clicking noise with every frequency change
   // SI5351_FREQ_MULT is 100ULL, MASTER_CLK_MULT is 4;
   int cwFreqOffset = (ConfigData.CWOffset + 6) * 24000 / 256;  // Calculate the CW offset based on user selected CW offset frequency.
@@ -134,8 +133,8 @@ uint32_t IFFreq = SR[SampleRate].rate / 4;  // IF (intermediate) frequency
 
   CAUTION: SI5351_FREQ_MULT is set in the si5253.h header file and is 100UL
 *****/
-void SetFreq() {  //AFP 09-22-22   Revised July 7 KF5N
-uint32_t IFFreq = SR[SampleRate].rate / 4;  // IF (intermediate) frequency
+void SetFreq() {                              //AFP 09-22-22   Revised July 7 KF5N
+  uint32_t IFFreq = SR[SampleRate].rate / 4;  // IF (intermediate) frequency
   // NEVER USE AUDIONOINTERRUPTS HERE: that introduces annoying clicking noise with every frequency change
   // SI5351_FREQ_MULT is 100ULL, MASTER_CLK_MULT is 4;
   int cwFreqOffset = (ConfigData.CWOffset + 6) * 24000 / 256;  // Calculate the CW offset based on user selected CW offset frequency.
@@ -188,11 +187,11 @@ void ResetTuning() {
   ConfigData.centerFreq = TxRxFreq = currentFreq;  //AFP 10-28-22  // currentFreqA changed to currentFreq.  KF5N August 7, 2023
   tft.writeTo(L2);                                 // Clear layer 2.  KF5N July 31, 2023
   tft.clearMemory();
-////  SetFreq();  // For new tuning scheme.  KF5N July 22, 2023
+  SetFreq();  // For new tuning scheme.  KF5N July 22, 2023
   DrawBandWidthIndicatorBar();
   BandInformation();
   ShowFrequency();
-//  UpdateAudioGraphics();  // Update Morse decoder if used.
+  //  UpdateAudioGraphics();  // Update Morse decoder if used.
   FilterSetSSB();
 }
 
@@ -224,7 +223,7 @@ void CenterFastTune() {
 *****/
 int DoSplitVFO() {
   char freqBuffer[15];
-//  int val;
+  //  int val;
   MenuSelect menu;
   long chunk = SPLIT_INCREMENT;
   long splitOffset;
@@ -251,12 +250,12 @@ int DoSplitVFO() {
     }
     filterEncoderMove = 0L;
 
-//    val = ReadSelectedPushButton();  // Read pin that controls all switches
+    //    val = ReadSelectedPushButton();  // Read pin that controls all switches
     menu = readButton();
-//    delay(150L);
+    //    delay(150L);
     if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
-      Clk1SetFreq += splitOffset;     // New transmit frequency // AFP 09-27-22
-//      UpdateInfoWindow();
+      Clk1SetFreq += splitOffset;                  // New transmit frequency // AFP 09-27-22
+                                                   //      UpdateInfoWindow();
       filterEncoderMove = 0L;
       break;
     }

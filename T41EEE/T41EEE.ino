@@ -836,8 +836,8 @@ FLASHMEM void setup() {
 #else
   sgtl5000_1.lineOutLevel(20);  // Setting of 20 limits line-out level to 2.14 volts p-p.
 #endif
-  sgtl5000_1.adcHighPassFilterEnable();   // This is required for QSE2DC, specifically for carrier calibration.
-//  sgtl5000_1.adcHighPassFilterDisable();  //reduces noise.  https://forum.pjrc.com/threads/27215-24-bit-audio-boards?p=78831&viewfull=1#post78831
+  sgtl5000_1.adcHighPassFilterEnable();  // This is required for QSE2DC, specifically for carrier calibration.
+                                         //  sgtl5000_1.adcHighPassFilterDisable();  //reduces noise.  https://forum.pjrc.com/threads/27215-24-bit-audio-boards?p=78831&viewfull=1#post78831
 
   updateMic();             // This updates the transmit signal chain settings.  Located in SSB_Exciter.cpp.
   initializeAudioPaths();  // Updates the AGC (compressor) in the receiver.
@@ -925,17 +925,17 @@ FLASHMEM void setup() {
     button.EnableButtonInterrupts();
     SaveAnalogSwitchValues();  // Call to reset switch matrix values
     eeprom.CalDataWrite();
-  }                        // KD0RC end
+  }  // KD0RC end
 #else
   button.EnableButtonInterrupts();
   eeprom.EEPROMStartup();
 #endif
 
-//  Entry graphics
+  //  Entry graphics
   Splash();
 
-//  Draw objects to the display.
-RedrawDisplayScreen();
+  //  Draw objects to the display.
+  RedrawDisplayScreen();
 
   /****************************************************************************************
      start local oscillator Si5351
@@ -984,13 +984,13 @@ RedrawDisplayScreen();
     bands.bands[ConfigData.currentBand].mode = RadioMode::SAM_MODE;
   }
 
-  mainMenuIndex = 0;  // Changed from middle to first. Do Menu Down to get to Calibrate quickly
+  mainMenuIndex = 0;                         // Changed from middle to first. Do Menu Down to get to Calibrate quickly
   zoomIndex = ConfigData.spectrum_zoom - 1;  // ButtonZoom() increments zoomIndex, so this cancels it so the read from EEPROM is accurately restored.  KF5N August 3, 2023
   button.ButtonZoom();                       // Restore zoom settings.  KF5N August 3, 2023
 
   ConfigData.sdCardPresent = SDPresentCheck();  // JJP 7/18/23
-  ConfigData.rfGainCurrent = 0;  // Start with lower gain so you don't get blasted.
-  lastState = RadioState::NOSTATE;  // Forces an update.
+  ConfigData.rfGainCurrent = 0;                 // Start with lower gain so you don't get blasted.
+  lastState = RadioState::NOSTATE;              // Forces an update.
 
   if ((MASTER_CLK_MULT_RX == 2) or (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();  // Required only for QSD2/QSE2.
 }
@@ -1011,8 +1011,7 @@ elapsedMicros usec = 0;  // Automatically increases as time passes; no ++ necess
 *****/
 float audioBW{ 0.0 };
 uint32_t receiverMute = 10;
-void loop()
-{
+void loop() {
   MenuSelect menu;
   long ditTimerOff;  //AFP 09-22-22
   long dahTimerOn;
@@ -1038,11 +1037,11 @@ void loop()
   if (lastState != radioState) {
     SetAudioOperatingState(radioState);
     button.ExecuteModeChange();
-    Serial.printf("Set audio state, begin loop. radioState = %d lastState = %d\n", radioState, lastState);
+    //    Serial.printf("Set audio state, begin loop. radioState = %d lastState = %d\n", radioState, lastState);
   }
 
-// Don't turn off audio in the case of CW for sidetone.
-  if (powerUp and not (radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE or radioState == RadioState::CW_TRANSMIT_KEYER_STATE)) {
+  // Don't turn off audio in the case of CW for sidetone.
+  if (powerUp and not(radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE or radioState == RadioState::CW_TRANSMIT_KEYER_STATE)) {
     afterPowerUp = afterPowerUp + 1;
     speakerScale.setGain(0);
     headphoneScale.setGain(0);
@@ -1054,7 +1053,7 @@ void loop()
       headphoneScale.setGain(HEADPHONESCALE);
     }
   }
-  if(radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE or radioState == RadioState::CW_TRANSMIT_KEYER_STATE) {
+  if (radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE or radioState == RadioState::CW_TRANSMIT_KEYER_STATE) {
     speakerScale.setGain(SPEAKERSCALE);
     headphoneScale.setGain(HEADPHONESCALE);
   }
