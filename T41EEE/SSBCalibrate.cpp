@@ -307,7 +307,6 @@ void SSBCalibrate::CalibratePreamble(int setZoom) {
       void
  *****/
 void SSBCalibrate::CalibrateEpilogue(bool radioCal, bool saveToEeprom) {
-    Serial.printf("SSB epilogue\n");
   /*
   Serial.printf("lastState=%d radioState=%d memory_used=%d memory_used_max=%d f32_memory_used=%d f32_memory_used_max=%d\n",
                 lastState,
