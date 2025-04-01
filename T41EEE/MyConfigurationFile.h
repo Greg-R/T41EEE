@@ -78,7 +78,7 @@
 //#define MUTEAUDIO LOW
 
 // The audio amplifier gain may need to be adjusted for the best volume range.
-#define SPEAKERSCALE 5.0     // Increase or decrease this value depending on your amplifier gain.
+#define SPEAKERSCALE 1.0     // Increase or decrease this value depending on your amplifier gain.
 #define HEADPHONESCALE 10.0  // Same as for the speaker.  Adjust to your preference for volume range.
 
 #define RFGAINSCALE 3000.0  // This adjusts for RF gain differences in the QSD.  QSD should use a value of 3000.  QSD2 should use a value of 1000.0.

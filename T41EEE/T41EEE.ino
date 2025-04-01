@@ -202,7 +202,7 @@ int filterWidth = static_cast<int>((bands.bands[ConfigData.currentBand].FHiCut -
 int h = 135;  // SPECTRUM_HEIGHT + 3;
 bool ANR_notch = false;
 uint8_t auto_codec_gain = 1;
-uint8_t display_S_meter_or_spectrum_state = 0;
+//uint8_t display_S_meter_or_spectrum_state = 0;
 uint8_t keyPressedOn = 0;
 uint8_t NR_first_time = 1;
 uint8_t NR_Kim;
@@ -1242,7 +1242,7 @@ void loop() {
     else if (bands.bands[ConfigData.currentBand].mode == RadioMode::AM_MODE or bands.bands[ConfigData.currentBand].mode == RadioMode::SAM_MODE)
       audioBW = bands.bands[ConfigData.currentBand].FAMCut;
 
-    process.audioGainCompensate = 4 * 2800.0 / audioBW;
+    process.audioGainCompensate = 2800.0 / audioBW;
 
     speakerVolume.setGain(volumeLog[ConfigData.audioVolume]);
     headphoneVolume.setGain(volumeLog[ConfigData.audioVolume]);

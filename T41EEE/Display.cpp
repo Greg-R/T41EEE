@@ -701,6 +701,7 @@ void BandInformation()  // SSB or CW
     void
 *****/
 void ShowCurrentPowerSetting() {
+  tft.setFontScale((enum RA8875tsize)0);
   tft.fillRect(OPERATION_STATS_X + 275, FREQUENCY_Y + 30, tft.getFontWidth() * 11, tft.getFontHeight(), RA8875_BLACK);  // Clear top-left menu area
   tft.setCursor(OPERATION_STATS_X + 275, FREQUENCY_Y + 30);
   tft.setTextColor(RA8875_RED);

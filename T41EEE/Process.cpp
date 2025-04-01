@@ -65,8 +65,11 @@ void Process::ProcessIQData() {
 
     //  Set RFGain for all bands.
     if (ConfigData.autoGain) rfGain = ConfigData.rfGainCurrent;                          // Auto-gain
-    else rfGain = ConfigData.rfGain[ConfigData.currentBand] - 30;                        // Manual gain adjust.
+    else rfGain = ConfigData.rfGain[ConfigData.currentBand] - 20;                        // Manual gain adjust.
     rfGainValue = pow(10, static_cast<float32_t>(rfGain) / 20.0);                        // DSPGAINSCALE removed in T41EEE.9.  Greg KF5N February 24, 2024
+
+    rfGainValue = rfGainValue * audioGainCompensate;
+
     arm_scale_f32(float_buffer_L, rfGainValue, float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 09-27-22
     arm_scale_f32(float_buffer_R, rfGainValue, float_buffer_R, BUFFER_SIZE * N_BLOCKS);  //AFP 09-27-22
 
@@ -132,7 +135,7 @@ void Process::ProcessIQData() {
       }
     }
 
-    display_S_meter_or_spectrum_state++;
+  //  display_S_meter_or_spectrum_state++;
     if (keyPressedOn == 1) {  ////AFP 09-01-22.  Is this a duplicate here???
       return;
     }
@@ -467,8 +470,8 @@ void Process::ProcessIQData() {
     **********************************************************************************/
 
     // Scale by 8 to compensate for interpolation.  Also compensate for audio filter bandwidth.
-    arm_scale_f32(float_buffer_L, 8.0 * audioGainCompensate, float_buffer_L, BUFFER_SIZE * N_BLOCKS);
-
+//    arm_scale_f32(float_buffer_L, 8.0 * audioGainCompensate, float_buffer_L, BUFFER_SIZE * N_BLOCKS);
+arm_scale_f32(float_buffer_L, 8.0, float_buffer_L, BUFFER_SIZE * N_BLOCKS);
     /**********************************************************************************  AFP 12-31-20
       CONVERT TO INTEGER AND PLAY AUDIO
     **********************************************************************************/

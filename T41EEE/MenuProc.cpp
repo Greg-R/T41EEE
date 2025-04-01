@@ -910,7 +910,8 @@ void RFOptions() {
       // powerOutCW and powerOutSSB must be updated.
       initPowerCoefficients();
       eeprom.ConfigDataWrite();  //AFP 10-21-22
-      BandInformation();
+//      BandInformation();
+      ShowCurrentPowerSetting();
       break;
 
     case 1:  // Manual gain set.

@@ -672,7 +672,7 @@ extern char keyboardBuffer[];
 extern const char *topMenus[];
 extern const char *zoomOptions[];
 extern bool ANR_notch;  // KF5N March 2, 2024
-extern uint8_t display_S_meter_or_spectrum_state;
+//extern uint8_t display_S_meter_or_spectrum_state;
 extern uint8_t keyPressedOn;  //AFP 09-01-22
 extern uint8_t NR_first_time;
 extern uint8_t NR_Kim;
