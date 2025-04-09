@@ -1242,7 +1242,8 @@ void loop() {
     else if (bands.bands[ConfigData.currentBand].mode == RadioMode::AM_MODE or bands.bands[ConfigData.currentBand].mode == RadioMode::SAM_MODE)
       audioBW = bands.bands[ConfigData.currentBand].FAMCut;
 
-    process.audioGainCompensate = 2800.0 / audioBW;
+    process.audioGainCompensate = 
+    2800.0 / audioBW;
 
     speakerVolume.setGain(volumeLog[ConfigData.audioVolume]);
     headphoneVolume.setGain(volumeLog[ConfigData.audioVolume]);
