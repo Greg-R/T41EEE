@@ -53,7 +53,7 @@ void Process::ProcessIQData() {
     }
     // Set frequency here only to minimize interruption to signal stream during tuning.
     // This code was unnecessary in the revised tuning scheme.  KF5N July 22, 2023
-    if (centerTuneFlag == 1) {  //AFP 10-04-22
+    if (centerTuneFlag == 1) {  //  This flag is set by EncoderFineTune().
       DrawBandWidthIndicatorBar();
       ShowFrequency();
     }                    //AFP 10-04-22

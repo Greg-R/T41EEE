@@ -791,12 +791,12 @@ void ShowFrequency() {
   if (ConfigData.activeVFO == VFO_A) {
     FormatFrequency(TxRxFreq, freqBuffer);
     tft.setFontScale(3, 2);  // JJP 7/15/23
-    if (TxRxFreq < bands.bands[ConfigData.currentBandA].fBandLow || TxRxFreq > bands.bands[ConfigData.currentBandA].fBandHigh) {
+    if (TxRxFreq < bands.bands[ConfigData.currentBandA].fBandLow or TxRxFreq > bands.bands[ConfigData.currentBandA].fBandHigh) {
       tft.setTextColor(RA8875_RED);  // Out of band
     } else {
       tft.setTextColor(RA8875_GREEN);  // In band
     }
-    tft.fillRect(0, FREQUENCY_Y - 14, tft.getFontWidth() * 11, tft.getFontHeight(), RA8875_BLACK);  // JJP 7/15/23
+    tft.fillRect(0, FREQUENCY_Y - 8, tft.getFontWidth() * 10, 34, RA8875_BLACK);  // This erases VFOA.
     tft.setCursor(0, FREQUENCY_Y - 17);                                                             // To adjust for Greg's font change jjp 7/14/23
     tft.print(freqBuffer);                                                                          // Show VFO_A
     tft.setFontScale(1, 2);                                                                         // JJP 7/15/23
