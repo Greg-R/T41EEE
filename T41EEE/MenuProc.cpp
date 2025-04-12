@@ -819,46 +819,42 @@ void EqualizerXmtOptions() {
 void SSBOptions()  // AFP 09-22-22 All new
 {
   static int micChoice = 0;
-  //  const char *micChoices[] = { "Mic Comp On", "Mic Comp Off", "Set Threshold", "Set Comp_Ratio", "Set Attack", "Set Decay", "Cancel" };
-  const std::string micChoices[] = { "CESSB", "SSB", "FT8", "Comp On", "Comp Off", "Mic Gain", "Comp Threshold", "Comp Ratio", "Cancel" };
+  float imdAmplitude = 0;
+  float imdAmplitudeOld = 0;
+  MenuSelect menu = MenuSelect::BOGUS_PIN_READ;
+  const std::string micChoices[] = { "CESSB", "SSB", "FT8", "Comp On", "Comp Off", "Mic Gain", "Comp Threshold", "Comp Ratio", "IMD Test", "Cancel" };
 
-  micChoice = SubmenuSelect(micChoices, 9, micChoice);
+  micChoice = SubmenuSelect(micChoices, 10, micChoice);
   switch (micChoice) {
 
     case 0:  // CESSB on
       ConfigData.cessb = true;
       cessb1.setProcessing(ConfigData.cessb);
-      Serial.printf("processing = %d", cessb1.getProcessing());
-      //    ConfigData.ConfigDataWrite();
+//      Serial.printf("processing = %d", cessb1.getProcessing());
       BandInformation();
       break;
 
     case 1:  // SSB Data on
       ConfigData.cessb = false;
       cessb1.setProcessing(ConfigData.cessb);
-      Serial.printf("processing = %d", cessb1.getProcessing());
-      //    ConfigData.ConfigDataWrite();
+//      Serial.printf("processing = %d", cessb1.getProcessing());
       BandInformation();
       break;
 
     case 2:  // FT8
       ConfigData.cessb = false;
       cessb1.setProcessing(ConfigData.cessb);
-      Serial.printf("processing = %d", cessb1.getProcessing());
-      //    ConfigData.ConfigDataWrite();
       BandInformation();
       break;
 
     case 3:  // Compressor On
       ConfigData.compressorFlag = true;
       UpdateCompressionField();
-      //    ConfigData.ConfigDataWrite();
       break;
 
     case 4:  // Compressor Off
       ConfigData.compressorFlag = false;
       UpdateCompressionField();
-      //    ConfigData.ConfigDataWrite();
       break;
 
     case 5:  // Adjust mic gain in dB.  Default 0 db.
@@ -875,7 +871,45 @@ void SSBOptions()  // AFP 09-22-22 All new
       UpdateCompressionField();
       break;
 
-    case 8:  // Cancel
+    case 8:  // IMD test.  This is a self-contained loop which uses the SSB exciter.
+
+//      if (imdAmplitude != imdAmplitudeOld) imdAmplitudeOld = imdAmplitude;
+  radioState = RadioState::SSB_CALIBRATE_STATE;
+  digitalWrite(RXTX, HIGH);  //xmit on
+  ShowTransmitReceiveStatus();
+  SetAudioOperatingState(radioState);
+      button.ExecuteModeChange();
+      Q_out_L_Ex.setMaxBuffers(80);  // Limits determined emperically.  These may need more adjustment.  Greg KF5N August 4, 2024.
+      Q_out_R_Ex.setMaxBuffers(80);
+//      while(menu != MenuSelect::MENU_OPTION_SELECT) {
+//      imdAmplitude = GetEncoderValueLive(0.0, 20.0, imdAmplitude, 0.1, micChoices[8], false);
+//      menu = readButton();
+//      delay(200);
+//Serial.printf("ExciterIQData loop\n");
+        delay(100);
+        ExciterIQData();
+//        delay(10);
+        ExciterIQData();
+//        delay(10);
+        ExciterIQData();
+        ExciterIQData();
+        ExciterIQData();
+        ExciterIQData();
+//        delay(200);
+//  }
+    radioState = RadioState::SSB_RECEIVE_STATE;
+      digitalWrite(RXTX, LOW);  // Transmitter off.
+      SetAudioOperatingState(radioState);
+          button.ExecuteModeChange();
+      ShowTransmitReceiveStatus();
+      if (menu != MenuSelect::BOGUS_PIN_READ) {        // A button press?
+        if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Exit.
+          tft.fillRect(SECONDARY_MENU_X - 1, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT + 1, RA8875_BLACK);
+        }
+      }
+      break;
+
+    case 9:  // Cancel
       return;
       break;
 

@@ -52,10 +52,13 @@ void ExciterIQData() {
         BUFFER_SIZE * N_BLOCKS = 2048 samples
      **********************************************************************************/
   // are there at least N_BLOCKS buffers in each channel available ?
-  if ((uint32_t)Q_in_L_Ex.available() > N_BLOCKS_EX) {
-
+  if ((uint32_t)Q_in_L_Ex.available() < 32 or (uint32_t)Q_in_R_Ex.available() < 32) {
+    Serial.printf("Q_in_L_Ex.available() = %d Q_in_R_Ex.available() = %d\n", Q_in_L_Ex.available(), Q_in_R_Ex.available());
+     return;
+  }
+    Serial.printf("Norm Op: Q_in_L_Ex.available() = %d Q_in_R_Ex.available() = %d\n", Q_in_L_Ex.available(), Q_in_R_Ex.available());
     // get audio samples from the audio  buffers and convert them to float
-    // read in 32 blocks á 128 samples in I and Q
+    // read in 32 blocks of 128 samples in I and Q
     for (unsigned i = 0; i < N_BLOCKS_EX; i++) {
 
       /**********************************************************************************  AFP 12-31-20
@@ -112,9 +115,13 @@ void ExciterIQData() {
     arm_offset_q15(q15_buffer_RTemp, CalData.qDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_RTemp, 2048);      
     }
 #endif
+//  Q_out_L_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
+//  Q_out_R_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
+  Q_out_L_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
+  Q_out_R_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
     Q_out_L_Ex.play(q15_buffer_LTemp, 2048);  // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
     Q_out_R_Ex.play(q15_buffer_RTemp, 2048);  // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.
-  }
+////  }
 }
 
 /*****

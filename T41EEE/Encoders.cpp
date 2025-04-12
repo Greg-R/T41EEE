@@ -169,7 +169,7 @@ void EncoderVolume()  //============================== AFP 10-22-22  Begin new
   Return value;
     int                         the new value
 *****/
-float GetEncoderValueLive(float minValue, float maxValue, float startValue, float increment, char prompt[], bool left)  //AFP 10-22-22
+float GetEncoderValueLive(float minValue, float maxValue, float startValue, float increment, std::string prompt, bool left)  //AFP 10-22-22
 {
   float currentValue = startValue;
   tft.setFontScale((enum RA8875tsize)1);
@@ -178,14 +178,14 @@ float GetEncoderValueLive(float minValue, float maxValue, float startValue, floa
   else tft.fillRect(250, 0, 285, CHAR_HEIGHT, RA8875_BLACK);  // Increased rectangle size to full erase value.  KF5N August 12, 2023
   if (left) tft.setCursor(0, 1);
   else tft.setCursor(257, 1);
-  tft.print(prompt);
+  tft.print(prompt.c_str());
   if (left) tft.setCursor(160, 1);
   else tft.setCursor(440, 1);
-  if (abs(startValue) > 2) {
-    tft.print(startValue, 0);
-  } else {
+//  if (abs(startValue) > 2) {  // Note sure where this restriction came from.
+//    tft.print(startValue, 0);
+//  } else {
     tft.print(startValue, 3);
-  }
+//  }
   if (filterEncoderMove != 0) {
     currentValue += filterEncoderMove * increment;  // Bump up or down...
     if (currentValue < minValue)
@@ -195,11 +195,11 @@ float GetEncoderValueLive(float minValue, float maxValue, float startValue, floa
 
     if (left) tft.setCursor(160, 1);
     else tft.setCursor(440, 1);
-    if (abs(startValue) > 2) {
-      tft.print(startValue, 0);
-    } else {
+//    if (abs(startValue) > 2) {
+//      tft.print(startValue, 0);
+//    } else {
       tft.print(startValue, 3);
-    }
+//    }
     filterEncoderMove = 0;
   }
   return currentValue;
