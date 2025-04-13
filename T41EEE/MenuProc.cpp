@@ -819,8 +819,8 @@ void EqualizerXmtOptions() {
 void SSBOptions()  // AFP 09-22-22 All new
 {
   static int micChoice = 0;
-  float imdAmplitude = 0;
-  float imdAmplitudeOld = 0;
+  float imdAmplitude = 0.0;
+  float imdAmplitudedB = 10.0;
   MenuSelect menu = MenuSelect::BOGUS_PIN_READ;
   const std::string micChoices[] = { "CESSB", "SSB", "FT8", "Comp On", "Comp Off", "Mic Gain", "Comp Threshold", "Comp Ratio", "IMD Test", "Cancel" };
 
@@ -873,30 +873,21 @@ void SSBOptions()  // AFP 09-22-22 All new
 
     case 8:  // IMD test.  This is a self-contained loop which uses the SSB exciter.
 
-//      if (imdAmplitude != imdAmplitudeOld) imdAmplitudeOld = imdAmplitude;
-  radioState = RadioState::SSB_CALIBRATE_STATE;
+  radioState = RadioState::SSB_IM3TEST_STATE;
+  SetFreq();
   digitalWrite(RXTX, HIGH);  //xmit on
   ShowTransmitReceiveStatus();
   SetAudioOperatingState(radioState);
       button.ExecuteModeChange();
-      Q_out_L_Ex.setMaxBuffers(80);  // Limits determined emperically.  These may need more adjustment.  Greg KF5N August 4, 2024.
-      Q_out_R_Ex.setMaxBuffers(80);
-//      while(menu != MenuSelect::MENU_OPTION_SELECT) {
-//      imdAmplitude = GetEncoderValueLive(0.0, 20.0, imdAmplitude, 0.1, micChoices[8], false);
-//      menu = readButton();
-//      delay(200);
-//Serial.printf("ExciterIQData loop\n");
-        delay(100);
+      while(menu != MenuSelect::MENU_OPTION_SELECT) {
+      menu = readButton();  // Use this to quit.
+      // Return IMD amplitude in dB.
+      imdAmplitudedB = GetEncoderValueLive(0.0, 100.0, imdAmplitudedB, 1.0, micChoices[8], false);
+      imdAmplitude = volumeLog[static_cast<int>(imdAmplitudedB)];
+      toneSSBCal1.amplitude(imdAmplitude);
+      toneSSBCal2.amplitude(imdAmplitude);
         ExciterIQData();
-//        delay(10);
-        ExciterIQData();
-//        delay(10);
-        ExciterIQData();
-        ExciterIQData();
-        ExciterIQData();
-        ExciterIQData();
-//        delay(200);
-//  }
+  }
     radioState = RadioState::SSB_RECEIVE_STATE;
       digitalWrite(RXTX, LOW);  // Transmitter off.
       SetAudioOperatingState(radioState);

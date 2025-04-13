@@ -257,7 +257,7 @@ const int RESET = 0;  // QSD2/QSE2 reset pin
 
 //  States used to control radio function.
 enum class RadioState{SSB_RECEIVE_STATE, SSB_TRANSMIT_STATE, FT8_TRANSMIT_STATE, FT8_RECEIVE_STATE, CW_RECEIVE_STATE, CW_TRANSMIT_STRAIGHT_STATE, 
-                      CW_TRANSMIT_KEYER_STATE, AM_RECEIVE_STATE, SAM_RECEIVE_STATE, SSB_CALIBRATE_STATE, CW_CALIBRATE_STATE, 
+                      CW_TRANSMIT_KEYER_STATE, AM_RECEIVE_STATE, SAM_RECEIVE_STATE, SSB_CALIBRATE_STATE, SSB_IM3TEST_STATE, CW_CALIBRATE_STATE, 
                       SET_CW_SIDETONE, NOSTATE};
 enum class RadioMode{CW_MODE, SSB_MODE, FT8_MODE, AM_MODE, SAM_MODE};  // Plain enum, because it needs to be iterated in mode change function.
 enum class Sideband{LOWER, UPPER, BOTH_AM, BOTH_SAM};
@@ -571,7 +571,7 @@ extern AudioConvert_I16toF32 int2Float1;          // Converts Int16 to Float.  S
 extern AudioEffectGain_F32 micGain;               // Added with CESSB.  Greg KF5N July 24, 2024.
 extern AudioEffectGain_F32 speakerVolume, headphoneVolume;
 extern AudioConvert_F32toI16 float2Int1;          // Converts Float to Int16.  See class in AudioStream_F32.h
-extern AudioSynthWaveformSine_F32 toneSSBCal;
+extern AudioSynthWaveformSine_F32 toneSSBCal1, toneSSBCal2;
 extern AudioMixer4_F32 mixer1;
 extern AudioEffectCompressor2_F32  compressor1;   // Open Audio Compressor 2
 extern radioCESSB_Z_transmit_F32 cessb1;

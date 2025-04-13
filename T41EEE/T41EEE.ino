@@ -826,7 +826,7 @@ FLASHMEM void setup() {
   //  Don't use the audio pre-processor.  This causes a spurious signal in the SSB transmit output.
   //  sgtl5000_1.audioPreProcessorEnable();  // Need to use one of the equalizers.
   AudioMemory(250);
-  AudioMemory_F32(10);
+  AudioMemory_F32(100);
   sgtl5000_1.inputSelect(AUDIO_INPUT_MIC);
   sgtl5000_1.volume(0.8);  // Set headphone volume.
   sgtl5000_1.micGain(0);
