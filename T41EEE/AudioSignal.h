@@ -169,9 +169,10 @@ void SetAudioOperatingState(RadioState operatingState) {
       SampleRate = SAMPLE_RATE_192K;
       InitializeDataArrays();  // I2S sample rate set in this function.
       sgtl5000_1.muteLineout();
-      // Deactivate microphone and 1 kHz test tone.
+      // Deactivate microphone and test tones.
       mixer1_tx.gain(0, 0.0);
       mixer1_tx.gain(1, 0.0);
+      mixer1_tx.gain(2, 0.0);
       toneSSBCal1.end();
       toneSSBCal2.end();
       switch1_tx.setChannel(1);  // Disconnect microphone path.
@@ -237,7 +238,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       ADC_RX_Q.clear();
 
       mixer1_tx.gain(0, 1);      // microphone audio on.
-      mixer1_tx.gain(1, 0);      // testTone off.
+      mixer1_tx.gain(1, 0);      // Calibration/IMD test tone off.
+      mixer1_tx.gain(2, 0);      // IMD test tone off.
       switch1_tx.setChannel(0);  // Connect microphone path.
       switch2_tx.setChannel(1);  // Disonnect 1 kHz test tone path.
 
@@ -376,7 +378,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       mixer1_tx.gain(1, 1);      // testTone 1 on.
       mixer1_tx.gain(2, 1);      // testTone 2 on.      
       switch1_tx.setChannel(1);  // Disconnect microphone path.
-      switch2_tx.setChannel(0);  // Connect 1 kHz test tone path.
+      switch2_tx.setChannel(0);  // Connect test tone path.
 
       if (ConfigData.compressorFlag) {
         switch4_tx.setChannel(0);

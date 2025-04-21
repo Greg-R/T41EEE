@@ -820,7 +820,7 @@ void SSBOptions()  // AFP 09-22-22 All new
 {
   static int micChoice = 0;
   float imdAmplitude = 0.0;
-  float imdAmplitudedB = 10.0;
+  int imdAmplitudedB = 100;
   MenuSelect menu = MenuSelect::BOGUS_PIN_READ;
   const std::string micChoices[] = { "CESSB", "SSB", "FT8", "Comp On", "Comp Off", "Mic Gain", "Comp Threshold", "Comp Ratio", "IMD Test", "Cancel" };
 
@@ -874,6 +874,7 @@ void SSBOptions()  // AFP 09-22-22 All new
     case 8:  // IMD test.  This is a self-contained loop which uses the SSB exciter.
 
   radioState = RadioState::SSB_IM3TEST_STATE;
+  bands.bands[ConfigData.currentBand].mode = RadioMode::SSB_MODE;
   SetFreq();
   digitalWrite(RXTX, HIGH);  //xmit on
   ShowTransmitReceiveStatus();
@@ -882,11 +883,13 @@ void SSBOptions()  // AFP 09-22-22 All new
       while(menu != MenuSelect::MENU_OPTION_SELECT) {
       menu = readButton();  // Use this to quit.
       // Return IMD amplitude in dB.
-      imdAmplitudedB = GetEncoderValueLive(0.0, 100.0, imdAmplitudedB, 1.0, micChoices[8], false);
-      imdAmplitude = volumeLog[static_cast<int>(imdAmplitudedB)];
+      imdAmplitudedB = GetEncoderValueLive(0.0, 200.0, imdAmplitudedB, 1.0, micChoices[8], false);
+      imdAmplitude = pow(10.0, (static_cast<float>(imdAmplitudedB) - 1.0)/40.0) * 0.00001;
+      AudioNoInterrupts();
       toneSSBCal1.amplitude(imdAmplitude);
       toneSSBCal2.amplitude(imdAmplitude);
-        ExciterIQData();
+      AudioInterrupts();
+      ExciterIQData();
   }
     radioState = RadioState::SSB_RECEIVE_STATE;
       digitalWrite(RXTX, LOW);  // Transmitter off.
