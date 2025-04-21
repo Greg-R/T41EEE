@@ -781,7 +781,7 @@ void FormatFrequency(uint32_t freq, char *freqBuffer) {
     // show frequency
 *****/
 void ShowFrequency() {
-  char freqBuffer[15];
+  char freqBuffer[15] = "              ";  // Initialize to blanks.
   if (ConfigData.activeVFO == VFO_A) {  // Needed for edge checking
     ConfigData.currentBand = ConfigData.currentBandA;
   } else {
@@ -1529,6 +1529,7 @@ void RedrawDisplayScreen() {
   DrawBandWidthIndicatorBar();
   ShowAutoStatus();
   UpdateAGCField();
+
   UpdateVolumeField();
   DisplayIncrementField();
   UpdateNotchField();
