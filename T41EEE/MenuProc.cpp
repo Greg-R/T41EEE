@@ -874,11 +874,13 @@ void SSBOptions()  // AFP 09-22-22 All new
     case 8:  // IMD test.  This is a self-contained loop which uses the SSB exciter.
 
   radioState = RadioState::SSB_IM3TEST_STATE;
+bands.bands[ConfigData.currentBand].mode = RadioMode::SSB_MODE;
+  SetAudioOperatingState(radioState);
+      button.ExecuteModeChange();
   SetFreq();
   digitalWrite(RXTX, HIGH);  //xmit on
   ShowTransmitReceiveStatus();
-  SetAudioOperatingState(radioState);
-      button.ExecuteModeChange();
+
       while(menu != MenuSelect::MENU_OPTION_SELECT) {
       menu = readButton();  // Use this to quit.
       // Return IMD amplitude in dB.
