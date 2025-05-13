@@ -997,7 +997,9 @@ FLASHMEM void setup() {
 //============================================================== END setup() =================================================================
 
 elapsedMicros usec = 0;  // Automatically increases as time passes; no ++ necessary.
-
+elapsedMicros usec1 = 0;
+uint32_t usec1Old = 0;
+uint32_t loopCounter = 0;
 
 /*****
   Purpose: Code here executes forever, or until: 1) power is removed, 2) user does a reset, 3) a component
@@ -1251,5 +1253,10 @@ void loop() {
     volumeChangeFlag = false;
     UpdateVolumeField();
   }
-
+  loopCounter = loopCounter + 1;
+  if(loopCounter > 49) {
+Serial.printf("Loop us = %u\n", (static_cast<uint32_t>(usec1) - usec1Old));
+loopCounter = 0;
+  }
+  usec1Old = usec1;
 }  // end loop()

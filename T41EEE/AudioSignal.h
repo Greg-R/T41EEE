@@ -16,7 +16,8 @@ AudioFilterEqualizer_F32 txEqualizer(audio_settings);
 AudioEffectCompressor2_F32 compressor1;  // Open Audio Compressor
 radioCESSB_Z_transmit_F32 cessb1;
 AudioConvert_F32toI16 float2Int1_tx, float2Int2_tx;  // Converts Float to Int16.  See class in AudioStream_F32.h
-AudioSwitch4_OA_F32 switch1_tx, switch2_tx, switch3_tx, switch4_tx;
+////AudioSwitch4_OA_F32 switch1_tx, switch2_tx, switch3_tx, switch4_tx, switch5_tx;
+AudioSwitch4_OA_F32 switch1_tx, switch3_tx, switch4_tx;
 AudioMixer4_F32 mixer1_tx, mixer2_tx, mixer3_tx;  // Used to switch in tone during calibration.
 AudioSynthWaveformSine_F32 toneSSBCal1, toneSSBCal2; // Tones for SSB calibration and IMD testing.
 AudioRecordQueue Q_in_L_Ex;                       // AudioRecordQueue for input Microphone channel.
@@ -28,12 +29,16 @@ AudioPlayQueue Q_out_R_Ex;                        // AudioPlayQueue for driving 
 AudioConnection connect0(i2s_quadIn, 0, int2Float1_tx, 0);  // Microphone audio channel.  Must use int2Float because Open Audio does not have quad input.
 
 AudioConnection_F32 connect1(int2Float1_tx, 0, switch1_tx, 0);  // Used switches here because it appeared necessary to stop flow of data.
-AudioConnection_F32 connect2(toneSSBCal1, 0, switch2_tx, 0);     // Tone used during SSB calibration.
+//// AudioConnection_F32 connect2(toneSSBCal1, 0, switch2_tx, 0);     // Tone used during SSB calibration and IMD testing.
+//// AudioConnection_F32 connect21(toneSSBCal2, 0, switch5_tx, 0);     // Tone used during IMD testing.
 
 // Need a mixer to switch in an audio tone during calibration.  Should be a nominal tone amplitude.
 AudioConnection_F32 connect3(switch1_tx, 0, mixer1_tx, 0);  // Connect microphone mixer1 output 0 via gain control.
-AudioConnection_F32 connect4(switch2_tx, 0, mixer1_tx, 1);  // Connect tone for SSB calibration.
-AudioConnection_F32 connect21(toneSSBCal2, 0, mixer1_tx, 2);  // Connect tone for IM3 testing.
+////AudioConnection_F32 connect4(switch2_tx, 0, mixer1_tx, 1);  // Connect tone for SSB calibration and IMD testing.
+////AudioConnection_F32 connect22(switch5_tx, 0, mixer1_tx, 2);  // Connect tone for IM3 testing.
+
+AudioConnection_F32 connect4(toneSSBCal1, 0, mixer1_tx, 1);  // Connect tone for SSB calibration and IMD testing.
+AudioConnection_F32 connect22(toneSSBCal2, 0, mixer1_tx, 2);  // Connect tone for IM3 testing.
 
 AudioConnection_F32 connect5(mixer1_tx, 0, micGain, 0);
 
@@ -175,7 +180,13 @@ void SetAudioOperatingState(RadioState operatingState) {
       toneSSBCal1.end();
       toneSSBCal2.end();
       switch1_tx.setChannel(1);  // Disconnect microphone path.
-      switch2_tx.setChannel(1);  //  Disconnect 1 kHz test tone path.
+//      switch2_tx.setChannel(1);  //  Disconnect SSB and IMD test tone path.
+//      switch5_tx.setChannel(1);  //  Disconnect IMD test tone path.
+
+      switch4_tx.setChannel(1);  // Bypass compressor.
+      mixer3_tx.gain(0, 0.0);
+      mixer3_tx.gain(1, 0.0);
+
       // Stop and clear the data buffers.
       ADC_RX_I.end();    // Receiver I channel
       ADC_RX_Q.end();    // Receiver Q channel
@@ -239,7 +250,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       mixer1_tx.gain(0, 1);      // microphone audio on.
       mixer1_tx.gain(1, 0);      // testTone off.
       switch1_tx.setChannel(0);  // Connect microphone path.
-      switch2_tx.setChannel(1);  // Disonnect 1 kHz test tone path.
+//      switch2_tx.setChannel(1);  // Disonnect 1 kHz test tone path.
 
       if (ConfigData.compressorFlag) {
         switch4_tx.setChannel(0);
@@ -305,7 +316,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       mixer1_tx.gain(1, 1);      // testTone on.
       mixer1_tx.gain(2, 0);      // testTone 2 off.  
       switch1_tx.setChannel(1);  // Disconnect microphone path.
-      switch2_tx.setChannel(0);  // Connect 1 kHz test tone path.
+//      switch2_tx.setChannel(0);  // Connect 1 kHz test tone path.
+//      switch5_tx.setChannel(1);  //  Disconnect IMD test tone path.
 
       if (ConfigData.compressorFlag) {
         switch4_tx.setChannel(0);
@@ -376,7 +388,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       mixer1_tx.gain(1, 1);      // testTone 1 on.
       mixer1_tx.gain(2, 1);      // testTone 2 on.      
       switch1_tx.setChannel(1);  // Disconnect microphone path.
-      switch2_tx.setChannel(0);  // Connect 1 kHz test tone path.
+//      switch2_tx.setChannel(0);  // Connect IMD test tone path.
+//      switch5_tx.setChannel(0);  //  Connect IMD test tone path.
 
       if (ConfigData.compressorFlag) {
         switch4_tx.setChannel(0);
@@ -459,7 +472,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       sgtl5000_1.unmuteLineout();
 
       switch1_tx.setChannel(1);  // Disconnect microphone path.
-      switch2_tx.setChannel(1);  //  Disconnect 1 kHz test tone path.
+//      switch2_tx.setChannel(1);  //  Disconnect 1 kHz test tone path.
 
       // CW does not use the transmitter front-end.
       Q_in_L_Ex.end();  // Transmit I channel path.

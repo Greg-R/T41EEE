@@ -181,11 +181,11 @@ float GetEncoderValueLive(float minValue, float maxValue, float startValue, floa
   tft.print(prompt.c_str());
   if (left) tft.setCursor(160, 1);
   else tft.setCursor(440, 1);
-//  if (abs(startValue) > 2) {  // Note sure where this restriction came from.
-//    tft.print(startValue, 0);
-//  } else {
+  if (abs(startValue) > 2) {  // Note sure where this restriction came from.
+    tft.print(startValue, 0);
+  } else {
     tft.print(startValue, 3);
-//  }
+  }
   if (filterEncoderMove != 0) {
     currentValue += filterEncoderMove * increment;  // Bump up or down...
     if (currentValue < minValue)
@@ -195,11 +195,11 @@ float GetEncoderValueLive(float minValue, float maxValue, float startValue, floa
 
     if (left) tft.setCursor(160, 1);
     else tft.setCursor(440, 1);
-//    if (abs(startValue) > 2) {
-//      tft.print(startValue, 0);
-//    } else {
+    if (abs(startValue) > 2) {
+      tft.print(startValue, 0);
+    } else {
       tft.print(startValue, 3);
-//    }
+    }
     filterEncoderMove = 0;
   }
   return currentValue;

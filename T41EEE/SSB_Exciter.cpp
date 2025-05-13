@@ -53,10 +53,10 @@ void ExciterIQData() {
      **********************************************************************************/
   // are there at least N_BLOCKS buffers in each channel available ?
   if ((uint32_t)Q_in_L_Ex.available() < 32 or (uint32_t)Q_in_R_Ex.available() < 32) {
-    Serial.printf("Q_in_L_Ex.available() = %d Q_in_R_Ex.available() = %d\n", Q_in_L_Ex.available(), Q_in_R_Ex.available());
+//    Serial.printf("Q_in_L_Ex.available() = %d Q_in_R_Ex.available() = %d\n", Q_in_L_Ex.available(), Q_in_R_Ex.available());
      return;
   }
-    Serial.printf("Norm Op: Q_in_L_Ex.available() = %d Q_in_R_Ex.available() = %d\n", Q_in_L_Ex.available(), Q_in_R_Ex.available());
+//    Serial.printf("Norm Op: Q_in_L_Ex.available() = %d Q_in_R_Ex.available() = %d\n", Q_in_L_Ex.available(), Q_in_R_Ex.available());
     // get audio samples from the audio  buffers and convert them to float
     // read in 32 blocks of 128 samples in I and Q
     for (unsigned i = 0; i < N_BLOCKS_EX; i++) {

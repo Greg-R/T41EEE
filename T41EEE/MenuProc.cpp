@@ -249,7 +249,8 @@ void CalibrateOptions() {
 #else  // Not using QSE2 (No carrier calibration)
 void CalibrateOptions() {
   int freqCorrectionFactorOld = 0;
-  int32_t increment = 100L;
+  int32_t increment = 100;
+  char freqCal[] = "Freq Cal: ";
   MenuSelect menu;
 
   tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 30, CHAR_HEIGHT, RA8875_BLACK);
@@ -263,7 +264,7 @@ void CalibrateOptions() {
   switch (IQChoice) {
 
     case 0:  // Calibrate Frequency  - uses WWV
-      CalData.freqCorrectionFactor = GetEncoderValueLive(-200000, 200000, CalData.freqCorrectionFactor, increment, (char *)"Freq Cal: ", false);
+      CalData.freqCorrectionFactor = GetEncoderValueLive(-200000, 200000, CalData.freqCorrectionFactor, increment, freqCal, false);
       if (CalData.freqCorrectionFactor != freqCorrectionFactorOld) {
         si5351.set_correction(CalData.freqCorrectionFactor, SI5351_PLL_INPUT_XO);
         freqCorrectionFactorOld = CalData.freqCorrectionFactor;
