@@ -404,12 +404,12 @@ void CWCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, boo
   State state = State::warmup;  // Start calibration state machine in warmup state.
   float maxSweepAmp = 0.2;
   float maxSweepPhase = 0.1;
-  float increment = 0.002;
+  float increment = 0.001;
   int averageCount = 0;
   float iOptimal = 1.0;
   float qOptimal = 0.0;
-  std::vector<float32_t> sweepVector(301);
-  std::vector<float32_t> sweepVectorValue(301);
+  std::vector<float32_t> sweepVector(401);
+  std::vector<float32_t> sweepVectorValue(401);
   elapsedMillis fiveSeconds;
   int viewTime = 0;
   bool averageFlag = false;
@@ -845,15 +845,15 @@ void CWCalibrate::DoXmitCalibrate(int mode, bool radioCal, bool shortCal, bool s
   int freqOffset;
   float correctionIncrement = 0.001;
   CWCalibrate::State state = State::warmup;  // Start calibration state machine in warmup state.
-  float maxSweepAmp = 0.1;
+  float maxSweepAmp = 0.2;
   float maxSweepPhase = 0.1;
-  float increment = 0.002;
+  float increment = 0.001;
   int averageCount = 0;
   IQCalType = 0;  // Begin with gain optimization.
   float iOptimal = 1.0;
   float qOptimal = 0.0;
-  std::vector<float32_t> sweepVector(351);
-  std::vector<float32_t> sweepVectorValue(351);
+  std::vector<float32_t> sweepVector(401);
+  std::vector<float32_t> sweepVectorValue(401);
   elapsedMillis fiveSeconds;
   int viewTime = 0;
   bool autoCal = false;
