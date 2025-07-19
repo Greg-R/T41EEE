@@ -133,17 +133,17 @@ void CalibrateOptions() {
       break;  // Missing break.  KF5N August 12, 2023
 
     case 6:                                                    // SSB receive cal
-      cwcalibrater.DoReceiveCalibrate(1, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
+      ssbcalibrater.DoReceiveCalibrate(1, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
                                                                //      eeprom.CalDataWrite();                                   // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 7:  // SSB Carrier Cal
-      ssbcalibrater.DoXmitCarrierCalibrate(false, false, true);
+      ssbcalibrater.DoXmitCarrierCalibrate(1, false, false, true);
       //      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 8:                                               // SSB Transmit cal
-      ssbcalibrater.DoXmitCalibrate(false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
+      ssbcalibrater.DoXmitCalibrate(1, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
                                                           //      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 

@@ -108,7 +108,7 @@ void CWCalibrate::printCalType(int mode, int IQCalType, bool autoCal, bool autoC
   const char *IQName[4] = { "Receive CW", "Transmit CW", "Carrier CW", "Calibrate" };
   tft.writeTo(L1);
   calName = IQName[calTypeFlag];
-  if (mode == 1) calName = "Receive SSB";
+  if (mode == 1) calName = "Receive SSB";  // This was an exception here due to Receive SSB being done by this class.
   tft.setFontScale((enum RA8875tsize)1);
   tft.setTextColor(RA8875_RED);
   if ((bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) and (calTypeFlag == 0)) {
