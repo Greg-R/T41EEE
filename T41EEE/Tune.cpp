@@ -28,7 +28,7 @@ void SetFreqCal(int calFreqShift) {           // July 7 2023 KF5N
     Clk2SetFreq = (((TxRxFreq + cwFreqOffset + calFreqShift) * SI5351_FREQ_MULT)) * MASTER_CLK_MULT_TX;  // AFP 09-27-22;  KF5N flip CWFreqShift, sign originally minus
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER)
     Clk2SetFreq = (((TxRxFreq - cwFreqOffset - calFreqShift) * SI5351_FREQ_MULT)) * MASTER_CLK_MULT_TX;  // AFP 10-01-22; KF5N flip CWFreqShift, sign originally plus
-
+  Clk2SetFreq = (TxRxFreq * SI5351_FREQ_MULT) * MASTER_CLK_MULT_TX;
   //  The receive LO frequency is not dependent on mode or sideband.  CW frequency shift is done in DSP code.
   Clk0SetFreq = ((ConfigData.centerFreq * SI5351_FREQ_MULT) + IFFreq * SI5351_FREQ_MULT) * MASTER_CLK_MULT_RX;
 

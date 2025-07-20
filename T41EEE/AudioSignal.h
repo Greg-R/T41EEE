@@ -171,7 +171,12 @@ void SetAudioOperatingState(RadioState operatingState) {
     case RadioState::AM_RECEIVE_STATE:
     case RadioState::SAM_RECEIVE_STATE:
     case RadioState::CW_RECEIVE_STATE:
+
+
       SampleRate = SAMPLE_RATE_192K;
+//      SampleRate = SAMPLE_RATE_48K;
+
+
       InitializeDataArrays();  // I2S sample rate set in this function.
       sgtl5000_1.muteLineout();
       // Deactivate microphone and 1 kHz test tone.

@@ -92,6 +92,8 @@ void SSBCalibrate::warmUpCal(int mode) {
   updateDisplayFlag = false;
   // Find peak of spectrum, which is 512 wide.  Use this to adjust spectrum peak to top of spectrum display.
   arm_max_q15(pixelnew, 512, &rawSpectrumPeak, &index_of_max);
+
+  rawSpectrumPeak = 100;
 }
 
 
@@ -388,8 +390,11 @@ void SSBCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, bo
   bool refineCal = false;
   loadCalToneBuffers(3000.0);
   CalibratePreamble(0);                                                                       // Set zoom to 1X.
-  if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) calFreqShift = 24000;  //  LSB offset.  KF5N
-  if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) calFreqShift = 24000;  //  USB offset.  KF5N
+//  if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) calFreqShift = 24000;  //  LSB offset.  KF5N
+//  if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) calFreqShift = 24000;  //  USB offset.  KF5N
+
+calFreqShift = 0;
+
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreqCal(calFreqShift);
   calTypeFlag = 0;  // RX cal
@@ -2000,7 +2005,7 @@ void SSBCalibrate::ShowSpectrum2(int mode)  //AFP 2-10-23
   //  The target bin locations are used by the for-loop to sweep a small range in the FFT.  A maximum finding function finds the peak signal strength.
   int cal_bins[3] = { 0, 0, 0 };
     if (calTypeFlag == 0 && bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-    cal_bins[0] = 315;
+    cal_bins[0] = 70;  // was 315
     cal_bins[1] = 455;
   }  // Receive calibration, LSB.  KF5N
   if (calTypeFlag == 0 && bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
