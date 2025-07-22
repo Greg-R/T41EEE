@@ -388,8 +388,8 @@ void CWCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, boo
   bool refineCal = false;
   loadCalToneBuffers(3000.0);
   CalibratePreamble(0);                                                                       // Set zoom to 1X.
-  if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) calFreqShift = 24000;  //  LSB offset.  KF5N
-  if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) calFreqShift = 24000;  //  USB offset.  KF5N
+  if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) calFreqShift = 6000;  //  LSB offset.  KF5N
+  if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) calFreqShift = 6000;  //  USB offset.  KF5N
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreqCal(calFreqShift);
   calTypeFlag = 0;  // RX cal

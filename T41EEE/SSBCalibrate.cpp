@@ -1,5 +1,19 @@
 // Class SSBCalibrate.  Greg KF5N July 10, 2024
 
+// loadCalToneBuffers(float toneFreq)
+// plotCalGraphics(int calType)
+// warmUpCal(int mode)
+// printCalType(bool autoCal, bool autoCalDone)
+// CalibratePreamble(int setZoom)
+// CalibrateEpilogue(bool radioCal, bool saveToEeprom)
+// DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom)
+// DoXmitCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom)
+// DoXmitCarrierCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom)
+// RadioCal(bool refineCal)
+// ProcessIQData2(int mode)
+// ShowSpectrum2(int mode)
+// PlotCalSpectrum(int mode, int x1, int cal_bins[3], int capture_bins)
+
 #include "SDT.h"
 
 
@@ -92,8 +106,8 @@ void SSBCalibrate::warmUpCal(int mode) {
   updateDisplayFlag = false;
   // Find peak of spectrum, which is 512 wide.  Use this to adjust spectrum peak to top of spectrum display.
   arm_max_q15(pixelnew, 512, &rawSpectrumPeak, &index_of_max);
-
-  rawSpectrumPeak = 100;
+Serial.printf("rawSpectrumPeak = %d\n", rawSpectrumPeak);
+//  rawSpectrumPeak = 193;
 }
 
 
@@ -258,7 +272,7 @@ void SSBCalibrate::printCalType(bool autoCal, bool autoCalDone) {
 void SSBCalibrate::CalibratePreamble(int setZoom) {
   cessb1.processorUsageMaxReset();
   calOnFlag = true;
-  ZoomFFTPrep();
+//  ZoomFFTPrep();
   IQCalType = 0;
   //  radioState = CW_TRANSMIT_STRAIGHT_STATE;                 // KF5N
   transmitPowerLevelTemp = ConfigData.transmitPowerLevel;  //AFP 05-11-23
@@ -389,11 +403,9 @@ void SSBCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, bo
   bool autoCal = false;
   bool refineCal = false;
   loadCalToneBuffers(3000.0);
-  CalibratePreamble(0);                                                                       // Set zoom to 1X.
-//  if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) calFreqShift = 24000;  //  LSB offset.  KF5N
-//  if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) calFreqShift = 24000;  //  USB offset.  KF5N
-
-calFreqShift = 0;
+  CalibratePreamble(0);    // Set zoom to 1X.  This will be an FFT span of 48 kHz.
+  if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) calFreqShift = 6000;  //  LSB offset.  KF5N
+  if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) calFreqShift = 6000;  //  USB offset.  KF5N
 
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreqCal(calFreqShift);
@@ -1922,7 +1934,8 @@ void SSBCalibrate::ProcessIQData2(int mode) {
       arm_scale_f32(float_buffer_L, recBandFactor[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 2-11-23
       arm_scale_f32(float_buffer_R, recBandFactor[ConfigData.currentBand], float_buffer_R, BUFFER_SIZE * N_BLOCKS);  //AFP 2-11-23
 
-    // Manual IQ amplitude correction
+    // Manual IQ amplitude correction (receive only)
+//    if(calTypeFlag == 0) {
     if (mode == 0) {
       if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
         arm_scale_f32(float_buffer_L, -CalData.IQCWRXAmpCorrectionFactorLSB[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
@@ -1946,7 +1959,7 @@ void SSBCalibrate::ProcessIQData2(int mode) {
         }
       }
     }
-
+//    }
       /* Manual IQ amplitude correction
       if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
         arm_scale_f32(float_buffer_L, -CalData.IQSSBRXAmpCorrectionFactorLSB[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
@@ -1961,16 +1974,17 @@ void SSBCalibrate::ProcessIQData2(int mode) {
 
       FreqShift1();  // Why done here? KF5N
 
-      //    if (ConfigData.spectrum_zoom == SPECTRUM_ZOOM_1) {  // && display_S_meter_or_spectrum_state == 1)
-      //      zoom_display = 1;
-      //CalcZoom1Magn();  //AFP Moved to display function
-      //    }
+          if (ConfigData.spectrum_zoom == SPECTRUM_ZOOM_1) {  // && display_S_meter_or_spectrum_state == 1)
+            zoom_display = 1;
+      CalcZoom1Magn();  //AFP Moved to display function
+          }
 
       // ZoomFFTExe is being called too many times in Calibration.  Should be called ONLY at the start of each sweep.
-      //    if (ConfigData.spectrum_zoom != SPECTRUM_ZOOM_1) {
+          if (ConfigData.spectrum_zoom != SPECTRUM_ZOOM_1) {
       //AFP  Used to process Zoom>1 for display
       //      ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
       ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
+          }
     }  // End of receive code
   }
 }
@@ -2035,8 +2049,11 @@ void SSBCalibrate::ShowSpectrum2(int mode)  //AFP 2-10-23
 
   //  There are 2 for-loops, one for the reference signal and another for the undesired sideband.
   if (calTypeFlag == 0) {  // Receive cal
-    for (x1 = cal_bins[0] - capture_bins; x1 < cal_bins[0] + capture_bins; x1++) adjdB = PlotCalSpectrum(mode, x1, cal_bins, capture_bins);
-    for (x1 = cal_bins[1] - capture_bins; x1 < cal_bins[1] + capture_bins; x1++) adjdB = PlotCalSpectrum(mode, x1, cal_bins, capture_bins);
+//    for (x1 = cal_bins[0] - capture_bins; x1 < cal_bins[0] + capture_bins; x1++) adjdB = PlotCalSpectrum(mode, x1, cal_bins, capture_bins);
+//    for (x1 = cal_bins[1] - capture_bins; x1 < cal_bins[1] + capture_bins; x1++) adjdB = PlotCalSpectrum(mode, x1, cal_bins, capture_bins);
+
+        for (x1 = 0; x1 < 512; x1 = x1 + 1) adjdB = PlotCalSpectrum(mode, x1, cal_bins, capture_bins);
+
   }
 
   /*  There are 2 for-loops, one for the reference signal and another for the undesired sideband.
@@ -2115,6 +2132,16 @@ float SSBCalibrate::PlotCalSpectrum(int mode, int x1, int cal_bins[3], int captu
     arm_max_q15(&pixelnew[(cal_bins[1] - capture_bins)], capture_bins * 2, &refAmplitude, &index_of_max);
   }
 */
+
+  if ((bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) && (calTypeFlag == 0)) {
+    arm_max_q15(&pixelnew[(cal_bins[0] - capture_bins)], capture_bins * 2, &refAmplitude, &index_of_max);
+    arm_max_q15(&pixelnew[(cal_bins[1] - capture_bins)], capture_bins * 2, &adjAmplitude, &index_of_max);
+  }
+  if ((bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) && (calTypeFlag == 0)) {
+    arm_max_q15(&pixelnew[(cal_bins[0] - capture_bins)], capture_bins * 2, &adjAmplitude, &index_of_max);
+    arm_max_q15(&pixelnew[(cal_bins[1] - capture_bins)], capture_bins * 2, &refAmplitude, &index_of_max);
+  }
+
 
   if ((bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) && (calTypeFlag == 1)) {
     arm_max_q15(&pixelnew[(cal_bins[0] - capture_bins)], capture_bins * 2, &refAmplitude, &index_of_max);

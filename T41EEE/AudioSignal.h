@@ -300,7 +300,6 @@ void SetAudioOperatingState(RadioState operatingState) {
     case RadioState::SSB_CALIBRATE_STATE:
       SampleRate = SAMPLE_RATE_48K;
       InitializeDataArrays();  // I2S sample rate set in this function.
-      // QSD disabled and disconnected
       controlAudioOut(ConfigData.audioOut, true);  // Mute all audio.
       sgtl5000_1.unmuteLineout();
       patchCord1.connect();  // Receiver I channel
@@ -554,7 +553,7 @@ void SetAudioOperatingState(RadioState operatingState) {
 */
 
     case RadioState::CW_CALIBRATE_STATE:
-      SampleRate = SAMPLE_RATE_192K;
+      SampleRate = SAMPLE_RATE_48K;
       SetI2SFreq(SR[SampleRate].rate);
       // QSD receiver enabled.  Calibrate is full duplex.
       controlAudioOut(ConfigData.audioOut, true);  // Mute all audio.
