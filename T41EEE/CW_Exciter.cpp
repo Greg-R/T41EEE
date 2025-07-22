@@ -54,7 +54,7 @@ void CW_ExciterIQData(int shaping)  //AFP 08-20-22
   q15_t q15_buffer_Sidetone[512];
 //  float float_buffer_Sidetone[256];
   float float_buffer_cw[256];
-    float float_buffer_temp_cw[512];
+  float float_buffer_temp_cw[512];
 
 // Create CW waveform and play into the SSB transmit signal chain input.
 //  arm_scale_f32(cosBuffer, 0.05, float_buffer_L_EX, 256);  // AFP 10-13-22 Use pre-calculated sin & cos instead of Hilbert

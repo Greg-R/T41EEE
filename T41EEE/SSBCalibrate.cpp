@@ -405,7 +405,7 @@ void SSBCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, bo
   loadCalToneBuffers(3000.0);
   CalibratePreamble(0);    // Set zoom to 1X.  This will be an FFT span of 48 kHz.
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) calFreqShift = 6000;  //  LSB offset.  KF5N
-  if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) calFreqShift = 6000;  //  USB offset.  KF5N
+  if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) calFreqShift = -6000;  //  USB offset.  KF5N
 
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreqCal(calFreqShift);
@@ -1908,7 +1908,7 @@ void SSBCalibrate::ProcessIQData2(int mode) {
     Q_out_L_Ex.play(q15_buffer_LTemp, dataWidth);  // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
     Q_out_R_Ex.play(q15_buffer_RTemp, dataWidth);  // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.
 
-    //}    // End of transmit code.  Begin receive code.
+    // End of transmit code.  Begin receive code.
 
     // Get audio samples from the audio  buffers and convert them to float.
     // Read in 16 blocks of 128 samples in I and Q if available.
@@ -1972,12 +1972,12 @@ void SSBCalibrate::ProcessIQData2(int mode) {
       }
       */
 
-      FreqShift1();  // Why done here? KF5N
-
           if (ConfigData.spectrum_zoom == SPECTRUM_ZOOM_1) {  // && display_S_meter_or_spectrum_state == 1)
             zoom_display = 1;
       CalcZoom1Magn();  //AFP Moved to display function
           }
+
+      FreqShift1();  // Why done here? KF5N
 
       // ZoomFFTExe is being called too many times in Calibration.  Should be called ONLY at the start of each sweep.
           if (ConfigData.spectrum_zoom != SPECTRUM_ZOOM_1) {

@@ -553,7 +553,7 @@ void SetAudioOperatingState(RadioState operatingState) {
 */
 
     case RadioState::CW_CALIBRATE_STATE:
-      SampleRate = SAMPLE_RATE_48K;
+      SampleRate = SAMPLE_RATE_192K;
       SetI2SFreq(SR[SampleRate].rate);
       // QSD receiver enabled.  Calibrate is full duplex.
       controlAudioOut(ConfigData.audioOut, true);  // Mute all audio.

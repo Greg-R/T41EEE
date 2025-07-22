@@ -1830,12 +1830,14 @@ void CWCalibrate::ProcessIQData2(int mode) {
       }
     }
 
-    FreqShift1();  // Why done here? KF5N
 
+    // X1 zoom must be done before the frequency shift!
     if (ConfigData.spectrum_zoom == SPECTRUM_ZOOM_1) {  // && display_S_meter_or_spectrum_state == 1)
       zoom_display = 1;
       CalcZoom1Magn();  //AFP Moved to display function
     }
+
+    FreqShift1();
 
     // ZoomFFTExe is being called too many times in Calibration.  Should be called ONLY at the start of each sweep.
     if (ConfigData.spectrum_zoom != SPECTRUM_ZOOM_1) {
@@ -1895,8 +1897,11 @@ void CWCalibrate::ShowSpectrum2(int mode)  //AFP 2-10-23
 
   //  There are 2 for-loops, one for the reference signal and another for the undesired sideband.
   if (calTypeFlag == 0) {  // Receive cal
-    for (x1 = cal_bins[0] - capture_bins; x1 < cal_bins[0] + capture_bins; x1++) adjdB = PlotCalSpectrum(mode, x1, cal_bins, capture_bins);
-    for (x1 = cal_bins[1] - capture_bins; x1 < cal_bins[1] + capture_bins; x1++) adjdB = PlotCalSpectrum(mode, x1, cal_bins, capture_bins);
+//    for (x1 = cal_bins[0] - capture_bins; x1 < cal_bins[0] + capture_bins; x1++) adjdB = PlotCalSpectrum(mode, x1, cal_bins, capture_bins);
+//    for (x1 = cal_bins[1] - capture_bins; x1 < cal_bins[1] + capture_bins; x1++) adjdB = PlotCalSpectrum(mode, x1, cal_bins, capture_bins);
+
+for (x1 = 0; x1 < 512; x1++) adjdB = PlotCalSpectrum(mode, x1, cal_bins, capture_bins);
+
   }
 
   // Plot carrier during transmit cal, do not return a dB value:
