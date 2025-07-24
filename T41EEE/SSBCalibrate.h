@@ -25,6 +25,7 @@ float adjdB = 0.0;
 float adjdBold = 0.0;  // Used in exponential averager.  KF5N May 19, 2024
 float adjdB_old = 0.0;
 float adjdB_sample = 0.0;
+float sineBuffer[512];   // Used to generate CW tone.
 q15_t rawSpectrumPeak = 0;
 float adjdB_avg = 0.0;
 uint32_t index = 0;
@@ -72,7 +73,6 @@ void warmUpCal(int mode);
 void printCalType(bool autoCal, bool autoCalDone);
 void CalibratePreamble(int setZoom);
 void CalibrateEpilogue(bool radioCal, bool saveToEeprom);
-//void DoReceiveCalibrate(bool radioCal, bool shortCal);
 void DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom);
 void DoXmitCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom);
 void DoXmitCarrierCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom);

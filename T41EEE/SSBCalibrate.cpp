@@ -30,10 +30,9 @@
 void SSBCalibrate::loadCalToneBuffers(float toneFreq) {
   float theta;
   // This loop creates the sinusoidal waveform for the tone.
-  for (int kf = 0; kf < 256; kf++) {
+  for (int kf = 0; kf < 512; kf++) {
     theta = kf * 2.0 * PI * toneFreq / 24000;
-    sinBuffer[kf] = sin(theta);
-    cosBuffer[kf] = cos(theta);
+    sineBuffer[kf] = sin(theta);
   }
 }
 

@@ -155,7 +155,10 @@ FLASHMEM void SelectCWOffset() {
   if (ConfigData.CWOffset == 4) ConfigData.CWOffset = tempCWOffset;
 
   // Now generate the values for the buffer which is used to create the CW tone.  The values are discrete because there must be whole cycles.
-  if (ConfigData.CWOffset < 4) sineTone(numCycles[ConfigData.CWOffset]);
+  if (ConfigData.CWOffset < 4) {
+  sineTone(numCycles[ConfigData.CWOffset]);  // This is for the CW decoder.
+  cwexciter.writeSineBuffer(numCycles[ConfigData.CWOffset]);
+  }
   UpdateAudioGraphics();
   eeprom.ConfigDataWrite();  // Save to EEPROM.
 }
@@ -347,14 +350,14 @@ void SetSideToneVolume(bool speaker) {
   while (true) {
     if (digitalRead(ConfigData.paddleDit) == LOW || digitalRead(ConfigData.paddleDah) == LOW) {
       if (keyDown) {
-        CW_ExciterIQData(CW_SHAPING_NONE);
+        cwexciter.CW_ExciterIQData(CW_SHAPING_NONE);
       } else {
-        CW_ExciterIQData(CW_SHAPING_RISE);
+        cwexciter.CW_ExciterIQData(CW_SHAPING_RISE);
         keyDown = true;
       }
     } else {
       if (keyDown) {
-        CW_ExciterIQData(CW_SHAPING_FALL);
+        cwexciter.CW_ExciterIQData(CW_SHAPING_FALL);
         keyDown = false;
       }
     }

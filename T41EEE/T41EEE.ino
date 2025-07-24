@@ -36,6 +36,7 @@ bool agc_action = false;
 Process process;           // Receiver process object.
 CWCalibrate cwcalibrater;  // Instantiate the calibration objects.
 SSBCalibrate ssbcalibrater;
+CW_Exciter cwexciter;
 JSON json;
 Eeprom eeprom;  // Eeprom object.
 Button button;
@@ -182,8 +183,8 @@ int32_t NCOFreq = 0;
 //================== Global CW Correlation and FFT Variables =================
 float32_t *cosBuffer = new float32_t[256];  // Was cosBuffer2; Greg KF5N February 7, 2024
 float32_t *sinBuffer = new float32_t[256];  // This can't be DMAMEM.  It will cause problems with the CW decoder.
-float32_t DMAMEM cwRiseBuffer[256];
-float32_t DMAMEM cwFallBuffer[256];
+float32_t DMAMEM cwRiseBuffer[512];
+float32_t DMAMEM cwFallBuffer[512];
 // ===========
 
 char keyboardBuffer[10];  // Set for call prefixes. May be increased later
@@ -799,6 +800,35 @@ MenuSelect readButton() {
 }
 
 
+/*****
+  Purpose: CW Key interrupt service routine (tip)
+
+  Parameter list: void
+
+  Return value: void
+*****/
+void KeyTipOn() {
+  if (digitalRead(KEYER_DIT_INPUT_TIP) == LOW and bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE)
+    keyPressedOn = 1;
+}
+
+
+/*****
+  Purpose: CW Key interrupt service routine (ring) //AFP 09-01-22
+
+  Parameter list: void
+
+  Return value; void
+*****/
+void KeyRingOn()  //AFP 09-25-22
+{
+  if (ConfigData.keyType == 1) {
+    if (digitalRead(KEYER_DAH_INPUT_RING) == LOW and bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE)
+      keyPressedOn = 1;
+  }
+}
+
+
 bool powerUp = false;
 uint32_t afterPowerUp = 0;
 /*****
@@ -1141,22 +1171,22 @@ void loop() {
         if (digitalRead(ConfigData.paddleDit) == LOW && ConfigData.keyType == 0) {  // AFP 09-25-22  Turn on CW signal
           cwTimer = millis();                                                       //Reset timer
 
-          if (!cwKeyDown) {
-            CW_ExciterIQData(CW_SHAPING_RISE);
+          if (cwKeyDown == false) {
+            cwexciter.CW_ExciterIQData(CW_SHAPING_RISE);
             cwKeyDown = true;
           } else {
-            CW_ExciterIQData(CW_SHAPING_NONE);
+            cwexciter.CW_ExciterIQData(CW_SHAPING_NONE);
           }
         } else {
           if (digitalRead(ConfigData.paddleDit) == HIGH && ConfigData.keyType == 0) {  //Turn off CW signal
             keyPressedOn = 0;
             if (cwKeyDown) {  // Initiate falling CW signal.
-              CW_ExciterIQData(CW_SHAPING_FALL);
+              cwexciter.CW_ExciterIQData(CW_SHAPING_FALL);
               cwKeyDown = false;
-            } else CW_ExciterIQData(CW_SHAPING_ZERO);  //  No waveforms; but DC offset is still present.
+            } else cwexciter.CW_ExciterIQData(CW_SHAPING_ZERO);  //  No waveforms; but DC offset is still present.
           }
         }
-      }
+      } // end CW transmit while loop
       //      digitalWrite(MUTE, MUTEAUDIO);  // mutes audio
       digitalWrite(RXTX, LOW);  // End Straight Key Mode
       break;
@@ -1171,11 +1201,11 @@ void loop() {
           ditTimerOn = millis();
           // Queue audio blocks--execution time of this loop will be between 0-20ms shorter
           // than the desired dit time, due to audio buffering.
-          CW_ExciterIQData(CW_SHAPING_RISE);
+          cwexciter.CW_ExciterIQData(CW_SHAPING_RISE);
           for (cwBlockIndex = 0; cwBlockIndex < transmitDitUnshapedBlocks; cwBlockIndex++) {
-            CW_ExciterIQData(CW_SHAPING_NONE);
+            cwexciter.CW_ExciterIQData(CW_SHAPING_NONE);
           }
-          CW_ExciterIQData(CW_SHAPING_FALL);
+          cwexciter.CW_ExciterIQData(CW_SHAPING_FALL);
 
           // Wait for calculated dit time, allowing audio blocks to be played
           while (millis() - ditTimerOn <= transmitDitLength) {
@@ -1185,18 +1215,18 @@ void loop() {
           // Pause for one dit length of silence
           ditTimerOff = millis();
           while (millis() - ditTimerOff <= transmitDitLength) {
-            CW_ExciterIQData(CW_SHAPING_ZERO);
+            cwexciter.CW_ExciterIQData(CW_SHAPING_ZERO);
           }
           cwTimer = millis();
         } else if (digitalRead(ConfigData.paddleDah) == LOW) {  //Keyer DAH
           dahTimerOn = millis();
           // Queue audio blocks--execution time of this loop will be between 0-20ms shorter
           // than the desired dah time, due to audio buffering
-          CW_ExciterIQData(CW_SHAPING_RISE);
+          cwexciter.CW_ExciterIQData(CW_SHAPING_RISE);
           for (cwBlockIndex = 0; cwBlockIndex < transmitDahUnshapedBlocks; cwBlockIndex++) {
-            CW_ExciterIQData(CW_SHAPING_NONE);
+            cwexciter.CW_ExciterIQData(CW_SHAPING_NONE);
           }
-          CW_ExciterIQData(CW_SHAPING_FALL);
+          cwexciter.CW_ExciterIQData(CW_SHAPING_FALL);
 
           // Wait for calculated dah time, allowing audio blocks to be played
           while (millis() - dahTimerOn <= 3UL * transmitDitLength) {
@@ -1206,11 +1236,11 @@ void loop() {
           // Pause for one dit length of silence
           ditTimerOff = millis();
           while (millis() - ditTimerOff <= transmitDitLength) {
-            CW_ExciterIQData(CW_SHAPING_ZERO);
+            cwexciter.CW_ExciterIQData(CW_SHAPING_ZERO);
           }
           cwTimer = millis();
         } else {
-          CW_ExciterIQData(CW_SHAPING_ZERO);
+          cwexciter.CW_ExciterIQData(CW_SHAPING_ZERO);
         }
         keyPressedOn = 0;  // Fix for keyer click-clack.  KF5N August 16, 2023
       }                    //End Relay timer

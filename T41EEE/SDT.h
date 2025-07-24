@@ -459,6 +459,7 @@ extern calibration_t CalData_temp;
 #include "Button.h"
 #include "CWCalibrate.h"
 #include "SSBCalibrate.h"
+#include "CW_Exciter.h"
 #include "JSON.h"
 #include "Eeprom.h"
 #include "Process.h"
@@ -594,6 +595,7 @@ extern Eeprom eeprom;                // EEPROM memory object.
 extern JSON json;
 extern CWCalibrate cwcalibrater;         // CW mode calibration object.
 extern SSBCalibrate ssbcalibrater;   // SSB mode calibration object.
+extern CW_Exciter cwexciter;         // CW exciter object
 extern Button button;
 
 extern Si5351 si5351;
