@@ -47,14 +47,15 @@ void SSBCalibrate::loadCalToneBuffers(float toneFreq) {
     void
 *****/
 void SSBCalibrate::plotCalGraphics(int calType) {
+  int bar_width = 8;
   tft.writeTo(L2);
   if (calType == 0) {  // Receive Cal
     if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
       tft.fillRect(445, SPECTRUM_TOP_Y + 20, 20, 341, DARK_RED);     // SPECTRUM_TOP_Y = 100, h = 135
       tft.fillRect(304, SPECTRUM_TOP_Y + 20, 20, 341, RA8875_BLUE);  // h = SPECTRUM_HEIGHT + 3
     } else {                                                         // SPECTRUM_HEIGHT = 150 so h = 153
-      tft.fillRect(50, SPECTRUM_TOP_Y + 20, 20, 341, DARK_RED);
-      tft.fillRect(188, SPECTRUM_TOP_Y + 20, 20, 341, RA8875_BLUE);
+      tft.fillRect(rx_red_usb - bar_width, SPECTRUM_TOP_Y + 20, 20, 341, DARK_RED);
+      tft.fillRect(rx_blue_usb - bar_width, SPECTRUM_TOP_Y + 20, 20, 341, RA8875_BLUE);
     }
   }
   if (calType == 1) {  // Transmit Cal
@@ -100,7 +101,7 @@ void SSBCalibrate::warmUpCal(int mode) {
     while (static_cast<uint32_t>(Q_in_L_Ex.available()) < 32 and static_cast<uint32_t>(ADC_RX_I.available()) < 32) {
       delay(1);
     }
-    SSBCalibrate::ProcessIQData2(mode);  // Note, FFT not called if buffers not sufficiently filled.
+    SSBCalibrate::ProcessIQData2(mode);  // Note, FFT not called if buffers are not sufficiently filled.
   }
   updateDisplayFlag = false;
   // Find peak of spectrum, which is 512 wide.  Use this to adjust spectrum peak to top of spectrum display.
@@ -2022,8 +2023,8 @@ void SSBCalibrate::ShowSpectrum2(int mode)  //AFP 2-10-23
     cal_bins[1] = 455;
   }  // Receive calibration, LSB.  KF5N
   if (calTypeFlag == 0 && bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-    cal_bins[0] = 59;
-    cal_bins[1] = 199;
+    cal_bins[0] = rx_blue_usb;
+    cal_bins[1] = rx_red_usb;
   }  // Receive calibration, USB.  KF5N
   /*
   if (calTypeFlag == 0 && bands.bands[ConfigData.currentBand].mode == DEMOD_LSB) {
@@ -2048,10 +2049,10 @@ void SSBCalibrate::ShowSpectrum2(int mode)  //AFP 2-10-23
 
   //  There are 2 for-loops, one for the reference signal and another for the undesired sideband.
   if (calTypeFlag == 0) {  // Receive cal
-//    for (x1 = cal_bins[0] - capture_bins; x1 < cal_bins[0] + capture_bins; x1++) adjdB = PlotCalSpectrum(mode, x1, cal_bins, capture_bins);
-//    for (x1 = cal_bins[1] - capture_bins; x1 < cal_bins[1] + capture_bins; x1++) adjdB = PlotCalSpectrum(mode, x1, cal_bins, capture_bins);
+    for (x1 = cal_bins[0] - capture_bins; x1 < cal_bins[0] + capture_bins; x1++) adjdB = PlotCalSpectrum(mode, x1, cal_bins, capture_bins);
+    for (x1 = cal_bins[1] - capture_bins; x1 < cal_bins[1] + capture_bins; x1++) adjdB = PlotCalSpectrum(mode, x1, cal_bins, capture_bins);
 
-        for (x1 = 0; x1 < 512; x1 = x1 + 1) adjdB = PlotCalSpectrum(mode, x1, cal_bins, capture_bins);
+//        for (x1 = 0; x1 < 512; x1 = x1 + 1) adjdB = PlotCalSpectrum(mode, x1, cal_bins, capture_bins);
 
   }
 
@@ -2137,8 +2138,8 @@ float SSBCalibrate::PlotCalSpectrum(int mode, int x1, int cal_bins[3], int captu
     arm_max_q15(&pixelnew[(cal_bins[1] - capture_bins)], capture_bins * 2, &adjAmplitude, &index_of_max);
   }
   if ((bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) && (calTypeFlag == 0)) {
-    arm_max_q15(&pixelnew[(cal_bins[0] - capture_bins)], capture_bins * 2, &adjAmplitude, &index_of_max);
-    arm_max_q15(&pixelnew[(cal_bins[1] - capture_bins)], capture_bins * 2, &refAmplitude, &index_of_max);
+    arm_max_q15(&pixelnew[(cal_bins[0] - capture_bins)], capture_bins * 2, &refAmplitude, &index_of_max);
+    arm_max_q15(&pixelnew[(cal_bins[1] - capture_bins)], capture_bins * 2, &adjAmplitude, &index_of_max);
   }
 
 

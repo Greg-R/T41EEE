@@ -183,8 +183,8 @@ int32_t NCOFreq = 0;
 //================== Global CW Correlation and FFT Variables =================
 float32_t *cosBuffer = new float32_t[256];  // Was cosBuffer2; Greg KF5N February 7, 2024
 float32_t *sinBuffer = new float32_t[256];  // This can't be DMAMEM.  It will cause problems with the CW decoder.
-float32_t DMAMEM cwRiseBuffer[512];
-float32_t DMAMEM cwFallBuffer[512];
+float32_t DMAMEM cwRiseBuffer[512] {0};
+float32_t DMAMEM cwFallBuffer[512] {0};
 // ===========
 
 char keyboardBuffer[10];  // Set for call prefixes. May be increased later

@@ -670,7 +670,8 @@ FLASHMEM void initUserDefinedStuff() {
   SetDitLength(ConfigData.currentWPM);
   SetTransmitDitLength(ConfigData.currentWPM);
   // Initialize buffers used by the CW transmitter and CW decoder.
-  sineTone(ConfigData.CWOffset + 6);  // This function takes "number of cycles" which is the offset + 6.
+  sineTone(ConfigData.CWOffset + 6);  // This function takes "number of cycles" which is the offset + 6.  Used by CW decoder.
+  cwexciter.writeSineBuffer(ConfigData.CWOffset + 6);  // Used to create CW sinusoidal tone.
   si5351.set_correction(CalData.freqCorrectionFactor, SI5351_PLL_INPUT_XO);
   initCWShaping();
   initPowerCoefficients();

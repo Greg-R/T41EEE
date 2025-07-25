@@ -38,6 +38,10 @@ RadioMode tempMode;
 RadioState tempState;
 float32_t amplitude = 0;
 float32_t phase = 0;
+
+// Blue and red bar variables:
+int32_t rx_blue_usb = 64;
+int32_t rx_red_usb = 448;
 enum class Cal_Mode{CW_RECEIVE, CW_TRANSMIT, CW_CARRIER, SSB_RECEIVE, SSB_TRANSMIT, SSB_CARRIER,};
 
 int Zoom_FFT_M1;
