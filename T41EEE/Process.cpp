@@ -453,14 +453,14 @@ void Process::ProcessIQData() {
           if (IQ_counter >= 1000) IQ_counter = 1;
 */
 
-#endif    // End automatic receiver calibration.
+   // End automatic receiver calibration.
 
     /**********************************************************************************  AFP 12-31-20
       IQ amplitude and phase correction.  For this scaled down version the I an Q chnnels are
       equalized and phase corrected manually. This is done by applying a correction, which is the difference, to
       the L channel only.  The phase is corrected in the IQPhaseCorrection() function.
     ***********************************************************************************************/
-
+#else
     // Manual IQ amplitude correction
     if (radioState == RadioState::CW_RECEIVE_STATE or radioState == RadioState::AM_RECEIVE_STATE or radioState == RadioState::SAM_RECEIVE_STATE) {
       if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
@@ -483,7 +483,7 @@ void Process::ProcessIQData() {
         }
       }
     }
-    //
+#endif
 
   //  display_S_meter_or_spectrum_state++;
     if (keyPressedOn == 1) {  ////AFP 09-01-22.  Is this a duplicate here???

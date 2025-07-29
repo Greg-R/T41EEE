@@ -89,8 +89,8 @@ AudioRecordQueue ADC_RX_Q;  // Q channel from ADC PCM1808.
 AudioPlayQueue Q_out_L;  // Receiver audio out and CW sidetone.
 
 AudioConvert_I16toF32 int2Float2;
-AudioConnection patchCord1(i2s_quadIn, 2, ADC_RX_I, 0);  // Receiver I and Q channel data stream.
-AudioConnection patchCord2(i2s_quadIn, 3, ADC_RX_Q, 0);  // This data stream goes to sketch code for processing.
+AudioConnection patchCord1(i2s_quadIn, 3, ADC_RX_I, 0);  // Receiver I and Q channel data stream.
+AudioConnection patchCord2(i2s_quadIn, 2, ADC_RX_Q, 0);  // This data stream goes to sketch code for processing.
 
 AudioConnection patchCord3(Q_out_L, 0, int2Float2, 0);  // 192ksps Audio data stream from sketch code.  Receiver audio or CW sidetone.
 
