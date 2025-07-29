@@ -197,8 +197,8 @@ int pos_left = centerLine - (int)(bands.bands[ConfigData.currentBand].FLoCut / 1
 int centerLine = (MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2;
 int16_t fftOffset = 100;
 int16_t audioFFToffset = 100;
-int fLoCutOld;
-int fHiCutOld;
+//int fLoCutOld;
+//int fHiCutOld;
 int filterWidth = static_cast<int>((bands.bands[ConfigData.currentBand].FHiCut - bands.bands[ConfigData.currentBand].FLoCut) / 1000.0 * pixel_per_khz);
 int h = 135;  // SPECTRUM_HEIGHT + 3;
 bool ANR_notch = false;

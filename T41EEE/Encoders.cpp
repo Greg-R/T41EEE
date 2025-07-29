@@ -71,6 +71,8 @@ void FilterSetSSB() {
   UpdateAudioGraphics();    // Redraw Morse decoder graphics because they get erased due to filter graphics updates.
   DrawFrequencyBarValue();  // This calls ShowBandwidth().  YES, this function is useful here.
   DrawBandWidthIndicatorBar();
+
+  Serial.printf("FLoCut = %d FHiCut = %d\n", bands.bands[ConfigData.currentBand].FLoCut, bands.bands[ConfigData.currentBand].FHiCut);
 }
 
 

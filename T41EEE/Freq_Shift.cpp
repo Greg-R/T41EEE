@@ -1,8 +1,8 @@
 
 #include "SDT.h"
 
-float32_t DMAMEM float_buffer_L_3[2048];
-float32_t DMAMEM float_buffer_R_3[2048];
+ float32_t DMAMEM float_buffer_L_3[2048];
+ float32_t DMAMEM float_buffer_R_3[2048];
 
 float32_t NCO_INC;
 float64_t OSC_COS;
@@ -38,11 +38,28 @@ float32_t hh2 = 0.0;
 void FreqShift1()
 {
   for (unsigned i = 0; i < BUFFER_SIZE * N_BLOCKS; i += 4) {
+
+        hh1 = - float_buffer_R[i + 1];
+        hh2 =   float_buffer_L[i + 1];
+        float_buffer_L[i + 1] = hh1;
+        float_buffer_R[i + 1] = hh2;
+        // xnew(2) = -xreal(2) - jximag(2)
+        hh1 = - float_buffer_L[i + 2];
+        hh2 = - float_buffer_R[i + 2];
+        float_buffer_L[i + 2] = hh1;
+        float_buffer_R[i + 2] = hh2;
+        // xnew(3) = + ximag(3) - jxreal(3)
+        hh1 =   float_buffer_R[i + 3];
+        hh2 = - float_buffer_L[i + 3];
+        float_buffer_L[i + 3] = hh1;
+        float_buffer_R[i + 3] = hh2;
+  }
+    /*
     hh1 = - float_buffer_R[i + 1];  // xnew(1) =  - ximag(1) + jxreal(1)
     hh2 =   float_buffer_L[i + 1];
     float_buffer_L[i + 1] = hh1;
     float_buffer_R[i + 1] = hh2;
-    hh1 = - float_buffer_L[i + 2];
+    hh1 = - float_buffer_L[i + 2];  // T41 code
     hh2 = - float_buffer_R[i + 2];
     float_buffer_L[i + 2] = hh1;
     float_buffer_R[i + 2] = hh2;
@@ -51,11 +68,13 @@ void FreqShift1()
     float_buffer_L[i + 3] = hh1;
     float_buffer_R[i + 3] = hh2;
   }
+  // This code does not appear in the original Teensy Convolution SDR.
   for (unsigned i = 0; i < BUFFER_SIZE * N_BLOCKS; i ++) {
     float_buffer_L_3[i] = float_buffer_L[i];
     float_buffer_R_3[i] = float_buffer_R[i];
   }
-  // this is for -Fs/4 [moves receive frequency to the right in the spectrumdisplay]
+  */ 
+  //this is for -Fs/4 [moves receive frequency to the right in the spectrumdisplay]
 }
 
 
@@ -141,9 +160,10 @@ void FreqShift2()
     Osc_Vect_Q = Osc_Gain * Osc_Q;
     Osc_Vect_I = Osc_Gain * Osc_I;
     //
+    // This code does not appear in the original Teensy Convolution SDR.
     // do actual frequency conversion
-    float freqAdjFactor = 1.1;
-    float_buffer_L[i] = (float_buffer_L_3[i] * freqAdjFactor * Osc_Q) + (float_buffer_R_3[i] * freqAdjFactor * Osc_I); // multiply I/Q data by sine/cosine data to do translation
-    float_buffer_R[i] = (float_buffer_R_3[i] * freqAdjFactor * Osc_Q) - (float_buffer_L_3[i] * freqAdjFactor * Osc_I);
+//    float freqAdjFactor = 1.1;
+//    float_buffer_L[i] = (float_buffer_L_3[i] * freqAdjFactor * Osc_Q) + (float_buffer_R_3[i] * freqAdjFactor * Osc_I); // multiply I/Q data by sine/cosine data to do translation
+//    float_buffer_R[i] = (float_buffer_R_3[i] * freqAdjFactor * Osc_Q) - (float_buffer_L_3[i] * freqAdjFactor * Osc_I);
   }
 }
