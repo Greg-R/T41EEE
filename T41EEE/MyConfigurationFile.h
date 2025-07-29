@@ -86,4 +86,4 @@
 #define FREQUENCYCAL 130000  // The nominal frequency calibration.  This can be set here permanently after determining
                              // the unique value for your radio.
 
-#define RECEIVERAUTOCAL      //  Uncomment to activate automatic receiver calibration.
+//#define RECEIVERAUTOCAL      //  Uncomment to activate automatic receiver calibration.
