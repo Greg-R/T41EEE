@@ -298,7 +298,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       break;
 
     case RadioState::SSB_CALIBRATE_STATE:
-      SampleRate = SAMPLE_RATE_48K;
+      SampleRate = SAMPLE_RATE_192K;
       InitializeDataArrays();  // I2S sample rate set in this function.
       controlAudioOut(ConfigData.audioOut, true);  // Mute all audio.
       sgtl5000_1.unmuteLineout();
@@ -310,10 +310,13 @@ void SetAudioOperatingState(RadioState operatingState) {
       ADC_RX_Q.end();
       ADC_RX_Q.clear();
 
+        cessb1.setSampleRate_Hz(48000);  ////
+
       // Test tone enabled and connected
       toneSSBCal1.setSampleRate_Hz(48000);
+//      toneSSBCal1.setSampleRate_Hz(192000);
       toneSSBCal1.amplitude(0.2);
-      toneSSBCal1.frequency(750.0);
+      toneSSBCal1.frequency(187.5);
       toneSSBCal1.begin();
       toneSSBCal2.end();
       mixer1_tx.gain(0, 0);      // microphone audio off.

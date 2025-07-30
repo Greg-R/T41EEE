@@ -147,16 +147,16 @@ void Process::ProcessIQData() {
         ********************************************************************************************************/
 
 //        if (MOSELEY)
-         // Moseley, N.A. & C.H. Slump (2006): A low-complexity feed-forward I/Q imbalance compensation algorithm.
+//        { // Moseley, N.A. & C.H. Slump (2006): A low-complexity feed-forward I/Q imbalance compensation algorithm.
           // in 17th Annual Workshop on Circuits, Nov. 2006, pp. 158–164.
           // http://doc.utwente.nl/66726/1/moseley.pdf
-/*
+
           if (twinpeaks_tested == 3) // delete "IQ test"-display after a while, when everything is OK
           {
             twinpeaks_counter++;
             if (twinpeaks_counter >= 200)
             { // delete IQ test message
-              tft.fillRect(spectrum_x + 256 + 2, pos_y_time + 17, 320 - spectrum_x - 58, 31, ILI9341_BLACK);
+              tft.fillRect(10 + 256 + 2, 48 + 17, 320 - 10 - 58, 31, RA8875_BLACK);
               twinpeaks_tested = 1;
             }
           }
@@ -168,25 +168,24 @@ void Process::ProcessIQData() {
 #endif
             if (twinpeaks_counter == 1)
             {
-              tft.fillRect(spectrum_x + 256 + 3, pos_y_time + 18, 49, 28, ILI9341_RED);
-              tft.drawRect(spectrum_x + 256 + 2, pos_y_time + 17, 320 - spectrum_x - 258, 31, ILI9341_MAROON);
-              tft.setCursor(spectrum_x + 256 + 6, pos_y_time + 19);
-              tft.setFont(Arial_12);
-              tft.setTextColor(ILI9341_WHITE);
+              tft.fillRect(10 + 256 + 3, 48 + 18, 49, 28, RA8875_RED);
+              tft.drawRect(10 + 256 + 2, 48 + 17, 320 - 10 - 258, 31, RA8875_RED);
+              tft.setCursor(10 + 256 + 6, 48 + 19);
+              tft.setFont(&FreeMono9pt7b);
+              tft.setTextColor(RA8875_WHITE);
               tft.print("IQtest");
             }
-            tft.setCursor(pos_x_time + 55, pos_y_time + 19 + 14);
-            tft.setFont(Arial_12);
+            tft.setCursor(232 + 55, 48 + 19 + 14);
+            tft.setFont(&FreeMono9pt7b);
             if (twinpeaks_counter)
             {
-              tft.setTextColor(ILI9341_RED);
+              tft.setTextColor(RA8875_RED);
               tft.print(800 - twinpeaks_counter + 1);
             }
-            tft.setTextColor(ILI9341_WHITE);
-            tft.setCursor(pos_x_time + 55, pos_y_time + 19 + 14);
+            tft.setTextColor(RA8875_WHITE);
+            tft.setCursor(232 + 55, 48 + 19 + 14);
             tft.print(800 - twinpeaks_counter);
           }
-          */
           //        if(twinpeaks_counter >= 500) // wait 500 cycles for the system to settle: compare fig. 11 in Moseley & Slump (2006)
           if (twinpeaks_counter >= 800 && twinpeaks_tested == 2) // wait 800 cycles for the system to settle: compare fig. 11 in Moseley & Slump (2006)
             // it takes quite a while until the automatic IQ correction has really settled (because of the built-in lowpass filter in the algorithm):
@@ -278,10 +277,10 @@ void Process::ProcessIQData() {
                 Serial.println("Tried four times to reset your codec, but still IQ balance is very bad - hardware error ???");
 #endif
                 twinpeaks_tested = 3;
-            //    tft.fillRect(spectrum_x + 256 + 3, pos_y_time + 18, 49, 28, ILI9341_RED);
-            //    tft.setCursor(pos_x_time + 42, pos_y_time + 22);
-            //    tft.setFont(Arial_12);
-            //    tft.print("reset!");
+                tft.fillRect(10 + 256 + 3, 48 + 18, 49, 28, RA8875_RED);
+                tft.setCursor(232 + 42, 48 + 22);
+                tft.setFont(&FreeMono9pt7b);
+                tft.print("reset!");
               }
             }
             else
@@ -291,15 +290,15 @@ void Process::ProcessIQData() {
 #ifdef DEBUG
               Serial.println("IQ phase balance is OK, so enjoy radio reception !");
 #endif
-           //   tft.fillRect(spectrum_x + 256 + 3, pos_y_time + 18, 49, 28, ILI9341_NAVY);
-           //   tft.drawRect(spectrum_x + 256 + 2, pos_y_time + 17, 320 - spectrum_x - 258, 31, ILI9341_MAROON);
-           //   tft.setCursor(spectrum_x + 256 + 6, pos_y_time + 22);
-           //   tft.setFont(Arial_12);
-           //   tft.setTextColor(ILI9341_WHITE);
-           //   tft.print("IQtest");
-           //   tft.setCursor(pos_x_time + 55, pos_y_time + 22 + 14);
-           //   tft.setFont(Arial_12);
-           //   tft.print("OK !");
+              tft.fillRect(10 + 256 + 3, 48 + 18, 49, 28, RA8875_RED);
+              tft.drawRect(10 + 256 + 2, 48 + 17, 320 - 10 - 258, 31, RA8875_RED);
+              tft.setCursor(10 + 256 + 6, 48 + 22);
+              tft.setFont(&FreeMono9pt7b);
+              tft.setTextColor(RA8875_WHITE);
+              tft.print("IQtest");
+              tft.setCursor(232 + 55, 48 + 22 + 14);
+              tft.setFont(&FreeMono9pt7b);
+              tft.print("OK !");
             }
           }
 
@@ -317,141 +316,6 @@ void Process::ProcessIQData() {
 //        }
 
 
-
-
-          // this is the IQ imbalance correction algorithm by Chang et al. 2010
-          // 1.) estimate K_est
-          // 2.) correct for K_est_mult
-          // 3.) estimate P_est
-          // 4.) correct for P_est_mult
-
-          // new experiment
-
-          // calculate the coefficients for the imbalance correction
-          // once at system start or when changing frequency band
-          // IQ_state 0: do nothing --> automatic IQ imbalance correction switched off
-          // IQ_state 1: estimate amplitude coefficient K_est
-          // IQ_state 2: K_est estimated, wait for next stage
-          // IQ_state 3: estimate phase coefficient P_est
-          // IQ_state 4: everything calculated and corrected
-
-          /*
-              switch(IQ_state)
-              {
-                case 0:
-                  break;
-                case 1: // Chang & Lin (2010): eq. (9)
-                    AudioNoInterrupts();
-                    Q_sum = 0.0;
-                    I_sum = 0.0;
-                    for (i = 0; i < n_para; i++)
-                    {
-                         Q_sum += float_buffer_R[i] * float_buffer_R[i + n_para];
-                         I_sum += float_buffer_L[i] * float_buffer_L[i + n_para];
-                    }
-                    K_est = sqrtf(Q_sum / I_sum);
-                    K_est_mult = 1.0 / K_est;
-                    IQ_state++;
-                    Serial.print("New 1 / K_est: "); Serial.println(1.0 / K_est);
-                    AudioInterrupts();
-                  break;
-                case 2: // Chang & Lin (2010): eq. (10)
-                    AudioNoInterrupts();
-                    IQ_sum = 0.0;
-                    I_sum = 0.0;
-                    for (i = 0; i < n_para; i++)
-                    {
-                         IQ_sum += float_buffer_L[i] * float_buffer_R[i + n_para];
-                         I_sum += float_buffer_L[i] * float_buffer_L[i + n_para];
-                    }
-                    P_est = IQ_sum / I_sum;
-                    P_est_mult = 1.0 / (sqrtf(1.0 - P_est * P_est));
-                    IQ_state = 1;
-                    Serial.print("1 / sqrt(1 - P_est^2): "); Serial.println(P_est_mult);
-                    if(P_est > -1.0 && P_est < 1.0) {
-                      Serial.print("New: Phasenfehler in Grad: "); Serial.println(- asinf(P_est));
-                    }
-                    AudioInterrupts();
-                  break;
-              }
-          
-
-          // only correct, if signal strength is above a threshold
-          //
-          if (IQ_counter >= 0 && 1 )
-          {
-            // 1.)
-            // K_est estimation
-            Q_sum = 0.0;
-            I_sum = 0.0;
-            for (unsigned i = 0; i < n_para; i++)
-            {
-              Q_sum += float_buffer_R[i] * float_buffer_R[i + n_para];
-              I_sum += float_buffer_L[i] * float_buffer_L[i + n_para];
-            }
-            if (I_sum != 0.0)
-            {
-              if (Q_sum / I_sum < 0) {
-#ifdef DEBUG
-                Serial.println("ACHTUNG WURZEL AUS NEGATIVER ZAHL");
-                Serial.println("ACHTUNG WURZEL AUS NEGATIVER ZAHL");
-                Serial.println("ACHTUNG WURZEL AUS NEGATIVER ZAHL");
-                Serial.println("ACHTUNG WURZEL AUS NEGATIVER ZAHL");
-                Serial.println("ACHTUNG WURZEL AUS NEGATIVER ZAHL");
-                Serial.println("ACHTUNG WURZEL AUS NEGATIVER ZAHL");
-                Serial.println("ACHTUNG WURZEL AUS NEGATIVER ZAHL");
-                Serial.println("ACHTUNG WURZEL AUS NEGATIVER ZAHL");
-                Serial.println("ACHTUNG WURZEL AUS NEGATIVER ZAHL");
-#endif
-                K_est = K_est_old;
-              }
-              else
-              {
-                if (IQ_counter != 0) K_est = 0.001 * sqrtf(Q_sum / I_sum) + 0.999 * K_est_old;
-                else
-                {
-                  K_est = sqrtf(Q_sum / I_sum);
-                }
-                K_est_old = K_est;
-              }
-            }
-            else K_est = K_est_old;
-#ifdef DEBUG
-            Serial.print("New 1 / K_est: "); Serial.println(100.0 / K_est);
-#endif
-            // 3.)
-            // phase estimation
-            IQ_sum = 0.0;
-            for (unsigned i = 0; i < n_para; i++)
-            { // amplitude correction inside the formula  --> K_est_mult !
-              IQ_sum += float_buffer_L[i] * float_buffer_R[i + n_para];// * K_est_mult;
-            }
-            if (I_sum == 0.0) I_sum = IQ_sum;
-            if (IQ_counter != 0) P_est = 0.001 * (IQ_sum / I_sum) + 0.999 * P_est_old;
-            else P_est = (IQ_sum / I_sum);
-            P_est_old = P_est;
-            if (P_est > -1.0 && P_est < 1.0) P_est_mult = 1.0 / (sqrtf(1.0 - P_est * P_est));
-            else P_est_mult = 1.0;
-            // dirty fix !!!
-#ifdef DEBUG
-            Serial.print("1 / sqrt(1 - P_est^2): "); Serial.println(P_est_mult * 100.0);
-#endif
-            if (P_est > -1.0 && P_est < 1.0) {
-#ifdef DEBUG
-              Serial.print("New: Phasenfehler in Grad: "); Serial.println(- asinf(P_est) * 100.0);
-#endif
-            }
-
-            // 4.)
-            // Chang & Lin (2010): eq. 12; phase correction
-            for (unsigned i = 0; i < BUFFER_SIZE * N_BLOCKS; i++)
-            {
-              float_buffer_R[i] = P_est_mult * float_buffer_R[i] - P_est * float_buffer_L[i];
-            }
-          }
-          IQ_counter++;
-          if (IQ_counter >= 1000) IQ_counter = 1;
-*/
 
    // End automatic receiver calibration.
 
