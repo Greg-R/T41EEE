@@ -108,7 +108,7 @@ void CWCalibrate::printCalType(int mode, int IQCalType, bool autoCal, bool autoC
   const char *IQName[4] = { "Receive CW", "Transmit CW", "Carrier CW", "Calibrate" };
   tft.writeTo(L1);
   calName = IQName[calTypeFlag];
-  if (mode == 1) calName = "Receive SSB";  // This was an exception here due to Receive SSB being done by this class.
+  if (mode == 1) calName = "Receive SSB";
   tft.setFontScale((enum RA8875tsize)1);
   tft.setTextColor(RA8875_RED);
   if ((bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) and (calTypeFlag == 0)) {
@@ -388,8 +388,8 @@ void CWCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, boo
   bool refineCal = false;
   loadCalToneBuffers(3000.0);
   CalibratePreamble(0);                                                                       // Set zoom to 1X.
-  if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) calFreqShift = 6000;  //  LSB offset.  KF5N
-  if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) calFreqShift = 6000;  //  USB offset.  KF5N
+  if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) calFreqShift = 24000;  //  LSB offset.  KF5N
+  if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) calFreqShift = 24000;  //  USB offset.  KF5N
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreqCal(calFreqShift);
   calTypeFlag = 0;  // RX cal
@@ -404,12 +404,12 @@ void CWCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, boo
   State state = State::warmup;  // Start calibration state machine in warmup state.
   float maxSweepAmp = 0.2;
   float maxSweepPhase = 0.1;
-  float increment = 0.002;
+  float increment = 0.001;
   int averageCount = 0;
   float iOptimal = 1.0;
   float qOptimal = 0.0;
-  std::vector<float32_t> sweepVector(301);
-  std::vector<float32_t> sweepVectorValue(301);
+  std::vector<float32_t> sweepVector(401);
+  std::vector<float32_t> sweepVectorValue(401);
   elapsedMillis fiveSeconds;
   int viewTime = 0;
   bool averageFlag = false;
@@ -845,15 +845,15 @@ void CWCalibrate::DoXmitCalibrate(int mode, bool radioCal, bool shortCal, bool s
   int freqOffset;
   float correctionIncrement = 0.001;
   CWCalibrate::State state = State::warmup;  // Start calibration state machine in warmup state.
-  float maxSweepAmp = 0.1;
+  float maxSweepAmp = 0.2;
   float maxSweepPhase = 0.1;
-  float increment = 0.002;
+  float increment = 0.001;
   int averageCount = 0;
   IQCalType = 0;  // Begin with gain optimization.
   float iOptimal = 1.0;
   float qOptimal = 0.0;
-  std::vector<float32_t> sweepVector(351);
-  std::vector<float32_t> sweepVectorValue(351);
+  std::vector<float32_t> sweepVector(401);
+  std::vector<float32_t> sweepVectorValue(401);
   elapsedMillis fiveSeconds;
   int viewTime = 0;
   bool autoCal = false;
@@ -1735,7 +1735,7 @@ void CWCalibrate::ProcessIQData2(int mode) {
     IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, phase, 256);   // Adjust phase
   } else {
     if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-      arm_scale_f32(float_buffer_L_EX, amplitude, float_buffer_L_EX, 256);  // AFP 2-11-23
+      arm_scale_f32(float_buffer_L_EX, -amplitude, float_buffer_L_EX, 256);  // AFP 2-11-23
       IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, phase, 256);
     }
   }
@@ -1808,11 +1808,11 @@ void CWCalibrate::ProcessIQData2(int mode) {
     // Manual IQ amplitude correction
     if (mode == 0) {
       if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-        arm_scale_f32(float_buffer_L, -CalData.IQCWRXAmpCorrectionFactorLSB[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
+        arm_scale_f32(float_buffer_L, CalData.IQCWRXAmpCorrectionFactorLSB[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
         IQPhaseCorrection(float_buffer_L, float_buffer_R, CalData.IQCWRXPhaseCorrectionFactorLSB[ConfigData.currentBand], BUFFER_SIZE * N_BLOCKS);
       } else {
         if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-          arm_scale_f32(float_buffer_L, -CalData.IQCWRXAmpCorrectionFactorUSB[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22 KF5N changed sign
+          arm_scale_f32(float_buffer_L, CalData.IQCWRXAmpCorrectionFactorUSB[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22 KF5N changed sign
           IQPhaseCorrection(float_buffer_L, float_buffer_R, CalData.IQCWRXPhaseCorrectionFactorUSB[ConfigData.currentBand], BUFFER_SIZE * N_BLOCKS);
         }
       }
@@ -1820,24 +1820,22 @@ void CWCalibrate::ProcessIQData2(int mode) {
 
     if (mode == 1) {
       if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-        arm_scale_f32(float_buffer_L, -CalData.IQSSBRXAmpCorrectionFactorLSB[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
+        arm_scale_f32(float_buffer_L, CalData.IQSSBRXAmpCorrectionFactorLSB[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
         IQPhaseCorrection(float_buffer_L, float_buffer_R, CalData.IQSSBRXPhaseCorrectionFactorLSB[ConfigData.currentBand], BUFFER_SIZE * N_BLOCKS);
       } else {
         if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-          arm_scale_f32(float_buffer_L, -CalData.IQSSBRXAmpCorrectionFactorUSB[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22 KF5N changed sign
+          arm_scale_f32(float_buffer_L, CalData.IQSSBRXAmpCorrectionFactorUSB[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22 KF5N changed sign
           IQPhaseCorrection(float_buffer_L, float_buffer_R, CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand], BUFFER_SIZE * N_BLOCKS);
         }
       }
     }
 
+    FreqShift1();
 
-    // X1 zoom must be done before the frequency shift!
     if (ConfigData.spectrum_zoom == SPECTRUM_ZOOM_1) {  // && display_S_meter_or_spectrum_state == 1)
       zoom_display = 1;
       CalcZoom1Magn();  //AFP Moved to display function
     }
-
-    FreqShift1();
 
     // ZoomFFTExe is being called too many times in Calibration.  Should be called ONLY at the start of each sweep.
     if (ConfigData.spectrum_zoom != SPECTRUM_ZOOM_1) {
@@ -1897,11 +1895,8 @@ void CWCalibrate::ShowSpectrum2(int mode)  //AFP 2-10-23
 
   //  There are 2 for-loops, one for the reference signal and another for the undesired sideband.
   if (calTypeFlag == 0) {  // Receive cal
-//    for (x1 = cal_bins[0] - capture_bins; x1 < cal_bins[0] + capture_bins; x1++) adjdB = PlotCalSpectrum(mode, x1, cal_bins, capture_bins);
-//    for (x1 = cal_bins[1] - capture_bins; x1 < cal_bins[1] + capture_bins; x1++) adjdB = PlotCalSpectrum(mode, x1, cal_bins, capture_bins);
-
-for (x1 = 0; x1 < 512; x1++) adjdB = PlotCalSpectrum(mode, x1, cal_bins, capture_bins);
-
+    for (x1 = cal_bins[0] - capture_bins; x1 < cal_bins[0] + capture_bins; x1++) adjdB = PlotCalSpectrum(mode, x1, cal_bins, capture_bins);
+    for (x1 = cal_bins[1] - capture_bins; x1 < cal_bins[1] + capture_bins; x1++) adjdB = PlotCalSpectrum(mode, x1, cal_bins, capture_bins);
   }
 
   // Plot carrier during transmit cal, do not return a dB value:
