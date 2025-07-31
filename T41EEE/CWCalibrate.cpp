@@ -33,14 +33,19 @@ void CWCalibrate::loadCalToneBuffers(float toneFreq) {
     void
 *****/
 void CWCalibrate::plotCalGraphics(int calType) {
+  int bar_width = 8;
   tft.writeTo(L2);
   if (calType == 0) {  // Receive Cal
     if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-      tft.fillRect(445, SPECTRUM_TOP_Y + 20, 20, 341, DARK_RED);     // SPECTRUM_TOP_Y = 100, h = 135
-      tft.fillRect(304, SPECTRUM_TOP_Y + 20, 20, 341, RA8875_BLUE);  // h = SPECTRUM_HEIGHT + 3
+//      tft.fillRect(445, SPECTRUM_TOP_Y + 20, 20, 341, DARK_RED);     // SPECTRUM_TOP_Y = 100, h = 135
+//      tft.fillRect(304, SPECTRUM_TOP_Y + 20, 20, 341, RA8875_BLUE);  // h = SPECTRUM_HEIGHT + 3
+      tft.fillRect(rx_red_usb - bar_width, SPECTRUM_TOP_Y + 20, 20, 341, DARK_RED);     // SPECTRUM_TOP_Y = 100, h = 135
+      tft.fillRect(rx_blue_usb - bar_width, SPECTRUM_TOP_Y + 20, 20, 341, RA8875_BLUE);  // h = SPECTRUM_HEIGHT + 3
     } else {                                                         // SPECTRUM_HEIGHT = 150 so h = 153
-      tft.fillRect(50, SPECTRUM_TOP_Y + 20, 20, 341, DARK_RED);
-      tft.fillRect(188, SPECTRUM_TOP_Y + 20, 20, 341, RA8875_BLUE);
+//      tft.fillRect(50, SPECTRUM_TOP_Y + 20, 20, 341, DARK_RED);
+//      tft.fillRect(188, SPECTRUM_TOP_Y + 20, 20, 341, RA8875_BLUE);
+      tft.fillRect(rx_red_usb - bar_width, SPECTRUM_TOP_Y + 20, 20, 341, DARK_RED);     // SPECTRUM_TOP_Y = 100, h = 135
+      tft.fillRect(rx_blue_usb - bar_width, SPECTRUM_TOP_Y + 20, 20, 341, RA8875_BLUE);  // h = SPECTRUM_HEIGHT + 3      
     }
   }
   if (calType == 1) {  // Transmit Cal
@@ -386,10 +391,11 @@ void CWCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, boo
   float correctionIncrement = 0.001;
   bool autoCal = false;
   bool refineCal = false;
-  loadCalToneBuffers(3000.0);
+  loadCalToneBuffers(750.0);
   CalibratePreamble(0);                                                                       // Set zoom to 1X.
-  if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) calFreqShift = 24000;  //  LSB offset.  KF5N
-  if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) calFreqShift = 24000;  //  USB offset.  KF5N
+//  if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) calFreqShift = 96000;  //  LSB offset.  KF5N
+//  if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) calFreqShift = 96000;  //  USB offset.  KF5N
+calFreqShift = 0;
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreqCal(calFreqShift);
   calTypeFlag = 0;  // RX cal
@@ -1731,11 +1737,11 @@ void CWCalibrate::ProcessIQData2(int mode) {
 
   //if(mode == 0) {
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-    arm_scale_f32(float_buffer_L_EX, -amplitude, float_buffer_L_EX, 256);  //Adjust level of L buffer // AFP 2-11-23
+    arm_scale_f32(float_buffer_L_EX, amplitude, float_buffer_L_EX, 256);  //Adjust level of L buffer // AFP 2-11-23
     IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, phase, 256);   // Adjust phase
   } else {
     if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-      arm_scale_f32(float_buffer_L_EX, -amplitude, float_buffer_L_EX, 256);  // AFP 2-11-23
+      arm_scale_f32(float_buffer_L_EX, amplitude, float_buffer_L_EX, 256);  // AFP 2-11-23
       IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, phase, 256);
     }
   }
@@ -1860,7 +1866,7 @@ void CWCalibrate::ProcessIQData2(int mode) {
 void CWCalibrate::ShowSpectrum2(int mode)  //AFP 2-10-23
 {
   int x1 = 0;
-  int capture_bins = 8;  // Sets the number of bins to scan for signal peak.
+  int capture_bins = 32;  // Sets the number of bins to scan for signal peak.
 
   pixelnew[0] = 0;
   pixelnew[1] = 0;
@@ -1875,12 +1881,16 @@ void CWCalibrate::ShowSpectrum2(int mode)  //AFP 2-10-23
   //  The target bin locations are used by the for-loop to sweep a small range in the FFT.  A maximum finding function finds the peak signal strength.
   int cal_bins[3] = { 0, 0, 0 };
   if (calTypeFlag == 0 && bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-    cal_bins[0] = 315;
-    cal_bins[1] = 455;
+//    cal_bins[0] = 315;
+//    cal_bins[1] = 455;
+    cal_bins[0] = rx_blue_usb;  // was 315
+    cal_bins[1] = rx_red_usb;
   }  // Receive calibration, LSB.  KF5N
   if (calTypeFlag == 0 && bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-    cal_bins[0] = 59;
-    cal_bins[1] = 199;
+//    cal_bins[0] = 59;
+//    cal_bins[1] = 199;
+    cal_bins[0] = rx_blue_usb;  // was 315
+    cal_bins[1] = rx_red_usb;
   }  // Receive calibration, USB.  KF5N
   if ((calTypeFlag == 1 || calTypeFlag == 2) && bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
     cal_bins[0] = 257;  // LSB

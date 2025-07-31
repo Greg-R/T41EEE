@@ -14,6 +14,10 @@
 class CWCalibrate {
 public:
 
+// Blue and red bar variables:
+int32_t rx_blue_usb = 128;
+int32_t rx_red_usb = 384;
+
 int IQCalType;
 int val;
 float correctionIncrement;  //AFP 2-7-23
