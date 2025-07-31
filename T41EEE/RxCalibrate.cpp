@@ -12,7 +12,7 @@
    Return value:
       void
  *****/
-void CWCalibrate::loadCalToneBuffers(float toneFreq) {
+void RxCalibrate::loadCalToneBuffers(float toneFreq) {
   float theta;
   // This loop creates the sinusoidal waveform for the tone.
   for (int kf = 0; kf < 256; kf++) {
@@ -32,22 +32,22 @@ void CWCalibrate::loadCalToneBuffers(float toneFreq) {
   Return value:
     void
 *****/
-void CWCalibrate::plotCalGraphics(int calType) {
+void RxCalibrate::plotCalGraphics(int calType) {
   int bar_width = 8;
   tft.writeTo(L2);
   if (calType == 0) {  // Receive Cal
-    if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-//      tft.fillRect(445, SPECTRUM_TOP_Y + 20, 20, 341, DARK_RED);     // SPECTRUM_TOP_Y = 100, h = 135
-//      tft.fillRect(304, SPECTRUM_TOP_Y + 20, 20, 341, RA8875_BLUE);  // h = SPECTRUM_HEIGHT + 3
-      tft.fillRect(rx_red_usb - bar_width, SPECTRUM_TOP_Y + 20, 20, 341, DARK_RED);     // SPECTRUM_TOP_Y = 100, h = 135
+//    if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
+      //      tft.fillRect(445, SPECTRUM_TOP_Y + 20, 20, 341, DARK_RED);     // SPECTRUM_TOP_Y = 100, h = 135
+      //      tft.fillRect(304, SPECTRUM_TOP_Y + 20, 20, 341, RA8875_BLUE);  // h = SPECTRUM_HEIGHT + 3
+      tft.fillRect(rx_red_usb - bar_width, SPECTRUM_TOP_Y + 20, 20, 341, DARK_RED);      // SPECTRUM_TOP_Y = 100, h = 135
       tft.fillRect(rx_blue_usb - bar_width, SPECTRUM_TOP_Y + 20, 20, 341, RA8875_BLUE);  // h = SPECTRUM_HEIGHT + 3
-    } else {                                                         // SPECTRUM_HEIGHT = 150 so h = 153
-//      tft.fillRect(50, SPECTRUM_TOP_Y + 20, 20, 341, DARK_RED);
-//      tft.fillRect(188, SPECTRUM_TOP_Y + 20, 20, 341, RA8875_BLUE);
-      tft.fillRect(rx_red_usb - bar_width, SPECTRUM_TOP_Y + 20, 20, 341, DARK_RED);     // SPECTRUM_TOP_Y = 100, h = 135
-      tft.fillRect(rx_blue_usb - bar_width, SPECTRUM_TOP_Y + 20, 20, 341, RA8875_BLUE);  // h = SPECTRUM_HEIGHT + 3      
-    }
-  }
+    } // else {                                                                             // SPECTRUM_HEIGHT = 150 so h = 153
+                                                                                         //      tft.fillRect(50, SPECTRUM_TOP_Y + 20, 20, 341, DARK_RED);
+                                                                                         //      tft.fillRect(188, SPECTRUM_TOP_Y + 20, 20, 341, RA8875_BLUE);
+//      tft.fillRect(rx_red_usb - bar_width, SPECTRUM_TOP_Y + 20, 20, 341, DARK_RED);      // SPECTRUM_TOP_Y = 100, h = 135
+//      tft.fillRect(rx_blue_usb - bar_width, SPECTRUM_TOP_Y + 20, 20, 341, RA8875_BLUE);  // h = SPECTRUM_HEIGHT + 3
+//    }
+//  }
   if (calType == 1) {  // Transmit Cal
     if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
       tft.fillRect(312, SPECTRUM_TOP_Y + 20, 20, 341, DARK_RED);  // Adjusted height due to other graphics changes.  KF5N August 3, 2023
@@ -83,7 +83,7 @@ void CWCalibrate::plotCalGraphics(int calType) {
   Return value:
     void
 *****/
-void CWCalibrate::warmUpCal(int mode) {
+void RxCalibrate::warmUpCal(int mode) {
   // Run ProcessIQData2() a few times to load and settle out buffers.  Compute FFT.  KF5N May 19, 2024
   uint32_t index_of_max;  // Not used, but required by arm_max_q15 function.
   for (int i = 0; i < 128; i = i + 1) {
@@ -91,7 +91,7 @@ void CWCalibrate::warmUpCal(int mode) {
     while (static_cast<uint32_t>(ADC_RX_I.available()) < 16 and static_cast<uint32_t>(ADC_RX_Q.available()) < 16) {
       delay(1);
     }
-    CWCalibrate::ProcessIQData2(mode);
+    RxCalibrate::ProcessIQData2(mode);
   }
   updateDisplayFlag = false;
   // Find peak of spectrum, which is 512 wide.  Use this to adjust spectrum peak to top of spectrum display.
@@ -108,14 +108,15 @@ void CWCalibrate::warmUpCal(int mode) {
   Return value:
     void
 *****/
-void CWCalibrate::printCalType(int mode, int IQCalType, bool autoCal, bool autoCalDone) {
+void RxCalibrate::printCalType(int mode, int IQCalType, bool autoCal, bool autoCalDone) {
   const char *calName;
-  const char *IQName[4] = { "Receive CW", "Transmit CW", "Carrier CW", "Calibrate" };
+  const char *IQName[4] = { "Receive", "Transmit CW", "Carrier CW", "Calibrate" };
   tft.writeTo(L1);
   calName = IQName[calTypeFlag];
   if (mode == 1) calName = "Receive SSB";
   tft.setFontScale((enum RA8875tsize)1);
   tft.setTextColor(RA8875_RED);
+  /*
   if ((bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) and (calTypeFlag == 0)) {
     tft.setCursor(35, 260);
     tft.print(calName);
@@ -137,14 +138,15 @@ void CWCalibrate::printCalType(int mode, int IQCalType, bool autoCal, bool autoC
       tft.print("Manual Mode");
     }
   }
-  if ((bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) and (calTypeFlag == 0)) {
-    tft.setCursor(275, 260);
+  */
+  if (calTypeFlag == 0) {
+    tft.setCursor(left_text_edge, 260);
     tft.print(calName);
-    tft.setCursor(275, 295);
+    tft.setCursor(left_text_edge, 295);
     tft.print(IQName[3]);
     if (autoCal) {
-      tft.setCursor(275, 330);
-      tft.fillRect(275, 330, 215, 40, RA8875_BLACK);
+      tft.setCursor(left_text_edge, 330);
+      tft.fillRect(left_text_edge, 330, 215, 40, RA8875_BLACK);
       if (autoCalDone) {
         tft.setTextColor(RA8875_GREEN);
         tft.print("Auto-Cal Mode");
@@ -153,92 +155,8 @@ void CWCalibrate::printCalType(int mode, int IQCalType, bool autoCal, bool autoC
         tft.print("Auto-Cal Mode");
       }
     } else {
-      tft.setCursor(275, 330);
-      tft.fillRect(275, 330, 215, 40, RA8875_BLACK);
-      tft.print("Manual Mode");
-    }
-  }
-  if ((bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) and (calTypeFlag == 1)) {
-    tft.setCursor(30, 260);
-    tft.print(calName);
-    tft.setCursor(30, 295);
-    tft.print(IQName[3]);
-    if (autoCal) {
-      tft.setCursor(30, 330);
-      tft.fillRect(30, 330, 215, 40, RA8875_BLACK);
-      if (autoCalDone) {
-        tft.setTextColor(RA8875_GREEN);
-        tft.print("Auto-Cal Mode");
-      } else {
-        tft.setTextColor(RA8875_RED);
-        tft.print("Auto-Cal Mode");
-      }
-    } else {
-      tft.setCursor(30, 330);
-      tft.fillRect(30, 330, 215, 40, RA8875_BLACK);
-      tft.print("Manual Mode");
-    }
-  }
-  if ((bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) and (calTypeFlag == 1)) {
-    tft.setCursor(290, 260);
-    tft.print(calName);
-    tft.setCursor(290, 295);
-    tft.print(IQName[3]);
-    if (autoCal) {
-      tft.setCursor(290, 330);
-      tft.fillRect(290, 330, 215, 40, RA8875_BLACK);
-      if (autoCalDone) {
-        tft.setTextColor(RA8875_GREEN);
-        tft.print("Auto-Cal Mode");
-      } else {
-        tft.setTextColor(RA8875_RED);
-        tft.print("Auto-Cal Mode");
-      }
-    } else {
-      tft.setCursor(290, 330);
-      tft.fillRect(290, 330, 215, 40, RA8875_BLACK);
-      tft.print("Manual Mode");
-    }
-  }
-  if ((bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) and (calTypeFlag == 2)) {
-    tft.setCursor(30, 260);
-    tft.print(calName);
-    tft.setCursor(30, 295);
-    tft.print(IQName[3]);
-    if (autoCal) {
-      tft.setCursor(30, 330);
-      tft.fillRect(30, 330, 215, 40, RA8875_BLACK);
-      if (autoCalDone) {
-        tft.setTextColor(RA8875_GREEN);
-        tft.print("Auto-Cal Mode");
-      } else {
-        tft.setTextColor(RA8875_RED);
-        tft.print("Auto-Cal Mode");
-      }
-    } else {
-      tft.setCursor(30, 330);
-      tft.fillRect(30, 330, 215, 40, RA8875_BLACK);
-      tft.print("Manual Mode");
-    }
-  }
-  if ((bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) and (calTypeFlag == 2)) {
-    tft.setCursor(290, 260);
-    tft.print(calName);
-    tft.setCursor(290, 295);
-    tft.print(IQName[3]);
-    if (autoCal) {
-      tft.setCursor(290, 330);
-      tft.fillRect(290, 330, 215, 40, RA8875_BLACK);
-      if (autoCalDone) {
-        tft.setTextColor(RA8875_GREEN);
-        tft.print("Auto-Cal Mode");
-      } else {
-        tft.setTextColor(RA8875_RED);
-        tft.print("Auto-Cal Mode");
-      }
-    } else {
-      tft.setCursor(290, 330);
-      tft.fillRect(290, 330, 215, 40, RA8875_BLACK);
+      tft.setCursor(left_text_edge, 330);
+      tft.fillRect(left_text_edge, 330, 215, 40, RA8875_BLACK);
       tft.print("Manual Mode");
     }
   }
@@ -257,7 +175,7 @@ void CWCalibrate::printCalType(int mode, int IQCalType, bool autoCal, bool autoC
    Return value:
       void
  *****/
-void CWCalibrate::CalibratePreamble(int setZoom) {
+void RxCalibrate::CalibratePreamble(int setZoom) {
   cessb1.processorUsageMaxReset();
   calOnFlag = true;
   IQCalType = 0;
@@ -289,19 +207,21 @@ void CWCalibrate::CalibratePreamble(int setZoom) {
   tft.writeTo(L1);
   tft.setFontScale((enum RA8875tsize)0);
   tft.setTextColor(RA8875_GREEN);
-  tft.setCursor(350, 160);
-  tft.print("user1 - Gain/Phase");
-  tft.setCursor(350, 175);
+  tft.setCursor(left_text_edge, 175);
+  tft.print("User1 - Gain/Phase");
+  tft.setCursor(left_text_edge, 195);
   tft.print("User2 - Incr");
-  tft.setCursor(350, 190);
+  tft.setCursor(left_text_edge, 215);
   tft.print("Zoom - Auto-Cal");
-  tft.setCursor(350, 205);
+  tft.setCursor(left_text_edge, 235);
   tft.print("Filter - Refine-Cal");
   tft.setTextColor(RA8875_CYAN);
-  tft.fillRect(350, 125, 100, tft.getFontHeight(), RA8875_BLACK);
-  tft.setCursor(400, 142);
+  tft.fillRect(left_text_edge, 125, 100, tft.getFontHeight(), RA8875_BLACK);
+  tft.setCursor(left_text_edge + 90, 142);
+  tft.setFontScale((enum RA8875tsize)1);
   tft.print("dB");
-  tft.setCursor(350, 125);
+  tft.setFontScale((enum RA8875tsize)0);
+  tft.setCursor(left_text_edge, 125);
   tft.print("Incr = ");
   userScale = ConfigData.currentScale;  //  Remember user preference so it can be reset when done.  KF5N
   ConfigData.currentScale = 1;          //  Set vertical scale to 10 dB during calibration.  KF5N
@@ -326,7 +246,7 @@ void CWCalibrate::CalibratePreamble(int setZoom) {
    Return value:
       void
  *****/
-void CWCalibrate::CalibrateEpilogue(bool radioCal, bool saveToEeprom) {
+void RxCalibrate::CalibrateEpilogue(bool radioCal, bool saveToEeprom) {
   /*
   Serial.printf("lastState=%d radioState=%d memory_used=%d memory_used_max=%d f32_memory_used=%d f32_memory_used_max=%d\n",
                 lastState,
@@ -385,25 +305,25 @@ void CWCalibrate::CalibrateEpilogue(bool radioCal, bool saveToEeprom) {
    Return value:
       void
  *****/
-void CWCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom) {
+void RxCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom) {
   MenuSelect task, lastUsedTask = MenuSelect::DEFAULT;
   int calFreqShift;
   float correctionIncrement = 0.001;
   bool autoCal = false;
   bool refineCal = false;
   loadCalToneBuffers(750.0);
-  CalibratePreamble(0);                                                                       // Set zoom to 1X.
-//  if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) calFreqShift = 96000;  //  LSB offset.  KF5N
-//  if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) calFreqShift = 96000;  //  USB offset.  KF5N
-calFreqShift = 0;
+  CalibratePreamble(0);  // Set zoom to 1X.
+  //  if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) calFreqShift = 96000;  //  LSB offset.  KF5N
+  //  if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) calFreqShift = 96000;  //  USB offset.  KF5N
+  calFreqShift = 96000;  // Transmit frequency to 2 times IF, the image.
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   SetFreqCal(calFreqShift);
   calTypeFlag = 0;  // RX cal
   plotCalGraphics(calTypeFlag);
   tft.setFontScale((enum RA8875tsize)0);
   tft.setTextColor(RA8875_WHITE);
-  tft.fillRect(405, 125, 50, tft.getFontHeight(), RA8875_BLACK);
-  tft.setCursor(405, 125);
+  tft.fillRect(left_text_edge + 60, 125, 50, tft.getFontHeight(), RA8875_BLACK);
+  tft.setCursor(left_text_edge + 60, 125);
   tft.print(correctionIncrement, 3);
   printCalType(mode, calTypeFlag, autoCal, false);
   warmUpCal(mode);
@@ -482,7 +402,7 @@ calFreqShift = 0;
         CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand] = phase;
       }
     }
-    CWCalibrate::ShowSpectrum2(mode);
+    RxCalibrate::ShowSpectrum2(mode);
     task = readButton(lastUsedTask);
     if (shortCal) task = MenuSelect::FILTER;
     switch (task) {
@@ -550,13 +470,13 @@ calFreqShift = 0;
           correctionIncrement = 0.01;  // AFP 2-11-23
         }
         tft.setFontScale((enum RA8875tsize)0);
-        tft.fillRect(405, 125, 50, tft.getFontHeight(), RA8875_BLACK);
-        tft.setCursor(405, 125);
+        tft.fillRect(left_text_edge + 60, 125, 50, tft.getFontHeight(), RA8875_BLACK);
+        tft.setCursor(left_text_edge + 60, 125);
         tft.print(correctionIncrement, 3);
         break;
       case MenuSelect::MENU_OPTION_SELECT:  // Save values and exit calibration.
         tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-        CWCalibrate::CalibrateEpilogue(radioCal, saveToEeprom);
+        RxCalibrate::CalibrateEpilogue(radioCal, saveToEeprom);
         return;
         break;
       default:
@@ -847,10 +767,10 @@ calFreqShift = 0;
    Return value:
       void
  *****/
-void CWCalibrate::DoXmitCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom) {
+void RxCalibrate::DoXmitCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom) {
   int freqOffset;
   float correctionIncrement = 0.001;
-  CWCalibrate::State state = State::warmup;  // Start calibration state machine in warmup state.
+  RxCalibrate::State state = State::warmup;  // Start calibration state machine in warmup state.
   float maxSweepAmp = 0.2;
   float maxSweepPhase = 0.1;
   float increment = 0.001;
@@ -867,7 +787,7 @@ void CWCalibrate::DoXmitCalibrate(int mode, bool radioCal, bool shortCal, bool s
   bool averageFlag = false;
   std::vector<float>::iterator result;
   MenuSelect task, lastUsedTask = MenuSelect::DEFAULT;
-  CWCalibrate::CalibratePreamble(4);  // Set zoom to 16X.
+  RxCalibrate::CalibratePreamble(4);  // Set zoom to 16X.
   freqOffset = 0;                     // Calibration tone same as regular modulation tone.
   loadCalToneBuffers(750.0);
   calTypeFlag = 1;  // TX cal
@@ -910,7 +830,7 @@ void CWCalibrate::DoXmitCalibrate(int mode, bool radioCal, bool shortCal, bool s
 
   // Transmit Calibration Loop
   while (true) {
-    CWCalibrate::ShowSpectrum2(mode);
+    RxCalibrate::ShowSpectrum2(mode);
     task = readButton(lastUsedTask);
     if (shortCal) task = MenuSelect::FILTER;
     switch (task) {
@@ -967,7 +887,7 @@ void CWCalibrate::DoXmitCalibrate(int mode, bool radioCal, bool shortCal, bool s
         break;
       case MenuSelect::MENU_OPTION_SELECT:  // Save values and exit calibration.
         tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-        CWCalibrate::CalibrateEpilogue(radioCal, saveToEeprom);
+        RxCalibrate::CalibrateEpilogue(radioCal, saveToEeprom);
         return;
         break;
       default:
@@ -1220,7 +1140,7 @@ void CWCalibrate::DoXmitCalibrate(int mode, bool radioCal, bool shortCal, bool s
       void
  *****/
 #ifdef QSE2
-void CWCalibrate::DoXmitCarrierCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom) {
+void RxCalibrate::DoXmitCarrierCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom) {
   MenuSelect task, lastUsedTask = MenuSelect::DEFAULT;
   int freqOffset;
   int correctionIncrement = 10;
@@ -1241,7 +1161,7 @@ void CWCalibrate::DoXmitCarrierCalibrate(int mode, bool radioCal, bool shortCal,
   bool refineCal = false;
   bool averageFlag = false;
   std::vector<float>::iterator result;
-  CWCalibrate::CalibratePreamble(4);  // Set zoom to 16X.
+  RxCalibrate::CalibratePreamble(4);  // Set zoom to 16X.
   freqOffset = 0;                     // Calibration tone same as regular modulation tone.
   loadCalToneBuffers(750.0);
   calTypeFlag = 2;  // Carrier cal
@@ -1282,7 +1202,7 @@ void CWCalibrate::DoXmitCarrierCalibrate(int mode, bool radioCal, bool shortCal,
 
   // Transmit Calibration Loop
   while (true) {
-    CWCalibrate::ShowSpectrum2(mode);
+    RxCalibrate::ShowSpectrum2(mode);
     task = readButton(lastUsedTask);
     if (shortCal) task = MenuSelect::FILTER;  // Jump to refineCal.
     switch (task) {
@@ -1338,7 +1258,7 @@ void CWCalibrate::DoXmitCarrierCalibrate(int mode, bool radioCal, bool shortCal,
         break;
       case MenuSelect::MENU_OPTION_SELECT:  // Save values and exit calibration.
         tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-        CWCalibrate::CalibrateEpilogue(radioCal, saveToEeprom);
+        RxCalibrate::CalibrateEpilogue(radioCal, saveToEeprom);
         return;
 
         break;
@@ -1568,7 +1488,7 @@ void CWCalibrate::DoXmitCarrierCalibrate(int mode, bool radioCal, bool shortCal,
 
 
 // Automatic calibration of all bands.  Greg KF5N June 4, 2024
-void CWCalibrate::RadioCal(bool refineCal) {
+void RxCalibrate::RadioCal(bool refineCal) {
   // Warn the user if the radio is not calibrated and refine cal is attempted.
   if (refineCal && not CalData.CWradioCalComplete) {
     tft.setFontScale((enum RA8875tsize)2);
@@ -1586,16 +1506,16 @@ void CWCalibrate::RadioCal(bool refineCal) {
   ShowFrequency();
   SetFreq();
   bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER;  // Do LSB first.
-  CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
-  CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoXmitCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
   bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER;  // For FT8.
-  CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
-  CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoXmitCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
 #ifdef QSE2
-  CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoXmitCarrierCalibrate(0, true, refineCal, false);
 #endif
 
-// Put back to LSB before proceeding:
+  // Put back to LSB before proceeding:
   bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER;
 
   //  40M
@@ -1606,16 +1526,16 @@ void CWCalibrate::RadioCal(bool refineCal) {
   ShowFrequency();
   SetFreq();
   bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER;  // Do LSB first.
-  CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
-  CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoXmitCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
   bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER;  // For FT8.
-  CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
-  CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoXmitCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
 #ifdef QSE2
-  CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoXmitCarrierCalibrate(0, true, refineCal, false);
 #endif
 
-// Put back to LSB before proceeding:
+  // Put back to LSB before proceeding:
   bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER;
 
   //  20M
@@ -1626,13 +1546,13 @@ void CWCalibrate::RadioCal(bool refineCal) {
   ShowFrequency();
   SetFreq();
   bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER;  // Do LSB first.
-  CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
-  CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoXmitCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
   bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER;  // For FT8.
-  CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
-  CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoXmitCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
 #ifdef QSE2
-  CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoXmitCarrierCalibrate(0, true, refineCal, false);
 #endif
 
   //  17M
@@ -1643,13 +1563,13 @@ void CWCalibrate::RadioCal(bool refineCal) {
   ShowFrequency();
   SetFreq();
   bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER;  // Do LSB first.
-  CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
-  CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoXmitCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
   bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER;  // For FT8.
-  CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
-  CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoXmitCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
 #ifdef QSE2
-  CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoXmitCarrierCalibrate(0, true, refineCal, false);
 #endif
 
   //  15M
@@ -1660,13 +1580,13 @@ void CWCalibrate::RadioCal(bool refineCal) {
   ShowFrequency();
   SetFreq();
   bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER;  // Do LSB first.
-  CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
-  CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoXmitCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
   bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER;  // For FT8.
-  CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
-  CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoXmitCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
 #ifdef QSE2
-  CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoXmitCarrierCalibrate(0, true, refineCal, false);
 #endif
 
   //  12M
@@ -1677,13 +1597,13 @@ void CWCalibrate::RadioCal(bool refineCal) {
   ShowFrequency();
   SetFreq();
   bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER;  // Do LSB first.
-  CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
-  CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoXmitCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
   bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER;  // For FT8.
-  CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
-  CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoXmitCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
 #ifdef QSE2
-  CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoXmitCarrierCalibrate(0, true, refineCal, false);
 #endif
 
   //  10M
@@ -1694,13 +1614,13 @@ void CWCalibrate::RadioCal(bool refineCal) {
   ShowFrequency();
   SetFreq();
   bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER;  // Do LSB first.
-  CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
-  CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoXmitCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
   bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER;  // For FT8.
-  CWCalibrate::DoXmitCalibrate(0, true, refineCal, false);
-  CWCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoXmitCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoReceiveCalibrate(0, true, refineCal, false);
 #ifdef QSE2
-  CWCalibrate::DoXmitCarrierCalibrate(0, true, refineCal, false);
+  RxCalibrate::DoXmitCarrierCalibrate(0, true, refineCal, false);
 #endif
 
   // Set flag for initial calibration completed.
@@ -1719,7 +1639,7 @@ void CWCalibrate::RadioCal(bool refineCal) {
    Return value:
       void
  *****/
-void CWCalibrate::ProcessIQData2(int mode) {
+void RxCalibrate::ProcessIQData2(int mode) {
   float rfGainValue, powerScale;                                   // AFP 2-11-23.  Greg KF5N February 13, 2023
   float recBandFactor[7] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };  // AFP 2-11-23  KF5N uniform values
 
@@ -1737,12 +1657,12 @@ void CWCalibrate::ProcessIQData2(int mode) {
 
   //if(mode == 0) {
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-    arm_scale_f32(float_buffer_L_EX, amplitude, float_buffer_L_EX, 256);  //Adjust level of L buffer // AFP 2-11-23
-    IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, phase, 256);   // Adjust phase
+    arm_scale_f32(float_buffer_L_EX, -CalData.IQSSBAmpCorrectionFactorLSB[ConfigData.currentBand], float_buffer_L_EX, 256);  //Adjust level of L buffer // AFP 2-11-23
+    IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, CalData.IQSSBPhaseCorrectionFactorLSB[ConfigData.currentBand], 256);  // Adjust phase
   } else {
     if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-      arm_scale_f32(float_buffer_L_EX, amplitude, float_buffer_L_EX, 256);  // AFP 2-11-23
-      IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, phase, 256);
+      arm_scale_f32(float_buffer_L_EX, CalData.IQSSBAmpCorrectionFactorUSB[ConfigData.currentBand], float_buffer_L_EX, 256);  // AFP 2-11-23
+      IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, CalData.IQSSBPhaseCorrectionFactorUSB[ConfigData.currentBand], 256);
     }
   }
 
@@ -1776,8 +1696,11 @@ void CWCalibrate::ProcessIQData2(int mode) {
     arm_float_to_q15(float_buffer_R_EX, q15_buffer_RTemp, 2048);
 
 #ifdef QSE2
-    arm_offset_q15(q15_buffer_LTemp, CalData.iDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_LTemp, 2048);
-    arm_offset_q15(q15_buffer_RTemp, CalData.qDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_RTemp, 2048);
+//    arm_offset_q15(q15_buffer_LTemp, CalData.iDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_LTemp, 2048);
+//    arm_offset_q15(q15_buffer_RTemp, CalData.qDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_RTemp, 2048);
+
+    arm_offset_q15(q15_buffer_LTemp, CalData.iDCoffsetSSB[ConfigData.currentBand] + CalData.dacOffsetSSB, q15_buffer_LTemp, 2048);  // Carrier suppression offset.
+    arm_offset_q15(q15_buffer_RTemp, CalData.qDCoffsetSSB[ConfigData.currentBand] + CalData.dacOffsetSSB, q15_buffer_RTemp, 2048);
 #endif
 
     Q_out_L_Ex.play(q15_buffer_LTemp, 2048);
@@ -1836,12 +1759,12 @@ void CWCalibrate::ProcessIQData2(int mode) {
       }
     }
 
-    FreqShift1();
-
     if (ConfigData.spectrum_zoom == SPECTRUM_ZOOM_1) {  // && display_S_meter_or_spectrum_state == 1)
       zoom_display = 1;
       CalcZoom1Magn();  //AFP Moved to display function
     }
+
+    FreqShift1();
 
     // ZoomFFTExe is being called too many times in Calibration.  Should be called ONLY at the start of each sweep.
     if (ConfigData.spectrum_zoom != SPECTRUM_ZOOM_1) {
@@ -1863,10 +1786,10 @@ void CWCalibrate::ProcessIQData2(int mode) {
   Return value;
     void
 *****/
-void CWCalibrate::ShowSpectrum2(int mode)  //AFP 2-10-23
+void RxCalibrate::ShowSpectrum2(int mode)  //AFP 2-10-23
 {
   int x1 = 0;
-  int capture_bins = 32;  // Sets the number of bins to scan for signal peak.
+  int capture_bins = 8;  // Sets the number of bins to scan for signal peak.
 
   pixelnew[0] = 0;
   pixelnew[1] = 0;
@@ -1881,14 +1804,14 @@ void CWCalibrate::ShowSpectrum2(int mode)  //AFP 2-10-23
   //  The target bin locations are used by the for-loop to sweep a small range in the FFT.  A maximum finding function finds the peak signal strength.
   int cal_bins[3] = { 0, 0, 0 };
   if (calTypeFlag == 0 && bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-//    cal_bins[0] = 315;
-//    cal_bins[1] = 455;
+    //    cal_bins[0] = 315;
+    //    cal_bins[1] = 455;
     cal_bins[0] = rx_blue_usb;  // was 315
     cal_bins[1] = rx_red_usb;
   }  // Receive calibration, LSB.  KF5N
   if (calTypeFlag == 0 && bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-//    cal_bins[0] = 59;
-//    cal_bins[1] = 199;
+    //    cal_bins[0] = 59;
+    //    cal_bins[1] = 199;
     cal_bins[0] = rx_blue_usb;  // was 315
     cal_bins[1] = rx_red_usb;
   }  // Receive calibration, USB.  KF5N
@@ -1921,9 +1844,9 @@ void CWCalibrate::ShowSpectrum2(int mode)  //AFP 2-10-23
     for (x1 = cal_bins[2] - capture_bins; x1 < cal_bins[2] + capture_bins; x1++) PlotCalSpectrum(mode, x1, cal_bins, capture_bins);  // Undesired sideband
   }
 
-  tft.setCursor(350, 142);
-  tft.setFontScale((enum RA8875tsize)0);
-  tft.fillRect(350, 142, 50, tft.getFontHeight(), RA8875_BLACK);  // Erase old adjdB number.                                       // 350, 125
+  tft.setCursor(left_text_edge, 142);
+  tft.setFontScale((enum RA8875tsize)1);
+  tft.fillRect(left_text_edge, 142, 80, tft.getFontHeight(), RA8875_BLACK);  // Erase old adjdB number.                                       // 350, 125
   tft.print(adjdB, 1);
 
   delay(5);  // This requires "tuning" in order to get best response.
@@ -1943,7 +1866,7 @@ void CWCalibrate::ShowSpectrum2(int mode)  //AFP 2-10-23
   Return value;
     float, returns the adjusted value in dB
 *****/
-float CWCalibrate::PlotCalSpectrum(int mode, int x1, int cal_bins[3], int capture_bins) {
+float RxCalibrate::PlotCalSpectrum(int mode, int x1, int cal_bins[3], int capture_bins) {
   int16_t adjAmplitude = 0;  // Was float; cast to float in dB calculation.  KF5N
   int16_t refAmplitude = 0;  // Was float; cast to float in dB calculation.  KF5N
   float alpha = 0.01;
@@ -1956,7 +1879,7 @@ float CWCalibrate::PlotCalSpectrum(int mode, int x1, int cal_bins[3], int captur
     updateDisplayFlag = true;                // This flag is used in ZoomFFTExe().
   } else updateDisplayFlag = false;          //  Do not save the the display data for the remainder of the sweep.
 
-  CWCalibrate::ProcessIQData2(mode);  // Call the Audio process from within the display routine to eliminate conflicts with drawing the spectrum.
+  RxCalibrate::ProcessIQData2(mode);  // Call the Audio process from within the display routine to eliminate conflicts with drawing the spectrum.
 
   y_new = pixelnew[x1];
   y1_new = pixelnew[x1 - 1];
@@ -1970,8 +1893,8 @@ float CWCalibrate::PlotCalSpectrum(int mode, int x1, int cal_bins[3], int captur
     arm_max_q15(&pixelnew[(cal_bins[1] - capture_bins)], capture_bins * 2, &adjAmplitude, &index_of_max);
   }
   if ((bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) && (calTypeFlag == 0)) {
-    arm_max_q15(&pixelnew[(cal_bins[0] - capture_bins)], capture_bins * 2, &adjAmplitude, &index_of_max);
-    arm_max_q15(&pixelnew[(cal_bins[1] - capture_bins)], capture_bins * 2, &refAmplitude, &index_of_max);
+    arm_max_q15(&pixelnew[(cal_bins[0] - capture_bins)], capture_bins * 2, &refAmplitude, &index_of_max);
+    arm_max_q15(&pixelnew[(cal_bins[1] - capture_bins)], capture_bins * 2, &adjAmplitude, &index_of_max);
   }
 
   if ((bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) && (calTypeFlag == 1)) {

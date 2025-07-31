@@ -34,7 +34,7 @@ bool agc_action = false;
 #include "Process.h"
 
 Process process;           // Receiver process object.
-CWCalibrate cwcalibrater;  // Instantiate the calibration objects.
+RxCalibrate rxcalibrater;  // Instantiate the calibration objects.
 SSBCalibrate ssbcalibrater;
 CW_Exciter cwexciter;
 JSON json;

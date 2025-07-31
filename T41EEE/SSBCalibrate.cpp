@@ -1619,7 +1619,7 @@ void SSBCalibrate::DoXmitCarrierCalibrate(int mode, bool radioCal, bool shortCal
 
 
 // Automatic calibration of all bands.  Greg KF5N June 4, 2024
-void SSBCalibrate::RadioCal(bool refineCal) {
+void SSBCalibrate::RadioCal(uint32_t mode, bool refineCal) {
   // Warn the user if the radio is not calibrated and refine cal is attempted.
   if (refineCal and not CalData.SSBradioCalComplete) {
     tft.setFontScale((enum RA8875tsize)2);
@@ -1637,10 +1637,10 @@ void SSBCalibrate::RadioCal(bool refineCal) {
   ShowFrequency();
   SetFreq();
   bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER;
-  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
+  rxcalibrater.DoReceiveCalibrate(1, true, refineCal, false);
   SSBCalibrate::DoXmitCalibrate(1, true, refineCal, false);
   bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER;
-  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
+  rxcalibrater.DoReceiveCalibrate(1, true, refineCal, false);
   SSBCalibrate::DoXmitCalibrate(1, true, refineCal, false);
 #ifdef QSE2
   SSBCalibrate::DoXmitCarrierCalibrate(1, true, refineCal, false);
@@ -1657,10 +1657,10 @@ void SSBCalibrate::RadioCal(bool refineCal) {
   ShowFrequency();
   SetFreq();
   bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER;
-  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
+  RxCalibrate.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
   SSBCalibrate::DoXmitCalibrate(true, refineCal, false);
   bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER;
-  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
+  RxCalibrate.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
   SSBCalibrate::DoXmitCalibrate(true, refineCal, false);
 #ifdef QSE2
   SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal, false);
@@ -1677,10 +1677,10 @@ void SSBCalibrate::RadioCal(bool refineCal) {
   ShowFrequency();
   SetFreq();
   bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER;
-  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
+  RxCalibrate.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
   SSBCalibrate::DoXmitCalibrate(true, refineCal, false);
   bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER;
-  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
+  RxCalibrate.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
   SSBCalibrate::DoXmitCalibrate(true, refineCal, false);
 #ifdef QSE2
   SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal, false);
@@ -1694,10 +1694,10 @@ void SSBCalibrate::RadioCal(bool refineCal) {
   ShowFrequency();
   SetFreq();
   bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER;
-  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
+  RxCalibrate.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
   SSBCalibrate::DoXmitCalibrate(true, refineCal, false);
   bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER;
-  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
+  RxCalibrate.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
   SSBCalibrate::DoXmitCalibrate(true, refineCal, false);
 #ifdef QSE2
   SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal, false);
@@ -1711,10 +1711,10 @@ void SSBCalibrate::RadioCal(bool refineCal) {
   ShowFrequency();
   SetFreq();
   bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER;
-  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
+  RxCalibrate.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
   SSBCalibrate::DoXmitCalibrate(true, refineCal, false);
   bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER;
-  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
+  RxCalibrate.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
   SSBCalibrate::DoXmitCalibrate(true, refineCal, false);
 #ifdef QSE2
   SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal, false);
@@ -1728,10 +1728,10 @@ void SSBCalibrate::RadioCal(bool refineCal) {
   ShowFrequency();
   SetFreq();
   bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER;
-  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
+  RxCalibrate.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
   SSBCalibrate::DoXmitCalibrate(true, refineCal, false);
   bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER;
-  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
+  RxCalibrate.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
   SSBCalibrate::DoXmitCalibrate(true, refineCal, false);
 #ifdef QSE2
   SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal, false);
@@ -1745,10 +1745,10 @@ void SSBCalibrate::RadioCal(bool refineCal) {
   ShowFrequency();
   SetFreq();
   bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER;
-  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
+  RxCalibrate.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
   SSBCalibrate::DoXmitCalibrate(true, refineCal, false);
   bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER;
-  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
+  RxCalibrate.CWCalibrate::DoReceiveCalibrate(1, true, refineCal, false);
   SSBCalibrate::DoXmitCalibrate(true, refineCal, false);
 #ifdef QSE2
   SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal, false);
@@ -1778,49 +1778,49 @@ void SSBCalibrate::RadioCal(bool refineCal) {
   SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
 #endif
   SSBCalibrate::DoXmitCalibrate(true, refineCal);
-  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal);
+  RxCalibrate.CWCalibrate::DoReceiveCalibrate(1, true, refineCal);
 
   button.BandSet(BAND_40M);
 #ifdef QSE2
   SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
 #endif
   SSBCalibrate::DoXmitCalibrate(true, refineCal);
-  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal);
+  RxCalibrate.CWCalibrate::DoReceiveCalibrate(1, true, refineCal);
 
   button.BandSet(BAND_20M);
 #ifdef QSE2
   SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
 #endif
   SSBCalibrate::DoXmitCalibrate(true, refineCal);
-  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal);
+  RxCalibrate.CWCalibrate::DoReceiveCalibrate(1, true, refineCal);
 
   button.BandSet(BAND_17M);
 #ifdef QSE2
   SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
 #endif
   SSBCalibrate::DoXmitCalibrate(true, refineCal);
-  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal);
+  RxCalibrate.CWCalibrate::DoReceiveCalibrate(1, true, refineCal);
 
   button.BandSet(BAND_15M);
 #ifdef QSE2
   SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
 #endif
   SSBCalibrate::DoXmitCalibrate(true, refineCal);
-  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal);
+  RxCalibrate.CWCalibrate::DoReceiveCalibrate(1, true, refineCal);
 
   button.BandSet(BAND_12M);
 #ifdef QSE2
   SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
 #endif
   SSBCalibrate::DoXmitCalibrate(true, refineCal);
-  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal);
+  RxCalibrate.CWCalibrate::DoReceiveCalibrate(1, true, refineCal);
 
   button.BandSet(BAND_10M);
 #ifdef QSE2
   SSBCalibrate::DoXmitCarrierCalibrate(true, refineCal);
 #endif
   SSBCalibrate::DoXmitCalibrate(true, refineCal);
-  cwcalibrater.CWCalibrate::DoReceiveCalibrate(1, true, refineCal);
+  RxCalibrate.CWCalibrate::DoReceiveCalibrate(1, true, refineCal);
 
   // Set flag for initial calibration completed.
   CalData.SSBradioCalComplete = true;

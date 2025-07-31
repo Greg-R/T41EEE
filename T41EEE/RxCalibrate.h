@@ -11,12 +11,13 @@
 //#include <vector>
 #include <algorithm>
 
-class CWCalibrate {
+class RxCalibrate {
 public:
 
 // Blue and red bar variables:
-int32_t rx_blue_usb = 128;
-int32_t rx_red_usb = 384;
+int32_t rx_blue_usb = 383;
+int32_t rx_red_usb = 127;
+int32_t left_text_edge = 165;
 
 int IQCalType;
 int val;

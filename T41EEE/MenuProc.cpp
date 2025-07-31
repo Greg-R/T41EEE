@@ -107,15 +107,15 @@ void CalibrateOptions() {
       break;
 
     case 2:                                                    // CW IQ Receive Cal - Gain and Phase
-      cwcalibrater.DoReceiveCalibrate(0, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
+      rxcalibrater.DoReceiveCalibrate(0, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
       break;
 
     case 3:  // CW Xmit Carrier calibration.
-      cwcalibrater.DoXmitCarrierCalibrate(0, false, false, true);
+//      RxCalibrate.DoXmitCarrierCalibrate(0, false, false, true);
       break;
 
     case 4:                                                 // CW IQ Transmit Cal - Gain and Phase  //AFP 2-21-23
-      cwcalibrater.DoXmitCalibrate(0, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
+//      RxCalibrate.DoXmitCalibrate(0, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
       break;
 
     case 5:  // SSB PA Cal
@@ -133,8 +133,8 @@ void CalibrateOptions() {
       break;  // Missing break.  KF5N August 12, 2023
 
     case 6:                                                    // SSB receive cal
-      ssbcalibrater.DoReceiveCalibrate(1, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
-                                                               //      eeprom.CalDataWrite();                                   // Save calibration numbers and configuration.  KF5N August 12, 2023
+      rxcalibrater.DoReceiveCalibrate(1, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
+
       break;
 
     case 7:  // SSB Carrier Cal
@@ -148,24 +148,22 @@ void CalibrateOptions() {
       break;
 
     case 9:  // CW fully automatic radio calibration.
-      cwcalibrater.RadioCal(false);
-      calibrateFlag = 0;
-      //      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
+     ssbcalibrater.RadioCal(0, false);
+     calibrateFlag = 0;
       break;
 
     case 10:  // CW full automatic calibration refinement.
-      cwcalibrater.RadioCal(true);
+      ssbcalibrater.RadioCal(0, true);
       calibrateFlag = 0;
-      //      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 11:  // SSB fully automatic radio calibration.
-      ssbcalibrater.RadioCal(false);
+      ssbcalibrater.RadioCal(1, false);
       calibrateFlag = 0;
       break;
 
     case 12:  // SSB fully automatic calibration refinement.
-      ssbcalibrater.RadioCal(true);
+      ssbcalibrater.RadioCal(1, true);
       calibrateFlag = 0;
       break;
 
@@ -295,12 +293,12 @@ void CalibrateOptions() {
       break;
 
     case 2:                                                    // CW IQ Receive Cal - Gain and Phase
-      cwcalibrater.DoReceiveCalibrate(0, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
+      RxCalibrate.DoReceiveCalibrate(0, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
                                                                //      eeprom.CalDataWrite();                             // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 3:                                                 // CW IQ Transmit Cal - Gain and Phase  //AFP 2-21-23
-      cwcalibrater.DoXmitCalibrate(0, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
+      RxCalibrate.DoXmitCalibrate(0, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
                                                             //      eeprom.CalDataWrite();                          // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
@@ -320,7 +318,7 @@ void CalibrateOptions() {
       break;  // Missing break.  KF5N August 12, 2023
 
     case 5:                                                    // SSB IQ Receive Cal - Gain and Phase
-      cwcalibrater.DoReceiveCalibrate(1, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
+      RxCalibrate.DoReceiveCalibrate(1, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
                                                                //      eeprom.CalDataWrite();                             // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
@@ -330,12 +328,12 @@ void CalibrateOptions() {
       break;
 
     case 7:  //  CW fully automatic radio calibration.
-      cwcalibrater.RadioCal(false);
+      RxCalibrate.RadioCal(false);
       calibrateFlag = 0;
       break;
 
     case 8:  // CW fully automatic calibration refinement.
-      cwcalibrater.RadioCal(true);
+      RxCalibrate.RadioCal(true);
       calibrateFlag = 0;
       break;
 

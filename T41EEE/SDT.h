@@ -457,7 +457,7 @@ extern calibration_t CalData_temp;
 
 // Custom classes in the sketch.
 #include "Button.h"
-#include "CWCalibrate.h"
+#include "RxCalibrate.h"
 #include "SSBCalibrate.h"
 #include "CW_Exciter.h"
 #include "JSON.h"
@@ -593,7 +593,7 @@ extern Metro ms_500;
 extern Process process;              // Receiver DSP object.
 extern Eeprom eeprom;                // EEPROM memory object.
 extern JSON json;
-extern CWCalibrate cwcalibrater;         // CW mode calibration object.
+extern RxCalibrate rxcalibrater;         // CW mode calibration object.
 extern SSBCalibrate ssbcalibrater;   // SSB mode calibration object.
 extern CW_Exciter cwexciter;         // CW exciter object
 extern Button button;
