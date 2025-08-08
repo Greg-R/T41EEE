@@ -427,15 +427,6 @@ struct calibration_t {
   float IQSSBAmpCorrectionFactorUSB[NUMBER_OF_BANDS] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
   float IQSSBPhaseCorrectionFactorUSB[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
 
-  // Using ARRL table: https://www.arrl.org/frequency-bands.
-#if ITU_REGION == 1
-  uint32_t calFrequencies[NUMBER_OF_BANDS][2] = { { 3590000, 3560000 }, { 7190000, 7030000 }, { 14285000, 14060000 }, { 18130000, 18096000 }, { 21400000, 21060000 }, { 24950000, 24906000 }, { 28365000, 28060000 } };
-#elif ITU_REGION == 2
-  uint32_t calFrequencies[NUMBER_OF_BANDS][2] = { { 3985000, 3560000 }, { 7290000, 7030000 }, { 14285000, 14060000 }, { 18130000, 18096000 }, { 21400000, 21060000 }, { 24950000, 24906000 }, { 28385000, 28060000 } };
-#elif ITU_REGION == 3
-  uint32_t calFrequencies[NUMBER_OF_BANDS][2] = { { 3885000, 3560000 }, { 7190000, 7030000 }, { 14285000, 14060000 }, { 18130000, 18096000 }, { 21400000, 21060000 }, { 24950000, 24906000 }, { 28385000, 28060000 } };
-#endif
-
   int buttonThresholdPressed = 944;   // switchValues[0] + WIGGLE_ROOM
   int buttonThresholdReleased = 964;  // buttonThresholdPressed + WIGGLE_ROOM
   uint32_t buttonRepeatDelay = 300000;     // Increased to 300000 from 200000 to better handle cheap, wornout buttons.
@@ -458,7 +449,7 @@ extern calibration_t CalData_temp;
 // Custom classes in the sketch.
 #include "Button.h"
 #include "RxCalibrate.h"
-#include "SSBCalibrate.h"
+#include "TxCalibrate.h"
 #include "CW_Exciter.h"
 #include "JSON.h"
 #include "Eeprom.h"
@@ -493,8 +484,6 @@ extern int pos_left;
 extern int centerLine;
 extern int h;
 extern int centerTuneFlag;
-
-// ============ end new stuff =======
 
 //================== Global Excite Variables =================
 
@@ -594,7 +583,7 @@ extern Process process;              // Receiver DSP object.
 extern Eeprom eeprom;                // EEPROM memory object.
 extern JSON json;
 extern RxCalibrate rxcalibrater;         // CW mode calibration object.
-extern SSBCalibrate ssbcalibrater;   // SSB mode calibration object.
+extern TxCalibrate txcalibrater;   // SSB mode calibration object.
 extern CW_Exciter cwexciter;         // CW exciter object
 extern Button button;
 
@@ -700,11 +689,10 @@ extern int audioYPixelold[];
 extern int audioYPixelcurrent[];
 
 extern int bandswitchPins[];
+extern PROGMEM uint32_t calFrequencies[NUMBER_OF_BANDS][2];
 extern bool calibrateFlag;
 extern bool morseDecodeAdjustFlag;
 extern int chipSelect;
-//extern int fLoCutOld;
-//extern int fHiCutOld;
 extern volatile int filterEncoderMove;
 extern volatile long fineTuneEncoderMove;
 extern int freqIncrement;
@@ -957,7 +945,7 @@ float goertzel_mag(int numSamples, int TARGET_FREQUENCY, int SAMPLING_RATE, floa
 int GetEncoderValue(int minValue, int maxValue, int startValue, int increment, std::string);
 float GetEncoderValueLive(float minValue, float maxValue, float startValue, float increment, std::string prompt, bool left);  //AFP 10-22-22
 float GetEncoderValueLiveString(float minValue, float maxValue, float startValue, float increment, std::string prompt, bool left);  //AFP 10-22-22
-q15_t GetEncoderValueLiveQ15t(int minValue, int maxValue, int startValue, int increment, char prompt[], bool left);
+q15_t GetEncoderValueLiveQ15t(int minValue, int maxValue, int startValue, int increment, std::string prompt, bool left);
 void GetFavoriteFrequency();
 float HaversineDistance(float dxLat, float dxLon);
 void initializeAudioPaths();  // Greg KF5N March 9, 2025

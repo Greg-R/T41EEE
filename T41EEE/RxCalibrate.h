@@ -19,7 +19,7 @@ int32_t rx_blue_usb = 383;
 int32_t rx_red_usb = 127;
 int32_t left_text_edge = 165;
 
-int IQCalType;
+uint32_t IQCalType;  // 0 is IQ Gain; 1 is Phase.
 int val;
 float correctionIncrement;  //AFP 2-7-23
 int userScale, userZoomIndex, userxmtMode;
@@ -39,6 +39,7 @@ uint32_t count = 0;
 uint32_t warmup = 0;
 uint32_t adjdBMinIndex;
 bool corrChange = false;
+int mode;
 Sideband tempSideband;
 RadioMode tempMode;
 RadioState tempState;
@@ -58,24 +59,25 @@ std::vector<float> sub_vectorPhaseResult = std::vector<float>(21);
                      average,
                      setOptimal,
                      exit };
-  enum class averagingState { refineAmp,
-                              refinePhase };
+//  enum class averagingState { refineAmp,
+//                              refinePhase };
 
-averagingState avgState = averagingState::refineAmp;
+//averagingState avgState = averagingState::refineAmp;
 
 void loadCalToneBuffers(float toneFreq);
-void plotCalGraphics(int calType);
-void ProcessIQData2(int mode);
-void warmUpCal(int mode);
-void printCalType(int mode, int IQCalType, bool autoCal, bool autoCalDone);
+void plotCalGraphics();
+void PrintMode();
+void ProcessIQData2();
+void warmUpCal();
+void printCalType(bool autoCal, bool autoCalDone);
 void CalibratePreamble(int setZoom);
 void CalibrateEpilogue(bool radioCal, bool saveToEeprom);
 void DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom);  // Mode determines CW versus SSB.
-void DoXmitCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom);
-#ifdef QSE2
-void DoXmitCarrierCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom);
-#endif
-void ShowSpectrum2(int mode);
-float PlotCalSpectrum(int mode, int x1, int cal_bins[3], int capture_bins);
-void RadioCal(bool refineCal);
+//void DoXmitCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom);
+//#ifdef QSE2
+//void DoXmitCarrierCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom);
+//#endif
+void ShowSpectrum2();
+float PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins);
+//void RadioCal(bool refineCal);
 };

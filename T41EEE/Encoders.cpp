@@ -269,11 +269,12 @@ float GetEncoderValueLiveString(float minValue, float maxValue, float startValue
     int maxValue                the largest value allowed
     int startValue              the numeric value to begin the count
     int increment               the amount by which each increment changes the value
-    char prompt[]               the input prompt
+    std::string prompt               the input prompt
+    bool left                   true to print left (IQ Gain or IDC Offset)
   Return value;
     int                         the new value
 *****/
-q15_t GetEncoderValueLiveQ15t(int minValue, int maxValue, int startValue, int increment, char prompt[], bool left)  //AFP 10-22-22
+q15_t GetEncoderValueLiveQ15t(int minValue, int maxValue, int startValue, int increment, std::string prompt, bool left)  //AFP 10-22-22
 {
   int currentValue = startValue;
   tft.setFontScale((enum RA8875tsize)1);
@@ -282,7 +283,7 @@ q15_t GetEncoderValueLiveQ15t(int minValue, int maxValue, int startValue, int in
   else tft.fillRect(250, 0, 285, CHAR_HEIGHT, RA8875_BLACK);  // Increased rectangle size to full erase value.  KF5N August 12, 2023
   if (left) tft.setCursor(0, 1);
   else tft.setCursor(257, 1);
-  tft.print(prompt);
+  tft.print(prompt.c_str());
   if (left) tft.setCursor(160, 1);
   else tft.setCursor(440, 1);
   if (abs(startValue) > 2) {

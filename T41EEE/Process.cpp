@@ -139,192 +139,12 @@ void Process::ProcessIQData() {
       ADC_RX_Q.clear();
     }
 
-
-#ifdef RECEIVERAUTOCAL
-        /*******************************************************************************************************
-
-          algorithm by Moseley & Slump
-        ********************************************************************************************************/
-
-//        if (MOSELEY)
-//        { // Moseley, N.A. & C.H. Slump (2006): A low-complexity feed-forward I/Q imbalance compensation algorithm.
-          // in 17th Annual Workshop on Circuits, Nov. 2006, pp. 158–164.
-          // http://doc.utwente.nl/66726/1/moseley.pdf
-
-          if (twinpeaks_tested == 3) // delete "IQ test"-display after a while, when everything is OK
-          {
-            twinpeaks_counter++;
-            if (twinpeaks_counter >= 200)
-            { // delete IQ test message
-              tft.fillRect(10 + 256 + 2, 48 + 17, 320 - 10 - 58, 31, RA8875_BLACK);
-              twinpeaks_tested = 1;
-            }
-          }
-          if (twinpeaks_tested == 2)
-          {
-            twinpeaks_counter++;
-#ifdef DEBUG
-            Serial.print("twinpeaks counter = "); Serial.println(twinpeaks_counter);
-#endif
-            if (twinpeaks_counter == 1)
-            {
-              tft.fillRect(10 + 256 + 3, 48 + 18, 49, 28, RA8875_RED);
-              tft.drawRect(10 + 256 + 2, 48 + 17, 320 - 10 - 258, 31, RA8875_RED);
-              tft.setCursor(10 + 256 + 6, 48 + 19);
-              tft.setFont(&FreeMono9pt7b);
-              tft.setTextColor(RA8875_WHITE);
-              tft.print("IQtest");
-            }
-            tft.setCursor(232 + 55, 48 + 19 + 14);
-            tft.setFont(&FreeMono9pt7b);
-            if (twinpeaks_counter)
-            {
-              tft.setTextColor(RA8875_RED);
-              tft.print(800 - twinpeaks_counter + 1);
-            }
-            tft.setTextColor(RA8875_WHITE);
-            tft.setCursor(232 + 55, 48 + 19 + 14);
-            tft.print(800 - twinpeaks_counter);
-          }
-          //        if(twinpeaks_counter >= 500) // wait 500 cycles for the system to settle: compare fig. 11 in Moseley & Slump (2006)
-          if (twinpeaks_counter >= 800 && twinpeaks_tested == 2) // wait 800 cycles for the system to settle: compare fig. 11 in Moseley & Slump (2006)
-            // it takes quite a while until the automatic IQ correction has really settled (because of the built-in lowpass filter in the algorithm):
-            // we take only the first 256 of the 4096 samples to calculate the IQ correction factors
-            // 500 cycles x 4096 samples (@96ksps sample rate) = 21.33 sec
-          {
-            twinpeaks_tested = 0;
-            twinpeaks_counter = 0;
-#ifdef DEBUG
-            Serial.println("twinpeaks_counter ready to test IQ balance !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1");
-#endif
-          }
-          teta1 = 0.0f;
-          teta2 = 0.0f;
-          teta3 = 0.0f;
-          for (unsigned i = 0; i < n_para; i++)
-          {
-            teta1 += sign(float_buffer_L[i]) * float_buffer_R[i]; // eq (34)
-            teta2 += sign(float_buffer_L[i]) * float_buffer_L[i]; // eq (35)
-            teta3 += sign (float_buffer_R[i]) * float_buffer_R[i]; // eq (36)
-          }
-          teta1 = -0.01f * (teta1 / n_para) + 0.99f * teta1_old; // eq (34) and first order lowpass
-          teta2 = 0.01f * (teta2 / n_para) + 0.99f * teta2_old; // eq (35) and first order lowpass
-          teta3 = 0.01f * (teta3 / n_para) + 0.99f * teta3_old; // eq (36) and first order lowpass
-
-          if (teta2 != 0.0) // prevent divide-by-zero
-          {
-            M_c1 = teta1 / teta2; // eq (30)
-          }
-          else
-          {
-            M_c1 = 0.0f;
-          }
-
-          float32_t moseley_help = (teta2 * teta2);
-          if (moseley_help > 0.0f) // prevent divide-by-zero
-          {
-            moseley_help = (teta3 * teta3 - teta1 * teta1) / moseley_help; // eq (31)
-          }
-          if (moseley_help > 0.0f)// prevent sqrtf of negative value
-          {
-            M_c2 = sqrtf(moseley_help); // eq (31)
-          }
-          else
-          {
-            M_c2 = 1.0f;
-          }
-          // Test and fix of the "twinpeak syndrome"
-          // which occurs sporadically and can -to our knowledge- only be fixed
-          // by a reset of the codec
-          // It can be identified by a totally non-existing mirror rejection,
-          // so I & Q have essentially the same phase
-          // We use this to identify the snydrome and reset the codec accordingly:
-          // calculate phase between I & Q
-
-          if (teta3 != 0.0f && twinpeaks_tested == 0) // prevent divide-by-zero
-            // twinpeak_tested = 2 --> wait for system to warm up
-            // twinpeak_tested = 0 --> go and test the IQ phase
-            // twinpeak_tested = 1 --> tested, verified, go and have a nice day!
-          {
-#ifdef DEBUG
-            Serial.println("HERE");
-#endif
-            // Moseley & Slump (2006) eq. (33)
-            // this gives us the phase error between I & Q in radians
-            float32_t phase_IQ = asinf(teta1 / teta3);
-#ifdef DEBUG
-            Serial.print("asinf = "); Serial.println(phase_IQ);
-#endif
-            if ((phase_IQ > 0.15f || phase_IQ < -0.15f) && codec_restarts < 5)
-              // threshold lowered, so we can be really sure to have IQ phase balance OK
-              // threshold of 22.5 degrees phase shift == PI / 8 == 0.3926990817
-              // hopefully your hardware is not so bad, that its phase error is more than 22 degrees ;-)
-              // if it is that bad, adjust this threshold to maybe PI / 7 or PI / 6
-            {
-//              reset_codec();
-#ifdef DEBUG
-              Serial.println("CODEC RESET");
-#endif
-              twinpeaks_tested = 2;
-              codec_restarts++;
-              // TODO: we should set a maximum number of codec resets
-              // and print out a message, if twinpeaks remains after the
-              // 5th reset for example --> could then be a severe hardware error !
-              if (codec_restarts >= 4)
-              {
-                // PRINT OUT WARNING MESSAGE
-#ifdef DEBUG
-                Serial.println("Tried four times to reset your codec, but still IQ balance is very bad - hardware error ???");
-#endif
-                twinpeaks_tested = 3;
-                tft.fillRect(10 + 256 + 3, 48 + 18, 49, 28, RA8875_RED);
-                tft.setCursor(232 + 42, 48 + 22);
-                tft.setFont(&FreeMono9pt7b);
-                tft.print("reset!");
-              }
-            }
-            else
-            {
-              twinpeaks_tested = 3;
-              twinpeaks_counter = 0;
-#ifdef DEBUG
-              Serial.println("IQ phase balance is OK, so enjoy radio reception !");
-#endif
-              tft.fillRect(10 + 256 + 3, 48 + 18, 49, 28, RA8875_RED);
-              tft.drawRect(10 + 256 + 2, 48 + 17, 320 - 10 - 258, 31, RA8875_RED);
-              tft.setCursor(10 + 256 + 6, 48 + 22);
-              tft.setFont(&FreeMono9pt7b);
-              tft.setTextColor(RA8875_WHITE);
-              tft.print("IQtest");
-              tft.setCursor(232 + 55, 48 + 22 + 14);
-              tft.setFont(&FreeMono9pt7b);
-              tft.print("OK !");
-            }
-          }
-
-          teta1_old = teta1;
-          teta2_old = teta2;
-          teta3_old = teta3;
-
-          // first correct Q and then correct I --> this order is crucially important!
-          for (unsigned i = 0; i < BUFFER_SIZE * N_BLOCKS; i++)
-          { // see fig. 5
-            float_buffer_R[i] += M_c1 * float_buffer_L[i];
-          }
-          // see fig. 5
-          arm_scale_f32 (float_buffer_L, M_c2, float_buffer_L, BUFFER_SIZE * N_BLOCKS);
-//        }
-
-
-
-   // End automatic receiver calibration.
-
     /**********************************************************************************  AFP 12-31-20
-      IQ amplitude and phase correction.  For this scaled down version the I an Q chnnels are
+      IQ amplitude and phase correction.  For this scaled down version the I an Q channels are
       equalized and phase corrected manually. This is done by applying a correction, which is the difference, to
       the L channel only.  The phase is corrected in the IQPhaseCorrection() function.
     ***********************************************************************************************/
-#else
+
     // Manual IQ amplitude correction
     if (radioState == RadioState::CW_RECEIVE_STATE or radioState == RadioState::AM_RECEIVE_STATE or radioState == RadioState::SAM_RECEIVE_STATE) {
       if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
@@ -347,9 +167,8 @@ void Process::ProcessIQData() {
         }
       }
     }
-#endif
 
-  //  display_S_meter_or_spectrum_state++;
+  //  Display_S_meter_or_spectrum_state++
     if (keyPressedOn == 1) {  ////AFP 09-01-22.  Is this a duplicate here???
       return;
     }

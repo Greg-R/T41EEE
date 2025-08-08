@@ -21,7 +21,7 @@ void CW_Exciter::writeSineBuffer(int numCycles) {
   freqSideTone = static_cast<float>(numCycles) * 48000.0 / 512.0;
   for (kf = 0, increment = 0.0; kf < 512; increment += 1.0, kf++) {        // Calc: numCycles = 8, 750 hz sine wave.
     theta = increment * 2.0 * PI * freqSideTone / 48000.0;
-    sineBuffer[kf] = 0.25 * sin(theta);  // Create the CW tone waveform.
+    sineBuffer[kf] = 0.12 * sin(theta);  // Create the CW tone waveform.
   }
   Serial.printf("numCycles = %d\n", numCycles);
 }

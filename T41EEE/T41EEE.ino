@@ -35,7 +35,7 @@ bool agc_action = false;
 
 Process process;           // Receiver process object.
 RxCalibrate rxcalibrater;  // Instantiate the calibration objects.
-SSBCalibrate ssbcalibrater;
+TxCalibrate txcalibrater;
 CW_Exciter cwexciter;
 JSON json;
 Eeprom eeprom;  // Eeprom object.
@@ -273,6 +273,14 @@ int bandswitchPins[] = {
 };
 
 bool calibrateFlag = false;
+  // Using ARRL table: https://www.arrl.org/frequency-bands.  First frequency is CW, second is SSB.
+#if ITU_REGION == 1
+uint32_t PROGMEM calFrequencies[NUMBER_OF_BANDS][2] = { { 3560000, 3790000 }, { 7030000, 7190000 }, { 14060000, 14285000 }, { 18096000, 18130000 }, { 21060000, 21400000 }, { 24906000, 24950000 }, { 28060000, 28365000 } };
+#elif ITU_REGION == 2
+uint32_t PROGMEM calFrequencies[NUMBER_OF_BANDS][2] = { { 3560000, 3985000 }, { 7030000, 7290000 }, { 14060000, 14285000 }, { 18096000, 18130000 }, { 21060000, 21400000 }, { 24906000, 24950000 }, { 28060000, 28365000 } };
+#elif ITU_REGION == 3
+uint32_t PROGMEM calFrequencies[NUMBER_OF_BANDS][2] = { { 3560000, 3885000 }, { 7030000, 7190000 }, { 14060000, 14285000 }, { 18096000, 18130000 }, { 21060000, 21400000 }, { 24906000, 24950000 }, { 28060000, 28365000 } };
+#endif
 bool morseDecodeAdjustFlag = false;
 bool calOnFlag = false;
 int chipSelect = BUILTIN_SDCARD;

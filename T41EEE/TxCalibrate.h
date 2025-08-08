@@ -11,7 +11,7 @@
 //#include <vector>
 #include <algorithm>
 
-class SSBCalibrate {
+class TxCalibrate {
 public:
 
 int IQCalType;
@@ -38,6 +38,9 @@ RadioMode tempMode;
 RadioState tempState;
 float32_t amplitude = 0;
 float32_t phase = 0;
+int32_t iDCoffset = 0;
+int32_t qDCoffset = 0;
+int mode = 0;
 
 // Blue and red bar variables:
 int32_t rx_blue_usb = 128;
@@ -64,25 +67,26 @@ std::vector<float> sub_vectorPhaseResult = std::vector<float>(21);
                      average,
                      setOptimal,
                      exit };
-  enum class averagingState { refineAmp,
-                              refinePhase };
+//  enum class averagingState { refineAmp,
+//                              refinePhase };
 
-averagingState avgState = averagingState::refineAmp;
+//averagingState avgState = averagingState::refineAmp;
 
 //void loadCalToneBuffers();
 void loadCalToneBuffers(float toneFreq);
 void plotCalGraphics(int calType);
-void ProcessIQData2(int mode);
-void warmUpCal(int mode);
+void ProcessIQData2();
+void warmUpCal();
+void PrintMode();
 void printCalType(bool autoCal, bool autoCalDone);
 void CalibratePreamble(int setZoom);
 void CalibrateEpilogue(bool radioCal, bool saveToEeprom);
-void DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom);
+//void DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom);
 void DoXmitCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom);
 void DoXmitCarrierCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom);
 const char *calFreqs[2]{ "750 Hz", "3.0 kHz" };
 //void SelectCalFreq();
-void ShowSpectrum2(int mode);
-float PlotCalSpectrum(int mode, int x1, int cal_bins[3], int capture_bins);
-void RadioCal(uint32_t mode, bool refineCal);
+void ShowSpectrum2();
+float PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins);
+void RadioCal(int mode, bool refineCal);
 };

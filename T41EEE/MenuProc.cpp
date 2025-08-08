@@ -111,11 +111,11 @@ void CalibrateOptions() {
       break;
 
     case 3:  // CW Xmit Carrier calibration.
-//      RxCalibrate.DoXmitCarrierCalibrate(0, false, false, true);
+      txcalibrater.DoXmitCarrierCalibrate(0, false, false, true);
       break;
 
-    case 4:                                                 // CW IQ Transmit Cal - Gain and Phase  //AFP 2-21-23
-//      RxCalibrate.DoXmitCalibrate(0, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
+    case 4:
+      txcalibrater.DoXmitCalibrate(0, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
       break;
 
     case 5:  // SSB PA Cal
@@ -138,32 +138,32 @@ void CalibrateOptions() {
       break;
 
     case 7:  // SSB Carrier Cal
-      ssbcalibrater.DoXmitCarrierCalibrate(1, false, false, true);
+      txcalibrater.DoXmitCarrierCalibrate(1, false, false, true);
       //      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 8:                                               // SSB Transmit cal
-      ssbcalibrater.DoXmitCalibrate(1, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
+      txcalibrater.DoXmitCalibrate(1, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
                                                           //      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
-    case 9:  // CW fully automatic radio calibration.
-     ssbcalibrater.RadioCal(0, false);
+    case 9:  // CW fully automatic radio calibration.  (mode, cal = false refinecal = true)
+     txcalibrater.RadioCal(0, false);
      calibrateFlag = 0;
       break;
 
     case 10:  // CW full automatic calibration refinement.
-      ssbcalibrater.RadioCal(0, true);
+      txcalibrater.RadioCal(0, true);
       calibrateFlag = 0;
       break;
 
     case 11:  // SSB fully automatic radio calibration.
-      ssbcalibrater.RadioCal(1, false);
+      txcalibrater.RadioCal(1, false);
       calibrateFlag = 0;
       break;
 
     case 12:  // SSB fully automatic calibration refinement.
-      ssbcalibrater.RadioCal(1, true);
+      txcalibrater.RadioCal(1, true);
       calibrateFlag = 0;
       break;
 
@@ -186,7 +186,7 @@ void CalibrateOptions() {
       break;
 
     case 14:  // Set DAC offset for CW carrier cancellation.
-      CalData.dacOffsetCW = GetEncoderValueLiveQ15t(-5000, 5000, CalData.dacOffsetCW, 50, (char *)"DC Offset:", false);
+      CalData.dacOffsetCW = GetEncoderValueLiveQ15t(-5000, 5000, CalData.dacOffsetCW, 50, "DC Offset:", false);
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {
         if (menu == MenuSelect::MENU_OPTION_SELECT) {
@@ -323,7 +323,7 @@ void CalibrateOptions() {
       break;
 
     case 6:
-      ssbcalibrater.DoXmitCalibrate(false, false, true);  // SSB Transmit cal
+      TxCalibrater.DoXmitCalibrate(false, false, true);  // SSB Transmit cal
                                                           //      eeprom.CalDataWrite();                        // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
@@ -338,12 +338,12 @@ void CalibrateOptions() {
       break;
 
     case 9:  // SSB fully automatic radio calibration.
-      ssbcalibrater.RadioCal(false);
+      TxCalibrater.RadioCal(false);
       calibrateFlag = 0;
       break;
 
     case 10:  // SSB fully automatic calibration refinement.
-      ssbcalibrater.RadioCal(true);
+      TxCalibrater.RadioCal(true);
       calibrateFlag = 0;
       break;
 
