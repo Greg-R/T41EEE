@@ -38,9 +38,21 @@ RadioMode tempMode;
 RadioState tempState;
 float32_t amplitude = 0;
 float32_t phase = 0;
+  float iOptimal = 1.0;
+  float qOptimal = 0.0;
 int32_t iDCoffset = 0;
 int32_t qDCoffset = 0;
 int mode = 0;
+  MenuSelect task; 
+  MenuSelect lastUsedTask = MenuSelect::DEFAULT;
+    bool autoCal = false;
+  bool refineCal = false;
+//  bool shortCal = false;  // Is this the same as refineCal???
+  bool radioCal = false;
+    bool averageFlag = false;
+      int averageCount = 0;
+      bool saveToEeprom = false;
+//        State state = State::warmup;  // Start calibration state machine in warmup state.
 
 // Blue and red bar variables:
 int32_t rx_blue_usb = 128;
@@ -56,6 +68,8 @@ std::vector<float> sub_vectorAmp = std::vector<float>(21);
 std::vector<float> sub_vectorPhase = std::vector<float>(21);
 std::vector<float> sub_vectorAmpResult = std::vector<float>(21);
 std::vector<float> sub_vectorPhaseResult = std::vector<float>(21);
+std::vector<float32_t> sweepVector = std::vector<float32_t>(101);
+std::vector<float32_t> sweepVectorValue = std::vector<float32_t>(101);;
 
   enum class State { warmup,
                      refineCal,
@@ -67,6 +81,8 @@ std::vector<float> sub_vectorPhaseResult = std::vector<float>(21);
                      average,
                      setOptimal,
                      exit };
+
+ State state;                    
 //  enum class averagingState { refineAmp,
 //                              refinePhase };
 
@@ -75,18 +91,19 @@ std::vector<float> sub_vectorPhaseResult = std::vector<float>(21);
 //void loadCalToneBuffers();
 void loadCalToneBuffers(float toneFreq);
 void plotCalGraphics(int calType);
-void ProcessIQData2();
+void MakeFFTData();
 void warmUpCal();
 void PrintMode();
 void printCalType(bool autoCal, bool autoCalDone);
 void CalibratePreamble(int setZoom);
 void CalibrateEpilogue(bool radioCal, bool saveToEeprom);
 //void DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom);
-void DoXmitCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom);
-void DoXmitCarrierCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom);
+void DoXmitCalibrate(int mode, bool radioCal, bool refineCal, bool saveToEeprom);
+void DoXmitCarrierCalibrate(int mode, bool radioCal, bool refineCal, bool saveToEeprom);
 const char *calFreqs[2]{ "750 Hz", "3.0 kHz" };
 //void SelectCalFreq();
-void ShowSpectrum2();
+void ShowSpectrum();
 float PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins);
 void RadioCal(int mode, bool refineCal);
+void buttonTasks(bool radioCal, bool refineCal);
 };

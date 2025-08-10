@@ -110,7 +110,7 @@ void CalibrateOptions() {
       rxcalibrater.DoReceiveCalibrate(0, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
       break;
 
-    case 3:  // CW Xmit Carrier calibration.
+    case 3:  // CW Xmit Carrier calibration.  Parameters are (mode, radioCal, refineCal, saveToEeprom)
       txcalibrater.DoXmitCarrierCalibrate(0, false, false, true);
       break;
 
