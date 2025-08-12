@@ -52,6 +52,7 @@ int mode = 0;
     bool averageFlag = false;
       int averageCount = 0;
       bool saveToEeprom = false;
+      bool fftSuccess = false;
 //        State state = State::warmup;  // Start calibration state machine in warmup state.
 
 // Blue and red bar variables:
@@ -82,7 +83,7 @@ std::vector<float32_t> sweepVectorValue = std::vector<float32_t>(101);;
                      setOptimal,
                      exit };
 
- State state;                    
+ State state = State::exit;                    
 //  enum class averagingState { refineAmp,
 //                              refinePhase };
 
@@ -105,5 +106,6 @@ const char *calFreqs[2]{ "750 Hz", "3.0 kHz" };
 void ShowSpectrum();
 float PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins);
 void RadioCal(int mode, bool refineCal);
-void buttonTasks(bool radioCal, bool refineCal);
+//void buttonTasks(bool radioCal, bool refineCal);
+void buttonTasks();
 };
