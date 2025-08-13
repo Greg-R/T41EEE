@@ -53,6 +53,8 @@ public:
   int averageCount = 0;
   bool saveToEeprom = false;
   bool fftSuccess = false;
+  bool fftActive = true;
+  bool exitManual = false;
   //        State state = State::warmup;  // Start calibration state machine in warmup state.
 
   // Blue and red bar variables:
@@ -104,7 +106,7 @@ public:
   void PrintMode();
   void printCalType(bool autoCal, bool autoCalDone);
   void CalibratePreamble(int setZoom);
-  void CalibrateEpilogue(bool radioCal, bool saveToEeprom);
+  void CalibrateEpilogue();
   //void DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom);
   void DoXmitCalibrate(int mode, bool radioCal, bool refineCal, bool saveToEeprom);
   void DoXmitCarrierCalibrate(int mode, bool radioCal, bool refineCal, bool saveToEeprom);
