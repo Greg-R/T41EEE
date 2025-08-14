@@ -117,4 +117,5 @@ public:
   void RadioCal(int mode, bool refineCal);
   //void buttonTasks(bool radioCal, bool refineCal);
   void buttonTasks();
+  void writeToCalData(float ichannel, float qchannel);
 };
