@@ -62,7 +62,7 @@ void ShowMenu(const char *menu[], int where) {
 #ifdef QSE2
 void CalibrateOptions() {
   int freqCorrectionFactorOld = 0;
-  int32_t increment = 100L;
+  int32_t increment = 100;
   MenuSelect menu;
   char freqCal[] = "Freq Cal: ";
   tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 30, CHAR_HEIGHT, RA8875_BLACK);
@@ -139,15 +139,13 @@ void CalibrateOptions() {
 
     case 7:  // SSB Carrier Cal
       txcalibrater.DoXmitCarrierCalibrate(1, false, false, true);
-      //      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 8:                                               // SSB Transmit cal
       txcalibrater.DoXmitCalibrate(1, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
-                                                          //      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
-    case 9:  // CW fully automatic radio calibration.  (mode, cal = false refinecal = true)
+    case 9:  // CW fully automatic radio calibration.  (mode, initial cal = false, refinecal = true)
      txcalibrater.RadioCal(0, false);
      calibrateFlag = 0;
       break;

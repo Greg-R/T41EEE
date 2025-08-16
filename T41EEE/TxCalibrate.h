@@ -14,7 +14,7 @@
 class TxCalibrate {
 public:
 
-  int IQCalType;
+  int IQCalType = 0;
   int val;
   float correctionIncrement;  //AFP 2-7-23
   int userScale, userZoomIndex;
