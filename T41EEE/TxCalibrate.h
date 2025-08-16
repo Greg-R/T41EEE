@@ -52,9 +52,11 @@ public:
   bool averageFlag = false;
   int averageCount = 0;
   bool saveToEeprom = false;
-  bool fftSuccess = false;
-  bool fftActive = true;
-  bool exitManual = false;
+  bool fftSuccess = false;  // A flag for debugging FFT inadequate data problems.
+  bool fftActive = true;  // This variable is used to deactive creation of the FFT result.
+                          // This is false when desired to push data through the system
+                          // to wring out the transient response.
+  bool exit = false;
   //        State state = State::warmup;  // Start calibration state machine in warmup state.
 
   // Blue and red bar variables:
@@ -73,13 +75,13 @@ public:
   int zoom_sample_ptr = 0;
   float32_t LPF_spectrum = 0.82;
 
-  std::vector<float> sub_vectorAmp = std::vector<float>(21);
+  std::vector<float> sub_vectorAmp = std::vector<float>(21);  // Can these arrays be commonized?
   std::vector<float> sub_vectorPhase = std::vector<float>(21);
   std::vector<float> sub_vectorAmpResult = std::vector<float>(21);
   std::vector<float> sub_vectorPhaseResult = std::vector<float>(21);
   std::vector<float32_t> sweepVector = std::vector<float32_t>(101);
   std::vector<float32_t> sweepVectorValue = std::vector<float32_t>(101);
-  ;
+
 
   enum class State { warmup,
                      refineCal,

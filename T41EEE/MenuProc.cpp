@@ -130,7 +130,7 @@ void CalibrateOptions() {
           calibrateFlag = 0;
         }
       }
-      break;  // Missing break.  KF5N August 12, 2023
+      break;
 
     case 6:                                                    // SSB receive cal
       rxcalibrater.DoReceiveCalibrate(1, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023

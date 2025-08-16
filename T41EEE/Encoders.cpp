@@ -72,7 +72,7 @@ void FilterSetSSB() {
   DrawFrequencyBarValue();  // This calls ShowBandwidth().  YES, this function is useful here.
   DrawBandWidthIndicatorBar();
 
-  Serial.printf("FLoCut = %d FHiCut = %d\n", bands.bands[ConfigData.currentBand].FLoCut, bands.bands[ConfigData.currentBand].FHiCut);
+//  Serial.printf("FLoCut = %d FHiCut = %d\n", bands.bands[ConfigData.currentBand].FLoCut, bands.bands[ConfigData.currentBand].FHiCut);
 }
 
 

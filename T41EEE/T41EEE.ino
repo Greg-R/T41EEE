@@ -852,6 +852,11 @@ FLASHMEM void setup() {
   powerUp = true;
   Serial.begin(115200);      // Use this serial for Teensy programming.
   SerialUSB1.begin(115200);  // Use this serial for FT8 keying.
+   /* check for CrashReport stored from previous run */
+  if (CrashReport) {
+    /* print info (hope Serial Monitor windows is open) */
+    Serial.print(CrashReport);
+  }
 
   setSyncProvider(getTeensy3Time);  // get TIME from real time clock with 3V backup battery
   setTime(now());
@@ -1294,7 +1299,7 @@ void loop() {
   }
   loopCounter = loopCounter + 1;
   if(loopCounter > 49) {
-Serial.printf("Loop us = %u\n", (static_cast<uint32_t>(usec1) - usec1Old));
+//Serial.printf("Loop us = %u\n", (static_cast<uint32_t>(usec1) - usec1Old));
 loopCounter = 0;
   }
   usec1Old = usec1;
