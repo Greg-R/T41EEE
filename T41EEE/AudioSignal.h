@@ -30,17 +30,13 @@ AudioPlayQueue_F32 cwToneData;
 AudioConnection connect0(i2s_quadIn, 0, int2Float1_tx, 0);  // Microphone audio channel.  Must use int2Float because Open Audio does not have quad input.
 
 AudioConnection_F32 connect1(int2Float1_tx, 0, switch1_tx, 0);  // Used switches here because it appeared necessary to stop flow of data.
-//// AudioConnection_F32 connect2(toneSSBCal1, 0, switch2_tx, 0);     // Tone used during SSB calibration and IMD testing.
-//// AudioConnection_F32 connect21(toneSSBCal2, 0, switch5_tx, 0);     // Tone used during IMD testing.
 
-// Need a mixer to switch in an audio tone during calibration.  Should be a nominal tone amplitude.
+// Need a mixer to switch between microphone audio and tones used for calibration, testing, and CW.
 AudioConnection_F32 connect3(switch1_tx, 0, mixer1_tx, 0);  // Connect microphone mixer1 output 0 via gain control.
-////AudioConnection_F32 connect4(switch2_tx, 0, mixer1_tx, 1);  // Connect tone for SSB calibration and IMD testing.
-////AudioConnection_F32 connect22(switch5_tx, 0, mixer1_tx, 2);  // Connect tone for IM3 testing.
 
-AudioConnection_F32 connect4(toneSSBCal1, 0, mixer1_tx, 1);  // Connect tone for SSB calibration and IMD testing.
+AudioConnection_F32 connect4(toneSSBCal1, 0, mixer1_tx, 1);  // Connect tone for SSB calibration and IM3 testing.
 AudioConnection_F32 connect22(toneSSBCal2, 0, mixer1_tx, 2);  // Connect tone for IM3 testing.
-AudioConnection_F32 connect24(cwToneData, 0, mixer1_tx, 3);  // Connect tone for IM3 testing.
+AudioConnection_F32 connect24(cwToneData, 0, mixer1_tx, 3);  // Connect CW transmit tone.
 
 AudioConnection_F32 connect5(mixer1_tx, 0, micGain, 0);
 

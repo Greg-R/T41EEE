@@ -95,13 +95,9 @@ public:
                      exit };
 
   State state = State::exit;
-  //  enum class averagingState { refineAmp,
-  //                              refinePhase };
-
-  //averagingState avgState = averagingState::refineAmp;
 
   //void loadCalToneBuffers();
-  void loadCalToneBuffers(float toneFreq);
+//  void loadCalToneBuffers(float toneFreq);
   void plotCalGraphics(int calType);
   void MakeFFTData();
   void warmUpCal();

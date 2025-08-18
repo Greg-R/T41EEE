@@ -207,12 +207,12 @@ void Process::ProcessIQData() {
     if ((ConfigData.spectrum_zoom == 3) && (updateDisplayCounter < 4)) ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
     if ((ConfigData.spectrum_zoom == 4) && (updateDisplayCounter < 8)) ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
 
-    if (calibrateFlag == true) {
+    if (calibrateFlag == true) {  // This is required for frequency calibration as it runs with the receiver active.
       CalibrateOptions();
     }
-    if (morseDecodeAdjustFlag == true) {
+    if (morseDecodeAdjustFlag == true) {  // This is required for Morse decode sensitivity adjustment with receiver active.
       CWOptions();
-    }
+   }
 
     /*************************************************************************************************
         freq_conv2()

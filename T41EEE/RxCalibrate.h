@@ -39,6 +39,8 @@ uint32_t count = 0;
 uint32_t warmup = 0;
 uint32_t adjdBMinIndex;
 bool corrChange = false;
+bool fftActive = false;
+bool fftSuccess = false;
 int mode;
 Sideband tempSideband;
 RadioMode tempMode;
@@ -67,7 +69,7 @@ std::vector<float> sub_vectorPhaseResult = std::vector<float>(21);
 void loadCalToneBuffers(float toneFreq);
 void plotCalGraphics();
 void PrintMode();
-void ProcessIQData2();
+void MakeFFTData();
 void warmUpCal();
 void printCalType(bool autoCal, bool autoCalDone);
 void CalibratePreamble(int setZoom);
@@ -77,7 +79,8 @@ void DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEepro
 //#ifdef QSE2
 //void DoXmitCarrierCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom);
 //#endif
-void ShowSpectrum2();
+void ShowSpectrum();
 float PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins);
+void writeToCalData(float ichannel, float qchannel);
 //void RadioCal(bool refineCal);
 };
