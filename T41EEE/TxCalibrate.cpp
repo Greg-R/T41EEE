@@ -90,7 +90,7 @@ void TxCalibrate::warmUpCal() {
   uint32_t index_of_max;  // Not used, but required by arm_max_q15 function.
   // MakeFFTData() has to be called enough times for transients to settle out before computing FFT.
   for (int i = 0; i < 16; i = i + 1) {
-    fftActive = false;  // Don't call FFT calculation.
+    fftActive = false;           // Don't call FFT calculation.
     TxCalibrate::MakeFFTData();  // Note, FFT not called if buffers are not sufficiently filled.
   }
   updateDisplayFlag = true;
@@ -246,8 +246,8 @@ void TxCalibrate::printCalType(bool autoCal, bool autoCalDone) {
  *****/
 void TxCalibrate::CalibratePreamble(int setZoom) {
   cessb1.processorUsageMaxReset();
-  calOnFlag = true;  // Used for the special display during calibration and also high-dynamic range FFT.
-//  IQCalType = 0;
+  calOnFlag = true;                                        // Used for the special display during calibration and also high-dynamic range FFT.
+                                                           //  IQCalType = 0;
   transmitPowerLevelTemp = ConfigData.transmitPowerLevel;  //AFP 05-11-23
   cwFreqOffsetTemp = ConfigData.CWOffset;
   // Remember the mode and state, and restore in the Epilogue.
@@ -363,8 +363,8 @@ void TxCalibrate::CalibrateEpilogue() {
 
 //void TxCalibrate::buttonTasks(bool radioCal, bool refineCal) {  // Does this function need parameters?
 void TxCalibrate::buttonTasks() {
-    task = readButton(lastUsedTask);
-    exit = false;
+  task = readButton(lastUsedTask);
+  //    exit = false;
   switch (task) {
     // Activate initial automatic calibration.
     case MenuSelect::ZOOM:  // 2nd row, 1st column button
@@ -374,13 +374,13 @@ void TxCalibrate::buttonTasks() {
       count = 0;
       warmup = 0;
       index = 0;
-//      IQCalType = 0;
+      //      IQCalType = 0;
       averageFlag = false;
       averageCount = 0;
       std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
       std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
-//      amplitude = 1.0;
-//      phase = 0.0;
+      //      amplitude = 1.0;
+      //      phase = 0.0;
       state = State::warmup;
       break;
     // Automatic calibration using previously stored values.
@@ -391,7 +391,7 @@ void TxCalibrate::buttonTasks() {
       count = 0;
       warmup = 0;
       index = 0;  // Why is index = 1???
-//      IQCalType = 0;
+                  //      IQCalType = 0;
       std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
       std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
       //      amplitude = ;
@@ -418,10 +418,8 @@ void TxCalibrate::buttonTasks() {
       tft.print(correctionIncrement, 3);
       break;
     case MenuSelect::MENU_OPTION_SELECT:  // Save values and exit calibration.
-                                          //      tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-      CalibrateEpilogue();
-      exit = true;
-      return;
+      state = State::exit;
+      autoCal = true;  // Set autoCal = true to access State::exit even during manual.
       break;
     default:
       break;
@@ -459,7 +457,7 @@ void TxCalibrate::writeToCalData(float ichannel, float qchannel) {
       void
  *****/
 void TxCalibrate::DoXmitCalibrate(int mode, bool radioCal, bool refineCal, bool saveToEeprom) {
-//  exitManual = false;
+  //  exitManual = false;
   int freqOffset;
   float correctionIncrement = 0.001;
   //  State state = State::warmup;  // Start calibration state machine in warmup state.
@@ -473,14 +471,14 @@ void TxCalibrate::DoXmitCalibrate(int mode, bool radioCal, bool refineCal, bool 
                   //  std::vector<float32_t> sweepVector(101);
                   //  std::vector<float32_t> sweepVectorValue(101);
   elapsedMillis fiveSeconds;
-  int viewTime = 0;
+  int startTimer = 0;
   //  bool autoCal = false;
   //  bool refineCal = false;
   //  bool averageFlag = false;
-  TxCalibrate::mode = mode;                  // CW or SSB.  This is an object state variable.
-//  TxCalibrate::radioCal = radioCal;          // Initial calibration of all bands.
-//  TxCalibrate::refineCal = refineCal;        // Refinement (using existing values a starting point) calibration for all bands.
-TxCalibrate::saveToEeprom = saveToEeprom;  // Save to EEPROM
+  TxCalibrate::mode = mode;  // CW or SSB.  This is an object state variable.
+  //  TxCalibrate::radioCal = radioCal;          // Initial calibration of all bands.
+  //  TxCalibrate::refineCal = refineCal;        // Refinement (using existing values a starting point) calibration for all bands.
+  TxCalibrate::saveToEeprom = saveToEeprom;  // Save to EEPROM
   std::vector<float>::iterator result;
 
   //  MenuSelect task, lastUsedTask = MenuSelect::DEFAULT;
@@ -542,10 +540,6 @@ TxCalibrate::saveToEeprom = saveToEeprom;  // Save to EEPROM
     // This function takes care of button presses and resultant control of the rest of the process.
     // The buttons are polled by the while loop.
     TxCalibrate::buttonTasks();  // This takes care of manual calls to the initial or refinement calibrations.
-        if (exit) {
-                Serial.printf("Audio memory usage = %d\n", AudioMemoryUsage());
-        return;  //  exit variable set in buttonTasks() if button pushed by user.
-        }
     //  Begin automatic calibration state machine.
     if (autoCal or radioCal) {
       switch (state) {
@@ -730,22 +724,23 @@ TxCalibrate::saveToEeprom = saveToEeprom;  // Save to EEPROM
           // Write the optimal values to the data structure.
           writeToCalData(iOptimal, qOptimal);
           state = State::exit;
-          viewTime = fiveSeconds;  // Start result view timer.
+          startTimer = static_cast<int>(milliTimer);  // Start result view timer.
           break;
         case State::exit:
+          // Delay exit if in radio calibration to show calibration results for 5 seconds.
           if (radioCal) {
             printCalType(autoCal, true);
-            if ((fiveSeconds - viewTime) < 5000) {  // Show calibration result for 5 seconds at conclusion during Radio Cal.
+            if ((static_cast<int>(milliTimer) - startTimer) < 5000) {  // Show calibration result for 5 seconds at conclusion during Radio Cal.
               state = State::exit;
               break;
             } else {
-              CalibrateEpilogue();  // After 5 seconds.
+              TxCalibrate::CalibrateEpilogue();
               return;
             }
+          } else {
+            TxCalibrate::CalibrateEpilogue();
+            return;
           }
-          autoCal = false;
-          refineCal = false;  // Reset refine cal.
-          printCalType(autoCal, false);
           break;
       }
     }  // end automatic calibration state machine
@@ -757,8 +752,8 @@ TxCalibrate::saveToEeprom = saveToEeprom;  // Save to EEPROM
     if (IQCalType == 1) phase = GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, "IQ Phase", false);
     writeToCalData(amplitude, phase);
 
-  }                         // end while
-CalibrateEpilogue();
+  }  // end while
+  CalibrateEpilogue();
 }  // End Transmit calibration
 
 
@@ -775,20 +770,16 @@ CalibrateEpilogue();
 void TxCalibrate::DoXmitCarrierCalibrate(int mode, bool radioCal, bool refineCal, bool saveToEeprom) {
   int maxSweepAmp = 450;
   int maxSweepPhase = 450;
-  int increment = 5;    //// Why correctionIncrement and increment?
+  int increment = 5;  //// Why correctionIncrement and increment?
   int averageCount = 0;
   TxCalibrate::mode = mode;                  // CW or SSB
-//  TxCalibrate::radioCal = radioCal;          // Initial calibration of all bands.
-//  TxCalibrate::refineCal = refineCal;        // Refinement (using existing values a starting point) calibration for all bands.
   TxCalibrate::saveToEeprom = saveToEeprom;  // Save to EEPROM
-  std::vector<float> sweepVector(181);  // 0 + 450 * 2
+  std::vector<float> sweepVector(181);       // 0 + 450 * 2
   std::vector<int> sweepVectorValue(181);
   std::vector<int> sub_vectorIoffset = std::vector<int>(21);
   std::vector<int> sub_vectorQoffset = std::vector<int>(21);
-  elapsedMillis fiveSeconds;
-  int viewTime = 0;
-
   std::vector<float>::iterator result;
+  int startTimer = 0;
   TxCalibrate::CalibratePreamble(2);  // Set zoom to 4X.  Note this is using 48ksps sample rate.
   int freqOffset = 0;                 // Calibration tone same as regular modulation tone.
   calTypeFlag = 2;                    // Carrier calibration
@@ -813,7 +804,7 @@ void TxCalibrate::DoXmitCarrierCalibrate(int mode, bool radioCal, bool refineCal
     qDCoffset = CalData.qDCoffsetSSB[ConfigData.currentBand];
   }
   // Run this so Q offset shows from begining.
-    GetEncoderValueLiveQ15t(-1000, 1000, qDCoffset, increment, "Q Offset", false);
+  GetEncoderValueLiveQ15t(-1000, 1000, qDCoffset, increment, "Q Offset", false);
   warmUpCal();
 
   if (radioCal) {
@@ -833,9 +824,9 @@ void TxCalibrate::DoXmitCarrierCalibrate(int mode, bool radioCal, bool refineCal
     fftActive = true;
     TxCalibrate::ShowSpectrum();
     TxCalibrate::buttonTasks();  // This takes care of manual calls to the initial or refinement calibrations.
-            if (exit) {
-        return;  //  exit variable set in buttonTasks() if button pushed by user.
-        }
+                                 //            if (exit) {
+                                 //        return;  //  exit variable set in buttonTasks() if button pushed by user.
+                                 //        }
     //  Begin automatic calibration state machine.
     if (autoCal or radioCal) {
       switch (state) {
@@ -846,9 +837,9 @@ void TxCalibrate::DoXmitCarrierCalibrate(int mode, bool radioCal, bool refineCal
           std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
           warmup = warmup + 1;
           if (not TxCalibrate::refineCal) {
-              qDCoffset = maxSweepPhase;  //  Need to use these values during warmup
-              iDCoffset = maxSweepAmp;    //  so adjdB and adjdB_avg are forced upwards.
-            }         
+            qDCoffset = maxSweepPhase;  //  Need to use these values during warmup
+            iDCoffset = maxSweepAmp;    //  so adjdB and adjdB_avg are forced upwards.
+          }
           state = State::warmup;
           if (warmup == 16) state = State::state0;
           if (warmup == 16 && TxCalibrate::refineCal) state = State::refineCal;
@@ -868,16 +859,13 @@ void TxCalibrate::DoXmitCarrierCalibrate(int mode, bool radioCal, bool refineCal
           qDCoffset = 0;
           iDCoffset = -maxSweepAmp;  // Begin sweep at low end and move upwards.
           GetEncoderValueLiveQ15t(1000, 1000, qDCoffset, increment, "Q Offset", false);
-//          adjdB = 0;
-//          adjdB_avg = 0;
-          index = 0;  //// ???
+          index = 0;
           IQCalType = 0;
           state = State::initialSweepAmp;  // Let this fall through.
 
         case State::initialSweepAmp:
           sweepVectorValue[index] = iDCoffset;  // Starting at -maxSweepAmp.
           sweepVector[index] = adjdB;           // Already computed in warm-up for index 0.
-//          Serial.printf("sweepVectorValue = %d sweepVector = %f\n", sweepVectorValue[index], sweepVector[index]);
           index = index + 1;
           // Increment for next measurement.
           iDCoffset = iDCoffset + increment;
@@ -903,7 +891,7 @@ void TxCalibrate::DoXmitCarrierCalibrate(int mode, bool radioCal, bool refineCal
             // Clear the vector before moving to phase.
             std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0);
             std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
-            qDCoffset = -maxSweepPhase;                                         // The starting value for phase.
+            qDCoffset = -maxSweepPhase;        // The starting value for phase.
             state = State::initialSweepPhase;  // Initial I channel sweep done; proceed to initial Q sweep.
             break;
           }
@@ -1027,24 +1015,25 @@ void TxCalibrate::DoXmitCarrierCalibrate(int mode, bool radioCal, bool refineCal
             CalData.qDCoffsetSSB[ConfigData.currentBand] = qOptimal;
           }
           state = State::exit;
-          viewTime = fiveSeconds;  // Start result view timer.
+          startTimer = static_cast<int>(milliTimer);  // Start result view timer.
           break;
         case State::exit:
+          // Delay exit if in radio calibration to show calibration results for 5 seconds.
           if (radioCal) {
             printCalType(autoCal, true);
-            if ((fiveSeconds - viewTime) < 5000) {  // Show calibration result for 5 seconds at conclusion during Radio Cal.
+            if ((static_cast<int>(milliTimer) - startTimer) < 5000) {  // Show calibration result for 5 seconds at conclusion during Radio Cal.
               state = State::exit;
               break;
             } else {
               TxCalibrate::CalibrateEpilogue();
               return;
             }
+          } else {
+            TxCalibrate::CalibrateEpilogue();
+            return;
           }
-          autoCal = false;
-          TxCalibrate::refineCal = false;  // Reset refine cal.
-          printCalType(autoCal, false);
           break;
-          default:
+        default:
           break;
       }
     }  // end automatic calibration state machine
@@ -1093,14 +1082,13 @@ void TxCalibrate::RadioCal(int mode, bool refineCal) {
     button.ExecuteModeChange();
     if (band < 2) {
       bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER;  // Calibrate lower sideband for 80M and 40M.
-    rxcalibrater.DoReceiveCalibrate(mode, true, refineCal, false);
-    txcalibrater.DoXmitCalibrate(mode, true, refineCal, false);
-    }
-    else
+      rxcalibrater.DoReceiveCalibrate(mode, true, refineCal, false);
+      txcalibrater.DoXmitCalibrate(mode, true, refineCal, false);
+    } else
       bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER;
 
     bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER;
-    rxcalibrater.DoReceiveCalibrate(mode, true, refineCal, false);   // Include 80M and 40M due to FT8.
+    rxcalibrater.DoReceiveCalibrate(mode, true, refineCal, false);  // Include 80M and 40M due to FT8.
     txcalibrater.DoXmitCalibrate(mode, true, refineCal, false);
 #ifdef QSE2
     txcalibrater.DoXmitCarrierCalibrate(mode, true, refineCal, false);
@@ -1139,10 +1127,8 @@ void TxCalibrate::MakeFFTData() {
         N_BLOCKS = FFT_L / 2 / BUFFER_SIZE * (uint32_t)DF; // should be 16 with DF == 8 and FFT_L = 512
         BUFFER_SIZE*N_BLOCKS = 2048 samples
      **********************************************************************************/
-  //     Serial.printf("Q_in_L_Ex.available = %d\n", Q_in_L_Ex.available());
   // Are there at least N_BLOCKS buffers in each channel available ?
   if (static_cast<uint32_t>(Q_in_L_Ex.available()) > 16 and static_cast<uint32_t>(Q_in_R_Ex.available()) > 16) {
-    //     Serial.printf("Q_in_L_Ex.available = %d\n", Q_in_L_Ex.available());
     // get audio samples from the audio  buffers and convert them to float
     // read in 16 blocks of 128 samples in I and Q
     for (unsigned i = 0; i < 16; i++) {
@@ -1264,7 +1250,6 @@ void TxCalibrate::MakeFFTData() {
 
     // This process started because there are 2048 samples available.  Perform FFT.
     updateDisplayFlag = true;
-    //      Serial.printf("Call ZoomFFTExe\n");
     if (fftActive) ZoomFFTExe(2048);
     fftSuccess = true;
   }  // End of receive code
@@ -1273,8 +1258,6 @@ void TxCalibrate::MakeFFTData() {
     Serial.printf("FFT failed due to insufficient I and Q recieve data!\n");
   }
 }
-
-
 
 
 /*****
@@ -1317,10 +1300,6 @@ void TxCalibrate::ShowSpectrum()  //AFP 2-10-23
     cal_bins[2] = 193;  // Undesired sideband
   }                     // Transmit and Carrier calibration, USB.  KF5N
 
-  //    TxCalibrate::MakeFFTData();
-  // Don't plot if MakeFFTData() was not succesful.
-  ////    if(fftSuccess == false) return;
-
   // Plot carrier during transmit cal, do not return a dB value:
   if (calTypeFlag == 1) {  // Transmit cal
     for (x1 = cal_bins[0] - capture_bins; x1 < cal_bins[0] + capture_bins; x1++) adjdB = TxCalibrate::PlotCalSpectrum(x1, cal_bins, capture_bins);
@@ -1338,8 +1317,7 @@ void TxCalibrate::ShowSpectrum()  //AFP 2-10-23
   tft.fillRect(350, 142, 50, tft.getFontHeight(), RA8875_BLACK);  // Erase old adjdB number.                                       // 350, 125
   tft.print(adjdB, 1);
 
-  ////  delay(5);  // This requires "tuning" in order to get best response.
-}
+}  // end ShowSpectrum()
 
 
 /*****
@@ -1431,4 +1409,4 @@ float TxCalibrate::PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
 
   tft.writeTo(L1);
   return adjdB_avg;
-}
+}  // end PlotCalSpectrum(. . .)

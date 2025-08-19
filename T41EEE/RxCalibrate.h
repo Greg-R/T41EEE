@@ -41,6 +41,7 @@ uint32_t adjdBMinIndex;
 bool corrChange = false;
 bool fftActive = false;
 bool fftSuccess = false;
+elapsedMillis milliTimer;
 int mode;
 Sideband tempSideband;
 RadioMode tempMode;

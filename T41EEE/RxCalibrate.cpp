@@ -70,7 +70,7 @@ void RxCalibrate::warmUpCal() {
   uint32_t index_of_max;  // Not used, but required by arm_max_q15 function.
   // MakeFFTData() has to be called enough times for transients to settle out before computing FFT.
   for (int i = 0; i < 16; i = i + 1) {
-    fftActive = false;  // Don't call FFT calculation.
+    fftActive = false;           // Don't call FFT calculation.
     RxCalibrate::MakeFFTData();  // Note, FFT not called if buffers are not sufficiently filled.
   }
   updateDisplayFlag = true;
@@ -295,6 +295,8 @@ void RxCalibrate::writeToCalData(float ichannel, float qchannel) {
 }
 
 
+
+
 /*****
   Purpose: Combined input/output for the purpose of calibrating the receiver IQ.
 
@@ -333,31 +335,31 @@ void RxCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, boo
   float qOptimal = 0.0;
   std::vector<float32_t> sweepVector(401);
   std::vector<float32_t> sweepVectorValue(401);
-  elapsedMillis fiveSeconds;
-  int viewTime = 0;
+
+  int startTimer = 0;  // Used to time display of results.
   bool averageFlag = false;
   std::vector<float>::iterator result;
+  // Get current values for amplitude and phase.  This is for refinement only.
+  if (mode == 0) {
+    if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
+      iOptimal = amplitude = CalData.IQCWRXAmpCorrectionFactorLSB[ConfigData.currentBand];
+      qOptimal = phase = CalData.IQCWRXPhaseCorrectionFactorLSB[ConfigData.currentBand];
+    } else if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
+      iOptimal = amplitude = CalData.IQCWRXAmpCorrectionFactorUSB[ConfigData.currentBand];
+      qOptimal = phase = CalData.IQCWRXPhaseCorrectionFactorUSB[ConfigData.currentBand];
+    }
+  }
+  if (mode == 1) {
+    if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
+      iOptimal = amplitude = CalData.IQSSBRXAmpCorrectionFactorLSB[ConfigData.currentBand];
+      qOptimal = phase = CalData.IQSSBRXPhaseCorrectionFactorLSB[ConfigData.currentBand];
+    } else if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
+      iOptimal = amplitude = CalData.IQSSBRXAmpCorrectionFactorUSB[ConfigData.currentBand];
+      qOptimal = phase = CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand];
+    }
+  }
 
-       if (mode == 0) {
-          if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-            iOptimal = amplitude = CalData.IQCWRXAmpCorrectionFactorLSB[ConfigData.currentBand];
-            qOptimal = phase = CalData.IQCWRXPhaseCorrectionFactorLSB[ConfigData.currentBand];
-          } else if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-            iOptimal = amplitude = CalData.IQCWRXAmpCorrectionFactorUSB[ConfigData.currentBand];
-            qOptimal = phase = CalData.IQCWRXPhaseCorrectionFactorUSB[ConfigData.currentBand];
-          }
-        }
-        if (mode == 1) {
-          if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-            iOptimal = amplitude = CalData.IQSSBRXAmpCorrectionFactorLSB[ConfigData.currentBand];
-            qOptimal = phase = CalData.IQSSBRXPhaseCorrectionFactorLSB[ConfigData.currentBand];
-          } else if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-            iOptimal = amplitude = CalData.IQSSBRXAmpCorrectionFactorUSB[ConfigData.currentBand];
-            qOptimal = phase = CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand];
-          }
-        }
-
-GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, (char *)"IQ Phase", false);  // Show phase on display.
+  GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, (char *)"IQ Phase", false);  // Show phase on display.
 
   if (radioCal) {
     autoCal = true;
@@ -373,9 +375,13 @@ GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, (char *)"IQ Phase", f
 
   // Receive Calibration Loop
   while (true) {
-        fftActive = true;
+    fftActive = true;
     RxCalibrate::ShowSpectrum();
     task = readButton(lastUsedTask);
+    //            if (exit) {
+    //                Serial.printf("Audio memory usage = %d\n", AudioMemoryUsage());
+    //        return;  //  exit variable set in buttonTasks() if button pushed by user.
+    //        }
     if (shortCal) task = MenuSelect::FILTER;
     switch (task) {
       // Activate automatic calibration (initial calibration).
@@ -426,8 +432,8 @@ GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, (char *)"IQ Phase", f
         break;
       case MenuSelect::MENU_OPTION_SELECT:  // Save values and exit calibration.
         tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-        RxCalibrate::CalibrateEpilogue(radioCal, saveToEeprom);
-        return;
+        state = State::exit;
+        autoCal = true;  // Set autoCal = true to access State::exit even during manual.
         break;
       default:
         break;
@@ -627,22 +633,23 @@ GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, (char *)"IQ Phase", f
           phase = qOptimal;
           writeToCalData(amplitude, phase);
           state = State::exit;
-          viewTime = fiveSeconds;  // Start result view timer.
+          startTimer = static_cast<int>(milliTimer);  // Start result view timer.
           break;
         case State::exit:
+          // Delay exit if in radio calibration to show calibration results for 5 seconds.
           if (radioCal) {
             printCalType(autoCal, true);
-            if ((fiveSeconds - viewTime) < 5000) {  // Show calibration result for 5 seconds at conclusion during Radio Cal.
+            if ((static_cast<int>(milliTimer) - startTimer) < 5000) {  // Show calibration result for 5 seconds at conclusion during Radio Cal.
               state = State::exit;
               break;
             } else {
-              CalibrateEpilogue(radioCal, saveToEeprom);
+              RxCalibrate::CalibrateEpilogue(radioCal, saveToEeprom);
               return;
             }
+          } else {
+            RxCalibrate::CalibrateEpilogue(radioCal, saveToEeprom);
+            return;
           }
-          autoCal = false;
-          refineCal = false;  // Reset refine cal.
-          printCalType(autoCal, false);
           break;
       }
     }  // end automatic calibration state machine
@@ -726,40 +733,40 @@ void RxCalibrate::MakeFFTData() {
 
   // This code block was introduced after TeensyDuino 1.58 appeared.  It doesn't use a for loop, but processes the entire 2048 buffer in one pass.
   // Revised I and Q calibration signal generation using large buffers.  Greg KF5N June 4 2023
-//  if (static_cast<uint32_t>(ADC_RX_I.available()) > 16 && static_cast<uint32_t>(ADC_RX_Q.available()) > 16) {  // Audio Record Queues!!!
-    q15_t q15_buffer_LTemp[2048];                                                                              //KF5N
-    q15_t q15_buffer_RTemp[2048];                                                                              //KF5N
-//    Q_out_L_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
-//    Q_out_R_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
-    arm_float_to_q15(float_buffer_L_EX, q15_buffer_LTemp, 2048);
-    arm_float_to_q15(float_buffer_R_EX, q15_buffer_RTemp, 2048);
+  //  if (static_cast<uint32_t>(ADC_RX_I.available()) > 16 && static_cast<uint32_t>(ADC_RX_Q.available()) > 16) {  // Audio Record Queues!!!
+  q15_t q15_buffer_LTemp[2048];  //KF5N
+  q15_t q15_buffer_RTemp[2048];  //KF5N
+                                 //    Q_out_L_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
+                                 //    Q_out_R_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
+  arm_float_to_q15(float_buffer_L_EX, q15_buffer_LTemp, 2048);
+  arm_float_to_q15(float_buffer_R_EX, q15_buffer_RTemp, 2048);
 
 #ifdef QSE2
-    if (mode == 0) {
-      arm_offset_q15(q15_buffer_LTemp, CalData.iDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_LTemp, 2048);
-      arm_offset_q15(q15_buffer_RTemp, CalData.qDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_RTemp, 2048);
-    }
-    if (mode == 1) {
-      arm_offset_q15(q15_buffer_LTemp, CalData.iDCoffsetSSB[ConfigData.currentBand] + CalData.dacOffsetSSB, q15_buffer_LTemp, 2048);  // Carrier suppression offset.
-      arm_offset_q15(q15_buffer_RTemp, CalData.qDCoffsetSSB[ConfigData.currentBand] + CalData.dacOffsetSSB, q15_buffer_RTemp, 2048);
-    }
+  if (mode == 0) {
+    arm_offset_q15(q15_buffer_LTemp, CalData.iDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_LTemp, 2048);
+    arm_offset_q15(q15_buffer_RTemp, CalData.qDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_RTemp, 2048);
+  }
+  if (mode == 1) {
+    arm_offset_q15(q15_buffer_LTemp, CalData.iDCoffsetSSB[ConfigData.currentBand] + CalData.dacOffsetSSB, q15_buffer_LTemp, 2048);  // Carrier suppression offset.
+    arm_offset_q15(q15_buffer_RTemp, CalData.qDCoffsetSSB[ConfigData.currentBand] + CalData.dacOffsetSSB, q15_buffer_RTemp, 2048);
+  }
 #endif
 
-    Q_out_L_Ex.play(q15_buffer_LTemp, 2048);
-    Q_out_R_Ex.play(q15_buffer_RTemp, 2048);
-    Q_out_L_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
-    Q_out_R_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
+  Q_out_L_Ex.play(q15_buffer_LTemp, 2048);
+  Q_out_R_Ex.play(q15_buffer_RTemp, 2048);
+  Q_out_L_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
+  Q_out_R_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
 
-// } else {
-//  Serial.printf("Not enough transmit data!\n");
-// }   // End of transmit code.  Begin receive code.
+  // } else {
+  //  Serial.printf("Not enough transmit data!\n");
+  // }   // End of transmit code.  Begin receive code.
 
-    // get audio samples from the audio  buffers and convert them to float
-    // read in 32 blocks á 128 samples in I and Q if available.
+  // get audio samples from the audio  buffers and convert them to float
+  // read in 32 blocks á 128 samples in I and Q if available.
 
-//    for (unsigned i = 0; i < 16; i++) {
-        if (static_cast<uint32_t>(ADC_RX_I.available()) > 16 and static_cast<uint32_t>(ADC_RX_Q.available()) > 16) {
-          for (unsigned i = 0; i < 16; i++) {
+  //    for (unsigned i = 0; i < 16; i++) {
+  if (static_cast<uint32_t>(ADC_RX_I.available()) > 16 and static_cast<uint32_t>(ADC_RX_Q.available()) > 16) {
+    for (unsigned i = 0; i < 16; i++) {
       /**********************************************************************************  AFP 12-31-20
           Using arm_Math library, convert to float one buffer_size.
           Float_buffer samples are now standardized from > -1.0 to < 1.0
@@ -802,33 +809,33 @@ void RxCalibrate::MakeFFTData() {
       }
     }
 
-//    if (ConfigData.spectrum_zoom == SPECTRUM_ZOOM_1) {  // && display_S_meter_or_spectrum_state == 1)
-//      zoom_display = 1;
-//      CalcZoom1Magn();  //AFP Moved to display function
-//    }
+    //    if (ConfigData.spectrum_zoom == SPECTRUM_ZOOM_1) {  // && display_S_meter_or_spectrum_state == 1)
+    //      zoom_display = 1;
+    //      CalcZoom1Magn();  //AFP Moved to display function
+    //    }
 
-   
+
 
     // ZoomFFTExe is being called too many times in Calibration.  Should be called ONLY at the start of each sweep.
-//    if (ConfigData.spectrum_zoom != SPECTRUM_ZOOM_1) {
-      //AFP  Used to process Zoom>1 for display
-//      ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
-//    }
+    //    if (ConfigData.spectrum_zoom != SPECTRUM_ZOOM_1) {
+    //AFP  Used to process Zoom>1 for display
+    //      ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
+    //    }
 
     // This process started because there are 2048 samples available.  Perform FFT.
     updateDisplayFlag = true;
     //      Serial.printf("Call ZoomFFTExe\n");
     if (fftActive) CalcZoom1Magn();  // Receiver calibration uses 1X zoom.
- FreqShift1();  // 48 kHz shift
+    FreqShift1();                    // 48 kHz shift
     fftSuccess = true;
-//    Serial.printf("FFT success!\n");
+    //    Serial.printf("FFT success!\n");
   }  // End of receive code
   else {
     fftSuccess = false;  // Insufficient receive buffers to make FFT.  Do not plot FFT data!
     Serial.printf("FFT failed!\n");
   }
 
-//  }  // End of receive code.
+  //  }  // End of receive code.
 }
 
 
@@ -882,7 +889,7 @@ void RxCalibrate::ShowSpectrum()  //AFP 2-10-23
   tft.fillRect(left_text_edge, 142, 80, tft.getFontHeight(), RA8875_BLACK);  // Erase old adjdB number.                                       // 350, 125
   tft.print(adjdB, 1);
 
-  delay(5);  // This requires "tuning" in order to get best response.
+////  delay(5);  // This requires "tuning" in order to get best response.
 }
 
 
@@ -910,10 +917,10 @@ float RxCalibrate::PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
   // The FFT should be performed only at the beginning of the sweep, and buffers must be full.
   if (x1 == (cal_bins[0] - capture_bins)) {  // Set flag at revised beginning.  KF5N
     updateDisplayFlag = true;                // This flag is used in ZoomFFTExe().
-RxCalibrate::MakeFFTData();  // Compute FFT and draw it on the display.
+    RxCalibrate::MakeFFTData();              // Compute FFT and draw it on the display.
   } else updateDisplayFlag = false;          //  Do not save the the display data for the remainder of the sweep.
 
-    // Call the Audio process from within the display routine to eliminate conflicts with drawing the spectrum.
+  // Call the Audio process from within the display routine to eliminate conflicts with drawing the spectrum.
 
   y_new = pixelnew[x1];
   y1_new = pixelnew[x1 - 1];

@@ -7,6 +7,7 @@
 // Updates to DoReceiveCalibration() and DoXmitCalibrate() functions by KF5N.  July 20, 2023
 // Updated PlotCalSpectrum() function to clean up graphics.  KF5N August 3, 2023
 // Major clean-up of calibration.  KF5N August 16, 2023
+// Re-factor calibration into transmit and receive classes.  KF5N August 2025
 
 //#include <vector>
 #include <algorithm>
@@ -42,6 +43,7 @@ public:
   float qOptimal = 0.0;
   int32_t iDCoffset = 0;
   int32_t qDCoffset = 0;
+  elapsedMillis milliTimer;
   int mode = 0;
   MenuSelect task;
   MenuSelect lastUsedTask = MenuSelect::DEFAULT;
@@ -56,7 +58,7 @@ public:
   bool fftActive = true;  // This variable is used to deactive creation of the FFT result.
                           // This is false when desired to push data through the system
                           // to wring out the transient response.
-  bool exit = false;
+//  bool exit = false;
   //        State state = State::warmup;  // Start calibration state machine in warmup state.
 
   // Blue and red bar variables:
