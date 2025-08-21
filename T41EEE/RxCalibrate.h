@@ -1,4 +1,3 @@
-// Class Calibrate replaces Process2.cpp.  Greg KF5N June 16, 2024
 
 #pragma once
 
@@ -7,6 +6,7 @@
 // Updates to DoReceiveCalibration() and DoXmitCalibrate() functions by KF5N.  July 20, 2023
 // Updated PlotCalSpectrum() function to clean up graphics.  KF5N August 3, 2023
 // Major clean-up of calibration.  KF5N August 16, 2023
+// Re-factored into class RxCalibrate.cpp.  This class does receive calibrate only.
 
 //#include <vector>
 #include <algorithm>
@@ -19,25 +19,28 @@ int32_t rx_blue_usb = 383;
 int32_t rx_red_usb = 127;
 int32_t left_text_edge = 165;
 
-uint32_t IQCalType;  // 0 is IQ Gain; 1 is Phase.
+uint32_t IQCalType = 0;  // 0 is IQ Gain; 1 is Phase.
+  bool refineCal = false;
+  bool radioCal = false;
+  bool averageFlag = false;  
+  bool saveToEeprom = false;
 int val;
-float correctionIncrement;  //AFP 2-7-23
+float increment;  //AFP 2-7-23
 int userScale, userZoomIndex, userxmtMode;
 int transmitPowerLevelTemp, cwFreqOffsetTemp, calFreqTemp;
 uint16_t base_y = 460;  // 247
 int calTypeFlag = 0;
 float adjdB = 0.0;
 float adjdBold = 0.0;  // Used in exponential averager.  KF5N May 19, 2024
-float adjdB_old = 0.0;
-float adjdB_sample = 0.0;
+float adjdB_avg = 0.0;
+uint32_t adjdBMinIndex;
 float32_t amplitude = 0.0;
 float32_t phase = 0.0;
 q15_t rawSpectrumPeak = 0;
-float adjdB_avg = 0.0;
 uint32_t index = 0;
 uint32_t count = 0;
 uint32_t warmup = 0;
-uint32_t adjdBMinIndex;
+bool exitManual = false;
 bool corrChange = false;
 bool fftActive = false;
 bool fftSuccess = false;
@@ -62,10 +65,6 @@ std::vector<float> sub_vectorPhaseResult = std::vector<float>(21);
                      average,
                      setOptimal,
                      exit };
-//  enum class averagingState { refineAmp,
-//                              refinePhase };
-
-//averagingState avgState = averagingState::refineAmp;
 
 void loadCalToneBuffers(float toneFreq);
 void plotCalGraphics();
@@ -75,13 +74,8 @@ void warmUpCal();
 void printCalType(bool autoCal, bool autoCalDone);
 void CalibratePreamble(int setZoom);
 void CalibrateEpilogue(bool radioCal, bool saveToEeprom);
-void DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom);  // Mode determines CW versus SSB.
-//void DoXmitCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom);
-//#ifdef QSE2
-//void DoXmitCarrierCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom);
-//#endif
+void DoReceiveCalibrate(int calMode, bool radio, bool refine, bool toEeprom);  // Mode determines CW versus SSB.
 void ShowSpectrum();
 float PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins);
 void writeToCalData(float ichannel, float qchannel);
-//void RadioCal(bool refineCal);
 };

@@ -1,4 +1,3 @@
-// Class Calibrate replaces Process2.cpp.  Greg KF5N June 16, 2024
 
 #pragma once
 
@@ -9,30 +8,26 @@
 // Major clean-up of calibration.  KF5N August 16, 2023
 // Re-factor calibration into transmit and receive classes.  KF5N August 2025
 
-//#include <vector>
-#include <algorithm>
-
 class TxCalibrate {
 public:
 
   int IQCalType = 0;
   int val;
-  float correctionIncrement;  //AFP 2-7-23
+  float xmitIncrement = 0.002;
+  int carrIncrement = 5;
   int userScale, userZoomIndex;
   int transmitPowerLevelTemp, cwFreqOffsetTemp, calFreqTemp;
   uint16_t base_y = 460;  // 247
   int calTypeFlag = 0;
   float adjdB = 0.0;
   float adjdBold = 0.0;  // Used in exponential averager.  KF5N May 19, 2024
-  float adjdB_old = 0.0;
-  float adjdB_sample = 0.0;
+  float adjdB_avg = 0.0;
+  uint32_t adjdBMinIndex;
   float sineBuffer[512];  // Used to generate CW tone.
   q15_t rawSpectrumPeak = 0;
-  float adjdB_avg = 0.0;
   uint32_t index = 0;
   uint32_t count = 0;
   uint32_t warmup = 0;
-  uint32_t adjdBMinIndex;
   bool corrChange = false;
   Sideband tempSideband;
   RadioMode tempMode;
@@ -49,17 +44,15 @@ public:
   MenuSelect lastUsedTask = MenuSelect::DEFAULT;
   bool autoCal = false;
   bool refineCal = false;
-  //  bool shortCal = false;  // Is this the same as refineCal???
   bool radioCal = false;
-  bool averageFlag = false;
-  int averageCount = 0;
+  bool averageFlag = false;  
   bool saveToEeprom = false;
+  int averageCount = 0;
   bool fftSuccess = false;  // A flag for debugging FFT inadequate data problems.
   bool fftActive = true;  // This variable is used to deactive creation of the FFT result.
                           // This is false when desired to push data through the system
                           // to wring out the transient response.
-//  bool exit = false;
-  //        State state = State::warmup;  // Start calibration state machine in warmup state.
+  bool exitManual = false;
 
   // Blue and red bar variables:
   int32_t rx_blue_usb = 128;
@@ -72,18 +65,8 @@ public:
                         SSB_CARRIER,
   };
 
-  int Zoom_FFT_M1;
-  //int Zoom_FFT_M2;
-  int zoom_sample_ptr = 0;
-  float32_t LPF_spectrum = 0.82;
-
-  std::vector<float> sub_vectorAmp = std::vector<float>(21);  // Can these arrays be commonized?
-  std::vector<float> sub_vectorPhase = std::vector<float>(21);
   std::vector<float> sub_vectorAmpResult = std::vector<float>(21);
   std::vector<float> sub_vectorPhaseResult = std::vector<float>(21);
-  std::vector<float32_t> sweepVector = std::vector<float32_t>(101);
-  std::vector<float32_t> sweepVectorValue = std::vector<float32_t>(101);
-
 
   enum class State { warmup,
                      refineCal,
@@ -98,8 +81,6 @@ public:
 
   State state = State::exit;
 
-  //void loadCalToneBuffers();
-//  void loadCalToneBuffers(float toneFreq);
   void plotCalGraphics(int calType);
   void MakeFFTData();
   void warmUpCal();
@@ -107,15 +88,12 @@ public:
   void printCalType(bool autoCal, bool autoCalDone);
   void CalibratePreamble(int setZoom);
   void CalibrateEpilogue();
-  //void DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom);
-  void DoXmitCalibrate(int mode, bool radioCal, bool refineCal, bool saveToEeprom);
-  void DoXmitCarrierCalibrate(int mode, bool radioCal, bool refineCal, bool saveToEeprom);
+  void DoXmitCalibrate(int calMode, bool radio, bool refine, bool toEeprom);
+  void DoXmitCarrierCalibrate(int calMode, bool radio, bool refine, bool toEeprom);
   const char *calFreqs[2]{ "750 Hz", "3.0 kHz" };
-  //void SelectCalFreq();
   void ShowSpectrum();
   float PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins);
   void RadioCal(int mode, bool refineCal);
-  //void buttonTasks(bool radioCal, bool refineCal);
   void buttonTasks();
   void writeToCalData(float ichannel, float qchannel);
 };

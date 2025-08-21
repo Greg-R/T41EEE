@@ -42,30 +42,14 @@ void RxCalibrate::plotCalGraphics() {
 
 
 /*****
-  Purpose: Run ProcessIQData2() a few times to load and settle out buffers.  KF5N May 22, 2024
+  Purpose: Run MakeFFTData() a few times to load and settle out buffers.  KF5N May 22, 2024
            Compute FFT in order to find maximum signal peak prior to beginning calibration.
   Parameter list:
     void
 
   Return value:
     void
-*****
-void RxCalibrate::warmUpCal() {
-  // Run ProcessIQData2() a few times to load and settle out buffers.  Compute FFT.  KF5N May 19, 2024
-  uint32_t index_of_max;  // Not used, but required by arm_max_q15 function.
-  for (int i = 0; i < 128; i = i + 1) {
-    updateDisplayFlag = true;  // Causes FFT to be calculated.
-    while (static_cast<uint32_t>(ADC_RX_I.available()) < 16 and static_cast<uint32_t>(ADC_RX_Q.available()) < 16) {
-      delay(1);
-    }
-    RxCalibrate::ProcessIQData2();
-  }
-  updateDisplayFlag = false;
-  // Find peak of spectrum, which is 512 wide.  Use this to adjust spectrum peak to top of spectrum display.
-  arm_max_q15(pixelnew, 512, &rawSpectrumPeak, &index_of_max);
-}
-*/
-
+*****/
 void RxCalibrate::warmUpCal() {
   uint32_t index_of_max;  // Not used, but required by arm_max_q15 function.
   // MakeFFTData() has to be called enough times for transients to settle out before computing FFT.
@@ -144,10 +128,10 @@ void RxCalibrate::printCalType(bool autoCal, bool autoCalDone) {
   Purpose: Set up prior to IQ calibrations.  New function.  KF5N August 14, 2023
   These things need to be saved here and restored in the epilogue function:
   Vertical scale in dB  (set to 10 dB during calibration)
-  Zoom, set to 1X in receive and 4X in transmit calibrations.
+  Zoom, set to 1X during receive calibration.
   Transmitter power, set to 5W during both calibrations.
    Parameter List:
-      int setZoom   (This parameter should be 0 for receive (1X) and 2 (4X) for transmit)
+      int setZoom   (This parameter should be 0 for receive (1X).
 
    Return value:
       void
@@ -155,7 +139,7 @@ void RxCalibrate::printCalType(bool autoCal, bool autoCalDone) {
 void RxCalibrate::CalibratePreamble(int setZoom) {
   cessb1.processorUsageMaxReset();
   calOnFlag = true;
-  //  IQCalType = 0;
+  exitManual = false;
   transmitPowerLevelTemp = ConfigData.transmitPowerLevel;  //AFP 05-11-23
   cwFreqOffsetTemp = ConfigData.CWOffset;
   // Remember the mode and state, and restore in the Epilogue.
@@ -168,7 +152,6 @@ void RxCalibrate::CalibratePreamble(int setZoom) {
     bands.bands[ConfigData.currentBand].sideband = ConfigData.lastSideband[ConfigData.currentBand];
   }
   ConfigData.CWOffset = 2;                   // 750 Hz for TX calibration.  Epilogue restores user selected offset.
-                                             //  userxmtMode = ConfigData.xmtMode;          // Store the user's mode setting.  KF5N July 22, 2023
   userZoomIndex = ConfigData.spectrum_zoom;  // Save the zoom index so it can be reset at the conclusion.  KF5N August 12, 2023
   zoomIndex = setZoom - 1;
   button.ButtonZoom();
@@ -273,6 +256,15 @@ void RxCalibrate::CalibrateEpilogue(bool radioCal, bool saveToEeprom) {
 }
 
 
+/*****
+  Purpose: Write the calibration factors to the CalData struct.
+
+   Parameter List:
+      float ichannel, float qchannel
+
+   Return value:
+      void
+ *****/
 void RxCalibrate::writeToCalData(float ichannel, float qchannel) {
   if (mode == 0) {  // CW
     if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
@@ -295,23 +287,25 @@ void RxCalibrate::writeToCalData(float ichannel, float qchannel) {
 }
 
 
-
-
 /*****
   Purpose: Combined input/output for the purpose of calibrating the receiver IQ.
 
    Parameter List:
-      int mode (0 is CW, 1 is SSB), bool radioCal, bool shortCal, bool saveToEeprom
+      int mode (0 is CW, 1 is SSB), bool radioCal, bool refineCal, bool saveToEeprom
 
    Return value:
       void
  *****/
-void RxCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, bool saveToEeprom) {
+void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool toEeprom) {
   MenuSelect task, lastUsedTask = MenuSelect::DEFAULT;
-  float correctionIncrement = 0.001;
+  
   bool autoCal = false;
-  bool refineCal = false;
-  RxCalibrate::mode = mode;
+
+  RxCalibrate::mode = calMode;  // CW or SSB.  This is an object state variable.
+  RxCalibrate::radioCal = radio;          // Initial calibration of all bands.
+  RxCalibrate::refineCal = refine;        // Refinement (using existing values a starting point) calibration for all bands.
+  RxCalibrate::saveToEeprom = toEeprom;  // Save to EEPROM
+
   loadCalToneBuffers(750.0);
   CalibratePreamble(0);      // Set zoom to 1X.
   int calFreqShift = 96000;  // Transmit frequency to 2 times IF, the image.
@@ -322,19 +316,19 @@ void RxCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, boo
   tft.setTextColor(RA8875_WHITE);
   tft.fillRect(left_text_edge + 60, 125, 50, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(left_text_edge + 60, 125);
-  tft.print(correctionIncrement, 3);
+  tft.print(increment, 3);
   printCalType(autoCal, false);
-  IQCalType = 0;  // This causes IQ Gain to be displayed.
-  warmUpCal();
+  IQCalType = 0;  // Start with IG Gain calibration.
+  warmUpCal();  // Finds the peak of the FFT to adjust in display.
   State state = State::warmup;  // Start calibration state machine in warmup state.
-  float maxSweepAmp = 0.2;
+  float maxSweepAmp = 0.1;
   float maxSweepPhase = 0.1;
   float increment = 0.001;
   int averageCount = 0;
   float iOptimal = 1.0;
   float qOptimal = 0.0;
-  std::vector<float32_t> sweepVector(401);
-  std::vector<float32_t> sweepVectorValue(401);
+  std::vector<float32_t> sweepVector(201);
+  std::vector<float32_t> sweepVectorValue(201);
 
   int startTimer = 0;  // Used to time display of results.
   bool averageFlag = false;
@@ -359,7 +353,7 @@ void RxCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, boo
     }
   }
 
-  GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, (char *)"IQ Phase", false);  // Show phase on display.
+  GetEncoderValueLive(-2.0, 2.0, phase, increment, (char *)"IQ Phase", false);  // Show phase on display.
 
   if (radioCal) {
     autoCal = true;
@@ -377,12 +371,17 @@ void RxCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, boo
   while (true) {
     fftActive = true;
     RxCalibrate::ShowSpectrum();
-    task = readButton(lastUsedTask);
+    task = readButton();
+        // Exit from manual calibration by button push.
+        if(exitManual == true) { 
+       RxCalibrate::CalibrateEpilogue(radioCal, saveToEeprom);
+      return;
+    }
     //            if (exit) {
     //                Serial.printf("Audio memory usage = %d\n", AudioMemoryUsage());
     //        return;  //  exit variable set in buttonTasks() if button pushed by user.
     //        }
-    if (shortCal) task = MenuSelect::FILTER;
+//    if (refineCal) task = MenuSelect::FILTER;
     switch (task) {
       // Activate automatic calibration (initial calibration).
       case MenuSelect::ZOOM:  // 2nd row, 1st column button
@@ -399,7 +398,8 @@ void RxCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, boo
         break;
       // Automatic calibration using previously stored values (refine calibration).
       case MenuSelect::FILTER:  // 3rd row, 1st column button
-        shortCal = false;
+      Serial.printf("Got to MenuSelect::FILTER case\n");
+        refineCal = true;
         autoCal = true;
         printCalType(autoCal, false);
         count = 0;
@@ -408,9 +408,8 @@ void RxCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, boo
         IQCalType = 0;
         std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
         std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
-        state = State::warmup;
         averageFlag = false;
-        refineCal = true;
+                state = State::warmup;
         break;
       // Toggle gain and phase adjustment in manual mode.
       case MenuSelect::UNUSED_1:
@@ -421,19 +420,20 @@ void RxCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, boo
       case MenuSelect::BEARING:  // UNUSED_2 is now called BEARING
         corrChange = not corrChange;
         if (corrChange == true) {       // Toggle increment value
-          correctionIncrement = 0.001;  // AFP 2-11-23
+          increment = 0.001;  // AFP 2-11-23
         } else {
-          correctionIncrement = 0.01;  // AFP 2-11-23
+          increment = 0.01;  // AFP 2-11-23
         }
         tft.setFontScale((enum RA8875tsize)0);
         tft.fillRect(left_text_edge + 60, 125, 50, tft.getFontHeight(), RA8875_BLACK);
         tft.setCursor(left_text_edge + 60, 125);
-        tft.print(correctionIncrement, 3);
+        tft.print(increment, 3);
         break;
       case MenuSelect::MENU_OPTION_SELECT:  // Save values and exit calibration.
-        tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-        state = State::exit;
-        autoCal = true;  // Set autoCal = true to access State::exit even during manual.
+//        tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
+//        state = State::exit;
+//        autoCal = true;  // Set autoCal = true to access State::exit even during manual.
+exitManual = true;
         break;
       default:
         break;
@@ -462,6 +462,7 @@ void RxCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, boo
           if (warmup == 16 && refineCal) state = State::refineCal;
           break;
         case State::refineCal:
+        Serial.printf("Got to refinelCal state\n");
           // Prep the refinement arrays based on saved values.
           for (int i = 0; i < 21; i = i + 1) {
             sub_vectorAmp[i] = (iOptimal - 10 * 0.001) + (0.001 * i);  // The next array to sweep.
@@ -477,9 +478,9 @@ void RxCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, boo
           phase = 0.0;
           amplitude = 1.0 - maxSweepAmp;                                                  // Begin sweep at low end and move upwards.
                                                                                           ////          if (mode == 0)
-          GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, "IQ Phase", false);  // Display the phase value.
+          GetEncoderValueLive(-2.0, 2.0, phase, increment, "IQ Phase", false);  // Display the phase value.
                                                                                           ////          if (mode == 1)
-                                                                                          ////            GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, (char *)"IQ Phase", false);
+                                                                                          ////            GetEncoderValueLive(-2.0, 2.0, phase, increment, (char *)"IQ Phase", false);
           adjdB = 0;
           adjdB_avg = 0;
           index = 0;
@@ -501,7 +502,7 @@ void RxCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, boo
             phase = -maxSweepPhase;                                             // The starting value for phase.
             amplitude = iOptimal;                                               // Reset for next sweep.
             // Update display to optimal value.
-            GetEncoderValueLive(-2.0, 2.0, amplitude, correctionIncrement, "IQ Gain", true);
+            GetEncoderValueLive(-2.0, 2.0, amplitude, increment, "IQ Gain", true);
             count = count + 1;
             // Save the sub_vector which will be used to refine the optimal result.
             for (int i = 0; i < 21; i = i + 1) {
@@ -532,7 +533,7 @@ void RxCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, boo
             adjdBMinIndex = std::distance(sweepVector.begin(), result);
             qOptimal = sweepVectorValue[adjdBMinIndex];  // Set to the discovered minimum.
             phase = qOptimal;                            // Set to the discovered minimum.
-            GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, "IQ Phase", false);
+            GetEncoderValueLive(-2.0, 2.0, phase, increment, "IQ Phase", false);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorPhase[i] = (qOptimal - 10 * 0.001) + (0.001 * i);
             }
@@ -564,7 +565,7 @@ void RxCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, boo
             // iOptimal is simply the value of sub_vectorAmp[adjdBMinIndex].
             iOptimal = sub_vectorAmp[adjdBMinIndex];  // -.001;
             amplitude = iOptimal;                     // Set to optimal value before refining phase.
-            GetEncoderValueLive(-2.0, 2.0, amplitude, correctionIncrement, (char *)"IQ Gain", true);
+            GetEncoderValueLive(-2.0, 2.0, amplitude, increment, (char *)"IQ Gain", true);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorAmp[i] = (iOptimal - 10 * 0.001) + (0.001 * i);  // The next array to sweep.
             }
@@ -597,7 +598,7 @@ void RxCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, boo
             index = 0;
             qOptimal = sub_vectorPhase[adjdBMinIndex];  // - .001;
             phase = qOptimal;
-            GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, "IQ Phase", false);
+            GetEncoderValueLive(-2.0, 2.0, phase, increment, "IQ Phase", false);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorPhase[i] = (qOptimal - 10 * 0.001) + (0.001 * i);
             }
@@ -647,19 +648,19 @@ void RxCalibrate::DoReceiveCalibrate(int mode, bool radioCal, bool shortCal, boo
               return;
             }
           } else {
-            RxCalibrate::CalibrateEpilogue(radioCal, saveToEeprom);
-            return;
+            autoCal = false;  // Don't enter switch, but remain in manual loop.
+            printCalType(autoCal, false);
           }
           break;
       }
     }  // end automatic calibration state machine
 
-    if (task != MenuSelect::DEFAULT) lastUsedTask = task;  //  Save the last used task.
+//    if (task != MenuSelect::DEFAULT) lastUsedTask = task;  //  Save the last used task.
     task = MenuSelect::DEFAULT;                            // Reset task after it is used.
 
     //  Read encoder and update values.  This is manual calibration.
-    if (IQCalType == 0) amplitude = GetEncoderValueLive(-2.0, 2.0, amplitude, correctionIncrement, "IQ Gain", true);
-    if (IQCalType == 1) phase = GetEncoderValueLive(-2.0, 2.0, phase, correctionIncrement, "IQ Phase", false);
+    if (IQCalType == 0) amplitude = GetEncoderValueLive(-2.0, 2.0, amplitude, increment, "IQ Gain", true);
+    if (IQCalType == 1) phase = GetEncoderValueLive(-2.0, 2.0, phase, increment, "IQ Phase", false);
     writeToCalData(amplitude, phase);
   }  // end while
 }  // End Receive calibration
@@ -736,8 +737,7 @@ void RxCalibrate::MakeFFTData() {
   //  if (static_cast<uint32_t>(ADC_RX_I.available()) > 16 && static_cast<uint32_t>(ADC_RX_Q.available()) > 16) {  // Audio Record Queues!!!
   q15_t q15_buffer_LTemp[2048];  //KF5N
   q15_t q15_buffer_RTemp[2048];  //KF5N
-                                 //    Q_out_L_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
-                                 //    Q_out_R_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
+  
   arm_float_to_q15(float_buffer_L_EX, q15_buffer_LTemp, 2048);
   arm_float_to_q15(float_buffer_R_EX, q15_buffer_RTemp, 2048);
 
@@ -751,20 +751,16 @@ void RxCalibrate::MakeFFTData() {
     arm_offset_q15(q15_buffer_RTemp, CalData.qDCoffsetSSB[ConfigData.currentBand] + CalData.dacOffsetSSB, q15_buffer_RTemp, 2048);
   }
 #endif
-
-  Q_out_L_Ex.play(q15_buffer_LTemp, 2048);
-  Q_out_R_Ex.play(q15_buffer_RTemp, 2048);
   Q_out_L_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
   Q_out_R_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
+  Q_out_L_Ex.play(q15_buffer_LTemp, 2048);
+  Q_out_R_Ex.play(q15_buffer_RTemp, 2048);
 
-  // } else {
-  //  Serial.printf("Not enough transmit data!\n");
+
   // }   // End of transmit code.  Begin receive code.
 
-  // get audio samples from the audio  buffers and convert them to float
-  // read in 32 blocks á 128 samples in I and Q if available.
-
-  //    for (unsigned i = 0; i < 16; i++) {
+  // Get audio samples from the audio  buffers and convert them to float.
+  // Read in 32 blocks á 128 samples in I and Q if available.
   if (static_cast<uint32_t>(ADC_RX_I.available()) > 16 and static_cast<uint32_t>(ADC_RX_Q.available()) > 16) {
     for (unsigned i = 0; i < 16; i++) {
       /**********************************************************************************  AFP 12-31-20
@@ -809,34 +805,17 @@ void RxCalibrate::MakeFFTData() {
       }
     }
 
-    //    if (ConfigData.spectrum_zoom == SPECTRUM_ZOOM_1) {  // && display_S_meter_or_spectrum_state == 1)
-    //      zoom_display = 1;
-    //      CalcZoom1Magn();  //AFP Moved to display function
-    //    }
-
-
-
-    // ZoomFFTExe is being called too many times in Calibration.  Should be called ONLY at the start of each sweep.
-    //    if (ConfigData.spectrum_zoom != SPECTRUM_ZOOM_1) {
-    //AFP  Used to process Zoom>1 for display
-    //      ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
-    //    }
-
     // This process started because there are 2048 samples available.  Perform FFT.
     updateDisplayFlag = true;
-    //      Serial.printf("Call ZoomFFTExe\n");
     if (fftActive) CalcZoom1Magn();  // Receiver calibration uses 1X zoom.
     FreqShift1();                    // 48 kHz shift
     fftSuccess = true;
-    //    Serial.printf("FFT success!\n");
   }  // End of receive code
   else {
     fftSuccess = false;  // Insufficient receive buffers to make FFT.  Do not plot FFT data!
     Serial.printf("FFT failed!\n");
   }
-
-  //  }  // End of receive code.
-}
+}  // end MakeFFTData()
 
 
 /*****
@@ -868,14 +847,10 @@ void RxCalibrate::ShowSpectrum()  //AFP 2-10-23
   //  The target bin locations are used by the for-loop to sweep a small range in the FFT.  A maximum finding function finds the peak signal strength.
   int cal_bins[3] = { 0, 0, 0 };
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-    //    cal_bins[0] = 315;
-    //    cal_bins[1] = 455;
     cal_bins[0] = rx_blue_usb;  // was 315
     cal_bins[1] = rx_red_usb;
   }  // Receive calibration, LSB.  KF5N
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-    //    cal_bins[0] = 59;
-    //    cal_bins[1] = 199;
     cal_bins[0] = rx_blue_usb;  // was 315
     cal_bins[1] = rx_red_usb;
   }  // Receive calibration, USB.  KF5N
@@ -889,7 +864,6 @@ void RxCalibrate::ShowSpectrum()  //AFP 2-10-23
   tft.fillRect(left_text_edge, 142, 80, tft.getFontHeight(), RA8875_BLACK);  // Erase old adjdB number.                                       // 350, 125
   tft.print(adjdB, 1);
 
-////  delay(5);  // This requires "tuning" in order to get best response.
 }
 
 
@@ -965,7 +939,6 @@ float RxCalibrate::PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
   adjdB_avg = adjdB * alpha + adjdBold * (1.0 - alpha);                                          // Exponential average.
 
   adjdBold = adjdB_avg;
-  adjdB_sample = adjdB;
 
   tft.writeTo(L1);
   return adjdB_avg;
