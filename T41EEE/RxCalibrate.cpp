@@ -190,7 +190,7 @@ void RxCalibrate::CalibratePreamble(int setZoom) {
   NCOFreq = 0L;
   digitalWrite(MUTE, MUTEAUDIO);  //  Mute Audio  (HIGH=Mute)
   digitalWrite(RXTX, HIGH);       // Turn on transmitter.
-  radioState = RadioState::CW_CALIBRATE_STATE;
+  radioState = RadioState::RECEIVE_CALIBRATE_STATE;
   ShowTransmitReceiveStatus();
   rawSpectrumPeak = 0;
   SetAudioOperatingState(radioState);  // Do this last!  This clears the queues.

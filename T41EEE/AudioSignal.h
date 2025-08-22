@@ -318,8 +318,6 @@ void SetAudioOperatingState(RadioState operatingState) {
       mixer1_tx.gain(1, 1);      // testTone on.
       mixer1_tx.gain(2, 0);      // testTone 2 off.  
       switch1_tx.setChannel(1);  // Disconnect microphone path.
-//      switch2_tx.setChannel(0);  // Connect 1 kHz test tone path.
-//      switch5_tx.setChannel(1);  //  Disconnect IMD test tone path.
 
       if (ConfigData.compressorFlag) {
         switch4_tx.setChannel(0);
@@ -348,8 +346,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       Q_in_R_Ex.begin();  // Q channel Microphone audio
       ADC_RX_I.begin();   // Calibration is full duplex!  Activate receiver data.  No demodulation during calibrate, spectrum only.
       ADC_RX_Q.begin();
-      patchCord25.disconnect();
-      patchCord26.disconnect();
+      patchCord25.disconnect();  // Disconnect headphone.
+      patchCord26.disconnect();  // Disconnect headphone.
 
       // Update equalizer.  Update first 14 only.  Last two are constant.
       for (int i = 0; i < 14; i = i + 1) dbBand1[i] = ConfigData.equalizerXmt[i];
@@ -464,37 +462,25 @@ void SetAudioOperatingState(RadioState operatingState) {
       mixer1_tx.gain(0, 0);      // microphone audio off.
       mixer1_tx.gain(1, 0);      // testTone 1 off.
       mixer1_tx.gain(2, 0);      // testTone 2 off.
-      mixer1_tx.gain(3, 1);      // CW tone path.
+      mixer1_tx.gain(3, 1);      // CW tone path.  Mic gain is also in this path.  Set micGain to 0dB.
 
       switch1_tx.setChannel(1);  // Disconnect microphone path.
-//      switch2_tx.setChannel(0);  // Connect 1 kHz test tone path.
-//      switch5_tx.setChannel(1);  //  Disconnect IMD test tone path.
 
-      if (ConfigData.compressorFlag) {
-        switch4_tx.setChannel(0);
-        mixer3_tx.gain(0, 1.0);
-        mixer3_tx.gain(1, 0.0);
-      } else {
+// Bypass equalizer and compressor in CW mode!
+        switch3_tx.setChannel(1);  // Bypass equalizer.  Must bypass for FT8.
+        mixer2_tx.gain(0, 0.0);
+        mixer2_tx.gain(1, 1.0);
+
         switch4_tx.setChannel(1);  // Bypass compressor.
         mixer3_tx.gain(0, 0.0);
         mixer3_tx.gain(1, 1.0);
         compGainCompensate.setGain_dB(10.0);  // Use compressor's below threshold gain.
-      }
 
-      if (ConfigData.xmitEQFlag and bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE) {
-        switch3_tx.setChannel(0);
-        mixer2_tx.gain(0, 1.0);
-        mixer2_tx.gain(1, 0.0);
-      } else {
-        switch3_tx.setChannel(1);  // Bypass equalizer.  Must bypass for FT8.
-        mixer2_tx.gain(0, 0.0);
-        mixer2_tx.gain(1, 1.0);
-      }
-
+// Set CW calibration factors.
           if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-    cessb1.setIQCorrections(true, CalData.IQSSBAmpCorrectionFactorLSB[ConfigData.currentBand], CalData.IQSSBPhaseCorrectionFactorLSB[ConfigData.currentBand], 0.0);
+    cessb1.setIQCorrections(true, CalData.IQCWAmpCorrectionFactorLSB[ConfigData.currentBand], CalData.IQCWPhaseCorrectionFactorLSB[ConfigData.currentBand], 0.0);
     } else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-    cessb1.setIQCorrections(true, CalData.IQSSBAmpCorrectionFactorUSB[ConfigData.currentBand], CalData.IQSSBPhaseCorrectionFactorUSB[ConfigData.currentBand], 0.0);
+    cessb1.setIQCorrections(true, CalData.IQCWAmpCorrectionFactorUSB[ConfigData.currentBand], CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand], 0.0);
     }
 
       Q_out_L_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);  // Need this as CW will put into wrong mode.  Greg KF5N August 4, 2024.
@@ -510,7 +496,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       for (int i = 0; i < 14; i = i + 1) dbBand1[i] = ConfigData.equalizerXmt[i];
 
       txEqualizer.equalizerNew(16, &fBand1[0], &dbBand1[0], 249, &equalizeCoeffs[0], 65.0f);
-      updateMic();
+//      updateMic();
+micGain.setGain_dB(0.0);  // Set mic gain to 0.  Don't want mic gain to influence CW.
       connect17.connect();  // Transmitter I channel
       connect18.connect();  // Transmitter Q channel
       connect19.connect();  // Transmitter I channel
@@ -550,6 +537,64 @@ void SetAudioOperatingState(RadioState operatingState) {
 */
 
     case RadioState::CW_CALIBRATE_STATE:
+      SampleRate = SAMPLE_RATE_48K;
+      InitializeDataArrays();  // I2S sample rate set in this function.
+      controlAudioOut(ConfigData.audioOut, true);  // Mute all audio.
+      sgtl5000_1.unmuteLineout();
+
+      ADC_RX_I.end();
+      ADC_RX_I.clear();
+      ADC_RX_Q.end();
+      ADC_RX_Q.clear();
+
+        cessb1.setSampleRate_Hz(48000);  ////
+
+      // Test tone enabled and connected
+      toneSSBCal1.setSampleRate_Hz(48000);
+      toneSSBCal1.amplitude(0.12);
+      toneSSBCal1.frequency(750.0);
+      toneSSBCal1.begin();
+      toneSSBCal2.end();
+      mixer1_tx.gain(0, 0);      // microphone audio off.
+      mixer1_tx.gain(1, 1);      // testTone on.
+      mixer1_tx.gain(2, 0);      // testTone 2 off.  
+      switch1_tx.setChannel(1);  // Disconnect microphone path.
+
+// Bypass equalizer and compressor in CW mode!
+        switch3_tx.setChannel(1);  // Bypass equalizer.
+        mixer2_tx.gain(0, 0.0);
+        mixer2_tx.gain(1, 1.0);
+
+        switch4_tx.setChannel(1);  // Bypass compressor.
+        mixer3_tx.gain(0, 0.0);
+        mixer3_tx.gain(1, 1.0);
+        compGainCompensate.setGain_dB(10.0);  // Use compressor's below threshold gain when bypassed.
+
+// Set CW calibration factors.
+          if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
+    cessb1.setIQCorrections(true, CalData.IQCWAmpCorrectionFactorLSB[ConfigData.currentBand], CalData.IQCWPhaseCorrectionFactorLSB[ConfigData.currentBand], 0.0);
+    } else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
+    cessb1.setIQCorrections(true, CalData.IQCWAmpCorrectionFactorUSB[ConfigData.currentBand], CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand], 0.0);
+    }
+
+      patchCord1.connect();  // Connect I and Q receiver data converters.
+      patchCord2.connect();
+      ADC_RX_I.begin();  // Calibration is full duplex!
+      ADC_RX_Q.begin();
+      patchCord25.disconnect();  // Disconnect headphone, which is shared with I and Q transmit.
+      patchCord26.disconnect();
+      micGain.setGain_dB(0.0);  // micGain should not influence CW.
+      //  Transmitter front-end and back-end needs to be active during CW calibration.
+      connect17.connect();  // Transmitter I channel
+      connect18.connect();  // Transmitter Q channel
+      Q_in_L_Ex.begin();  // I channel to sketch
+      Q_in_R_Ex.begin();  // Q channel to sketch
+      connect19.connect();  // Transmitter I channel to audio adapter
+      connect20.connect();  // Transmitter Q channel to audio adapter
+
+      break;
+
+    case RadioState::RECEIVE_CALIBRATE_STATE:
       SampleRate = SAMPLE_RATE_192K;
       SetI2SFreq(SR[SampleRate].rate);
       // QSD receiver enabled.  Calibrate is full duplex.
@@ -557,7 +602,6 @@ void SetAudioOperatingState(RadioState operatingState) {
       sgtl5000_1.unmuteLineout();
 
       switch1_tx.setChannel(1);  // Disconnect microphone path.
-//      switch2_tx.setChannel(1);  //  Disconnect 1 kHz test tone path.
 
       // CW does not use the transmitter front-end.
       Q_in_L_Ex.end();  // Transmit I channel path.
@@ -584,7 +628,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       connect19.connect();  // Transmitter I channel
       connect20.connect();  // Transmitter Q channel
 
-      break;
+break;
 
     case RadioState::SET_CW_SIDETONE:
       SampleRate = SAMPLE_RATE_192K;

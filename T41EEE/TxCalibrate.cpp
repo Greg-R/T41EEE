@@ -290,7 +290,8 @@ void TxCalibrate::CalibratePreamble(int setZoom) {
   digitalWrite(MUTE, MUTEAUDIO);  //  Mute Audio  (HIGH=Mute)
   digitalWrite(RXTX, HIGH);       // Turn on transmitter.
   rawSpectrumPeak = 0;
-  radioState = RadioState::SSB_CALIBRATE_STATE;
+  if(mode == 0) radioState = RadioState::CW_CALIBRATE_STATE;  
+  if(mode == 1) radioState = RadioState::SSB_CALIBRATE_STATE;
   ShowTransmitReceiveStatus();
   SetAudioOperatingState(radioState);  // Do this last!  This turns the queues on.
 }
@@ -1129,7 +1130,7 @@ void TxCalibrate::MakeFFTData() {
   float32_t recBandFactor[7] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };  // AFP 2-11-23  KF5N uniform values
 
   uint32_t dataWidth = 2048;  // was 2048
-  float32_t powerScale;
+  float32_t powerScale = 0;
 
   /**********************************************************************************  AFP 12-31-20
         Get samples from queue buffers
@@ -1175,9 +1176,11 @@ void TxCalibrate::MakeFFTData() {
 
     //  This is the correct place in the data stream to inject the scaling for power.
 #ifdef QSE2
-    powerScale = 2.0 * ConfigData.powerOutSSB[ConfigData.currentBand];
+if(mode == 0)    powerScale = 2.0 * ConfigData.powerOutCW[ConfigData.currentBand];
+if(mode == 1)    powerScale = 2.0 * ConfigData.powerOutSSB[ConfigData.currentBand];
 #else
-    powerScale = 1.4 * ConfigData.powerOutSSB[ConfigData.currentBand];
+if(mode == 0)    powerScale = 1.4 * ConfigData.powerOutCW[ConfigData.currentBand];
+if(mode == 1)    powerScale = 1.4 * ConfigData.powerOutSSB[ConfigData.currentBand];
 #endif
 
     arm_scale_f32(float_buffer_L_EX, powerScale, float_buffer_L_EX, dataWidth);

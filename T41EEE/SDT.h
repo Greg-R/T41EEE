@@ -258,7 +258,7 @@ const int RESET = 0;  // QSD2/QSE2 reset pin
 //  States used to control radio function.
 enum class RadioState{SSB_RECEIVE_STATE, SSB_TRANSMIT_STATE, FT8_TRANSMIT_STATE, FT8_RECEIVE_STATE, CW_RECEIVE_STATE, CW_TRANSMIT_STRAIGHT_STATE, 
                       CW_TRANSMIT_KEYER_STATE, AM_RECEIVE_STATE, SAM_RECEIVE_STATE, SSB_CALIBRATE_STATE, SSB_IM3TEST_STATE, CW_CALIBRATE_STATE, 
-                      SET_CW_SIDETONE, NOSTATE};
+                      RECEIVE_CALIBRATE_STATE, SET_CW_SIDETONE, NOSTATE};
 enum class RadioMode{CW_MODE, SSB_MODE, FT8_MODE, AM_MODE, SAM_MODE};  // Plain enum, because it needs to be iterated in mode change function.
 enum class Sideband{LOWER, UPPER, BOTH_AM, BOTH_SAM};
 enum class AudioState{SPEAKER, HEADPHONE, BOTH, MUTE_BOTH};

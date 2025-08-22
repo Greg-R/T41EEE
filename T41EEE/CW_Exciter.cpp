@@ -39,7 +39,7 @@ void CW_Exciter::writeSineBuffer(int numCycles) {
 void CW_Exciter::CW_ExciterIQData(int shaping)  //AFP 08-20-22
 {
 //  uint32_t N_BLOCKS_EX = N_B_EX;
-  float32_t powerScale;
+  float32_t powerScale = 0;
 //  q15_t q15_buffer_LTemp[2048];  //KF5N
 //  q15_t q15_buffer_RTemp[256];  //KF5N
 
@@ -170,17 +170,17 @@ else return;
     arm_float_to_q15(float_buffer_q, q15_buffer_RTemp, 512);
 #ifdef QSE2
 //    if(bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE) {
-    arm_offset_q15(q15_buffer_LTemp, CalData.iDCoffsetSSB[ConfigData.currentBand] + CalData.dacOffsetSSB, q15_buffer_LTemp, 512);  // Carrier suppression offset.
-    arm_offset_q15(q15_buffer_RTemp, CalData.qDCoffsetSSB[ConfigData.currentBand] + CalData.dacOffsetSSB, q15_buffer_RTemp, 512);
+    arm_offset_q15(q15_buffer_LTemp, CalData.iDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_LTemp, 512);  // Carrier suppression offset.
+    arm_offset_q15(q15_buffer_RTemp, CalData.qDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_RTemp, 512);
 //    } else if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) {
 //    arm_offset_q15(q15_buffer_LTemp, CalData.iDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_LTemp, 2048);  // Carrier suppression offset.
 //    arm_offset_q15(q15_buffer_RTemp, CalData.qDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_RTemp, 2048);      
 //    }
 #endif
-  Q_out_L_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
-  Q_out_R_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
-//  Q_out_L_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
-//  Q_out_R_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
+//  Q_out_L_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
+//  Q_out_R_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
+  Q_out_L_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
+  Q_out_R_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
     Q_out_L_Ex.play(q15_buffer_LTemp, 512);  // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
     Q_out_R_Ex.play(q15_buffer_RTemp, 512);  // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.
 
