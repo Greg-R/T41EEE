@@ -31,9 +31,9 @@ bool agc_action = false;
 #include "AudioSignal.h"
 //End dataflow
 
-#include "Process.h"
+#include "ReceiveDSP.h"
 
-Process process;           // Receiver process object.
+ReceiveDSP process;           // Receiver process object.
 RxCalibrate rxcalibrater;  // Instantiate the calibration objects.
 TxCalibrate txcalibrater;
 CW_Exciter cwexciter;

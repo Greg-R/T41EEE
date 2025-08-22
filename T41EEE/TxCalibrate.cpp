@@ -351,7 +351,7 @@ void TxCalibrate::CalibrateEpilogue() {
 
 //void TxCalibrate::buttonTasks(bool radioCal, bool refineCal) {  // Does this function need parameters?
 void TxCalibrate::buttonTasks() {
-  task = readButton(lastUsedTask);
+  task = readButton();
   //    exit = false;
   switch (task) {
     // Activate initial automatic calibration.

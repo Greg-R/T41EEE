@@ -72,6 +72,7 @@ cwToneData.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
     cwToneData.play(float_buffer_cw, 512);           // Push CW waveform into SSB transmitter input.
 
 //    arm_float_to_q15(float_buffer_temp_cw, q15_buffer_Sidetone, 512);
+// Make Q15 data for CW sidetone.
     arm_float_to_q15(float_buffer_cw, q15_buffer_Sidetone, 512);
 
     Q_out_L.setBehaviour(AudioPlayQueue::NON_STALLING);

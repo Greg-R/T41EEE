@@ -453,7 +453,7 @@ extern calibration_t CalData_temp;
 #include "CW_Exciter.h"
 #include "JSON.h"
 #include "Eeprom.h"
-#include "Process.h"
+#include "ReceiveDSP.h"
 
 //------------------------- Global CW Filter declarations ----------
 
@@ -579,7 +579,7 @@ extern Rotary fineTuneEncoder;  // (4,  5);
 
 extern Metro ms_500;
 
-extern Process process;              // Receiver DSP object.
+extern ReceiveDSP process;              // Receiver DSP object.
 extern Eeprom eeprom;                // EEPROM memory object.
 extern JSON json;
 extern RxCalibrate rxcalibrater;         // CW mode calibration object.

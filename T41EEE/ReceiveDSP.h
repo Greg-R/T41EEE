@@ -2,7 +2,7 @@
 
 
 
-class Process {
+class ReceiveDSP {
 
 public:
 

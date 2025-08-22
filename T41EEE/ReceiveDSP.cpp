@@ -46,7 +46,7 @@ float32_t sign(float32_t x) {
    Return value:
       void
  *****/
-void Process::ProcessIQData() {
+void ReceiveDSP::ProcessIQData() {
   if (keyPressedOn == 1) {  //AFP 09-01-22
     return;
   }

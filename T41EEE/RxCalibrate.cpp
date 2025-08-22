@@ -297,7 +297,7 @@ void RxCalibrate::writeToCalData(float ichannel, float qchannel) {
       void
  *****/
 void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool toEeprom) {
-  MenuSelect task, lastUsedTask = MenuSelect::DEFAULT;
+  MenuSelect task = MenuSelect::DEFAULT;
   
   bool autoCal = false;
 

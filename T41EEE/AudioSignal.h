@@ -449,7 +449,6 @@ void SetAudioOperatingState(RadioState operatingState) {
       // Speaker and headphones should be unmuted according to current audio out state for sidetone.
       controlAudioOut(ConfigData.audioOut, false);
 
-
       ADC_RX_I.end();
       ADC_RX_I.clear();
       ADC_RX_Q.end();

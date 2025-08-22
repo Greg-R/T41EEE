@@ -40,8 +40,8 @@ public:
   int32_t qDCoffset = 0;
   elapsedMillis milliTimer;
   int mode = 0;
-  MenuSelect task;
-  MenuSelect lastUsedTask = MenuSelect::DEFAULT;
+  MenuSelect task = MenuSelect::DEFAULT;
+//  MenuSelect lastUsedTask = MenuSelect::DEFAULT;
   bool autoCal = false;
   bool refineCal = false;
   bool radioCal = false;
