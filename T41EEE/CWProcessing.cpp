@@ -323,6 +323,8 @@ FLASHMEM void SetKeyPowerUp() {
 
 /*****
   Purpose: Allow user to set the sidetone volume.  KF5N August 31, 2023
+           Sidetone volume is set separately for speaker and headphone.
+           Headphone volume has to be set in the Audio Adapter hardware.
 
   Parameter list:
     bool speaker (true for speaker, false for headphone)
@@ -347,6 +349,7 @@ void SetSideToneVolume(bool speaker) {
   keyDown = false;
   tft.print(sidetoneDisplay);  // Display in range of 0 to 100.
 
+// This is going to run the CW transmitter, however, the power amplifier is not enabled.
   while (true) {
     if (digitalRead(ConfigData.paddleDit) == LOW || digitalRead(ConfigData.paddleDah) == LOW) {
       if (keyDown) {
@@ -377,14 +380,15 @@ void SetSideToneVolume(bool speaker) {
       filterEncoderMove = 0;
     }
     speakerVolume.setGain(volumeLog[ConfigData.sidetoneSpeaker]);
+    // This is the only practical way to set headphone sidetone volume.
     sgtl5000_1.volume(static_cast<float32_t>(ConfigData.sidetoneHeadphone) / 100.0);  // This control has a range of 0.0 to 1.0.
     menu = readButton();
-    if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
+    if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Exit and save to EEPROM.
                                                    // ConfigData.ConfigData.sidetoneVolume = ConfigData.sidetoneVolume;
       eeprom.ConfigDataWrite();
       break;
     }
-  }
+  }  // end while loop
   EraseMenus();
   lastState = RadioState::NOSTATE;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 7, 2023
 }

@@ -492,15 +492,25 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord25.disconnect();
       patchCord26.disconnect();
 
-      // Update equalizer.  Update first 14 only.  Last two are constant.
-      for (int i = 0; i < 14; i = i + 1) dbBand1[i] = ConfigData.equalizerXmt[i];
+      patchCord3.connect();  // Sidetone
+      // Speaker and headphones should be unmuted according to current audio out state for sidetone.
+      controlAudioOut(ConfigData.audioOut, false);
+      sgtl5000_1.unmuteLineout();
 
-      txEqualizer.equalizerNew(16, &fBand1[0], &dbBand1[0], 249, &equalizeCoeffs[0], 65.0f);
+      sgtl5000_1.volume(static_cast<float32_t>(ConfigData.sidetoneHeadphone) / 100.0);  // This is for scaling the sidetone in the headphone output.  This is
+                                                                                        // the only way to adjust sidetone volume in the headphone.
+      patchCord25.disconnect();                                                         // Disconnect headphone, which is shared with I and Q transmit.
+      patchCord26.disconnect();                                                         // Headphone sidetone is same as transmit I and Q!
+      speakerVolume.setGain(volumeLog[ConfigData.sidetoneSpeaker]);  // Adjust sidetone volume.  Headphone sidetone done in hardware.
+      // Update equalizer.  Update first 14 only.  Last two are constant.
+//      for (int i = 0; i < 14; i = i + 1) dbBand1[i] = ConfigData.equalizerXmt[i];
+
+//      txEqualizer.equalizerNew(16, &fBand1[0], &dbBand1[0], 249, &equalizeCoeffs[0], 65.0f);
 //      updateMic();
 micGain.setGain_dB(0.0);  // Set mic gain to 0.  Don't want mic gain to influence CW.
-      connect17.connect();  // Transmitter I channel
+      connect17.connect();  // Transmitter I channel  // Transmitter front-end
       connect18.connect();  // Transmitter Q channel
-      connect19.connect();  // Transmitter I channel
+      connect19.connect();  // Transmitter I channel  // Transmitter back-end
       connect20.connect();  // Transmitter Q channel
 
       break;
@@ -631,6 +641,77 @@ micGain.setGain_dB(0.0);  // Set mic gain to 0.  Don't want mic gain to influenc
 break;
 
     case RadioState::SET_CW_SIDETONE:
+
+      SampleRate = SAMPLE_RATE_48K;
+      InitializeDataArrays();  // I2S sample rate set in this function.
+      // QSD disabled and disconnected
+      controlAudioOut(ConfigData.audioOut, true);  // Mute all audio.
+      sgtl5000_1.unmuteLineout();
+      patchCord1.disconnect();  // Receiver I channel
+      patchCord2.disconnect();  // Receiver Q channel
+      patchCord3.connect();  // Sidetone
+      // Speaker and headphones should be unmuted according to current audio out state for sidetone.
+      controlAudioOut(ConfigData.audioOut, false);
+
+      ADC_RX_I.end();
+      ADC_RX_I.clear();
+      ADC_RX_Q.end();
+      ADC_RX_Q.clear();
+
+      // Test tone enabled and connected
+////      toneSSBCal1.setSampleRate_Hz(48000);
+////      toneSSBCal1.amplitude(0.2);
+////      toneSSBCal1.frequency(750.0);
+////      toneSSBCal1.begin();
+      toneSSBCal1.end();
+      toneSSBCal2.end();
+      mixer1_tx.gain(0, 0);      // microphone audio off.
+      mixer1_tx.gain(1, 0);      // testTone 1 off.
+      mixer1_tx.gain(2, 0);      // testTone 2 off.
+      mixer1_tx.gain(3, 1);      // CW tone path.  Mic gain is also in this path.  Set micGain to 0dB.
+
+      switch1_tx.setChannel(1);  // Disconnect microphone path.
+
+// Bypass equalizer and compressor in CW mode!
+        switch3_tx.setChannel(1);  // Bypass equalizer.  Must bypass for FT8.
+        mixer2_tx.gain(0, 0.0);
+        mixer2_tx.gain(1, 1.0);
+
+        switch4_tx.setChannel(1);  // Bypass compressor.
+        mixer3_tx.gain(0, 0.0);
+        mixer3_tx.gain(1, 1.0);
+        compGainCompensate.setGain_dB(10.0);  // Use compressor's below threshold gain.
+
+// Set CW calibration factors.
+//          if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
+//    cessb1.setIQCorrections(true, CalData.IQCWAmpCorrectionFactorLSB[ConfigData.currentBand], CalData.IQCWPhaseCorrectionFactorLSB[ConfigData.currentBand], 0.0);
+//    } else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
+//    cessb1.setIQCorrections(true, CalData.IQCWAmpCorrectionFactorUSB[ConfigData.currentBand], CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand], 0.0);
+//    }
+
+      Q_out_L_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);  // Need this as CW will put into wrong mode.  Greg KF5N August 4, 2024.
+      Q_out_R_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
+      Q_in_L_Ex.begin();  // I channel Microphone audio
+      Q_in_R_Ex.begin();  // Q channel Microphone audio
+//      ADC_RX_I.begin();   // Calibration is full duplex!  Activate receiver data.  No demodulation during calibrate, spectrum only.
+//      ADC_RX_Q.begin();
+      patchCord25.disconnect();
+      patchCord26.disconnect();
+
+      // Update equalizer.  Update first 14 only.  Last two are constant.
+//      for (int i = 0; i < 14; i = i + 1) dbBand1[i] = ConfigData.equalizerXmt[i];
+
+//      txEqualizer.equalizerNew(16, &fBand1[0], &dbBand1[0], 249, &equalizeCoeffs[0], 65.0f);
+//      updateMic();
+micGain.setGain_dB(0.0);  // Set mic gain to 0.  Don't want mic gain to influence CW.
+      connect17.connect();  // Transmitter I channel
+      connect18.connect();  // Transmitter Q channel
+      connect19.connect();  // Transmitter I channel
+      connect20.connect();  // Transmitter Q channel
+
+      break;
+
+    /*
       SampleRate = SAMPLE_RATE_192K;
       SetI2SFreq(SR[SampleRate].rate);
       sgtl5000_1.muteLineout();
@@ -655,6 +736,7 @@ break;
       connect20.connect();  // Transmitter Q channel
 
       break;
+      */
 
     case RadioState::NOSTATE:
       break;
@@ -678,7 +760,7 @@ break;
 *****/
 void controlAudioOut(AudioState audioState, bool mute) {
   if (mute) {
-    sgtl5000_1.muteHeadphone();     // Unmute headphones.
+    sgtl5000_1.muteHeadphone();     // Mute headphones.
     digitalWrite(MUTE, MUTEAUDIO);  // Mute speaker audio amplifier.
     return;
   }
@@ -689,13 +771,13 @@ void controlAudioOut(AudioState audioState, bool mute) {
       break;
 
     case AudioState::SPEAKER:
-      sgtl5000_1.muteHeadphone();       // Unmute headphones.
-      digitalWrite(MUTE, UNMUTEAUDIO);  // Mute speaker audio amplifier.
+      sgtl5000_1.muteHeadphone();       // Mute headphones.
+      digitalWrite(MUTE, UNMUTEAUDIO);  // Unmute speaker audio amplifier.
       break;
 
     case AudioState::BOTH:
       sgtl5000_1.unmuteHeadphone();     // Unmute headphones.
-      digitalWrite(MUTE, UNMUTEAUDIO);  // Mute speaker audio amplifier.
+      digitalWrite(MUTE, UNMUTEAUDIO);  // Unmute speaker audio amplifier.
       break;
 
     case AudioState::MUTE_BOTH:

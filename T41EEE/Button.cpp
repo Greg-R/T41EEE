@@ -251,7 +251,6 @@ void Button::ExecuteButtonPress(MenuSelect val) {
       break;
 
     case MenuSelect::MUTE_AUDIO:  // 11.  Was noise floor.  Greg KF5N February 12, 2025
-                                  //      ButtonSetNoiseFloor();
       ButtonMuteAudio();
       break;
 
@@ -820,7 +819,8 @@ void Button::ButtonNotchFilter() {
 
 /*****
   Purpose: Mute speaker, headphone, or both with button pushes.  Greg KF5N February 12, 2025.
-
+           This function rotates through the 4 possible permuations of mute/unmute.
+           Each state makes changes and proceeds to the next state.
   Parameter list:
     void
 
