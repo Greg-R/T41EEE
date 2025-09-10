@@ -1,5 +1,6 @@
 
 #include "SDT.h"
+#include "Display.h"
 
 // DrawAudioSpectContainer()
 // ShowName()

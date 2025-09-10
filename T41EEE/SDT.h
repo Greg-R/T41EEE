@@ -74,8 +74,7 @@ const int CHAR_HEIGHT = 32;
 #define WATERFALL_TOP_Y (SPECTRUM_TOP_Y + SPECTRUM_HEIGHT + 5)        // 130 + 120 + 5 = 255
 #define FIRST_WATERFALL_LINE (WATERFALL_TOP_Y + 20)                   // 255 + 35 = 290
 #define WATERFALL_BOTTOM (FIRST_WATERFALL_LINE + MAX_WATERFALL_ROWS)  // 290 + 170 = 460
-#define TEMP_X_OFFSET 15
-#define TEMP_Y_OFFSET 465  // 480 * 0.97 = 465
+
 #define AGC_Y_OFFSET 292
 #define AGC_X_OFFSET 680
 #define INFORMATION_WINDOW_X WATERFALL_RIGHT_X + 25  // 512 + 25 = 537
@@ -444,6 +443,7 @@ extern calibration_t CalData_temp;
 
 // Custom classes in the sketch.
 #include "Button.h"
+//#include "Display.h"
 #include "RxCalibrate.h"
 #include "TxCalibrate.h"
 #include "CW_Exciter.h"
