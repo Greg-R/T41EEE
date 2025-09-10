@@ -63,13 +63,9 @@ Si5351 si5351;  // Instantiate the PLL device.
 
 RadioState radioState, lastState;  // KF5N
 int resetTuningFlag = 0;
-#ifndef RA8875_DISPLAY
-ILI9488_t3 tft = ILI9488_t3(&SPI, TFT_CS, TFT_DC, TFT_RST);  // Instantiate the display.
-#else
-#define RA8875_CS TFT_CS
-#define RA8875_RESET TFT_DC  // any pin or nothing!
+uint32_t RA8875_CS {TFT_CS};
+uint32_t RA8875_RESET {TFT_DC};  // any pin or nothing!
 RA8875 tft = RA8875(RA8875_CS, RA8875_RESET);
-#endif
 
 SPISettings settingsA(70000000UL, MSBFIRST, SPI_MODE1);
 

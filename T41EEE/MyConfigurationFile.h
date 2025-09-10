@@ -1,6 +1,7 @@
 
 //====================== User Specific Preferences =============
-
+const char RIGNAME[] = "T41-EP SDT";
+const int RIGNAME_X_OFFSET = 570;   // Pixel count to rig name field.
 //#define DEBUG 		                                                        // Uncommented for debugging, comment out for normal use
 //#define DEBUG1                                                            // Uncomment to see temperature and load information.
 //#define DEBUG_SWITCH_CAL                                                  // Uncomment to run switch cal by pushing and holding a button at power-up.

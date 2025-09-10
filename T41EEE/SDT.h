@@ -30,11 +30,7 @@
 
 // Constants and #defines first:
 //======================================== Symbolic Constants for the T41 ===================================================
-const char RIGNAME[] = "T41-EP SDT";
 const int NUMBER_OF_SWITCHES = 18;  // Number of push button switches.
-
-const int RIGNAME_X_OFFSET = 570;   // Pixel count to rig name field
-#define RA8875_DISPLAY 1       // Comment out if not using RA8875 display
 const int TEMPMON_ROOMTEMP = 25.0;
 #define SD_CS BUILTIN_SDCARD  // Works on T_3.6 and T_4.1 ...
 
