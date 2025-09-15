@@ -7,6 +7,7 @@ const int audio_block_samples = 128;  // Always 128
 AudioSettings_F32 audio_settings(sample_rate_Hz, audio_block_samples);
 AudioInputI2SQuad i2s_quadIn;  // 4 inputs/outputs available only in Teensy audio and not Open Audio library.
 AudioOutputI2SQuad i2s_quadOut;  // Restricted to 16 bits; this is a problem for volume control.
+//AudioOutputI2SQuad_F32 i2s_quadOut_f32;
 
 // Transmitter
 AudioControlSGTL5000 sgtl5000_1;                                                  // Controller for the Teensy Audio Adapter.
