@@ -56,13 +56,10 @@ const int MENU_OPTION_SELECT = 0;  // These are the expected values from the swi
 const int XPIXELS = 800;  // This is for the 5.0" display
 const int YPIXELS = 480;
 const int CHAR_HEIGHT = 32;
-#define EEPROM_BASE_ADDRESS 0
-#define CAL_BASE_ADDRESS 1024
-#define BANDS_BASE_ADDRESS 2048
 #define PIXELS_PER_EQUALIZER_DELTA 10  // Number of pixels per detent of encoder for equalizer changes
 #define SPECTRUM_LEFT_X 3              // Used to plot left edge of spectrum display  AFP 12-14-21
 #define WATERFALL_LEFT_X SPECTRUM_LEFT_X
-#define SPECTRUM_RES 512                                        // The value used in the original open-source code is 256.  Al uses 512.
+//#define SPECTRUM_RES 512                                        // The value used in the original open-source code is 256.  Al uses 512.
 #define SPECTRUM_TOP_Y 100                                      // Start of spectrum plot space
 #define SPECTRUM_HEIGHT 150                                     // This is the pixel height of spectrum plot area without disturbing the axes
 #define SPECTRUM_BOTTOM (SPECTRUM_TOP_Y + SPECTRUM_HEIGHT - 3)  // 247 = 100 + 150 - 3
@@ -439,7 +436,7 @@ struct calibration_t {
 };  // end calibration struct
 
 extern struct calibration_t CalData;
-extern calibration_t CalData_temp;
+//extern calibration_t CalData_temp;
 
 // Custom classes in the sketch.
 #include "Button.h"

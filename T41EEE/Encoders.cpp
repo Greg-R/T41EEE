@@ -33,7 +33,6 @@ void FilterSetSSB() {
   int32_t filter_change;
   if (filter_pos != last_filter_pos) {  // This decision is required as this function is required to be used in many locations.  KF5N April 21, 2024
     if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) BandInformation();
-    //    tft.fillRect((MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2 - filterWidth, SPECTRUM_TOP_Y + 17, filterWidth, SPECTRUM_HEIGHT - 20, RA8875_BLACK);  // Erase old filter background
     filter_change = (filter_pos - last_filter_pos);
     if (filter_change >= 1) {
       filterWidth--;  // filterWidth is used in graphics only!

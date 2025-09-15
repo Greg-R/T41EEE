@@ -211,7 +211,7 @@ void CenterFastTune() {
 
 
 /*****
-  Purpose: Purpose is to sety VFOA to receive frequency and VFOB to the transmit frequency
+  Purpose: Purpose is to set VFOA to receive frequency and VFOB to the transmit frequency.
 
   Parameter list:
     void

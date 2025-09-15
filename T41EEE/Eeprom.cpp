@@ -13,7 +13,6 @@
 *****/
 void Eeprom::ConfigDataWrite() {
   EEPROM.put(EEPROM_BASE_ADDRESS + 4, ConfigData);
-//  Serial.printf("config write!\n");
 }
 
 
@@ -32,6 +31,21 @@ void Eeprom::ConfigDataRead() {
 
 
 /*****
+  Purpose: This is nothing more than an alias for EEPROM.get(EEPROM_BASE_ADDRESS + 4, ConfigData).
+  This is a version with a different signature.  Used only once, in MenuProc.cpp.
+
+  Parameter list:
+  None
+
+  Return value;
+    void
+*****/
+void Eeprom::ConfigDataRead(config_t configStruct) {
+  EEPROM.get(EEPROM_BASE_ADDRESS + 4, configStruct);  // Read as one large chunk
+}
+
+
+/*****
   Purpose: Write the struct size stored to the EEPROM.
 
   Parameter list:
@@ -40,7 +54,7 @@ void Eeprom::ConfigDataRead() {
   Return value;
     void
 *****/
-void Eeprom::ConfigDataWriteSize(int structSize) {
+void Eeprom::ConfigDataWriteSize(uint32_t structSize) {
   EEPROM.put(EEPROM_BASE_ADDRESS, structSize);  // Read as one large chunk
 }
 
@@ -57,7 +71,6 @@ void Eeprom::ConfigDataWriteSize(int structSize) {
 *****/
 void Eeprom::CalDataWrite() {
   EEPROM.put(CAL_BASE_ADDRESS + 4, CalData);
-//    Serial.printf("cal write!\n");
 }
 
 
@@ -76,6 +89,21 @@ void Eeprom::CalDataRead() {
 
 
 /*****
+  Purpose: This is nothing more than an alias for EEPROM.get(EEPROM_BASE_ADDRESS + 4, ConfigData).
+  This is a version with a different signature.  Used only once, in MenuProc.cpp.
+
+  Parameter list:
+  None
+
+  Return value;
+    void
+*****/
+void Eeprom::CalDataRead(calibration_t calStruct) {
+  EEPROM.get(EEPROM_BASE_ADDRESS + 4, calStruct);  // Read as one large chunk
+}
+
+
+/*****
   Purpose: Write the struct size stored to the EEPROM.
 
   Parameter list:
@@ -84,7 +112,7 @@ void Eeprom::CalDataRead() {
   Return value;
     void
 *****/
-void Eeprom::CalDataWriteSize(int structSize) {
+void Eeprom::CalDataWriteSize(uint32_t structSize) {
   EEPROM.put(CAL_BASE_ADDRESS, structSize);  // Read as one large chunk
 }
 
@@ -128,7 +156,7 @@ void Eeprom::BandsRead() {
   Return value;
     void
 *****/
-void Eeprom::BandsWriteSize(int structSize) {
+void Eeprom::BandsWriteSize(uint32_t structSize) {
   EEPROM.put(BANDS_BASE_ADDRESS, structSize);  // Read as one large chunk
 }
 
@@ -435,5 +463,4 @@ void Eeprom::EEPROMStartup() {
   BandsWriteSize(BandsStackSize);  // Write the size of the bands array to EEPROM.
   BandsWrite();  // Write the bands array to non-volatile memory.
 
-//  Serial.printf("")
 }

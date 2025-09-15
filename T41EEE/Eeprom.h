@@ -16,24 +16,26 @@ public:
 
 void ConfigDataWrite();
 void ConfigDataRead();
-void ConfigDataWriteSize(int structSize);
+void ConfigDataRead(config_t configStruct);
+void ConfigDataWriteSize(uint32_t structSize);
 void CalDataWrite();
 void CalDataRead();
-void CalDataWriteSize(int structSize);
+void CalDataRead(calibration_t calStruct);
+void CalDataWriteSize(uint32_t structSize);
 void BandsWrite();
 void BandsRead();
-void BandsWriteSize(int structSize);
+void BandsWriteSize(uint32_t structSize);
 
 int EEPROMReadSize(uint32_t address);
-void EEPROMStuffFavorites(unsigned long current[]);
+void EEPROMStuffFavorites(uint32_t current[]);
 void SetFavoriteFrequency();
 void GetFavoriteFrequency();
 void CalDataDefaults();
 void ConfigDataDefaults();
 void EEPROMStartup();
 
-//private:
-//const uint32_t EEPROM_BASE_ADDRESS = 0;
-//const uint32_t CAL_BASE_ADDRESS = 1024;
-
+private:
+const uint32_t EEPROM_BASE_ADDRESS = 0;
+const uint32_t CAL_BASE_ADDRESS = 1024;
+const uint32_t BANDS_BASE_ADDRESS = 2048;
 };

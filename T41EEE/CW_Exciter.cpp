@@ -19,7 +19,7 @@ void CW_Exciter::writeSineBuffer(int numCycles) {
   float theta, increment;
   float freqSideTone;
   freqSideTone = static_cast<float>(numCycles) * 48000.0 / 512.0;
-  for (kf = 0, increment = 0.0; kf < 512; increment += 1.0, kf++) {        // Calc: numCycles = 8, 750 hz sine wave.
+  for (kf = 0, increment = 0.0; kf < 512; increment += 1.0, kf++) {  // Calc: numCycles = 8, 750 hz sine wave.
     theta = increment * 2.0 * PI * freqSideTone / 48000.0;
     sineBuffer[kf] = 0.12 * sin(theta);  // Create the CW tone waveform.
   }
@@ -38,18 +38,18 @@ void CW_Exciter::writeSineBuffer(int numCycles) {
 *****/
 void CW_Exciter::CW_ExciterIQData(int shaping)  //AFP 08-20-22
 {
-//  uint32_t N_BLOCKS_EX = N_B_EX;
+  //  uint32_t N_BLOCKS_EX = N_B_EX;
   float32_t powerScale = 0;
-//  q15_t q15_buffer_LTemp[2048];  //KF5N
-//  q15_t q15_buffer_RTemp[256];  //KF5N
+  //  q15_t q15_buffer_LTemp[2048];  //KF5N
+  //  q15_t q15_buffer_RTemp[256];  //KF5N
 
-//  float float_buffer_Sidetone[256];
-//  float float_buffer_cw[256];
+  //  float float_buffer_Sidetone[256];
+  //  float float_buffer_cw[256];
 
 
-// Create CW waveform and play into the SSB transmit signal chain input.
-//  arm_scale_f32(cosBuffer, 0.05, float_buffer_L_EX, 256);  // AFP 10-13-22 Use pre-calculated sin & cos instead of Hilbert
-//  arm_scale_f32(sineBuffer, 0.25, float_buffer_cw, 256);  // AFP 10-13-22
+  // Create CW waveform and play into the SSB transmit signal chain input.
+  //  arm_scale_f32(cosBuffer, 0.05, float_buffer_L_EX, 256);  // AFP 10-13-22 Use pre-calculated sin & cos instead of Hilbert
+  //  arm_scale_f32(sineBuffer, 0.25, float_buffer_cw, 256);  // AFP 10-13-22
 
   if (shaping == CW_SHAPING_RISE) {
     arm_mult_f32(sineBuffer, cwRiseBuffer, float_buffer_cw, 512);
@@ -60,30 +60,30 @@ void CW_Exciter::CW_ExciterIQData(int shaping)  //AFP 08-20-22
   } else {
     arm_scale_f32(sineBuffer, 1.0, float_buffer_cw, 512);
   }
-      //  Interpolate by 2.  Output 512 samples.
-//    arm_fir_interpolate_f32(&FIR_int1_EX_I, float_buffer_cw, float_buffer_temp_cw, 256);
+  //  Interpolate by 2.  Output 512 samples.
+  //    arm_fir_interpolate_f32(&FIR_int1_EX_I, float_buffer_cw, float_buffer_temp_cw, 256);
 
-    // interpolation-by-4,  Output 2048 samples.
-//    arm_fir_interpolate_f32(&FIR_int2_EX_I, float_buffer_LTemp, float_buffer_cw, 512);
-cwToneData.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
-// cwToneData.setBehaviour(AudioPlayQueue_F32::NON_STALLING); 
-    cwToneData.setMaxBuffers(4);
-//    cwToneData.play(float_buffer_temp_cw, 512);           // Push CW waveform into SSB transmitter input.
-    cwToneData.play(float_buffer_cw, 512);           // Push CW waveform into SSB transmitter input.
+  // interpolation-by-4,  Output 2048 samples.
+  //    arm_fir_interpolate_f32(&FIR_int2_EX_I, float_buffer_LTemp, float_buffer_cw, 512);
+  cwToneData.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
+  // cwToneData.setBehaviour(AudioPlayQueue_F32::NON_STALLING);
+  cwToneData.setMaxBuffers(4);
+  //    cwToneData.play(float_buffer_temp_cw, 512);           // Push CW waveform into SSB transmitter input.
+  cwToneData.play(float_buffer_cw, 512);  // Push CW waveform into SSB transmitter input.
 
-//    arm_float_to_q15(float_buffer_temp_cw, q15_buffer_Sidetone, 512);
-// Make Q15 data for CW sidetone.
-    arm_float_to_q15(float_buffer_cw, q15_buffer_Sidetone, 512);
+  //    arm_float_to_q15(float_buffer_temp_cw, q15_buffer_Sidetone, 512);
+  // Make Q15 data for CW sidetone.
+  arm_float_to_q15(float_buffer_cw, q15_buffer_Sidetone, 512);
 
-    Q_out_L.setBehaviour(AudioPlayQueue::NON_STALLING);
-//    Q_out_L.setBehaviour(AudioPlayQueue::ORIGINAL);
-//    Q_out_L.setMaxBuffers(64);
-//    Q_out_L.play(q15_buffer_Sidetone, 128);                // CW sidetone.  Connected to receiver audio path during transmit.
+  Q_out_L.setBehaviour(AudioPlayQueue::NON_STALLING);
+  //    Q_out_L.setBehaviour(AudioPlayQueue::ORIGINAL);
+  //    Q_out_L.setMaxBuffers(64);
+  //    Q_out_L.play(q15_buffer_Sidetone, 128);                // CW sidetone.  Connected to receiver audio path during transmit.
 
-//Serial.printf("CW Exciter %d\n", shaping);
+  //Serial.printf("CW Exciter %d\n", shaping);
 
   //  Need to have a sidetone which is independent of any scaling.  Re-use float_bufferL/RTemp and Q_out_L/Q_out_R buffers.
-////  arm_scale_f32(float_buffer_L_EX, 20, float_buffer_Sidetone, 256);
+  ////  arm_scale_f32(float_buffer_L_EX, 20, float_buffer_Sidetone, 256);
 
 
   /**********************************************************************************  AFP 12-31-20
@@ -114,79 +114,78 @@ cwToneData.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
 //      Q_in_R_Ex.freeBuffer();  // Right channel not used.  KF5N March 11, 2024
 //    }
 */
-  float float_buffer_i[512] = {0.0};
-  float float_buffer_q[512] = {0.0};
+  float float_buffer_i[512] = { 0.0 };
+  float float_buffer_q[512] = { 0.0 };
 
-//arm_q15_to_float(Q_in_L_Ex.readBuffer(), &float_buffer_L_EX[BUFFER_SIZE * i], BUFFER_SIZE);  // convert int_buffer to float 32bit
-//arm_q15_to_float(Q_in_R_Ex.readBuffer(), &float_buffer_R_EX[BUFFER_SIZE * i], BUFFER_SIZE);  // Right channel not used.  KF5N March 11, 2024
+  //arm_q15_to_float(Q_in_L_Ex.readBuffer(), &float_buffer_L_EX[BUFFER_SIZE * i], BUFFER_SIZE);  // convert int_buffer to float 32bit
+  //arm_q15_to_float(Q_in_R_Ex.readBuffer(), &float_buffer_R_EX[BUFFER_SIZE * i], BUFFER_SIZE);  // Right channel not used.  KF5N March 11, 2024
 
-//Serial.printf("BEFORE Q_in_L_Ex.available = %d\n", Q_in_L_Ex.available());
+  //Serial.printf("BEFORE Q_in_L_Ex.available = %d\n", Q_in_L_Ex.available());
 
-if(Q_in_L_Ex.available() > 3 and Q_in_R_Ex.available() > 3) {
-  for(int i = 0; i < 4; i = i + 1) {
- arm_q15_to_float(Q_in_L_Ex.readBuffer(), &float_buffer_i[128 * i], 128);  // convert int_buffer to float 32bit
- arm_q15_to_float(Q_in_R_Ex.readBuffer(), &float_buffer_q[128 * i], 128);
-Q_in_L_Ex.freeBuffer();
-Q_in_R_Ex.freeBuffer();
-  }
-}
-else return;
-//arm_q15_to_float(Q_in_R_Ex.readBuffer(), float_buffer_q, 128);  // Right channel not used.  KF5N March 11, 2024
+  if (Q_in_L_Ex.available() > 3 and Q_in_R_Ex.available() > 3) {
+    for (int i = 0; i < 4; i = i + 1) {
+      arm_q15_to_float(Q_in_L_Ex.readBuffer(), &float_buffer_i[128 * i], 128);  // convert int_buffer to float 32bit
+      arm_q15_to_float(Q_in_R_Ex.readBuffer(), &float_buffer_q[128 * i], 128);
+      Q_in_L_Ex.freeBuffer();
+      Q_in_R_Ex.freeBuffer();
+    }
+  } else return;
+  //arm_q15_to_float(Q_in_R_Ex.readBuffer(), float_buffer_q, 128);  // Right channel not used.  KF5N March 11, 2024
 
-//Serial.printf("AFTER Q_in_L_Ex.available = %d\n", Q_in_L_Ex.available());
+  //Serial.printf("AFTER Q_in_L_Ex.available = %d\n", Q_in_L_Ex.available());
 
-    // Set the sideband.
-    if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) cessb1.setSideband(false);
-    if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) cessb1.setSideband(true);
+  // Set the sideband.
+  if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) cessb1.setSideband(false);
+  if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) cessb1.setSideband(true);
 
     // Apply amplitude and phase corrections.  FT8 uses CW corrections and is always USB.
 
     //  THIS NEEDS TO BE DONE EARLIER!  Moved to AudioSignal.h.
 
-//    if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-//    cessb1.setIQCorrections(true, CalData.IQSSBAmpCorrectionFactorLSB[ConfigData.currentBand], CalData.IQSSBPhaseCorrectionFactorLSB[ConfigData.currentBand], 0.0);
-//    } else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-//    cessb1.setIQCorrections(true, CalData.IQSSBAmpCorrectionFactorUSB[ConfigData.currentBand], CalData.IQSSBPhaseCorrectionFactorUSB[ConfigData.currentBand], 0.0);
-//    }
+    //    if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
+    //    cessb1.setIQCorrections(true, CalData.IQSSBAmpCorrectionFactorLSB[ConfigData.currentBand], CalData.IQSSBPhaseCorrectionFactorLSB[ConfigData.currentBand], 0.0);
+    //    } else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
+    //    cessb1.setIQCorrections(true, CalData.IQSSBAmpCorrectionFactorUSB[ConfigData.currentBand], CalData.IQSSBPhaseCorrectionFactorUSB[ConfigData.currentBand], 0.0);
+    //    }
 
     //  This is the correct place in the data flow to inject the scaling for power.
 #ifdef QSE2
-    powerScale = 2.0 * ConfigData.powerOutCW[ConfigData.currentBand];
+  powerScale = 2.0 * ConfigData.powerOutCW[ConfigData.currentBand];
 #else
-    powerScale = 1.4 * ConfigData.powerOutCW[ConfigData.currentBand];
+  powerScale = 1.4 * ConfigData.powerOutCW[ConfigData.currentBand];
 #endif
 
-    arm_scale_f32(float_buffer_i, powerScale, float_buffer_i, 512);
-    arm_scale_f32(float_buffer_q, powerScale, float_buffer_q, 512);
+  arm_scale_f32(float_buffer_i, powerScale, float_buffer_i, 512);
+  arm_scale_f32(float_buffer_q, powerScale, float_buffer_q, 512);
 
-    // **********************************************************************************  AFP 12-31-20
-    //  CONVERT TO INTEGER AND PLAY AUDIO
-    // **********************************************************************************
-    q15_t q15_buffer_LTemp[512] {0};  // KF5N
-    q15_t q15_buffer_RTemp[512] {0};  // KF5N
+  // **********************************************************************************  AFP 12-31-20
+  //  CONVERT TO INTEGER AND PLAY AUDIO
+  // **********************************************************************************
+  q15_t q15_buffer_LTemp[512]{ 0 };  // KF5N
+  q15_t q15_buffer_RTemp[512]{ 0 };  // KF5N
 
 
-    arm_float_to_q15(float_buffer_i, q15_buffer_LTemp, 512);
-    arm_float_to_q15(float_buffer_q, q15_buffer_RTemp, 512);
+  arm_float_to_q15(float_buffer_i, q15_buffer_LTemp, 512);
+  arm_float_to_q15(float_buffer_q, q15_buffer_RTemp, 512);
 #ifdef QSE2
-//    if(bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE) {
-    arm_offset_q15(q15_buffer_LTemp, CalData.iDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_LTemp, 512);  // Carrier suppression offset.
-    arm_offset_q15(q15_buffer_RTemp, CalData.qDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_RTemp, 512);
+  //    if(bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE) {
+  arm_offset_q15(q15_buffer_LTemp, CalData.iDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_LTemp, 512);  // Carrier suppression offset.
+  arm_offset_q15(q15_buffer_RTemp, CalData.qDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_RTemp, 512);
 //    } else if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) {
 //    arm_offset_q15(q15_buffer_LTemp, CalData.iDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_LTemp, 2048);  // Carrier suppression offset.
-//    arm_offset_q15(q15_buffer_RTemp, CalData.qDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_RTemp, 2048);      
+//    arm_offset_q15(q15_buffer_RTemp, CalData.qDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_RTemp, 2048);
 //    }
 #endif
-//  Q_out_L_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
-//  Q_out_R_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
+  //  Q_out_L_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
+  //  Q_out_R_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
   Q_out_L_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
   Q_out_R_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
-    Q_out_L_Ex.play(q15_buffer_LTemp, 512);  // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
-    Q_out_R_Ex.play(q15_buffer_RTemp, 512);  // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.
+  Q_out_L_Ex.play(q15_buffer_LTemp, 512);  // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
+  Q_out_R_Ex.play(q15_buffer_RTemp, 512);  // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.
 
-    Q_out_L.play(q15_buffer_Sidetone, 512);
+  Q_out_L.play(q15_buffer_Sidetone, 512);
 
-/*  This is the correct place in the data stream to inject the scaling for power.
+  /*  This is the correct place in the data stream to inject the scaling for power.
 #ifdef QSE2
   powerScale = 40.0 * ConfigData.powerOutCW[ConfigData.currentBand];
 #else

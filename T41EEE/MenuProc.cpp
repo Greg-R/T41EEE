@@ -141,13 +141,13 @@ void CalibrateOptions() {
       txcalibrater.DoXmitCarrierCalibrate(1, false, false, true);
       break;
 
-    case 8:                                               // SSB Transmit cal
+    case 8:                                                 // SSB Transmit cal
       txcalibrater.DoXmitCalibrate(1, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
       break;
 
     case 9:  // CW fully automatic radio calibration.  (mode, initial cal = false, refinecal = true)
-     txcalibrater.RadioCal(0, false);
-     calibrateFlag = 0;
+      txcalibrater.RadioCal(0, false);
+      calibrateFlag = 0;
       break;
 
     case 10:  // CW full automatic calibration refinement.
@@ -229,18 +229,18 @@ void CalibrateOptions() {
       break;
 
     case 18:  // Cancelled choice
-//      RedrawDisplayScreen();
-//      currentFreq = TxRxFreq = ConfigData.centerFreq + NCOFreq;
-//      DrawBandWidthIndicatorBar();  // AFP 10-20-22
-//      ShowFrequency();
-//      BandInformation();
+              //      RedrawDisplayScreen();
+              //      currentFreq = TxRxFreq = ConfigData.centerFreq + NCOFreq;
+              //      DrawBandWidthIndicatorBar();  // AFP 10-20-22
+              //      ShowFrequency();
+              //      BandInformation();
       calibrateFlag = 0;
       break;
 
     default:
       break;
   }
-//  UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
+  //  UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
 }
 #else  // Not using QSE2 (No carrier calibration)
 void CalibrateOptions() {
@@ -290,14 +290,14 @@ void CalibrateOptions() {
 
       break;
 
-    case 2:                                                    // CW IQ Receive Cal - Gain and Phase
+    case 2:                                                   // CW IQ Receive Cal - Gain and Phase
       RxCalibrate.DoReceiveCalibrate(0, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
-                                                               //      eeprom.CalDataWrite();                             // Save calibration numbers and configuration.  KF5N August 12, 2023
+                                                              //      eeprom.CalDataWrite();                             // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
-    case 3:                                                 // CW IQ Transmit Cal - Gain and Phase  //AFP 2-21-23
+    case 3:                                                // CW IQ Transmit Cal - Gain and Phase  //AFP 2-21-23
       RxCalibrate.DoXmitCalibrate(0, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
-                                                            //      eeprom.CalDataWrite();                          // Save calibration numbers and configuration.  KF5N August 12, 2023
+                                                           //      eeprom.CalDataWrite();                          // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 4:  // SSB PA Cal
@@ -315,14 +315,14 @@ void CalibrateOptions() {
 
       break;  // Missing break.  KF5N August 12, 2023
 
-    case 5:                                                    // SSB IQ Receive Cal - Gain and Phase
+    case 5:                                                   // SSB IQ Receive Cal - Gain and Phase
       RxCalibrate.DoReceiveCalibrate(1, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
-                                                               //      eeprom.CalDataWrite();                             // Save calibration numbers and configuration.  KF5N August 12, 2023
+                                                              //      eeprom.CalDataWrite();                             // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 6:
       TxCalibrater.DoXmitCalibrate(false, false, true);  // SSB Transmit cal
-                                                          //      eeprom.CalDataWrite();                        // Save calibration numbers and configuration.  KF5N August 12, 2023
+                                                         //      eeprom.CalDataWrite();                        // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 7:  //  CW fully automatic radio calibration.
@@ -367,8 +367,8 @@ void CalibrateOptions() {
       SaveAnalogSwitchValues();
       calibrateFlag = 0;
       RedrawDisplayScreen();
-//      ShowFrequency();
-//      DrawFrequencyBarValue();
+      //      ShowFrequency();
+      //      DrawFrequencyBarValue();
       eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
@@ -654,10 +654,11 @@ void ProcessEqualizerChoices(int EQType, char *title) {
   for (iFreq = 0; iFreq < EQUALIZER_CELL_COUNT; iFreq++) {
     tft.fillRect(xOrigin + (barWidth + 4) * iFreq, barTopY - (yLevel[iFreq] - DEFAULT_EQUALIZER_BAR), barWidth, yLevel[iFreq], RA8875_CYAN);
     tft.setCursor(xOrigin + (barWidth + 4) * iFreq, yOrigin + high - tft.getFontHeight() * 2);
-    if (EQType == 0) tft.print(rXeqFreq[iFreq].c_str()); else tft.print(tXeqFreq[iFreq].c_str());
+    if (EQType == 0) tft.print(rXeqFreq[iFreq].c_str());
+    else tft.print(tXeqFreq[iFreq].c_str());
     tft.setCursor(xOrigin + (barWidth + 4) * iFreq + tft.getFontWidth() * 1.5, yOrigin + high + tft.getFontHeight() * 2);
-if (EQType == 0) tft.print(yLevel[iFreq]);
-if (EQType == 1) tft.print(ConfigData.equalizerXmt[iFreq]);
+    if (EQType == 0) tft.print(yLevel[iFreq]);
+    if (EQType == 1) tft.print(ConfigData.equalizerXmt[iFreq]);
   }
 
   columnIndex = 0;  // Get ready to set values for columns
@@ -684,22 +685,23 @@ if (EQType == 1) tft.print(ConfigData.equalizerXmt[iFreq]);
         tft.fillRect(xOffset,                    // Indent to proper bar...
                      barBottomY - newValue - 1,  // Start at red line
                      barWidth,                   // Set bar width
-                     yLevel[columnIndex] + 1,               // Erase old bar
+                     yLevel[columnIndex] + 1,    // Erase old bar
                      RA8875_BLACK);
-//        newValue += (PIXELS_PER_EQUALIZER_DELTA * filterEncoderMove);  // Find new bar height. OK since filterEncoderMove equals 1 or -1. PIXELS_PER_EQUALIZER_DELTA = 10
-          yLevel[columnIndex] += (PIXELS_PER_EQUALIZER_DELTA * filterEncoderMove);
-        tft.fillRect(xOffset,                                          // Indent to proper bar...
-                     barBottomY - yLevel[columnIndex],                            // Start at red line
-                     barWidth,                                         // Set bar width
-                     yLevel[columnIndex],                                         // Draw new bar
+        //        newValue += (PIXELS_PER_EQUALIZER_DELTA * filterEncoderMove);  // Find new bar height. OK since filterEncoderMove equals 1 or -1. PIXELS_PER_EQUALIZER_DELTA = 10
+        yLevel[columnIndex] += (PIXELS_PER_EQUALIZER_DELTA * filterEncoderMove);
+        tft.fillRect(xOffset,                           // Indent to proper bar...
+                     barBottomY - yLevel[columnIndex],  // Start at red line
+                     barWidth,                          // Set bar width
+                     yLevel[columnIndex],               // Draw new bar
                      RA8875_MAGENTA);
-//        yLevel[columnIndex] = newValue;
+        //        yLevel[columnIndex] = newValue;
 
         tft.fillRect(xOffset + tft.getFontWidth() * 1.5 - 1, yOrigin + high + tft.getFontHeight() * 2,  // Update bottom number
                      barWidth, CHAR_HEIGHT, RA8875_BLACK);
         tft.setCursor(xOffset + tft.getFontWidth() * 1.5, yOrigin + high + tft.getFontHeight() * 2);
-        if(EQType == 0) tft.print(yLevel[columnIndex]); else tft.print((yLevel[columnIndex] - 100) / 10);
-        if (yLevel[columnIndex] < DEFAULT_EQUALIZER_BAR) {  // Repaint red center line if erased
+        if (EQType == 0) tft.print(yLevel[columnIndex]);
+        else tft.print((yLevel[columnIndex] - 100) / 10);
+        if (yLevel[columnIndex] < DEFAULT_EQUALIZER_BAR) {                             // Repaint red center line if erased
           tft.drawFastHLine(xOrigin - 4, yOrigin + (high / 2), wide + 4, RA8875_RED);  // Clear hole in display center
         }
       }
@@ -764,7 +766,7 @@ void EqualizerRecOptions() {
       break;
   }
   eeprom.ConfigDataWrite();
-//  RedrawDisplayScreen();
+  //  RedrawDisplayScreen();
   UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
 }
 
@@ -798,7 +800,7 @@ void EqualizerXmtOptions() {
       break;
   }
   eeprom.ConfigDataWrite();
-//  RedrawDisplayScreen();
+  //  RedrawDisplayScreen();
   UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
 }
 
@@ -827,14 +829,14 @@ void SSBOptions()  // AFP 09-22-22 All new
     case 0:  // CESSB on
       ConfigData.cessb = true;
       cessb1.setProcessing(ConfigData.cessb);
-//      Serial.printf("processing = %d", cessb1.getProcessing());
+      //      Serial.printf("processing = %d", cessb1.getProcessing());
       BandInformation();
       break;
 
     case 1:  // SSB Data on
       ConfigData.cessb = false;
       cessb1.setProcessing(ConfigData.cessb);
-//      Serial.printf("processing = %d", cessb1.getProcessing());
+      //      Serial.printf("processing = %d", cessb1.getProcessing());
       BandInformation();
       break;
 
@@ -870,27 +872,27 @@ void SSBOptions()  // AFP 09-22-22 All new
 
     case 8:  // IMD test.  This is a self-contained loop which uses the SSB exciter.
 
-  radioState = RadioState::SSB_IM3TEST_STATE;
-bands.bands[ConfigData.currentBand].mode = RadioMode::SSB_MODE;
-  SetAudioOperatingState(radioState);
+      radioState = RadioState::SSB_IM3TEST_STATE;
+      bands.bands[ConfigData.currentBand].mode = RadioMode::SSB_MODE;
+      SetAudioOperatingState(radioState);
       button.ExecuteModeChange();
-  SetFreq();
-  digitalWrite(RXTX, HIGH);  //xmit on
-  ShowTransmitReceiveStatus();
+      SetFreq();
+      digitalWrite(RXTX, HIGH);  //xmit on
+      ShowTransmitReceiveStatus();
 
-      while(menu != MenuSelect::MENU_OPTION_SELECT) {
-      menu = readButton();  // Use this to quit.
-      // Return IMD amplitude in dB.
-      imdAmplitudedB = GetEncoderValueLive(0.0, 100.0, imdAmplitudedB, 1.0, micChoices[8], false);
-      imdAmplitude = volumeLog[static_cast<int>(imdAmplitudedB)];
-      toneSSBCal1.amplitude(imdAmplitude);
-      toneSSBCal2.amplitude(imdAmplitude);
+      while (menu != MenuSelect::MENU_OPTION_SELECT) {
+        menu = readButton();  // Use this to quit.
+        // Return IMD amplitude in dB.
+        imdAmplitudedB = GetEncoderValueLive(0.0, 100.0, imdAmplitudedB, 1.0, micChoices[8], false);
+        imdAmplitude = volumeLog[static_cast<int>(imdAmplitudedB)];
+        toneSSBCal1.amplitude(imdAmplitude);
+        toneSSBCal2.amplitude(imdAmplitude);
         ExciterIQData();
-  }
-    radioState = RadioState::SSB_RECEIVE_STATE;
+      }
+      radioState = RadioState::SSB_RECEIVE_STATE;
       digitalWrite(RXTX, LOW);  // Transmitter off.
       SetAudioOperatingState(radioState);
-          button.ExecuteModeChange();
+      button.ExecuteModeChange();
       ShowTransmitReceiveStatus();
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // A button press?
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Exit.
@@ -934,7 +936,7 @@ void RFOptions() {
       // powerOutCW and powerOutSSB must be updated.
       initPowerCoefficients();
       eeprom.ConfigDataWrite();  //AFP 10-21-22
-//      BandInformation();
+                                 //      BandInformation();
       ShowCurrentPowerSetting();
       break;
 
@@ -1082,23 +1084,23 @@ void VFOSelect() {
       break;
   }
   bands.bands[ConfigData.currentBand].freq = TxRxFreq;
-//  SetBand();           // KF5N July 12, 2023
+  //  SetBand();           // KF5N July 12, 2023
   SetBandRelay();  // Required when switching VFOs. KF5N July 12, 2023
   SetFreq();
-//  RedrawDisplayScreen();
-//  BandInformation();
-//  ShowBandwidth();
+  //  RedrawDisplayScreen();
+  //  BandInformation();
+  //  ShowBandwidth();
   FilterBandwidth();
   tft.fillRect(FREQUENCY_X_SPLIT, FREQUENCY_Y - 12, VFOB_PIXEL_LENGTH, FREQUENCY_PIXEL_HI, RA8875_BLACK);  // delete old digit
   tft.fillRect(FREQUENCY_X, FREQUENCY_Y - 12, VFOA_PIXEL_LENGTH, FREQUENCY_PIXEL_HI, RA8875_BLACK);        // delete old digit  tft.setFontScale( (enum RA8875tsize) 0);
-//  ShowFrequency();
+                                                                                                           //  ShowFrequency();
   // Draw or not draw CW filter graphics to audio spectrum area.  KF5N July 30, 2023
   tft.writeTo(L2);
   tft.clearMemory();
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) BandInformation();
-//  DrawBandWidthIndicatorBar();
-//  DrawFrequencyBarValue();
-//  UpdateAudioGraphics();
+  //  DrawBandWidthIndicatorBar();
+  //  DrawFrequencyBarValue();
+  //  UpdateAudioGraphics();
 }
 
 
@@ -1136,7 +1138,7 @@ void ConfigDataOptions() {  //           0               1                2     
       break;
 
     case 4:                                                      // Copy ConfigData->SD.
-      EEPROM.get(EEPROM_BASE_ADDRESS + 4, tempConfig);           // Read as one large chunk
+      eeprom.ConfigDataRead(tempConfig);                         // Read as one large chunk
       json.saveConfiguration(configFilename, tempConfig, true);  // Save ConfigData struct to SD
       break;
 
@@ -1154,9 +1156,10 @@ void ConfigDataOptions() {  //           0               1                2     
       {
         Serial.println(F("\nBegin ConfigData from ConfigData"));
         // Don't want to overwrite the stack.  Need a temporary struct, read the ConfigData data into that.
-        config_t ConfigData_temp;
-        EEPROM.get(EEPROM_BASE_ADDRESS + 4, ConfigData_temp);
-        json.saveConfiguration(configFilename, ConfigData_temp, false);  // Write the temporary struct to the serial monitor.
+        //  config_t ConfigData_temp;
+        //  EEPROM.get(EEPROM_BASE_ADDRESS + 4, ConfigData_temp);
+        eeprom.ConfigDataRead(tempConfig);
+        json.saveConfiguration(configFilename, tempConfig, false);  // Write the temporary struct to the serial monitor.
         Serial.println(F("\nEnd ConfigData from ConfigData\n"));
       }
       break;
@@ -1211,8 +1214,9 @@ void CalDataOptions() {  //           0               1                2        
       eeprom.CalDataDefaults();  // Restore defaults to CalData struct and refresh display.
       break;
 
-    case 2:                                              // Copy CalData->SD.
-      EEPROM.get(CAL_BASE_ADDRESS + 4, tempCal);         // Read as one large chunk
+    case 2:  // Copy CalData->SD.
+             //      EEPROM.get(CAL_BASE_ADDRESS + 4, tempCal);         // Read as one large chunk
+      eeprom.CalDataRead(tempCal);
       json.saveCalibration(calFilename, tempCal, true);  // Save ConfigData struct to SD
       break;
 
@@ -1230,9 +1234,10 @@ void CalDataOptions() {  //           0               1                2        
       {
         Serial.println(F("\nBegin CalData from CalData"));
         // Don't want to overwrite the stack.  Need a temporary struct, read the CalData data into that.
-        calibration_t CalData_temp;
-        EEPROM.get(CAL_BASE_ADDRESS + 4, CalData_temp);
-        json.saveCalibration(calFilename, CalData_temp, false);  // Write the temporary struct to the serial monitor.
+        //        calibration_t CalData_temp;
+        //        EEPROM.get(CAL_BASE_ADDRESS + 4, CalData_temp);
+        eeprom.CalDataRead(tempCal);
+        json.saveCalibration(calFilename, tempCal, false);  // Write the temporary struct to the serial monitor.
         Serial.println(F("\nEnd CalData from CalData\n"));
       }
       break;

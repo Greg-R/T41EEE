@@ -6,7 +6,7 @@ const float sample_rate_Hz = 48000.0f;
 const int audio_block_samples = 128;  // Always 128
 AudioSettings_F32 audio_settings(sample_rate_Hz, audio_block_samples);
 AudioInputI2SQuad i2s_quadIn;  // 4 inputs/outputs available only in Teensy audio and not Open Audio library.
-AudioOutputI2SQuad i2s_quadOut;
+AudioOutputI2SQuad i2s_quadOut;  // Restricted to 16 bits; this is a problem for volume control.
 
 // Transmitter
 AudioControlSGTL5000 sgtl5000_1;                                                  // Controller for the Teensy Audio Adapter.
@@ -16,7 +16,6 @@ AudioFilterEqualizer_F32 txEqualizer(audio_settings);
 AudioEffectCompressor2_F32 compressor1;  // Open Audio Compressor
 radioCESSB_Z_transmit_F32 cessb1;
 AudioConvert_F32toI16 float2Int1_tx, float2Int2_tx;  // Converts Float to Int16.  See class in AudioStream_F32.h
-////AudioSwitch4_OA_F32 switch1_tx, switch2_tx, switch3_tx, switch4_tx, switch5_tx;
 AudioSwitch4_OA_F32 switch1_tx, switch3_tx, switch4_tx;
 AudioMixer4_F32 mixer1_tx, mixer2_tx, mixer3_tx;  // Used to switch in tone during calibration.
 AudioSynthWaveformSine_F32 toneSSBCal1, toneSSBCal2; // Tones for SSB calibration and IMD testing.
@@ -197,7 +196,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       Q_in_R_Ex.end();   // Transmit Q channel path.
       Q_in_L_Ex.clear();
       Q_in_R_Ex.clear();
-      // Deactivate TX audio output path.
+      // Deactivate TX audio output path.  This disconnects from i2s_quadOut ports 0 and 1,
+      // which are- used by headphones during receive.
       connect19.disconnect();
       connect20.disconnect();
       // Connect audio paths

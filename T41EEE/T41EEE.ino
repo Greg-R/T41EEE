@@ -8,6 +8,8 @@
 const char *configFilename = "/config.txt";    // <- SD library uses 8.3 filenames
 const char *calFilename = "/calibration.txt";  // <- SD library uses 8.3 filenames
 
+extern const int32_t SPECTRUM_RES {512};
+
 struct maps myMapFiles[10] = {
   { "Cincinnati.bmp", 39.07466, -84.42677 },  // Map name and coordinates for QTH
   { "Denver.bmp", 39.61331, -105.01664 },
