@@ -6,8 +6,8 @@ const float sample_rate_Hz = 48000.0f;
 const int audio_block_samples = 128;  // Always 128
 AudioSettings_F32 audio_settings(sample_rate_Hz, audio_block_samples);
 AudioInputI2SQuad i2s_quadIn;  // 4 inputs/outputs available only in Teensy audio and not Open Audio library.
-AudioOutputI2SQuad i2s_quadOut;  // Restricted to 16 bits; this is a problem for volume control.
-//AudioOutputI2SQuad_F32 i2s_quadOut_f32;
+//AudioOutputI2SQuad i2s_quadOut;  // Restricted to 16 bits; this is a problem for volume control.
+AudioOutputI2SQuad_F32 i2s_quadOut_f32;
 
 // Transmitter
 AudioControlSGTL5000 sgtl5000_1;                                                  // Controller for the Teensy Audio Adapter.
@@ -66,8 +66,10 @@ AudioConnection connect17(float2Int1_tx, 0, Q_in_L_Ex, 0);  // Stream I and Q in
 AudioConnection connect18(float2Int2_tx, 0, Q_in_R_Ex, 0);
 
 // Transmitter back-end.  This takes streaming data from the sketch and drives it into the I2S.
-AudioConnection connect19(Q_out_L_Ex, 0, i2s_quadOut, 0);  // I channel to line out
-AudioConnection connect20(Q_out_R_Ex, 0, i2s_quadOut, 1);  // Q channel to line out
+//AudioConnection connect19(Q_out_L_Ex, 0, i2s_quadOut, 0);  // I channel to line out
+//AudioConnection connect20(Q_out_R_Ex, 0, i2s_quadOut, 1);  // Q channel to line out
+AudioConnection connect19(Q_out_L_Ex, 0, i2s_quadOut_f32, 0);  // I channel to line out
+AudioConnection connect20(Q_out_R_Ex, 0, i2s_quadOut_f32, 1);  // Q channel to line out
 
 // Receiver data flow
 AudioEffectCompressor2_F32 compressor2_1;  // Used for audio AGC.
@@ -102,15 +104,18 @@ AudioConnection_F32 patchCord8(compGain, 0, mixer4, 1);
 AudioConnection_F32 patchCord9(mixer4, 0, speakerScale, 0);  // speakerScale is used to adjust for different audio amplifier gains.
 AudioConnection_F32 patchCord10(speakerScale, 0, speakerVolume, 0);
 AudioConnection_F32 patchCord11(speakerVolume, 0, float2Int3, 0);
-AudioConnection patchCord12(float2Int3, 0, i2s_quadOut, 2);  //  Speaker audio to PCM5102 via Teensy pin 32.
+//AudioConnection patchCord12(float2Int3, 0, i2s_quadOut, 2);  //  Speaker audio to PCM5102 via Teensy pin 32.
+AudioConnection patchCord12(float2Int3, 0, i2s_quadOut_f32, 2);  //  Speaker audio to PCM5102 via Teensy pin 32.
 
 // Headphone path
 AudioConnection_F32 patchCord13(mixer4, 0, headphoneScale, 0);  // headphoneScale is user centering of headphone volume.
 AudioConnection_F32 patchCord14(headphoneScale, 0, headphoneVolume, 0);
 AudioConnection_F32 patchCord15(headphoneVolume, 0, float2Int4, 0);
 
-AudioConnection patchCord25(float2Int4, 0, i2s_quadOut, 0);  // Headphone
-AudioConnection patchCord26(float2Int4, 0, i2s_quadOut, 1);  // Headphone
+//AudioConnection patchCord25(float2Int4, 0, i2s_quadOut, 0);  // Headphone
+//AudioConnection patchCord26(float2Int4, 0, i2s_quadOut, 1);  // Headphone
+AudioConnection patchCord25(float2Int4, 0, i2s_quadOut_f32, 0);  // Headphone
+AudioConnection patchCord26(float2Int4, 0, i2s_quadOut_f32, 1);  // Headphone
 
 // Half-octave transmit band equalizer, 16 bands, but only the lower 14 are used.
 float32_t fBand1[] = { 50.0, 70.711, 100.0, 141.421, 200.0, 282.843, 400.0, 565.685, 800.0, 1131.371, 1600.0, 2262.742, 3200.0, 4525.483, 6400.0, 24000.0 };
