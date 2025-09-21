@@ -161,16 +161,16 @@ void CW_Exciter::CW_ExciterIQData(int shaping)  //AFP 08-20-22
   // **********************************************************************************  AFP 12-31-20
   //  CONVERT TO INTEGER AND PLAY AUDIO
   // **********************************************************************************
-  q15_t q15_buffer_LTemp[512]{ 0 };  // KF5N
-  q15_t q15_buffer_RTemp[512]{ 0 };  // KF5N
+////  q15_t q15_buffer_LTemp[512]{ 0 };  // KF5N
+////  q15_t q15_buffer_RTemp[512]{ 0 };  // KF5N
 
 
-  arm_float_to_q15(float_buffer_i, q15_buffer_LTemp, 512);
-  arm_float_to_q15(float_buffer_q, q15_buffer_RTemp, 512);
+////  arm_float_to_q15(float_buffer_i, q15_buffer_LTemp, 512);
+////  arm_float_to_q15(float_buffer_q, q15_buffer_RTemp, 512);
 #ifdef QSE2
   //    if(bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE) {
-  arm_offset_q15(q15_buffer_LTemp, CalData.iDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_LTemp, 512);  // Carrier suppression offset.
-  arm_offset_q15(q15_buffer_RTemp, CalData.qDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_RTemp, 512);
+////  arm_offset_q15(q15_buffer_LTemp, CalData.iDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_LTemp, 512);  // Carrier suppression offset.
+////  arm_offset_q15(q15_buffer_RTemp, CalData.qDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_RTemp, 512);
 //    } else if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) {
 //    arm_offset_q15(q15_buffer_LTemp, CalData.iDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_LTemp, 2048);  // Carrier suppression offset.
 //    arm_offset_q15(q15_buffer_RTemp, CalData.qDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_RTemp, 2048);
@@ -178,10 +178,12 @@ void CW_Exciter::CW_ExciterIQData(int shaping)  //AFP 08-20-22
 #endif
   //  Q_out_L_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
   //  Q_out_R_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
-  Q_out_L_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
-  Q_out_R_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
-  Q_out_L_Ex.play(q15_buffer_LTemp, 512);  // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
-  Q_out_R_Ex.play(q15_buffer_RTemp, 512);  // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.
+  Q_out_L_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
+  Q_out_R_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
+////  Q_out_L_Ex.play(q15_buffer_LTemp, 512);  // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
+////  Q_out_R_Ex.play(q15_buffer_RTemp, 512);  // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.
+  Q_out_L_Ex.play(float_buffer_i, 512);  // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
+////  Q_out_R_Ex.play(float_buffer_q, 512);  // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.
 
   Q_out_L.play(q15_buffer_Sidetone, 512);
 

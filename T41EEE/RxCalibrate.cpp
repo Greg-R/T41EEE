@@ -741,6 +741,7 @@ void RxCalibrate::MakeFFTData() {
   arm_float_to_q15(float_buffer_L_EX, q15_buffer_LTemp, 2048);
   arm_float_to_q15(float_buffer_R_EX, q15_buffer_RTemp, 2048);
 
+/* Temporarily bypass.
 #ifdef QSE2
   if (mode == 0) {
     arm_offset_q15(q15_buffer_LTemp, CalData.iDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_LTemp, 2048);
@@ -751,10 +752,13 @@ void RxCalibrate::MakeFFTData() {
     arm_offset_q15(q15_buffer_RTemp, CalData.qDCoffsetSSB[ConfigData.currentBand] + CalData.dacOffsetSSB, q15_buffer_RTemp, 2048);
   }
 #endif
-  Q_out_L_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
-  Q_out_R_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
-  Q_out_L_Ex.play(q15_buffer_LTemp, 2048);
-  Q_out_R_Ex.play(q15_buffer_RTemp, 2048);
+*/
+  Q_out_L_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
+  Q_out_R_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
+//  Q_out_L_Ex.play(q15_buffer_LTemp, 2048);
+//  Q_out_R_Ex.play(q15_buffer_RTemp, 2048);
+  Q_out_L_Ex.play(float_buffer_L_EX, 2048);
+  Q_out_R_Ex.play(float_buffer_R_EX, 2048);
 
 
   // }   // End of transmit code.  Begin receive code.

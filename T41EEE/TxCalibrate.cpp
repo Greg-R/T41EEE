@@ -1186,11 +1186,12 @@ if(mode == 1)    powerScale = 1.4 * ConfigData.powerOutSSB[ConfigData.currentBan
     arm_scale_f32(float_buffer_L_EX, powerScale, float_buffer_L_EX, dataWidth);
     arm_scale_f32(float_buffer_R_EX, powerScale, float_buffer_R_EX, dataWidth);
 
-    /**********************************************************************************  AFP 12-31-20
+/* Temporarily bypass ***************************************************************************  AFP 12-31-20
       CONVERT TO INTEGER AND PLAY AUDIO
-    **********************************************************************************/
+//    **********************************************************************************
     q15_t q15_buffer_LTemp[dataWidth];  // KF5N
     q15_t q15_buffer_RTemp[dataWidth];  // KF5N
+
 
     arm_float_to_q15(float_buffer_L_EX, q15_buffer_LTemp, 2048);
     arm_float_to_q15(float_buffer_R_EX, q15_buffer_RTemp, 2048);
@@ -1204,8 +1205,11 @@ if(mode == 1)    powerScale = 1.4 * ConfigData.powerOutSSB[ConfigData.currentBan
       arm_offset_q15(q15_buffer_RTemp, CalData.qDCoffsetSSB[ConfigData.currentBand] + CalData.dacOffsetSSB, q15_buffer_RTemp, dataWidth);
     }
 #endif
-    Q_out_L_Ex.play(q15_buffer_LTemp, dataWidth);  // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
-    Q_out_R_Ex.play(q15_buffer_RTemp, dataWidth);  // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.
+*/
+//    Q_out_L_Ex.play(q15_buffer_LTemp, dataWidth);  // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
+//    Q_out_R_Ex.play(q15_buffer_RTemp, dataWidth);  // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.
+    Q_out_L_Ex.play(float_buffer_L_EX, dataWidth);  // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
+    Q_out_R_Ex.play(float_buffer_R_EX, dataWidth);  // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.    
   } else {
     fftSuccess = false;  // Not enough transmit data.
     Serial.printf("Failed to get enough I and Q transmitter data!\n");
