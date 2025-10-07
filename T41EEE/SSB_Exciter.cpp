@@ -118,12 +118,12 @@ void ExciterIQData() {
 */
 //  Q_out_L_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
 //  Q_out_R_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
-  Q_out_L_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
-  Q_out_R_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
+////  Q_out_L_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
+////  Q_out_R_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
 //    Q_out_L_Ex.play(q15_buffer_LTemp, 2048);  // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
 //    Q_out_R_Ex.play(q15_buffer_RTemp, 2048);  // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.
-    Q_out_L_Ex.play(float_buffer_L_EX, 2048);  // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
-    Q_out_R_Ex.play(float_buffer_R_EX, 2048);  // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.
+////    Q_out_L_Ex.play(float_buffer_L_EX, 2048);  // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
+////    Q_out_R_Ex.play(float_buffer_R_EX, 2048);  // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.
 }
 
 /*****

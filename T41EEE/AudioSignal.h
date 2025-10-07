@@ -1,6 +1,6 @@
 // Teensy and Open Audio Signal Chains include file.
 
-#define F32
+//#define F32
 
 // Common to Transmitter and Receiver.
 const float sample_rate_Hz = 48000.0f;
@@ -299,8 +299,8 @@ void SetAudioOperatingState(RadioState operatingState) {
         mixer2_tx.gain(1, 1.0);
       }
 
-      Q_out_L_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);  // Need this as CW will put into wrong mode.  Greg KF5N August 4, 2024.
-      Q_out_R_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
+////      Q_out_L_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);  // Need this as CW will put into wrong mode.  Greg KF5N August 4, 2024.
+////      Q_out_R_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
       Q_in_L_Ex.begin();         // I channel Microphone audio
       Q_in_R_Ex.begin();         // Q channel Microphone audio
 ////      patchCord25.disconnect();  // Disconnect headphone.
@@ -365,8 +365,8 @@ void SetAudioOperatingState(RadioState operatingState) {
         mixer2_tx.gain(1, 1.0);
       }
 
-      Q_out_L_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);  // Need this as CW will put into wrong mode.  Greg KF5N August 4, 2024.
-      Q_out_R_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
+////      Q_out_L_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);  // Need this as CW will put into wrong mode.  Greg KF5N August 4, 2024.
+////      Q_out_R_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
       Q_in_L_Ex.begin();  // I channel Microphone audio
       Q_in_R_Ex.begin();  // Q channel Microphone audio
       ADC_RX_I.begin();   // Calibration is full duplex!  Activate receiver data.  No demodulation during calibrate, spectrum only.
@@ -437,8 +437,8 @@ void SetAudioOperatingState(RadioState operatingState) {
         mixer2_tx.gain(1, 1.0);
       }
 
-      Q_out_L_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);  // Need this as CW will put into wrong mode.  Greg KF5N August 4, 2024.
-      Q_out_R_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
+////      Q_out_L_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);  // Need this as CW will put into wrong mode.  Greg KF5N August 4, 2024.
+////      Q_out_R_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
       Q_in_L_Ex.begin();  // I channel Microphone audio
       Q_in_R_Ex.begin();  // Q channel Microphone audio
 //      ADC_RX_I.begin();   // Calibration is full duplex!  Activate receiver data.  No demodulation during calibrate, spectrum only.
