@@ -6,16 +6,17 @@
 const float sample_rate_Hz = 48000.0f;
 const int audio_block_samples = 128;  // Always 128
 AudioSettings_F32 audio_settings(sample_rate_Hz, audio_block_samples);
-AudioInputI2SQuad i2s_quadIn;  // 4 inputs/outputs available only in Teensy audio and not Open Audio library.
-#ifndef F32
-AudioOutputI2SQuad i2s_quadOut;  // Restricted to 16 bits; this is a problem for volume control.
-#else
+AudioInputI2SQuad i2s_quadIn;  // 4 inputs available only in Teensy audio and not Open Audio library.
+//#ifndef F32
+//AudioOutputI2SQuad i2s_quadOut;  // Restricted to 16 bits; this is a problem for volume control.
+//#else // Input 2 is first right channel.
 AudioOutputI2SQuad_F32 i2s_quadOut_f32;
-#endif
+//#endif
+
 
 // Transmitter
 AudioControlSGTL5000 sgtl5000_1;                                                  // Controller for the Teensy Audio Adapter.
-AudioConvert_I16toF32 int2Float1_tx;                                              // Converts Int16 to Float.  See class in AudioStream_F32.h
+AudioConvert_I16toF32 int2Float1_tx;                                              // Converts Int16 to Float.
 AudioEffectGain_F32 micGain(audio_settings), compGainCompensate(audio_settings);  // Microphone gain control.
 AudioFilterEqualizer_F32 txEqualizer(audio_settings);
 AudioEffectCompressor2_F32 compressor1;  // Open Audio Compressor
@@ -26,13 +27,13 @@ AudioMixer4_F32 mixer1_tx, mixer2_tx, mixer3_tx;  // Used to switch in tone duri
 AudioSynthWaveformSine_F32 toneSSBCal1, toneSSBCal2; // Tones for SSB calibration and IMD testing.
 AudioRecordQueue Q_in_L_Ex;                       // AudioRecordQueue for input Microphone channel.
 AudioRecordQueue Q_in_R_Ex;                       // This 2nd channel is needed as we are bringing I and Q into the sketch instead of only microphone audio.
-#ifndef F32
-AudioPlayQueue Q_out_L_Ex;                        // AudioPlayQueue for driving the I channel (CW/SSB) to the QSE.
-AudioPlayQueue Q_out_R_Ex;                        // AudioPlayQueue for driving the Q channel (CW/SSB) to the QSE.
-#else
+//#ifndef F32
+//AudioPlayQueue Q_out_L_Ex;                        // AudioPlayQueue for driving the I channel (CW/SSB) to the QSE.
+//AudioPlayQueue Q_out_R_Ex;                        // AudioPlayQueue for driving the Q channel (CW/SSB) to the QSE.
+//#else
 AudioPlayQueue_F32 Q_out_L_Ex;                        // AudioPlayQueue for driving the I channel (CW/SSB) to the QSE.
 AudioPlayQueue_F32 Q_out_R_Ex;                        // AudioPlayQueue for driving the Q channel (CW/SSB) to the QSE.
-#endif
+//#endif
 AudioPlayQueue_F32 cwToneData;
 
 //  Begin transmit signal chain.
@@ -75,13 +76,13 @@ AudioConnection connect17(float2Int1_tx, 0, Q_in_L_Ex, 0);  // Stream I and Q in
 AudioConnection connect18(float2Int2_tx, 0, Q_in_R_Ex, 0);
 
 // Transmitter back-end.  This takes streaming data from the sketch and drives it into the I2S.
-#ifndef F32
-AudioConnection connect19(Q_out_L_Ex, 0, i2s_quadOut, 0);  // I channel to line out
-AudioConnection connect20(Q_out_R_Ex, 0, i2s_quadOut, 1);  // Q channel to line out
-#else
+//#ifndef F32
+//AudioConnection connect19(Q_out_L_Ex, 0, i2s_quadOut, 0);  // I channel to line out
+//AudioConnection connect20(Q_out_R_Ex, 0, i2s_quadOut, 1);  // Q channel to line out
+//#else // Input 2 is first right channel.
 //// AudioConnection connect19(Q_out_L_Ex, 0, i2s_quadOut_f32, 0);  // I channel to line out
 //// AudioConnection connect20(Q_out_R_Ex, 0, i2s_quadOut_f32, 1);  // Q channel to line out
-#endif
+//#endif
 
 // Receiver data flow
 AudioEffectCompressor2_F32 compressor2_1;  // Used for audio AGC.
@@ -116,25 +117,25 @@ AudioConnection_F32 patchCord8(compGain, 0, mixer4, 1);
 AudioConnection_F32 patchCord9(mixer4, 0, speakerScale, 0);  // speakerScale is used to adjust for different audio amplifier gains.
 AudioConnection_F32 patchCord10(speakerScale, 0, speakerVolume, 0);
 
-#ifndef F32
-AudioConnection_F32 patchCord11(speakerVolume, 0, float2Int3, 0);
-AudioConnection patchCord12(float2Int3, 0, i2s_quadOut, 2);  //  Speaker audio to PCM5102 via Teensy pin 32.
-#else
+//#ifndef F32
+//AudioConnection_F32 patchCord11(speakerVolume, 0, float2Int3, 0);
+//AudioConnection patchCord12(float2Int3, 0, i2s_quadOut, 2);  //  Speaker audio to PCM5102 via Teensy pin 32.
+//#else
 AudioConnection_F32 patchCord12(speakerVolume, 0, i2s_quadOut_f32, 2);  //  Speaker audio to PCM5102 via Teensy pin 32.
-#endif
+//#endif
 
 // Headphone path
 AudioConnection_F32 patchCord13(mixer4, 0, headphoneVolume, 0);  // headphoneScale is user centering of headphone volume.
 AudioConnection_F32 patchCord14(headphoneVolume, 0, headphoneScale, 0);
 
-#ifndef F32
-AudioConnection_F32 patchCord15(headphoneVolume, 0, float2Int4, 0);
-AudioConnection patchCord25(float2Int4, 0, i2s_quadOut, 0);  // Headphone
-AudioConnection patchCord26(float2Int4, 0, i2s_quadOut, 1);  // Headphone
-#else
+//#ifndef F32
+//AudioConnection_F32 patchCord15(headphoneVolume, 0, float2Int4, 0);
+//AudioConnection patchCord25(float2Int4, 0, i2s_quadOut, 0);  // Headphone
+//AudioConnection patchCord26(float2Int4, 0, i2s_quadOut, 1);  // Headphone
+//#else
 AudioConnection_F32 patchCord25(headphoneVolume, 0, i2s_quadOut_f32, 0);  // Headphone
 AudioConnection_F32 patchCord26(headphoneScale, 0, i2s_quadOut_f32, 1);  //  Can't connect same output to 0 and 1 inputs.  Why???
-#endif
+//#endif
 
 // Half-octave transmit band equalizer, 16 bands, but only the lower 14 are used.
 float32_t fBand1[] = { 50.0, 70.711, 100.0, 141.421, 200.0, 282.843, 400.0, 565.685, 800.0, 1131.371, 1600.0, 2262.742, 3200.0, 4525.483, 6400.0, 24000.0 };

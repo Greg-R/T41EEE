@@ -178,14 +178,14 @@ void CW_Exciter::CW_ExciterIQData(int shaping)  //AFP 08-20-22
 #endif
   //  Q_out_L_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
   //  Q_out_R_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
-#ifndef F32
-  Q_out_L_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
-  Q_out_R_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
-#else
+//#ifndef F32
+//  Q_out_L_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
+//  Q_out_R_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
+//#else
   Q_out_L_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
   Q_out_R_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
     Q_out_L_Ex.play(float_buffer_i, 512);  // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
-#endif
+//#endif
 ////  Q_out_L_Ex.play(q15_buffer_LTemp, 512);  // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
 ////  Q_out_R_Ex.play(q15_buffer_RTemp, 512);  // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.
 

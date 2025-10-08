@@ -548,13 +548,13 @@ extern AudioRecordQueue ADC_RX_Q;
 extern AudioRecordQueue Q_in_L_Ex;
 extern AudioRecordQueue Q_in_R_Ex;
 extern AudioPlayQueue Q_out_L;
-#ifndef F32
-extern AudioPlayQueue Q_out_L_Ex;
-extern AudioPlayQueue Q_out_R_Ex;
-#else
+//#ifndef F32
+//extern AudioPlayQueue Q_out_L_Ex;
+//extern AudioPlayQueue Q_out_R_Ex;
+//#else
 extern AudioPlayQueue_F32 Q_out_L_Ex;
 extern AudioPlayQueue_F32 Q_out_R_Ex;
-#endif
+//#endif
 
 extern AudioPlayQueue_F32 cwToneData;
 

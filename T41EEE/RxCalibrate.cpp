@@ -530,7 +530,7 @@ exitManual = true;
           phase = phase + increment;
           if (phase > maxSweepPhase) {
             result = std::min_element(sweepVector.begin(), sweepVector.end());
-            adjdBMinIndex = std::distance(sweepVector.begin(), result);
+            adjdBMinIndex = std::distance(sweepVector.begin(), result); // Input 2 is first right channel.
             qOptimal = sweepVectorValue[adjdBMinIndex];  // Set to the discovered minimum.
             phase = qOptimal;                            // Set to the discovered minimum.
             GetEncoderValueLive(-2.0, 2.0, phase, increment, "IQ Phase", false);
