@@ -292,7 +292,7 @@ extern Bands bands;
 // Configuration data structure.
 struct config_t {
 
-char versionSettings[10] = "T41EEE.9";  // This is required to be the first!  See EEPROMRead() function.
+char versionSettings[10] = "T41EEX.91";  // This is required to be the first!  See EEPROMRead() function.
 
   bool AGCMode = true;
   float32_t AGCThreshold = -40.0;

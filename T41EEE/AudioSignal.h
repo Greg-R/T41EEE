@@ -3,14 +3,14 @@
 //#define F32
 
 // Common to Transmitter and Receiver.
-const float sample_rate_Hz = 48000.0f;
+const float sample_rate_Hz = 48000.0;  // The transmitter operates at 48ksps.
 const int audio_block_samples = 128;  // Always 128
 AudioSettings_F32 audio_settings(sample_rate_Hz, audio_block_samples);
 AudioInputI2SQuad i2s_quadIn;  // 4 inputs available only in Teensy audio and not Open Audio library.
 //#ifndef F32
 //AudioOutputI2SQuad i2s_quadOut;  // Restricted to 16 bits; this is a problem for volume control.
 //#else // Input 2 is first right channel.
-AudioOutputI2SQuad_F32 i2s_quadOut_f32;
+AudioOutputI2S_F32 i2s_quadOut_f32;
 //#endif
 
 
@@ -122,6 +122,7 @@ AudioConnection_F32 patchCord10(speakerScale, 0, speakerVolume, 0);
 //AudioConnection patchCord12(float2Int3, 0, i2s_quadOut, 2);  //  Speaker audio to PCM5102 via Teensy pin 32.
 //#else
 AudioConnection_F32 patchCord12(speakerVolume, 0, i2s_quadOut_f32, 2);  //  Speaker audio to PCM5102 via Teensy pin 32.
+AudioConnection_F32 patchCord30(speakerVolume, 0, i2s_quadOut_f32, 3);  //  Temporary test of the 4th channel.
 //#endif
 
 // Headphone path
