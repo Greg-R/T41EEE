@@ -820,7 +820,8 @@ void Button::ButtonNotchFilter() {
 /*****
   Purpose: Mute speaker, headphone, or both with button pushes.  Greg KF5N February 12, 2025.
            This function rotates through the 4 possible permuations of mute/unmute.
-           Each state makes changes and proceeds to the next state.
+           The state is rotated and then audio configuration updated by controlAudioOut(...).
+           The function controlAudioOut() is in the file AudioSignal.h.
   Parameter list:
     void
 
@@ -830,22 +831,22 @@ void Button::ButtonNotchFilter() {
 void Button::ButtonMuteAudio() {
   switch (ConfigData.audioOut) {
     case AudioState::SPEAKER:         // Speaker is on, mute and unmute headphones.
-      digitalWrite(MUTE, MUTEAUDIO);  //  Speaker mute
-      sgtl5000_1.unmuteHeadphone();   // Make the headphone output active.
+//      digitalWrite(MUTE, MUTEAUDIO);  //  Speaker mute
+//      sgtl5000_1.unmuteHeadphone();   // Make the headphone output active.
       ConfigData.audioOut = AudioState::HEADPHONE;
       break;
     case AudioState::HEADPHONE:       // Mute both speaker and headphones.
-      digitalWrite(MUTE, MUTEAUDIO);  // Speaker unmute
-      sgtl5000_1.muteHeadphone();     // Mute headphonts
+//      digitalWrite(MUTE, MUTEAUDIO);  // Speaker unmute
+//      sgtl5000_1.muteHeadphone();     // Mute headphones
       ConfigData.audioOut = AudioState::MUTE_BOTH;
       break;
     case AudioState::MUTE_BOTH:         //  Unmute both.
-      digitalWrite(MUTE, UNMUTEAUDIO);  //  Mute Speaker
-      sgtl5000_1.unmuteHeadphone();     // Make the headphone output active.
+//      digitalWrite(MUTE, UNMUTEAUDIO);  //  Mute Speaker
+//      sgtl5000_1.unmuteHeadphone();     // Make the headphone output active.
       ConfigData.audioOut = AudioState::BOTH;
       break;
     case AudioState::BOTH:              //  Headphones mute, speaker on
-      digitalWrite(MUTE, UNMUTEAUDIO);  //  Unmute Speaker
+//      digitalWrite(MUTE, UNMUTEAUDIO);  //  Unmute Speaker
       sgtl5000_1.muteHeadphone();       //  Mute headphone
       ConfigData.audioOut = AudioState::SPEAKER;
       break;
@@ -853,7 +854,8 @@ void Button::ButtonMuteAudio() {
       return;
       break;
   }
-  UpdateAudioField();
+  controlAudioOut(ConfigData.audioOut, false);  // Don't mute all.
+  UpdateAudioField();  // Update display.
 }
 
 

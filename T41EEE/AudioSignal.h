@@ -1,18 +1,11 @@
 // Teensy and Open Audio Signal Chains include file.
 
-//#define F32
-
 // Common to Transmitter and Receiver.
 const float sample_rate_Hz = 48000.0;  // The transmitter operates at 48ksps.
-const int audio_block_samples = 128;  // Always 128
+const int audio_block_samples = 128;   // Always 128
 AudioSettings_F32 audio_settings(sample_rate_Hz, audio_block_samples);
 AudioInputI2SQuad i2s_quadIn;  // 4 inputs available only in Teensy audio and not Open Audio library.
-//#ifndef F32
-//AudioOutputI2SQuad i2s_quadOut;  // Restricted to 16 bits; this is a problem for volume control.
-//#else // Input 2 is first right channel.
-AudioOutputI2S_F32 i2s_quadOut_f32;
-//#endif
-
+AudioOutputI2SQuad_F32 i2s_quadOut_f32(audio_settings);
 
 // Transmitter
 AudioControlSGTL5000 sgtl5000_1;                                                  // Controller for the Teensy Audio Adapter.
@@ -23,16 +16,16 @@ AudioEffectCompressor2_F32 compressor1;  // Open Audio Compressor
 radioCESSB_Z_transmit_F32 cessb1;
 AudioConvert_F32toI16 float2Int1_tx, float2Int2_tx;  // Converts Float to Int16.  See class in AudioStream_F32.h
 AudioSwitch4_OA_F32 switch1_tx, switch3_tx, switch4_tx;
-AudioMixer4_F32 mixer1_tx, mixer2_tx, mixer3_tx;  // Used to switch in tone during calibration.
-AudioSynthWaveformSine_F32 toneSSBCal1, toneSSBCal2; // Tones for SSB calibration and IMD testing.
-AudioRecordQueue Q_in_L_Ex;                       // AudioRecordQueue for input Microphone channel.
-AudioRecordQueue Q_in_R_Ex;                       // This 2nd channel is needed as we are bringing I and Q into the sketch instead of only microphone audio.
+AudioMixer4_F32 mixer1_tx, mixer2_tx, mixer3_tx;      // Used to switch in tone during calibration.
+AudioSynthWaveformSine_F32 toneSSBCal1, toneSSBCal2;  // Tones for SSB calibration and IMD testing.
+AudioRecordQueue Q_in_L_Ex;                           // AudioRecordQueue for input Microphone channel.
+AudioRecordQueue Q_in_R_Ex;                           // This 2nd channel is needed as we are bringing I and Q into the sketch instead of only microphone audio.
 //#ifndef F32
 //AudioPlayQueue Q_out_L_Ex;                        // AudioPlayQueue for driving the I channel (CW/SSB) to the QSE.
 //AudioPlayQueue Q_out_R_Ex;                        // AudioPlayQueue for driving the Q channel (CW/SSB) to the QSE.
 //#else
-AudioPlayQueue_F32 Q_out_L_Ex;                        // AudioPlayQueue for driving the I channel (CW/SSB) to the QSE.
-AudioPlayQueue_F32 Q_out_R_Ex;                        // AudioPlayQueue for driving the Q channel (CW/SSB) to the QSE.
+AudioPlayQueue_F32 Q_out_L_Ex;  // AudioPlayQueue for driving the I channel (CW/SSB) to the QSE.
+AudioPlayQueue_F32 Q_out_R_Ex;  // AudioPlayQueue for driving the Q channel (CW/SSB) to the QSE.
 //#endif
 AudioPlayQueue_F32 cwToneData;
 
@@ -44,9 +37,9 @@ AudioConnection_F32 connect1(int2Float1_tx, 0, switch1_tx, 0);  // Used switches
 // Need a mixer to switch between microphone audio and tones used for calibration, testing, and CW.
 AudioConnection_F32 connect3(switch1_tx, 0, mixer1_tx, 0);  // Connect microphone mixer1 output 0 via gain control.
 
-AudioConnection_F32 connect4(toneSSBCal1, 0, mixer1_tx, 1);  // Connect tone for SSB calibration and IM3 testing.
+AudioConnection_F32 connect4(toneSSBCal1, 0, mixer1_tx, 1);   // Connect tone for SSB calibration and IM3 testing.
 AudioConnection_F32 connect22(toneSSBCal2, 0, mixer1_tx, 2);  // Connect tone for IM3 testing.
-AudioConnection_F32 connect24(cwToneData, 0, mixer1_tx, 3);  // Connect CW transmit tone.
+AudioConnection_F32 connect24(cwToneData, 0, mixer1_tx, 3);   // Connect CW transmit tone.
 
 AudioConnection_F32 connect5(mixer1_tx, 0, micGain, 0);
 
@@ -73,7 +66,7 @@ AudioConnection_F32 connect15(cessb1, 0, float2Int1_tx, 0);
 AudioConnection_F32 connect16(cessb1, 1, float2Int2_tx, 0);
 
 AudioConnection connect17(float2Int1_tx, 0, Q_in_L_Ex, 0);  // Stream I and Q into the sketch.
-AudioConnection connect18(float2Int2_tx, 0, Q_in_R_Ex, 0);
+AudioConnection connect18(float2Int2_tx, 0, Q_in_R_Ex, 0);  // Tones for SSB calibration and IMD testing.
 
 // Transmitter back-end.  This takes streaming data from the sketch and drives it into the I2S.
 //#ifndef F32
@@ -91,7 +84,7 @@ AudioEffectCompressor2_F32 *pc1 = &compressor2_1;
 AudioEffectGain_F32 speakerVolume, speakerScale, headphoneVolume, headphoneScale, compGain, buffer;
 AudioAmplifier testGain;
 AudioMixer4_F32 mixer4;
-AudioSwitch4_OA_F32 switch4;
+AudioSwitch4_OA_F32 switch1_rx, switch2_rx;
 AudioConvert_F32toI16 float2Int3, float2Int4, float2Int5, float2Int6;
 
 AudioRecordQueue ADC_RX_I;  // I channel from ADC PCM1808.
@@ -105,37 +98,45 @@ AudioConnection patchCord2(i2s_quadIn, 2, ADC_RX_Q, 0);  // This data stream goe
 
 AudioConnection patchCord3(Q_out_L, 0, int2Float2, 0);  // 192ksps Audio data stream from sketch code.  Receiver audio or CW sidetone.
 
-AudioConnection_F32 patchCord4(int2Float2, 0, switch4, 0);  // Used to bypass compressor2_1.
+AudioConnection_F32 patchCord4(int2Float2, 0, switch1_rx, 0);  // Used to bypass compressor2_1.
 
-AudioConnection_F32 patchCord5(switch4, 0, compressor2_1, 0);  // Compressor used as audio AGC.
+AudioConnection_F32 patchCord5(switch1_rx, 0, compressor2_1, 0);  // Compressor used as audio AGC.
 AudioConnection_F32 patchCord6(compressor2_1, 0, mixer4, 0);
 
-AudioConnection_F32 patchCord7(switch4, 1, compGain, 0);  // Bypass compressor2_1.  Equalize compressor gain.
+AudioConnection_F32 patchCord7(switch1_rx, 1, compGain, 0);  // Bypass compressor2_1.  Equalize compressor gain.
 AudioConnection_F32 patchCord8(compGain, 0, mixer4, 1);
 
+// Switch in front of headphone and speaker audio paths so that inactive path can be switched off.
+AudioConnection_F32 patchCord9(mixer4, 0, switch2_rx, 0);
+
 // Speaker path
-AudioConnection_F32 patchCord9(mixer4, 0, speakerScale, 0);  // speakerScale is used to adjust for different audio amplifier gains.
-AudioConnection_F32 patchCord10(speakerScale, 0, speakerVolume, 0);
+AudioConnection_F32 patchCord10(switch2_rx, 0, speakerScale, 0);  // speakerScale is used to adjust for different audio amplifier gains.
+AudioConnection_F32 patchCord11(speakerScale, 0, speakerVolume, 0);
+
+AudioConnection_F32 patchCord12(speakerVolume, 0, i2s_quadOut_f32, 2);  //  Speaker audio to PCM5102 via Teensy pin 32.
 
 //#ifndef F32
 //AudioConnection_F32 patchCord11(speakerVolume, 0, float2Int3, 0);
 //AudioConnection patchCord12(float2Int3, 0, i2s_quadOut, 2);  //  Speaker audio to PCM5102 via Teensy pin 32.
 //#else
-AudioConnection_F32 patchCord12(speakerVolume, 0, i2s_quadOut_f32, 2);  //  Speaker audio to PCM5102 via Teensy pin 32.
-AudioConnection_F32 patchCord30(speakerVolume, 0, i2s_quadOut_f32, 3);  //  Temporary test of the 4th channel.
-//#endif
 
 // Headphone path
-AudioConnection_F32 patchCord13(mixer4, 0, headphoneVolume, 0);  // headphoneScale is user centering of headphone volume.
-AudioConnection_F32 patchCord14(headphoneVolume, 0, headphoneScale, 0);
+AudioConnection_F32 patchCord13(switch2_rx, 1, headphoneScale, 0);  // headphoneScale is user centering of headphone volume.
+AudioConnection_F32 patchCord14(headphoneScale, 0, headphoneVolume, 0);
 
-//#ifndef F32
+AudioConnection_F32 patchCord25(headphoneVolume, 0, i2s_quadOut_f32, 0);  // Headphone left
+AudioConnection_F32 patchCord26(headphoneVolume, 0, i2s_quadOut_f32, 1);  // Headphone right
+
+// Now connect both headphone and speaker paths to the same output of the switch.
+AudioConnection_F32 patchCord27(switch2_rx, 2, speakerScale, 0);    // Headphone right
+AudioConnection_F32 patchCord28(switch2_rx, 2, headphoneScale, 0);  // Headphone right
+
 //AudioConnection_F32 patchCord15(headphoneVolume, 0, float2Int4, 0);
 //AudioConnection patchCord25(float2Int4, 0, i2s_quadOut, 0);  // Headphone
 //AudioConnection patchCord26(float2Int4, 0, i2s_quadOut, 1);  // Headphone
-//#else
-AudioConnection_F32 patchCord25(headphoneVolume, 0, i2s_quadOut_f32, 0);  // Headphone
-AudioConnection_F32 patchCord26(headphoneScale, 0, i2s_quadOut_f32, 1);  //  Can't connect same output to 0 and 1 inputs.  Why???
+
+//AudioConnection_F32 patchCord25(tone0, 0, i2s_quadOut_f32, 0);  // Headphone
+//AudioConnection_F32 patchCord26(tone1, 0, i2s_quadOut_f32, 1);  //  Can't connect same output to 0 and 1 inputs.  Why???
 //#endif
 
 // Half-octave transmit band equalizer, 16 bands, but only the lower 14 are used.
@@ -146,7 +147,7 @@ float32_t equalizeCoeffs[249];
 
 // End dataflow code
 
-void controlAudioOut(AudioState audioState, bool mute);
+void controlAudioOut(AudioState audioState, bool mute);  // Declaration, implemenation below.
 
 // Configure basic compressor macro.  This is used in the audio path as a form of AGC.
 void initializeAudioPaths() {
@@ -202,12 +203,12 @@ void SetAudioOperatingState(RadioState operatingState) {
       mixer1_tx.gain(0, 0.0);
       mixer1_tx.gain(1, 0.0);
       mixer1_tx.gain(2, 0);
-      mixer1_tx.gain(3, 0);      // CW tone path.
+      mixer1_tx.gain(3, 0);  // CW tone path.
       toneSSBCal1.end();
       toneSSBCal2.end();
       switch1_tx.setChannel(1);  // Disconnect microphone path.
-//      switch2_tx.setChannel(1);  //  Disconnect SSB and IMD test tone path.
-//      switch5_tx.setChannel(1);  //  Disconnect IMD test tone path.
+                                 //      switch2_tx.setChannel(1);  //  Disconnect SSB and IMD test tone path.
+                                 //      switch5_tx.setChannel(1);  //  Disconnect IMD test tone path.
 
       switch4_tx.setChannel(1);  // Bypass compressor.
       mixer3_tx.gain(0, 0.0);
@@ -225,23 +226,23 @@ void SetAudioOperatingState(RadioState operatingState) {
       Q_in_R_Ex.clear();
       // Deactivate TX audio output path.  This disconnects from i2s_quadOut ports 0 and 1,
       // which are- used by headphones during receive.
-////      connect19.disconnect();
-////      connect20.disconnect();
+      ////      connect19.disconnect();
+      ////      connect20.disconnect();
       // Connect audio paths
       patchCord1.connect();
       patchCord2.connect();
       patchCord3.connect();
-////      patchCord25.connect();
-////      patchCord26.connect();
+      ////      patchCord25.connect();
+      ////      patchCord26.connect();
 
       // Configure audio compressor (AGC)
       if (ConfigData.AGCMode == true) {  // Activate compressor2_1 path.
-        switch4.setChannel(0);
+        switch1_rx.setChannel(0);
         mixer4.gain(0, 1.0);
         mixer4.gain(1, 0.0);
         initializeAudioPaths();
       } else {
-        switch4.setChannel(1);  // Bypass compressor2_1.
+        switch1_rx.setChannel(1);  // Bypass compressor2_1.
         mixer4.gain(0, 0.0);
         mixer4.gain(1, 1.0);
         compGain.setGain_dB(30.0);  // Set the gain equal to the compressor2_1 nominal gain (below threshold).
@@ -278,7 +279,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       mixer1_tx.gain(0, 1);      // microphone audio on.
       mixer1_tx.gain(1, 0);      // testTone off.
       switch1_tx.setChannel(0);  // Connect microphone path.
-//    switch2_tx.setChannel(1);  // Disonnect 1 kHz test tone path.
+                                 //    switch2_tx.setChannel(1);  // Disonnect 1 kHz test tone path.
 
       if (ConfigData.compressorFlag) {
         switch4_tx.setChannel(0);
@@ -301,12 +302,12 @@ void SetAudioOperatingState(RadioState operatingState) {
         mixer2_tx.gain(1, 1.0);
       }
 
-////      Q_out_L_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);  // Need this as CW will put into wrong mode.  Greg KF5N August 4, 2024.
-////      Q_out_R_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
-      Q_in_L_Ex.begin();         // I channel Microphone audio
-      Q_in_R_Ex.begin();         // Q channel Microphone audio
-////      patchCord25.disconnect();  // Disconnect headphone.
-////      patchCord26.disconnect();
+      ////      Q_out_L_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);  // Need this as CW will put into wrong mode.  Greg KF5N August 4, 2024.
+      ////      Q_out_R_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
+      Q_in_L_Ex.begin();  // I channel Microphone audio
+      Q_in_R_Ex.begin();  // Q channel Microphone audio
+                          ////      patchCord25.disconnect();  // Disconnect headphone.
+                          ////      patchCord26.disconnect();
 
       // Update equalizer.  Update first 14 only.  Last two are constant.
       for (int i = 0; i < 14; i = i + 1) dbBand1[i] = static_cast<float32_t>(ConfigData.equalizerXmt[i]);
@@ -315,14 +316,14 @@ void SetAudioOperatingState(RadioState operatingState) {
       updateMic();
       connect17.connect();  // Transmitter I channel
       connect18.connect();  // Transmitter Q channel
-////      connect19.connect();  // Transmitter I channel
-////      connect20.connect();  // Transmitter Q channel
+                            ////      connect19.connect();  // Transmitter I channel
+                            ////      connect20.connect();  // Transmitter Q channel
 
       break;
 
     case RadioState::SSB_CALIBRATE_STATE:
       SampleRate = SAMPLE_RATE_48K;
-      InitializeDataArrays();  // I2S sample rate set in this function.
+      InitializeDataArrays();                      // I2S sample rate set in this function.
       controlAudioOut(ConfigData.audioOut, true);  // Mute all audio.
       sgtl5000_1.unmuteLineout();
       patchCord1.connect();  // Receiver I channel
@@ -333,7 +334,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       ADC_RX_Q.end();
       ADC_RX_Q.clear();
 
-        cessb1.setSampleRate_Hz(48000);  ////
+      cessb1.setSampleRate_Hz(48000);  ////
 
       // Test tone enabled and connected
       toneSSBCal1.setSampleRate_Hz(48000);
@@ -343,7 +344,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       toneSSBCal2.end();
       mixer1_tx.gain(0, 0);      // microphone audio off.
       mixer1_tx.gain(1, 1);      // testTone on.
-      mixer1_tx.gain(2, 0);      // testTone 2 off.  
+      mixer1_tx.gain(2, 0);      // testTone 2 off.
       switch1_tx.setChannel(1);  // Disconnect microphone path.
 
       if (ConfigData.compressorFlag) {
@@ -367,14 +368,14 @@ void SetAudioOperatingState(RadioState operatingState) {
         mixer2_tx.gain(1, 1.0);
       }
 
-////      Q_out_L_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);  // Need this as CW will put into wrong mode.  Greg KF5N August 4, 2024.
-////      Q_out_R_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
+      ////      Q_out_L_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);  // Need this as CW will put into wrong mode.  Greg KF5N August 4, 2024.
+      ////      Q_out_R_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
       Q_in_L_Ex.begin();  // I channel Microphone audio
       Q_in_R_Ex.begin();  // Q channel Microphone audio
       ADC_RX_I.begin();   // Calibration is full duplex!  Activate receiver data.  No demodulation during calibrate, spectrum only.
       ADC_RX_Q.begin();
-////      patchCord25.disconnect();  // Disconnect headphone.
-////      patchCord26.disconnect();  // Disconnect headphone.
+      ////      patchCord25.disconnect();  // Disconnect headphone.
+      ////      patchCord26.disconnect();  // Disconnect headphone.
 
       // Update equalizer.  Update first 14 only.  Last two are constant.
       for (int i = 0; i < 14; i = i + 1) dbBand1[i] = ConfigData.equalizerXmt[i];
@@ -383,8 +384,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       updateMic();
       connect17.connect();  // Transmitter I channel
       connect18.connect();  // Transmitter Q channel
-////      connect19.connect();  // Transmitter I channel
-////      connect20.connect();  // Transmitter Q channel
+                            ////      connect19.connect();  // Transmitter I channel
+                            ////      connect20.connect();  // Transmitter Q channel
 
       break;
 
@@ -394,8 +395,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       // QSD disabled and disconnected
       controlAudioOut(ConfigData.audioOut, true);  // Mute all audio.
       sgtl5000_1.unmuteLineout();
-//      patchCord1.connect();  // Receiver I channel
-//      patchCord2.connect();  // Receiver Q channel
+      //      patchCord1.connect();  // Receiver I channel
+      //      patchCord2.connect();  // Receiver Q channel
 
       ADC_RX_I.end();
       ADC_RX_I.clear();
@@ -413,10 +414,10 @@ void SetAudioOperatingState(RadioState operatingState) {
       toneSSBCal2.begin();
       mixer1_tx.gain(0, 0);      // microphone audio off.
       mixer1_tx.gain(1, 1);      // testTone 1 on.
-      mixer1_tx.gain(2, 1);      // testTone 2 on.      
+      mixer1_tx.gain(2, 1);      // testTone 2 on.
       switch1_tx.setChannel(1);  // Disconnect microphone path.
-//      switch2_tx.setChannel(0);  // Connect IMD test tone path.
-//      switch5_tx.setChannel(0);  //  Connect IMD test tone path.
+                                 //      switch2_tx.setChannel(0);  // Connect IMD test tone path.
+                                 //      switch5_tx.setChannel(0);  //  Connect IMD test tone path.
 
       if (ConfigData.compressorFlag) {
         switch4_tx.setChannel(0);
@@ -439,14 +440,14 @@ void SetAudioOperatingState(RadioState operatingState) {
         mixer2_tx.gain(1, 1.0);
       }
 
-////      Q_out_L_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);  // Need this as CW will put into wrong mode.  Greg KF5N August 4, 2024.
-////      Q_out_R_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
+      ////      Q_out_L_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);  // Need this as CW will put into wrong mode.  Greg KF5N August 4, 2024.
+      ////      Q_out_R_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
       Q_in_L_Ex.begin();  // I channel Microphone audio
       Q_in_R_Ex.begin();  // Q channel Microphone audio
-//      ADC_RX_I.begin();   // Calibration is full duplex!  Activate receiver data.  No demodulation during calibrate, spectrum only.
-//      ADC_RX_Q.begin();
-////      patchCord25.disconnect();
-////      patchCord26.disconnect();
+                          //      ADC_RX_I.begin();   // Calibration is full duplex!  Activate receiver data.  No demodulation during calibrate, spectrum only.
+                          //      ADC_RX_Q.begin();
+                          ////      patchCord25.disconnect();
+                          ////      patchCord26.disconnect();
 
       // Update equalizer.  Update first 14 only.  Last two are constant.
       for (int i = 0; i < 14; i = i + 1) dbBand1[i] = ConfigData.equalizerXmt[i];
@@ -455,8 +456,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       updateMic();
       connect17.connect();  // Transmitter I channel
       connect18.connect();  // Transmitter Q channel
-////      connect19.connect();  // Transmitter I channel
-////      connect20.connect();  // Transmitter Q channel
+                            ////      connect19.connect();  // Transmitter I channel
+                            ////      connect20.connect();  // Transmitter Q channel
 
       break;
 
@@ -470,7 +471,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       sgtl5000_1.unmuteLineout();
       patchCord1.disconnect();  // Receiver I channel
       patchCord2.disconnect();  // Receiver Q channel
-      patchCord3.connect();  // Sidetone
+      patchCord3.connect();     // Sidetone
       // Speaker and headphones should be unmuted according to current audio out state for sidetone.
       controlAudioOut(ConfigData.audioOut, false);
 
@@ -480,44 +481,44 @@ void SetAudioOperatingState(RadioState operatingState) {
       ADC_RX_Q.clear();
 
       // Test tone enabled and connected
-////      toneSSBCal1.setSampleRate_Hz(48000);
-////      toneSSBCal1.amplitude(0.2);
-////      toneSSBCal1.frequency(750.0);
-////      toneSSBCal1.begin();
+      ////      toneSSBCal1.setSampleRate_Hz(48000);
+      ////      toneSSBCal1.amplitude(0.2);
+      ////      toneSSBCal1.frequency(750.0);
+      ////      toneSSBCal1.begin();
       toneSSBCal1.end();
       toneSSBCal2.end();
-      mixer1_tx.gain(0, 0);      // microphone audio off.
-      mixer1_tx.gain(1, 0);      // testTone 1 off.
-      mixer1_tx.gain(2, 0);      // testTone 2 off.
-      mixer1_tx.gain(3, 1);      // CW tone path.  Mic gain is also in this path.  Set micGain to 0dB.
+      mixer1_tx.gain(0, 0);  // microphone audio off.
+      mixer1_tx.gain(1, 0);  // testTone 1 off.
+      mixer1_tx.gain(2, 0);  // testTone 2 off.
+      mixer1_tx.gain(3, 1);  // CW tone path.  Mic gain is also in this path.  Set micGain to 0dB.
 
       switch1_tx.setChannel(1);  // Disconnect microphone path.
 
-// Bypass equalizer and compressor in CW mode!
-        switch3_tx.setChannel(1);  // Bypass equalizer.  Must bypass for FT8.
-        mixer2_tx.gain(0, 0.0);
-        mixer2_tx.gain(1, 1.0);
+      // Bypass equalizer and compressor in CW mode!
+      switch3_tx.setChannel(1);  // Bypass equalizer.  Must bypass for FT8.
+      mixer2_tx.gain(0, 0.0);
+      mixer2_tx.gain(1, 1.0);
 
-        switch4_tx.setChannel(1);  // Bypass compressor.
-        mixer3_tx.gain(0, 0.0);
-        mixer3_tx.gain(1, 1.0);
-        compGainCompensate.setGain_dB(10.0);  // Use compressor's below threshold gain.
+      switch4_tx.setChannel(1);  // Bypass compressor.
+      mixer3_tx.gain(0, 0.0);
+      mixer3_tx.gain(1, 1.0);
+      compGainCompensate.setGain_dB(10.0);  // Use compressor's below threshold gain.
 
-// Set CW calibration factors.
-          if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-    cessb1.setIQCorrections(true, CalData.IQCWAmpCorrectionFactorLSB[ConfigData.currentBand], CalData.IQCWPhaseCorrectionFactorLSB[ConfigData.currentBand], 0.0);
-    } else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-    cessb1.setIQCorrections(true, CalData.IQCWAmpCorrectionFactorUSB[ConfigData.currentBand], CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand], 0.0);
-    }
+      // Set CW calibration factors.
+      if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
+        cessb1.setIQCorrections(true, CalData.IQCWAmpCorrectionFactorLSB[ConfigData.currentBand], CalData.IQCWPhaseCorrectionFactorLSB[ConfigData.currentBand], 0.0);
+      } else if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
+        cessb1.setIQCorrections(true, CalData.IQCWAmpCorrectionFactorUSB[ConfigData.currentBand], CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand], 0.0);
+      }
 
       Q_out_L_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);  // Need this as CW will put into wrong mode.  Greg KF5N August 4, 2024.
       Q_out_R_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
       Q_in_L_Ex.begin();  // I channel Microphone audio
       Q_in_R_Ex.begin();  // Q channel Microphone audio
-//      ADC_RX_I.begin();   // Calibration is full duplex!  Activate receiver data.  No demodulation during calibrate, spectrum only.
-//      ADC_RX_Q.begin();
-////      patchCord25.disconnect();
-////      patchCord26.disconnect();
+                          //      ADC_RX_I.begin();   // Calibration is full duplex!  Activate receiver data.  No demodulation during calibrate, spectrum only.
+                          //      ADC_RX_Q.begin();
+                          ////      patchCord25.disconnect();
+                          ////      patchCord26.disconnect();
 
       patchCord3.connect();  // Sidetone
       // Speaker and headphones should be unmuted according to current audio out state for sidetone.
@@ -526,23 +527,23 @@ void SetAudioOperatingState(RadioState operatingState) {
 
       sgtl5000_1.volume(static_cast<float32_t>(ConfigData.sidetoneHeadphone) / 100.0);  // This is for scaling the sidetone in the headphone output.  This is
                                                                                         // the only way to adjust sidetone volume in the headphone.
-////      patchCord25.disconnect();                                                         // Disconnect headphone, which is shared with I and Q transmit.
-////      patchCord26.disconnect();                                                         // Headphone sidetone is same as transmit I and Q!
-      speakerVolume.setGain(volumeLog[ConfigData.sidetoneSpeaker]);  // Adjust sidetone volume.  Headphone sidetone done in hardware.
-      // Update equalizer.  Update first 14 only.  Last two are constant.
-//      for (int i = 0; i < 14; i = i + 1) dbBand1[i] = ConfigData.equalizerXmt[i];
+                                                                                        ////      patchCord25.disconnect();                                                         // Disconnect headphone, which is shared with I and Q transmit.
+                                                                                        ////      patchCord26.disconnect();                                                         // Headphone sidetone is same as transmit I and Q!
+      speakerVolume.setGain(volumeLog[ConfigData.sidetoneSpeaker]);                     // Adjust sidetone volume.  Headphone sidetone done in hardware.
+                                                                                        // Update equalizer.  Update first 14 only.  Last two are constant.
+      //      for (int i = 0; i < 14; i = i + 1) dbBand1[i] = ConfigData.equalizerXmt[i];
 
-//      txEqualizer.equalizerNew(16, &fBand1[0], &dbBand1[0], 249, &equalizeCoeffs[0], 65.0f);
-//      updateMic();
-micGain.setGain_dB(0.0);  // Set mic gain to 0.  Don't want mic gain to influence CW.
-      connect17.connect();  // Transmitter I channel  // Transmitter front-end
-      connect18.connect();  // Transmitter Q channel
-////      connect19.connect();  // Transmitter I channel  // Transmitter back-end
-////      connect20.connect();  // Transmitter Q channel
+      //      txEqualizer.equalizerNew(16, &fBand1[0], &dbBand1[0], 249, &equalizeCoeffs[0], 65.0f);
+      //      updateMic();
+      micGain.setGain_dB(0.0);  // Set mic gain to 0.  Don't want mic gain to influence CW.
+      connect17.connect();      // Transmitter I channel  // Transmitter front-end
+      connect18.connect();      // Transmitter Q channel
+                                ////      connect19.connect();  // Transmitter I channel  // Transmitter back-end
+                                ////      connect20.connect();  // Transmitter Q channel
 
       break;
 
-    /*
+      /*
       ADC_RX_I.end();
       ADC_RX_I.clear();
       ADC_RX_Q.end();
@@ -575,7 +576,7 @@ micGain.setGain_dB(0.0);  // Set mic gain to 0.  Don't want mic gain to influenc
 
     case RadioState::CW_CALIBRATE_STATE:
       SampleRate = SAMPLE_RATE_48K;
-      InitializeDataArrays();  // I2S sample rate set in this function.
+      InitializeDataArrays();                      // I2S sample rate set in this function.
       controlAudioOut(ConfigData.audioOut, true);  // Mute all audio.
       sgtl5000_1.unmuteLineout();
 
@@ -584,7 +585,7 @@ micGain.setGain_dB(0.0);  // Set mic gain to 0.  Don't want mic gain to influenc
       ADC_RX_Q.end();
       ADC_RX_Q.clear();
 
-        cessb1.setSampleRate_Hz(48000);  ////
+      cessb1.setSampleRate_Hz(48000);  ////
 
       // Test tone enabled and connected
       toneSSBCal1.setSampleRate_Hz(48000);
@@ -594,40 +595,40 @@ micGain.setGain_dB(0.0);  // Set mic gain to 0.  Don't want mic gain to influenc
       toneSSBCal2.end();
       mixer1_tx.gain(0, 0);      // microphone audio off.
       mixer1_tx.gain(1, 1);      // testTone on.
-      mixer1_tx.gain(2, 0);      // testTone 2 off.  
+      mixer1_tx.gain(2, 0);      // testTone 2 off.
       switch1_tx.setChannel(1);  // Disconnect microphone path.
 
-// Bypass equalizer and compressor in CW mode!
-        switch3_tx.setChannel(1);  // Bypass equalizer.
-        mixer2_tx.gain(0, 0.0);
-        mixer2_tx.gain(1, 1.0);
+      // Bypass equalizer and compressor in CW mode!
+      switch3_tx.setChannel(1);  // Bypass equalizer.
+      mixer2_tx.gain(0, 0.0);
+      mixer2_tx.gain(1, 1.0);
 
-        switch4_tx.setChannel(1);  // Bypass compressor.
-        mixer3_tx.gain(0, 0.0);
-        mixer3_tx.gain(1, 1.0);
-        compGainCompensate.setGain_dB(10.0);  // Use compressor's below threshold gain when bypassed.
+      switch4_tx.setChannel(1);  // Bypass compressor.
+      mixer3_tx.gain(0, 0.0);
+      mixer3_tx.gain(1, 1.0);
+      compGainCompensate.setGain_dB(10.0);  // Use compressor's below threshold gain when bypassed.
 
-// Set CW calibration factors.
-          if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-    cessb1.setIQCorrections(true, CalData.IQCWAmpCorrectionFactorLSB[ConfigData.currentBand], CalData.IQCWPhaseCorrectionFactorLSB[ConfigData.currentBand], 0.0);
-    } else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-    cessb1.setIQCorrections(true, CalData.IQCWAmpCorrectionFactorUSB[ConfigData.currentBand], CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand], 0.0);
-    }
+      // Set CW calibration factors.
+      if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
+        cessb1.setIQCorrections(true, CalData.IQCWAmpCorrectionFactorLSB[ConfigData.currentBand], CalData.IQCWPhaseCorrectionFactorLSB[ConfigData.currentBand], 0.0);
+      } else if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
+        cessb1.setIQCorrections(true, CalData.IQCWAmpCorrectionFactorUSB[ConfigData.currentBand], CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand], 0.0);
+      }
 
       patchCord1.connect();  // Connect I and Q receiver data converters.
       patchCord2.connect();
       ADC_RX_I.begin();  // Calibration is full duplex!
       ADC_RX_Q.begin();
-////      patchCord25.disconnect();  // Disconnect headphone, which is shared with I and Q transmit.
-////      patchCord26.disconnect();
+      ////      patchCord25.disconnect();  // Disconnect headphone, which is shared with I and Q transmit.
+      ////      patchCord26.disconnect();
       micGain.setGain_dB(0.0);  // micGain should not influence CW.
       //  Transmitter front-end and back-end needs to be active during CW calibration.
       connect17.connect();  // Transmitter I channel
       connect18.connect();  // Transmitter Q channel
-      Q_in_L_Ex.begin();  // I channel to sketch
-      Q_in_R_Ex.begin();  // Q channel to sketch
-////      connect19.connect();  // Transmitter I channel to audio adapter
-////      connect20.connect();  // Transmitter Q channel to audio adapter
+      Q_in_L_Ex.begin();    // I channel to sketch
+      Q_in_R_Ex.begin();    // Q channel to sketch
+                            ////      connect19.connect();  // Transmitter I channel to audio adapter
+                            ////      connect20.connect();  // Transmitter Q channel to audio adapter
 
       break;
 
@@ -659,13 +660,13 @@ micGain.setGain_dB(0.0);  // Set mic gain to 0.  Don't want mic gain to influenc
       patchCord2.connect();
       ADC_RX_I.begin();  // Calibration is full duplex!
       ADC_RX_Q.begin();
-////      patchCord25.disconnect();  // Disconnect headphone, which is shared with I and Q transmit.
-////      patchCord26.disconnect();
+      ////      patchCord25.disconnect();  // Disconnect headphone, which is shared with I and Q transmit.
+      ////      patchCord26.disconnect();
       //  Transmitter back-end needs to be active during CW calibration.
-////      connect19.connect();  // Transmitter I channel
-////      connect20.connect();  // Transmitter Q channel
+      ////      connect19.connect();  // Transmitter I channel
+      ////      connect20.connect();  // Transmitter Q channel
 
-break;
+      break;
 
     case RadioState::SET_CW_SIDETONE:
 
@@ -676,7 +677,7 @@ break;
       sgtl5000_1.unmuteLineout();
       patchCord1.disconnect();  // Receiver I channel
       patchCord2.disconnect();  // Receiver Q channel
-      patchCord3.connect();  // Sidetone
+      patchCord3.connect();     // Sidetone
       // Speaker and headphones should be unmuted according to current audio out state for sidetone.
       controlAudioOut(ConfigData.audioOut, false);
 
@@ -686,59 +687,59 @@ break;
       ADC_RX_Q.clear();
 
       // Test tone enabled and connected
-////      toneSSBCal1.setSampleRate_Hz(48000);
-////      toneSSBCal1.amplitude(0.2);
-////      toneSSBCal1.frequency(750.0);
-////      toneSSBCal1.begin();
+      ////      toneSSBCal1.setSampleRate_Hz(48000);
+      ////      toneSSBCal1.amplitude(0.2);
+      ////      toneSSBCal1.frequency(750.0);
+      ////      toneSSBCal1.begin();
       toneSSBCal1.end();
       toneSSBCal2.end();
-      mixer1_tx.gain(0, 0);      // microphone audio off.
-      mixer1_tx.gain(1, 0);      // testTone 1 off.
-      mixer1_tx.gain(2, 0);      // testTone 2 off.
-      mixer1_tx.gain(3, 1);      // CW tone path.  Mic gain is also in this path.  Set micGain to 0dB.
+      mixer1_tx.gain(0, 0);  // microphone audio off.
+      mixer1_tx.gain(1, 0);  // testTone 1 off.
+      mixer1_tx.gain(2, 0);  // testTone 2 off.
+      mixer1_tx.gain(3, 1);  // CW tone path.  Mic gain is also in this path.  Set micGain to 0dB.
 
       switch1_tx.setChannel(1);  // Disconnect microphone path.
 
-// Bypass equalizer and compressor in CW mode!
-        switch3_tx.setChannel(1);  // Bypass equalizer.  Must bypass for FT8.
-        mixer2_tx.gain(0, 0.0);
-        mixer2_tx.gain(1, 1.0);
+      // Bypass equalizer and compressor in CW mode!
+      switch3_tx.setChannel(1);  // Bypass equalizer.  Must bypass for FT8.
+      mixer2_tx.gain(0, 0.0);
+      mixer2_tx.gain(1, 1.0);
 
-        switch4_tx.setChannel(1);  // Bypass compressor.
-        mixer3_tx.gain(0, 0.0);
-        mixer3_tx.gain(1, 1.0);
-        compGainCompensate.setGain_dB(10.0);  // Use compressor's below threshold gain.
+      switch4_tx.setChannel(1);  // Bypass compressor.
+      mixer3_tx.gain(0, 0.0);
+      mixer3_tx.gain(1, 1.0);
+      compGainCompensate.setGain_dB(10.0);  // Use compressor's below threshold gain.
 
-// Set CW calibration factors.
-//          if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-//    cessb1.setIQCorrections(true, CalData.IQCWAmpCorrectionFactorLSB[ConfigData.currentBand], CalData.IQCWPhaseCorrectionFactorLSB[ConfigData.currentBand], 0.0);
-//    } else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-//    cessb1.setIQCorrections(true, CalData.IQCWAmpCorrectionFactorUSB[ConfigData.currentBand], CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand], 0.0);
-//    }
+      // Set CW calibration factors.
+      //          if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
+      //    cessb1.setIQCorrections(true, CalData.IQCWAmpCorrectionFactorLSB[ConfigData.currentBand], CalData.IQCWPhaseCorrectionFactorLSB[ConfigData.currentBand], 0.0);
+      //    } else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
+      //    cessb1.setIQCorrections(true, CalData.IQCWAmpCorrectionFactorUSB[ConfigData.currentBand], CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand], 0.0);
+      //    }
 
       Q_out_L_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);  // Need this as CW will put into wrong mode.  Greg KF5N August 4, 2024.
       Q_out_R_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
       Q_in_L_Ex.begin();  // I channel Microphone audio
       Q_in_R_Ex.begin();  // Q channel Microphone audio
-//      ADC_RX_I.begin();   // Calibration is full duplex!  Activate receiver data.  No demodulation during calibrate, spectrum only.
-//      ADC_RX_Q.begin();
-////      patchCord25.disconnect();
-////      patchCord26.disconnect();
+      //      ADC_RX_I.begin();   // Calibration is full duplex!  Activate receiver data.  No demodulation during calibrate, spectrum only.
+      //      ADC_RX_Q.begin();
+      ////      patchCord25.disconnect();
+      ////      patchCord26.disconnect();
 
       // Update equalizer.  Update first 14 only.  Last two are constant.
-//      for (int i = 0; i < 14; i = i + 1) dbBand1[i] = ConfigData.equalizerXmt[i];
+      //      for (int i = 0; i < 14; i = i + 1) dbBand1[i] = ConfigData.equalizerXmt[i];
 
-//      txEqualizer.equalizerNew(16, &fBand1[0], &dbBand1[0], 249, &equalizeCoeffs[0], 65.0f);
-//      updateMic();
-micGain.setGain_dB(0.0);  // Set mic gain to 0.  Don't want mic gain to influence CW.
-      connect17.connect();  // Transmitter I channel
-      connect18.connect();  // Transmitter Q channel
-////      connect19.connect();  // Transmitter I channel
-////      connect20.connect();  // Transmitter Q channel
+      //      txEqualizer.equalizerNew(16, &fBand1[0], &dbBand1[0], 249, &equalizeCoeffs[0], 65.0f);
+      //      updateMic();
+      micGain.setGain_dB(0.0);  // Set mic gain to 0.  Don't want mic gain to influence CW.
+      connect17.connect();      // Transmitter I channel
+      connect18.connect();      // Transmitter Q channel
+                                ////      connect19.connect();  // Transmitter I channel
+                                ////      connect20.connect();  // Transmitter Q channel
 
       break;
 
-    /*
+      /*
       SampleRate = SAMPLE_RATE_192K;
       SetI2SFreq(SR[SampleRate].rate);
       sgtl5000_1.muteLineout();
@@ -776,6 +777,8 @@ micGain.setGain_dB(0.0);  // Set mic gain to 0.  Don't want mic gain to influenc
 
 /*****
   Purpose: Manage headphone and speaker mute/unmute.
+           This function is extern as it is used by
+           the audio output button from the Button class.
 
   Parameter list:
     void AudioState   Desired audio state.
@@ -786,33 +789,40 @@ micGain.setGain_dB(0.0);  // Set mic gain to 0.  Don't want mic gain to influenc
 
 *****/
 void controlAudioOut(AudioState audioState, bool mute) {
-  if (mute) {
-    sgtl5000_1.muteHeadphone();     // Mute headphones.
-    digitalWrite(MUTE, MUTEAUDIO);  // Mute speaker audio amplifier.
-    return;
-  }
+
   switch (audioState) {
     case AudioState::HEADPHONE:
-      sgtl5000_1.unmuteHeadphone();   // Unmute headphones.
       digitalWrite(MUTE, MUTEAUDIO);  // Mute speaker audio amplifier.
+      switch2_rx.setChannel(1);       // Switch to headphone path.
+      sgtl5000_1.unmuteHeadphone();   // Unmute headphones.
+      Serial.println("Set headphone");
       break;
 
     case AudioState::SPEAKER:
       sgtl5000_1.muteHeadphone();       // Mute headphones.
+      switch2_rx.setChannel(0);         // Switch to speaker path.
       digitalWrite(MUTE, UNMUTEAUDIO);  // Unmute speaker audio amplifier.
       break;
 
     case AudioState::BOTH:
+      switch2_rx.setChannel(2);         // Drive both audio paths.
       sgtl5000_1.unmuteHeadphone();     // Unmute headphones.
       digitalWrite(MUTE, UNMUTEAUDIO);  // Unmute speaker audio amplifier.
       break;
 
     case AudioState::MUTE_BOTH:
-      sgtl5000_1.muteHeadphone();     // Unmute headphones.
+      switch2_rx.setChannel(3);       // Switch to unused path.
+      sgtl5000_1.muteHeadphone();     // Mute headphones.
       digitalWrite(MUTE, MUTEAUDIO);  // Mute speaker audio amplifier.
       break;
 
     default:
       break;
+  }
+  // Physically mute audio, but leave audio paths set above intact.
+  if (mute) {
+    sgtl5000_1.muteHeadphone();     // Mute headphones.
+    digitalWrite(MUTE, MUTEAUDIO);  // Mute speaker audio amplifier.
+    return;
   }
 }

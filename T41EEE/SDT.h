@@ -292,7 +292,7 @@ extern Bands bands;
 // Configuration data structure.
 struct config_t {
 
-char versionSettings[10] = "T41EEX.91";  // This is required to be the first!  See EEPROMRead() function.
+char versionSettings[10] = "T41EEE.91";  // This is required to be the first!  See EEPROMRead() function.
 
   bool AGCMode = true;
   float32_t AGCThreshold = -40.0;
@@ -570,6 +570,7 @@ extern radioCESSB_Z_transmit_F32 cessb1;
 // end Teensy and OpenAudio objects
 
 extern void SetAudioOperatingState(RadioState operatingState);  // Configures audio system for requested mode state.
+extern void controlAudioOut(AudioState audioState, bool mute);  // Sets speaker and headphone mute/unmute.
 
 extern Rotary volumeEncoder;    // (2,  3)
 extern Rotary tuneEncoder;      // (16, 17)
