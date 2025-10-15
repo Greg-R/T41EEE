@@ -87,8 +87,8 @@ void ReceiveDSP::ProcessIQData() {
     // Set frequency here only to minimize interruption to signal stream during tuning.
     // This code was unnecessary in the revised tuning scheme.  KF5N July 22, 2023
     if (centerTuneFlag == 1) {  //  This flag is set by EncoderFineTune().
-      DrawBandWidthIndicatorBar();
-      ShowFrequency();
+      display.DrawBandWidthIndicatorBar();
+      display.ShowFrequency();
     }                    //AFP 10-04-22
     centerTuneFlag = 0;  //AFP 10-04-22
     if (resetTuningFlag == 1) {
@@ -326,7 +326,7 @@ void ReceiveDSP::ProcessIQData() {
       }
       arm_max_f32(audioSpectBuffer, 1024, &audioMaxSquared, &AudioMaxIndex);  // AFP 09-18-22 Max value of squared abin magnitude in audio
       audioMaxSquaredAve = .5 * audioMaxSquared + .5 * audioMaxSquaredAve;    // AFP 09-18-22 Running averaged values
-      DisplaydbM();
+      display.DisplaydbM();
     }
 
     /**********************************************************************************

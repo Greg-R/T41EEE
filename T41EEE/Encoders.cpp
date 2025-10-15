@@ -32,7 +32,7 @@ const int FT_step = 500;                 // Hz step in Fast Tune
 void FilterSetSSB() {
   int32_t filter_change;
   if (filter_pos != last_filter_pos) {  // This decision is required as this function is required to be used in many locations.  KF5N April 21, 2024
-    if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) BandInformation();
+    if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) display.BandInformation();
     filter_change = (filter_pos - last_filter_pos);
     if (filter_change >= 1) {
       filterWidth--;  // filterWidth is used in graphics only!
@@ -67,9 +67,9 @@ void FilterSetSSB() {
     volumeChangeFlag = true;
   }
 
-  UpdateAudioGraphics();    // Redraw Morse decoder graphics because they get erased due to filter graphics updates.
-  DrawFrequencyBarValue();  // This calls ShowBandwidth().  YES, this function is useful here.
-  DrawBandWidthIndicatorBar();
+  display.UpdateAudioGraphics();    // Redraw Morse decoder graphics because they get erased due to filter graphics updates.
+  display.DrawFrequencyBarValue();  // This calls ShowBandwidth().  YES, this function is useful here.
+  display.DrawBandWidthIndicatorBar();
 
 //  Serial.printf("FLoCut = %d FHiCut = %d\n", bands.bands[ConfigData.currentBand].FLoCut, bands.bands[ConfigData.currentBand].FHiCut);
 }
@@ -109,9 +109,9 @@ void EncoderCenterTune() {
   TxRxFreq = ConfigData.centerFreq + NCOFreq;
   ConfigData.lastFrequencies[ConfigData.currentBand][ConfigData.activeVFO] = TxRxFreq;
   SetFreq();                    //  Change to receiver tuning process.  KF5N July 22, 2023
-  DrawBandWidthIndicatorBar();  // AFP 10-20-22
-  ShowFrequency();
-  BandInformation();
+  display.DrawBandWidthIndicatorBar();  // AFP 10-20-22
+  display.ShowFrequency();
+  display.BandInformation();
 }
 
 
@@ -401,13 +401,13 @@ int SetWPM() {
     menu = readButton();
     if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
       ConfigData.currentWPM = lastWPM;
-      UpdateWPMField();
+      display.UpdateWPMField();
       break;
     }
   }
   eeprom.ConfigDataWrite();
   tft.setTextColor(RA8875_WHITE);
-  EraseMenus();
+  display.EraseMenus();
   return ConfigData.currentWPM;
 }
 
@@ -456,7 +456,7 @@ uint32_t SetTransmitDelay()
     }
   }
   tft.setTextColor(RA8875_WHITE);
-  EraseMenus();
+  display.EraseMenus();
   return ConfigData.cwTransmitDelay;
 }
 

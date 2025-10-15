@@ -15,42 +15,6 @@
 // BandInformation()
 //
 
-#define CLIP_AUDIO_PEAK 115  // The pixel value where audio peak overwrites S-meter
-#define INCREMENT_X WATERFALL_RIGHT_X + 25
-#define INCREMENT_Y WATERFALL_TOP_Y + 70
-#define SMETER_X WATERFALL_RIGHT_X + 16
-#define SMETER_Y YPIXELS * 0.22  // 480 * 0.22 = 106
-
-const uint16_t gradient[] = {  // Color array for waterfall background
-  0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9,
-  0x10, 0x1F, 0x11F, 0x19F, 0x23F, 0x2BF, 0x33F, 0x3BF, 0x43F, 0x4BF,
-  0x53F, 0x5BF, 0x63F, 0x6BF, 0x73F, 0x7FE, 0x7FA, 0x7F5, 0x7F0, 0x7EB,
-  0x7E6, 0x7E2, 0x17E0, 0x3FE0, 0x67E0, 0x8FE0, 0xB7E0, 0xD7E0, 0xFFE0, 0xFFC0,
-  0xFF80, 0xFF20, 0xFEE0, 0xFE80, 0xFE40, 0xFDE0, 0xFDA0, 0xFD40, 0xFD00, 0xFCA0,
-  0xFC60, 0xFC00, 0xFBC0, 0xFB60, 0xFB20, 0xFAC0, 0xFA80, 0xFA20, 0xF9E0, 0xF980,
-  0xF940, 0xF8E0, 0xF8A0, 0xF840, 0xF800, 0xF802, 0xF804, 0xF806, 0xF808, 0xF80A,
-  0xF80C, 0xF80E, 0xF810, 0xF812, 0xF814, 0xF816, 0xF818, 0xF81A, 0xF81C, 0xF81E,
-  0xF81E, 0xF81E, 0xF81E, 0xF83E, 0xF83E, 0xF83E, 0xF83E, 0xF85E, 0xF85E, 0xF85E,
-  0xF85E, 0xF87E, 0xF87E, 0xF83E, 0xF83E, 0xF83E, 0xF83E, 0xF85E, 0xF85E, 0xF85E,
-  0xF85E, 0xF87E, 0xF87E, 0xF87E, 0xF87E, 0xF87E, 0xF87E, 0xF87E, 0xF87E, 0xF87E,
-  0xF87E, 0xF87E, 0xF87E, 0xF87E, 0xF88F, 0xF88F, 0xF88F
-};
-
-int16_t spectrum_x = 10;
-uint16_t waterfall[MAX_WATERFALL_WIDTH];
-int maxYPlot;
-int filterWidthX;              // The current filter X.
-//uint8_t twinpeaks_tested = 2;  // initial value --> 2 !!
-uint8_t write_analog_gain = 0;
-int16_t pos_x_time = 390;  // 14;
-int16_t pos_y_time = 5;    //114;
-float xExpand = 1.4;       //
-int16_t spectrum_pos_centre_f = 64 * xExpand;
-int pos_centre_f = 64;
-int smeterLength;
-float CPU_temperature = 0.0;
-double elapsed_micros_mean;
-
 
 /*****
   Purpose: Draw audio spectrum box.  AFP added 3-14-21
@@ -60,7 +24,7 @@ double elapsed_micros_mean;
   Return value;
     void
 *****/
-void DrawAudioSpectContainer() {
+void Display::DrawAudioSpectContainer() {
   tft.writeTo(L1);
   tft.drawRect(BAND_INDICATOR_X - 9, SPECTRUM_BOTTOM - 118, 255, 118, RA8875_GREEN);
   tft.setFontScale((enum RA8875tsize)0);
@@ -83,7 +47,7 @@ void DrawAudioSpectContainer() {
   Return value;
     void
 *****/
-void ShowName() {
+void Display::ShowName() {
   tft.fillRect(RIGNAME_X_OFFSET, 0, XPIXELS - RIGNAME_X_OFFSET, tft.getFontHeight(), RA8875_BLACK);
   tft.setFontScale((enum RA8875tsize)1);
   tft.setTextColor(RA8875_YELLOW);
@@ -114,7 +78,7 @@ void ShowName() {
   Return value;
     void
 *****/
-void ShowSpectrum() {
+void Display::ShowSpectrum() {
 #define LOWERPIXTARGET 13  //  HB start
 #define UPPERPIXTARGET 15
 
@@ -332,7 +296,7 @@ void ShowSpectrum() {
         // M = demod_mode, FU & FL upper & lower frequency
         // this routine prints the frequency bars under the spectrum display
 *****/
-void ShowBandwidth() {
+void Display::ShowBandwidth() {
   char buff[10];
   int centerLine = (MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2;
   int pos_left;
@@ -379,13 +343,13 @@ const float pixels_per_s = 12;
 const float pixels_per_s = 12.2;
 #endif
 /*****
-  Purpose: DrawSMeterContainer()
+  Purpose: Draw the S-meter container.
   Parameter list:
     void
   Return value;
     void
 *****/
-void DrawSMeterContainer() {
+void Display::DrawSMeterContainer() {
   int i;
   // DB2OO, 30-AUG-23: the white line must only go till S9
   tft.drawFastHLine(SMETER_X, SMETER_Y - 1, 9 * pixels_per_s, RA8875_WHITE);
@@ -444,7 +408,7 @@ void DrawSMeterContainer() {
   Return value;
     void
 *****/
-void ShowSpectrumdBScale() {
+void Display::ShowSpectrumdBScale() {
   tft.setFontScale((enum RA8875tsize)0);
   tft.fillRect(SPECTRUM_LEFT_X + 1, SPECTRUM_TOP_Y + 2, 33, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(SPECTRUM_LEFT_X + 5, SPECTRUM_TOP_Y + 2);
@@ -454,13 +418,13 @@ void ShowSpectrumdBScale() {
 
 
 /*****
-  Purpose: This function draws spectrum display container
+  Purpose: This function draws spectrum display container.
   Parameter list:
     void
   Return value;
     void
 *****/
-void DrawSpectrumDisplayContainer() {
+void Display::DrawSpectrumDisplayContainer() {
   if (calOnFlag)
     tft.drawRect(SPECTRUM_LEFT_X - 1, SPECTRUM_TOP_Y, MAX_WATERFALL_WIDTH + 2, 362, RA8875_YELLOW);  // Spectrum box for calibration.
   else {
@@ -472,7 +436,7 @@ void DrawSpectrumDisplayContainer() {
 
 /*****
   Purpose: This function draws the frequency bar at the bottom of the spectrum scope, putting markers at every
-            graticule and the full frequency
+            graticule and the full frequency.
 
   Parameter list:
     void
@@ -480,7 +444,7 @@ void DrawSpectrumDisplayContainer() {
   Return value;
     void
 *****/
-void DrawFrequencyBarValue() {
+void Display::DrawFrequencyBarValue() {
   char txt[16];
   int bignum;
   int centerIdx;
@@ -577,7 +541,7 @@ void DrawFrequencyBarValue() {
   Return value;
     void
 *****/
-void ShowAutoStatus() {
+void Display::ShowAutoStatus() {
   tft.setFontScale((enum RA8875tsize)0);
   tft.fillRect(SPECTRUM_LEFT_X + 350, SPECTRUM_TOP_Y + 2, 130, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(SPECTRUM_LEFT_X + 350, SPECTRUM_TOP_Y + 2);
@@ -592,7 +556,7 @@ void ShowAutoStatus() {
 
 
 /*****
-  Purpose: To display the current transmission frequency, band, mode, and sideband above the spectrum display
+  Purpose: To display the current transmission frequency, band, mode, and sideband above the spectrum display.
 
   Parameter list:
     void
@@ -601,7 +565,7 @@ void ShowAutoStatus() {
     void
 
 *****/
-void BandInformation()  // SSB or CW
+void Display::BandInformation()
 {
   std::string CWFilter[] = { "0.8kHz", "1.0kHz", "1.3kHz", "1.8kHz", "2.0kHz", " Off " };
 
@@ -693,7 +657,7 @@ void BandInformation()  // SSB or CW
 
 
 /*****
-  Purpose: Display current power setting
+  Purpose: Display current power setting.
 
   Parameter list:
     void
@@ -701,7 +665,7 @@ void BandInformation()  // SSB or CW
   Return value;
     void
 *****/
-void ShowCurrentPowerSetting() {
+void Display::ShowCurrentPowerSetting() {
   tft.setFontScale((enum RA8875tsize)0);
   tft.fillRect(OPERATION_STATS_X + 275, FREQUENCY_Y + 30, tft.getFontWidth() * 11, tft.getFontHeight(), RA8875_BLACK);  // Clear top-left menu area
   tft.setCursor(OPERATION_STATS_X + 275, FREQUENCY_Y + 30);
@@ -713,14 +677,14 @@ void ShowCurrentPowerSetting() {
 
 
 /*****
-  Purpose: Format frequency for printing
+  Purpose: Format frequency for printing.
   Parameter list:
     void
   Return value;
     void
     // show frequency
 *****/
-void FormatFrequency(uint32_t freq, char *freqBuffer) {
+void Display::FormatFrequency(uint32_t freq, char *freqBuffer) {
   char outBuffer[15];
   int i;
   int len;
@@ -781,7 +745,7 @@ void FormatFrequency(uint32_t freq, char *freqBuffer) {
     void
     // show frequency
 *****/
-void ShowFrequency() {
+void Display::ShowFrequency() {
   char freqBuffer[15] = "              ";  // Initialize to blanks.
   if (ConfigData.activeVFO == VFO_A) {  // Needed for edge checking
     ConfigData.currentBand = ConfigData.currentBandA;
@@ -830,13 +794,13 @@ void ShowFrequency() {
 
 
 /*****
-  Purpose: Display dBm
+  Purpose: Display signal level in dBm.
   Parameter list:
     void
   Return value;
     void
 *****/
-void DisplaydbM() {
+void Display::DisplaydbM() {
   char buff[10];
   const char *unit_label;
   int16_t smeterPad;
@@ -912,7 +876,7 @@ void DisplaydbM() {
 
 
 /*****
-  Purpose: Display the current temperature and load figures for T4.1
+  Purpose: Display the current temperature and load figures for Teensy 4.1.
 
   Parameter list:
     int notchF        the notch to use
@@ -921,7 +885,7 @@ void DisplaydbM() {
   Return value;
     void
 *****/
-void ShowTempAndLoad() {
+void Display::ShowTempAndLoad() {
   char buff[10];
   int valueColor = RA8875_GREEN;
   double block_time;
@@ -963,7 +927,7 @@ void ShowTempAndLoad() {
 }
 
 /*****
-  Purpose: format a floating point number
+  Purpose: Format a floating point number.
 
   Parameter list:
     float val         the value to format
@@ -974,7 +938,7 @@ void ShowTempAndLoad() {
   Return value;
     void
 *****/
-void MyDrawFloat(float val, int decimals, int x, int y, char *buff) {
+void Display::MyDrawFloat(float val, int decimals, int x, int y, char *buff) {
   dtostrf(val, FLOAT_PRECISION, decimals, buff);  // Use 8 as that is the max prevision on a float
 
   tft.fillRect(x + 15, y, 12 * sizeof(buff), 15, RA8875_BLACK);
@@ -993,14 +957,14 @@ void MyDrawFloat(float val, int decimals, int x, int y, char *buff) {
   Return value;
     void
 *****/
-FLASHMEM void UpdateInfoWindow() {
+void Display::UpdateInfoWindow() {
   tft.fillRect(INFORMATION_WINDOW_X - 8, INFORMATION_WINDOW_Y, 250, 170, RA8875_BLACK);    // Clear fields
   tft.drawRect(BAND_INDICATOR_X - 10, BAND_INDICATOR_Y - 2, 260, 200, RA8875_LIGHT_GREY);  // Redraw Info Window
 }
 
 
 /*****
-  Purpose: Updates the states of the speaker and headphone.
+  Purpose: Updates the displayed states of the speaker and headphone.
 
   Parameter list:
     void
@@ -1008,7 +972,7 @@ FLASHMEM void UpdateInfoWindow() {
   Return value;
     void
 *****/
-void UpdateAudioField() {
+void Display::UpdateAudioField() {
   tft.setFontScale((enum RA8875tsize)0);
   tft.setCursor(670, 365);
   tft.fillRect(670, 365, 115, 30, RA8875_BLACK);  // Erase previous states.
@@ -1043,16 +1007,11 @@ void UpdateAudioField() {
     default:
       break;
   }
-
-  //  tft.setTextColor(RA8875_GREEN);
-  //  tft.fillRect(BAND_INDICATOR_X + 90, BAND_INDICATOR_Y, tft.getFontWidth() * 3 + 2, tft.getFontHeight(), RA8875_BLACK);
-  //  tft.setCursor(FIELD_OFFSET_X, BAND_INDICATOR_Y);
-  //  tft.print(ConfigData.audioVolume);
 }
 
 
 /*****
-  Purpose: Updates the Volume setting on the display
+  Purpose: Updates the Volume setting on the display.
 
   Parameter list:
     void
@@ -1060,9 +1019,8 @@ void UpdateAudioField() {
   Return value;
     void
 *****/
-void UpdateVolumeField() {
+void Display::UpdateVolumeField() {
   tft.setFontScale((enum RA8875tsize)1);
-
   tft.setCursor(BAND_INDICATOR_X + 10, BAND_INDICATOR_Y);  // Volume
   tft.setTextColor(RA8875_WHITE);
   tft.print("Vol:");
@@ -1073,7 +1031,16 @@ void UpdateVolumeField() {
 }
 
 
-void UpdateAGCField() {
+/*****
+  Purpose: Updates the AGC setting on the display.
+
+  Parameter list:
+    void
+
+  Return value;
+    void
+*****/
+void Display::UpdateAGCField() {
   tft.setFontScale((enum RA8875tsize)1);
   tft.fillRect(AGC_X_OFFSET - 10, AGC_Y_OFFSET, tft.getFontWidth() * 7 + 2, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(BAND_INDICATOR_X + 133, BAND_INDICATOR_Y);
@@ -1156,7 +1123,7 @@ void DisplayAGC() {
 */
 
 /*****
-  Purpose: Updates the increment setting on the display
+  Purpose: Updates the frequency increment setting on the display.
 
   Parameter list:
     void
@@ -1164,7 +1131,7 @@ void DisplayAGC() {
   Return value;
     void
 *****/
-void DisplayIncrementField() {
+void Display::DisplayIncrementField() {
   tft.setFontScale((enum RA8875tsize)0);
   tft.setTextColor(RA8875_WHITE);  // Frequency increment
   tft.setCursor(INCREMENT_X + 100, INCREMENT_Y - 1);
@@ -1185,7 +1152,7 @@ void DisplayIncrementField() {
 
 
 /*****
-  Purpose: Updates the notch value on the display
+  Purpose: Updates the notch value on the display.
 
   Parameter list:
     void
@@ -1193,7 +1160,7 @@ void DisplayIncrementField() {
   Return value;
     void
 *****/
-void UpdateNotchField() {
+void Display::UpdateNotchField() {
   tft.setFontScale((enum RA8875tsize)0);
 
   if (NR_first_time == 0) {  // Notch setting
@@ -1214,7 +1181,7 @@ void UpdateNotchField() {
 }
 
 /*****
-  Purpose: Updates the zoom setting on the display
+  Purpose: Updates the zoom setting on the display.
 
   Parameter list:
     void
@@ -1222,7 +1189,7 @@ void UpdateNotchField() {
   Return value;
     void
 *****/
-void UpdateZoomField() {
+void Display::UpdateZoomField() {
   tft.setFontScale((enum RA8875tsize)0);
 
   tft.fillRect(ZOOM_X, ZOOM_Y, 80, tft.getFontHeight(), RA8875_BLACK);
@@ -1244,7 +1211,7 @@ void UpdateZoomField() {
   Return value;
     void
 *****/
-void UpdateCompressionField()  // JJP 8/26/2023
+void Display::UpdateCompressionField()  // JJP 8/26/2023
 {
   tft.fillRect(COMPRESSION_X, COMPRESSION_Y - 2, 175, 15, RA8875_BLACK);
   tft.setFontScale((enum RA8875tsize)0);
@@ -1264,7 +1231,7 @@ void UpdateCompressionField()  // JJP 8/26/2023
 
 
 /*****
-  Purpose: Updates whether the decoder is on or off and decoder related graphics including CW, highpass, and lowpass filter bandwidths.
+  Purpose: Updates Morse decoder related graphics including CW, highpass, and lowpass filter bandwidths.
 
   Parameter list:
     void
@@ -1272,7 +1239,7 @@ void UpdateCompressionField()  // JJP 8/26/2023
   Return value;
     void
 *****/
-FLASHMEM void UpdateAudioGraphics() {
+void Display::UpdateAudioGraphics() {
   float CWFilterPosition = 0.0;
   // Update text
   tft.setFontScale((enum RA8875tsize)0);
@@ -1387,8 +1354,7 @@ FLASHMEM void UpdateAudioGraphics() {
 
 
 /*****
-  Purpose: Updates the Rx and Tx equalizer states
-           shown on the display.
+  Purpose: Updates the displayed Rx and Tx equalizer states.
 
   Parameter list:
     bool rxEqState, txEqState
@@ -1396,7 +1362,7 @@ FLASHMEM void UpdateAudioGraphics() {
   Return value;
     void
 *****/
-FLASHMEM void UpdateEqualizerField(bool rxEqState, bool txEqState) {
+void Display::UpdateEqualizerField(bool rxEqState, bool txEqState) {
   tft.setFontScale((enum RA8875tsize)0);
   tft.fillRect(FIELD_OFFSET_X, DECODER_Y + 15, tft.getFontWidth() * 15, tft.getFontHeight() + 2, RA8875_BLACK);
   tft.setTextColor(RA8875_WHITE);  // Display zoom factor
@@ -1435,7 +1401,7 @@ FLASHMEM void UpdateEqualizerField(bool rxEqState, bool txEqState) {
 
 
 /*****
-  Purpose: Updates the Keyer and WPM setting on the display
+  Purpose: Updates the displayed Keyer and WPM settings.
 
   Parameter list:
     void
@@ -1443,7 +1409,7 @@ FLASHMEM void UpdateEqualizerField(bool rxEqState, bool txEqState) {
   Return value;
     void
 *****/
-void UpdateWPMField() {
+void Display::UpdateWPMField() {
   tft.setFontScale((enum RA8875tsize)0);
 
   tft.setTextColor(RA8875_WHITE);  // Display zoom factor
@@ -1470,7 +1436,7 @@ void UpdateWPMField() {
 
 
 /*****
-  Purpose: Updates the noise field on the display
+  Purpose: Updates the noise field on the display.
 
   Parameter list:
     void
@@ -1478,7 +1444,7 @@ void UpdateWPMField() {
   Return value;
     void
 *****/
-void UpdateNoiseField() {
+void Display::UpdateNoiseField() {
   const char *filter[] = { "Off", "Kim", "Spec", "LMS" };  //AFP 09-19-22
   tft.setFontScale((enum RA8875tsize)0);
   tft.fillRect(FIELD_OFFSET_X, NOISE_REDUCE_Y, 35, tft.getFontHeight(), RA8875_BLACK);
@@ -1492,7 +1458,7 @@ void UpdateNoiseField() {
 
 
 /*****
-  Purpose: This function draws the Info Window frame
+  Purpose: This function draws the Info Window frame.
 
   Parameter list:
     void
@@ -1500,7 +1466,7 @@ void UpdateNoiseField() {
   Return value;
     void
 *****/
-void DrawInfoWindowFrame() {
+void Display::DrawInfoWindowFrame() {
   tft.drawRect(BAND_INDICATOR_X - 10, BAND_INDICATOR_Y - 2, 260, 200, RA8875_LIGHT_GREY);
   tft.fillRect(TEMP_X_OFFSET, TEMP_Y_OFFSET + 80, 80, tft.getFontHeight() + 10, RA8875_BLACK);  // Clear volume field
 }
@@ -1515,7 +1481,7 @@ void DrawInfoWindowFrame() {
   Return value;
     void
 *****/
-void RedrawDisplayScreen() {
+void Display::RedrawDisplayScreen() {
   tft.fillWindow();  // Clear the display.
   DrawAudioSpectContainer();
   DrawSpectrumDisplayContainer();
@@ -1555,7 +1521,7 @@ void RedrawDisplayScreen() {
   Return value;
     void
 *****/
-void DrawBandWidthIndicatorBar()  // AFP 10-30-22
+void Display::DrawBandWidthIndicatorBar()  // AFP 10-30-22
 {
   int Zoom1Offset = 0.0;
   float hz_per_pixel = 0.0;
@@ -1626,7 +1592,7 @@ void DrawBandWidthIndicatorBar()  // AFP 10-30-22
 }
 
 /*****
-  Purpose: This function removes the spectrum display container
+  Purpose: This function removes the spectrum display container.
 
   Parameter list:
     void
@@ -1634,75 +1600,33 @@ void DrawBandWidthIndicatorBar()  // AFP 10-30-22
   Return value;
     void
 *****/
-void EraseSpectrumDisplayContainer() {
+void Display::EraseSpectrumDisplayContainer() {
   tft.fillRect(SPECTRUM_LEFT_X - 2, SPECTRUM_TOP_Y - 1, MAX_WATERFALL_WIDTH + 6, SPECTRUM_HEIGHT + 8, RA8875_BLACK);  // Spectrum box
 }
 
 
 /*****
-  Purpose: This function erases the contents of the spectrum display
-
-  Parameter list:
-    void
-
-  Return value;
-    void
-*****/
-void EraseSpectrumWindow() {
-  tft.fillRect(SPECTRUM_LEFT_X, SPECTRUM_TOP_Y, MAX_WATERFALL_WIDTH, SPECTRUM_HEIGHT, RA8875_BLACK);  // Spectrum box
-}
-
-
-/*****
-  Purpose: To erase both primary and secondary menus from display
+  Purpose: Erases both primary and secondary menus from display.
 
   Parameter list:
 
   Return value;
     void
 *****/
-void EraseMenus() {
+void Display::EraseMenus() {
   tft.fillRect(PRIMARY_MENU_X, MENUS_Y, BOTH_MENU_WIDTHS, CHAR_HEIGHT + 1, RA8875_BLACK);  // Erase menu choices
 }
 
 
 /*****
-  Purpose: To erase primary menu from display
+  Purpose: Shows transmit (red) and receive (green) mode.
 
   Parameter list:
 
   Return value;
     void
 *****/
-void ErasePrimaryMenu() {
-  tft.fillRect(PRIMARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH, CHAR_HEIGHT + 1, RA8875_BLACK);  // Erase menu choices
-  //  menuStatus = NO_MENUS_ACTIVE;                                                           // Change menu state
-}
-
-
-/*****
-  Purpose: To erase secondary menu from display
-
-  Parameter list:
-
-  Return value;
-    void
-*****/
-void EraseSecondaryMenu() {
-  tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH, CHAR_HEIGHT + 1, RA8875_BLACK);  // Erase menu choices
-  //  menuStatus = NO_MENUS_ACTIVE;                                                             // Change menu state
-}
-
-
-/*****
-  Purpose: Shows transmit (red) and receive (green) mode
-
-  Parameter list:
-
-  Return value;
-    void
-*****/
-void ShowTransmitReceiveStatus() {
+void Display::ShowTransmitReceiveStatus() {
   tft.setFontScale((enum RA8875tsize)1);
   tft.setTextColor(RA8875_BLACK);
   if (radioState == RadioState::SSB_TRANSMIT_STATE or radioState == RadioState::FT8_TRANSMIT_STATE or radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE

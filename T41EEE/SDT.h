@@ -440,7 +440,7 @@ extern struct calibration_t CalData;
 
 // Custom classes in the sketch.
 #include "Button.h"
-//#include "Display.h"
+#include "Display.h"
 #include "RxCalibrate.h"
 #include "TxCalibrate.h"
 #include "CW_Exciter.h"
@@ -579,6 +579,7 @@ extern Rotary fineTuneEncoder;  // (4,  5);
 
 extern Metro ms_500;
 
+extern Display display;
 extern ReceiveDSP process;              // Receiver DSP object.
 extern Eeprom eeprom;                // EEPROM memory object.
 extern JSON json;
@@ -931,9 +932,9 @@ void EncoderVolume();
 void EqualizerRecOptions();
 void EqualizerXmtOptions();
 void EraseMenus();
-void ErasePrimaryMenu();
+//void ErasePrimaryMenu();
 void EraseSpectrumDisplayContainer();
-void EraseSpectrumWindow();
+//void EraseSpectrumWindow();
 void FilterBandwidth();
 void FilterOverlay();
 void FilterSetSSB();

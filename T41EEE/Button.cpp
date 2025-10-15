@@ -194,7 +194,7 @@ void Button::ExecuteButtonPress(MenuSelect val) {
 
       ShowMenu(&topMenus[mainMenuIndex], PRIMARY_MENU);
       functionPtr[mainMenuIndex]();  // These are processed in MenuProcessing.cpp
-      EraseMenus();
+      display.EraseMenus();
       break;
 
     case MenuSelect::MAIN_MENU_UP:  // 1
@@ -205,7 +205,7 @@ void Button::ExecuteButtonPress(MenuSelect val) {
       break;
 
     case MenuSelect::BAND_UP:  // 2 Now calls ProcessIQData and Encoders calls
-      EraseMenus();
+      display.EraseMenus();
       ButtonBandIncrease();
       NCOFreq = 0L;
       break;
@@ -220,34 +220,34 @@ void Button::ExecuteButtonPress(MenuSelect val) {
       break;
 
     case MenuSelect::BAND_DN:  // 5
-      EraseMenus();
+      display.EraseMenus();
       ButtonBandDecrease();
       NCOFreq = 0L;
       break;
 
     case MenuSelect::FILTER:  // 6
-      EraseMenus();
+      display.EraseMenus();
       ButtonFilter();
       break;
 
     case MenuSelect::DEMODULATION:  // 7
-      EraseMenus();
+      display.EraseMenus();
       ButtonSelectSideband();
       break;
 
     case MenuSelect::SET_MODE:  // 8
       ButtonMode();
-      ShowSpectrumdBScale();
+      display.ShowSpectrumdBScale();
       break;
 
     case MenuSelect::NOISE_REDUCTION:  // 9
       ButtonNR();
-      UpdateNoiseField();  // This is required because LMS NR must turn off AutoNotch.
+      display.UpdateNoiseField();  // This is required because LMS NR must turn off AutoNotch.
       break;
 
     case MenuSelect::NOTCH_FILTER:  // 10
       ButtonNotchFilter();
-      UpdateNotchField();
+      display.UpdateNotchField();
       break;
 
     case MenuSelect::MUTE_AUDIO:  // 11.  Was noise floor.  Greg KF5N February 12, 2025
@@ -260,7 +260,7 @@ void Button::ExecuteButtonPress(MenuSelect val) {
 
     case MenuSelect::DECODER_TOGGLE:  // 13
       ConfigData.decoderFlag = not ConfigData.decoderFlag;
-      UpdateAudioGraphics();
+      display.UpdateAudioGraphics();
       break;
 
     case MenuSelect::MAIN_TUNE_INCREMENT:  // 14
@@ -313,7 +313,7 @@ void Button::ExecuteButtonPress(MenuSelect val) {
           break;
         }
       }
-      RedrawDisplayScreen();
+      display.RedrawDisplayScreen();
       break;
 
     case MenuSelect::BOGUS_PIN_READ:  // 18
@@ -348,7 +348,7 @@ void Button::ButtonCenterFreqIncrement() {
     index = 0;
   }
   ConfigData.centerTuneStep = centerTuneArray[index];
-  DisplayIncrementField();
+  display.DisplayIncrementField();
 }
 
 
@@ -373,7 +373,7 @@ void Button::ButtonFineFreqIncrement() {
     index = 0;
   }
   ConfigData.fineTuneStep = fineTuneArray[index];
-  DisplayIncrementField();
+  display.DisplayIncrementField();
 }
 
 
@@ -660,13 +660,13 @@ void Button::ButtonZoom() {
   else
     ConfigData.spectrum_zoom = zoomIndex;
   ZoomFFTPrep();
-  UpdateZoomField();
+  display.UpdateZoomField();
   tft.writeTo(L2);  // Clear layer 2.  KF5N July 31, 2023
   tft.clearMemory();
   tft.writeTo(L1);  // Always exit function in L1.  KF5N August 15, 2023
-  DrawBandWidthIndicatorBar();
-  DrawFrequencyBarValue();
-  ShowFrequency();
+  display.DrawBandWidthIndicatorBar();
+  display.DrawFrequencyBarValue();
+  display.ShowFrequency();
   ResetTuning();  // AFP 10-11-22
   FilterSetSSB();
 }
@@ -794,7 +794,7 @@ void Button::ButtonNR()  //AFP 09-19-22 update
     ConfigData.nrOptionSelect = 0;
   }
   if (ConfigData.nrOptionSelect == 3) ANR_notch = false;  // Turn off AutoNotch if LMS NR is selected.
-  UpdateNoiseField();
+  display.UpdateNoiseField();
 }
 
 
@@ -812,7 +812,7 @@ void Button::ButtonNotchFilter() {
   //  If the notch is activated and LMS NR is also active, turn off NR and update display.
   if (ANR_notch && ConfigData.nrOptionSelect == 3) {
     ConfigData.nrOptionSelect = 0;  // Turn off noise reduction.  Other NR selections will be valid.
-    UpdateNoiseField();
+    display.UpdateNoiseField();
   }
 }
 
@@ -855,7 +855,7 @@ void Button::ButtonMuteAudio() {
       break;
   }
   controlAudioOut(ConfigData.audioOut, false);  // Don't mute all.
-  UpdateAudioField();  // Update display.
+  display.UpdateAudioField();  // Update display.
 }
 
 
@@ -945,7 +945,7 @@ void Button::ButtonFrequencyEntry() {
                     0x31, 0x32, 0x33,
                     0x30, 0x7F, 0x7F,
                     0x7F, 0x7F, 0x99 };
-  EraseMenus();
+  display.EraseMenus();
 #ifdef show_FEHelp
   int keyCol[] = { YELLOW, RED, RED,
                    RA8875_BLUE, RA8875_GREEN, RA8875_GREEN,
@@ -1133,19 +1133,19 @@ void Button::ButtonFrequencyEntry() {
   }
   tft.fillRect(0, 0, 799, 479, RA8875_BLACK);  // Clear layer 2  JJP 7/23/23
   tft.writeTo(L1);
-  EraseSpectrumDisplayContainer();
-  DrawSpectrumDisplayContainer();
-  DrawFrequencyBarValue();
+  display.EraseSpectrumDisplayContainer();
+  display.DrawSpectrumDisplayContainer();
+  display.DrawFrequencyBarValue();
   //  SetBand();
   SetFreq();
-  ShowFrequency();
-  ShowSpectrumdBScale();
+  display.ShowFrequency();
+  display.ShowSpectrumdBScale();
   // Draw or not draw CW filter graphics to audio spectrum area.  KF5N July 30, 2023
   tft.writeTo(L2);
   tft.clearMemory();
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) BandInformation();
-  DrawBandWidthIndicatorBar();
-  RedrawDisplayScreen();  // KD0RC
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) display.BandInformation();
+  display.DrawBandWidthIndicatorBar();
+  display.RedrawDisplayScreen();  // KD0RC
   FilterSetSSB();
 }
 
@@ -1165,14 +1165,14 @@ void Button::ExecuteModeChange() {
   tft.writeTo(L2);  // Destroy the bandwidth indicator bar.  KF5N July 30, 2023
   tft.clearMemory();
   tft.writeTo(L1);
-  UpdateAudioGraphics();         // KF5N December 28 2023.
+  display.UpdateAudioGraphics();         // KF5N December 28 2023.
   FilterSetSSB();
   FilterBandwidth();
-  ShowBandwidth();
-  ShowFrequency();
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) BandInformation();
-  DrawBandWidthIndicatorBar();  // Restore the bandwidth indicator bar.  KF5N July 30, 2023
-  BandInformation();
+  display.ShowBandwidth();
+  display.ShowFrequency();
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) display.BandInformation();
+  display.DrawBandWidthIndicatorBar();  // Restore the bandwidth indicator bar.  KF5N July 30, 2023
+  display.BandInformation();
   fftOffset = 140;
 //  Serial.printf("Execute Mode Change\n");
   SetBandRelay();  // Set relays in LPF for current band.

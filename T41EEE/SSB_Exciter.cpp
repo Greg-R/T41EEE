@@ -191,11 +191,11 @@ void SetCompressionThreshold() {
     if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
       updateMic();
       eeprom.ConfigDataWrite();
-      UpdateCompressionField();
+      display.UpdateCompressionField();
       break;
     }
   }
-  EraseMenus();
+  display.EraseMenus();
 }
 
 
@@ -247,7 +247,7 @@ menu = readButton(lastUsedTask);
       break;
     }
   }
-  EraseMenus();
+  display.EraseMenus();
 }
 
 

@@ -35,6 +35,7 @@ bool agc_action = false;
 
 #include "ReceiveDSP.h"
 
+Display display;
 ReceiveDSP process;           // Receiver process object.
 RxCalibrate rxcalibrater;  // Instantiate the calibration objects.
 TxCalibrate txcalibrater;
@@ -976,7 +977,7 @@ FLASHMEM void setup() {
   Splash();
 
   //  Draw objects to the display.
-  RedrawDisplayScreen();
+  display.RedrawDisplayScreen();
 
   /****************************************************************************************
      start local oscillator Si5351
@@ -1112,14 +1113,14 @@ void loop() {
     case RadioState::SSB_RECEIVE_STATE:
       if (lastState != radioState) {  // G0ORX 01092023
         digitalWrite(RXTX, LOW);      //xmit off
-        ShowTransmitReceiveStatus();
+        display.ShowTransmitReceiveStatus();
       }
-      ShowSpectrum();
+      display.ShowSpectrum();
       break;
     case RadioState::SSB_TRANSMIT_STATE:
       digitalWrite(RXTX, HIGH);  //xmit on
 
-      ShowTransmitReceiveStatus();
+      display.ShowTransmitReceiveStatus();
       while (digitalRead(PTT) == LOW) {
         ExciterIQData();
 
@@ -1152,7 +1153,7 @@ void loop() {
     case RadioState::FT8_TRANSMIT_STATE:
       digitalWrite(RXTX, HIGH);  //xmit on
 
-      ShowTransmitReceiveStatus();
+      display.ShowTransmitReceiveStatus();
       while (SerialUSB1.rts() == HIGH) {
         ExciterIQData();
       }
@@ -1168,13 +1169,13 @@ void loop() {
   switch (radioState) {
     case RadioState::CW_RECEIVE_STATE:
       if (lastState != radioState) {  // G0ORX 01092023
-        ShowTransmitReceiveStatus();
+        display.ShowTransmitReceiveStatus();
         keyPressedOn = 0;
       }
-      ShowSpectrum();  // if removed CW signal on is 2 mS
+      display.ShowSpectrum();  // if removed CW signal on is 2 mS
       break;
     case RadioState::CW_TRANSMIT_STRAIGHT_STATE:
-      ShowTransmitReceiveStatus();
+      display.ShowTransmitReceiveStatus();
       cwKeyDown = false;  // false initiates CW_SHAPING_RISE.
       cwTimer = millis();
       while (millis() - cwTimer <= ConfigData.cwTransmitDelay) {  //Start CW transmit timer on
@@ -1202,7 +1203,7 @@ void loop() {
       digitalWrite(RXTX, LOW);  // End Straight Key Mode
       break;
     case RadioState::CW_TRANSMIT_KEYER_STATE:
-      ShowTransmitReceiveStatus();
+      display.ShowTransmitReceiveStatus();
       //      digitalWrite(MUTE, UNMUTEAUDIO);  // unmutes audio for sidetone
       cwTimer = millis();
       while (millis() - cwTimer <= ConfigData.cwTransmitDelay) {
@@ -1267,7 +1268,7 @@ void loop() {
   //  End radio state machine
   if (lastState != radioState) {  // G0ORX 09012023
     lastState = radioState;
-    ShowTransmitReceiveStatus();
+    display.ShowTransmitReceiveStatus();
   }
 
 #ifdef DEBUG1
@@ -1293,7 +1294,7 @@ void loop() {
     headphoneVolume.setGain(volumeLog[ConfigData.audioVolume]);
 
     volumeChangeFlag = false;
-    UpdateVolumeField();
+    display.UpdateVolumeField();
   }
   loopCounter = loopCounter + 1;
   if(loopCounter > 49) {

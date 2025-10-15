@@ -85,7 +85,7 @@ void SetFreq() {                              //AFP 09-22-22   Revised July 7 KF
     si5351.output_enable(SI5351_CLK2, 1);
   }
   //=====================  AFP 10-03-22 =================
-  DrawFrequencyBarValue();
+  display.DrawFrequencyBarValue();
 }
 #else
 /*****
@@ -188,9 +188,9 @@ void ResetTuning() {
   tft.writeTo(L2);                                 // Clear layer 2.  KF5N July 31, 2023
   tft.clearMemory();
   SetFreq();  // For new tuning scheme.  KF5N July 22, 2023
-  DrawBandWidthIndicatorBar();
-  BandInformation();
-  ShowFrequency();
+  display.DrawBandWidthIndicatorBar();
+  display.BandInformation();
+  display.ShowFrequency();
   //  UpdateAudioGraphics();  // Update Morse decoder if used.
   FilterSetSSB();
 }
@@ -261,7 +261,7 @@ int DoSplitVFO() {
     }
   }
   ConfigData.currentFreqB = ConfigData.currentFreqA + splitOffset;
-  FormatFrequency(ConfigData.currentFreqB, freqBuffer);
+  display.FormatFrequency(ConfigData.currentFreqB, freqBuffer);
   tft.fillRect(FREQUENCY_X_SPLIT, FREQUENCY_Y - 12, VFOB_PIXEL_LENGTH, FREQUENCY_PIXEL_HI, RA8875_BLACK);
   tft.setCursor(FREQUENCY_X_SPLIT, FREQUENCY_Y);
   tft.setFont(&FreeMonoBold24pt7b);
@@ -269,7 +269,7 @@ int DoSplitVFO() {
   tft.print(freqBuffer);  // Show VFO_A
 
   tft.setFont(&FreeMonoBold18pt7b);
-  FormatFrequency(ConfigData.currentFreqA, freqBuffer);
+  display.FormatFrequency(ConfigData.currentFreqA, freqBuffer);
   tft.setTextColor(RA8875_LIGHT_GREY);
   tft.setCursor(FREQUENCY_X, FREQUENCY_Y + 6);
   tft.print(freqBuffer);  // Show VFO_A

@@ -237,7 +237,7 @@ void Eeprom::SetFavoriteFrequency() {
 menu = readButton();
     delay(150L);
     if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
-      EraseMenus();
+      display.EraseMenus();
       ConfigData.favoriteFreqs[index] = TxRxFreq;
       //UpdateEEPROMSyncIndicator(0);       //  JJP 7/25/23
       if (ConfigData.activeVFO == VFO_A) {
@@ -247,10 +247,10 @@ menu = readButton();
       }
       //      EEPROMWrite();
       SetFreq();
-      BandInformation();
+      display.BandInformation();
 //      ShowBandwidth();
       FilterBandwidth();
-      ShowFrequency();
+      display.ShowFrequency();
       break;
     }
   }
@@ -341,24 +341,24 @@ MenuSelect menu = MenuSelect::DEFAULT;
       }
     }
     if (menu == MenuSelect::MENU_OPTION_SELECT) {
-      EraseSpectrumDisplayContainer();
+      display.EraseSpectrumDisplayContainer();
 //      currentMode = bands.bands[ConfigData.currentBand].mode;
-      DrawSpectrumDisplayContainer();
-      DrawFrequencyBarValue();
+      display.DrawSpectrumDisplayContainer();
+      display.DrawFrequencyBarValue();
 //      SetBandRelay();
       SetFreq();
-      ShowFrequency();
-      ShowSpectrumdBScale();
-      EraseMenus();
+      display.ShowFrequency();
+      display.ShowSpectrumdBScale();
+      display.EraseMenus();
       ResetTuning();
       FilterBandwidth();
-      BandInformation();
+      display.BandInformation();
       NCOFreq = 0L;
-      DrawBandWidthIndicatorBar();  // AFP 10-20-22
+      display.DrawBandWidthIndicatorBar();  // AFP 10-20-22
 //      digitalWrite(bandswitchPins[ConfigData.currentBand], LOW);
       SetFreq();
-      ShowSpectrumdBScale();
-      ShowSpectrum();
+      display.ShowSpectrumdBScale();
+      display.ShowSpectrum();
       //bands.bands[currentBand].mode = currentBand;
       return;
     }

@@ -158,9 +158,9 @@ void RxCalibrate::CalibratePreamble(int setZoom) {
   tft.fillRect(0, 272, 517, 399, RA8875_BLACK);  // Erase waterfall.  KF5N August 14, 2023
 
   tft.fillWindow();
-  DrawSpectrumDisplayContainer();
-  ShowFrequency();
-  BandInformation();
+  display.DrawSpectrumDisplayContainer();
+  display.ShowFrequency();
+  display.BandInformation();
 
   tft.writeTo(L2);  // Erase the bandwidth bar.  KF5N August 16, 2023
   tft.clearMemory();
@@ -191,7 +191,7 @@ void RxCalibrate::CalibratePreamble(int setZoom) {
   digitalWrite(MUTE, MUTEAUDIO);  //  Mute Audio  (HIGH=Mute)
   digitalWrite(RXTX, HIGH);       // Turn on transmitter.
   radioState = RadioState::RECEIVE_CALIBRATE_STATE;
-  ShowTransmitReceiveStatus();
+  display.ShowTransmitReceiveStatus();
   rawSpectrumPeak = 0;
   SetAudioOperatingState(radioState);  // Do this last!  This clears the queues.
 }
@@ -222,7 +222,7 @@ void RxCalibrate::CalibrateEpilogue(bool radioCal, bool saveToEeprom) {
 
   digitalWrite(RXTX, LOW);  // Turn off the transmitter.
   updateDisplayFlag = false;
-  ShowTransmitReceiveStatus();
+  display.ShowTransmitReceiveStatus();
   // Clear queues to reduce transient.
   ADC_RX_I.end();
   ADC_RX_I.clear();
@@ -234,7 +234,7 @@ void RxCalibrate::CalibrateEpilogue(bool radioCal, bool saveToEeprom) {
   ConfigData.CWOffset = cwFreqOffsetTemp;  // Return user selected CW offset frequency.
   sineTone(ConfigData.CWOffset + 6);       // This function takes "number of cycles" which is the offset + 6.
   ConfigData.currentScale = userScale;     //  Restore vertical scale to user preference.  KF5N
-  ShowSpectrumdBScale();
+  display.ShowSpectrumdBScale();
   ConfigData.transmitPowerLevel = transmitPowerLevelTemp;  // Restore the user's transmit power level setting.  KF5N August 15, 2023
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) bands.bands[ConfigData.currentBand].sideband = tempSideband;
   bands.bands[ConfigData.currentBand].mode = tempMode;
@@ -246,7 +246,7 @@ void RxCalibrate::CalibrateEpilogue(bool radioCal, bool saveToEeprom) {
   tft.clearMemory();
   tft.writeTo(L1);  // Exit function in layer 1.  KF5N August 3, 2023
   calOnFlag = false;
-  if (not radioCal) RedrawDisplayScreen();  // Redraw everything!
+  if (not radioCal) display.RedrawDisplayScreen();  // Redraw everything!
   else tft.fillWindow();                    // Clear the display.
   fftOffset = 0;                            // Some reboots may be caused by large fftOffset values when Auto-Spectrum is on.
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();

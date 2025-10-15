@@ -11,6 +11,8 @@
 // ConfigData Options
 // CalData Options
 
+// VFO Select
+
 #include "SDT.h"
 
 int micChoice = 0;
@@ -212,7 +214,7 @@ void CalibrateOptions() {
     case 16:  // Calibrate buttons
       SaveAnalogSwitchValues();
       calibrateFlag = 0;
-      RedrawDisplayScreen();
+      display.RedrawDisplayScreen();
       eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
@@ -459,7 +461,7 @@ void CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
     case 6:          // Type of key:
       SetKeyType();  // Straight key or keyer? Stored in ConfigData.keyType.
       SetKeyPowerUp();
-      UpdateWPMField();
+      display.UpdateWPMField();
       break;
 
     case 7:  // Flip paddles
@@ -502,7 +504,7 @@ void SpectrumOptions() { /*
   ConfigData.currentScale = spectrumSet;  // Yep...
   eeprom.ConfigDataWrite();
   //  RedrawDisplayScreen();
-  ShowSpectrumdBScale();
+  display.ShowSpectrumdBScale();
   lastState = RadioState::NOSTATE;  // Force update of operating state.
 }
 
@@ -557,13 +559,13 @@ void AGCOptions() {
     case 0:  // AGC On
       ConfigData.AGCMode = true;
       SetAudioOperatingState(radioState);
-      UpdateAGCField();
+      display.UpdateAGCField();
       break;
 
     case 1:  // AGC Off
       ConfigData.AGCMode = false;
       SetAudioOperatingState(radioState);
-      UpdateAGCField();
+      display.UpdateAGCField();
       break;
 
     case 2:  // Set AGC threshold
@@ -730,7 +732,7 @@ void ProcessEqualizerChoices(int EQType, char *title) {
     }    // end outer while
     eeprom.ConfigDataWrite();
   }
-  RedrawDisplayScreen();
+  display.RedrawDisplayScreen();
   lastState = RadioState::NOSTATE;  // Force update of operating state.
 }
 
@@ -767,7 +769,7 @@ void EqualizerRecOptions() {
   }
   eeprom.ConfigDataWrite();
   //  RedrawDisplayScreen();
-  UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
+  display.UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
 }
 
 
@@ -801,7 +803,7 @@ void EqualizerXmtOptions() {
   }
   eeprom.ConfigDataWrite();
   //  RedrawDisplayScreen();
-  UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
+  display.UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
 }
 
 
@@ -830,30 +832,30 @@ void SSBOptions()  // AFP 09-22-22 All new
       ConfigData.cessb = true;
       cessb1.setProcessing(ConfigData.cessb);
       //      Serial.printf("processing = %d", cessb1.getProcessing());
-      BandInformation();
+      display.BandInformation();
       break;
 
     case 1:  // SSB Data on
       ConfigData.cessb = false;
       cessb1.setProcessing(ConfigData.cessb);
       //      Serial.printf("processing = %d", cessb1.getProcessing());
-      BandInformation();
+      display.BandInformation();
       break;
 
     case 2:  // FT8
       ConfigData.cessb = false;
       cessb1.setProcessing(ConfigData.cessb);
-      BandInformation();
+      display.BandInformation();
       break;
 
     case 3:  // Compressor On
       ConfigData.compressorFlag = true;
-      UpdateCompressionField();
+      display.UpdateCompressionField();
       break;
 
     case 4:  // Compressor Off
       ConfigData.compressorFlag = false;
-      UpdateCompressionField();
+      display.UpdateCompressionField();
       break;
 
     case 5:  // Adjust mic gain in dB.  Default 0 db.
@@ -862,12 +864,12 @@ void SSBOptions()  // AFP 09-22-22 All new
 
     case 6:  // Set compression ratio.  Default -10 dB.
       SetCompressionThreshold();
-      UpdateCompressionField();
+      display.UpdateCompressionField();
       break;
 
     case 7:  // Set compressor threshold.  Default 100.0.
       SetCompressionRatio();
-      UpdateCompressionField();
+      display.UpdateCompressionField();
       break;
 
     case 8:  // IMD test.  This is a self-contained loop which uses the SSB exciter.
@@ -878,7 +880,7 @@ void SSBOptions()  // AFP 09-22-22 All new
       button.ExecuteModeChange();
       SetFreq();
       digitalWrite(RXTX, HIGH);  //xmit on
-      ShowTransmitReceiveStatus();
+      display.ShowTransmitReceiveStatus();
 
       while (menu != MenuSelect::MENU_OPTION_SELECT) {
         menu = readButton();  // Use this to quit.
@@ -893,7 +895,7 @@ void SSBOptions()  // AFP 09-22-22 All new
       digitalWrite(RXTX, LOW);  // Transmitter off.
       SetAudioOperatingState(radioState);
       button.ExecuteModeChange();
-      ShowTransmitReceiveStatus();
+      display.ShowTransmitReceiveStatus();
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // A button press?
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Exit.
           tft.fillRect(SECONDARY_MENU_X - 1, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT + 1, RA8875_BLACK);
@@ -937,7 +939,7 @@ void RFOptions() {
       initPowerCoefficients();
       eeprom.ConfigDataWrite();  //AFP 10-21-22
                                  //      BandInformation();
-      ShowCurrentPowerSetting();
+      display.ShowCurrentPowerSetting();
       break;
 
     case 1:  // Manual gain set.
@@ -949,27 +951,27 @@ void RFOptions() {
       ConfigData.autoGain = true;
       ConfigData.autoSpectrum = false;  // Make sure Auto-Spectrum is off.
                                         //      fftOffset = 0;
-      ShowAutoStatus();
+      display.ShowAutoStatus();
       eeprom.ConfigDataWrite();
       break;
 
     case 3:  // Auto-Gain Off
       ConfigData.autoGain = false;
-      ShowAutoStatus();
+      display.ShowAutoStatus();
       eeprom.ConfigDataWrite();
       break;
 
     case 4:  // Auto-Spectrum On
       ConfigData.autoSpectrum = true;
       ConfigData.autoGain = false;  // Make sure Auto-Gain is off.
-      ShowAutoStatus();
+      display.ShowAutoStatus();
       eeprom.ConfigDataWrite();
       break;
 
     case 5:  // Auto-Spectrum Off
       ConfigData.autoSpectrum = false;
       //      fftOffset = 0;
-      ShowAutoStatus();
+      display.ShowAutoStatus();
       eeprom.ConfigDataWrite();
       break;
 
@@ -1024,8 +1026,8 @@ void DoPaddleFlip() {
         ConfigData.paddleDah = KEYER_DAH_INPUT_RING;
         ConfigData.paddleFlip = 0;  // KD0RC
       }
-      EraseMenus();
-      UpdateWPMField();  // KD0RC
+      display.EraseMenus();
+      display.UpdateWPMField();  // KD0RC
       break;
     }
   }
@@ -1048,7 +1050,7 @@ void VFOSelect() {
   int choice, lastChoice;
 
   choice = lastChoice = toggle = ConfigData.activeVFO;
-  splitOn = 0;
+//  splitOn = 0;
 
   tft.setTextColor(RA8875_BLACK);
   tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH, CHAR_HEIGHT, RA8875_GREEN);
@@ -1056,7 +1058,7 @@ void VFOSelect() {
   tft.print(VFOOptions[choice].c_str());  // Show the default (right paddle = dah
 
   choice = SubmenuSelect(VFOOptions, 4, 0);
-  delay(10);
+//  delay(10);
   NCOFreq = 0L;
   switch (choice) {
     case VFO_A:  // VFO A
@@ -1064,7 +1066,7 @@ void VFOSelect() {
       ConfigData.activeVFO = VFO_A;
       ConfigData.currentBand = ConfigData.currentBandA;
       tft.fillRect(FILTER_PARAMETERS_X + 180, FILTER_PARAMETERS_Y, 150, 20, RA8875_BLACK);  // Erase split message
-      splitOn = 0;
+//      splitOn = 0;
       break;
 
     case VFO_B:  // VFO B
@@ -1072,12 +1074,12 @@ void VFOSelect() {
       ConfigData.activeVFO = VFO_B;
       ConfigData.currentBand = ConfigData.currentBandB;
       tft.fillRect(FILTER_PARAMETERS_X + 180, FILTER_PARAMETERS_Y, 150, 20, RA8875_BLACK);  // Erase split message
-      splitOn = 0;
+//      splitOn = 0;
       break;
 
     case VFO_SPLIT:  // Split
       DoSplitVFO();
-      splitOn = 1;
+//      splitOn = 1;
       break;
 
     default:  // Cancel
@@ -1097,7 +1099,7 @@ void VFOSelect() {
   // Draw or not draw CW filter graphics to audio spectrum area.  KF5N July 30, 2023
   tft.writeTo(L2);
   tft.clearMemory();
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) BandInformation();
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) display.BandInformation();
   //  DrawBandWidthIndicatorBar();
   //  DrawFrequencyBarValue();
   //  UpdateAudioGraphics();
@@ -1149,7 +1151,7 @@ void ConfigDataOptions() {  //           0               1                2     
       tft.writeTo(L2);                                     // This is specifically to clear the bandwidth indicator bar.  KF5N August 7, 2023
       tft.clearMemory();
       tft.writeTo(L1);
-      RedrawDisplayScreen();  // Assume there are lots of changes and do a heavy-duty refresh.  KF5N August 7, 2023
+      display.RedrawDisplayScreen();  // Assume there are lots of changes and do a heavy-duty refresh.  KF5N August 7, 2023
       break;
 
     case 6:  // ConfigData->Serial
@@ -1227,7 +1229,7 @@ void CalDataOptions() {  //           0               1                2        
       tft.writeTo(L2);                             // This is specifically to clear the bandwidth indicator bar.  KF5N August 7, 2023
       tft.clearMemory();
       tft.writeTo(L1);
-      RedrawDisplayScreen();  // Assume there are lots of changes and do a heavy-duty refresh.  KF5N August 7, 2023
+      display.RedrawDisplayScreen();  // Assume there are lots of changes and do a heavy-duty refresh.  KF5N August 7, 2023
       break;
 
     case 4:  // CalData->Serial
@@ -1306,7 +1308,7 @@ int SubmenuSelect(const std::string options[], int numberOfChoices, int defaultS
       switch (menu) {
         case MenuSelect::MENU_OPTION_SELECT:  // They made a choice
           tft.setTextColor(RA8875_WHITE);
-          EraseMenus();
+          display.EraseMenus();
           return encoderReturnValue;
           break;
 
@@ -1376,7 +1378,7 @@ int SubmenuSelectString(std::string options[], int numberOfChoices, int defaultS
       switch (menu) {
         case MenuSelect::MENU_OPTION_SELECT:  // They made a choice
           tft.setTextColor(RA8875_WHITE);
-          EraseMenus();
+          display.EraseMenus();
           return encoderReturnValue;
           break;
 

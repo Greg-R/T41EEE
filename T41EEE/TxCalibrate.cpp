@@ -259,9 +259,9 @@ void TxCalibrate::CalibratePreamble(int setZoom) {
   tft.fillRect(0, 272, 517, 399, RA8875_BLACK);  // Erase waterfall.  KF5N August 14, 2023
 
   tft.fillWindow();
-  DrawSpectrumDisplayContainer();
-  ShowFrequency();
-  BandInformation();
+  display.DrawSpectrumDisplayContainer();
+  display.ShowFrequency();
+  display.BandInformation();
 
   tft.writeTo(L2);  // Erase the bandwidth bar.  KF5N August 16, 2023
   tft.clearMemory();
@@ -292,7 +292,7 @@ void TxCalibrate::CalibratePreamble(int setZoom) {
   rawSpectrumPeak = 0;
   if(mode == 0) radioState = RadioState::CW_CALIBRATE_STATE;  
   if(mode == 1) radioState = RadioState::SSB_CALIBRATE_STATE;
-  ShowTransmitReceiveStatus();
+  display.ShowTransmitReceiveStatus();
   SetAudioOperatingState(radioState);  // Do this last!  This turns the queues on.
 }
 
@@ -341,7 +341,7 @@ void TxCalibrate::CalibrateEpilogue() {
   tft.clearMemory();
   tft.writeTo(L1);  // Exit function in layer 1.  KF5N August 3, 2023
   calOnFlag = false;
-  if (not TxCalibrate::radioCal) RedrawDisplayScreen();  // Redraw everything!
+  if (not TxCalibrate::radioCal) display.RedrawDisplayScreen();  // Redraw everything!
   else tft.fillWindow();                                 // Clear the display in radioCal.
   fftOffset = 0;                                         // Some reboots may be caused by large fftOffset values when Auto-Spectrum is on.
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
@@ -1090,7 +1090,7 @@ void TxCalibrate::RadioCal(int mode, bool refineCal) {
     SetBandRelay();
     TxRxFreq = calFrequencies[band][mode];  // [band][cw 0, ssb 1]
     ConfigData.centerFreq = TxRxFreq;
-    ShowFrequency();
+    display.ShowFrequency();
     SetFreq();
     button.ExecuteModeChange();
     if (band < 2) {
@@ -1112,7 +1112,7 @@ void TxCalibrate::RadioCal(int mode, bool refineCal) {
   if (mode == 0) CalData.CWradioCalComplete = true;
   if (mode == 1) CalData.SSBradioCalComplete = true;
   eeprom.CalDataWrite();
-  RedrawDisplayScreen();
+  display.RedrawDisplayScreen();
 }
 
 

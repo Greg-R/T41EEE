@@ -124,7 +124,7 @@ FLASHMEM void SelectCWFilter() {
 //  BandInformation();
 
 if(ConfigData.CWFilterIndex != 5) switchFilterSideband = true;  // Sets current delimiter to FLow.
-  UpdateAudioGraphics();  // This draws decoder delimiters and CW bandwidth box (red);
+  display.UpdateAudioGraphics();  // This draws decoder delimiters and CW bandwidth box (red);
   eeprom.ConfigDataWrite();
 }
 
@@ -147,7 +147,7 @@ FLASHMEM void SelectCWOffset() {
   tempCWOffset = ConfigData.CWOffset;
   tempDecoderFlag = ConfigData.decoderFlag;                                // Remember current status of decoder.
   ConfigData.decoderFlag = false;                                          // Set to false to erase decoder delimiters.
-  UpdateAudioGraphics();                                                    // Erase graphics if they exist.
+  display.UpdateAudioGraphics();                                                    // Erase graphics if they exist.
   ConfigData.decoderFlag = tempDecoderFlag;                                // Restore the decoder flag value.
   ConfigData.CWOffset = SubmenuSelect(CWOffsets, 5, ConfigData.CWOffset);  // CWFilter is an array of strings.
 
@@ -159,7 +159,7 @@ FLASHMEM void SelectCWOffset() {
   sineTone(numCycles[ConfigData.CWOffset]);  // This is for the CW decoder.
   cwexciter.writeSineBuffer(numCycles[ConfigData.CWOffset]);
   }
-  UpdateAudioGraphics();
+  display.UpdateAudioGraphics();
   eeprom.ConfigDataWrite();  // Save to EEPROM.
 }
 
@@ -389,7 +389,7 @@ void SetSideToneVolume(bool speaker) {
       break;
     }
   }  // end while loop
-  EraseMenus();
+  display.EraseMenus();
   lastState = RadioState::NOSTATE;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 7, 2023
 }
 
