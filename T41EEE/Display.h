@@ -54,6 +54,7 @@ void ShowAutoStatus();  // Indicate Auto-Gain or Auto-Spectrum is active.
 void BandInformation();  // To display the current transmission frequency, band, mode, and sideband above the spectrum display
 void ShowCurrentPowerSetting();  // Display current power setting.
 void FormatFrequency(uint32_t freq, char *freqBuffer);  // Format frequency for printing.
+void SwitchVFO();  // Switch active VFO in the display.
 void ShowFrequency();  // Show Main frequency display at top.  This shows VFO A and VFO B.
 void DisplaydbM();  // Display signal level in dBm.
 void ShowTempAndLoad();  // Display the current temperature and load figures for Teensy 4.1.

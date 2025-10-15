@@ -565,8 +565,7 @@ void Display::ShowAutoStatus() {
     void
 
 *****/
-void Display::BandInformation()
-{
+void Display::BandInformation() {
   std::string CWFilter[] = { "0.8kHz", "1.0kHz", "1.3kHz", "1.8kHz", "2.0kHz", " Off " };
 
   tft.setFontScale((enum RA8875tsize)0);
@@ -736,59 +735,98 @@ void Display::FormatFrequency(uint32_t freq, char *freqBuffer) {
 
 
 /*****
+  Purpose: Used to swap the currently active VFO in the display.
+
+  Parameter list:
+    void
+
+  Return value
+    none
+*****/
+void Display::SwitchVFO() {
+  char freqBuffer[15] = "              ";                                       // Initialize to blanks.
+  tft.fillRect(0, FREQUENCY_Y - 8, tft.getFontWidth() * 33, 34, RA8875_BLACK);  // Erase both VFO frequencies.
+                                                                                // Write VFO A as active VFO.
+  if (ConfigData.activeVFO == VFO_A) {
+    if (TxRxFreq < bands.bands[ConfigData.currentBandA].fBandLow or TxRxFreq > bands.bands[ConfigData.currentBandA].fBandHigh) {
+      tft.setTextColor(RA8875_RED);  // Out of band
+    } else {
+      tft.setTextColor(RA8875_GREEN);  // In band
+    }
+    FormatFrequency(TxRxFreq, freqBuffer);
+    tft.setFontScale(3, 2);              // Larger font for active VFO.
+    tft.setCursor(0, FREQUENCY_Y - 18);  // To adjust for Greg's font change jjp 7/14/23
+    tft.print(freqBuffer);               // Print VFOA frequency.
+                                         // Now reduce the font of VFOB and print it.
+    tft.setFontScale(1, 2);              // Smaller font for inactive VFO.
+    tft.setTextColor(RA8875_LIGHT_GREY);
+    tft.setCursor(FREQUENCY_X_SPLIT + 60, FREQUENCY_Y - 18);
+    FormatFrequency(ConfigData.currentFreqB, freqBuffer);
+    tft.print(freqBuffer);  // Print VFOB frequency.
+  }
+  // Write VFO B as active VFO.
+  if (ConfigData.activeVFO == VFO_B) {
+    if (TxRxFreq < bands.bands[ConfigData.currentBandB].fBandLow or TxRxFreq > bands.bands[ConfigData.currentBandB].fBandHigh) {
+      tft.setTextColor(RA8875_RED);  // Out of band
+    } else {
+      tft.setTextColor(RA8875_GREEN);  // In band
+    }
+    FormatFrequency(TxRxFreq, freqBuffer);
+    tft.setFontScale(3, 2);                                   // Larger font for active VFO.
+    tft.setCursor(FREQUENCY_X_SPLIT - 80, FREQUENCY_Y - 18);  // To adjust for Greg's font change jjp 7/14/23
+    tft.print(freqBuffer);                                    // Print VFOB frequency.
+                                                              // Now reduce the font of VFOB and print it.
+    tft.setFontScale(1, 2);                                   // Smaller font for inactive VFO.
+    tft.setTextColor(RA8875_LIGHT_GREY);
+    tft.setCursor(0, FREQUENCY_Y - 18);
+    FormatFrequency(ConfigData.currentFreqB, freqBuffer);
+    tft.print(freqBuffer);  // Print VFOB frequency.
+  }
+}
+
+
+/*****
   Purpose: Show Main frequency display at top.  This shows currentFreqA and currentFreqB.
+           This function updates the active VFO only!  It is minimalist for smooth tuning.
 
   Parameter list:
     void
 
   Return value;
     void
-    // show frequency
 *****/
 void Display::ShowFrequency() {
   char freqBuffer[15] = "              ";  // Initialize to blanks.
-  if (ConfigData.activeVFO == VFO_A) {  // Needed for edge checking
+  if (ConfigData.activeVFO == VFO_A) {     // Needed for edge checking
     ConfigData.currentBand = ConfigData.currentBandA;
   } else {
     ConfigData.currentBand = ConfigData.currentBandB;
   }
-
+  // Update VFO A.
   if (ConfigData.activeVFO == VFO_A) {
     FormatFrequency(TxRxFreq, freqBuffer);
     tft.setFontScale(3, 2);  // JJP 7/15/23
+    // Change frequency readout to red if out of band to alert user.
     if (TxRxFreq < bands.bands[ConfigData.currentBandA].fBandLow or TxRxFreq > bands.bands[ConfigData.currentBandA].fBandHigh) {
       tft.setTextColor(RA8875_RED);  // Out of band
     } else {
       tft.setTextColor(RA8875_GREEN);  // In band
     }
-    tft.fillRect(0, FREQUENCY_Y - 8, tft.getFontWidth() * 10, 34, RA8875_BLACK);  // This erases VFOA.
-    tft.setCursor(0, FREQUENCY_Y - 17);                                                             // To adjust for Greg's font change jjp 7/14/23
-    tft.print(freqBuffer);                                                                          // Show VFO_A
-    tft.setFontScale(1, 2);                                                                         // JJP 7/15/23
-    tft.setTextColor(RA8875_LIGHT_GREY);
-    tft.setCursor(FREQUENCY_X_SPLIT + 60, FREQUENCY_Y - 15);
-    FormatFrequency(ConfigData.currentFreqB, freqBuffer);
-    tft.print(freqBuffer);
-  } else {  // Show VFO_B
+    tft.fillRect(0, FREQUENCY_Y - 8, tft.getFontWidth() * 10, 34, RA8875_BLACK);  // Erase VFOA frequency.
+    tft.setCursor(0, FREQUENCY_Y - 18);                                           // To adjust for Greg's font change jjp 7/14/23
+    tft.print(freqBuffer);                                                        // Show VFO_A
+  } else {                                                                        // Update VFO_B.
     FormatFrequency(TxRxFreq, freqBuffer);
-    tft.setFontScale(3, 2);                                                                                              // JJP 7/15/23
-                                                                                                                         //  tft.fillRect(FREQUENCY_X_SPLIT - 60, FREQUENCY_Y - 12, VFOB_PIXEL_LENGTH, FREQUENCY_PIXEL_HI, RA8875_BLACK);  //JJP 7/15/23
-    tft.fillRect(FREQUENCY_X_SPLIT - 60, FREQUENCY_Y - 14, tft.getFontWidth() * 10, tft.getFontHeight(), RA8875_BLACK);  //JJP 7/15/23
-    tft.setCursor(FREQUENCY_X_SPLIT - 60, FREQUENCY_Y - 12);
-    if (TxRxFreq < bands.bands[ConfigData.currentBandB].fBandLow || TxRxFreq > bands.bands[ConfigData.currentBandB].fBandHigh) {
+    tft.setFontScale(3, 2);
+    tft.fillRect(FREQUENCY_X_SPLIT - 76, FREQUENCY_Y - 8, tft.getFontWidth() * 10, 34, RA8875_BLACK);  // Erase VFOB frequency.
+    tft.setCursor(FREQUENCY_X_SPLIT - 80, FREQUENCY_Y - 18);
+    if (TxRxFreq < bands.bands[ConfigData.currentBandB].fBandLow or TxRxFreq > bands.bands[ConfigData.currentBandB].fBandHigh) {
       tft.setTextColor(RA8875_RED);
     } else {
       tft.setTextColor(RA8875_GREEN);
     }
-    tft.print(freqBuffer);   // Show VFO_A
-    tft.setFontScale(1, 2);  // JJP 7/15/23
-    FormatFrequency(TxRxFreq, freqBuffer);
-    tft.fillRect(0, FREQUENCY_Y - 14, tft.getFontWidth() * 10, tft.getFontHeight(), RA8875_BLACK);  // JJP 7/15/23
-    tft.setTextColor(RA8875_LIGHT_GREY);
-    tft.setCursor(20, FREQUENCY_Y - 17);
-    FormatFrequency(ConfigData.currentFreqA, freqBuffer);
-    tft.print(freqBuffer);  // Show VFO_A
-  }                         // end Show VFO_B
+    tft.print(freqBuffer);
+  }
   tft.setFontDefault();
 }
 
@@ -1508,6 +1546,7 @@ void Display::RedrawDisplayScreen() {
   UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
   UpdateAudioField();
   ShowCurrentPowerSetting();
+  SwitchVFO();                      // Prints both VFOA and VFOB frequencies.
   SetBandRelay();                   // Set LPF relays for current band.
   lastState = RadioState::NOSTATE;  // Force an update.
 }

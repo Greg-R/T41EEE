@@ -8,10 +8,12 @@
 // Receive Equalizer Options
 // SSB Options
 // RF Options
-// ConfigData Options
-// CalData Options
-
+// DoPaddleFlip
 // VFO Select
+// ConfigDataOptions
+// CalDataOptions
+// SubmenuSelect
+// SubmenuSelectString
 
 #include "SDT.h"
 
@@ -397,10 +399,9 @@ void CalibrateOptions() {
 #endif
 
 
-// ==============  AFP 10-22-22 ==================
 /*****
   Purpose: Present the CW options available to the user.  Change and store to ConfigData.
-
+==============  AFP 10-22-22 ==================
   Parameter list:
     void
 
@@ -409,12 +410,10 @@ void CalibrateOptions() {
 *****/
 void CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
 {
-  // const char *cwChoices[]{ "Decode Sens", "CW Filter", "CW Offset", "WPM", "Sidetone Volume", "Key Type", "Paddle Flip", "Transmit Delay", "Cancel" };
   std::string cwChoices[]{ "Decode Sens", "CW Filter", "CW Offset", "WPM", "Sidetone Speaker", "Sidetone Headpho",
                            "Key Type", "Paddle Flip", "Transmit Delay", "Cancel" };
   int CWChoice = 0;
   uint32_t morseDecodeSensitivityOld = 0;
-  //  uint32_t increment = 10;
   MenuSelect menu;
 
   if (morseDecodeAdjustFlag == false) {
@@ -487,13 +486,7 @@ void CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
   Return value
     int           an index into displayScale[] array, or -1 on cancel
 *****/
-void SpectrumOptions() { /*
-  dispSc displayScale[] =  //r *dbText,dBScale, baseOffset
-  {
-    {"20 dB/", 10.0, 24},
-    {"10 dB/", 20.0, 10},  // JJP 7/14/23
-  };
-  */
+void SpectrumOptions() {
   const std::string spectrumChoices[] = { "20 dB/unit", "10 dB/unit", "Cancel" };
   int spectrumSet = ConfigData.currentScale;  // JJP 7/14/23
 
@@ -503,57 +496,25 @@ void SpectrumOptions() { /*
   }
   ConfigData.currentScale = spectrumSet;  // Yep...
   eeprom.ConfigDataWrite();
-  //  RedrawDisplayScreen();
   display.ShowSpectrumdBScale();
   lastState = RadioState::NOSTATE;  // Force update of operating state.
 }
 
 
 /*****
-  Purpose: Select AGC option.
+  Purpose: Adjust the receiver's AGC configuration.
 
   Parameter list:
     void
 
   Return value
-    void
-*****
-void AGCOptions() {
-  const char *AGCChoices[] = { "AGC Off", "AGC Long", "AGC Slow", "AGC Medium", "AGC Fast", "Cancel" };  // G0ORX (Added Long) September 5, 2023
-
-  ConfigData.AGCMode = SubmenuSelect(AGCChoices, 6, ConfigData.AGCMode);  // G0ORX
-  if (ConfigData.AGCMode == 5) {
-    return;
-  }
-
-  AGCLoadValues();         // G0ORX September 5, 2023
-  ConfigData.ConfigDataWrite();    // ...save it
-  UpdateAGCField();
-}
-void AGCOptions() {
-//  const char *AGCChoices[] = { "AGC Off", "AGC Long", "AGC Slow", "AGC Medium", "AGC Fast", "Cancel" };  // G0ORX (Added Long) September 5, 2023
-  const char *AGCChoices[] = { "AGC Off", "AGC On", "Cancel" };  // AGC revised.  Greg KF5N February 26, 2025
-
-//  ConfigData.AGCMode = SubmenuSelect(AGCChoices, 6, ConfigData.AGCMode);  // G0ORX
-    ConfigData.AGCMode = SubmenuSelect(AGCChoices, 3, ConfigData.AGCMode);  // AGC revised.  Greg KF5N February 26, 2025
-
-  if (ConfigData.AGCMode == 2) {
-    return;
-  }
-SetAudioOperatingState(radioState);
-
-  eeprom.ConfigDataWrite();    // ...save it
-  UpdateAGCField();
-}
-*/
-
-
+    none
+*****/
 void AGCOptions() {
   const std::string AGCChoices[] = { "AGC On", "AGC Off", "AGC Threshold", "Cancel" };  // G0ORX (Added Long) September 5, 2023
   int agcSet = 0;
 
   agcSet = SubmenuSelect(AGCChoices, 4, ConfigData.AGCMode);  // G0ORX
-
 
   switch (agcSet) {
     case 0:  // AGC On
@@ -569,8 +530,6 @@ void AGCOptions() {
       break;
 
     case 2:  // Set AGC threshold
-             //      ConfigData.AGCThreshold = static_cast<float32_t>(GetEncoderValue(-60, -20, ConfigData.AGCThreshold, 1, "AGC Threshold"));
-             //      ConfigData.AGCThreshold = GetEncoderValueLiveString(-60.0, -20.0, ConfigData.AGCThreshold, 1.0, "AGC Thr ", false);
       ConfigData.AGCThreshold = static_cast<float32_t>(GetEncoderValue(-60, -20, ConfigData.AGCThreshold, 1, "AGC Threshold "));
 
       initializeAudioPaths();
@@ -597,8 +556,6 @@ void AGCOptions() {
     void
 *****/
 void ProcessEqualizerChoices(int EQType, char *title) {
-  //  for (int i = 0; i < EQUALIZER_CELL_COUNT; i++) {
-  //  }
 
   std::string rXeqFreq[14]{ " 200", " 250", " 315", " 400", " 500", " 630", " 800", "1000", "1250", "1600", "2000", "2500", "3150", "4000" };
   std::string tXeqFreq[14]{ "  50", "  71", " 100", " 141", " 200", " 283", " 400", " 566", " 800", "1131", "1600", "2263", "3200", "4526" };
@@ -768,19 +725,18 @@ void EqualizerRecOptions() {
       break;
   }
   eeprom.ConfigDataWrite();
-  //  RedrawDisplayScreen();
   display.UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
 }
 
 
 /*****
-  Purpose: Xmit EQ options
+  Purpose: Transmit equalizer options.
 
   Parameter list:
     void
 
   Return value
-    int           an index into the band array
+    none
 *****/
 void EqualizerXmtOptions() {
   const std::string XmtEQChoices[] = { "TX EQ On", "TX EQ Off", "TX EQSet", "Cancel" };  // Add code practice oscillator
@@ -807,7 +763,6 @@ void EqualizerXmtOptions() {
 }
 
 
-
 /*****
   Purpose: Set options for the SSB exciter.
 
@@ -815,7 +770,7 @@ void EqualizerXmtOptions() {
     void
 
   Return value
-    int           an index into the band array
+    none
 *****/
 void SSBOptions()  // AFP 09-22-22 All new
 {
@@ -831,14 +786,12 @@ void SSBOptions()  // AFP 09-22-22 All new
     case 0:  // CESSB on
       ConfigData.cessb = true;
       cessb1.setProcessing(ConfigData.cessb);
-      //      Serial.printf("processing = %d", cessb1.getProcessing());
       display.BandInformation();
       break;
 
     case 1:  // SSB Data on
       ConfigData.cessb = false;
       cessb1.setProcessing(ConfigData.cessb);
-      //      Serial.printf("processing = %d", cessb1.getProcessing());
       display.BandInformation();
       break;
 
@@ -917,16 +870,15 @@ void SSBOptions()  // AFP 09-22-22 All new
 
 
 /*****
-  Purpose: Present the bands available and return the selection
+  Purpose: RF related options adjustment.
 
   Parameter list:
     void
 
   Return value12
-    int           an index into the band array
+    none
 *****/
 void RFOptions() {
-  //  const char *rfOptions[] = { "TX Power Set", "RF Gain Set", "RF Auto-Gain On", "RF Auto-Gain Off", "Auto-Spectrum On", "AutoSpectrum Off", "Cancel" };
   const std::string rfOptions[] = { "TX Power Set", "RF Gain Set", "RF Auto-Gain On", "RF Auto-Gain Off", "Auto-Spectrum On", "AutoSpectrum Off", "Cancel" };
   int rfSet = 0;
   rfSet = SubmenuSelect(rfOptions, 7, rfSet);
@@ -982,7 +934,7 @@ void RFOptions() {
 
 
 /*****
-  Purpose: This option reverses the dit and dah paddles on the keyer
+  Purpose: This option reverses the dit and dah paddles on the keyer.
 
   Parameter list:
     void
@@ -994,7 +946,6 @@ void DoPaddleFlip() {
   const char *paddleState[] = { "Right paddle = dah", "Right paddle = dit" };
   int choice, lastChoice;
   MenuSelect pushButtonSwitchIndex;
-  //  int valPin;
 
   ConfigData.paddleDah = KEYER_DAH_INPUT_RING;  // Defaults
   ConfigData.paddleDit = KEYER_DIT_INPUT_TIP;
@@ -1007,8 +958,6 @@ void DoPaddleFlip() {
 
   while (true) {
     delay(150L);
-    //    valPin = ReadSelectedPushButton();                     // Poll buttons
-    //    if (valPin != -1) {                                    // button was pushed
     pushButtonSwitchIndex = readButton();  // Winner, winner...chicken dinner!
     if (pushButtonSwitchIndex == MenuSelect::MAIN_MENU_UP || pushButtonSwitchIndex == MenuSelect::MAIN_MENU_DN) {
       choice = !choice;  // Reverse the last choice
@@ -1036,13 +985,13 @@ void DoPaddleFlip() {
 
 
 /*****
-  Purpose: Used to change the currently active VFO
+  Purpose: Used to change the currently active VFO.
 
   Parameter list:
     void
 
   Return value
-    int             // the currently active VFO, A = 1, B = 0
+    none
 *****/
 void VFOSelect() {
   const std::string VFOOptions[] = { "VFO A", "VFO B", "VFO Split", "Cancel" };
@@ -1050,7 +999,6 @@ void VFOSelect() {
   int choice, lastChoice;
 
   choice = lastChoice = toggle = ConfigData.activeVFO;
-//  splitOn = 0;
 
   tft.setTextColor(RA8875_BLACK);
   tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH, CHAR_HEIGHT, RA8875_GREEN);
@@ -1058,51 +1006,31 @@ void VFOSelect() {
   tft.print(VFOOptions[choice].c_str());  // Show the default (right paddle = dah
 
   choice = SubmenuSelect(VFOOptions, 4, 0);
-//  delay(10);
   NCOFreq = 0L;
   switch (choice) {
     case VFO_A:  // VFO A
       ConfigData.centerFreq = TxRxFreq = ConfigData.currentFreqA;
       ConfigData.activeVFO = VFO_A;
       ConfigData.currentBand = ConfigData.currentBandA;
-      tft.fillRect(FILTER_PARAMETERS_X + 180, FILTER_PARAMETERS_Y, 150, 20, RA8875_BLACK);  // Erase split message
-//      splitOn = 0;
       break;
 
     case VFO_B:  // VFO B
       ConfigData.centerFreq = TxRxFreq = ConfigData.currentFreqB;
       ConfigData.activeVFO = VFO_B;
       ConfigData.currentBand = ConfigData.currentBandB;
-      tft.fillRect(FILTER_PARAMETERS_X + 180, FILTER_PARAMETERS_Y, 150, 20, RA8875_BLACK);  // Erase split message
-//      splitOn = 0;
+
       break;
 
     case VFO_SPLIT:  // Split
       DoSplitVFO();
-//      splitOn = 1;
+
       break;
 
     default:  // Cancel
       break;
   }
-  bands.bands[ConfigData.currentBand].freq = TxRxFreq;
-  //  SetBand();           // KF5N July 12, 2023
-  SetBandRelay();  // Required when switching VFOs. KF5N July 12, 2023
-  SetFreq();
-  //  RedrawDisplayScreen();
-  //  BandInformation();
-  //  ShowBandwidth();
-  FilterBandwidth();
-  tft.fillRect(FREQUENCY_X_SPLIT, FREQUENCY_Y - 12, VFOB_PIXEL_LENGTH, FREQUENCY_PIXEL_HI, RA8875_BLACK);  // delete old digit
-  tft.fillRect(FREQUENCY_X, FREQUENCY_Y - 12, VFOA_PIXEL_LENGTH, FREQUENCY_PIXEL_HI, RA8875_BLACK);        // delete old digit  tft.setFontScale( (enum RA8875tsize) 0);
-                                                                                                           //  ShowFrequency();
-  // Draw or not draw CW filter graphics to audio spectrum area.  KF5N July 30, 2023
-  tft.writeTo(L2);
-  tft.clearMemory();
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) display.BandInformation();
-  //  DrawBandWidthIndicatorBar();
-  //  DrawFrequencyBarValue();
-  //  UpdateAudioGraphics();
+  display.SwitchVFO();
+  button.ExecuteModeChange();
 }
 
 

@@ -905,10 +905,10 @@ void Button::ResetZoom(int zoomIndex1) {
     ConfigData.spectrum_zoom = zoomIndex1;
 
   ZoomFFTPrep();
-  UpdateZoomField();
-  DrawBandWidthIndicatorBar();
-  DrawFrequencyBarValue();
-  ShowFrequency();
+  display.UpdateZoomField();
+  display.DrawBandWidthIndicatorBar();
+  display.DrawFrequencyBarValue();
+  display.ShowFrequency();
 }
 
 

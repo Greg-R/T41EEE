@@ -906,8 +906,8 @@ void CWOptions();
 
 void CW_ExciterIQData(int shaping);  // AFP 08-18-22
 void DisplayClock();
-void DisplaydbM();
-void DisplayIncrementField();
+//void DisplaydbM();
+//void DisplayIncrementField();
 void DoCWDecoding(int audioValue);
 void DoCWReceiveProcessing();  //AFP 09-19-22
 void DoExciterEQ();
@@ -917,13 +917,12 @@ void DoGapHistogram(long val);
 int DoSplitVFO();
 void DoPaddleFlip();
 void DrawActiveLetter(int row, int horizontalSpacer, int whichLetterIndex, int keyWidth, int keyHeight);
-void DrawBandWidthIndicatorBar();  // AFP 03-27-22 Layers
-void DrawFrequencyBarValue();
-void DrawInfoWindowFrame();
+//void DrawBandWidthIndicatorBar();  // AFP 03-27-22 Layers
+//void DrawFrequencyBarValue();
+//void DrawInfoWindowFrame();
 void DrawKeyboard();
-void DrawSMeterContainer();
-void DrawSpectrumDisplayContainer();
-void DrawAudioSpectContainer();
+//void DrawSMeterContainer();
+//void DrawSpectrumDisplayContainer();
 
 void EncoderFineTune();
 void EncoderFilter();
@@ -931,15 +930,15 @@ void EncoderCenterTune();
 void EncoderVolume();
 void EqualizerRecOptions();
 void EqualizerXmtOptions();
-void EraseMenus();
+//void EraseMenus();
 //void ErasePrimaryMenu();
-void EraseSpectrumDisplayContainer();
+//void EraseSpectrumDisplayContainer();
 //void EraseSpectrumWindow();
 void FilterBandwidth();
 void FilterOverlay();
 void FilterSetSSB();
 int FindCountry(char *prefix);
-void FormatFrequency(uint32_t f, char *b);
+//void FormatFrequency(uint32_t f, char *b);
 void FreqShift1();
 void FreqShift2();
 float goertzel_mag(int numSamples, int TARGET_FREQUENCY, int SAMPLING_RATE, float *data);
@@ -968,14 +967,14 @@ float32_t log10f_fast(float32_t X);
 int ModeOptions();
 //DB2OO, 29-AUG-23: added
 void MorseCharacterDisplay(char currentLetter);
-void MyDrawFloat(float val, int decimals, int x, int y, char *buff);
+//void MyDrawFloat(float val, int decimals, int x, int y, char *buff);
 float MSinc(int m, float fc);
 void printFile(const char *filename);
 void playTransmitData();  // KF5N February 23, 2024
 void ProcessEqualizerChoices(int EQType, char *title);
 MenuSelect readButton(MenuSelect lastUsedTask);
 MenuSelect readButton();
-void RedrawDisplayScreen();
+//void RedrawDisplayScreen();
 void ResetFlipFlops();
 void ResetHistograms();
 void ResetTuning();  // AFP 10-11-22
@@ -1000,23 +999,23 @@ void SetSideToneVolume(bool speaker);  // This function uses encoder to set side
 uint32_t SetTransmitDelay();
 void SetTransmitDitLength(int wpm);  // JJP 8/19/23
 int SetWPM();
-void ShowAutoStatus();
+//void ShowAutoStatus();
 void ShowBandwidth();
-void ShowCurrentPowerSetting();
+//void ShowCurrentPowerSetting();
 void ShowDecoderMessage();
 void sineTone(int numCycles);
 void initCWShaping();
 void SpectrumOptions();
-void UpdateInfoWindow();
+//void UpdateInfoWindow();
 void SetFreqCal(int calFreqShift);
-void ShowFrequency();
+//void ShowFrequency();
 void ShowMenu(const char *menu[], int where);
-void ShowName();
-void ShowSpectrum();
-void ShowSpectrumdBScale();
-void ShowTempAndLoad();
-void ShowTransmitReceiveStatus();
-void BandInformation();
+//void ShowName();
+//void ShowSpectrum();
+//void ShowSpectrumdBScale();
+//void ShowTempAndLoad();
+//void ShowTransmitReceiveStatus();
+//void BandInformation();
 void SpectralNoiseReduction(void);
 void SpectralNoiseReductionInit();
 void Splash();
@@ -1026,17 +1025,17 @@ int SubmenuSelectString(std::string options[], int numberOfChoices, int defaultS
 void T4_rtc_set(unsigned long t);
 float TGetTemp();
 
-void UpdateAGCField();
-void UpdateAudioField();
-void UpdateCompressionField();
-void UpdateAudioGraphics();
-void UpdateEqualizerField(bool rxEqState, bool txEqState);
+//void UpdateAGCField();
+//void UpdateAudioField();
+//void UpdateCompressionField();
+//void UpdateAudioGraphics();
+//void UpdateEqualizerField(bool rxEqState, bool txEqState);
 void updateMic();  // This updates the Open Audio compressor.
-void UpdateNoiseField();
-void UpdateNotchField();
-void UpdateVolumeField();
-void UpdateWPMField();
-void UpdateZoomField();
+//void UpdateNoiseField();
+//void UpdateNotchField();
+//void UpdateVolumeField();
+//void UpdateWPMField();
+//void UpdateZoomField();
 
 void VFOSelect();
 
