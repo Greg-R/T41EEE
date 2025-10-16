@@ -73,8 +73,8 @@ AudioConnection connect18(float2Int2_tx, 0, Q_in_R_Ex, 0);  // Tones for SSB cal
 //AudioConnection connect19(Q_out_L_Ex, 0, i2s_quadOut, 0);  // I channel to line out
 //AudioConnection connect20(Q_out_R_Ex, 0, i2s_quadOut, 1);  // Q channel to line out
 //#else // Input 2 is first right channel.
-//// AudioConnection connect19(Q_out_L_Ex, 0, i2s_quadOut_f32, 0);  // I channel to line out
-//// AudioConnection connect20(Q_out_R_Ex, 0, i2s_quadOut_f32, 1);  // Q channel to line out
+// AudioConnection_F32 connect19(Q_out_L_Ex, 0, i2s_quadOut_f32, 0);  // I channel to line out
+// AudioConnection_F32 connect20(Q_out_R_Ex, 0, i2s_quadOut_f32, 1);  // Q channel to line out
 //#endif
 
 // Receiver data flow
@@ -124,12 +124,28 @@ AudioConnection_F32 patchCord12(speakerVolume, 0, i2s_quadOut_f32, 2);  //  Spea
 AudioConnection_F32 patchCord13(switch2_rx, 1, headphoneScale, 0);  // headphoneScale is user centering of headphone volume.
 AudioConnection_F32 patchCord14(headphoneScale, 0, headphoneVolume, 0);
 
-AudioConnection_F32 patchCord25(headphoneVolume, 0, i2s_quadOut_f32, 0);  // Headphone left
-AudioConnection_F32 patchCord26(headphoneVolume, 0, i2s_quadOut_f32, 1);  // Headphone right
+////AudioConnection_F32 patchCord25(headphoneVolume, 0, i2s_quadOut_f32, 0);  // Headphone left
+////AudioConnection_F32 patchCord26(headphoneVolume, 0, i2s_quadOut_f32, 1);  // Headphone right
 
-// Now connect both headphone and speaker paths to the same output of the switch.
+// Now connect both headphone and speaker paths to the same output (2) of the switch.
 AudioConnection_F32 patchCord27(switch2_rx, 2, speakerScale, 0);    // Headphone right
 AudioConnection_F32 patchCord28(switch2_rx, 2, headphoneScale, 0);  // Headphone right
+
+// The headphone and transmitter back-end share inputs 0 and 1 of the quad I2s output object.
+// Because 2 outputs can't be connected to the same input, two more mixers are required.
+
+AudioMixer4_F32 mixer_rxtx_I, mixer_rxtx_Q;
+
+// Transmitter back-end to Audio Adapter.
+//AudioConnection_F32 patchCord29(Q_out_L_Ex, 0, mixer_rxtx_I, 0);
+//AudioConnection_F32 patchCord30(Q_out_R_Ex, 0, mixer_rxtx_Q, 0);
+
+// Headphone to Audio Adapter.
+//AudioConnection_F32 patchCord31(headphoneVolume, 0, mixer_rxtx_I, 1);
+//AudioConnection_F32 patchCord32(headphoneVolume, 0, mixer_rxtx_Q, 1);
+
+AudioConnection_F32 patchCord33(Q_out_L_Ex, 0, i2s_quadOut_f32, 0);
+AudioConnection_F32 patchCord34(Q_out_R_Ex, 0, i2s_quadOut_f32, 1);
 
 //AudioConnection_F32 patchCord15(headphoneVolume, 0, float2Int4, 0);
 //AudioConnection patchCord25(float2Int4, 0, i2s_quadOut, 0);  // Headphone
@@ -204,6 +220,10 @@ void SetAudioOperatingState(RadioState operatingState) {
       mixer1_tx.gain(1, 0.0);
       mixer1_tx.gain(2, 0);
       mixer1_tx.gain(3, 0);  // CW tone path.
+      mixer_rxtx_I.gain(0, 0.0);  // Disconnect transmitter back-end to Audio Adapter.
+      mixer_rxtx_Q.gain(0, 0.0);
+      mixer_rxtx_I.gain(1, 1.0);  // Connect headphone path to Audio Adapter.
+      mixer_rxtx_Q.gain(1, 1.0);
       toneSSBCal1.end();
       toneSSBCal2.end();
       switch1_tx.setChannel(1);  // Disconnect microphone path.
@@ -491,6 +511,10 @@ void SetAudioOperatingState(RadioState operatingState) {
       mixer1_tx.gain(1, 0);  // testTone 1 off.
       mixer1_tx.gain(2, 0);  // testTone 2 off.
       mixer1_tx.gain(3, 1);  // CW tone path.  Mic gain is also in this path.  Set micGain to 0dB.
+      mixer_rxtx_I.gain(0, 1.0);  // Connect transmitter back-end to Audio Adapter.
+      mixer_rxtx_Q.gain(0, 1.0);
+      mixer_rxtx_I.gain(1, 0.0);  // Disconnect headphone path to Audio Adapter.
+      mixer_rxtx_Q.gain(1, 0.0);
 
       switch1_tx.setChannel(1);  // Disconnect microphone path.
 

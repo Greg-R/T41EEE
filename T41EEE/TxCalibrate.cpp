@@ -410,9 +410,9 @@ void TxCalibrate::buttonTasks() {
       }
       if (calTypeFlag == 2) {
         if (corrChange == true) {  // Toggle increment value
-          carrIncrement = 5;       // AFP 2-11-23
+          carrIncrement = 0.0005;       // AFP 2-11-23
         } else {
-          carrIncrement = 10;  // AFP 2-11-23
+          carrIncrement = 0.001;  // AFP 2-11-23
         }
       }
       tft.print(carrIncrement);
@@ -777,7 +777,7 @@ void TxCalibrate::DoXmitCalibrate(int calMode, bool radio, bool refine, bool toE
 void TxCalibrate::DoXmitCarrierCalibrate(int calMode, bool radio, bool refine, bool toEeprom) {
   int maxSweepAmp = 450;
   int maxSweepPhase = 450;
-  carrIncrement = 5;
+  carrIncrement = 0.001;
   int averageCount = 0;
   TxCalibrate::mode = calMode;                  // CW or SSB
 TxCalibrate::radioCal = radio;
@@ -799,7 +799,7 @@ TxCalibrate::refineCal = refine;
   tft.setTextColor(RA8875_WHITE);
   tft.fillRect(405, 125, 50, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(405, 125);
-  tft.print(carrIncrement);
+  tft.print(carrIncrement, 3);
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   radioState = RadioState::SSB_TRANSMIT_STATE;
   SetFreqCal(freqOffset);
@@ -815,7 +815,7 @@ TxCalibrate::refineCal = refine;
     qDCoffset = CalData.qDCoffsetSSB[ConfigData.currentBand];
   }
   // Run this so Q offset shows from begining.
-  GetEncoderValueLiveQ15t(-1000, 1000, qDCoffset, carrIncrement, "Q Offset", false);
+  GetEncoderValueLive(-1.0, 1.0, qDCoffset, carrIncrement, "Q Offset", false);
   warmUpCal();
 
   if (radioCal) {
@@ -871,7 +871,7 @@ TxCalibrate::refineCal = refine;
         case State::state0:
           qDCoffset = 0;
           iDCoffset = -maxSweepAmp;  // Begin sweep at low end and move upwards.
-          GetEncoderValueLiveQ15t(1000, 1000, qDCoffset, carrIncrement, "Q Offset", false);
+          GetEncoderValueLive(-1.0, 1.0, qDCoffset, carrIncrement, "Q Offset", false);
           index = 0;
           IQCalType = 0;
           state = State::initialSweepAmp;  // Let this fall through.
@@ -890,7 +890,7 @@ TxCalibrate::refineCal = refine;
             iOptimal = sweepVectorValue[adjdBMinIndex];                         // Set to the discovered minimum.
             iDCoffset = iOptimal;                                               // Reset for next sweep.
             // Update display to optimal value.
-            GetEncoderValueLiveQ15t(-1000, 1000, iDCoffset, carrIncrement, "I Offset", true);
+            GetEncoderValueLive(-1.0, 1.0, iDCoffset, carrIncrement, "I Offset", true);
             // Save the sub_vector which will be used to refine the optimal result.
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorIoffset[i] = (iOptimal - 10 * 5) + (5 * i);
@@ -922,7 +922,7 @@ TxCalibrate::refineCal = refine;
             adjdBMinIndex = std::distance(sweepVector.begin(), result);
             qOptimal = sweepVectorValue[adjdBMinIndex];  // Set to the discovered minimum.
             qDCoffset = qOptimal;                        // Set to the discovered minimum.
-            GetEncoderValueLiveQ15t(-1000, 1000, qDCoffset, carrIncrement, "Q Offset", false);
+            GetEncoderValueLive(-1.0, 1.0, qDCoffset, carrIncrement, "Q Offset", false);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorQoffset[i] = (qOptimal - 10 * 5) + (5 * i);
             }
@@ -931,7 +931,7 @@ TxCalibrate::refineCal = refine;
             index = 0;
             averageFlag = false;
             averageCount = 0;
-            carrIncrement = 5;         // Use smaller increment in refinement.
+            carrIncrement = 0.0005;         // Use smaller increment in refinement.
             count = 0;                 // This variable is used to switch back and forth between I and Q refinement.
             state = State::refineAmp;  // Proceed to refine the gain channel.
             break;
@@ -955,7 +955,7 @@ TxCalibrate::refineCal = refine;
             // iOptimal is simply the value of sub_vectorAmp[adjdBMinIndex].
             iOptimal = sub_vectorIoffset[adjdBMinIndex];  // -.001;
             iDCoffset = iOptimal;                         // Set to optimal value before refining phase.
-            GetEncoderValueLiveQ15t(-1000, 1000, iDCoffset, carrIncrement, "I Offset", true);
+            GetEncoderValueLive(-1.0, 1.0, iDCoffset, carrIncrement, "I Offset", true);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorIoffset[i] = (iOptimal - 10 * 5) + (5 * i);  // The next array to sweep.
             }
@@ -987,7 +987,7 @@ TxCalibrate::refineCal = refine;
             index = 0;
             qOptimal = sub_vectorQoffset[adjdBMinIndex];  // - .001;
             qDCoffset = qOptimal;
-            GetEncoderValueLiveQ15t(-1000, 1000, qDCoffset, carrIncrement, "Q Offset", false);
+            GetEncoderValueLive(-1.0, 1.0, qDCoffset, carrIncrement, "Q Offset", false);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorQoffset[i] = (qOptimal - 10 * 5) + (5 * i);
             }
@@ -1054,8 +1054,8 @@ TxCalibrate::refineCal = refine;
 //    if (task != MenuSelect::DEFAULT) lastUsedTask = task;  //  Save the last used task.
     task = MenuSelect::DEFAULT;                            // Reset task after it is used.
     //  Read encoder and update values.
-    if (IQCalType == 0) iDCoffset = GetEncoderValueLiveQ15t(-1000, 1000, iDCoffset, carrIncrement, "I Offset", true);
-    if (IQCalType == 1) qDCoffset = GetEncoderValueLiveQ15t(-1000, 1000, qDCoffset, carrIncrement, "Q Offset", false);
+    if (IQCalType == 0) iDCoffset = GetEncoderValueLive(-1.0, 1.0, iDCoffset, 0.001, "I Offset", true);
+    if (IQCalType == 1) qDCoffset = GetEncoderValueLive(-1.0, 1.0, qDCoffset, carrIncrement, "Q Offset", false);
     if (mode == 0) {
       CalData.iDCoffsetCW[ConfigData.currentBand] = iDCoffset;
       CalData.qDCoffsetCW[ConfigData.currentBand] = qDCoffset;
@@ -1186,26 +1186,26 @@ if(mode == 1)    powerScale = 1.4 * ConfigData.powerOutSSB[ConfigData.currentBan
     arm_scale_f32(float_buffer_L_EX, powerScale, float_buffer_L_EX, dataWidth);
     arm_scale_f32(float_buffer_R_EX, powerScale, float_buffer_R_EX, dataWidth);
 
-/* Temporarily bypass ***************************************************************************  AFP 12-31-20
-      CONVERT TO INTEGER AND PLAY AUDIO
+// Temporarily bypass ***************************************************************************  AFP 12-31-20
+//      CONVERT TO INTEGER AND PLAY AUDIO
 //    **********************************************************************************
-    q15_t q15_buffer_LTemp[dataWidth];  // KF5N
-    q15_t q15_buffer_RTemp[dataWidth];  // KF5N
+//    q15_t q15_buffer_LTemp[dataWidth];  // KF5N
+//    q15_t q15_buffer_RTemp[dataWidth];  // KF5N
 
 
-    arm_float_to_q15(float_buffer_L_EX, q15_buffer_LTemp, 2048);
-    arm_float_to_q15(float_buffer_R_EX, q15_buffer_RTemp, 2048);
+//    arm_float_to_q15(float_buffer_L_EX, q15_buffer_LTemp, 2048);
+//    arm_float_to_q15(float_buffer_R_EX, q15_buffer_RTemp, 2048);
 #ifdef QSE2
     if (TxCalibrate::mode == 0) {
-      arm_offset_q15(q15_buffer_LTemp, CalData.iDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_LTemp, dataWidth);  // Carrier suppression offset.
-      arm_offset_q15(q15_buffer_RTemp, CalData.qDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_RTemp, dataWidth);
+      arm_offset_f32(float_buffer_L_EX, CalData.iDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, float_buffer_L_EX, dataWidth);  // Carrier suppression offset.
+      arm_offset_f32(float_buffer_R_EX, CalData.qDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, float_buffer_R_EX, dataWidth);
     }
     if (TxCalibrate::mode == 1) {
-      arm_offset_q15(q15_buffer_LTemp, CalData.iDCoffsetSSB[ConfigData.currentBand] + CalData.dacOffsetSSB, q15_buffer_LTemp, dataWidth);  // Carrier suppression offset.
-      arm_offset_q15(q15_buffer_RTemp, CalData.qDCoffsetSSB[ConfigData.currentBand] + CalData.dacOffsetSSB, q15_buffer_RTemp, dataWidth);
+      arm_offset_f32(float_buffer_L_EX, CalData.iDCoffsetSSB[ConfigData.currentBand] + CalData.dacOffsetSSB, float_buffer_L_EX, dataWidth);  // Carrier suppression offset.
+      arm_offset_f32(float_buffer_R_EX, CalData.qDCoffsetSSB[ConfigData.currentBand] + CalData.dacOffsetSSB, float_buffer_R_EX, dataWidth);
     }
 #endif
-*/
+//
 //    Q_out_L_Ex.play(q15_buffer_LTemp, dataWidth);  // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
 //    Q_out_R_Ex.play(q15_buffer_RTemp, dataWidth);  // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.
     Q_out_L_Ex.play(float_buffer_L_EX, dataWidth);  // play it!  This is the I channel from the Audio Adapter line out to QSE I input.

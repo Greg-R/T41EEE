@@ -423,12 +423,12 @@ struct calibration_t {
   int buttonThresholdReleased = 964;  // buttonThresholdPressed + WIGGLE_ROOM
   uint32_t buttonRepeatDelay = 300000;     // Increased to 300000 from 200000 to better handle cheap, wornout buttons.
 #ifdef QSE2
-  q15_t iDCoffsetCW[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-  q15_t qDCoffsetCW[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-  q15_t iDCoffsetSSB[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-  q15_t qDCoffsetSSB[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-  q15_t dacOffsetCW = 1500;  // This must be "tuned" for each radio and/or Audio Adapter board.
-  q15_t dacOffsetSSB = 1500;  // This must be "tuned" for each radio and/or Audio Adapter board.
+  float32_t iDCoffsetCW[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+  float32_t qDCoffsetCW[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+  float32_t iDCoffsetSSB[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+  float32_t qDCoffsetSSB[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
+  float32_t dacOffsetCW = 0.0;  // This must be "tuned" for each radio and/or Audio Adapter board.
+  float32_t dacOffsetSSB = 0.0;  // This must be "tuned" for each radio and/or Audio Adapter board.
 #endif
   bool CWradioCalComplete = false;
   bool SSBradioCalComplete = false;
@@ -436,7 +436,6 @@ struct calibration_t {
 };  // end calibration struct
 
 extern struct calibration_t CalData;
-//extern calibration_t CalData_temp;
 
 // Custom classes in the sketch.
 #include "Button.h"

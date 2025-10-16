@@ -166,34 +166,35 @@ void CW_Exciter::CW_ExciterIQData(int shaping)  //AFP 08-20-22
 
 
 ////  arm_float_to_q15(float_buffer_i, q15_buffer_LTemp, 512);
-////  arm_float_to_q15(float_buffer_q, q15_buffer_RTemp, 512);
+/*  arm_float_to_q15(float_buffer_q, q15_buffer_RTemp, 512);
 #ifdef QSE2
-  //    if(bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE) {
-////  arm_offset_q15(q15_buffer_LTemp, CalData.iDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_LTemp, 512);  // Carrier suppression offset.
-////  arm_offset_q15(q15_buffer_RTemp, CalData.qDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_RTemp, 512);
-//    } else if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) {
-//    arm_offset_q15(q15_buffer_LTemp, CalData.iDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_LTemp, 2048);  // Carrier suppression offset.
-//    arm_offset_q15(q15_buffer_RTemp, CalData.qDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_RTemp, 2048);
-//    }
+      if(bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE) {
+  arm_offset_f32(float_buffer_i, CalData.iDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, float_buffer_i, 512);  // Carrier suppression offset.
+  arm_offset_f32(float_buffer_q, CalData.qDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, float_buffer_q, 512);
+    } else if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) {
+    arm_offset_f32(float_buffer_i, CalData.iDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, float_buffer_i, 2048);  // Carrier suppression offset.
+    arm_offset_f32(float_buffer_q, CalData.qDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, float_buffer_q, 2048);
+    }
 #endif
-  //  Q_out_L_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
+*/  
+// Q_out_L_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
   //  Q_out_R_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
 //#ifndef F32
 //  Q_out_L_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
 //  Q_out_R_Ex.setBehaviour(AudioPlayQueue::ORIGINAL);
 //#else
-  Q_out_L_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
-  Q_out_R_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
-    Q_out_L_Ex.play(float_buffer_i, 512);  // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
+//  Q_out_L_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
+//  Q_out_R_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
+//    Q_out_L_Ex.play(float_buffer_i, 512);  // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
 //#endif
-////  Q_out_L_Ex.play(q15_buffer_LTemp, 512);  // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
-////  Q_out_R_Ex.play(q15_buffer_RTemp, 512);  // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.
+//  Q_out_L_Ex.play(q15_buffer_LTemp, 512);  // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
+//  Q_out_R_Ex.play(q15_buffer_RTemp, 512);  // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.
 
-////  Q_out_R_Ex.play(float_buffer_q, 512);  // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.
+//  Q_out_R_Ex.play(float_buffer_q, 512);  // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.
 
   Q_out_L.play(q15_buffer_Sidetone, 512);
 
-  /*  This is the correct place in the data stream to inject the scaling for power.
+  //  This is the correct place in the data stream to inject the scaling for power.
 #ifdef QSE2
   powerScale = 40.0 * ConfigData.powerOutCW[ConfigData.currentBand];
 #else
@@ -209,21 +210,21 @@ void CW_Exciter::CW_ExciterIQData(int shaping)  //AFP 08-20-22
   //  **********************************************************************************
 
   // Transmitter I and Q.  Cast the arrays from float to q15_t.  q15_t is equivalent to int16_t.
-  arm_float_to_q15(float_buffer_Sidetone, q15_buffer_Sidetone, 256);  // source, destination, number of samples
-  arm_float_to_q15(float_buffer_L_EX, q15_buffer_LTemp, 256);         // source, destination, number of samples
-  arm_float_to_q15(float_buffer_R_EX, q15_buffer_RTemp, 256);
+//  arm_float_to_q15(float_buffer_Sidetone, q15_buffer_Sidetone, 256);  // source, destination, number of samples
+//  arm_float_to_q15(float_buffer_L_EX, q15_buffer_LTemp, 256);         // source, destination, number of samples
+//  arm_float_to_q15(float_buffer_R_EX, q15_buffer_RTemp, 256);
 
 // Inject the DC offset from carrier calibration.  There is an ARM function for this.
 #ifdef QSE2
-  arm_offset_q15(q15_buffer_LTemp, CalData.iDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_LTemp, 256);
-  arm_offset_q15(q15_buffer_RTemp, CalData.qDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_RTemp, 256);
+  arm_offset_f32(float_buffer_i, CalData.iDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, float_buffer_i, 256);
+  arm_offset_f32(float_buffer_q, CalData.qDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, float_buffer_q, 256);
 #endif
 
 //  Q_out_L_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);  // This mode is required when setting sidetone volume.
 //  Q_out_R_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);  // The process will stall due to disconnection of I and Q patchcords.
-  Q_out_L_Ex.play(q15_buffer_LTemp, 256);                // Transmitter
-  Q_out_R_Ex.play(q15_buffer_RTemp, 256);                // Transmitter
+  Q_out_L_Ex.play(float_buffer_i, 256);                // Transmitter
+  Q_out_R_Ex.play(float_buffer_q, 256);                // Transmitter
 
 //  Q_out_L.play(q15_buffer_Sidetone, 256);                // CW sidetone.  Connected to receiver audio path during transmit.
-  */
+
 }
