@@ -11,14 +11,14 @@
 class TxCalibrate {
 public:
 
-  int IQCalType = 0;
+  int32_t IQCalType = 0;
   int val;
-  float xmitIncrement = 0.002;
-  float32_t carrIncrement = 0.0005;
+  float xmitIncrement = 0.002;   // Increment for transmit calibration.
+  float32_t carrIncrement = 0.0005;  // Increment for carrier calibration.
   int userScale, userZoomIndex;
   int transmitPowerLevelTemp, cwFreqOffsetTemp, calFreqTemp;
   uint16_t base_y = 460;  // 247
-  int calTypeFlag = 0;
+  uint32_t calTypeFlag = 0;
   float adjdB = 0.0;
   float adjdBold = 0.0;  // Used in exponential averager.  KF5N May 19, 2024
   float adjdB_avg = 0.0;
@@ -36,8 +36,8 @@ public:
   float32_t phase = 0;
   float iOptimal = 1.0;
   float qOptimal = 0.0;
-  float32_t iDCoffset = 0;
-  float32_t qDCoffset = 0;
+  float32_t iDCoffset = 0.0;
+  float32_t qDCoffset = 0.0;
   elapsedMillis milliTimer;
   int mode = 0;
   MenuSelect task = MenuSelect::DEFAULT;

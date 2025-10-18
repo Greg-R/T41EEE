@@ -78,7 +78,7 @@ void Display::ShowName() {
   Return value;
     void
 *****/
-void Display::ShowSpectrum() {
+void Display::ShowSpectrum(bool drawSpectrum) {
 #define LOWERPIXTARGET 13  //  HB start
 #define UPPERPIXTARGET 15
 
@@ -104,7 +104,7 @@ void Display::ShowSpectrum() {
   pixelCurrent[0] = 0;
   pixelCurrent[1] = 0;
   //                512
-  for (x1 = 1; x1 < MAX_WATERFALL_WIDTH - 1; x1++)  //AFP, JJP changed init from 0 to 1 for x1: out of bounds addressing in line 112
+  for (x1 = 4; x1 < MAX_WATERFALL_WIDTH; x1++)  // 
   //Draws the main Spectrum, Waterfall and Audio displays
   {
     updateDisplayFlag = false;
@@ -187,8 +187,10 @@ void Display::ShowSpectrum() {
     if (y_old2_plot < 120) y_old2_plot = 120;
 
     // Erase the old spectrum, and draw the new spectrum.
-    tft.drawLine(x1 + 1, y_old2_plot, x1 + 1, y_old_plot, RA8875_BLACK);   // Erase old...
-    tft.drawLine(x1 + 1, y1_new_plot, x1 + 1, y_new_plot, RA8875_YELLOW);  // Draw new
+    if(drawSpectrum) {
+    tft.drawLine(x1 + 3, y_old2_plot, x1 + 3, y_old_plot, RA8875_BLACK);   // Erase old...
+    tft.drawLine(x1 + 3, y1_new_plot, x1 + 3, y_new_plot, RA8875_YELLOW);  // Draw new
+    }
 
     //  What is the actual spectrum at this time?  It's a combination of the old and new spectrums.
     //  In the case of a CW interrupt, the array pixelnew should be saved as the actual spectrum.

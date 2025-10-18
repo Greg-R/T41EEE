@@ -358,7 +358,7 @@ MenuSelect menu = MenuSelect::DEFAULT;
 //      digitalWrite(bandswitchPins[ConfigData.currentBand], LOW);
       SetFreq();
       display.ShowSpectrumdBScale();
-      display.ShowSpectrum();
+//      display.ShowSpectrum();
       //bands.bands[currentBand].mode = currentBand;
       return;
     }

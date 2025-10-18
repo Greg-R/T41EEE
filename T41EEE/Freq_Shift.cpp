@@ -128,6 +128,8 @@ void FreqShift2()
 
   NCO_INC = 2.0 * PI * (NCOFreq + sideToneShift) / SR[SampleRate].rate; // 192000 SPS is the actual sample rate used in the Receive ADC
 
+  if(NCO_INC > 0) Serial.printf("NCO_INC\n");
+
   OSC_COS = cos (NCO_INC);
   OSC_SIN = sin (NCO_INC);
 

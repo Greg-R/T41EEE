@@ -14,9 +14,11 @@
 class RxCalibrate {
 public:
 
-// Blue and red bar variables:
-int32_t rx_blue_usb = 383;
-int32_t rx_red_usb = 127;
+// Blue and red bar variables.  These should be 256 (bins) apart.
+// These variables identify the center of the bars, not the left edge.
+int32_t rx_blue_usb = 385;  // Image frequency.  383
+int32_t rx_red_usb = 129;   // Receive frequency. 127
+int32_t capture_bins = 32;      // Make bar_width divisible by 2.
 int32_t left_text_edge = 165;
 
 uint32_t IQCalType = 0;  // 0 is IQ Gain; 1 is Phase.

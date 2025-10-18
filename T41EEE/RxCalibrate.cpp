@@ -33,10 +33,10 @@ void RxCalibrate::loadCalToneBuffers(float toneFreq) {
     void
 *****/
 void RxCalibrate::plotCalGraphics() {
-  int bar_width = 8;
   tft.writeTo(L2);
-  tft.fillRect(rx_red_usb - bar_width, SPECTRUM_TOP_Y + 20, 20, 341, DARK_RED);      // SPECTRUM_TOP_Y = 100, h = 135
-  tft.fillRect(rx_blue_usb - bar_width, SPECTRUM_TOP_Y + 20, 20, 341, RA8875_BLUE);  // h = SPECTRUM_HEIGHT + 3
+  // Note, the spectrum bins begin at x = 4.
+  tft.fillRect(rx_red_usb - capture_bins/2 + 0, SPECTRUM_TOP_Y + 20, capture_bins, 341, DARK_RED);      // SPECTRUM_TOP_Y = 100, h = 135
+  tft.fillRect(rx_blue_usb - capture_bins/2 + 0, SPECTRUM_TOP_Y + 20, capture_bins, 341, RA8875_BLUE);  // h = SPECTRUM_HEIGHT + 3
   tft.writeTo(L1);
 }
 
@@ -53,7 +53,8 @@ void RxCalibrate::plotCalGraphics() {
 void RxCalibrate::warmUpCal() {
   uint32_t index_of_max;  // Not used, but required by arm_max_q15 function.
   // MakeFFTData() has to be called enough times for transients to settle out before computing FFT.
-  for (int i = 0; i < 16; i = i + 1) {
+//  delay(5000);
+  for (int i = 0; i < 128; i = i + 1) {
     fftActive = false;           // Don't call FFT calculation.
     RxCalibrate::MakeFFTData();  // Note, FFT not called if buffers are not sufficiently filled.
   }
@@ -63,7 +64,9 @@ void RxCalibrate::warmUpCal() {
   updateDisplayFlag = false;
   // Find peak of spectrum, which is 512 wide.  Use this to adjust spectrum peak to top of spectrum display.
   arm_max_q15(pixelnew, 512, &rawSpectrumPeak, &index_of_max);
-  Serial.printf("rawSpectrumPeak = %d\n", rawSpectrumPeak);
+//  Serial.printf("rawSpectrumPeak = %d\n", rawSpectrumPeak);
+//  Serial.printf("index_of_max = %d\n", index_of_max);
+if(index_of_max < 380 or index_of_max > 388) Serial.printf("Problem with warmUpCal\n");
 }
 
 
@@ -176,10 +179,11 @@ void RxCalibrate::CalibratePreamble(int setZoom) {
   tft.setCursor(left_text_edge, 235);
   tft.print("Filter - Refine-Cal");
   tft.setTextColor(RA8875_CYAN);
-  tft.fillRect(left_text_edge, 125, 100, tft.getFontHeight(), RA8875_BLACK);
+////  tft.fillRect(left_text_edge, 125, 100, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(left_text_edge + 90, 142);
   tft.setFontScale((enum RA8875tsize)1);
   tft.print("dB");
+  tft.setTextColor(RA8875_GREEN);
   tft.setFontScale((enum RA8875tsize)0);
   tft.setCursor(left_text_edge, 125);
   tft.print("Incr = ");
@@ -247,8 +251,8 @@ void RxCalibrate::CalibrateEpilogue(bool radioCal, bool saveToEeprom) {
   tft.writeTo(L1);  // Exit function in layer 1.  KF5N August 3, 2023
   calOnFlag = false;
   if (not radioCal) display.RedrawDisplayScreen();  // Redraw everything!
-  else tft.fillWindow();                    // Clear the display.
-  fftOffset = 0;                            // Some reboots may be caused by large fftOffset values when Auto-Spectrum is on.
+  else tft.fillWindow();                            // Clear the display.
+  fftOffset = 0;                                    // Some reboots may be caused by large fftOffset values when Auto-Spectrum is on.
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   lastState = RadioState::NOSTATE;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 16, 2023
   powerUp = true;                   // Clip off transient.
@@ -298,12 +302,12 @@ void RxCalibrate::writeToCalData(float ichannel, float qchannel) {
  *****/
 void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool toEeprom) {
   MenuSelect task = MenuSelect::DEFAULT;
-  
+
   bool autoCal = false;
 
-  RxCalibrate::mode = calMode;  // CW or SSB.  This is an object state variable.
-  RxCalibrate::radioCal = radio;          // Initial calibration of all bands.
-  RxCalibrate::refineCal = refine;        // Refinement (using existing values a starting point) calibration for all bands.
+  RxCalibrate::mode = calMode;           // CW or SSB.  This is an object state variable.
+  RxCalibrate::radioCal = radio;         // Initial calibration of all bands.
+  RxCalibrate::refineCal = refine;       // Refinement (using existing values a starting point) calibration for all bands.
   RxCalibrate::saveToEeprom = toEeprom;  // Save to EEPROM
 
   loadCalToneBuffers(750.0);
@@ -318,8 +322,8 @@ void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool 
   tft.setCursor(left_text_edge + 60, 125);
   tft.print(increment, 3);
   printCalType(autoCal, false);
-  IQCalType = 0;  // Start with IG Gain calibration.
-  warmUpCal();  // Finds the peak of the FFT to adjust in display.
+  IQCalType = 0;                // Start with IG Gain calibration.
+  warmUpCal();                  // Finds the peak of the FFT to adjust in display.
   State state = State::warmup;  // Start calibration state machine in warmup state.
   float maxSweepAmp = 0.1;
   float maxSweepPhase = 0.1;
@@ -353,7 +357,7 @@ void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool 
     }
   }
 
-  GetEncoderValueLive(-2.0, 2.0, phase, increment, (char *)"IQ Phase", false);  // Show phase on display.
+  GetEncoderValueLive(-2.0, 2.0, phase, increment, (char *)"IQ Phase", false, false);  // Show phase on display.
 
   if (radioCal) {
     autoCal = true;
@@ -372,16 +376,16 @@ void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool 
     fftActive = true;
     RxCalibrate::ShowSpectrum();
     task = readButton();
-        // Exit from manual calibration by button push.
-        if(exitManual == true) { 
-       RxCalibrate::CalibrateEpilogue(radioCal, saveToEeprom);
+    // Exit from manual calibration by button push.
+    if (exitManual == true) {
+      RxCalibrate::CalibrateEpilogue(radioCal, saveToEeprom);
       return;
     }
     //            if (exit) {
     //                Serial.printf("Audio memory usage = %d\n", AudioMemoryUsage());
     //        return;  //  exit variable set in buttonTasks() if button pushed by user.
     //        }
-//    if (refineCal) task = MenuSelect::FILTER;
+    //    if (refineCal) task = MenuSelect::FILTER;
     switch (task) {
       // Activate automatic calibration (initial calibration).
       case MenuSelect::ZOOM:  // 2nd row, 1st column button
@@ -398,7 +402,7 @@ void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool 
         break;
       // Automatic calibration using previously stored values (refine calibration).
       case MenuSelect::FILTER:  // 3rd row, 1st column button
-      Serial.printf("Got to MenuSelect::FILTER case\n");
+        Serial.printf("Got to MenuSelect::FILTER case\n");
         refineCal = true;
         autoCal = true;
         printCalType(autoCal, false);
@@ -409,18 +413,25 @@ void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool 
         std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
         std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
         averageFlag = false;
-                state = State::warmup;
+        state = State::warmup;
         break;
       // Toggle gain and phase adjustment in manual mode.
       case MenuSelect::UNUSED_1:
-        if (IQCalType == 0) IQCalType = 1;
-        else IQCalType = 0;
+        if (IQCalType == 0) {
+          IQCalType = 1;
+          // Switching to phase, make gain white.
+          GetEncoderValueLive(-2.0, 2.0, amplitude, increment, "IQ Gain", true, false);
+        } else {
+          IQCalType = 0;
+          // Switching go gain, make phase white.
+          GetEncoderValueLive(-2.0, 2.0, phase, increment, "IQ Phase", false, false);
+        }
         break;
       // Toggle increment value
       case MenuSelect::BEARING:  // UNUSED_2 is now called BEARING
         corrChange = not corrChange;
-        if (corrChange == true) {       // Toggle increment value
-          increment = 0.001;  // AFP 2-11-23
+        if (corrChange == true) {  // Toggle increment value
+          increment = 0.001;       // AFP 2-11-23
         } else {
           increment = 0.01;  // AFP 2-11-23
         }
@@ -430,10 +441,10 @@ void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool 
         tft.print(increment, 3);
         break;
       case MenuSelect::MENU_OPTION_SELECT:  // Save values and exit calibration.
-//        tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-//        state = State::exit;
-//        autoCal = true;  // Set autoCal = true to access State::exit even during manual.
-exitManual = true;
+        //        tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
+        //        state = State::exit;
+        //        autoCal = true;  // Set autoCal = true to access State::exit even during manual.
+        exitManual = true;
         break;
       default:
         break;
@@ -462,7 +473,7 @@ exitManual = true;
           if (warmup == 16 && refineCal) state = State::refineCal;
           break;
         case State::refineCal:
-        Serial.printf("Got to refinelCal state\n");
+          Serial.printf("Got to refinelCal state\n");
           // Prep the refinement arrays based on saved values.
           for (int i = 0; i < 21; i = i + 1) {
             sub_vectorAmp[i] = (iOptimal - 10 * 0.001) + (0.001 * i);  // The next array to sweep.
@@ -476,11 +487,11 @@ exitManual = true;
         case State::state0:
           // Starting values for sweeps.  First sweep is amplitude (gain).
           phase = 0.0;
-          amplitude = 1.0 - maxSweepAmp;                                                  // Begin sweep at low end and move upwards.
-                                                                                          ////          if (mode == 0)
-          GetEncoderValueLive(-2.0, 2.0, phase, increment, "IQ Phase", false);  // Display the phase value.
-                                                                                          ////          if (mode == 1)
-                                                                                          ////            GetEncoderValueLive(-2.0, 2.0, phase, increment, (char *)"IQ Phase", false);
+          amplitude = 1.0 - maxSweepAmp;                                               // Begin sweep at low end and move upwards.
+                                                                                       ////          if (mode == 0)
+          GetEncoderValueLive(-2.0, 2.0, phase, increment, "IQ Phase", false, false);  // Display the phase value.
+                                                                                       ////          if (mode == 1)
+                                                                                       ////            GetEncoderValueLive(-2.0, 2.0, phase, increment, (char *)"IQ Phase", false);
           adjdB = 0;
           adjdB_avg = 0;
           index = 0;
@@ -502,7 +513,7 @@ exitManual = true;
             phase = -maxSweepPhase;                                             // The starting value for phase.
             amplitude = iOptimal;                                               // Reset for next sweep.
             // Update display to optimal value.
-            GetEncoderValueLive(-2.0, 2.0, amplitude, increment, "IQ Gain", true);
+            GetEncoderValueLive(-2.0, 2.0, amplitude, increment, "IQ Gain", true, false);
             count = count + 1;
             // Save the sub_vector which will be used to refine the optimal result.
             for (int i = 0; i < 21; i = i + 1) {
@@ -530,10 +541,10 @@ exitManual = true;
           phase = phase + increment;
           if (phase > maxSweepPhase) {
             result = std::min_element(sweepVector.begin(), sweepVector.end());
-            adjdBMinIndex = std::distance(sweepVector.begin(), result); // Input 2 is first right channel.
-            qOptimal = sweepVectorValue[adjdBMinIndex];  // Set to the discovered minimum.
-            phase = qOptimal;                            // Set to the discovered minimum.
-            GetEncoderValueLive(-2.0, 2.0, phase, increment, "IQ Phase", false);
+            adjdBMinIndex = std::distance(sweepVector.begin(), result);  // Input 2 is first right channel.
+            qOptimal = sweepVectorValue[adjdBMinIndex];                  // Set to the discovered minimum.
+            phase = qOptimal;                                            // Set to the discovered minimum.
+            GetEncoderValueLive(-2.0, 2.0, phase, increment, "IQ Phase", false, false);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorPhase[i] = (qOptimal - 10 * 0.001) + (0.001 * i);
             }
@@ -565,7 +576,7 @@ exitManual = true;
             // iOptimal is simply the value of sub_vectorAmp[adjdBMinIndex].
             iOptimal = sub_vectorAmp[adjdBMinIndex];  // -.001;
             amplitude = iOptimal;                     // Set to optimal value before refining phase.
-            GetEncoderValueLive(-2.0, 2.0, amplitude, increment, (char *)"IQ Gain", true);
+            GetEncoderValueLive(-2.0, 2.0, amplitude, increment, (char *)"IQ Gain", true, true);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorAmp[i] = (iOptimal - 10 * 0.001) + (0.001 * i);  // The next array to sweep.
             }
@@ -598,7 +609,7 @@ exitManual = true;
             index = 0;
             qOptimal = sub_vectorPhase[adjdBMinIndex];  // - .001;
             phase = qOptimal;
-            GetEncoderValueLive(-2.0, 2.0, phase, increment, "IQ Phase", false);
+            GetEncoderValueLive(-2.0, 2.0, phase, increment, "IQ Phase", false, false);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorPhase[i] = (qOptimal - 10 * 0.001) + (0.001 * i);
             }
@@ -655,12 +666,12 @@ exitManual = true;
       }
     }  // end automatic calibration state machine
 
-//    if (task != MenuSelect::DEFAULT) lastUsedTask = task;  //  Save the last used task.
-    task = MenuSelect::DEFAULT;                            // Reset task after it is used.
+    //    if (task != MenuSelect::DEFAULT) lastUsedTask = task;  //  Save the last used task.
+    task = MenuSelect::DEFAULT;  // Reset task after it is used.
 
     //  Read encoder and update values.  This is manual calibration.
-    if (IQCalType == 0) amplitude = GetEncoderValueLive(-2.0, 2.0, amplitude, increment, "IQ Gain", true);
-    if (IQCalType == 1) phase = GetEncoderValueLive(-2.0, 2.0, phase, increment, "IQ Phase", false);
+    if (IQCalType == 0) amplitude = GetEncoderValueLive(-2.0, 2.0, amplitude, increment, "IQ Gain", true, true);
+    if (IQCalType == 1) phase = GetEncoderValueLive(-2.0, 2.0, phase, increment, "IQ Phase", false, true);
     writeToCalData(amplitude, phase);
   }  // end while
 }  // End Receive calibration
@@ -735,28 +746,27 @@ void RxCalibrate::MakeFFTData() {
   // This code block was introduced after TeensyDuino 1.58 appeared.  It doesn't use a for loop, but processes the entire 2048 buffer in one pass.
   // Revised I and Q calibration signal generation using large buffers.  Greg KF5N June 4 2023
   //  if (static_cast<uint32_t>(ADC_RX_I.available()) > 16 && static_cast<uint32_t>(ADC_RX_Q.available()) > 16) {  // Audio Record Queues!!!
-  q15_t q15_buffer_LTemp[2048];  //KF5N
-  q15_t q15_buffer_RTemp[2048];  //KF5N
-  
-  arm_float_to_q15(float_buffer_L_EX, q15_buffer_LTemp, 2048);
-  arm_float_to_q15(float_buffer_R_EX, q15_buffer_RTemp, 2048);
+//  q15_t q15_buffer_LTemp[2048];  //KF5N
+//  q15_t q15_buffer_RTemp[2048];  //KF5N
 
-/* Temporarily bypass.
+//  arm_float_to_q15(float_buffer_L_EX, q15_buffer_LTemp, 2048);
+//  arm_float_to_q15(float_buffer_R_EX, q15_buffer_RTemp, 2048);
+
 #ifdef QSE2
   if (mode == 0) {
-    arm_offset_q15(q15_buffer_LTemp, CalData.iDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_LTemp, 2048);
-    arm_offset_q15(q15_buffer_RTemp, CalData.qDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_RTemp, 2048);
+    arm_offset_f32(float_buffer_L_EX, CalData.iDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, float_buffer_L_EX, 2048);
+    arm_offset_f32(float_buffer_R_EX, CalData.qDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, float_buffer_R_EX, 2048);
   }
   if (mode == 1) {
-    arm_offset_q15(q15_buffer_LTemp, CalData.iDCoffsetSSB[ConfigData.currentBand] + CalData.dacOffsetSSB, q15_buffer_LTemp, 2048);  // Carrier suppression offset.
-    arm_offset_q15(q15_buffer_RTemp, CalData.qDCoffsetSSB[ConfigData.currentBand] + CalData.dacOffsetSSB, q15_buffer_RTemp, 2048);
+    arm_offset_f32(float_buffer_L_EX, CalData.iDCoffsetSSB[ConfigData.currentBand] + CalData.dacOffsetSSB, float_buffer_L_EX, 2048);  // Carrier suppression offset.
+    arm_offset_f32(float_buffer_R_EX, CalData.qDCoffsetSSB[ConfigData.currentBand] + CalData.dacOffsetSSB, float_buffer_R_EX, 2048);
   }
 #endif
-*/
+
   Q_out_L_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
   Q_out_R_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
-//  Q_out_L_Ex.play(q15_buffer_LTemp, 2048);
-//  Q_out_R_Ex.play(q15_buffer_RTemp, 2048);
+  //  Q_out_L_Ex.play(q15_buffer_LTemp, 2048);
+  //  Q_out_R_Ex.play(q15_buffer_RTemp, 2048);
   Q_out_L_Ex.play(float_buffer_L_EX, 2048);
   Q_out_R_Ex.play(float_buffer_R_EX, 2048);
 
@@ -836,7 +846,7 @@ void RxCalibrate::MakeFFTData() {
 void RxCalibrate::ShowSpectrum()  //AFP 2-10-23
 {
   int x1 = 0;
-  int capture_bins = 8;  // Sets the number of bins to scan for signal peak.
+//  int capture_bins = 8;  // Sets the number of bins to scan for signal peak.
 
   pixelnew[0] = 0;
   pixelnew[1] = 0;
@@ -860,14 +870,13 @@ void RxCalibrate::ShowSpectrum()  //AFP 2-10-23
   }  // Receive calibration, USB.  KF5N
 
   //  There are 2 for-loops, one for the reference signal and another for the undesired sideband.
-  for (x1 = cal_bins[0] - capture_bins; x1 < cal_bins[0] + capture_bins; x1++) adjdB = PlotCalSpectrum(x1, cal_bins, capture_bins);
-  for (x1 = cal_bins[1] - capture_bins; x1 < cal_bins[1] + capture_bins; x1++) adjdB = PlotCalSpectrum(x1, cal_bins, capture_bins);
+  for (x1 = cal_bins[0] - capture_bins/2; x1 < cal_bins[0] + capture_bins/2; x1++) adjdB = PlotCalSpectrum(x1, cal_bins, capture_bins);
+  for (x1 = cal_bins[1] - capture_bins/2; x1 < cal_bins[1] + capture_bins/2; x1++) adjdB = PlotCalSpectrum(x1, cal_bins, capture_bins);
 
   tft.setCursor(left_text_edge, 142);
   tft.setFontScale((enum RA8875tsize)1);
   tft.fillRect(left_text_edge, 142, 80, tft.getFontHeight(), RA8875_BLACK);  // Erase old adjdB number.                                       // 350, 125
   tft.print(adjdB, 1);
-
 }
 
 
@@ -893,7 +902,7 @@ float RxCalibrate::PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
   int y_new_plot, y1_new_plot, y_old_plot, y_old2_plot;
 
   // The FFT should be performed only at the beginning of the sweep, and buffers must be full.
-  if (x1 == (cal_bins[0] - capture_bins)) {  // Set flag at revised beginning.  KF5N
+  if (x1 == (cal_bins[0] - capture_bins/2)) {  // Set flag at revised beginning.  KF5N
     updateDisplayFlag = true;                // This flag is used in ZoomFFTExe().
     RxCalibrate::MakeFFTData();              // Compute FFT and draw it on the display.
   } else updateDisplayFlag = false;          //  Do not save the the display data for the remainder of the sweep.
@@ -908,12 +917,12 @@ float RxCalibrate::PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
   // Find the maximums of the desired and undesired signals.
 
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-    arm_max_q15(&pixelnew[(cal_bins[0] - capture_bins)], capture_bins * 2, &refAmplitude, &index_of_max);
-    arm_max_q15(&pixelnew[(cal_bins[1] - capture_bins)], capture_bins * 2, &adjAmplitude, &index_of_max);
+    arm_max_q15(&pixelnew[(cal_bins[0] - capture_bins/2)], capture_bins, &refAmplitude, &index_of_max);
+    arm_max_q15(&pixelnew[(cal_bins[1] - capture_bins/2)], capture_bins, &adjAmplitude, &index_of_max);
   }
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-    arm_max_q15(&pixelnew[(cal_bins[0] - capture_bins)], capture_bins * 2, &refAmplitude, &index_of_max);
-    arm_max_q15(&pixelnew[(cal_bins[1] - capture_bins)], capture_bins * 2, &adjAmplitude, &index_of_max);
+    arm_max_q15(&pixelnew[(cal_bins[0] - capture_bins/2)], capture_bins, &refAmplitude, &index_of_max);
+    arm_max_q15(&pixelnew[(cal_bins[1] - capture_bins/2)], capture_bins, &adjAmplitude, &index_of_max);
   }
 
   y_old2_plot = 135 + (-y_old2 + rawSpectrumPeak);
@@ -934,8 +943,8 @@ float RxCalibrate::PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
   if (y1_new_plot > base_y) y1_new_plot = base_y;
 
   // Erase the old spectrum and draw the new spectrum.
-  tft.drawLine(x1, y_old2_plot, x1, y_old_plot, RA8875_BLACK);   // Erase old...
-  tft.drawLine(x1, y1_new_plot, x1, y_new_plot, RA8875_YELLOW);  // Draw new
+  tft.drawLine(x1 + 0, y_old2_plot, x1 + 0, y_old_plot, RA8875_BLACK);   // Erase old...
+  tft.drawLine(x1 + 0, y1_new_plot, x1 + 0, y_new_plot, RA8875_YELLOW);  // Draw new
 
   pixelCurrent[x1] = pixelnew[x1];  //  This is the actual "old" spectrum! Copied to pixelold by the FFT function.
 

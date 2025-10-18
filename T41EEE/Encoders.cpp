@@ -157,36 +157,41 @@ void EncoderVolume()  //============================== AFP 10-22-22  Begin new
 
 
 /*****
-  Purpose: Use the encoder to change the value of a number in some other function
-           This function does not have a while loop.  Thus it must be used inside
+  Purpose: Use the encoder to change the value of a number in some other function.
+           This function does not have a while loop, thus it must be used inside
            some other loop.
 
   Parameter list:
-    int minValue                the lowest value allowed
-    int maxValue                the largest value allowed
-    int startValue              the numeric value to begin the count
-    int increment               the amount by which each increment changes the value
-    char prompt[]               the input prompt
+    int minValue                The lowest value allowed.
+    int maxValue                The largest value allowed.
+    int startValue              The starting numeric value.
+    int increment               The amount by which each increment changes the value.
+    std:string prompt[]         The input textual prompt.
+    bool left                   Put in left or right slot at top of display.
+    bool colorRed               If true, the revised value is displayed in red.
   Return value;
-    int                         the new value
+    int                         The revised value.
 *****/
-float GetEncoderValueLive(float minValue, float maxValue, float startValue, float increment, std::string prompt, bool left)  //AFP 10-22-22
+float GetEncoderValueLive(float minValue, float maxValue, float startValue, float increment, std::string prompt, bool left, bool colorRed)
 {
   float currentValue = startValue;
   tft.setFontScale((enum RA8875tsize)1);
   tft.setTextColor(RA8875_WHITE);
-  if (left) tft.fillRect(160, 0, 85, CHAR_HEIGHT, RA8875_BLACK);
-  else tft.fillRect(250, 0, 285, CHAR_HEIGHT, RA8875_BLACK);  // Increased rectangle size to full erase value.  KF5N August 12, 2023
+  if (left) tft.fillRect(150, 8, 95, 22, RA8875_BLACK);
+  else tft.fillRect(425, 8, 95, 22, RA8875_BLACK);  // Increased rectangle size to full erase value.  KF5N August 12, 2023
   if (left) tft.setCursor(0, 1);
-  else tft.setCursor(257, 1);
+  else tft.setCursor(260, 1);
   tft.print(prompt.c_str());
-  if (left) tft.setCursor(160, 1);
-  else tft.setCursor(440, 1);
+if (left) tft.setCursor(149, 1);
+  else tft.setCursor(425, 1);
+  if(colorRed) tft.setTextColor(RA8875_RED);  // Make value red if active.
   if (abs(startValue) > 2) {  // Note sure where this restriction came from.
     tft.print(startValue, 0);
   } else {
-    tft.print(startValue, 3);
+    if(increment < 0.001) tft.print(startValue, 4);
+    else tft.print(startValue, 3);
   }
+  tft.setTextColor(RA8875_WHITE);
   if (filterEncoderMove != 0) {
     currentValue += filterEncoderMove * increment;  // Bump up or down...
     if (currentValue < minValue)
@@ -194,13 +199,16 @@ float GetEncoderValueLive(float minValue, float maxValue, float startValue, floa
     else if (currentValue > maxValue)
       currentValue = maxValue;
 
-    if (left) tft.setCursor(160, 1);
-    else tft.setCursor(440, 1);
+    if (left) tft.setCursor(149, 1);
+    else tft.setCursor(425, 1);
+      if(colorRed) tft.setTextColor(RA8875_RED);  // Make value red if active.
     if (abs(startValue) > 2) {
       tft.print(startValue, 0);
     } else {
-      tft.print(startValue, 3);
+    if(increment < 0.001) tft.print(startValue, 4);
+    else tft.print(startValue, 3);
     }
+    tft.setTextColor(RA8875_WHITE);
     filterEncoderMove = 0;
   }
   return currentValue;
@@ -324,7 +332,6 @@ q15_t GetEncoderValueLiveQ15t(int minValue, int maxValue, int startValue, int in
   Return value;
     int                         the new value
 *****/
-//int GetEncoderValue(int minValue, int maxValue, int startValue, int increment, char prompt[]) {
 int GetEncoderValue(int minValue, int maxValue, int startValue, int increment, std::string prompt) {
   int currentValue = startValue;
   MenuSelect menu;

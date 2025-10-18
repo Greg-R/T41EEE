@@ -1055,6 +1055,7 @@ uint32_t loopCounter = 0;
 *****/
 float audioBW{ 0.0 };
 uint32_t receiverMute = 10;
+bool drawSpectrum = false;
 void loop() {
   MenuSelect menu;
   long ditTimerOff;  //AFP 09-22-22
@@ -1096,6 +1097,7 @@ void loop() {
       receiverMute = 3;  // Determines duration of mute.
       speakerScale.setGain(SPEAKERSCALE);
       headphoneScale.setGain(HEADPHONESCALE);
+      drawSpectrum = true;
     }
   }
   if (radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE or radioState == RadioState::CW_TRANSMIT_KEYER_STATE) {
@@ -1115,7 +1117,7 @@ void loop() {
         digitalWrite(RXTX, LOW);      //xmit off
         display.ShowTransmitReceiveStatus();
       }
-      display.ShowSpectrum();
+      display.ShowSpectrum(drawSpectrum);
       break;
     case RadioState::SSB_TRANSMIT_STATE:
       digitalWrite(RXTX, HIGH);  //xmit on
@@ -1172,7 +1174,7 @@ void loop() {
         display.ShowTransmitReceiveStatus();
         keyPressedOn = 0;
       }
-      display.ShowSpectrum();  // if removed CW signal on is 2 mS
+      display.ShowSpectrum(drawSpectrum);  // if removed CW signal on is 2 mS
       break;
     case RadioState::CW_TRANSMIT_STRAIGHT_STATE:
       display.ShowTransmitReceiveStatus();

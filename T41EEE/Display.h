@@ -43,7 +43,7 @@ const uint16_t gradient[117]  {  // Color array for waterfall background
 
 void DrawAudioSpectContainer();  // Draw audio spectrum box.
 void ShowName();  // Show the program name and version number.
-void ShowSpectrum();  // Draws the RF and audio spectrums.
+void ShowSpectrum(bool drawSpectrum);  // Draws the RF and audio spectrums.
 void ShowBandwidth();  // Show filter bandwidth near center of spectrum.
 void DrawSMeterContainer();  // Draw the S-meter container.
 void ShowSpectrumdBScale();  // Print the vertical dB setting to the spectrum display.

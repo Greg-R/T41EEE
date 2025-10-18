@@ -9,11 +9,11 @@ void updateMic() {
   micGain.setGain_dB(ConfigData.micGain);  // Set the microphone gain.
 
   struct compressionCurve crv = { -3.0, 0.0,  // margin, offset
-                                  { 0.0, -10.0, ConfigData.micThreshold, -1000.0f, -1000.0f },  
+                                  { 0.0, -10.0, ConfigData.micThreshold, -1000.0f, -1000.0f },
                                   { 10.0, ConfigData.micCompRatio, 1.0f, 1.0, 1.0 } };
 
-  int16_t delaySize = 256;                    // Any power of 2, i.e., 256, 128, 64, etc.
-  compressor1.setDelayBufferSize(delaySize);  // Improves transient response of compressor.
+  int16_t delaySize = 256;                        // Any power of 2, i.e., 256, 128, 64, etc.
+  compressor1.setDelayBufferSize(delaySize);      // Improves transient response of compressor.
   compressor1.setAttackReleaseSec(0.005f, 2.0f);  // Same as used in Tiny Ten by Bob W7PUA.
   compressor1.setCompressionCurve(&crv);
   compressor1.begin();
@@ -46,86 +46,72 @@ void ExciterIQData() {
   /**********************************************************************************  AFP 12-31-20
         Get samples from queue buffers
         Teensy Audio Library stores ADC data in two buffers size=128, Q_in_L and Q_in_R as initiated from the audio lib.
-        Then the buffers are  read into two arrays in blocks of 128 up to N_BLOCKS.  The arrays are
+        Then the buffers are read into two arrays in blocks of 128 up to N_BLOCKS.  The arrays are
         of size BUFFER_SIZE*N_BLOCKS.  BUFFER_SIZE is 128.
         N_BLOCKS = FFT_L / 2 / BUFFER_SIZE * (uint32_t)DF; // should be 16 with DF == 8 and FFT_L = 512
         BUFFER_SIZE * N_BLOCKS = 2048 samples
      **********************************************************************************/
-  // are there at least N_BLOCKS buffers in each channel available ?
-  if ((uint32_t)Q_in_L_Ex.available() < 32 or (uint32_t)Q_in_R_Ex.available() < 32) {
-//    Serial.printf("Q_in_L_Ex.available() = %d Q_in_R_Ex.available() = %d\n", Q_in_L_Ex.available(), Q_in_R_Ex.available());
-     return;
+  // Are there at least N_BLOCKS buffers in each channel available ?
+  if (static_cast<uint32_t>(Q_in_L_Ex.available()) < 32 or static_cast<uint32_t>(Q_in_R_Ex.available()) < 32) {
+    return;
   }
-//    Serial.printf("Norm Op: Q_in_L_Ex.available() = %d Q_in_R_Ex.available() = %d\n", Q_in_L_Ex.available(), Q_in_R_Ex.available());
-    // get audio samples from the audio  buffers and convert them to float
-    // read in 32 blocks of 128 samples in I and Q
-    for (unsigned i = 0; i < N_BLOCKS_EX; i++) {
 
-      /**********************************************************************************  AFP 12-31-20
+  // Get audio samples from the audio buffers and convert them to float.
+  for (unsigned i = 0; i < N_BLOCKS_EX; i++) {
+
+    /**********************************************************************************  AFP 12-31-20
           Using arm_Math library, convert to float one buffer_size.
           Float_buffer samples are now standardized from > -1.0 to < 1.0
       **********************************************************************************/
-      arm_q15_to_float(Q_in_L_Ex.readBuffer(), &float_buffer_L_EX[BUFFER_SIZE * i], BUFFER_SIZE);  // convert int_buffer to float 32bit
-      arm_q15_to_float(Q_in_R_Ex.readBuffer(), &float_buffer_R_EX[BUFFER_SIZE * i], BUFFER_SIZE);  // Right channel not used.  KF5N March 11, 2024
-      Q_in_L_Ex.freeBuffer();
-      Q_in_R_Ex.freeBuffer();  // Right channel not used.  KF5N March 11, 2024
-    }
+    arm_q15_to_float(Q_in_L_Ex.readBuffer(), &float_buffer_L_EX[BUFFER_SIZE * i], BUFFER_SIZE);  // convert int_buffer to float 32bit
+    arm_q15_to_float(Q_in_R_Ex.readBuffer(), &float_buffer_R_EX[BUFFER_SIZE * i], BUFFER_SIZE);  // Right channel not used.  KF5N March 11, 2024
+    Q_in_L_Ex.freeBuffer();
+    Q_in_R_Ex.freeBuffer();  // Right channel not used.  KF5N March 11, 2024
+  }
 
-    // Set the sideband.
-    if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) cessb1.setSideband(false);
-    if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) cessb1.setSideband(true);
+  // Set the sideband.
+  if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) cessb1.setSideband(false);
+  if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) cessb1.setSideband(true);
 
-    // Apply amplitude and phase corrections.  FT8 uses CW corrections and is always USB.
-    if(bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-    if(bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE)
-    cessb1.setIQCorrections(true, CalData.IQSSBAmpCorrectionFactorLSB[ConfigData.currentBand], CalData.IQSSBPhaseCorrectionFactorLSB[ConfigData.currentBand], 0.0);
+  // Apply amplitude and phase corrections.  FT8 uses CW corrections and is always USB.
+  if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
+    if (bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE)
+      cessb1.setIQCorrections(true, CalData.IQSSBAmpCorrectionFactorLSB[ConfigData.currentBand], CalData.IQSSBPhaseCorrectionFactorLSB[ConfigData.currentBand], 0.0);
     else if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE)
-    cessb1.setIQCorrections(true, CalData.IQCWAmpCorrectionFactorUSB[ConfigData.currentBand], CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand], 0.0);
-    } else if(bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-    if(bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE)
-    cessb1.setIQCorrections(true, CalData.IQSSBAmpCorrectionFactorUSB[ConfigData.currentBand], CalData.IQSSBPhaseCorrectionFactorUSB[ConfigData.currentBand], 0.0);
+      cessb1.setIQCorrections(true, CalData.IQCWAmpCorrectionFactorUSB[ConfigData.currentBand], CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand], 0.0);
+  } else if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
+    if (bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE)
+      cessb1.setIQCorrections(true, CalData.IQSSBAmpCorrectionFactorUSB[ConfigData.currentBand], CalData.IQSSBPhaseCorrectionFactorUSB[ConfigData.currentBand], 0.0);
     else if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE)
-    cessb1.setIQCorrections(true, CalData.IQCWAmpCorrectionFactorUSB[ConfigData.currentBand], CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand], 0.0);
-    }
+      cessb1.setIQCorrections(true, CalData.IQCWAmpCorrectionFactorUSB[ConfigData.currentBand], CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand], 0.0);
+  }
 
-    //  This is the correct place in the data flow to inject the scaling for power.
+  //  This is the correct place in the data flow to inject the scaling for power.
 #ifdef QSE2
-    powerScale = 2.0 * ConfigData.powerOutSSB[ConfigData.currentBand];
+  powerScale = 2.0 * ConfigData.powerOutSSB[ConfigData.currentBand];
 #else
-    powerScale = 1.4 * ConfigData.powerOutSSB[ConfigData.currentBand];
+  powerScale = 1.4 * ConfigData.powerOutSSB[ConfigData.currentBand];
 #endif
 
-    arm_scale_f32(float_buffer_L_EX, powerScale, float_buffer_L_EX, 2048);  //Scale to compensate for losses in Interpolation
-    arm_scale_f32(float_buffer_R_EX, powerScale, float_buffer_R_EX, 2048);
+  arm_scale_f32(float_buffer_L_EX, powerScale, float_buffer_L_EX, 2048);  //Scale to compensate for losses in Interpolation
+  arm_scale_f32(float_buffer_R_EX, powerScale, float_buffer_R_EX, 2048);
 
-    // Temporarily bypass*******************************************************************  AFP 12-31-20
-//      CONVERT TO INTEGER AND PLAY AUDIO
-//    **********************************************************************************
-//    q15_t q15_buffer_LTemp[2048];  // KF5N
-//    q15_t q15_buffer_RTemp[2048];  // KF5N
-
-//    arm_float_to_q15(float_buffer_L_EX, q15_buffer_LTemp, 2048);
-//    arm_float_to_q15(float_buffer_R_EX, q15_buffer_RTemp, 2048);
-/*
 #ifdef QSE2
-    if(bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE) {
-    arm_offset_q15(q15_buffer_LTemp, CalData.iDCoffsetSSB[ConfigData.currentBand] + CalData.dacOffsetSSB, q15_buffer_LTemp, 2048);  // Carrier suppression offset.
-    arm_offset_q15(q15_buffer_RTemp, CalData.qDCoffsetSSB[ConfigData.currentBand] + CalData.dacOffsetSSB, q15_buffer_RTemp, 2048);
-    } else if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) {
-    arm_offset_q15(q15_buffer_LTemp, CalData.iDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_LTemp, 2048);  // Carrier suppression offset.
-    arm_offset_q15(q15_buffer_RTemp, CalData.qDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_RTemp, 2048);      
-    }
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE) {
+    arm_offset_f32(float_buffer_L_EX, CalData.iDCoffsetSSB[ConfigData.currentBand] + CalData.dacOffsetSSB, float_buffer_L_EX, 2048);  // Carrier suppression offset.
+    arm_offset_f32(float_buffer_R_EX, CalData.qDCoffsetSSB[ConfigData.currentBand] + CalData.dacOffsetSSB, float_buffer_R_EX, 2048);
+  } else if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) {
+    arm_offset_f32(float_buffer_L_EX, CalData.iDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, float_buffer_L_EX, 2048);  // Carrier suppression offset.
+    arm_offset_f32(float_buffer_R_EX, CalData.qDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, float_buffer_R_EX, 2048);
+  }
 #endif
-*/
-//
-//  Q_out_L_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
-//  Q_out_R_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);
+
   Q_out_L_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
   Q_out_R_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
-//    Q_out_L_Ex.play(q15_buffer_LTemp, 2048);  // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
-//    Q_out_R_Ex.play(q15_buffer_RTemp, 2048);  // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.
-    Q_out_L_Ex.play(float_buffer_L_EX, 2048);  // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
-    Q_out_R_Ex.play(float_buffer_R_EX, 2048);  // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.
+
+  // Play audio.
+  Q_out_L_Ex.play(float_buffer_L_EX, 2048);  // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
+  Q_out_R_Ex.play(float_buffer_R_EX, 2048);  // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.
 }
 
 /*****
@@ -140,12 +126,11 @@ void ExciterIQData() {
 void SetBandRelay() {
   // There are 4 physical relays in the case of the V10/V11 LPF board.
   for (int i = 0; i < 5; i = i + 1) {
-    if(i == ConfigData.currentBand) {
-    digitalWrite(bandswitchPins[ConfigData.currentBand], HIGH);
-    }
-    else { 
-      if(bandswitchPins[i] != bandswitchPins[ConfigData.currentBand])  // Skip if the pins are the same.
-      digitalWrite(bandswitchPins[i], LOW);  // Set band relay low.
+    if (i == ConfigData.currentBand) {
+      digitalWrite(bandswitchPins[ConfigData.currentBand], HIGH);
+    } else {
+      if (bandswitchPins[i] != bandswitchPins[ConfigData.currentBand])  // Skip if the pins are the same.
+        digitalWrite(bandswitchPins[i], LOW);                           // Set band relay low.
     }
   }
 }
@@ -235,8 +220,8 @@ void SetCompressionRatio() {
       tft.print(ConfigData.micCompRatio, 0);
       filterEncoderMove = 0;
     }
-menu = readButton(lastUsedTask);
-/*
+    menu = readButton(lastUsedTask);
+    /*
     val = ReadSelectedPushButton();  // Read pin that controls all switches
     menu = ProcessButtonPress(val);
     delay(150L);
