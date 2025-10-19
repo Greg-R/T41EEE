@@ -264,7 +264,7 @@ void CalibrateOptions() {
   switch (IQChoice) {
 
     case 0:  // Calibrate Frequency  - uses WWV
-      CalData.freqCorrectionFactor = GetEncoderValueLive(-200000, 200000, CalData.freqCorrectionFactor, increment, freqCal, false);
+      CalData.freqCorrectionFactor = GetEncoderValueLive(-200000, 200000, CalData.freqCorrectionFactor, increment, freqCal, false, true);
       if (CalData.freqCorrectionFactor != freqCorrectionFactorOld) {
         si5351.set_correction(CalData.freqCorrectionFactor, SI5351_PLL_INPUT_XO);
         freqCorrectionFactorOld = CalData.freqCorrectionFactor;
@@ -280,7 +280,7 @@ void CalibrateOptions() {
       break;
 
     case 1:  // CW PA Cal
-      CalData.CWPowerCalibrationFactor[ConfigData.currentBand] = GetEncoderValueLive(0.0, 1.0, CalData.CWPowerCalibrationFactor[ConfigData.currentBand], 0.01, (char *)"CW PA Cal: ", false);
+      CalData.CWPowerCalibrationFactor[ConfigData.currentBand] = GetEncoderValueLive(0.0, 1.0, CalData.CWPowerCalibrationFactor[ConfigData.currentBand], 0.01, "CW PA Cal: ", false, true);
       ConfigData.powerOutCW[ConfigData.currentBand] = sqrt(ConfigData.transmitPowerLevel / 20.0) * CalData.CWPowerCalibrationFactor[ConfigData.currentBand];
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
@@ -295,17 +295,17 @@ void CalibrateOptions() {
       break;
 
     case 2:                                                   // CW IQ Receive Cal - Gain and Phase
-      RxCalibrate.DoReceiveCalibrate(0, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
+      rxcalibrater.DoReceiveCalibrate(0, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
                                                               //      eeprom.CalDataWrite();                             // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 3:                                                // CW IQ Transmit Cal - Gain and Phase  //AFP 2-21-23
-      RxCalibrate.DoXmitCalibrate(0, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
+      txcalibrater.DoXmitCalibrate(0, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
                                                            //      eeprom.CalDataWrite();                          // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 4:  // SSB PA Cal
-      CalData.SSBPowerCalibrationFactor[ConfigData.currentBand] = GetEncoderValueLive(0.0, 1.0, CalData.SSBPowerCalibrationFactor[ConfigData.currentBand], 0.01, (char *)"SSB PA Cal: ", false);
+      CalData.SSBPowerCalibrationFactor[ConfigData.currentBand] = GetEncoderValueLive(0.0, 1.0, CalData.SSBPowerCalibrationFactor[ConfigData.currentBand], 0.01, "SSB PA Cal: ", false, true);
       ConfigData.powerOutSSB[ConfigData.currentBand] = sqrt(ConfigData.transmitPowerLevel / 20.0) * CalData.SSBPowerCalibrationFactor[ConfigData.currentBand];
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
@@ -320,39 +320,39 @@ void CalibrateOptions() {
       break;  // Missing break.  KF5N August 12, 2023
 
     case 5:                                                   // SSB IQ Receive Cal - Gain and Phase
-      RxCalibrate.DoReceiveCalibrate(1, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
-                                                              //      eeprom.CalDataWrite();                             // Save calibration numbers and configuration.  KF5N August 12, 2023
+      rxcalibrater.DoReceiveCalibrate(1, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
+
       break;
 
     case 6:
-      TxCalibrater.DoXmitCalibrate(false, false, true);  // SSB Transmit cal
-                                                         //      eeprom.CalDataWrite();                        // Save calibration numbers and configuration.  KF5N August 12, 2023
+      txcalibrater.DoXmitCalibrate(false, false, true, true);  // SSB Transmit cal
+
       break;
 
     case 7:  //  CW fully automatic radio calibration.
-      RxCalibrate.RadioCal(false);
+      txcalibrater.RadioCal(0, false);
       calibrateFlag = 0;
       break;
 
     case 8:  // CW fully automatic calibration refinement.
-      RxCalibrate.RadioCal(true);
+      txcalibrater.RadioCal(0, true);
       calibrateFlag = 0;
       break;
 
     case 9:  // SSB fully automatic radio calibration.
-      TxCalibrater.RadioCal(false);
+      txcalibrater.RadioCal(1, false);
       calibrateFlag = 0;
       break;
 
     case 10:  // SSB fully automatic calibration refinement.
-      TxCalibrater.RadioCal(true);
+      txcalibrater.RadioCal(1, true);
       calibrateFlag = 0;
       break;
 
     case 11:  // dBm level cal.  Was choose CW calibration tone frequency.
               //      calibrater.SelectCalFreq();
               //      calibrateFlag = 0;
-      CalData.dBm_calibration = GetEncoderValueLive(0, 100, CalData.dBm_calibration, 1, (char *)"dBm Cal: ", false);
+      CalData.dBm_calibration = GetEncoderValueLive(0, 100, CalData.dBm_calibration, 1, "dBm Cal: ", false, true);
       if (CalData.dBm_calibration != freqCorrectionFactorOld) {
         //        si5351.set_correction(ConfigData.freqCorrectionFactor, SI5351_PLL_INPUT_XO);
         freqCorrectionFactorOld = CalData.dBm_calibration;
@@ -370,14 +370,12 @@ void CalibrateOptions() {
     case 12:  // Calibrate buttons
       SaveAnalogSwitchValues();
       calibrateFlag = 0;
-      RedrawDisplayScreen();
-      //      ShowFrequency();
-      //      DrawFrequencyBarValue();
+      display.RedrawDisplayScreen();
       eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 13:  // Set button repeat rate
-      CalData.buttonRepeatDelay = 1000 * GetEncoderValueLive(0, 5000, CalData.buttonRepeatDelay / 1000, 1, (char *)"Btn Repeat:  ", false);
+      CalData.buttonRepeatDelay = 1000 * GetEncoderValueLive(0, 5000, CalData.buttonRepeatDelay / 1000, 1, "Btn Repeat:  ", false, true);
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {
         if (menu == MenuSelect::MENU_OPTION_SELECT) {

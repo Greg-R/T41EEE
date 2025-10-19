@@ -107,7 +107,7 @@ void SetFreqCal(int calFreqShift) {           // July 7 2023 KF5N
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER)
     Clk1SetFreq = (((TxRxFreq + cwFreqOffset + calFreqShift) * SI5351_FREQ_MULT)) * MASTER_CLK_MULT_TX;  // AFP 09-27-22;  KF5N flip CWFreqShift, sign originally minus
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER)
-    Clk1SetFreq = (((TxRxFreq - cwFreqOffset - calFreqShift) * SI5351_FREQ_MULT)) * MASTER_CLK_MULT_TX;  // AFP 10-01-22; KF5N flip CWFreqShift, sign originally plus
+    Clk1SetFreq = (((TxRxFreq - cwFreqOffset + calFreqShift) * SI5351_FREQ_MULT)) * MASTER_CLK_MULT_TX;  // AFP 10-01-22; KF5N flip CWFreqShift, sign originally plus
 
   //  The receive LO frequency is not dependent on mode or sideband.  CW frequency shift is done in DSP code.
   Clk2SetFreq = ((ConfigData.centerFreq * SI5351_FREQ_MULT) + IFFreq * SI5351_FREQ_MULT) * MASTER_CLK_MULT_RX;
@@ -165,7 +165,7 @@ void SetFreq() {                              //AFP 09-22-22   Revised July 7 KF
     si5351.output_enable(SI5351_CLK1, 1);
   }
   //=====================  AFP 10-03-22 =================
-  DrawFrequencyBarValue();
+  display.DrawFrequencyBarValue();
 }
 #endif
 

@@ -253,7 +253,7 @@ void RxCalibrate::CalibrateEpilogue(bool radioCal, bool saveToEeprom) {
   if (not radioCal) display.RedrawDisplayScreen();  // Redraw everything!
   else tft.fillWindow();                            // Clear the display.
   fftOffset = 0;                                    // Some reboots may be caused by large fftOffset values when Auto-Spectrum is on.
-  if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
+  if ((MASTER_CLK_MULT_RX == 2) or (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   lastState = RadioState::NOSTATE;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 16, 2023
   powerUp = true;                   // Clip off transient.
   return;
@@ -320,14 +320,14 @@ void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool 
   tft.setTextColor(RA8875_WHITE);
   tft.fillRect(left_text_edge + 60, 125, 50, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(left_text_edge + 60, 125);
+  float increment = 0.002;
   tft.print(increment, 3);
   printCalType(autoCal, false);
   IQCalType = 0;                // Start with IG Gain calibration.
   warmUpCal();                  // Finds the peak of the FFT to adjust in display.
   State state = State::warmup;  // Start calibration state machine in warmup state.
-  float maxSweepAmp = 0.1;
+  float maxSweepAmp = 0.2;
   float maxSweepPhase = 0.1;
-  float increment = 0.001;
   int averageCount = 0;
   float iOptimal = 1.0;
   float qOptimal = 0.0;
@@ -402,7 +402,6 @@ void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool 
         break;
       // Automatic calibration using previously stored values (refine calibration).
       case MenuSelect::FILTER:  // 3rd row, 1st column button
-        Serial.printf("Got to MenuSelect::FILTER case\n");
         refineCal = true;
         autoCal = true;
         printCalType(autoCal, false);
@@ -473,7 +472,6 @@ void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool 
           if (warmup == 16 && refineCal) state = State::refineCal;
           break;
         case State::refineCal:
-          Serial.printf("Got to refinelCal state\n");
           // Prep the refinement arrays based on saved values.
           for (int i = 0; i < 21; i = i + 1) {
             sub_vectorAmp[i] = (iOptimal - 10 * 0.001) + (0.001 * i);  // The next array to sweep.

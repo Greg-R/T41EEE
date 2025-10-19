@@ -1300,7 +1300,7 @@ void loop() {
   }
   loopCounter = loopCounter + 1;
   if(loopCounter > 49) {
-Serial.printf("Loop us = %u\n", (static_cast<uint32_t>(usec1) - usec1Old));
+// Serial.printf("Loop us = %u\n", (static_cast<uint32_t>(usec1) - usec1Old));
 loopCounter = 0;
   }
   usec1Old = usec1;

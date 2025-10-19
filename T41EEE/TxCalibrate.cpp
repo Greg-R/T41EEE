@@ -398,12 +398,12 @@ void TxCalibrate::buttonTasks() {
       if (IQCalType == 0) {
         IQCalType = 1;
         // Turn off red indication of active setting.
-        if (calTypeFlag == 1) GetEncoderValueLive(-1.0, 1.0, iDCoffset, xmitIncrement, "IQ Gain", true, false);
+        if (calTypeFlag == 1) GetEncoderValueLive(-1.0, 1.0, amplitude, xmitIncrement, "IQ Gain", true, false);
         if (calTypeFlag == 2) GetEncoderValueLive(-1.0, 1.0, iDCoffset, carrIncrement, "I Offset", true, false);
       } else {
         IQCalType = 0;
         // Turn off red indication of active setting.
-        if (calTypeFlag == 1) GetEncoderValueLive(-1.0, 1.0, qDCoffset, xmitIncrement, "IQ Phase", false, false);
+        if (calTypeFlag == 1) GetEncoderValueLive(-1.0, 1.0, phase, xmitIncrement, "IQ Phase", false, false);
         if (calTypeFlag == 2) GetEncoderValueLive(-1.0, 1.0, qDCoffset, carrIncrement, "Q Offset", false, false);
       }
       break;
@@ -470,18 +470,18 @@ void TxCalibrate::writeToCalData(float ichannel, float qchannel) {
       void
  *****/
 void TxCalibrate::DoXmitCalibrate(int calMode, bool radio, bool refine, bool toEeprom) {
-  int freqOffset;
+  int freqOffset = 0;  // Calibration tone same as regular modulation tone.
   //  float correctionIncrement = 0.001;
   //  State state = State::warmup;  // Start calibration state machine in warmup state.
-  float maxSweepAmp = 0.1;
+  float maxSweepAmp = 0.2;
   float maxSweepPhase = 0.1;
   xmitIncrement = 0.002;  // Coarse increment used during initial calibration.
   //  int averageCount = 0;
   IQCalType = 0;  // Begin with IQ gain optimization.
                   //  float iOptimal = 1.0;
                   //  float qOptimal = 0.0;
-  std::vector<float32_t> sweepVector(101);
-  std::vector<float32_t> sweepVectorValue(101);
+  std::vector<float32_t> sweepVector(201);
+  std::vector<float32_t> sweepVectorValue(201);
   std::vector<float32_t> sub_vectorAmp = std::vector<float>(21);  // Can these arrays be commonized?
   std::vector<float32_t> sub_vectorPhase = std::vector<float>(21);
   //  std::vector<float> sub_vectorAmpResult = std::vector<float>(21);
@@ -498,8 +498,7 @@ void TxCalibrate::DoXmitCalibrate(int calMode, bool radio, bool refine, bool toE
   std::vector<float>::iterator result;
 
   //  MenuSelect task, lastUsedTask = MenuSelect::DEFAULT;
-  TxCalibrate::CalibratePreamble(2);  // Set zoom to 4X.  Sample rate 48ksps.
-  freqOffset = 0;                     // Calibration tone same as regular modulation tone.
+  TxCalibrate::CalibratePreamble(2);  // Set zoom to 4X.  Sample rate 48ksps.                  
   calTypeFlag = 1;                    // TX cal
   plotCalGraphics(calTypeFlag);
   tft.setFontScale((enum RA8875tsize)0);
@@ -612,7 +611,6 @@ void TxCalibrate::DoXmitCalibrate(int calMode, bool radio, bool refine, bool toE
             result = std::min_element(sweepVector.begin(), sweepVector.end());  // Value of the minimum.
             adjdBMinIndex = std::distance(sweepVector.begin(), result);         // Find the index.
             iOptimal = sweepVectorValue[adjdBMinIndex];                         // Set to the discovered minimum.
-                                                                                //            Serial.printf("Init The optimal amplitude = %.3f at index %d with value %.1f count = %d\n", sweepVectorValue[adjdBMinIndex], adjdBMinIndex, *result, count);
             amplitude = iOptimal;                                               // Set amplitude to the discovered optimal value.
             // Update display to optimal value and change from red to white.
             GetEncoderValueLive(-2.0, 2.0, amplitude, xmitIncrement, "IQ Gain", true, false);

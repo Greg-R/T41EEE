@@ -27,7 +27,7 @@ uint32_t IQCalType = 0;  // 0 is IQ Gain; 1 is Phase.
   bool averageFlag = false;  
   bool saveToEeprom = false;
 int val;
-float increment;  //AFP 2-7-23
+//float increment = 0.002;
 int userScale, userZoomIndex, userxmtMode;
 int transmitPowerLevelTemp, cwFreqOffsetTemp, calFreqTemp;
 uint16_t base_y = 460;  // 247
