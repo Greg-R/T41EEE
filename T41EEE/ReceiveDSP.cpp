@@ -47,9 +47,9 @@ float32_t sign(float32_t x) {
       void
  *****/
 void ReceiveDSP::ProcessIQData() {
-  if (keyPressedOn == 1) {  //AFP 09-01-22
-    return;
-  }
+////  if (keyPressedOn == true) {  //AFP 09-01-22
+////    return;
+////  }
   /**********************************************************************************  AFP 12-31-20
         Get samples from queue buffers
         Teensy Audio Library stores ADC data in two buffers size=128, Q_in_L and Q_in_R as initiated from the audio lib.
@@ -81,9 +81,9 @@ void ReceiveDSP::ProcessIQData() {
       ADC_RX_Q.freeBuffer();
     }  // end for loop
 
-    if (keyPressedOn == 1) {  //AFP 09-01-22.  Bail out if transmitting but ignore in AM mode.
-      return;
-    }
+////    if (keyPressedOn == true) {  //AFP 09-01-22.  Bail out if transmitting but ignore in AM mode.
+////      return;
+////    }
     // Set frequency here only to minimize interruption to signal stream during tuning.
     // This code was unnecessary in the revised tuning scheme.  KF5N July 22, 2023
     if (centerTuneFlag == 1) {  //  This flag is set by EncoderFineTune().
@@ -171,7 +171,7 @@ void ReceiveDSP::ProcessIQData() {
     }
 
     //  Display_S_meter_or_spectrum_state++
-    //  if (keyPressedOn == 1) {  ////AFP 09-01-22.  Is this a duplicate here???  Removed Oct 14 2025 KF5N
+    //  if (keyPressedOn == true) {  ////AFP 09-01-22.  Is this a duplicate here???  Removed Oct 14 2025 KF5N
     //    return;
     //  }
 
@@ -188,7 +188,7 @@ void ReceiveDSP::ProcessIQData() {
            xnew(1) =  - ximag(1) + jxreal(1)
     **********************************************************************************/
     // X1 zoom must be done before the frequency shift!
-    if ((ConfigData.spectrum_zoom == 0) && (updateDisplayCounter == 1)) {
+    if ((ConfigData.spectrum_zoom == 0) and (updateDisplayCounter == 1)) {
       updateDisplayFlag = true;
       CalcZoom1Magn();
     }
@@ -204,10 +204,10 @@ void ReceiveDSP::ProcessIQData() {
         Spectrum Zoom uses the shifted spectrum, so the center "hump" around DC is shifted by fs/4
     **********************************************************************************/
 
-    if ((ConfigData.spectrum_zoom == 1) && (updateDisplayCounter == 1)) ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
-    if ((ConfigData.spectrum_zoom == 2) && (updateDisplayCounter < 2)) ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
-    if ((ConfigData.spectrum_zoom == 3) && (updateDisplayCounter < 4)) ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
-    if ((ConfigData.spectrum_zoom == 4) && (updateDisplayCounter < 8)) ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
+    if ((ConfigData.spectrum_zoom == 1) and (updateDisplayCounter == 1)) ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
+    if ((ConfigData.spectrum_zoom == 2) and (updateDisplayCounter < 2)) ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
+    if ((ConfigData.spectrum_zoom == 3) and (updateDisplayCounter < 4)) ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
+    if ((ConfigData.spectrum_zoom == 4) and (updateDisplayCounter < 8)) ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
 
     if (calibrateFlag == true) {  // This is required for frequency calibration as it runs with the receiver active.
       CalibrateOptions();

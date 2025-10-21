@@ -34,7 +34,7 @@ void RxCalibrate::loadCalToneBuffers(float toneFreq) {
 *****/
 void RxCalibrate::plotCalGraphics() {
   tft.writeTo(L2);
-  // Note, the spectrum bins begin at x = 4.
+  // Note, the spectrum bins begin at x = 2.
   tft.fillRect(rx_red_usb - capture_bins/2 + 0, SPECTRUM_TOP_Y + 20, capture_bins, 341, DARK_RED);      // SPECTRUM_TOP_Y = 100, h = 135
   tft.fillRect(rx_blue_usb - capture_bins/2 + 0, SPECTRUM_TOP_Y + 20, capture_bins, 341, RA8875_BLUE);  // h = SPECTRUM_HEIGHT + 3
   tft.writeTo(L1);
@@ -51,22 +51,31 @@ void RxCalibrate::plotCalGraphics() {
     void
 *****/
 void RxCalibrate::warmUpCal() {
-  uint32_t index_of_max;  // Not used, but required by arm_max_q15 function.
+  uint32_t index_of_max{ 0 };
+  uint32_t count{ 0 };
+  uint32_t i;
   // MakeFFTData() has to be called enough times for transients to settle out before computing FFT.
 //  delay(5000);
-  for (int i = 0; i < 128; i = i + 1) {
-    fftActive = false;           // Don't call FFT calculation.
+  for (i = 0; i < 128; i = i + 1) {
+    fftActive = true;
+    updateDisplayFlag = true;
     RxCalibrate::MakeFFTData();  // Note, FFT not called if buffers are not sufficiently filled.
+    arm_max_q15(pixelnew, 512, &rawSpectrumPeak, &index_of_max);
+    if(index_of_max > 380 and index_of_max < 388) {  // The peak is in the correct bin?
+      count = count + 1;    
+    }  else count = 0;  // Reset count in case of failure.
+    if( count == 5) break;  // If five in a row, exit the loop.  Warm-up is complete.
   }
-  updateDisplayFlag = true;
-  fftActive = true;
+  updateDisplayFlag = true;  // This flag is used by the normal receiver process.
+  fftActive = true;          // This is a flag local to this class.
   RxCalibrate::MakeFFTData();  // Now FFT will be calculated.
   updateDisplayFlag = false;
+  fftActive = false;
   // Find peak of spectrum, which is 512 wide.  Use this to adjust spectrum peak to top of spectrum display.
   arm_max_q15(pixelnew, 512, &rawSpectrumPeak, &index_of_max);
-//  Serial.printf("rawSpectrumPeak = %d\n", rawSpectrumPeak);
-//  Serial.printf("index_of_max = %d\n", index_of_max);
-if(index_of_max < 380 or index_of_max > 388) Serial.printf("Problem with warmUpCal\n");
+  Serial.printf("RX rawSpectrumPeak = %d count = %d i = %d\n", rawSpectrumPeak, count, i);
+  Serial.printf("RX index_of_max = %d\n", index_of_max);
+if(index_of_max < 380 or index_of_max > 388) Serial.printf("Problem with RX warmUpCal\n");
 }
 
 

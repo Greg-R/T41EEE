@@ -1,9 +1,8 @@
 
-
 // setup() and loop() are at the bottom of this file.
 
 #include "SDT.h"
-#include <charconv>
+//#include <charconv>
 
 const char *configFilename = "/config.txt";    // <- SD library uses 8.3 filenames
 const char *calFilename = "/calibration.txt";  // <- SD library uses 8.3 filenames
@@ -27,13 +26,13 @@ struct maps myMapFiles[10] = {
 uint32_t FFT_length = FFT_LENGTH;
 
 //======================================== Global object definitions ==================================================
-// ===========================  AFP 08-22-22
 bool agc_action = false;
+
 // Teensy and OpenAudio dataflow code.
 #include "AudioSignal.h"
 //End dataflow
 
-#include "ReceiveDSP.h"
+//#include "ReceiveDSP.h"
 
 Display display;
 ReceiveDSP process;           // Receiver process object.
@@ -51,14 +50,13 @@ const char *topMenus[] = { "CW Options", "RF Set", "VFO Select",
 // Pointers to functions which execute the menu options.  Do these functions used the returned integer???
 void (*functionPtr[])() = { &CWOptions, &RFOptions, &VFOSelect,
                             &ConfigDataOptions, &CalDataOptions, &AGCOptions, &SpectrumOptions,
-                            //                            button.ButtonMuteAudio, &SSBOptions,
                             &SSBOptions, &EqualizerXmtOptions,
                             &EqualizerRecOptions, &CalibrateOptions, &BearingMaps };
 
-Rotary volumeEncoder = Rotary(VOLUME_ENCODER_A, VOLUME_ENCODER_B);        //( 2,  3)
-Rotary tuneEncoder = Rotary(TUNE_ENCODER_A, TUNE_ENCODER_B);              //(16, 17)
-Rotary filterEncoder = Rotary(FILTER_ENCODER_A, FILTER_ENCODER_B);        //(15, 14)
-Rotary fineTuneEncoder = Rotary(FINETUNE_ENCODER_A, FINETUNE_ENCODER_B);  //( 4,  5)
+Rotary volumeEncoder = Rotary(VOLUME_ENCODER_A, VOLUME_ENCODER_B);        // ( 2,  3)
+Rotary tuneEncoder = Rotary(TUNE_ENCODER_A, TUNE_ENCODER_B);              // (16, 17)
+Rotary filterEncoder = Rotary(FILTER_ENCODER_A, FILTER_ENCODER_B);        // (15, 14)
+Rotary fineTuneEncoder = Rotary(FINETUNE_ENCODER_A, FINETUNE_ENCODER_B);  // ( 4,  5)
 
 Metro ms_500 = Metro(500);  // Set up a Metro
 
@@ -66,11 +64,14 @@ Si5351 si5351;  // Instantiate the PLL device.
 
 RadioState radioState, lastState;  // KF5N
 int resetTuningFlag = 0;
-uint32_t RA8875_CS {TFT_CS};
-uint32_t RA8875_RESET {TFT_DC};  // any pin or nothing!
-RA8875 tft = RA8875(RA8875_CS, RA8875_RESET);
+//uint32_t RA8875_CS {TFT_CS};  // Used?
+//uint32_t RA8875_RESET {TFT_DC};  // any pin or nothing!  Used?
+//RA8875 tft = RA8875(RA8875_CS, RA8875_RESET);
+// Display object.
+RA8875 tft = RA8875(TFT_CS, TFT_DC);
 
-SPISettings settingsA(70000000UL, MSBFIRST, SPI_MODE1);
+// This setting actually used?
+// SPISettings settingsA(70000000UL, MSBFIRST, SPI_MODE1);
 
 const uint32_t N_B_EX = 16;
 
@@ -190,20 +191,19 @@ char keyboardBuffer[10];  // Set for call prefixes. May be increased later
 const char *tune_text = "Fast Tune";
 const char *zoomOptions[] = { "1x ", "2x ", "4x ", "8x ", "16x" };
 
-float32_t pixel_per_khz = ((1 << ConfigData.spectrum_zoom) * SPECTRUM_RES * 1000.0 / SR[SampleRate].rate);
-int pos_left = centerLine - (int)(bands.bands[ConfigData.currentBand].FLoCut / 1000.0 * pixel_per_khz);
+//float32_t pixel_per_khz = ((1 << ConfigData.spectrum_zoom) * SPECTRUM_RES * 1000.0 / SR[SampleRate].rate);
+//int pos_left = centerLine - (int)(bands.bands[ConfigData.currentBand].FLoCut / 1000.0 * pixel_per_khz);
 
 int centerLine = (MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2;
 int16_t fftOffset = 100;
 int16_t audioFFToffset = 100;
 //int fLoCutOld;
 //int fHiCutOld;
-int filterWidth = static_cast<int>((bands.bands[ConfigData.currentBand].FHiCut - bands.bands[ConfigData.currentBand].FLoCut) / 1000.0 * pixel_per_khz);
+//int filterWidth = static_cast<int>((bands.bands[ConfigData.currentBand].FHiCut - bands.bands[ConfigData.currentBand].FLoCut) / 1000.0 * pixel_per_khz);
 int h = 135;  // SPECTRUM_HEIGHT + 3;
 bool ANR_notch = false;
 uint8_t auto_codec_gain = 1;
-//uint8_t display_S_meter_or_spectrum_state = 0;
-uint8_t keyPressedOn = 0;
+bool keyPressedOn = 0;
 uint8_t NR_first_time = 1;
 uint8_t NR_Kim;
 
@@ -211,9 +211,10 @@ uint32_t SampleRate = SAMPLE_RATE_192K;
 
 uint32_t zoom_display = 1;
 
-int16_t pixelCurrent[SPECTRUM_RES];
-int16_t pixelnew[SPECTRUM_RES];
-int16_t pixelold[SPECTRUM_RES];
+//  These arrays are used to create the RF spectrum plot in the display.
+int16_t pixelCurrent[SPECTRUM_RES]{ 0 };
+int16_t pixelnew[SPECTRUM_RES]{ 0 };
+int16_t pixelold[SPECTRUM_RES]{ 0 };
 
 //===== New histogram stuff ===
 volatile int filterEncoderMove = 0;
@@ -290,7 +291,7 @@ int n_R;
 int newCursorPosition = 0;
 int oldCursorPosition = 256;
 bool switchFilterSideband = false;
-int x2 = 0;  //AFP
+//int x2 = 0;  //AFP
 
 int zoomIndex = 1;  //AFP 9-26-22
 bool updateDisplayFlag = false;
@@ -1070,15 +1071,14 @@ void loop() {
   //  State detection for modes which can transmit.  AM and SAM don't transmit, so there is not a state transition required.
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE and digitalRead(PTT) == HIGH) radioState = RadioState::SSB_RECEIVE_STATE;
 //  if (bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE and digitalRead(PTT) == HIGH) radioState = RadioState::SSB_CALIBRATE_STATE;
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE && digitalRead(PTT) == LOW) radioState = RadioState::SSB_TRANSMIT_STATE;
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE and digitalRead(PTT) == LOW) radioState = RadioState::SSB_TRANSMIT_STATE;
 
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE and SerialUSB1.rts() == LOW) radioState = RadioState::FT8_RECEIVE_STATE;
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE and SerialUSB1.rts() == HIGH) radioState = RadioState::FT8_TRANSMIT_STATE;
 
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE && (digitalRead(ConfigData.paddleDit) == HIGH && digitalRead(ConfigData.paddleDah) == HIGH)) radioState = RadioState::CW_RECEIVE_STATE;  // Was using symbolic constants. Also changed in code below.  KF5N August 8, 2023
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE && (digitalRead(ConfigData.paddleDit) == LOW && bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE && ConfigData.keyType == 0)) radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE && (keyPressedOn == 1 && bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE && ConfigData.keyType == 1)) radioState = RadioState::CW_TRANSMIT_KEYER_STATE;
-
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and (digitalRead(ConfigData.paddleDit) == HIGH and digitalRead(ConfigData.paddleDah) == HIGH)) radioState = RadioState::CW_RECEIVE_STATE;  // Was using symbolic constants. Also changed in code below.  KF5N August 8, 2023
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and (keyPressedOn == true and bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE && ConfigData.keyType == 0)) radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and (keyPressedOn == true and bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE && ConfigData.keyType == 1)) radioState = RadioState::CW_TRANSMIT_KEYER_STATE;
 
   if (lastState != radioState) {
     SetAudioOperatingState(radioState);
@@ -1097,7 +1097,7 @@ void loop() {
       receiverMute = 3;  // Determines duration of mute.
       speakerScale.setGain(SPEAKERSCALE);
       headphoneScale.setGain(HEADPHONESCALE);
-      drawSpectrum = true;
+      drawSpectrum = true;  // Delay drawing the spectrum until the FFT transients are decreased.
     }
   }
   if (radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE or radioState == RadioState::CW_TRANSMIT_KEYER_STATE) {
@@ -1182,7 +1182,7 @@ void loop() {
       cwTimer = millis();
       while (millis() - cwTimer <= ConfigData.cwTransmitDelay) {  //Start CW transmit timer on
         digitalWrite(RXTX, HIGH);
-        if (digitalRead(ConfigData.paddleDit) == LOW && ConfigData.keyType == 0) {  // AFP 09-25-22  Turn on CW signal
+        if (digitalRead(ConfigData.paddleDit) == LOW and ConfigData.keyType == 0) {  // AFP 09-25-22  Turn on CW signal
           cwTimer = millis();                                                       //Reset timer
 
           if (cwKeyDown == false) {
@@ -1292,8 +1292,11 @@ void loop() {
     process.audioGainCompensate = 
     2800.0 / audioBW;
 
-    speakerVolume.setGain(volumeLog[ConfigData.audioVolume]);
-    headphoneVolume.setGain(volumeLog[ConfigData.audioVolume]);
+// Update volume if ONLY one audio output is active.
+if(ConfigData.audioOut == AudioState::SPEAKER)    speakerVolume.setGain(volumeLog[ConfigData.speakerVolume]);
+if(ConfigData.audioOut == AudioState::HEADPHONE)    headphoneVolume.setGain(volumeLog[ConfigData.headphoneVolume]);
+// In the case of BOTH, volume controls speaker only.  This is intended for monitoring FT8.
+if(ConfigData.audioOut == AudioState::BOTH)    headphoneVolume.setGain(volumeLog[ConfigData.speakerVolume]);
 
     volumeChangeFlag = false;
     display.UpdateVolumeField();

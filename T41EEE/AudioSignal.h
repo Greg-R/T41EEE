@@ -76,8 +76,8 @@ AudioMixer4_F32 mixer4;
 AudioSwitch4_OA_F32 switch1_rx, switch2_rx;
 AudioConvert_F32toI16 float2Int3, float2Int4, float2Int5, float2Int6;
 
-AudioRecordQueue ADC_RX_I;  // I channel from ADC PCM1808.
-AudioRecordQueue ADC_RX_Q;  // Q channel from ADC PCM1808.
+AudioRecordQueue ADC_RX_I;  // Receiver I channel from ADC PCM1808, 16 bit.
+AudioRecordQueue ADC_RX_Q;  // Receiver Q channel from ADC PCM1808, 16 bit.
 
 AudioPlayQueue Q_out_L;  // Receiver audio out and CW sidetone.
 
@@ -87,6 +87,7 @@ AudioConnection patchCord2(i2s_quadIn, 2, ADC_RX_Q, 0);  // This data stream goe
 
 AudioConnection patchCord3(Q_out_L, 0, int2Float2, 0);  // 192ksps Audio data stream from sketch code.  Receiver audio or CW sidetone.
 
+// F32 from here forward.
 AudioConnection_F32 patchCord4(int2Float2, 0, switch1_rx, 0);  // Used to bypass compressor2_1.
 
 AudioConnection_F32 patchCord5(switch1_rx, 0, compressor2_1, 0);  // Compressor used as audio AGC.
@@ -137,6 +138,7 @@ float32_t equalizeCoeffs[249];
 
 // End receiver and transmitter signal chain code.
 
+// This function implemented below.
 void controlAudioOut(AudioState audioState, bool mute);  // Declaration, implemenation below.
 
 // Configure basic compressor macro.  This is used in the audio path as a form of AGC.
@@ -187,8 +189,18 @@ void SetAudioOperatingState(RadioState operatingState) {
     case RadioState::SAM_RECEIVE_STATE:
     case RadioState::CW_RECEIVE_STATE:
       SampleRate = SAMPLE_RATE_192K;
-      InitializeDataArrays();  // I2S sample rate set in this function.
-      sgtl5000_1.muteLineout();
+      InitializeDataArrays();    // I2S sample rate set in this function.
+      sgtl5000_1.muteLineout();  // Shut off I and Q baseband to QSE.
+      // Stop and clear the data buffers.
+      Q_out_L.setMaxBuffers(64);
+      ADC_RX_I.end();    // Receiver I channel
+      ADC_RX_Q.end();    // Receiver Q channel
+      ADC_RX_I.clear();  // Receiver I channel
+      ADC_RX_Q.clear();  // Receiver Q channel
+      Q_in_L_Ex.end();   // Transmit I channel path.
+      Q_in_R_Ex.end();   // Transmit Q channel path.
+      Q_in_L_Ex.clear();
+      Q_in_R_Ex.clear();
       // Deactivate microphone and tones.
       mixer1_tx.gain(0, 0.0);
       mixer1_tx.gain(1, 0.0);
@@ -208,26 +220,10 @@ void SetAudioOperatingState(RadioState operatingState) {
       mixer3_tx.gain(0, 0.0);
       mixer3_tx.gain(1, 0.0);
 
-      // Stop and clear the data buffers.
-      Q_out_L.setMaxBuffers(64);
-      ADC_RX_I.end();    // Receiver I channel
-      ADC_RX_Q.end();    // Receiver Q channel
-      ADC_RX_I.clear();  // Receiver I channel
-      ADC_RX_Q.clear();  // Receiver Q channel
-      Q_in_L_Ex.end();   // Transmit I channel path.
-      Q_in_R_Ex.end();   // Transmit Q channel path.
-      Q_in_L_Ex.clear();
-      Q_in_R_Ex.clear();
-      // Deactivate TX audio output path.  This disconnects from i2s_quadOut ports 0 and 1,
-      // which are- used by headphones during receive.
-      ////      connect19.disconnect();
-      ////      connect20.disconnect();
       // Connect audio paths
       patchCord1.connect();
       patchCord2.connect();
       patchCord3.connect();
-      ////      patchCord25.connect();
-      ////      patchCord26.connect();
 
       // Configure audio compressor (AGC)
       if (ConfigData.AGCMode == true) {  // Activate compressor2_1 path.
@@ -246,9 +242,9 @@ void SetAudioOperatingState(RadioState operatingState) {
       ADC_RX_I.begin();  // Receiver I channel
       ADC_RX_Q.begin();  // Receiver Q channel
 
-      speakerVolume.setGain(volumeLog[ConfigData.audioVolume]);    // Set volume because sidetone may have changed it.
-      headphoneVolume.setGain(volumeLog[ConfigData.audioVolume]);  // Set volume because sidetone may have changed it.
-      sgtl5000_1.volume(0.8);                                      // Restore headphone volume after CW sidetone reduction.
+      speakerVolume.setGain(volumeLog[ConfigData.speakerVolume]);      // Set volume because sidetone may have changed it.
+      headphoneVolume.setGain(volumeLog[ConfigData.headphoneVolume]);  // Set volume because sidetone may have changed it.
+      sgtl5000_1.volume(0.8);                                          // Restore headphone volume after CW sidetone reduction.
 
       controlAudioOut(ConfigData.audioOut, false);  // Configure audio out; don't mute all.
 
@@ -336,7 +332,7 @@ void SetAudioOperatingState(RadioState operatingState) {
 
       // Test tone enabled and connected
       toneSSBCal1.setSampleRate_Hz(48000);
-      toneSSBCal1.amplitude(0.2);
+      toneSSBCal1.amplitude(0.12);  // Set to same amplitude as CW tone.
       toneSSBCal1.frequency(750.0);
       toneSSBCal1.begin();
       toneSSBCal2.end();
@@ -668,8 +664,8 @@ void SetAudioOperatingState(RadioState operatingState) {
 
       toneSSBCal1.end();
       toneSSBCal2.end();
-      mixer1_tx.gain(0, 0);  // microphone audio off.
-      mixer1_tx.gain(1, 0);  // testTone off.
+      mixer1_tx.gain(0, 0);       // microphone audio off.
+      mixer1_tx.gain(1, 0);       // testTone off.
       mixer_rxtx_I.gain(0, 1.0);  // Connect transmitter back-end to Audio Adapter.
       mixer_rxtx_Q.gain(0, 1.0);
       mixer_rxtx_I.gain(1, 0.0);  // Disconnect headphone path to Audio Adapter.
@@ -813,19 +809,21 @@ void controlAudioOut(AudioState audioState, bool mute) {
       digitalWrite(MUTE, MUTEAUDIO);  // Mute speaker audio amplifier.
       switch2_rx.setChannel(1);       // Switch to headphone path.
       sgtl5000_1.unmuteHeadphone();   // Unmute headphones.
-      Serial.println("Set headphone");
+      display.UpdateVolumeField();
       break;
 
     case AudioState::SPEAKER:
       sgtl5000_1.muteHeadphone();       // Mute headphones.
       switch2_rx.setChannel(0);         // Switch to speaker path.
       digitalWrite(MUTE, UNMUTEAUDIO);  // Unmute speaker audio amplifier.
+      display.UpdateVolumeField();
       break;
 
     case AudioState::BOTH:
       switch2_rx.setChannel(2);         // Drive both audio paths.
       sgtl5000_1.unmuteHeadphone();     // Unmute headphones.
       digitalWrite(MUTE, UNMUTEAUDIO);  // Unmute speaker audio amplifier.
+      display.UpdateVolumeField();      // Volume control for speaker only if BOTH.
       break;
 
     case AudioState::MUTE_BOTH:

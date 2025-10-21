@@ -47,6 +47,7 @@ int g_WRCount;
 int keyCell;  // Where to place the cell in the X axis
 //const int chipSelect          = BUILTIN_SDCARD;
 uint8_t g_ra8875_layer_active = 0;
+int x2 = 0;  //AFP
 
 float bearingDegrees;
 float bearingRadians;

@@ -168,7 +168,8 @@ void ZoomFFTExe(uint32_t blockSize) {
   if (updateDisplayFlag == true) {
 //    Serial.printf("UpdateDisplayFlag\n");
     for (int i = 0; i < fftWidth; i++) {
-      pixelold[i] = pixelCurrent[i];
+//      pixelold[i] = pixelCurrent[i];
+pixelold[i] = pixelnew[i];
     }
     // Perform complex FFT
     // Calculation is performed in-place the FFT_buffer [re, im, re, im, re, im . . .]
@@ -208,7 +209,7 @@ void ZoomFFTExe(uint32_t blockSize) {
     Used when Spectrum Zoom =1
 *****/
 void CalcZoom1Magn() {
-  if (updateDisplayFlag == 1) {
+  if (updateDisplayFlag == true) {
     float32_t spec_help = 0.0;
     float32_t LPFcoeff = 0.7;  // Is this a global or not?
     if (LPFcoeff > 1.0) {

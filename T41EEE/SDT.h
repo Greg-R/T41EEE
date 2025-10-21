@@ -296,7 +296,9 @@ char versionSettings[10] = "T41EEE.91";  // This is required to be the first!  S
 
   bool AGCMode = true;
   float32_t AGCThreshold = -40.0;
-  int audioVolume = 30;  // 4 bytes
+  int speakerVolume = 30;
+  int headphoneVolume = 30;
+  AudioState audioOut = AudioState::SPEAKER;                       // Default audio output is speaker.
   int rfGainCurrent = 0;
   int rfGain[NUMBER_OF_BANDS]{ 0 };
   bool autoGain = false;
@@ -304,7 +306,6 @@ char versionSettings[10] = "T41EEE.91";  // This is required to be the first!  S
   uint32_t centerTuneStep = CENTER_TUNE_DEFAULT;       // JJP 7-3-23
   uint32_t fineTuneStep = FINE_TUNE_DEFAULT;           // JJP 7-3-23
   float32_t transmitPowerLevel = DEFAULT_POWER_LEVEL;  // Changed from int to float; Greg KF5N February 12, 2024
-  AudioState audioOut = AudioState::SPEAKER;                       // Default audio output is speaker.
   int nrOptionSelect = 0;                              // 1 byte
   int currentScale = 1;
   long spectrum_zoom = SPECTRUM_ZOOM_2;
@@ -667,7 +668,7 @@ extern const char *topMenus[];
 extern const char *zoomOptions[];
 extern bool ANR_notch;  // KF5N March 2, 2024
 //extern uint8_t display_S_meter_or_spectrum_state;
-extern uint8_t keyPressedOn;  //AFP 09-01-22
+extern bool keyPressedOn;  // State changed by CW key isr()s.
 extern uint8_t NR_first_time;
 extern uint8_t NR_Kim;
 extern uint32_t SampleRate;

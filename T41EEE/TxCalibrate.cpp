@@ -66,11 +66,19 @@ void TxCalibrate::plotCalGraphics(int calType) {
     void
 *****/
 void TxCalibrate::warmUpCal() {
-  uint32_t index_of_max;  // Not used, but required by arm_max_q15 function.
+  uint32_t index_of_max{ 0 };
+  uint32_t count{ 0 };
+  uint32_t i;
   // MakeFFTData() has to be called enough times for transients to settle out before computing FFT.
-  for (int i = 0; i < 64; i = i + 1) {
-    fftActive = false;           // Don't call FFT calculation.
+  for (i = 0; i < 128; i = i + 1) {
+    fftActive = true;
+    updateDisplayFlag = true;
     TxCalibrate::MakeFFTData();  // Note, FFT not called if buffers are not sufficiently filled.
+    arm_max_q15(pixelnew, 512, &rawSpectrumPeak, &index_of_max);
+    if(index_of_max > 251 and index_of_max < 260) {  // The peak is in the correct bin?
+      count = count + 1;    
+    }  else count = 0;  // Reset count in case of failure.
+    if( count == 5) break;  // If five in a row, exit the loop.  Warm-up is complete.
   }
   updateDisplayFlag = true;
   fftActive = true;
@@ -78,9 +86,9 @@ void TxCalibrate::warmUpCal() {
   updateDisplayFlag = false;
   // Find peak of spectrum, which is 512 wide.  Use this to adjust spectrum peak to top of spectrum display.
   arm_max_q15(pixelnew, 512, &rawSpectrumPeak, &index_of_max);
-//  Serial.printf("rawSpectrumPeak = %d\n", rawSpectrumPeak);
-//  Serial.printf("index_of_max = %d\n", index_of_max);
-  if(index_of_max < 251 or index_of_max > 260) Serial.printf("Problem with warmUpCal\n");
+  Serial.printf("TX rawSpectrumPeak = %d count = %d i = %d\n", rawSpectrumPeak, count, i);
+  Serial.printf("TX index_of_max = %d\n", index_of_max);
+  if(index_of_max < 251 or index_of_max > 260) Serial.printf("Problem with TX warmUpCal\n");
 }
 
 

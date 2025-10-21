@@ -7,17 +7,22 @@
 // Updated PlotCalSpectrum() function to clean up graphics.  KF5N August 3, 2023
 // Major clean-up of calibration.  KF5N August 16, 2023
 // Re-factored into class RxCalibrate.cpp.  This class does receive calibrate only.
+// Greg Raven KF5N October 20, 2025.
+
+#pragma once
 
 //#include <vector>
-#include <algorithm>
+//#include <algorithm>
 
 class RxCalibrate {
 public:
 
 // Blue and red bar variables.  These should be 256 (bins) apart.
 // These variables identify the center of the bars, not the left edge.
-int32_t rx_blue_usb = 385;  // Image frequency.  383
-int32_t rx_red_usb = 129;   // Receive frequency. 127
+// The exact bins should be 127 and 383, however, for some reason, the
+// peak is a couple of bins to the right.
+int32_t rx_blue_usb = 385;  // Image frequency.
+int32_t rx_red_usb = 129;   // Receive frequency. Exact bin 127.
 int32_t capture_bins = 32;      // Make bar_width divisible by 2.
 int32_t left_text_edge = 165;
 

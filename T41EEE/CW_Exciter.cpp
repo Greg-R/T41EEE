@@ -1,8 +1,6 @@
+// CW Exciter class
 
 #include "SDT.h"
-
-
-
 
 /*****
   Purpose: Load buffers used to modulate the transmitter during calibration.
@@ -15,15 +13,15 @@
       void
  *****/
 void CW_Exciter::writeSineBuffer(int numCycles) {
-  int kf;
-  float theta, increment;
-  float freqSideTone;
+  float32_t theta{ 0.0 }; //, increment{ 0.0 };
+  float32_t freqSideTone{ 0.0 };
+  const float32_t amplitude{ 0.12 }; // Sets the peak amplitude of the sinusoid.
   freqSideTone = static_cast<float>(numCycles) * 48000.0 / 512.0;
-  for (kf = 0, increment = 0.0; kf < 512; increment += 1.0, kf++) {  // Calc: numCycles = 8, 750 hz sine wave.
-    theta = increment * 2.0 * PI * freqSideTone / 48000.0;
-    sineBuffer[kf] = 0.12 * sin(theta);  // Create the CW tone waveform.
+  for (int kf = 0, increment = 0; kf < 512; increment += 1, kf++) {  // Calc: numCycles = 8, 750 hz sine wave.
+    theta = static_cast<float32_t>(increment) * 2.0 * PI * freqSideTone / 48000.0;
+    sineBuffer[kf] = amplitude * sin(theta);  // Create the CW tone waveform.
   }
-  Serial.printf("numCycles = %d\n", numCycles);
+//  Serial.printf("numCycles = %d\n", numCycles);
 }
 
 

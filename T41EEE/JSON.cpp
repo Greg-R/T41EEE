@@ -66,7 +66,9 @@ FLASHMEM void JSON::loadConfiguration(const char *filename, config_t &ConfigData
   // Copy values from the JsonDocument to the ConfigData
   strlcpy(ConfigData.versionSettings, doc["versionSettings"] | "t41pp.0", 10);
   ConfigData.AGCMode = doc["AGCMode"];
-  ConfigData.audioVolume = doc["audioVolume"];
+  ConfigData.speakerVolume = doc["speakerVolume"];
+  ConfigData.headphoneVolume = doc["headphoneVolume"];
+  ConfigData.audioOut = doc["audioOut"];
   ConfigData.rfGainCurrent = doc["rfGainCurrent"];
   for (int i = 0; i < NUMBER_OF_BANDS; i++) ConfigData.rfGain[i] = doc["rfGain"][i];
   ConfigData.autoGain = doc["autoGain"];
@@ -76,7 +78,7 @@ FLASHMEM void JSON::loadConfiguration(const char *filename, config_t &ConfigData
   ConfigData.fineTuneStep = doc["fineTuneStep"];
   ConfigData.transmitPowerLevel = doc["transmitPowerLevel"];
 //  ConfigData.xmtMode = doc["xmtMode"];
-  ConfigData.audioOut = doc["audioOut"];
+
   ConfigData.nrOptionSelect = doc["nrOptionSelect"];
   ConfigData.currentScale = doc["currentScale"];
   ConfigData.spectrum_zoom = doc["spectrum_zoom"];
@@ -158,7 +160,9 @@ FLASHMEM void JSON::saveConfiguration(const char *filename, const config_t &Conf
   // Set the values in the document
   doc["versionSettings"] = ConfigData.versionSettings;    // Fix for version not updating in JSON file.  KF5N March 18, 2024.
   doc["AGCMode"] = ConfigData.AGCMode;
-  doc["audioVolume"] = ConfigData.audioVolume;
+  doc["audioVolume"] = ConfigData.speakerVolume;
+  doc["audioVolume"] = ConfigData.headphoneVolume;
+  doc["audioOut"] = ConfigData.audioOut;
   doc["rfGainCurrent"] = ConfigData.rfGainCurrent;
   for (int i = 0; i < NUMBER_OF_BANDS; i++) doc["rfGain"][i] = ConfigData.rfGain[i];
   doc["autoGain"] = ConfigData.autoGain;
@@ -168,7 +172,6 @@ FLASHMEM void JSON::saveConfiguration(const char *filename, const config_t &Conf
   doc["fineTuneStep"] = ConfigData.fineTuneStep;
   doc["transmitPowerLevel"] = ConfigData.transmitPowerLevel;
 //  doc["xmtMode"] = ConfigData.xmtMode;
-  doc["audioOut"] = ConfigData.audioOut;
   doc["nrOptionSelect"] = ConfigData.nrOptionSelect;
   doc["currentScale"] = ConfigData.currentScale;
   doc["spectrum_zoom"] = ConfigData.spectrum_zoom;

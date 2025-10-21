@@ -31,6 +31,7 @@ const int FT_step = 500;                 // Hz step in Fast Tune
 // which is attached to an interrupt.  Graphics changes are handled by UpdateAudioGraphics() in Display.cpp.
 void FilterSetSSB() {
   int32_t filter_change;
+  int filterWidth = static_cast<int>((bands.bands[ConfigData.currentBand].FHiCut - bands.bands[ConfigData.currentBand].FLoCut) / 1000.0 * pixel_per_khz);
   if (filter_pos != last_filter_pos) {  // This decision is required as this function is required to be used in many locations.  KF5N April 21, 2024
     if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) display.BandInformation();
     filter_change = (filter_pos - last_filter_pos);
@@ -127,7 +128,7 @@ void EncoderCenterTune() {
 void EncoderVolume()  //============================== AFP 10-22-22  Begin new
 {
   char result;
-  int increment [[maybe_unused]] = 0;
+//  int increment [[maybe_unused]] = 0;
 
   result = volumeEncoder.process();  // Read the encoder
 
@@ -143,14 +144,25 @@ void EncoderVolume()  //============================== AFP 10-22-22  Begin new
       adjustVolEncoder = -1;
       break;
   }
-  ConfigData.audioVolume += adjustVolEncoder;
 
-  if (ConfigData.audioVolume > 100) {
-    ConfigData.audioVolume = 100;
+if(ConfigData.audioOut == AudioState::SPEAKER) {
+  ConfigData.speakerVolume += adjustVolEncoder;
+  if (ConfigData.speakerVolume > 100) {
+    ConfigData.speakerVolume = 100;
   } else {
-    if (ConfigData.audioVolume < 0)
-      ConfigData.audioVolume = 0;
+    if (ConfigData.speakerVolume < 0)
+      ConfigData.speakerVolume = 0;
   }
+}
+if(ConfigData.audioOut == AudioState::HEADPHONE) {  
+  ConfigData.headphoneVolume += adjustVolEncoder;
+  if (ConfigData.headphoneVolume > 100) {
+    ConfigData.headphoneVolume = 100;
+  } else {
+    if (ConfigData.headphoneVolume < 0)
+      ConfigData.headphoneVolume = 0;
+  }
+}
 
   volumeChangeFlag = true;  // Need this because of unknown timing in display updating.
 }
