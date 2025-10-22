@@ -189,7 +189,7 @@ void Display::ShowSpectrum(bool drawSpectrum) {
     // In the case of a CW interrupt, the array pixelnew should be saved as the actual spectrum.
     // This is the actual "old" spectrum!  This is required due to CW interrupts.  pixelCurrent
     // gets copied to pixelold by the FFT function.  Greg KF5N
-  //  pixelCurrent[x1] = pixelnew[x1];
+    //  pixelCurrent[x1] = pixelnew[x1];
     audioYPixelcurrent[x1] = audioYPixel[x1];
 
     if (keyPressedOn) {
@@ -213,8 +213,8 @@ void Display::ShowSpectrum(bool drawSpectrum) {
         tft.drawLine(i + 3, y1_old, i + 3, y2_old, RA8875_BLACK);
       }
       spectrumErased = true;
-//      Serial.printf("Bail-out from ShowSpectrum at x1 = %d\n", x1);
-      for(int i = 0; i < 512; i = i + 1) {
+      //      Serial.printf("Bail-out from ShowSpectrum at x1 = %d\n", x1);
+      for (int i = 0; i < 512; i = i + 1) {
         pixelnew[i] = 0;
         pixelold[i] = 0;
       }
@@ -1595,6 +1595,10 @@ void Display::DrawBandWidthIndicatorBar()  // AFP 10-30-22
   int cwOffsetPixels = 0;
   int cwOffsets[4]{ 563, 657, 750, 844 };  // Rounded to nearest Hz.
   float hz_per_pixel = 0.0;
+
+  tft.writeTo(L2);  // Destroy the current bandwidth indicator bar.  KF5N July 30, 2023
+  tft.clearMemory();
+  tft.writeTo(L1);
 
   switch (zoomIndex) {
     case 0:  // 1X

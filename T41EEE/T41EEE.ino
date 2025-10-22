@@ -851,7 +851,7 @@ uint32_t afterPowerUp = 0;
     void
 *****/
 FLASHMEM void setup() {
-  powerUp = true;
+
   Serial.begin(115200);      // Use this serial for Teensy programming.
   SerialUSB1.begin(115200);  // Use this serial for FT8 keying.
    /* check for CrashReport stored from previous run */
@@ -1037,9 +1037,8 @@ FLASHMEM void setup() {
   ConfigData.rfGainCurrent = 0;                 // Start with lower gain so you don't get blasted.
   lastState = RadioState::NOSTATE;              // Forces an update.
 
-
-
   if ((MASTER_CLK_MULT_RX == 2) or (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();  // Required only for QSD2/QSE2.
+  powerUp = true;
 }
 //============================================================== END setup() =================================================================
 
@@ -1087,16 +1086,29 @@ void loop() {
 // Transition to new state if required.
   if (lastState != radioState) {
     SetAudioOperatingState(radioState);
-    button.ExecuteModeChange();
+
+if(radioState == RadioState::CW_RECEIVE_STATE) modecontrol.CWReceiveMode();
+if(radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE) modecontrol.CWTransmitMode();
+
+if(radioState == RadioState::SSB_RECEIVE_STATE) modecontrol.SSBReceiveMode();
+if(radioState == RadioState::SSB_TRANSMIT_STATE) modecontrol.SSBTransmitMode();
+
+if(radioState == RadioState::FT8_RECEIVE_STATE) modecontrol.FT8ReceiveMode();
+if(radioState == RadioState::FT8_TRANSMIT_STATE) modecontrol.FT8TransmitMode();
+
+if(radioState == RadioState::AM_RECEIVE_STATE) modecontrol.AMReceiveMode();
+if(radioState == RadioState::SAM_RECEIVE_STATE) modecontrol.SAMReceiveMode();
+
+  }
     if(radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE and lastState == RadioState::CW_RECEIVE_STATE) {
 Serial.printf("spectrumErased = %d\n", display.spectrumErased);
     }
-    if(lastState == RadioState::CW_TRANSMIT_STRAIGHT_STATE and (radioState == RadioState::CW_RECEIVE_STATE or lastState == RadioState::NOSTATE)) {
-     button.ExecuteModeChange();
-    }
-    if(false) button.ExecuteModeChange();
+//    if(lastState == RadioState::CW_TRANSMIT_STRAIGHT_STATE and (radioState == RadioState::CW_RECEIVE_STATE or lastState == RadioState::NOSTATE)) {
+//     button.ExecuteModeChange();
+
+//    if(false) button.ExecuteModeChange();
     //    Serial.printf("Set audio state, begin loop. radioState = %d lastState = %d\n", radioState, lastState);
-  }
+
 
   // Don't turn off audio in the case of CW for sidetone.
   if (powerUp and not(radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE or radioState == RadioState::CW_TRANSMIT_KEYER_STATE)) {

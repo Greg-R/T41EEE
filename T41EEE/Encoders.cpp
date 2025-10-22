@@ -110,7 +110,7 @@ void EncoderCenterTune() {
   TxRxFreq = ConfigData.centerFreq + NCOFreq;
   ConfigData.lastFrequencies[ConfigData.currentBand][ConfigData.activeVFO] = TxRxFreq;
   SetFreq();                    //  Change to receiver tuning process.  KF5N July 22, 2023
-  display.DrawBandWidthIndicatorBar();  // AFP 10-20-22
+//  display.DrawBandWidthIndicatorBar();  // AFP 10-20-22  This only needed for fine tune?
   display.ShowFrequency();
   display.BandInformation();
 }

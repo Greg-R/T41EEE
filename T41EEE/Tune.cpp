@@ -83,7 +83,7 @@ void SetFreq() {                              //AFP 09-22-22   Revised July 7 KF
     si5351.output_enable(SI5351_CLK2, 1);
   }
   //=====================  AFP 10-03-22 =================
-  display.DrawFrequencyBarValue();
+//  display.DrawFrequencyBarValue();
 }
 #else
 /*****
@@ -165,7 +165,7 @@ void SetFreq() {                              //AFP 09-22-22   Revised July 7 KF
     si5351.output_enable(SI5351_CLK1, 1);
   }
   //=====================  AFP 10-03-22 =================
-  display.DrawFrequencyBarValue();
+//  display.DrawFrequencyBarValue();
 }
 #endif
 
