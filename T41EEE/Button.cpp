@@ -1170,9 +1170,9 @@ void Button::ExecuteModeChange() {
   FilterBandwidth();
   display.ShowBandwidth();
   display.ShowFrequency();
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) display.BandInformation();
-  display.DrawBandWidthIndicatorBar();  // Restore the bandwidth indicator bar.  KF5N July 30, 2023
-  display.BandInformation();
+////  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) display.BandInformation();  Seems to be called by default.
+//  display.DrawBandWidthIndicatorBar();  // Restore the bandwidth indicator bar.  KF5N July 30, 2023.  Gets called in UpdateAudioGraphics
+  display.BandInformation();  // Called by default?
   fftOffset = 140;
 //  Serial.printf("Execute Mode Change\n");
   SetBandRelay();  // Set relays in LPF for current band.

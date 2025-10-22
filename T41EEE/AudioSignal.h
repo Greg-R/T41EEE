@@ -15,7 +15,8 @@ AudioFilterEqualizer_F32 txEqualizer(audio_settings);
 AudioEffectCompressor2_F32 compressor1;  // Open Audio Compressor
 radioCESSB_Z_transmit_F32 cessb1;
 AudioConvert_F32toI16 float2Int1_tx, float2Int2_tx;  // Converts Float to Int16.  See class in AudioStream_F32.h
-AudioSwitch4_OA_F32 switch1_tx, switch3_tx, switch4_tx;
+////AudioSwitch4_OA_F32 switch1_tx, switch3_tx, switch4_tx;
+AudioSwitch4_OA_F32 switch3_tx, switch4_tx;
 AudioMixer4_F32 mixer1_tx, mixer2_tx, mixer3_tx;      // Used to switch in tone during calibration.
 AudioSynthWaveformSine_F32 toneSSBCal1, toneSSBCal2;  // Tones for SSB calibration and IMD testing.
 AudioRecordQueue Q_in_L_Ex;                           // AudioRecordQueue for input Microphone channel.
@@ -27,10 +28,11 @@ AudioPlayQueue_F32 cwToneData;
 //  Begin transmit signal chain.
 AudioConnection connect0(i2s_quadIn, 0, int2Float1_tx, 0);  // Microphone audio channel.  Must use int2Float because Open Audio does not have quad input.
 
-AudioConnection_F32 connect1(int2Float1_tx, 0, switch1_tx, 0);  // Used switches here because it appeared necessary to stop flow of data.
+//AudioConnection_F32 connect1(int2Float1_tx, 0, switch1_tx, 0);  // Used switches here because it appeared necessary to stop flow of data.
 
 // Need a mixer to switch between microphone audio and tones used for calibration, testing, and CW.
-AudioConnection_F32 connect3(switch1_tx, 0, mixer1_tx, 0);  // Connect microphone mixer1 output 0 via gain control.
+//AudioConnection_F32 connect3(switch1_tx, 0, mixer1_tx, 0);  // Connect microphone mixer1 output 0 via gain control.
+AudioConnection_F32 connect3(int2Float1_tx, 0, mixer1_tx, 0);  // Connect microphone mixer1 output 0 via gain control.
 
 AudioConnection_F32 connect4(toneSSBCal1, 0, mixer1_tx, 1);   // Connect tone for SSB calibration and IM3 testing.
 AudioConnection_F32 connect22(toneSSBCal2, 0, mixer1_tx, 2);  // Connect tone for IM3 testing.
@@ -212,7 +214,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       mixer_rxtx_Q.gain(1, 1.0);
       toneSSBCal1.end();
       toneSSBCal2.end();
-      switch1_tx.setChannel(1);  // Disconnect microphone path.
+////      switch1_tx.setChannel(1);  // Disconnect microphone path.
                                  //      switch2_tx.setChannel(1);  //  Disconnect SSB and IMD test tone path.
                                  //      switch5_tx.setChannel(1);  //  Disconnect IMD test tone path.
 
@@ -268,7 +270,7 @@ void SetAudioOperatingState(RadioState operatingState) {
 
       mixer1_tx.gain(0, 1);       // microphone audio on.
       mixer1_tx.gain(1, 0);       // testTone off.
-      switch1_tx.setChannel(0);   // Connect microphone path.
+////      switch1_tx.setChannel(0);   // Connect microphone path.
                                   //    switch2_tx.setChannel(1);  // Disonnect 1 kHz test tone path.
       mixer_rxtx_I.gain(0, 1.0);  // Connect transmitter back-end to Audio Adapter.
       mixer_rxtx_Q.gain(0, 1.0);
@@ -339,7 +341,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       mixer1_tx.gain(0, 0);       // microphone audio off.
       mixer1_tx.gain(1, 1);       // testTone on.
       mixer1_tx.gain(2, 0);       // testTone 2 off.
-      switch1_tx.setChannel(1);   // Disconnect microphone path.
+////      switch1_tx.setChannel(1);   // Disconnect microphone path.
       mixer_rxtx_I.gain(0, 1.0);  // Connect transmitter back-end to Audio Adapter.
       mixer_rxtx_Q.gain(0, 1.0);
       mixer_rxtx_I.gain(1, 0.0);  // Disconnect headphone path to Audio Adapter.
@@ -413,7 +415,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       mixer1_tx.gain(0, 0);       // microphone audio off.
       mixer1_tx.gain(1, 1);       // testTone 1 on.
       mixer1_tx.gain(2, 1);       // testTone 2 on.
-      switch1_tx.setChannel(1);   // Disconnect microphone path.
+////      switch1_tx.setChannel(1);   // Disconnect microphone path.
                                   //      switch2_tx.setChannel(0);  // Connect IMD test tone path.
                                   //      switch5_tx.setChannel(0);  //  Connect IMD test tone path.
       mixer_rxtx_I.gain(0, 1.0);  // Connect transmitter back-end to Audio Adapter.
@@ -498,7 +500,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       mixer_rxtx_I.gain(1, 0.0);  // Disconnect headphone path to Audio Adapter.
       mixer_rxtx_Q.gain(1, 0.0);
 
-      switch1_tx.setChannel(1);  // Disconnect microphone path.
+////      switch1_tx.setChannel(1);  // Disconnect microphone path.
 
       // Bypass equalizer and compressor in CW mode!
       switch3_tx.setChannel(1);  // Bypass equalizer.  Must bypass for FT8.
@@ -602,7 +604,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       mixer1_tx.gain(0, 0);       // microphone audio off.
       mixer1_tx.gain(1, 1);       // testTone on.
       mixer1_tx.gain(2, 0);       // testTone 2 off.
-      switch1_tx.setChannel(1);   // Disconnect microphone path.
+////      switch1_tx.setChannel(1);   // Disconnect microphone path.
       mixer_rxtx_I.gain(0, 1.0);  // Connect transmitter back-end to Audio Adapter.
       mixer_rxtx_Q.gain(0, 1.0);
       mixer_rxtx_I.gain(1, 0.0);  // Disconnect headphone path to Audio Adapter.
@@ -649,7 +651,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       controlAudioOut(ConfigData.audioOut, true);  // Mute all audio.
       sgtl5000_1.unmuteLineout();
 
-      switch1_tx.setChannel(1);  // Disconnect microphone path.
+////      switch1_tx.setChannel(1);  // Disconnect microphone path.
 
       // CW does not use the transmitter front-end.
       Q_in_L_Ex.end();  // Transmit I channel path.
@@ -712,7 +714,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       mixer1_tx.gain(2, 0);  // testTone 2 off.
       mixer1_tx.gain(3, 1);  // CW tone path.  Mic gain is also in this path.  Set micGain to 0dB.
 
-      switch1_tx.setChannel(1);  // Disconnect microphone path.
+////      switch1_tx.setChannel(1);  // Disconnect microphone path.
 
       // Bypass equalizer and compressor in CW mode!
       switch3_tx.setChannel(1);  // Bypass equalizer.  Must bypass for FT8.

@@ -42,6 +42,7 @@ CW_Exciter cwexciter;
 JSON json;
 Eeprom eeprom;  // Eeprom object.
 Button button;
+ModeControl modecontrol;
 
 const char *topMenus[] = { "CW Options", "RF Set", "VFO Select",
                            "Config EEPROM", "Cal EEPROM", "AGC", "Spectrum Options",
@@ -200,6 +201,7 @@ int16_t audioFFToffset = 100;
 //int fLoCutOld;
 //int fHiCutOld;
 //int filterWidth = static_cast<int>((bands.bands[ConfigData.currentBand].FHiCut - bands.bands[ConfigData.currentBand].FLoCut) / 1000.0 * pixel_per_khz);
+int filterWidth{ 0 };
 int h = 135;  // SPECTRUM_HEIGHT + 3;
 bool ANR_notch = false;
 uint8_t auto_codec_gain = 1;
@@ -212,7 +214,7 @@ uint32_t SampleRate = SAMPLE_RATE_192K;
 uint32_t zoom_display = 1;
 
 //  These arrays are used to create the RF spectrum plot in the display.
-int16_t pixelCurrent[SPECTRUM_RES]{ 0 };
+//int16_t pixelCurrent[SPECTRUM_RES]{ 0 };
 int16_t pixelnew[SPECTRUM_RES]{ 0 };
 int16_t pixelold[SPECTRUM_RES]{ 0 };
 
@@ -1035,6 +1037,8 @@ FLASHMEM void setup() {
   ConfigData.rfGainCurrent = 0;                 // Start with lower gain so you don't get blasted.
   lastState = RadioState::NOSTATE;              // Forces an update.
 
+
+
   if ((MASTER_CLK_MULT_RX == 2) or (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();  // Required only for QSD2/QSE2.
 }
 //============================================================== END setup() =================================================================
@@ -1080,9 +1084,17 @@ void loop() {
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and (keyPressedOn == true and bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE && ConfigData.keyType == 0)) radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and (keyPressedOn == true and bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE && ConfigData.keyType == 1)) radioState = RadioState::CW_TRANSMIT_KEYER_STATE;
 
+// Transition to new state if required.
   if (lastState != radioState) {
     SetAudioOperatingState(radioState);
     button.ExecuteModeChange();
+    if(radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE and lastState == RadioState::CW_RECEIVE_STATE) {
+Serial.printf("spectrumErased = %d\n", display.spectrumErased);
+    }
+    if(lastState == RadioState::CW_TRANSMIT_STRAIGHT_STATE and (radioState == RadioState::CW_RECEIVE_STATE or lastState == RadioState::NOSTATE)) {
+     button.ExecuteModeChange();
+    }
+    if(false) button.ExecuteModeChange();
     //    Serial.printf("Set audio state, begin loop. radioState = %d lastState = %d\n", radioState, lastState);
   }
 
@@ -1193,7 +1205,7 @@ void loop() {
           }
         } else {
           if (digitalRead(ConfigData.paddleDit) == HIGH && ConfigData.keyType == 0) {  //Turn off CW signal
-            keyPressedOn = 0;
+            keyPressedOn = false;
             if (cwKeyDown) {  // Initiate falling CW signal.
               cwexciter.CW_ExciterIQData(CW_SHAPING_FALL);
               cwKeyDown = false;
@@ -1303,7 +1315,7 @@ if(ConfigData.audioOut == AudioState::BOTH)    headphoneVolume.setGain(volumeLog
   }
   loopCounter = loopCounter + 1;
   if(loopCounter > 49) {
-// Serial.printf("Loop us = %u\n", (static_cast<uint32_t>(usec1) - usec1Old));
+ Serial.printf("Loop us = %u\n", (static_cast<uint32_t>(usec1) - usec1Old));
 loopCounter = 0;
   }
   usec1Old = usec1;

@@ -953,7 +953,7 @@ float RxCalibrate::PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
   tft.drawLine(x1 + 0, y_old2_plot, x1 + 0, y_old_plot, RA8875_BLACK);   // Erase old...
   tft.drawLine(x1 + 0, y1_new_plot, x1 + 0, y_new_plot, RA8875_YELLOW);  // Draw new
 
-  pixelCurrent[x1] = pixelnew[x1];  //  This is the actual "old" spectrum! Copied to pixelold by the FFT function.
+//  pixelCurrent[x1] = pixelnew[x1];  //  This is the actual "old" spectrum! Copied to pixelold by the FFT function.
 
   adjdB = (static_cast<float>(adjAmplitude) - static_cast<float>(refAmplitude)) / (1.95 * 2.0);  // Cast to float and calculate the dB level.  Needs further refinement for accuracy.  KF5N
   adjdB_avg = adjdB * alpha + adjdBold * (1.0 - alpha);                                          // Exponential average.

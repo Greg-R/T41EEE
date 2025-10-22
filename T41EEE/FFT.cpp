@@ -168,8 +168,8 @@ void ZoomFFTExe(uint32_t blockSize) {
   if (updateDisplayFlag == true) {
 //    Serial.printf("UpdateDisplayFlag\n");
     for (int i = 0; i < fftWidth; i++) {
-//      pixelold[i] = pixelCurrent[i];
 pixelold[i] = pixelnew[i];
+//pixelCurrent[i] = pixelnew[i];
     }
     // Perform complex FFT
     // Calculation is performed in-place the FFT_buffer [re, im, re, im, re, im . . .]
@@ -216,7 +216,7 @@ void CalcZoom1Magn() {
       LPFcoeff = 1.0;
     }
     for (int i = 0; i < fftWidth; i++) {
-      pixelold[i] = pixelCurrent[i];
+      pixelold[i] = pixelnew[i];
     }
 
     for (int i = 0; i < fftWidth; i++) {                                                    // interleave real and imaginary input values [real, imag, real, imag . . .]

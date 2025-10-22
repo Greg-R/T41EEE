@@ -31,7 +31,7 @@ const int FT_step = 500;                 // Hz step in Fast Tune
 // which is attached to an interrupt.  Graphics changes are handled by UpdateAudioGraphics() in Display.cpp.
 void FilterSetSSB() {
   int32_t filter_change;
-  int filterWidth = static_cast<int>((bands.bands[ConfigData.currentBand].FHiCut - bands.bands[ConfigData.currentBand].FLoCut) / 1000.0 * pixel_per_khz);
+////  int filterWidth = static_cast<int>((bands.bands[ConfigData.currentBand].FHiCut - bands.bands[ConfigData.currentBand].FLoCut) / 1000.0 * pixel_per_khz);
   if (filter_pos != last_filter_pos) {  // This decision is required as this function is required to be used in many locations.  KF5N April 21, 2024
     if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) display.BandInformation();
     filter_change = (filter_pos - last_filter_pos);

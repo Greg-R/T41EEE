@@ -25,6 +25,7 @@ int smeterLength;
 float CPU_temperature = 0.0;
 double elapsed_micros_mean;
 int centerLine = (MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2 + 2;  // The FFT is plotted starting at x = 3.
+bool spectrumErased{ false };
 
 const uint16_t gradient[117]  {  // Color array for waterfall background
   0x0,    0x1,    0x2,    0x3,    0x4,    0x5,    0x6,    0x7,    0x8,    0x9,

@@ -447,6 +447,7 @@ extern struct calibration_t CalData;
 #include "JSON.h"
 #include "Eeprom.h"
 #include "ReceiveDSP.h"
+#include "ModeControl.h"
 
 //------------------------- Global CW Filter declarations ----------
 
@@ -472,7 +473,7 @@ extern float32_t cwFallBuffer[];
 extern int filterWidth;
 
 //===== New histogram stuff
-extern float32_t pixel_per_khz;  //AFP
+//extern float32_t pixel_per_khz;  //AFP
 extern int pos_left;
 extern int centerLine;
 extern int h;
@@ -675,7 +676,7 @@ extern uint32_t SampleRate;
 extern uint32_t zoom_display;
 extern int16_t pixelnew[];
 extern int16_t pixelold[];
-extern int16_t pixelCurrent[];
+//extern int16_t pixelCurrent[];
 extern int16_t y_old, y_new, y1_new, y1_old, y_old2;
 extern const uint16_t gradient[];
 extern const uint32_t IIR_biquad_Zoom_FFT_N_stages;
