@@ -1299,6 +1299,7 @@ void Display::UpdateCompressionField()  // JJP 8/26/2023
 
 /*****
   Purpose: Updates Morse decoder related graphics including CW, highpass, and lowpass filter bandwidths.
+           This method calls DrawBandWidthIndicatorBar().
 
   Parameter list:
     void
@@ -1341,8 +1342,8 @@ void Display::UpdateAudioGraphics() {
     filterHiPositionMarker = map(bands.bands[ConfigData.currentBand].FAMCut, 0, 6000, 0, 256);
   }
 
-  //Draw Filter indicator lines on audio plot to Layer 2.
-  tft.writeTo(L2);
+  // Draw Filter indicator lines on audio plot to Layer 2.
+////  tft.writeTo(L2);
   // The encoder should adjust the low side of the filter if the CW filter is on.  This creates a tunable bandpass.  Sort of.
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and ConfigData.CWFilterIndex != 5) switchFilterSideband = true;
 
@@ -1383,15 +1384,15 @@ void Display::UpdateAudioGraphics() {
       break;
   }
 
-  // Draw CW filter box if required.  Don't do this if the CW filter is off.
+  // Draw CW filter box if required.  Don't do this if the CW filter is off.  This has to be written to L2 or it will be erased by the audio spectrum eraser.
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and ConfigData.CWFilterIndex != 5) {
-    tft.writeTo(L2);  // This has to be written to L2 or it will be erased by the audio spectrum eraser.
+//    tft.writeTo(L2);  // 
     tft.fillRect(BAND_INDICATOR_X - 6 + abs(filterLoPositionMarker), AUDIO_SPECTRUM_TOP, CWFilterPosition - abs(filterLoPositionMarker), 120, MAROON);
     tft.drawFastVLine(BAND_INDICATOR_X - 8 + CWFilterPosition, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_LIGHT_GREY);
   }
 
   // Draw decoder delimiters if the decoder is on.
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and ConfigData.decoderFlag) {
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) { // and ConfigData.decoderFlag) {  CW delimiters always shown in CW mode.  Greg KF5N October 2025
     // Draw delimiter bars for CW offset frequency.  This depends on the user selected offset.
     if (ConfigData.CWOffset == 0) {
       tft.drawFastVLine(BAND_INDICATOR_X + 15, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_GREEN);  //CW lower freq indicator
@@ -1411,11 +1412,12 @@ void Display::UpdateAudioGraphics() {
     }
   }
 
-  // Update stuff including graphics that got erase by this function.
-  BandInformation();
-  ShowBandwidth();
-  DrawFrequencyBarValue();  // This calls ShowBandwidth().  YES, this function is useful here.
+  // Update stuff including graphics that got erased by this function.
+////  BandInformation();
+////  ShowBandwidth();
+////  DrawFrequencyBarValue();  // This calls ShowBandwidth().  YES, this function is useful here.
   DrawBandWidthIndicatorBar();
+
   tft.writeTo(L1);
 }
 
@@ -1582,7 +1584,8 @@ void Display::RedrawDisplayScreen() {
 
 
 /*****
-  Purpose: Draw Tuned Bandwidth on Spectrum Plot. // Calculations simplified KF5N April 22, 2024
+  Purpose: Draw Tuned Bandwidth graphic (blue bar) on Spectrum Plot. // Calculations simplified KF5N April 22, 2024
+           This method is called at the conclusion of UpdateAudioGraphics().
 
   Parameter list:
 
@@ -1596,9 +1599,10 @@ void Display::DrawBandWidthIndicatorBar()  // AFP 10-30-22
   int cwOffsets[4]{ 563, 657, 750, 844 };  // Rounded to nearest Hz.
   float hz_per_pixel = 0.0;
 
-  tft.writeTo(L2);  // Destroy the current bandwidth indicator bar.  KF5N July 30, 2023
-  tft.clearMemory();
-  tft.writeTo(L1);
+//  This method works in concert with UpdateAudioGraphics().  It clears L2.
+////  tft.writeTo(L2);  // Destroy the current bandwidth indicator bar.  KF5N July 30, 2023
+////  tft.clearMemory();
+//  tft.writeTo(L1);
 
   switch (zoomIndex) {
     case 0:  // 1X

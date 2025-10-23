@@ -6,8 +6,9 @@ void ModeControl::CWReceiveMode() {
 
   SetFreq();
   display.BandInformation();  // Updates display when mode changes.
-  FilterBandwidth();  // Required to set up filter properly for this mode.
-  display.DrawBandWidthIndicatorBar();
+
+  display.UpdateAudioGraphics();
+  FilterSetSSB();  // Required to set up filter properly for this mode.
 }
 
 
@@ -23,8 +24,9 @@ void ModeControl::SSBReceiveMode() {
 
   SetFreq();
   display.BandInformation();  // Updates display when mode changes.
-  FilterBandwidth();  // Required to set up filter properly for this mode.
-    display.DrawBandWidthIndicatorBar();
+
+    display.UpdateAudioGraphics();
+      FilterSetSSB();  // Required to set up filter properly for this mode.
 }
 
 
@@ -40,8 +42,9 @@ void ModeControl::FT8ReceiveMode() {
 
   SetFreq();
   display.BandInformation();  // Updates display when mode changes.
-  FilterBandwidth();  // Required to set up filter properly for this mode.
-    display.DrawBandWidthIndicatorBar();
+
+    display.UpdateAudioGraphics();
+      FilterSetSSB();  // Required to set up filter properly for this mode.
 }
 
 
@@ -57,8 +60,9 @@ void ModeControl::AMReceiveMode() {
 
   SetFreq();
   display.BandInformation();  // Updates display when mode changes.
-  FilterBandwidth();  // Required to set up filter properly for this mode.
-  display.DrawBandWidthIndicatorBar();
+
+  display.UpdateAudioGraphics();
+    FilterSetSSB();  // Required to set up filter properly for this mode.
 }
 
 
@@ -66,8 +70,9 @@ void ModeControl::SAMReceiveMode() {
 
   SetFreq();
   display.BandInformation();  // Updates display when mode changes.
-  FilterBandwidth();  // Required to set up filter properly for this mode.
-  display.DrawBandWidthIndicatorBar();
+
+  display.UpdateAudioGraphics();
+    FilterSetSSB();  // Required to set up filter properly for this mode.
 }
 
 

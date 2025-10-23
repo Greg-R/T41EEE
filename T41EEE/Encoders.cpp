@@ -68,9 +68,11 @@ void FilterSetSSB() {
     volumeChangeFlag = true;
   }
 
-  display.UpdateAudioGraphics();    // Redraw Morse decoder graphics because they get erased due to filter graphics updates.
-  display.DrawFrequencyBarValue();  // This calls ShowBandwidth().  YES, this function is useful here.
-  display.DrawBandWidthIndicatorBar();
+//  display.DrawBandWidthIndicatorBar();  // The width of the blue bar is proportional to the filter bandwidth.
+display.UpdateAudioGraphics();    // Updates graphics associated with filter bandwidth.
+////  display.DrawFrequencyBarValue();  // This calls ShowBandwidth().  YES, this function is useful here.
+display.ShowBandwidth();  // This updates the filter settings numbers at the top of the spectrum display.
+
 
 //  Serial.printf("FLoCut = %d FHiCut = %d\n", bands.bands[ConfigData.currentBand].FLoCut, bands.bands[ConfigData.currentBand].FHiCut);
 }

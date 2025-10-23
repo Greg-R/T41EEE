@@ -1032,6 +1032,7 @@ FLASHMEM void setup() {
   mainMenuIndex = 0;                         // Changed from middle to first. Do Menu Down to get to Calibrate quickly
   zoomIndex = ConfigData.spectrum_zoom - 1;  // ButtonZoom() increments zoomIndex, so this cancels it so the read from EEPROM is accurately restored.  KF5N August 3, 2023
   button.ButtonZoom();                       // Restore zoom settings.  KF5N August 3, 2023
+  FilterSetSSB();                   // This is not updated until bandwidth is adjusted, so it needs to be done here in setup.
 
   ConfigData.sdCardPresent = SDPresentCheck();  // JJP 7/18/23
   ConfigData.rfGainCurrent = 0;                 // Start with lower gain so you don't get blasted.

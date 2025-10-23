@@ -867,7 +867,7 @@ void Button::ButtonMuteAudio() {
 
   Return value;
     int           the current noise floor value
-*****/
+*****
 int Button::DrawNewFloor(int floor) {
   static int oldY = SPECTRUM_BOTTOM;
 
@@ -884,7 +884,7 @@ int Button::DrawNewFloor(int floor) {
   oldY = SPECTRUM_BOTTOM - floor;
   return floor;
 }
-
+*/
 
 /*****
   Purpose: Reset Zoom to zoomIndex
