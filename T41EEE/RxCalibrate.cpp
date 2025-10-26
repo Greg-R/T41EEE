@@ -247,7 +247,7 @@ void RxCalibrate::CalibrateEpilogue(bool radioCal, bool saveToEeprom) {
   ConfigData.CWOffset = cwFreqOffsetTemp;  // Return user selected CW offset frequency.
   sineTone(ConfigData.CWOffset + 6);       // This function takes "number of cycles" which is the offset + 6.
   ConfigData.currentScale = userScale;     //  Restore vertical scale to user preference.  KF5N
-  display.ShowSpectrumdBScale();
+////  display.ShowSpectrumdBScale();
   ConfigData.transmitPowerLevel = transmitPowerLevelTemp;  // Restore the user's transmit power level setting.  KF5N August 15, 2023
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) bands.bands[ConfigData.currentBand].sideband = tempSideband;
   bands.bands[ConfigData.currentBand].mode = tempMode;
@@ -686,16 +686,17 @@ void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool 
 
 /*****
   Purpose: Signal processing for the purpose of calibration.
+           This operates at 192ksps and is therefore not compatible with TX calibration.
 
    Parameter List:
-      int toneFreq, index of an array of tone frequencies.
+      none
 
    Return value:
       void
  *****/
 void RxCalibrate::MakeFFTData() {
   float rfGainValue, powerScale;                                   // AFP 2-11-23.  Greg KF5N February 13, 2023
-  float recBandFactor[7] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };  // AFP 2-11-23  KF5N uniform values
+//  float recBandFactor[7] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };  // AFP 2-11-23  KF5N uniform values
 
   /**********************************************************************************  AFP 12-31-20
         Get samples from queue buffers
@@ -705,11 +706,11 @@ void RxCalibrate::MakeFFTData() {
         N_BLOCKS = FFT_LENGTH / 2 / BUFFER_SIZE * (uint32_t)DF; // should be 16 with DF == 8 and FFT_LENGTH = 512
         BUFFER_SIZE*N_BLOCKS = 2048 samples
      **********************************************************************************/
-  // Generate I and Q for the transmit or receive calibration.  KF5N                                  // KF5N
+  // Generate I and Q for receive calibration.  Greg Raven KF5N October 2025
   arm_scale_f32(cosBuffer, 0.20, float_buffer_L_EX, 256);  // AFP 2-11-23 Use pre-calculated sin & cos instead of Hilbert
-  arm_scale_f32(sinBuffer, 0.20, float_buffer_R_EX, 256);  // AFP 2-11-23 Sidetone = 3000
+  arm_scale_f32(sinBuffer, 0.20, float_buffer_R_EX, 256);
 
-  // Transmitter calibration parameters.  These will be approximations, good enough for this purpose.
+  // Transmitter calibration parameters.  These will be approximations, and good enough for this purpose.
   if (mode == 0) {
     if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
       arm_scale_f32(float_buffer_L_EX, -CalData.IQCWAmpCorrectionFactorLSB[ConfigData.currentBand], float_buffer_L_EX, 256);       //Adjust level of L buffer // AFP 2-11-23
@@ -780,8 +781,8 @@ void RxCalibrate::MakeFFTData() {
 
   // }   // End of transmit code.  Begin receive code.
 
-  // Get audio samples from the audio  buffers and convert them to float.
-  // Read in 32 blocks á 128 samples in I and Q if available.
+  // Get I16 audio blocks from the record queues and convert them to float.
+  // Read in 16 blocks of 128 samples in I and Q if available.
   if (static_cast<uint32_t>(ADC_RX_I.available()) > 16 and static_cast<uint32_t>(ADC_RX_Q.available()) > 16) {
     for (unsigned i = 0; i < 16; i++) {
       /**********************************************************************************  AFP 12-31-20
@@ -801,10 +802,10 @@ void RxCalibrate::MakeFFTData() {
     /**********************************************************************************  AFP 12-31-20
       Scale the data buffers by the RFgain value defined in bands.bands[ConfigData.currentBand] structure
     **********************************************************************************/
-    arm_scale_f32(float_buffer_L, recBandFactor[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 2-11-23
-    arm_scale_f32(float_buffer_R, recBandFactor[ConfigData.currentBand], float_buffer_R, BUFFER_SIZE * N_BLOCKS);  //AFP 2-11-23
+//    arm_scale_f32(float_buffer_L, recBandFactor[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 2-11-23
+//    arm_scale_f32(float_buffer_R, recBandFactor[ConfigData.currentBand], float_buffer_R, BUFFER_SIZE * N_BLOCKS);  //AFP 2-11-23
 
-    // IQ amplitude correction.  Mode 0 is for CW and Mode 1 is for SSB.
+    // IQ amplitude and phase correction.  Mode 0 is for CW and Mode 1 is for SSB.
     if (mode == 0) {
       if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
         arm_scale_f32(float_buffer_L, CalData.IQCWRXAmpCorrectionFactorLSB[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22

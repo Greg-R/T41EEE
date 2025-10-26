@@ -13,15 +13,15 @@
       void
  *****/
 void CW_Exciter::writeSineBuffer(int numCycles) {
-  float32_t theta{ 0.0 }; //, increment{ 0.0 };
+  float32_t theta{ 0.0 };  //, increment{ 0.0 };
   float32_t freqSideTone{ 0.0 };
-  const float32_t amplitude{ 0.12 }; // Sets the peak amplitude of the sinusoid.
+  const float32_t amplitude{ 0.12 };  // Sets the peak amplitude of the sinusoid.
   freqSideTone = static_cast<float>(numCycles) * 48000.0 / 512.0;
   for (int kf = 0, increment = 0; kf < 512; increment += 1, kf++) {  // Calc: numCycles = 8, 750 hz sine wave.
     theta = static_cast<float32_t>(increment) * 2.0 * PI * freqSideTone / 48000.0;
     sineBuffer[kf] = amplitude * sin(theta);  // Create the CW tone waveform.
   }
-//  Serial.printf("numCycles = %d\n", numCycles);
+  //  Serial.printf("numCycles = %d\n", numCycles);
 }
 
 
@@ -57,10 +57,26 @@ void CW_Exciter::CW_ExciterIQData(int shaping)  //AFP 08-20-22
 
   Q_out_L.setBehaviour(AudioPlayQueue::NON_STALLING);
 
-  float float_buffer_i[512] = { 0.0 };
-  float float_buffer_q[512] = { 0.0 };
+  float32_t float_buffer_i[512] = { 0.0 };
+  float32_t float_buffer_q[512] = { 0.0 };
+  float32_t* iBuffer;  // I and Q pointers needed for one-time read of record queues.
+  float32_t* qBuffer;
 
+// Read incoming I and Q audio blocks from the SSB exciter.
   if (Q_in_L_Ex.available() > 3 and Q_in_R_Ex.available() > 3) {
+    for (int i = 0; i < 4; i = i + 1) {
+      iBuffer = Q_in_L_Ex.readBuffer();
+      qBuffer = Q_in_R_Ex.readBuffer();
+      std::copy(iBuffer, iBuffer + 128, &float_buffer_i[128 * i]);
+      std::copy(qBuffer, qBuffer + 128, &float_buffer_q[128 * i]);
+      Q_in_L_Ex.freeBuffer();
+      Q_in_R_Ex.freeBuffer();
+    }
+  } else return;
+  
+
+/*
+    if (Q_in_L_Ex.available() > 3 and Q_in_R_Ex.available() > 3) {
     for (int i = 0; i < 4; i = i + 1) {
       arm_q15_to_float(Q_in_L_Ex.readBuffer(), &float_buffer_i[128 * i], 128);  // convert int_buffer to float 32bit
       arm_q15_to_float(Q_in_R_Ex.readBuffer(), &float_buffer_q[128 * i], 128);
@@ -68,6 +84,7 @@ void CW_Exciter::CW_ExciterIQData(int shaping)  //AFP 08-20-22
       Q_in_R_Ex.freeBuffer();
     }
   } else return;
+  */
 
   // Set the sideband.
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) cessb1.setSideband(false);

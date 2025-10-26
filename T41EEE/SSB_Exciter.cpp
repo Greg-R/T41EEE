@@ -59,12 +59,16 @@ void ExciterIQData() {
   // Get audio samples from the audio buffers and convert them to float.
   for (unsigned i = 0; i < N_BLOCKS_EX; i++) {
 
+
+
+
+
     /**********************************************************************************  AFP 12-31-20
           Using arm_Math library, convert to float one buffer_size.
           Float_buffer samples are now standardized from > -1.0 to < 1.0
       **********************************************************************************/
-    arm_q15_to_float(Q_in_L_Ex.readBuffer(), &float_buffer_L_EX[BUFFER_SIZE * i], BUFFER_SIZE);  // convert int_buffer to float 32bit
-    arm_q15_to_float(Q_in_R_Ex.readBuffer(), &float_buffer_R_EX[BUFFER_SIZE * i], BUFFER_SIZE);  // Right channel not used.  KF5N March 11, 2024
+//    arm_q15_to_float(Q_in_L_Ex.readBuffer(), &float_buffer_L_EX[BUFFER_SIZE * i], BUFFER_SIZE);  // convert int_buffer to float 32bit
+//    arm_q15_to_float(Q_in_R_Ex.readBuffer(), &float_buffer_R_EX[BUFFER_SIZE * i], BUFFER_SIZE);  // Right channel not used.  KF5N March 11, 2024
     Q_in_L_Ex.freeBuffer();
     Q_in_R_Ex.freeBuffer();  // Right channel not used.  KF5N March 11, 2024
   }
@@ -124,6 +128,7 @@ void ExciterIQData() {
     void
 *****/
 void SetBandRelay() {
+  Serial.printf("SetBandRelay\n");
   // There are 4 physical relays in the case of the V10/V11 LPF board.
   for (int i = 0; i < 5; i = i + 1) {
     if (i == ConfigData.currentBand) {

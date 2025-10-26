@@ -546,8 +546,10 @@ extern AudioConnection patchCord16;
 extern AudioAmplifier volumeAdjust;
 extern AudioRecordQueue ADC_RX_I;
 extern AudioRecordQueue ADC_RX_Q;
-extern AudioRecordQueue Q_in_L_Ex;
-extern AudioRecordQueue Q_in_R_Ex;
+
+extern AudioRecordQueue_F32 Q_in_L_Ex;
+extern AudioRecordQueue_F32 Q_in_R_Ex;
+
 extern AudioPlayQueue Q_out_L;
 //#ifndef F32
 //extern AudioPlayQueue Q_out_L_Ex;

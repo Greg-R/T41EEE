@@ -1114,12 +1114,14 @@ void TxCalibrate::RadioCal(int mode, bool refineCal) {
   for (int band : ham_bands) {
     button.BandSet(band);
     ConfigData.currentBand = ConfigData.currentBandA = band;
-    SetBandRelay();
+//    SetBandRelay();  Done in ExecuteModeChange()
     TxRxFreq = calFrequencies[band][mode];  // [band][cw 0, ssb 1]
     ConfigData.centerFreq = TxRxFreq;
     display.ShowFrequency();
+    display.BandInformation();
     SetFreq();
-    button.ExecuteModeChange();
+    SetBandRelay();
+//    button.ExecuteModeChange();
     if (band < 2) {
       bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER;  // Calibrate lower sideband for 80M and 40M.
       rxcalibrater.DoReceiveCalibrate(mode, true, refineCal, false);
@@ -1154,34 +1156,36 @@ void TxCalibrate::RadioCal(int mode, bool refineCal) {
  *****/
 void TxCalibrate::MakeFFTData() {
   float32_t rfGainValue;                                               // AFP 2-11-23.  Greg KF5N February 13, 2023
-  float32_t recBandFactor[7] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };  // AFP 2-11-23  KF5N uniform values
+//  float32_t recBandFactor[7] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };  // AFP 2-11-23  KF5N uniform values
 
   uint32_t dataWidth = 2048;  // was 2048
   float32_t powerScale = 0;
 
-  /**********************************************************************************  AFP 12-31-20
-        Get samples from queue buffers
-        Teensy Audio Library stores ADC data in two buffers size=128, Q_in_L and Q_in_R as initiated from the audio lib.
-        Then the buffers are  read into two arrays sp_L and sp_R in blocks of 128 up to N_BLOCKS.  The arrays are
-        of size BUFFER_SIZE*N_BLOCKS.  BUFFER_SIZE is 128.
-        N_BLOCKS = FFT_L / 2 / BUFFER_SIZE * (uint32_t)DF; // should be 16 with DF == 8 and FFT_L = 512
-        BUFFER_SIZE*N_BLOCKS = 2048 samples
-     **********************************************************************************/
+  float32_t* iBuffer;  // I and Q pointers needed for one-time read of record queues.
+  float32_t* qBuffer;
+
+// Read incoming I and Q audio blocks from the SSB exciter.
   // Are there at least N_BLOCKS buffers in each channel available ?
-  if (static_cast<uint32_t>(Q_in_L_Ex.available()) > 16 and static_cast<uint32_t>(Q_in_R_Ex.available()) > 16) {
-    // get audio samples from the audio  buffers and convert them to float
-    // read in 16 blocks of 128 samples in I and Q
+  if (static_cast<uint32_t>(Q_in_L_Ex.available()) > 15 and static_cast<uint32_t>(Q_in_R_Ex.available()) > 15) {
     for (unsigned i = 0; i < 16; i++) {
 
-      /**********************************************************************************  AFP 12-31-20
-          Using arm_Math library, convert to float one buffer_size.
-          Float_buffer samples are now standardized from > -1.0 to < 1.0
-      **********************************************************************************/
-      arm_q15_to_float(Q_in_L_Ex.readBuffer(), &float_buffer_L_EX[BUFFER_SIZE * i], BUFFER_SIZE);  // convert int_buffer to float 32bit
-      arm_q15_to_float(Q_in_R_Ex.readBuffer(), &float_buffer_R_EX[BUFFER_SIZE * i], BUFFER_SIZE);  // Right channel not used.  KF5N March 11, 2024
+      iBuffer = Q_in_L_Ex.readBuffer();
+      qBuffer = Q_in_R_Ex.readBuffer();
+      std::copy(iBuffer, iBuffer + 128, &float_buffer_L_EX[128 * i]);
+      std::copy(qBuffer, qBuffer + 128, &float_buffer_R_EX[128 * i]);
+
       Q_in_L_Ex.freeBuffer();
       Q_in_R_Ex.freeBuffer();
     }
+    
+//  if (static_cast<uint32_t>(Q_in_L_Ex.available()) > 15 and static_cast<uint32_t>(Q_in_R_Ex.available()) > 15) {
+//        for (unsigned i = 0; i < 16; i++) {
+//      arm_q15_to_float(Q_in_L_Ex.readBuffer(), &float_buffer_L_EX[BUFFER_SIZE * i], BUFFER_SIZE);  // convert int_buffer to float 32bit
+//      arm_q15_to_float(Q_in_R_Ex.readBuffer(), &float_buffer_R_EX[BUFFER_SIZE * i], BUFFER_SIZE);  // Right channel not used.  KF5N March 11, 2024
+//      Q_in_L_Ex.freeBuffer();
+//      Q_in_R_Ex.freeBuffer();
+ //   }
+
 
     // Set the sideband.
     if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) cessb1.setSideband(false);
@@ -1245,7 +1249,7 @@ void TxCalibrate::MakeFFTData() {
 
   // Get audio samples from the audio  buffers and convert them to float.
   // Read in 16 blocks of 128 samples in I and Q if available.
-  if (static_cast<uint32_t>(ADC_RX_I.available()) > 16 and static_cast<uint32_t>(ADC_RX_Q.available()) > 16) {
+  if (static_cast<uint32_t>(ADC_RX_I.available()) > 15 and static_cast<uint32_t>(ADC_RX_Q.available()) > 15) {
     for (unsigned i = 0; i < N_BLOCKS; i++) {
       /**********************************************************************************  AFP 12-31-20
           Using arm_Math library, convert to float one buffer_size.
@@ -1264,10 +1268,10 @@ void TxCalibrate::MakeFFTData() {
     /**********************************************************************************  AFP 12-31-20
       Scale the data buffers by the RFgain value defined in bands.bands[ConfigData.currentBand] structure
     **********************************************************************************/
-    arm_scale_f32(float_buffer_L, recBandFactor[ConfigData.currentBand], float_buffer_L, 2048);  //AFP 2-11-23
-    arm_scale_f32(float_buffer_R, recBandFactor[ConfigData.currentBand], float_buffer_R, 2048);  //AFP 2-11-23
+//    arm_scale_f32(float_buffer_L, recBandFactor[ConfigData.currentBand], float_buffer_L, 2048);  //AFP 2-11-23
+//    arm_scale_f32(float_buffer_R, recBandFactor[ConfigData.currentBand], float_buffer_R, 2048);  //AFP 2-11-23
 
-    // Manual IQ amplitude correction (receive only)
+    // Manual IQ amplitude and phase correction (receive only).
     if (mode == 0) {
       if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
         arm_scale_f32(float_buffer_L, CalData.IQCWRXAmpCorrectionFactorLSB[ConfigData.currentBand], float_buffer_L, 2048);  //AFP 04-14-22
@@ -1292,7 +1296,7 @@ void TxCalibrate::MakeFFTData() {
       }
     }
 
-    FreqShift1();  // 48 kHz shift
+    FreqShift1();  // 12 kHz shift
 
     // This process started because there are 2048 samples available.  Perform FFT.
     updateDisplayFlag = true;
@@ -1301,7 +1305,7 @@ void TxCalibrate::MakeFFTData() {
   }  // End of receive code
   else {
     fftSuccess = false;  // Insufficient receive buffers to make FFT.  Do not plot FFT data!
-    Serial.printf("FFT failed due to insufficient I and Q recieve data!\n");
+    Serial.printf("FFT failed due to insufficient I and Q receive data!\n");
   }
 }
 

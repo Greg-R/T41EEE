@@ -73,14 +73,14 @@ void UpdateAudioGraphics();  // Updates Morse decoder related graphics including
 void UpdateEqualizerField(bool rxEqState, bool txEqState);  // Updates the displayed Rx and Tx equalizer states.
 void UpdateWPMField();  // Updates the displayed Keyer and WPM settings.
 void UpdateNoiseField();  // Updates the noise field on the display.
-void DrawInfoWindowFrame();  // This function draws the Info Window frame.
+//void DrawInfoWindowFrame();  // This function draws the Info Window frame.
 void RedrawDisplayScreen();  // This function redraws the entire display screen.
 void DrawBandWidthIndicatorBar();  // Draw Tuned Bandwidth on Spectrum Plot.
 void EraseSpectrumDisplayContainer();  // This function removes the spectrum display container.
-void EraseSpectrumWindow();  // This function erases the contents of the spectrum display.
+//void EraseSpectrumWindow();  // This function erases the contents of the spectrum display.
 void EraseMenus();  // Erases both primary and secondary menus from display.
-void ErasePrimaryMenu();  // Erase primary menu from display.
-void EraseSecondaryMenu();  // Erase secondary menu from display.
+//void ErasePrimaryMenu();  // Erase primary menu from display.
+//void EraseSecondaryMenu();  // Erase secondary menu from display.
 void ShowTransmitReceiveStatus();  // Shows transmit (red) and receive (green) mode.
 
 private:

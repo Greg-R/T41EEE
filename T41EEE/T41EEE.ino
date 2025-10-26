@@ -281,11 +281,11 @@ bool audioGraphicsFlag = false;    // Set by FilterSetSSB();
 bool startRxFlag = false;
 // Using ARRL table: https://www.arrl.org/frequency-bands.  First frequency is CW, second is SSB.
 #if ITU_REGION == 1
-uint32_t PROGMEM calFrequencies[NUMBER_OF_BANDS][2] = { { 3560000, 3790000 }, { 7030000, 7190000 }, { 14060000, 14285000 }, { 18096000, 18130000 }, { 21060000, 21400000 }, { 24906000, 24950000 }, { 28060000, 28365000 } };
+uint32_t PROGMEM calFrequencies[NUMBER_OF_BANDS][2] = { { 3560000, 3790000 }, { 7030000, 7190000 }, { 14060000, 14285000 }, { 18096000, 18130000 }, { 21060000, 21400000 }, { 24906000, 24950000 }, { 28060000, 28375000 } };
 #elif ITU_REGION == 2
-uint32_t PROGMEM calFrequencies[NUMBER_OF_BANDS][2] = { { 3560000, 3985000 }, { 7030000, 7290000 }, { 14060000, 14285000 }, { 18096000, 18130000 }, { 21060000, 21400000 }, { 24906000, 24950000 }, { 28060000, 28365000 } };
+uint32_t PROGMEM calFrequencies[NUMBER_OF_BANDS][2] = { { 3560000, 3985000 }, { 7030000, 7290000 }, { 14060000, 14285000 }, { 18096000, 18130000 }, { 21060000, 21400000 }, { 24906000, 24950000 }, { 28060000, 28375000 } };
 #elif ITU_REGION == 3
-uint32_t PROGMEM calFrequencies[NUMBER_OF_BANDS][2] = { { 3560000, 3885000 }, { 7030000, 7190000 }, { 14060000, 14285000 }, { 18096000, 18130000 }, { 21060000, 21400000 }, { 24906000, 24950000 }, { 28060000, 28365000 } };
+uint32_t PROGMEM calFrequencies[NUMBER_OF_BANDS][2] = { { 3560000, 3885000 }, { 7030000, 7190000 }, { 14060000, 14285000 }, { 18096000, 18130000 }, { 21060000, 21400000 }, { 24906000, 24950000 }, { 28060000, 28375000 } };
 #endif
 bool morseDecodeAdjustFlag = false;
 bool calOnFlag = false;
@@ -874,8 +874,8 @@ FLASHMEM void setup() {
   sgtl5000_1.setAddress(LOW);  // This sets to one of two possible I2C addresses, controlled by a jumper on the Audio Adapter.
   //  Don't use the audio pre-processor.  This causes a spurious signal in the SSB transmit output.
   //  sgtl5000_1.audioPreProcessorEnable();  // Need to use one of the equalizers.
-  AudioMemory(250);
-  AudioMemory_F32(100);
+  AudioMemory(240);
+  AudioMemory_F32(110);
   sgtl5000_1.inputSelect(AUDIO_INPUT_MIC);
   sgtl5000_1.volume(0.8);  // Set headphone volume.
   sgtl5000_1.micGain(0);
