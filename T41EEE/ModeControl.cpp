@@ -3,77 +3,76 @@
 
 
 void ModeControl::CWReceiveMode() {
-
+startRxFlag = true;
   SetFreq();
-  display.BandInformation();  // Updates display when mode changes.
+  display.BandInformation();  // Updates center frequency, band, mode, and sideband at top of spectrum.
 
   display.UpdateAudioGraphics();
-  FilterSetSSB();  // Required to set up filter properly for this mode.
+  FilterBandwidth();  // Required to set up filter properly for this mode.
+  display.ShowBandwidth();
+  Serial.printf("CWReceiveMode()\n");
 }
 
 
 void ModeControl::CWTransmitMode() {
 
   SetFreq();
-
-
 }
 
 
 void ModeControl::SSBReceiveMode() {
 
   SetFreq();
-  display.BandInformation();  // Updates display when mode changes.
+  display.BandInformation();  // Updates center frequency, band, mode, and sideband at top of spectrum.
 
-    display.UpdateAudioGraphics();
-      FilterSetSSB();  // Required to set up filter properly for this mode.
+  display.UpdateAudioGraphics();
+  FilterBandwidth();  // Required to set up filter properly for this mode.
+  display.ShowBandwidth();
 }
 
 
 void ModeControl::SSBTransmitMode() {
 
   SetFreq();
-
-
 }
 
 
 void ModeControl::FT8ReceiveMode() {
 
   SetFreq();
-  display.BandInformation();  // Updates display when mode changes.
+  display.BandInformation();  // Updates center frequency, band, mode, and sideband at top of spectrum.
 
-    display.UpdateAudioGraphics();
-      FilterSetSSB();  // Required to set up filter properly for this mode.
+  display.UpdateAudioGraphics();
+  FilterBandwidth();  // Required to set up filter properly for this mode.
+  display.ShowBandwidth();
 }
 
 
 void ModeControl::FT8TransmitMode() {
 
   SetFreq();
-
-
 }
 
 
 void ModeControl::AMReceiveMode() {
 
   SetFreq();
-  display.BandInformation();  // Updates display when mode changes.
+  display.BandInformation();  // Updates center frequency, band, mode, and sideband at top of spectrum.
 
   display.UpdateAudioGraphics();
-    FilterSetSSB();  // Required to set up filter properly for this mode.
+  FilterBandwidth();  // Required to set up filter properly for this mode.
+  display.ShowBandwidth();
 }
 
 
 void ModeControl::SAMReceiveMode() {
 
   SetFreq();
-  display.BandInformation();  // Updates display when mode changes.
+  //  bands.bands[ConfigData.currentBand].sideband = Sideband::BOTH_SAM;
+  display.BandInformation();  // Updates center frequency, band, mode, and sideband at top of spectrum.
 
   display.UpdateAudioGraphics();
-    FilterSetSSB();  // Required to set up filter properly for this mode.
+  //    FilterSetSSB();  // Required to set up filter properly for this mode.
+  FilterBandwidth();
+  display.ShowBandwidth();
 }
-
-
-

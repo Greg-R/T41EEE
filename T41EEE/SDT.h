@@ -142,7 +142,7 @@ const int FFT_LENGTH = 512;
 #define FILTER_WIN 0x10        // Color of SSB filter width
 
 #define MAX_WPM 60
-#define ENCODER_FACTOR 0.25F  // Use 0.25f with cheap encoders that have 4 detents per step.
+
                               // For other encoders or libs we use 1.0f.
 #define MAX_ZOOM_ENTRIES 5
 
@@ -676,6 +676,10 @@ extern uint32_t SampleRate;
 extern uint32_t zoom_display;
 extern int16_t pixelnew[];
 extern int16_t pixelold[];
+extern bool encoderFilterFlag;  // Set by EncoderFilter() isr.
+extern bool audioCompensateFlag;  // Set by FilterSetSSB().
+extern bool audioGraphicsFlag;
+extern bool startRxFlag;
 //extern int16_t pixelCurrent[];
 extern int16_t y_old, y_new, y1_new, y1_old, y_old2;
 extern const uint16_t gradient[];

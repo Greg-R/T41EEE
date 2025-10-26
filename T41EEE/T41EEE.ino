@@ -7,7 +7,7 @@
 const char *configFilename = "/config.txt";    // <- SD library uses 8.3 filenames
 const char *calFilename = "/calibration.txt";  // <- SD library uses 8.3 filenames
 
-extern const int32_t SPECTRUM_RES {512};
+extern const int32_t SPECTRUM_RES{ 512 };
 
 struct maps myMapFiles[10] = {
   { "Cincinnati.bmp", 39.07466, -84.42677 },  // Map name and coordinates for QTH
@@ -35,7 +35,7 @@ bool agc_action = false;
 //#include "ReceiveDSP.h"
 
 Display display;
-ReceiveDSP process;           // Receiver process object.
+ReceiveDSP process;        // Receiver process object.
 RxCalibrate rxcalibrater;  // Instantiate the calibration objects.
 TxCalibrate txcalibrater;
 CW_Exciter cwexciter;
@@ -184,8 +184,8 @@ int32_t NCOFreq = 0;
 //================== Global CW Correlation and FFT Variables =================
 float32_t *cosBuffer = new float32_t[256];  // Was cosBuffer2; Greg KF5N February 7, 2024
 float32_t *sinBuffer = new float32_t[256];  // This can't be DMAMEM.  It will cause problems with the CW decoder.
-float32_t DMAMEM cwRiseBuffer[512] {0};
-float32_t DMAMEM cwFallBuffer[512] {0};
+float32_t DMAMEM cwRiseBuffer[512]{ 0 };
+float32_t DMAMEM cwFallBuffer[512]{ 0 };
 // ===========
 
 char keyboardBuffer[10];  // Set for call prefixes. May be increased later
@@ -275,7 +275,11 @@ int bandswitchPins[] = {
 };
 
 bool calibrateFlag = false;
-  // Using ARRL table: https://www.arrl.org/frequency-bands.  First frequency is CW, second is SSB.
+bool encoderFilterFlag = false;    // Set by EncoderFilter() isr.
+bool audioCompensateFlag = false;  // Set by FilterSetSSB();
+bool audioGraphicsFlag = false;    // Set by FilterSetSSB();
+bool startRxFlag = false;
+// Using ARRL table: https://www.arrl.org/frequency-bands.  First frequency is CW, second is SSB.
 #if ITU_REGION == 1
 uint32_t PROGMEM calFrequencies[NUMBER_OF_BANDS][2] = { { 3560000, 3790000 }, { 7030000, 7190000 }, { 14060000, 14285000 }, { 18096000, 18130000 }, { 21060000, 21400000 }, { 24906000, 24950000 }, { 28060000, 28365000 } };
 #elif ITU_REGION == 2
@@ -854,7 +858,7 @@ FLASHMEM void setup() {
 
   Serial.begin(115200);      // Use this serial for Teensy programming.
   SerialUSB1.begin(115200);  // Use this serial for FT8 keying.
-   /* check for CrashReport stored from previous run */
+                             /* check for CrashReport stored from previous run */
   if (CrashReport) {
     /* print info (hope Serial Monitor windows is open) */
     Serial.print(CrashReport);
@@ -881,8 +885,8 @@ FLASHMEM void setup() {
 #else
   sgtl5000_1.lineOutLevel(20);  // Setting of 20 limits line-out level to 2.14 volts p-p.
 #endif
-  sgtl5000_1.adcHighPassFilterEnable();  // This is required for QSE2DC, specifically for carrier calibration.
-                                         //  sgtl5000_1.adcHighPassFilterDisable();  //reduces noise.  https://forum.pjrc.com/threads/27215-24-bit-audio-boards?p=78831&viewfull=1#post78831
+  //  sgtl5000_1.adcHighPassFilterEnable();  // This is required for QSE2DC, specifically for carrier calibration.
+  sgtl5000_1.adcHighPassFilterDisable();  //reduces noise.  https://forum.pjrc.com/threads/27215-24-bit-audio-boards?p=78831&viewfull=1#post78831
 
   updateMic();             // This updates the transmit signal chain settings.  Located in SSB_Exciter.cpp.
   initializeAudioPaths();  // Updates the AGC (compressor) in the receiver.
@@ -1032,7 +1036,7 @@ FLASHMEM void setup() {
   mainMenuIndex = 0;                         // Changed from middle to first. Do Menu Down to get to Calibrate quickly
   zoomIndex = ConfigData.spectrum_zoom - 1;  // ButtonZoom() increments zoomIndex, so this cancels it so the read from EEPROM is accurately restored.  KF5N August 3, 2023
   button.ButtonZoom();                       // Restore zoom settings.  KF5N August 3, 2023
-  FilterSetSSB();                   // This is not updated until bandwidth is adjusted, so it needs to be done here in setup.
+  FilterSetSSB();                            // This is not updated until bandwidth is adjusted, so it needs to be done here in setup.
 
   ConfigData.sdCardPresent = SDPresentCheck();  // JJP 7/18/23
   ConfigData.rfGainCurrent = 0;                 // Start with lower gain so you don't get blasted.
@@ -1074,7 +1078,7 @@ void loop() {
   }
   //  State detection for modes which can transmit.  AM and SAM don't transmit, so there is not a state transition required.
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE and digitalRead(PTT) == HIGH) radioState = RadioState::SSB_RECEIVE_STATE;
-//  if (bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE and digitalRead(PTT) == HIGH) radioState = RadioState::SSB_CALIBRATE_STATE;
+  //  if (bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE and digitalRead(PTT) == HIGH) radioState = RadioState::SSB_CALIBRATE_STATE;
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE and digitalRead(PTT) == LOW) radioState = RadioState::SSB_TRANSMIT_STATE;
 
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE and SerialUSB1.rts() == LOW) radioState = RadioState::FT8_RECEIVE_STATE;
@@ -1084,31 +1088,30 @@ void loop() {
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and (keyPressedOn == true and bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE && ConfigData.keyType == 0)) radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and (keyPressedOn == true and bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE && ConfigData.keyType == 1)) radioState = RadioState::CW_TRANSMIT_KEYER_STATE;
 
-// Transition to new state if required.
+  // Transition to new state if required.
   if (lastState != radioState) {
     SetAudioOperatingState(radioState);
 
-if(radioState == RadioState::CW_RECEIVE_STATE) modecontrol.CWReceiveMode();
-if(radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE) modecontrol.CWTransmitMode();
+    if (radioState == RadioState::CW_RECEIVE_STATE) modecontrol.CWReceiveMode();
+    if (radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE) modecontrol.CWTransmitMode();
 
-if(radioState == RadioState::SSB_RECEIVE_STATE) modecontrol.SSBReceiveMode();
-if(radioState == RadioState::SSB_TRANSMIT_STATE) modecontrol.SSBTransmitMode();
+    if (radioState == RadioState::SSB_RECEIVE_STATE) modecontrol.SSBReceiveMode();
+    if (radioState == RadioState::SSB_TRANSMIT_STATE) modecontrol.SSBTransmitMode();
 
-if(radioState == RadioState::FT8_RECEIVE_STATE) modecontrol.FT8ReceiveMode();
-if(radioState == RadioState::FT8_TRANSMIT_STATE) modecontrol.FT8TransmitMode();
+    if (radioState == RadioState::FT8_RECEIVE_STATE) modecontrol.FT8ReceiveMode();
+    if (radioState == RadioState::FT8_TRANSMIT_STATE) modecontrol.FT8TransmitMode();
 
-if(radioState == RadioState::AM_RECEIVE_STATE) modecontrol.AMReceiveMode();
-if(radioState == RadioState::SAM_RECEIVE_STATE) modecontrol.SAMReceiveMode();
-
+    if (radioState == RadioState::AM_RECEIVE_STATE) modecontrol.AMReceiveMode();
+    if (radioState == RadioState::SAM_RECEIVE_STATE) modecontrol.SAMReceiveMode();
   }
-    if(radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE and lastState == RadioState::CW_RECEIVE_STATE) {
-Serial.printf("spectrumErased = %d\n", display.spectrumErased);
-    }
-//    if(lastState == RadioState::CW_TRANSMIT_STRAIGHT_STATE and (radioState == RadioState::CW_RECEIVE_STATE or lastState == RadioState::NOSTATE)) {
-//     button.ExecuteModeChange();
+  if (radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE and lastState == RadioState::CW_RECEIVE_STATE) {
+    Serial.printf("spectrumErased = %d\n", display.spectrumErased);
+  }
+  //    if(lastState == RadioState::CW_TRANSMIT_STRAIGHT_STATE and (radioState == RadioState::CW_RECEIVE_STATE or lastState == RadioState::NOSTATE)) {
+  //     button.ExecuteModeChange();
 
-//    if(false) button.ExecuteModeChange();
-    //    Serial.printf("Set audio state, begin loop. radioState = %d lastState = %d\n", radioState, lastState);
+  //    if(false) button.ExecuteModeChange();
+  //    Serial.printf("Set audio state, begin loop. radioState = %d lastState = %d\n", radioState, lastState);
 
 
   // Don't turn off audio in the case of CW for sidetone.
@@ -1208,7 +1211,7 @@ Serial.printf("spectrumErased = %d\n", display.spectrumErased);
       while (millis() - cwTimer <= ConfigData.cwTransmitDelay) {  //Start CW transmit timer on
         digitalWrite(RXTX, HIGH);
         if (digitalRead(ConfigData.paddleDit) == LOW and ConfigData.keyType == 0) {  // AFP 09-25-22  Turn on CW signal
-          cwTimer = millis();                                                       //Reset timer
+          cwTimer = millis();                                                        //Reset timer
 
           if (cwKeyDown == false) {
             cwexciter.CW_ExciterIQData(CW_SHAPING_RISE);
@@ -1225,7 +1228,7 @@ Serial.printf("spectrumErased = %d\n", display.spectrumErased);
             } else cwexciter.CW_ExciterIQData(CW_SHAPING_ZERO);  //  No waveforms; but DC offset is still present.
           }
         }
-      } // end CW transmit while loop
+      }  // end CW transmit while loop
       //      digitalWrite(MUTE, MUTEAUDIO);  // mutes audio
       digitalWrite(RXTX, LOW);  // End Straight Key Mode
       break;
@@ -1305,7 +1308,7 @@ Serial.printf("spectrumErased = %d\n", display.spectrumErased);
   }
 #endif
 
-  if (volumeChangeFlag == true) {
+  if (audioCompensateFlag) {
     // Compensate for audio filter setting.
     // Nominal bandwidth is 2.8kHz.  This will be the 0 dB reference.
     // The upper and lower frequency limits are bands[ConfigData.currentBand].FLoCut and bands[ConfigData.currentBand].FHiCut.
@@ -1314,22 +1317,30 @@ Serial.printf("spectrumErased = %d\n", display.spectrumErased);
     else if (bands.bands[ConfigData.currentBand].mode == RadioMode::AM_MODE or bands.bands[ConfigData.currentBand].mode == RadioMode::SAM_MODE)
       audioBW = bands.bands[ConfigData.currentBand].FAMCut;
 
-    process.audioGainCompensate = 
-    2800.0 / audioBW;
+    process.audioGainCompensate = 2800.0 / audioBW;
+    audioCompensateFlag = false;
+  }
 
-// Update volume if ONLY one audio output is active.
-if(ConfigData.audioOut == AudioState::SPEAKER)    speakerVolume.setGain(volumeLog[ConfigData.speakerVolume]);
-if(ConfigData.audioOut == AudioState::HEADPHONE)    headphoneVolume.setGain(volumeLog[ConfigData.headphoneVolume]);
-// In the case of BOTH, volume controls speaker only.  This is intended for monitoring FT8.
-if(ConfigData.audioOut == AudioState::BOTH)    headphoneVolume.setGain(volumeLog[ConfigData.speakerVolume]);
+  if (volumeChangeFlag == true) {
+    // Update volume if ONLY one audio output is active.
+    if (ConfigData.audioOut == AudioState::SPEAKER) speakerVolume.setGain(volumeLog[ConfigData.speakerVolume]);
+    if (ConfigData.audioOut == AudioState::HEADPHONE) headphoneVolume.setGain(volumeLog[ConfigData.headphoneVolume]);
+    // In the case of BOTH, volume controls speaker only.  This is intended for monitoring FT8.
+    if (ConfigData.audioOut == AudioState::BOTH) headphoneVolume.setGain(volumeLog[ConfigData.speakerVolume]);
 
     volumeChangeFlag = false;
     display.UpdateVolumeField();
   }
+
+  if(audioGraphicsFlag) {
+     display.UpdateAudioGraphics();
+audioGraphicsFlag = false;
+  }
+
   loopCounter = loopCounter + 1;
-  if(loopCounter > 49) {
- Serial.printf("Loop us = %u\n", (static_cast<uint32_t>(usec1) - usec1Old));
-loopCounter = 0;
+  if (loopCounter > 49) {
+    Serial.printf("Loop us = %u\n", (static_cast<uint32_t>(usec1) - usec1Old));
+    loopCounter = 0;
   }
   usec1Old = usec1;
 }  // end loop()

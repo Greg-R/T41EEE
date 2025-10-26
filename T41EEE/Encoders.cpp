@@ -3,6 +3,7 @@
 #include "SDT.h"
 
 float adjustVolEncoder;
+const float32_t ENCODER_FACTOR{ 0.25 };  // Use 0.25f with cheap encoders that have 4 detents per step.
 
 #ifdef FAST_TUNE
 bool FastTune = true;                    //  HMB
@@ -30,10 +31,12 @@ const int FT_step = 500;                 // Hz step in Fast Tune
 // This version limits the result to an fhigh and an flow number.  Note that this function works in concert with EncoderFilter()
 // which is attached to an interrupt.  Graphics changes are handled by UpdateAudioGraphics() in Display.cpp.
 void FilterSetSSB() {
+  Serial.printf("FilterSetSSB\n");
+  /*
   int32_t filter_change;
-////  int filterWidth = static_cast<int>((bands.bands[ConfigData.currentBand].FHiCut - bands.bands[ConfigData.currentBand].FLoCut) / 1000.0 * pixel_per_khz);
+  ////  int filterWidth = static_cast<int>((bands.bands[ConfigData.currentBand].FHiCut - bands.bands[ConfigData.currentBand].FLoCut) / 1000.0 * pixel_per_khz);
   if (filter_pos != last_filter_pos) {  // This decision is required as this function is required to be used in many locations.  KF5N April 21, 2024
-    if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) display.BandInformation();
+////    if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) display.BandInformation();  This shouldn't be necessary.
     filter_change = (filter_pos - last_filter_pos);
     if (filter_change >= 1) {
       filterWidth--;  // filterWidth is used in graphics only!
@@ -46,35 +49,34 @@ void FilterSetSSB() {
         filterWidth = 50;
     }
     last_filter_pos = filter_pos;
-    // Change the FLoCut and FhiCut variables which adjust the DSP filters.
+    */
 
-    if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER or bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-      if (switchFilterSideband == true) {  // Adjust and limit FLoCut
-        bands.bands[ConfigData.currentBand].FLoCut = bands.bands[ConfigData.currentBand].FLoCut + filterEncoderMove * 100 * ENCODER_FACTOR;
-        // Don't allow FLoCut to be less than 100 Hz below FHiCut.
-        if (bands.bands[ConfigData.currentBand].FLoCut >= (bands.bands[ConfigData.currentBand].FHiCut - 100)) bands.bands[ConfigData.currentBand].FLoCut = bands.bands[ConfigData.currentBand].FHiCut - 100;
-      } else {  // Adjust and limit FHiCut.
-        bands.bands[ConfigData.currentBand].FHiCut = bands.bands[ConfigData.currentBand].FHiCut + filterEncoderMove * 100 * ENCODER_FACTOR;
-        // Don't allow FHiCut to be less than 100 Hz above FLoCut.
-        if (bands.bands[ConfigData.currentBand].FHiCut <= (bands.bands[ConfigData.currentBand].FLoCut + 100)) bands.bands[ConfigData.currentBand].FHiCut = bands.bands[ConfigData.currentBand].FLoCut + 100;
-      }
+  // Change the FLoCut and FhiCut variables which adjust the DSP filters.
+  if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER or bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
+    if (switchFilterSideband == true) {  // Adjust and limit FLoCut
+      bands.bands[ConfigData.currentBand].FLoCut = bands.bands[ConfigData.currentBand].FLoCut + filterEncoderMove * 100 * ENCODER_FACTOR;
+      // Don't allow FLoCut to be less than 100 Hz below FHiCut.
+      if (bands.bands[ConfigData.currentBand].FLoCut >= (bands.bands[ConfigData.currentBand].FHiCut - 100)) bands.bands[ConfigData.currentBand].FLoCut = bands.bands[ConfigData.currentBand].FHiCut - 100;
+      // Stop the filter adjustment if moving towards zero and hits zero.
+      if (bands.bands[ConfigData.currentBand].FLoCut <= 0) bands.bands[ConfigData.currentBand].FLoCut = 0;
+    } else {  // Adjust and limit FHiCut.
+      bands.bands[ConfigData.currentBand].FHiCut = bands.bands[ConfigData.currentBand].FHiCut + filterEncoderMove * 100 * ENCODER_FACTOR;
+      // Don't allow FHiCut to be less than 100 Hz above FLoCut.
+      if (bands.bands[ConfigData.currentBand].FHiCut <= (bands.bands[ConfigData.currentBand].FLoCut + 100)) bands.bands[ConfigData.currentBand].FHiCut = bands.bands[ConfigData.currentBand].FLoCut + 100;
     }
-
-    if (bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
-      bands.bands[ConfigData.currentBand].FAMCut = bands.bands[ConfigData.currentBand].FAMCut + filterEncoderMove * 100 * ENCODER_FACTOR;
-    }
-
-    FilterBandwidth();
-    volumeChangeFlag = true;
   }
 
-//  display.DrawBandWidthIndicatorBar();  // The width of the blue bar is proportional to the filter bandwidth.
-display.UpdateAudioGraphics();    // Updates graphics associated with filter bandwidth.
-////  display.DrawFrequencyBarValue();  // This calls ShowBandwidth().  YES, this function is useful here.
-display.ShowBandwidth();  // This updates the filter settings numbers at the top of the spectrum display.
+  if (bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
+    bands.bands[ConfigData.currentBand].FAMCut = bands.bands[ConfigData.currentBand].FAMCut + filterEncoderMove * 100 * ENCODER_FACTOR;
+  }
 
+  FilterBandwidth();
+  audioCompensateFlag = true;
+  encoderFilterFlag = false;
+  audioGraphicsFlag = true;
 
-//  Serial.printf("FLoCut = %d FHiCut = %d\n", bands.bands[ConfigData.currentBand].FLoCut, bands.bands[ConfigData.currentBand].FHiCut);
+  ////  display.UpdateAudioGraphics();  // Updates graphics associated with filter bandwidth including bandwidth indicator bar.
+  ////  display.ShowBandwidth();  // This updates the filter settings numbers at the top of the spectrum display.
 }
 
 
@@ -111,8 +113,8 @@ void EncoderCenterTune() {
   if (ConfigData.centerFreq < 300000) ConfigData.centerFreq = 300000;
   TxRxFreq = ConfigData.centerFreq + NCOFreq;
   ConfigData.lastFrequencies[ConfigData.currentBand][ConfigData.activeVFO] = TxRxFreq;
-  SetFreq();                    //  Change to receiver tuning process.  KF5N July 22, 2023
-//  display.DrawBandWidthIndicatorBar();  // AFP 10-20-22  This only needed for fine tune?
+  SetFreq();  //  Change to receiver tuning process.  KF5N July 22, 2023
+              //  display.DrawBandWidthIndicatorBar();  // AFP 10-20-22  This only needed for fine tune?
   display.ShowFrequency();
   display.BandInformation();
 }
@@ -130,7 +132,7 @@ void EncoderCenterTune() {
 void EncoderVolume()  //============================== AFP 10-22-22  Begin new
 {
   char result;
-//  int increment [[maybe_unused]] = 0;
+  //  int increment [[maybe_unused]] = 0;
 
   result = volumeEncoder.process();  // Read the encoder
 
@@ -147,24 +149,24 @@ void EncoderVolume()  //============================== AFP 10-22-22  Begin new
       break;
   }
 
-if(ConfigData.audioOut == AudioState::SPEAKER) {
-  ConfigData.speakerVolume += adjustVolEncoder;
-  if (ConfigData.speakerVolume > 100) {
-    ConfigData.speakerVolume = 100;
-  } else {
-    if (ConfigData.speakerVolume < 0)
-      ConfigData.speakerVolume = 0;
+  if (ConfigData.audioOut == AudioState::SPEAKER) {
+    ConfigData.speakerVolume += adjustVolEncoder;
+    if (ConfigData.speakerVolume > 100) {
+      ConfigData.speakerVolume = 100;
+    } else {
+      if (ConfigData.speakerVolume < 0)
+        ConfigData.speakerVolume = 0;
+    }
   }
-}
-if(ConfigData.audioOut == AudioState::HEADPHONE) {  
-  ConfigData.headphoneVolume += adjustVolEncoder;
-  if (ConfigData.headphoneVolume > 100) {
-    ConfigData.headphoneVolume = 100;
-  } else {
-    if (ConfigData.headphoneVolume < 0)
-      ConfigData.headphoneVolume = 0;
+  if (ConfigData.audioOut == AudioState::HEADPHONE) {
+    ConfigData.headphoneVolume += adjustVolEncoder;
+    if (ConfigData.headphoneVolume > 100) {
+      ConfigData.headphoneVolume = 100;
+    } else {
+      if (ConfigData.headphoneVolume < 0)
+        ConfigData.headphoneVolume = 0;
+    }
   }
-}
 
   volumeChangeFlag = true;  // Need this because of unknown timing in display updating.
 }
@@ -173,7 +175,7 @@ if(ConfigData.audioOut == AudioState::HEADPHONE) {
 /*****
   Purpose: Use the encoder to change the value of a number in some other function.
            This function does not have a while loop, thus it must be used inside
-           some other loop.
+           some other loop.  Major revision Greg Raven KF5N October 24, 2025.
 
   Parameter list:
     int minValue                The lowest value allowed.
@@ -186,45 +188,30 @@ if(ConfigData.audioOut == AudioState::HEADPHONE) {
   Return value;
     int                         The revised value.
 *****/
-float GetEncoderValueLive(float minValue, float maxValue, float startValue, float increment, std::string prompt, bool left, bool colorRed)
-{
+float GetEncoderValueLive(float minValue, float maxValue, float startValue, float increment, std::string prompt, bool left, bool colorRed) {
   float currentValue = startValue;
   tft.setFontScale((enum RA8875tsize)1);
-  tft.setTextColor(RA8875_WHITE);
-  if (left) tft.fillRect(150, 8, 95, 22, RA8875_BLACK);
-  else tft.fillRect(425, 8, 95, 22, RA8875_BLACK);  // Increased rectangle size to full erase value.  KF5N August 12, 2023
+  tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
   if (left) tft.setCursor(0, 1);
-  else tft.setCursor(260, 1);
+  else tft.setCursor(290, 1);  //// 260
   tft.print(prompt.c_str());
-if (left) tft.setCursor(149, 1);
-  else tft.setCursor(425, 1);
-  if(colorRed) tft.setTextColor(RA8875_RED);  // Make value red if active.
-  if (abs(startValue) > 2) {  // Note sure where this restriction came from.
+  if (colorRed) tft.setTextColor(RA8875_RED, RA8875_BLACK);  // Make value red if active.
+  if (abs(startValue) > 2) {
     tft.print(startValue, 0);
   } else {
-    if(increment < 0.001) tft.print(startValue, 4);
-    else tft.print(startValue, 3);
+    if (0 >= increment and increment < 0.1) tft.print(startValue, 5);
+    else tft.print(startValue, 4);
   }
-  tft.setTextColor(RA8875_WHITE);
+  tft.print(" ");
+  // Increment currentValue if encoder moved.
   if (filterEncoderMove != 0) {
     currentValue += filterEncoderMove * increment;  // Bump up or down...
     if (currentValue < minValue)
       currentValue = minValue;
     else if (currentValue > maxValue)
       currentValue = maxValue;
-
-    if (left) tft.setCursor(149, 1);
-    else tft.setCursor(425, 1);
-      if(colorRed) tft.setTextColor(RA8875_RED);  // Make value red if active.
-    if (abs(startValue) > 2) {
-      tft.print(startValue, 0);
-    } else {
-    if(increment < 0.001) tft.print(startValue, 4);
-    else tft.print(startValue, 3);
-    }
-    tft.setTextColor(RA8875_WHITE);
-    filterEncoderMove = 0;
   }
+  filterEncoderMove = 0;
   return currentValue;
 }
 
@@ -442,8 +429,7 @@ int SetWPM() {
   Return value;
     long            the delay length in milliseconds
 *****/
-uint32_t SetTransmitDelay()
-{
+uint32_t SetTransmitDelay() {
   MenuSelect menu;
   long lastDelay = ConfigData.cwTransmitDelay;
   long increment = 250;  // Means a quarter second change per detent
@@ -611,7 +597,7 @@ void EncoderFineTune() {
 
 // This function is attached to interrupts (in the .ino file).
 void EncoderFilter() {
-  char result;
+  int32_t result;
   result = filterEncoder.process();  // Read the encoder
 
   if (result == 0) {
@@ -630,7 +616,14 @@ void EncoderFilter() {
       // filter_pos = last_filter_pos - 5 * filterEncoderMove;   // AFP 10-22-22
       break;
   }
+  /*
   if (calibrateFlag == false and morseDecodeAdjustFlag == false) {  // This is done so that filter adjustment is not affected during these operations.
-    filter_pos = last_filter_pos - 5 * filterEncoderMove;           // AFP 10-22-22.  Hmmm.  Why multiply by 5???  Greg KF5N April 21, 2024
+//  if(last_filter_pos != filter_pos) setFilter = true;
+    if(last_filter_pos <= 0) last_filter_pos = 0;
+    filter_pos = last_filter_pos + 5 * filterEncoderMove;           // AFP 10-22-22.  Hmmm.  Why multiply by 5???  Greg KF5N April 21, 2024
+    if(filter_pos <= 0) filter_pos = 0;
   }                                                                 // AFP 10-22-22   filter_pos is allowed to go negative.  This may be a problem.
+*/
+// Don't adjust the filter if doing frequency calibration or adjusting Morse decode sensitivity.
+  if (calibrateFlag == false and morseDecodeAdjustFlag == false)  encoderFilterFlag = true;
 }

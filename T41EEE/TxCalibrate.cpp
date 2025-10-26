@@ -406,13 +406,13 @@ void TxCalibrate::buttonTasks() {
       if (IQCalType == 0) {
         IQCalType = 1;
         // Turn off red indication of active setting.
-        if (calTypeFlag == 1) GetEncoderValueLive(-1.0, 1.0, amplitude, xmitIncrement, "IQ Gain", true, false);
-        if (calTypeFlag == 2) GetEncoderValueLive(-1.0, 1.0, iDCoffset, carrIncrement, "I Offset", true, false);
+        if (calTypeFlag == 1) GetEncoderValueLive(-1.0, 1.0, amplitude, xmitIncrement, "IQ Gain ", true, false);
+        if (calTypeFlag == 2) GetEncoderValueLive(-1.0, 1.0, iDCoffset, carrIncrement, "I Offset ", true, false);
       } else {
         IQCalType = 0;
         // Turn off red indication of active setting.
-        if (calTypeFlag == 1) GetEncoderValueLive(-1.0, 1.0, phase, xmitIncrement, "IQ Phase", false, false);
-        if (calTypeFlag == 2) GetEncoderValueLive(-1.0, 1.0, qDCoffset, carrIncrement, "Q Offset", false, false);
+        if (calTypeFlag == 1) GetEncoderValueLive(-1.0, 1.0, phase, xmitIncrement, "IQ Phase ", false, false);
+        if (calTypeFlag == 2) GetEncoderValueLive(-1.0, 1.0, qDCoffset, carrIncrement, "Q Offset ", false, false);
       }
       break;
     // Toggle increment value
@@ -541,7 +541,7 @@ void TxCalibrate::DoXmitCalibrate(int calMode, bool radio, bool refine, bool toE
     }
   }
   // Run this so Phase shows from beginning.  Get the value for the current sideband.
-  GetEncoderValueLive(-2.0, 2.0, phase, xmitIncrement, "IQ Phase", false, false);
+  GetEncoderValueLive(-2.0, 2.0, phase, xmitIncrement, "IQ Phase ", false, false);
   warmUpCal();
 
   if (radioCal) {
@@ -601,7 +601,7 @@ void TxCalibrate::DoXmitCalibrate(int calMode, bool radio, bool refine, bool toE
           // Starting values for initial calibration sweeps.  First sweep is amplitude (gain).
           phase = 0.0;                                                                     // Hold phase at 0.0 while amplitude sweeps.
           amplitude = 1.0 - maxSweepAmp;                                                   // Begin sweep at low end and move upwards.
-          GetEncoderValueLive(-2.0, 2.0, phase, xmitIncrement, "IQ Phase", false, false);  // Display phase value during amplitude sweep.
+          GetEncoderValueLive(-2.0, 2.0, phase, xmitIncrement, "IQ Phase ", false, false);  // Display phase value during amplitude sweep.
           adjdB = 0;
           adjdB_avg = 0;
           index = 0;
@@ -621,7 +621,7 @@ void TxCalibrate::DoXmitCalibrate(int calMode, bool radio, bool refine, bool toE
             iOptimal = sweepVectorValue[adjdBMinIndex];                         // Set to the discovered minimum.
             amplitude = iOptimal;                                               // Set amplitude to the discovered optimal value.
             // Update display to optimal value and change from red to white.
-            GetEncoderValueLive(-2.0, 2.0, amplitude, xmitIncrement, "IQ Gain", true, false);
+            GetEncoderValueLive(-2.0, 2.0, amplitude, xmitIncrement, "IQ Gain ", true, false);
             // Save the sub_vector which will be used to refine the optimal result.
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorAmp[i] = (iOptimal - 10 * 0.001) + (0.001 * i);
@@ -650,7 +650,7 @@ void TxCalibrate::DoXmitCalibrate(int calMode, bool radio, bool refine, bool toE
             qOptimal = sweepVectorValue[adjdBMinIndex];  // Set to the discovered minimum.
             phase = qOptimal;                            // Set to the discovered minimum.
                                                          // Update display to optimal value and change from red to white.
-            GetEncoderValueLive(-2.0, 2.0, phase, xmitIncrement, "IQ Phase", false, false);
+            GetEncoderValueLive(-2.0, 2.0, phase, xmitIncrement, "IQ Phase ", false, false);
             // Save the sub_vector which will be used to refine the optimal result.
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorPhase[i] = (qOptimal - 10 * 0.001) + (0.001 * i);
@@ -684,7 +684,7 @@ void TxCalibrate::DoXmitCalibrate(int calMode, bool radio, bool refine, bool toE
             iOptimal = sub_vectorAmp[adjdBMinIndex];  // -.001;
             amplitude = iOptimal;                     // Set to optimal value before refining phase.
             // Update display to optimal value and change from red to white.
-            GetEncoderValueLive(-2.0, 2.0, amplitude, xmitIncrement, "IQ Gain", true, false);
+            GetEncoderValueLive(-2.0, 2.0, amplitude, xmitIncrement, "IQ Gain ", true, false);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorAmp[i] = (iOptimal - 10 * 0.001) + (0.001 * i);  // The next array to sweep.
             }
@@ -718,7 +718,7 @@ void TxCalibrate::DoXmitCalibrate(int calMode, bool radio, bool refine, bool toE
             qOptimal = sub_vectorPhase[adjdBMinIndex];
             phase = qOptimal;
             // Update display to optimal value and change from red to white.
-            GetEncoderValueLive(-2.0, 2.0, phase, xmitIncrement, "IQ Phase", false, false);
+            GetEncoderValueLive(-2.0, 2.0, phase, xmitIncrement, "IQ Phase ", false, false);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorPhase[i] = (qOptimal - 10 * 0.001) + (0.001 * i);
             }
@@ -778,8 +778,8 @@ void TxCalibrate::DoXmitCalibrate(int calMode, bool radio, bool refine, bool toE
     //    if (task != MenuSelect::DEFAULT) lastUsedTask = task;  //  Save the last used task.
     task = MenuSelect::DEFAULT;  // Reset task after it is used.
                                  //  Read encoder and update values.
-    if (IQCalType == 0) amplitude = GetEncoderValueLive(-2.0, 2.0, amplitude, xmitIncrement, "IQ Gain", true, true);
-    if (IQCalType == 1) phase = GetEncoderValueLive(-2.0, 2.0, phase, xmitIncrement, "IQ Phase", false, true);
+    if (IQCalType == 0) amplitude = GetEncoderValueLive(-2.0, 2.0, amplitude, xmitIncrement, "IQ Gain ", true, true);
+    if (IQCalType == 1) phase = GetEncoderValueLive(-2.0, 2.0, phase, xmitIncrement, "IQ Phase ", false, true);
     writeToCalData(amplitude, phase);
 
   }  // end while
@@ -838,7 +838,7 @@ void TxCalibrate::DoXmitCarrierCalibrate(int calMode, bool radio, bool refine, b
     qDCoffset = CalData.qDCoffsetSSB[ConfigData.currentBand];
   }
   // Run this so Q offset shows from begining.
-  GetEncoderValueLive(-1.0, 1.0, qDCoffset, carrIncrement, "Q Offset", false, false);
+  GetEncoderValueLive(-1.0, 1.0, qDCoffset, carrIncrement, "Q Offset ", false, false);
   warmUpCal();
 
   if (radioCal) {
@@ -895,7 +895,7 @@ void TxCalibrate::DoXmitCarrierCalibrate(int calMode, bool radio, bool refine, b
         case State::state0:
           qDCoffset = 0;
           iDCoffset = -maxSweepAmp;  // Begin sweep at low end and move upwards.
-          GetEncoderValueLive(-1.0, 1.0, qDCoffset, carrIncrement, "Q Offset", false, false);
+          GetEncoderValueLive(-1.0, 1.0, qDCoffset, carrIncrement, "Q Offset ", false, false);
           index = 0;
           IQCalType = 0;
           state = State::initialSweepAmp;  // Let this fall through.
@@ -914,7 +914,7 @@ void TxCalibrate::DoXmitCarrierCalibrate(int calMode, bool radio, bool refine, b
             iOptimal = sweepVectorValue[adjdBMinIndex];                         // Set to the discovered minimum.
             iDCoffset = iOptimal;                                               // Reset for next sweep.
             // Update display to optimal value and change from red to white.
-            GetEncoderValueLive(-1.0, 1.0, iDCoffset, carrIncrement, "I Offset", true, false);
+            GetEncoderValueLive(-1.0, 1.0, iDCoffset, carrIncrement, "I Offset ", true, false);
             // Save the sub_vector which will be used to refine the optimal result.
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorIoffset[i] = (iOptimal - 10.0 * 0.0005) + (0.0005 * static_cast<float32_t>(i));
@@ -947,7 +947,7 @@ void TxCalibrate::DoXmitCarrierCalibrate(int calMode, bool radio, bool refine, b
             qOptimal = sweepVectorValue[adjdBMinIndex];  // Set to the discovered minimum.
             qDCoffset = qOptimal;                        // Set to the discovered minimum.
             // Update display to optimal value and change from red to white.
-            GetEncoderValueLive(-1.0, 1.0, qDCoffset, carrIncrement, "Q Offset", false, false);
+            GetEncoderValueLive(-1.0, 1.0, qDCoffset, carrIncrement, "Q Offset ", false, false);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorQoffset[i] = (qOptimal - 10.0 * 0.0005) + (0.0005 * static_cast<float32_t>(i));
             }
@@ -981,7 +981,7 @@ void TxCalibrate::DoXmitCarrierCalibrate(int calMode, bool radio, bool refine, b
             iOptimal = sub_vectorIoffset[adjdBMinIndex];  // -.001;
             iDCoffset = iOptimal;                         // Set to optimal value before refining phase.
             // Update display to optimal value and change from red to white.
-            GetEncoderValueLive(-1.0, 1.0, iDCoffset, carrIncrement, "I Offset", true, false);
+            GetEncoderValueLive(-1.0, 1.0, iDCoffset, carrIncrement, "I Offset ", true, false);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorIoffset[i] = (iOptimal - 10 * 0.0005) + (0.0005 * static_cast<float32_t>(i));  // The next array to sweep.
             }
@@ -1014,7 +1014,7 @@ void TxCalibrate::DoXmitCarrierCalibrate(int calMode, bool radio, bool refine, b
             qOptimal = sub_vectorQoffset[adjdBMinIndex];  // - .001;
             qDCoffset = qOptimal;
             // Update display to optimal value and change from red to white.
-            GetEncoderValueLive(-1.0, 1.0, qDCoffset, carrIncrement, "Q Offset", false, false);
+            GetEncoderValueLive(-1.0, 1.0, qDCoffset, carrIncrement, "Q Offset ", false, false);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorQoffset[i] = (qOptimal - 10 * 0.0005) + (0.0005 * static_cast<float32_t>(i));
             }
@@ -1081,8 +1081,8 @@ void TxCalibrate::DoXmitCarrierCalibrate(int calMode, bool radio, bool refine, b
     //    if (task != MenuSelect::DEFAULT) lastUsedTask = task;  //  Save the last used task.
     task = MenuSelect::DEFAULT;  // Reset task after it is used.
     //  Read encoder and update values.
-    if (IQCalType == 0) iDCoffset = GetEncoderValueLive(-1.0, 1.0, iDCoffset, carrIncrement, "I Offset", true, true);
-    if (IQCalType == 1) qDCoffset = GetEncoderValueLive(-1.0, 1.0, qDCoffset, carrIncrement, "Q Offset", false, true);
+    if (IQCalType == 0) iDCoffset = GetEncoderValueLive(-1.0, 1.0, iDCoffset, carrIncrement, "I Offset ", true, true);
+    if (IQCalType == 1) qDCoffset = GetEncoderValueLive(-1.0, 1.0, qDCoffset, carrIncrement, "Q Offset ", false, true);
     if (mode == 0) {
       CalData.iDCoffsetCW[ConfigData.currentBand] = iDCoffset;
       CalData.qDCoffsetCW[ConfigData.currentBand] = qDCoffset;

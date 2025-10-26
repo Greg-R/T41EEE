@@ -1162,20 +1162,25 @@ void Button::ButtonFrequencyEntry() {
     void
 *****/
 void Button::ExecuteModeChange() {
-  tft.writeTo(L2);  // Destroy the bandwidth indicator bar.  KF5N July 30, 2023
-  tft.clearMemory();
-  tft.writeTo(L1);
-  display.UpdateAudioGraphics();         // KF5N December 28 2023.
-  FilterSetSSB();
-  FilterBandwidth();
-  display.ShowBandwidth();
+  Serial.printf("ExecuteModeChange\n");
+//  tft.writeTo(L2);  // Destroy the bandwidth indicator bar.  KF5N July 30, 2023
+//  tft.clearMemory();
+//  tft.writeTo(L1);
+
+  FilterSetSSB();  // This sets the audioGraphicsFlag and runs UpdateAudioGraphics.
+
+//  FilterBandwidth();
+//  display.UpdateAudioGraphics();         // KF5N December 28 2023.  Runs BandwidthIndicatorBar() and ShowBandwidth().
+
   display.ShowFrequency();
 ////  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) display.BandInformation();  Seems to be called by default.
 //  display.DrawBandWidthIndicatorBar();  // Restore the bandwidth indicator bar.  KF5N July 30, 2023.  Gets called in UpdateAudioGraphics
   display.BandInformation();  // Called by default?
+//    display.ShowBandwidth();
   fftOffset = 140;
-//  Serial.printf("Execute Mode Change\n");
+
   SetBandRelay();  // Set relays in LPF for current band.
   SetFreq();       // Must update frequency, for example moving from SSB to CW, the RX LO is shifted.  KF5N
+
   powerUp = true;
 }

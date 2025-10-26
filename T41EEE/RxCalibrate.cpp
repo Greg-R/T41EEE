@@ -366,7 +366,7 @@ void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool 
     }
   }
 
-  GetEncoderValueLive(-2.0, 2.0, phase, increment, (char *)"IQ Phase", false, false);  // Show phase on display.
+  GetEncoderValueLive(-2.0, 2.0, phase, increment, (char *)"IQ Phase ", false, false);  // Show phase on display.
 
   if (radioCal) {
     autoCal = true;
@@ -428,11 +428,11 @@ void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool 
         if (IQCalType == 0) {
           IQCalType = 1;
           // Switching to phase, make gain white.
-          GetEncoderValueLive(-2.0, 2.0, amplitude, increment, "IQ Gain", true, false);
+          GetEncoderValueLive(-2.0, 2.0, amplitude, increment, "IQ Gain ", true, false);
         } else {
           IQCalType = 0;
           // Switching go gain, make phase white.
-          GetEncoderValueLive(-2.0, 2.0, phase, increment, "IQ Phase", false, false);
+          GetEncoderValueLive(-2.0, 2.0, phase, increment, "IQ Phase ", false, false);
         }
         break;
       // Toggle increment value
@@ -496,7 +496,7 @@ void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool 
           phase = 0.0;
           amplitude = 1.0 - maxSweepAmp;                                               // Begin sweep at low end and move upwards.
                                                                                        ////          if (mode == 0)
-          GetEncoderValueLive(-2.0, 2.0, phase, increment, "IQ Phase", false, false);  // Display the phase value.
+          GetEncoderValueLive(-2.0, 2.0, phase, increment, "IQ Phase ", false, false);  // Display the phase value.
                                                                                        ////          if (mode == 1)
                                                                                        ////            GetEncoderValueLive(-2.0, 2.0, phase, increment, (char *)"IQ Phase", false);
           adjdB = 0;
@@ -520,7 +520,7 @@ void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool 
             phase = -maxSweepPhase;                                             // The starting value for phase.
             amplitude = iOptimal;                                               // Reset for next sweep.
             // Update display to optimal value.
-            GetEncoderValueLive(-2.0, 2.0, amplitude, increment, "IQ Gain", true, false);
+            GetEncoderValueLive(-2.0, 2.0, amplitude, increment, "IQ Gain ", true, false);
             count = count + 1;
             // Save the sub_vector which will be used to refine the optimal result.
             for (int i = 0; i < 21; i = i + 1) {
@@ -551,7 +551,7 @@ void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool 
             adjdBMinIndex = std::distance(sweepVector.begin(), result);  // Input 2 is first right channel.
             qOptimal = sweepVectorValue[adjdBMinIndex];                  // Set to the discovered minimum.
             phase = qOptimal;                                            // Set to the discovered minimum.
-            GetEncoderValueLive(-2.0, 2.0, phase, increment, "IQ Phase", false, false);
+            GetEncoderValueLive(-2.0, 2.0, phase, increment, "IQ Phase ", false, false);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorPhase[i] = (qOptimal - 10 * 0.001) + (0.001 * i);
             }
@@ -583,7 +583,7 @@ void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool 
             // iOptimal is simply the value of sub_vectorAmp[adjdBMinIndex].
             iOptimal = sub_vectorAmp[adjdBMinIndex];  // -.001;
             amplitude = iOptimal;                     // Set to optimal value before refining phase.
-            GetEncoderValueLive(-2.0, 2.0, amplitude, increment, (char *)"IQ Gain", true, true);
+            GetEncoderValueLive(-2.0, 2.0, amplitude, increment, (char *)"IQ Gain ", true, true);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorAmp[i] = (iOptimal - 10 * 0.001) + (0.001 * i);  // The next array to sweep.
             }
@@ -616,7 +616,7 @@ void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool 
             index = 0;
             qOptimal = sub_vectorPhase[adjdBMinIndex];  // - .001;
             phase = qOptimal;
-            GetEncoderValueLive(-2.0, 2.0, phase, increment, "IQ Phase", false, false);
+            GetEncoderValueLive(-2.0, 2.0, phase, increment, "IQ Phase ", false, false);
             for (int i = 0; i < 21; i = i + 1) {
               sub_vectorPhase[i] = (qOptimal - 10 * 0.001) + (0.001 * i);
             }
@@ -677,8 +677,8 @@ void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool 
     task = MenuSelect::DEFAULT;  // Reset task after it is used.
 
     //  Read encoder and update values.  This is manual calibration.
-    if (IQCalType == 0) amplitude = GetEncoderValueLive(-2.0, 2.0, amplitude, increment, "IQ Gain", true, true);
-    if (IQCalType == 1) phase = GetEncoderValueLive(-2.0, 2.0, phase, increment, "IQ Phase", false, true);
+    if (IQCalType == 0) amplitude = GetEncoderValueLive(-2.0, 2.0, amplitude, increment, "IQ Gain ", true, true);
+    if (IQCalType == 1) phase = GetEncoderValueLive(-2.0, 2.0, phase, increment, "IQ Phase ", false, true);
     writeToCalData(amplitude, phase);
   }  // end while
 }  // End Receive calibration

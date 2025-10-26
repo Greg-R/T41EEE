@@ -180,8 +180,8 @@ pixelold[i] = pixelnew[i];
       FFT_spec[i + fftWidth / 2] = (buffer_spec_FFT[i * 2] * buffer_spec_FFT[i * 2] + buffer_spec_FFT[i * 2 + 1] * buffer_spec_FFT[i * 2 + 1]);
       FFT_spec[i] = (buffer_spec_FFT[(i + fftWidth / 2) * 2] * buffer_spec_FFT[(i + fftWidth / 2) * 2] + buffer_spec_FFT[(i + fftWidth / 2) * 2 + 1] * buffer_spec_FFT[(i + fftWidth / 2) * 2 + 1]);
     }
-    // apply low pass filter and scale the magnitude values and convert to int for spectrum display
-    // apply spectrum AGC
+    // Apply low pass filter and scale the magnitude values and convert to int for spectrum display.
+    // Apply spectrum AGC.
     //
     for (int16_t x = 0; x < fftWidth; x++) {
       FFT_spec[x] = LPFcoeff * FFT_spec[x] + onem_LPFcoeff * FFT_spec_old[x];

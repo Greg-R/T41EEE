@@ -68,20 +68,20 @@ void CalibrateOptions() {
   int freqCorrectionFactorOld = 0;
   int32_t increment = 100;
   MenuSelect menu;
-  char freqCal[] = "Freq Cal: ";
-  tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 30, CHAR_HEIGHT, RA8875_BLACK);
+  //  tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 30, CHAR_HEIGHT, RA8875_BLACK);
 
   // Select the type of calibration, and then skip this during the loop() function.
   // Note that some calibrate options run inside the loop() function!
-  if (calibrateFlag == 0) {                                                                                                                                                                                                                                                                                                                  //    0             1           2               3                4              5             6              7                  8                  9               10                11               12                13               14               15              16          17           18
-    const std::string IQOptions[]{ "Freq Cal", "CW PA Cal", "CW Rec Cal", "CW Carrier Cal", "CW Xmit Cal", "SSB PA Cal", "SSB Rec Cal", "SSB Carrier Cal", "SSB Transmit Cal", "CW Radio Cal", "CW Refine Cal", "SSB Radio Cal", "SSB Refine Cal", "dBm Level Cal", "DAC Offset CW", "DAC Offset SSB", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
-    IQChoice = SubmenuSelect(IQOptions, 19, 0);                                                                                                                                                                                                                                                                                              //AFP 10-21-22
+  if (calibrateFlag == 0) {  //    0             1           2               3                4              5             6              7                  8                  9               10                11               12                13               14               15              16          17           18
+                             //    const std::string IQOptions[]{ "Freq Cal", "CW PA Cal", "CW Rec Cal", "CW Carrier Cal", "CW Xmit Cal", "SSB PA Cal", "SSB Rec Cal", "SSB Carrier Cal", "SSB Transmit Cal", "CW Radio Cal", "CW Refine Cal", "SSB Radio Cal", "SSB Refine Cal", "dBm Level Cal", "DAC Offset CW", "DAC Offset SSB", "Btn Cal", "Btn Repeat", "Cancel" };
+    const std::string IQOptions[]{ "Freq Cal", "CW PA Cal", "CW Rec Cal", "CW Carrier Cal", "CW Xmit Cal", "SSB PA Cal", "SSB Rec Cal", "SSB Carrier Cal", "SSB Transmit Cal", "CW Radio Cal", "CW Refine Cal", "SSB Radio Cal", "SSB Refine Cal", "dBm Level Cal", "Btn Cal", "Btn Repeat", "Cancel" };
+    IQChoice = SubmenuSelect(IQOptions, 19, 0);
   }
   calibrateFlag = 1;
   switch (IQChoice) {
 
     case 0:  // Calibrate Frequency  - uses WWV
-      CalData.freqCorrectionFactor = GetEncoderValueLive(-200000, 200000, CalData.freqCorrectionFactor, increment, freqCal, false, true);
+      CalData.freqCorrectionFactor = GetEncoderValueLive(-200000, 200000, CalData.freqCorrectionFactor, increment, "Freq Cal: ", true, true);
       if (CalData.freqCorrectionFactor != freqCorrectionFactorOld) {
         si5351.set_correction(CalData.freqCorrectionFactor, SI5351_PLL_INPUT_XO);
         freqCorrectionFactorOld = CalData.freqCorrectionFactor;
@@ -89,7 +89,8 @@ void CalibrateOptions() {
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
-          tft.fillRect(SECONDARY_MENU_X - 1, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT + 1, RA8875_BLACK);
+          tft.setCursor(0, 1);
+          tft.print("                ");  // Erase.
           eeprom.CalDataWrite();
           calibrateFlag = 0;
         }
@@ -97,12 +98,13 @@ void CalibrateOptions() {
       break;
 
     case 1:  // CW PA Cal
-      CalData.CWPowerCalibrationFactor[ConfigData.currentBand] = GetEncoderValueLive(0.0, 1.0, CalData.CWPowerCalibrationFactor[ConfigData.currentBand], 0.01, "CW PA Cal: ", false, true);
+      CalData.CWPowerCalibrationFactor[ConfigData.currentBand] = GetEncoderValueLive(0.0, 1.0, CalData.CWPowerCalibrationFactor[ConfigData.currentBand], 0.01, "CW PA Cal: ", true, true);
       ConfigData.powerOutCW[ConfigData.currentBand] = sqrt(ConfigData.transmitPowerLevel / 20.0) * CalData.CWPowerCalibrationFactor[ConfigData.currentBand];
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
-          tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
+          tft.setCursor(0, 1);
+          tft.print("                 ");  // Erase.
           eeprom.ConfigDataWrite();
           eeprom.CalDataWrite();
           calibrateFlag = 0;
@@ -123,12 +125,13 @@ void CalibrateOptions() {
       break;
 
     case 5:  // SSB PA Cal
-      CalData.SSBPowerCalibrationFactor[ConfigData.currentBand] = GetEncoderValueLive(0.0, 1.0, CalData.SSBPowerCalibrationFactor[ConfigData.currentBand], 0.01, (char *)"SSB PA Cal: ", false, true);
+      CalData.SSBPowerCalibrationFactor[ConfigData.currentBand] = GetEncoderValueLive(0.0, 1.0, CalData.SSBPowerCalibrationFactor[ConfigData.currentBand], 0.01, "SSB PA Cal: ", true, true);
       ConfigData.powerOutSSB[ConfigData.currentBand] = sqrt(ConfigData.transmitPowerLevel / 20.0) * CalData.SSBPowerCalibrationFactor[ConfigData.currentBand];
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
-          tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
+          tft.setCursor(0, 1);
+          tft.print("                  ");  // Erase.
           eeprom.CalDataWrite();
           eeprom.ConfigDataWrite();
           calibrateFlag = 0;
@@ -169,24 +172,22 @@ void CalibrateOptions() {
       calibrateFlag = 0;
       break;
 
-    case 13:  // dBm level cal.  Was choose CW calibration tone frequency.
-              //      calibrater.SelectCalFreq();
-              //      calibrateFlag = 0;
-      CalData.dBm_calibration = GetEncoderValueLive(0, 100, CalData.dBm_calibration, 1, (char *)"dBm Cal: ", false, true);
+    case 13:  // dBm level cal.
+      CalData.dBm_calibration = GetEncoderValueLive(0, 100, CalData.dBm_calibration, 1, (char *)"dBm Cal: ", true, true);
       if (CalData.dBm_calibration != freqCorrectionFactorOld) {
-        //        si5351.set_correction(ConfigData.freqCorrectionFactor, SI5351_PLL_INPUT_XO);
         freqCorrectionFactorOld = CalData.dBm_calibration;
       }
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
-          tft.fillRect(SECONDARY_MENU_X - 1, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT + 1, RA8875_BLACK);
+          tft.setCursor(0, 1);
+          tft.print("                ");  // Erase.
           eeprom.CalDataWrite();
           calibrateFlag = 0;
         }
       }
       break;
-
+      /*
     case 14:  // Set DAC offset for CW carrier cancellation.
       CalData.dacOffsetCW = GetEncoderValueLiveQ15t(-5000, 5000, CalData.dacOffsetCW, 50, "DC Offset:", false);
       menu = readButton();
@@ -212,39 +213,35 @@ void CalibrateOptions() {
       }
       //      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
-
-    case 16:  // Calibrate buttons
+*/
+    case 14:  // Calibrate buttons
       SaveAnalogSwitchValues();
       calibrateFlag = 0;
       display.RedrawDisplayScreen();
       eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
-    case 17:  // Set button repeat rate
-      CalData.buttonRepeatDelay = 1000 * GetEncoderValueLive(0, 5000, CalData.buttonRepeatDelay / 1000, 1, "Btn Repeat:  ", false, true);
+    case 15:  // Set button repeat rate
+      CalData.buttonRepeatDelay = 1000 * GetEncoderValueLive(0, 5000, CalData.buttonRepeatDelay / 1000, 1, "Btn Repeat:  ", true, true);
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {
         if (menu == MenuSelect::MENU_OPTION_SELECT) {
-          tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
+          tft.setCursor(0, 1);
+          tft.print("                ");  // Erase.
           eeprom.CalDataWrite();
           calibrateFlag = 0;
         }
       }
       break;
 
-    case 18:  // Cancelled choice
-              //      RedrawDisplayScreen();
-              //      currentFreq = TxRxFreq = ConfigData.centerFreq + NCOFreq;
-              //      DrawBandWidthIndicatorBar();  // AFP 10-20-22
-              //      ShowFrequency();
-              //      BandInformation();
+    case 16:  // Cancelled choice
+
       calibrateFlag = 0;
       break;
 
     default:
       break;
   }
-  //  UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
 }
 #else  // Not using QSE2 (No carrier calibration)
 void CalibrateOptions() {
@@ -253,7 +250,7 @@ void CalibrateOptions() {
   char freqCal[] = "Freq Cal: ";
   MenuSelect menu;
 
-  tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 30, CHAR_HEIGHT, RA8875_BLACK);
+  //  tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 30, CHAR_HEIGHT, RA8875_BLACK);
 
   // Select the type of calibration, and then skip this during the loop() function.
   if (calibrateFlag == 0) {
@@ -272,7 +269,8 @@ void CalibrateOptions() {
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
-          tft.fillRect(SECONDARY_MENU_X - 1, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT + 1, RA8875_BLACK);
+          tft.setCursor(0, 1);
+          tft.print("                ");  // Erase.
           eeprom.CalDataWrite();
           calibrateFlag = false;
         }
@@ -280,12 +278,13 @@ void CalibrateOptions() {
       break;
 
     case 1:  // CW PA Cal
-      CalData.CWPowerCalibrationFactor[ConfigData.currentBand] = GetEncoderValueLive(0.0, 1.0, CalData.CWPowerCalibrationFactor[ConfigData.currentBand], 0.01, "CW PA Cal: ", false, true);
+      CalData.CWPowerCalibrationFactor[ConfigData.currentBand] = GetEncoderValueLive(0.0, 1.0, CalData.CWPowerCalibrationFactor[ConfigData.currentBand], 0.01, "CW PA Cal: ", true, true);
       ConfigData.powerOutCW[ConfigData.currentBand] = sqrt(ConfigData.transmitPowerLevel / 20.0) * CalData.CWPowerCalibrationFactor[ConfigData.currentBand];
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
-          tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
+          tft.setCursor(0, 1);
+          tft.print("                 ");  // Erase.
           eeprom.ConfigDataWrite();
           eeprom.CalDataWrite();
           calibrateFlag = 0;
@@ -294,23 +293,24 @@ void CalibrateOptions() {
 
       break;
 
-    case 2:                                                   // CW IQ Receive Cal - Gain and Phase
+    case 2:                                                    // CW IQ Receive Cal - Gain and Phase
       rxcalibrater.DoReceiveCalibrate(0, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
-                                                              //      eeprom.CalDataWrite();                             // Save calibration numbers and configuration.  KF5N August 12, 2023
+                                                               //      eeprom.CalDataWrite();                             // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
-    case 3:                                                // CW IQ Transmit Cal - Gain and Phase  //AFP 2-21-23
+    case 3:                                                 // CW IQ Transmit Cal - Gain and Phase  //AFP 2-21-23
       txcalibrater.DoXmitCalibrate(0, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
-                                                           //      eeprom.CalDataWrite();                          // Save calibration numbers and configuration.  KF5N August 12, 2023
+                                                            //      eeprom.CalDataWrite();                          // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 4:  // SSB PA Cal
-      CalData.SSBPowerCalibrationFactor[ConfigData.currentBand] = GetEncoderValueLive(0.0, 1.0, CalData.SSBPowerCalibrationFactor[ConfigData.currentBand], 0.01, "SSB PA Cal: ", false, true);
+      CalData.SSBPowerCalibrationFactor[ConfigData.currentBand] = GetEncoderValueLive(0.0, 1.0, CalData.SSBPowerCalibrationFactor[ConfigData.currentBand], 0.01, "SSB PA Cal: ", true, true);
       ConfigData.powerOutSSB[ConfigData.currentBand] = sqrt(ConfigData.transmitPowerLevel / 20.0) * CalData.SSBPowerCalibrationFactor[ConfigData.currentBand];
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
-          tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
+          tft.setCursor(0, 1);
+          tft.print("                  ");  // Erase.
           eeprom.ConfigDataWrite();
           eeprom.CalDataWrite();
           calibrateFlag = 0;
@@ -319,7 +319,7 @@ void CalibrateOptions() {
 
       break;  // Missing break.  KF5N August 12, 2023
 
-    case 5:                                                   // SSB IQ Receive Cal - Gain and Phase
+    case 5:                                                    // SSB IQ Receive Cal - Gain and Phase
       rxcalibrater.DoReceiveCalibrate(1, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
 
       break;
@@ -350,17 +350,15 @@ void CalibrateOptions() {
       break;
 
     case 11:  // dBm level cal.  Was choose CW calibration tone frequency.
-              //      calibrater.SelectCalFreq();
-              //      calibrateFlag = 0;
-      CalData.dBm_calibration = GetEncoderValueLive(0, 100, CalData.dBm_calibration, 1, "dBm Cal: ", false, true);
+      CalData.dBm_calibration = GetEncoderValueLive(0, 100, CalData.dBm_calibration, 1, "dBm Cal: ", true, true);
       if (CalData.dBm_calibration != freqCorrectionFactorOld) {
-        //        si5351.set_correction(ConfigData.freqCorrectionFactor, SI5351_PLL_INPUT_XO);
         freqCorrectionFactorOld = CalData.dBm_calibration;
       }
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
-          tft.fillRect(SECONDARY_MENU_X - 1, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT + 1, RA8875_BLACK);
+          tft.setCursor(0, 1);
+          tft.print("                ");  // Erase.
           eeprom.CalDataWrite();
           calibrateFlag = 0;
         }
@@ -375,11 +373,12 @@ void CalibrateOptions() {
       break;
 
     case 13:  // Set button repeat rate
-      CalData.buttonRepeatDelay = 1000 * GetEncoderValueLive(0, 5000, CalData.buttonRepeatDelay / 1000, 1, "Btn Repeat:  ", false, true);
+      CalData.buttonRepeatDelay = 1000 * GetEncoderValueLive(0, 5000, CalData.buttonRepeatDelay / 1000, 1, "Btn Repeat:  ", true, true);
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {
         if (menu == MenuSelect::MENU_OPTION_SELECT) {
-          tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
+          tft.setCursor(0, 1);
+          tft.print("                ");  // Erase.
           eeprom.CalDataWrite();
           calibrateFlag = 0;
         }

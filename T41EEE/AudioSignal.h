@@ -5,7 +5,8 @@ const float sample_rate_Hz = 48000.0;  // The transmitter operates at 48ksps.
 const int audio_block_samples = 128;   // Always 128
 AudioSettings_F32 audio_settings(sample_rate_Hz, audio_block_samples);
 AudioInputI2SQuad i2s_quadIn;  // 4 inputs available only in Teensy audio and not Open Audio library.
-AudioOutputI2SQuad_F32 i2s_quadOut_f32(audio_settings);
+//AudioOutputI2SQuad_F32 i2s_quadOut_f32(audio_settings);
+AudioOutputI2SQuad_F32 i2s_quadOut_f32;
 
 // Transmitter
 AudioControlSGTL5000 sgtl5000_1;                                                  // Controller for the Teensy Audio Adapter.
@@ -129,8 +130,8 @@ AudioConnection_F32 patchCord31(headphoneVolume, 0, mixer_rxtx_I, 1);
 AudioConnection_F32 patchCord32(headphoneVolume, 0, mixer_rxtx_Q, 1);
 
 // I and Q channels from outputs of mixers to the quad I2S output object's inputs.
-AudioConnection_F32 patchCord33(mixer_rxtx_I, 0, i2s_quadOut_f32, 0);
-AudioConnection_F32 patchCord34(mixer_rxtx_Q, 0, i2s_quadOut_f32, 1);
+ AudioConnection_F32 patchCord33(mixer_rxtx_I, 0, i2s_quadOut_f32, 0);
+ AudioConnection_F32 patchCord34(mixer_rxtx_Q, 0, i2s_quadOut_f32, 1);
 
 // Half-octave transmit band equalizer, 16 bands, but only the lower 14 are used.
 float32_t fBand1[] = { 50.0, 70.711, 100.0, 141.421, 200.0, 282.843, 400.0, 565.685, 800.0, 1131.371, 1600.0, 2262.742, 3200.0, 4525.483, 6400.0, 24000.0 };
@@ -203,6 +204,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       Q_in_R_Ex.end();   // Transmit Q channel path.
       Q_in_L_Ex.clear();
       Q_in_R_Ex.clear();
+      connect0.disconnect();  // Disconnect microphone input data stream.
       // Deactivate microphone and tones.
       mixer1_tx.gain(0, 0.0);
       mixer1_tx.gain(1, 0.0);
@@ -262,7 +264,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord1.disconnect();  // Receiver I channel
       patchCord2.disconnect();  // Receiver Q channel
       patchCord3.disconnect();  // Receiver audio
-
+      connect0.connect();  // Connect microphone input data stream.
+      
       ADC_RX_I.end();
       ADC_RX_I.clear();
       ADC_RX_Q.end();
@@ -320,7 +323,7 @@ void SetAudioOperatingState(RadioState operatingState) {
     case RadioState::SSB_CALIBRATE_STATE:
       SampleRate = SAMPLE_RATE_48K;
       InitializeDataArrays();                      // I2S sample rate set in this function.
-      controlAudioOut(ConfigData.audioOut, true);  // Mute all audio.
+      controlAudioOut(AudioState::MUTE_BOTH, true);  // Mute all audio.
       sgtl5000_1.unmuteLineout();
       patchCord1.connect();  // Receiver I channel
       patchCord2.connect();  // Receiver Q channel
@@ -393,7 +396,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       SampleRate = SAMPLE_RATE_48K;
       InitializeDataArrays();  // I2S sample rate set in this function.
       // QSD disabled and disconnected
-      controlAudioOut(ConfigData.audioOut, true);  // Mute all audio.
+      controlAudioOut(AudioState::MUTE_BOTH, true);  // Mute all audio.
       sgtl5000_1.unmuteLineout();
       //      patchCord1.connect();  // Receiver I channel
       //      patchCord2.connect();  // Receiver Q channel
@@ -585,7 +588,7 @@ void SetAudioOperatingState(RadioState operatingState) {
     case RadioState::CW_CALIBRATE_STATE:
       SampleRate = SAMPLE_RATE_48K;
       InitializeDataArrays();                      // I2S sample rate set in this function.
-      controlAudioOut(ConfigData.audioOut, true);  // Mute all audio.
+      controlAudioOut(AudioState::MUTE_BOTH, true);  // Mute all audio.
       sgtl5000_1.unmuteLineout();
 
       ADC_RX_I.end();
@@ -648,7 +651,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       SampleRate = SAMPLE_RATE_192K;
       SetI2SFreq(SR[SampleRate].rate);
       // QSD receiver enabled.  Calibrate is full duplex.
-      controlAudioOut(ConfigData.audioOut, true);  // Mute all audio.
+      controlAudioOut(AudioState::MUTE_BOTH, true);  // Mute all audio.
       sgtl5000_1.unmuteLineout();
 
 ////      switch1_tx.setChannel(1);  // Disconnect microphone path.
