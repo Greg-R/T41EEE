@@ -188,9 +188,9 @@ void ResetTuning() {
   SetFreq();  // For new tuning scheme.  KF5N July 22, 2023
   display.DrawBandWidthIndicatorBar();
   display.BandInformation();
-  display.ShowFrequency();
+////  display.ShowFrequency();
   //  UpdateAudioGraphics();  // Update Morse decoder if used.
-  FilterSetSSB();
+////  FilterSetSSB();
 }
 
 

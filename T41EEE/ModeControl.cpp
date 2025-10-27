@@ -3,14 +3,15 @@
 
 
 void ModeControl::CWReceiveMode() {
+    Serial.printf("CWReceiveMode()\n");
 startRxFlag = true;
   SetFreq();
   display.BandInformation();  // Updates center frequency, band, mode, and sideband at top of spectrum.
 
   display.UpdateAudioGraphics();
   FilterBandwidth();  // Required to set up filter properly for this mode.
-  display.ShowBandwidth();
-  Serial.printf("CWReceiveMode()\n");
+//  display.ShowBandwidth();  Run by UpdateAudioGraphics().
+
 }
 
 

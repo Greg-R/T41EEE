@@ -522,9 +522,5 @@ void ReceiveDSP::ProcessIQData() {
     elapsed_micros_sum = elapsed_micros_sum + usec;
     elapsed_micros_idx_t++;
   }                         // end of if(audio blocks available)
-  if (ms_500.check() == 1)  // For clock updates AFP 10-26-22
-  {
-    //wait_flag = 0;
-    DisplayClock();
-  }
+
 }

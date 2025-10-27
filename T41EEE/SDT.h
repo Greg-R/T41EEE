@@ -475,9 +475,9 @@ extern int filterWidth;
 //===== New histogram stuff
 //extern float32_t pixel_per_khz;  //AFP
 extern int pos_left;
-extern int centerLine;
+// extern int centerLine;
 extern int h;
-extern int centerTuneFlag;
+extern bool centerTuneFlag;
 
 //================== Global Excite Variables =================
 
@@ -701,8 +701,8 @@ extern PROGMEM uint32_t calFrequencies[NUMBER_OF_BANDS][2];
 extern bool calibrateFlag;
 extern bool morseDecodeAdjustFlag;
 extern int chipSelect;
-extern volatile int filterEncoderMove;
-extern volatile long fineTuneEncoderMove;
+extern int32_t filterEncoderMove;
+extern int32_t fineTuneEncoderMove;
 extern int freqIncrement;
 extern void (*functionPtr[])();
 extern int idx;

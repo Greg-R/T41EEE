@@ -195,7 +195,7 @@ const char *zoomOptions[] = { "1x ", "2x ", "4x ", "8x ", "16x" };
 //float32_t pixel_per_khz = ((1 << ConfigData.spectrum_zoom) * SPECTRUM_RES * 1000.0 / SR[SampleRate].rate);
 //int pos_left = centerLine - (int)(bands.bands[ConfigData.currentBand].FLoCut / 1000.0 * pixel_per_khz);
 
-int centerLine = (MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2;
+//int centerLine = (MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2;
 int16_t fftOffset = 100;
 int16_t audioFFToffset = 100;
 //int fLoCutOld;
@@ -218,13 +218,13 @@ uint32_t zoom_display = 1;
 int16_t pixelnew[SPECTRUM_RES]{ 0 };
 int16_t pixelold[SPECTRUM_RES]{ 0 };
 
-//===== New histogram stuff ===
-volatile int filterEncoderMove = 0;
-volatile long fineTuneEncoderMove = 0L;
+//  Set by the filter encoder isr.
+int32_t filterEncoderMove = 0;
+int32_t fineTuneEncoderMove = 0;
 
 int selectedMapIndex;
 
-int centerTuneFlag = 0;
+bool centerTuneFlag = false;
 unsigned long cwTimer;
 unsigned long ditTimerOn;
 unsigned long ditLength;
@@ -739,6 +739,15 @@ FLASHMEM void InitializeDataArrays() {
   initTempMon(temp_check_frequency, lowAlarmTemp, highAlarmTemp, panicAlarmTemp);
   // this starts the measurements
   TEMPMON_TEMPSENSE0 |= 0x2U;
+
+  // Move these to the initialization function?  Moved from setup.  Greg Raven KF5N October 2025
+  arm_fir_init_f32(&FIR_CW_DecodeL, 64, CW_Filter_Coeffs2, FIR_CW_DecodeL_state, 256);  //AFP 10-25-22
+  arm_fir_init_f32(&FIR_CW_DecodeR, 64, CW_Filter_Coeffs2, FIR_CW_DecodeR_state, 256);
+  arm_fir_interpolate_init_f32(&FIR_int1_EX_I, 2, 48, coeffs48K_8K_LPF_FIR, FIR_int1_EX_I_state, 256);  // Used in CW exciter.
+  arm_fir_interpolate_init_f32(&FIR_int1_EX_Q, 2, 48, coeffs48K_8K_LPF_FIR, FIR_int1_EX_Q_state, 256);
+  arm_fir_interpolate_init_f32(&FIR_int2_EX_I, 4, 32, coeffs192K_10K_LPF_FIR, FIR_int2_EX_I_state, 512);
+  arm_fir_interpolate_init_f32(&FIR_int2_EX_Q, 4, 32, coeffs192K_10K_LPF_FIR, FIR_int2_EX_Q_state, 512);
+
 }  // end InitializeDataArrays()
 
 
@@ -864,42 +873,7 @@ FLASHMEM void setup() {
     Serial.print(CrashReport);
   }
 
-  setSyncProvider(getTeensy3Time);  // get TIME from real time clock with 3V backup battery
-  setTime(now());
-  Teensy3Clock.set(now());  // set the RTC
-  T4_rtc_set(Teensy3Clock.get());
-
-  // Configure Audio Adapter
-  sgtl5000_1.enable();
-  sgtl5000_1.setAddress(LOW);  // This sets to one of two possible I2C addresses, controlled by a jumper on the Audio Adapter.
-  //  Don't use the audio pre-processor.  This causes a spurious signal in the SSB transmit output.
-  //  sgtl5000_1.audioPreProcessorEnable();  // Need to use one of the equalizers.
-  AudioMemory(240);
-  AudioMemory_F32(110);
-  sgtl5000_1.inputSelect(AUDIO_INPUT_MIC);
-  sgtl5000_1.volume(0.8);  // Set headphone volume.
-  sgtl5000_1.micGain(0);
-  sgtl5000_1.lineInLevel(0);  // Line-in is not used.  Can't turn it off though.
-#ifdef QSE2
-  sgtl5000_1.lineOutLevel(13);  // Setting of 13 limits line-out level to 3.15 volts p-p (maximum).
-#else
-  sgtl5000_1.lineOutLevel(20);  // Setting of 20 limits line-out level to 2.14 volts p-p.
-#endif
-  //  sgtl5000_1.adcHighPassFilterEnable();  // This is required for QSE2DC, specifically for carrier calibration.
-  sgtl5000_1.adcHighPassFilterDisable();  //reduces noise.  https://forum.pjrc.com/threads/27215-24-bit-audio-boards?p=78831&viewfull=1#post78831
-
-  updateMic();             // This updates the transmit signal chain settings.  Located in SSB_Exciter.cpp.
-  initializeAudioPaths();  // Updates the AGC (compressor) in the receiver.
-  // Set up "Controlled Envelope Single Side Band" from the Open Audio Library.
-  cessb1.setSampleRate_Hz(48000);
-  cessb1.setGains(3.5f, 1.4f, 0.5f);  // gainIn, gainCompensate, gainOut
-  cessb1.setSideband(false);
-  cessb1.setProcessing(ConfigData.cessb);  // Set to CESSB or SSB Data.  Greg KF5N August 17 2024
-
-  Q_out_L_Ex.setMaxBuffers(32);  // Limits determined emperically.  These may need more adjustment.  Greg KF5N August 4, 2024.
-  Q_out_R_Ex.setMaxBuffers(32);
-  Q_out_L.setMaxBuffers(64);  // Receiver audio buffer limit.
-
+  // Configure Teensy.
   // GPOs used to control hardware.
   pinMode(FILTERPIN15M, OUTPUT);
   pinMode(FILTERPIN20M, OUTPUT);
@@ -935,15 +909,13 @@ FLASHMEM void setup() {
   attachInterrupt(digitalPinToInterrupt(KEYER_DIT_INPUT_TIP), KeyTipOn, CHANGE);  // Changed to keyTipOn from KeyOn everywhere JJP 8/31/22
   attachInterrupt(digitalPinToInterrupt(KEYER_DAH_INPUT_RING), KeyRingOn, CHANGE);
 
-  // Move these to the initialization function?
-  arm_fir_init_f32(&FIR_CW_DecodeL, 64, CW_Filter_Coeffs2, FIR_CW_DecodeL_state, 256);  //AFP 10-25-22
-  arm_fir_init_f32(&FIR_CW_DecodeR, 64, CW_Filter_Coeffs2, FIR_CW_DecodeR_state, 256);
-  arm_fir_interpolate_init_f32(&FIR_int1_EX_I, 2, 48, coeffs48K_8K_LPF_FIR, FIR_int1_EX_I_state, 256);  // Used in CW exciter.
-  arm_fir_interpolate_init_f32(&FIR_int1_EX_Q, 2, 48, coeffs48K_8K_LPF_FIR, FIR_int1_EX_Q_state, 256);
-  arm_fir_interpolate_init_f32(&FIR_int2_EX_I, 4, 32, coeffs192K_10K_LPF_FIR, FIR_int2_EX_I_state, 512);
-  arm_fir_interpolate_init_f32(&FIR_int2_EX_Q, 4, 32, coeffs192K_10K_LPF_FIR, FIR_int2_EX_Q_state, 512);
+  // Configure clock.
+  setSyncProvider(getTeensy3Time);  // get TIME from real time clock with 3V backup battery
+  setTime(now());
+  Teensy3Clock.set(now());  // set the RTC
+  T4_rtc_set(Teensy3Clock.get());
 
-  //***********************  Display interface settings ************
+  // Configure display.
   uint32_t iospeed_display = IOMUXC_PAD_DSE(3) | IOMUXC_PAD_SPEED(1);
   *(digital_pin_to_info_PGM + 13)->pad = iospeed_display;  //clk
   *(digital_pin_to_info_PGM + 11)->pad = iospeed_display;  //MOSI
@@ -952,16 +924,56 @@ FLASHMEM void setup() {
   tft.begin(RA8875_800x480, 8, 20000000UL, 4000000UL);  // parameter list from library code
   tft.setRotation(0);
 
-  // Setup for scrolling attributes. Part of initSpectrum_RA8875() call written by Mike Lewis
-  tft.useLayers(true);  //mainly used to turn on layers! //AFP 03-27-22 Layers
+  // Setup for scrolling attributes. Part of initSpectrum_RA8875() call written by Mike Lewis.
+  tft.useLayers(true);  // Layers are critical for good display action!
   tft.layerEffect(OR);
   tft.clearMemory();
   tft.writeTo(L2);
   tft.clearMemory();
   tft.writeTo(L1);
 
-  // =============== EEPROM section =================
+  // Set Teensy and Open Audio Library blocks.
+  AudioMemory(240);
+  AudioMemory_F32(110);
+
+  // Configure Audio Adapter
+  sgtl5000_1.enable();
+  sgtl5000_1.setAddress(LOW);  // This sets to one of two possible I2C addresses, controlled by a jumper on the Audio Adapter.
+  //  Don't use the audio pre-processor.  This causes a spurious signal in the SSB transmit output.
+  //  sgtl5000_1.audioPreProcessorEnable();  // Need to use one of the equalizers.
+
+  sgtl5000_1.inputSelect(AUDIO_INPUT_MIC);
+  sgtl5000_1.volume(0.8);  // Set headphone volume.
+  sgtl5000_1.micGain(0);
+  sgtl5000_1.lineInLevel(0);  // Line-in is not used.  Can't turn it off though.
+#ifdef QSE2
+  sgtl5000_1.lineOutLevel(13);  // Setting of 13 limits line-out level to 3.15 volts p-p (maximum).
+#else
+  sgtl5000_1.lineOutLevel(20);  // Setting of 20 limits line-out level to 2.14 volts p-p.
+#endif
+  //  sgtl5000_1.adcHighPassFilterEnable();  // This is required for QSE2DC, specifically for carrier calibration.
+  sgtl5000_1.adcHighPassFilterDisable();  //reduces noise.  https://forum.pjrc.com/threads/27215-24-bit-audio-boards?p=78831&viewfull=1#post78831
+
+  // Configure transmitter and receiver.
+
+  // Set up "Controlled Envelope Single Side Band" from the Open Audio Library.
+  cessb1.setSampleRate_Hz(48000);
+  cessb1.setGains(3.5f, 1.4f, 0.5f);  // gainIn, gainCompensate, gainOut
+  cessb1.setSideband(false);
+  cessb1.setProcessing(ConfigData.cessb);  // Set to CESSB or SSB Data.  Greg KF5N August 17 2024
+
+  updateMic();             // This updates the transmit signal chain settings.  Located in SSB_Exciter.cpp.
+  initializeAudioPaths();  // Updates the AGC (compressor) in the receiver.
+
+  Q_out_L_Ex.setMaxBuffers(32);  // Limits determined emperically.  These may need more adjustment.  Greg KF5N August 4, 2024.
+  Q_out_R_Ex.setMaxBuffers(32);
+  Q_out_L.setMaxBuffers(64);  // Receiver audio buffer limit.
+
+  // Configure and check SD card.
   ConfigData.sdCardPresent = InitializeSDCard();  // Initialize mandatory SD card.
+  ConfigData.sdCardPresent = SDPresentCheck();    // JJP 7/18/23
+
+  // Switch matrix debug code.
   // Push and hold a button at power up to activate switch matrix calibration.
 #ifdef DEBUG_SWITCH_CAL
   if (analogRead(BUSY_ANALOG_PIN) < NOTHING_TO_SEE_HERE) {
@@ -983,12 +995,7 @@ FLASHMEM void setup() {
   //  Entry graphics
   Splash();
 
-  //  Draw objects to the display.
-  display.RedrawDisplayScreen();
-
-  /****************************************************************************************
-     start local oscillator Si5351
-  ****************************************************************************************/
+  // Configure RF local oscillator Si5351.
   si5351.reset();                                                                        // KF5N.  Moved Si5351 start-up to setup. JJP  7/14/23
   si5351.init(SI5351_CRYSTAL_LOAD_10PF, Si_5351_crystal, CalData.freqCorrectionFactor);  // JJP  7/14/23
   si5351.set_ms_source(SI5351_CLK2, SI5351_PLLB);                                        // Allows CLK1 and CLK2 to exceed 100 MHz simultaneously.
@@ -1007,11 +1014,9 @@ FLASHMEM void setup() {
   speakerVolume.setGain(0.0);  // Set volume to zero at power-up.
   headphoneVolume.setGain(0.0);
   volumeChangeFlag = true;  // Adjust volume to saved value.
-  filterEncoderMove = 0;
-  fineTuneEncoderMove = 0;
 
   lastState = RadioState::NOSTATE;  // To make sure the receiver will be configured on the first pass through.  KF5N September 3, 2023
-  // Set up the initial state/mode.
+  /* Set up the initial state/mode.
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) {
     radioState = RadioState::CW_RECEIVE_STATE;
     bands.bands[ConfigData.currentBand].mode = RadioMode::CW_MODE;
@@ -1032,21 +1037,26 @@ FLASHMEM void setup() {
     radioState = RadioState::SAM_RECEIVE_STATE;
     bands.bands[ConfigData.currentBand].mode = RadioMode::SAM_MODE;
   }
+  */
 
+  // Miscellaneous configurations.
   mainMenuIndex = 0;                         // Changed from middle to first. Do Menu Down to get to Calibrate quickly
-  zoomIndex = ConfigData.spectrum_zoom - 1;  // ButtonZoom() increments zoomIndex, so this cancels it so the read from EEPROM is accurately restored.  KF5N August 3, 2023
-  button.ButtonZoom();                       // Restore zoom settings.  KF5N August 3, 2023
-  FilterSetSSB();                            // This is not updated until bandwidth is adjusted, so it needs to be done here in setup.
+////  zoomIndex = ConfigData.spectrum_zoom - 1;  // ButtonZoom() increments zoomIndex, so this cancels it so the read from EEPROM is accurately restored.  KF5N August 3, 2023
+////  button.ButtonZoom();                       // Restore zoom settings.  KF5N August 3, 2023
+//  FilterSetSSB();                            // This is not updated until bandwidth is adjusted, so it needs to be done here in setup.
+  ConfigData.rfGainCurrent = 0;              // Start with lower gain so you don't get blasted.
+  lastState = RadioState::NOSTATE;           // Forces an update.
+                                             // Reset flip-flops in QSD2 and/or QSE2.  Required only for QSD2/QSE2.
+  if ((MASTER_CLK_MULT_RX == 2) or (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
 
-  ConfigData.sdCardPresent = SDPresentCheck();  // JJP 7/18/23
-  ConfigData.rfGainCurrent = 0;                 // Start with lower gain so you don't get blasted.
-  lastState = RadioState::NOSTATE;              // Forces an update.
+  powerUp = true;  // This delays receiver start-up to allow transients to settle.
 
-  if ((MASTER_CLK_MULT_RX == 2) or (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();  // Required only for QSD2/QSE2.
-  powerUp = true;
+  //  Draw the entire radio display.
+  display.RedrawDisplayScreen();
 }
 //============================================================== END setup() =================================================================
 
+// Timer and loop counting code.
 elapsedMicros usec = 0;  // Automatically increases as time passes; no ++ necessary.
 elapsedMicros usec1 = 0;
 uint32_t usec1Old = 0;
@@ -1332,15 +1342,19 @@ void loop() {
     display.UpdateVolumeField();
   }
 
-  if(audioGraphicsFlag) {
-     display.UpdateAudioGraphics();
-audioGraphicsFlag = false;
+  if (audioGraphicsFlag) {
+    display.UpdateAudioGraphics();
+    audioGraphicsFlag = false;
   }
 
   loopCounter = loopCounter + 1;
   if (loopCounter > 49) {
-    Serial.printf("Loop us = %u\n", (static_cast<uint32_t>(usec1) - usec1Old));
+////    Serial.printf("Loop us = %u\n", (static_cast<uint32_t>(usec1) - usec1Old));
     loopCounter = 0;
   }
   usec1Old = usec1;
+
+  if (ms_500.check() == 1) {  // For clock updates AFP 10-26-22
+    display.DisplayClock();
+  }
 }  // end loop()

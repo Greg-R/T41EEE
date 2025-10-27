@@ -3,8 +3,7 @@
 
 #include "SDT.h"
 
-#define TIME_X 550                                      // Upper-left corner for time
-#define TIME_Y (YPIXELS * 0.07)
+
 #define TABLE_SIZE_64 64
 
 uint8_t display_dbm = DISPLAY_S_METER_DBM;
@@ -551,14 +550,14 @@ void SaveAnalogSwitchValues() {
 }
 
 
-// ================== Clock stuff
+
 /*****
   Purpose: DisplayClock()
   Parameter list:
     void
   Return value;
     void
-*****/
+*****
 void DisplayClock() {
   char timeBuffer[15];
   char temp[5];
@@ -598,6 +597,7 @@ void DisplayClock() {
   tft.setTextColor(RA8875_WHITE);
   tft.print(timeBuffer);
 }  // end function displayTime
+*/
 
 
 /*****

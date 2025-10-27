@@ -666,9 +666,9 @@ void Button::ButtonZoom() {
   tft.writeTo(L1);  // Always exit function in L1.  KF5N August 15, 2023
   display.DrawBandWidthIndicatorBar();
   display.DrawFrequencyBarValue();
-  display.ShowFrequency();
+////  display.ShowFrequency();
   ResetTuning();  // AFP 10-11-22
-  FilterSetSSB();
+////  FilterSetSSB();
 }
 
 
@@ -924,6 +924,7 @@ void Button::ResetZoom(int zoomIndex1) {
 *****/
 void Button::ButtonFrequencyEntry() {
   bool valid_frequency = false;
+  int centerLine = (MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2;
   TxRxFreqOld = TxRxFreq;
 
 #define show_FEHelp
@@ -1176,7 +1177,7 @@ void Button::ExecuteModeChange() {
 ////  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) display.BandInformation();  Seems to be called by default.
 //  display.DrawBandWidthIndicatorBar();  // Restore the bandwidth indicator bar.  KF5N July 30, 2023.  Gets called in UpdateAudioGraphics
   display.BandInformation();  // Called by default?
-//    display.ShowBandwidth();
+    display.DrawFrequencyBarValue();
   fftOffset = 140;
 
   SetBandRelay();  // Set relays in LPF for current band.

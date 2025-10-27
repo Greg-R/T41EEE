@@ -71,9 +71,9 @@ void FilterSetSSB() {
   }
 
   FilterBandwidth();
-  audioCompensateFlag = true;
-  encoderFilterFlag = false;
-  audioGraphicsFlag = true;
+  audioCompensateFlag = true;  // Compensate for volume due to filter setting.  Done in loop().
+  encoderFilterFlag = false;   // The flag is set by the EncoderFilter() isr.
+  audioGraphicsFlag = true;    // Need to adjust things in the display.  Done in loop().
 
   ////  display.UpdateAudioGraphics();  // Updates graphics associated with filter bandwidth including bandwidth indicator bar.
   ////  display.ShowBandwidth();  // This updates the filter settings numbers at the top of the spectrum display.
@@ -117,6 +117,7 @@ void EncoderCenterTune() {
               //  display.DrawBandWidthIndicatorBar();  // AFP 10-20-22  This only needed for fine tune?
   display.ShowFrequency();
   display.BandInformation();
+  display.DrawFrequencyBarValue();
 }
 
 

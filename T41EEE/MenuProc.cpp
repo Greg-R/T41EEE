@@ -769,8 +769,7 @@ void EqualizerXmtOptions() {
   Return value
     none
 *****/
-void SSBOptions()  // AFP 09-22-22 All new
-{
+void SSBOptions() {
   static int micChoice = 0;
   float imdAmplitude = 0.0;
   float imdAmplitudedB = 10.0;
