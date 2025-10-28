@@ -92,7 +92,7 @@ void Display::ShowSpectrum(bool drawSpectrum) {
   int FH_max = 0, FH_max_box = 0;    //  HB finish
   int middleSlice = centerLine / 2;  // Approximate center element
   int x1 = 0;                        //AFP
-//  int h = SPECTRUM_HEIGHT + 7;
+                                     //  int h = SPECTRUM_HEIGHT + 7;
   int y1_new{ 0 }, y2_new{ 0 }, y1_old{ 0 }, y2_old{ 0 };
   int test1;
   updateDisplayCounter = 0;
@@ -130,10 +130,11 @@ void Display::ShowSpectrum(bool drawSpectrum) {
     if (startRxFlag) updateDisplayFlag = false;  // Don't process data the first time after coming out of transmit mode.
     startRxFlag = false;
 
-    // Don't call this function unless the filter bandwidth has been adjusted.  This requires 2 global variables.
+    if (updateDisplayFlag == true) x1 = 1;  // This is required for 8X and 16X zooms.
 
     process.ProcessIQData();  // Call the Audio process from within the display routine to eliminate conflicts with drawing the spectrum and waterfall displays
 
+    // Don't call this function unless the filter bandwidth has been adjusted.
     if (encoderFilterFlag) {
       FilterSetSSB();
     }
@@ -479,8 +480,8 @@ void Display::DrawSpectrumDisplayContainer() {
   else {
     tft.drawRect(SPECTRUM_LEFT_X - 1, SPECTRUM_TOP_Y, MAX_WATERFALL_WIDTH + 2, 362, RA8875_BLACK);               // Erase spectrum box for calibration.
     tft.drawRect(SPECTRUM_LEFT_X - 1, SPECTRUM_TOP_Y, MAX_WATERFALL_WIDTH + 2, SPECTRUM_HEIGHT, RA8875_YELLOW);  // Spectrum box.  SPECTRUM_HEIGHT = 150
-    tft.writeTo(L1);  // Draw on L1 so it won't interfere with the blue tuning bar.  Don't let the spectrum overwrite the X position in ShowSpectrum().
-    tft.drawFastVLine(centerLine, SPECTRUM_TOP_Y, h + 20, RA8875_GREEN);  // Draws centerline on spectrum display.
+    tft.writeTo(L1);                                                                                             // Draw on L1 so it won't interfere with the blue tuning bar.  Don't let the spectrum overwrite the X position in ShowSpectrum().
+    tft.drawFastVLine(centerLine, SPECTRUM_TOP_Y, h + 20, RA8875_GREEN);                                         // Draws centerline on spectrum display.
     tft.writeTo(L1);
   }
 }
@@ -510,7 +511,7 @@ void Display::DrawFrequencyBarValue() {
   // positions for graticules: first for ConfigData.spectrum_zoom < 3, then for ConfigData.spectrum_zoom > 2
   const static int idx2pos[2][9] = {
     { -43, 2, 48, 94, 140, 185, 231, 277, 314 },  //AFP 10-30-22
-    { -43, 2, 48, 94, 140, 185, 231, 277, 314 }    //AFP 10-30-22
+    { -43, 2, 48, 94, 140, 185, 231, 277, 314 }   //AFP 10-30-22
   };
 
   grat = static_cast<float>(SR[SampleRate].rate / 8000.0) / static_cast<float>(1 << ConfigData.spectrum_zoom);  // 1, 2, 4, 8, 16, 32, 64 . . . 4096
@@ -518,7 +519,7 @@ void Display::DrawFrequencyBarValue() {
   tft.writeTo(L1);  // Not writing to correct layer?  KF5N.  July 31, 2023
   tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
   tft.setFontScale((enum RA8875tsize)0);
-//  tft.fillRect(WATERFALL_LEFT_X, WATERFALL_TOP_Y, MAX_WATERFALL_WIDTH + 5, tft.getFontHeight(), RA8875_BLACK);  // 4-16-2022 JACK
+  //  tft.fillRect(WATERFALL_LEFT_X, WATERFALL_TOP_Y, MAX_WATERFALL_WIDTH + 5, tft.getFontHeight(), RA8875_BLACK);  // 4-16-2022 JACK
 
   freq_calc = static_cast<float>(static_cast<uint32_t>(ConfigData.centerFreq));  // get current frequency in Hz
 
@@ -555,7 +556,7 @@ void Display::DrawFrequencyBarValue() {
   tft.print(txt);
   tft.print(" ");
 
-Serial.printf("freq_calc = %d\n", static_cast<int>(freq_calc));
+  Serial.printf("freq_calc = %d\n", static_cast<int>(freq_calc));
 
   tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
   /**************************************************************************************************
@@ -567,7 +568,7 @@ Serial.printf("freq_calc = %d\n", static_cast<int>(freq_calc));
     if (idx != centerIdx) {
       ultoa((freq_calc + (idx * grat)), txt, DEC);
       x = WATERFALL_LEFT_X + pos_help * xExpand + 40;
-      if(idx == 4 ) x = x - 4;  // Scoot end frequency a little bit left so it doesn't collide with audio 0k index.
+      if (idx == 4) x = x - 4;  // Scoot end frequency a little bit left so it doesn't collide with audio 0k index.
       if (ConfigData.spectrum_zoom == 0) {
         tft.setCursor(x, WATERFALL_TOP_Y);  // AFP 10-20-22
       } else {
@@ -575,16 +576,16 @@ Serial.printf("freq_calc = %d\n", static_cast<int>(freq_calc));
       }
       // ============  AFP 10-21-22
       tft.print(txt);
-        tft.print(" ");
+      tft.print(" ");
       if (idx < 4) {
         tft.drawFastVLine((WATERFALL_LEFT_X + pos_help * xExpand + 60), WATERFALL_TOP_Y - 5, 7, RA8875_YELLOW);  // Tick marks depending on zoom
       } else {
         tft.drawFastVLine((WATERFALL_LEFT_X + (pos_help + 9) * xExpand + 60), WATERFALL_TOP_Y - 5, 7, RA8875_YELLOW);
       }
     }
-//    if (ConfigData.spectrum_zoom > 2 or freq_calc > 1000) {  freq_calc is ALWAYS > 1000.  So half of the numbers in the array get skipped.
-//      idx++;
-//    }
+    //    if (ConfigData.spectrum_zoom > 2 or freq_calc > 1000) {  freq_calc is ALWAYS > 1000.  So half of the numbers in the array get skipped.
+    //      idx++;
+    //    }
   }
   tft.writeTo(L1);  // Always leave on layer 1.  KF5N.  July 31, 2023
   tft.setFontScale((enum RA8875tsize)1);
