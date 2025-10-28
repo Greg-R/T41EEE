@@ -664,10 +664,11 @@ void Button::ButtonZoom() {
   tft.writeTo(L2);  // Clear layer 2.  KF5N July 31, 2023
   tft.clearMemory();
   tft.writeTo(L1);  // Always exit function in L1.  KF5N August 15, 2023
-  display.DrawBandWidthIndicatorBar();
+
   display.DrawFrequencyBarValue();
 ////  display.ShowFrequency();
   ResetTuning();  // AFP 10-11-22
+    display.UpdateAudioGraphics();
 ////  FilterSetSSB();
 }
 

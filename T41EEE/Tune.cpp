@@ -186,9 +186,10 @@ void ResetTuning() {
   tft.writeTo(L2);                                 // Clear layer 2.  KF5N July 31, 2023
   tft.clearMemory();
   SetFreq();  // For new tuning scheme.  KF5N July 22, 2023
-  display.DrawBandWidthIndicatorBar();
+  display.UpdateAudioGraphics();
   display.BandInformation();
-////  display.ShowFrequency();
+  display.DrawFrequencyBarValue();
+  display.ShowFrequency();
   //  UpdateAudioGraphics();  // Update Morse decoder if used.
 ////  FilterSetSSB();
 }
@@ -202,10 +203,10 @@ void ResetTuning() {
   Return value;
     void
 *****/
-void CenterFastTune() {
-  tft.drawFastVLine(oldCursorPosition, SPECTRUM_TOP_Y + 20, SPECTRUM_HEIGHT - 27, RA8875_BLACK);
-  tft.drawFastVLine(newCursorPosition, SPECTRUM_TOP_Y + 20, SPECTRUM_HEIGHT - 27, RA8875_RED);
-}
+//void CenterFastTune() {
+//  tft.drawFastVLine(oldCursorPosition, SPECTRUM_TOP_Y + 20, SPECTRUM_HEIGHT - 27, RA8875_BLACK);
+//  tft.drawFastVLine(newCursorPosition, SPECTRUM_TOP_Y + 20, SPECTRUM_HEIGHT - 27, RA8875_RED);
+//}
 
 
 /*****

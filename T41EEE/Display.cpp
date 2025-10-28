@@ -475,14 +475,13 @@ void Display::ShowSpectrumdBScale() {
 *****/
 void Display::DrawSpectrumDisplayContainer() {
   Serial.printf("DrawSpectrumDisplayContainer\n");
+  tft.writeTo(L1);  // Draw on L1 so it won't interfere with the blue tuning bar.  Don't let the spectrum overwrite the X position in ShowSpectrum().
   if (calOnFlag)
     tft.drawRect(SPECTRUM_LEFT_X - 1, SPECTRUM_TOP_Y, MAX_WATERFALL_WIDTH + 2, 362, RA8875_YELLOW);  // Spectrum box for calibration.
   else {
     tft.drawRect(SPECTRUM_LEFT_X - 1, SPECTRUM_TOP_Y, MAX_WATERFALL_WIDTH + 2, 362, RA8875_BLACK);               // Erase spectrum box for calibration.
-    tft.drawRect(SPECTRUM_LEFT_X - 1, SPECTRUM_TOP_Y, MAX_WATERFALL_WIDTH + 2, SPECTRUM_HEIGHT, RA8875_YELLOW);  // Spectrum box.  SPECTRUM_HEIGHT = 150
-    tft.writeTo(L1);                                                                                             // Draw on L1 so it won't interfere with the blue tuning bar.  Don't let the spectrum overwrite the X position in ShowSpectrum().
+    tft.drawRect(SPECTRUM_LEFT_X - 1, SPECTRUM_TOP_Y, MAX_WATERFALL_WIDTH + 2, SPECTRUM_HEIGHT, RA8875_YELLOW);  // Spectrum box.  SPECTRUM_HEIGHT = 150                                                                                           
     tft.drawFastVLine(centerLine, SPECTRUM_TOP_Y, h + 20, RA8875_GREEN);                                         // Draws centerline on spectrum display.
-    tft.writeTo(L1);
   }
 }
 
@@ -1673,7 +1672,7 @@ void Display::DrawBandWidthIndicatorBar()  // AFP 10-30-22
   }
   newCursorPosition = static_cast<int>(NCOFreq / hz_per_pixel) + Zoom1Offset;  // More accurate tuning bar position.  KF5N May 17, 2024
   tft.writeTo(L2);                                                             // Write graphics to Layer 2.
-  //  tft.clearMemory();              // This destroys the CW filter graphics, removed.  KF5N July 30, 2023
+                                                                               //    tft.clearMemory();              // This destroys the CW filter graphics, removed.  KF5N July 30, 2023
   //  tft.clearScreen(RA8875_BLACK);  // This causes an audio hole in fine tuning.  KF5N 7-16-23
 
   // Calculate the width of the tuning bar.
@@ -1692,8 +1691,8 @@ void Display::DrawBandWidthIndicatorBar()  // AFP 10-30-22
     //  Serial.printf("FHiCut = %d FLoCut = %d\n", bands.bands[ConfigData.currentBand].FHiCut, bands.bands[ConfigData.currentBand].FLoCut);
     switch (bands.bands[ConfigData.currentBand].sideband) {
       case Sideband::LOWER:
-        tft.fillRect(centerLine - filterWidth + oldCursorPosition, SPECTRUM_TOP_Y + 20, filterWidth * 1.0, SPECTRUM_HEIGHT - 20, RA8875_BLACK);  // Was 0.96.  KF5N July 31, 2023
-        tft.fillRect(centerLine - filterWidth + newCursorPosition, SPECTRUM_TOP_Y + 20, filterWidth, SPECTRUM_HEIGHT - 20, FILTER_WIN);
+        tft.fillRect(centerLine - filterWidth + oldCursorPosition, SPECTRUM_TOP_Y + 20, filterWidth + 1, SPECTRUM_HEIGHT - 20, RA8875_BLACK);  // Was 0.96.  KF5N July 31, 2023
+        tft.fillRect(centerLine - filterWidth + newCursorPosition, SPECTRUM_TOP_Y + 20, filterWidth + 1, SPECTRUM_HEIGHT - 20, FILTER_WIN);
         break;
 
       case Sideband::UPPER:
@@ -1720,7 +1719,7 @@ void Display::DrawBandWidthIndicatorBar()  // AFP 10-30-22
     //  Serial.printf("cwOffsetPixels = %d\n", cwOffsetPixels);
     switch (bands.bands[ConfigData.currentBand].sideband) {
       case Sideband::LOWER:
-        tft.fillRect(centerLine - filterWidth + oldCursorPosition + cwOffsetPixels, SPECTRUM_TOP_Y + 20, filterWidth * 1.0, SPECTRUM_HEIGHT - 20, RA8875_BLACK);
+        tft.fillRect(centerLine - filterWidth + oldCursorPosition + cwOffsetPixels, SPECTRUM_TOP_Y + 20, filterWidth, SPECTRUM_HEIGHT - 20, RA8875_BLACK);
         tft.fillRect(centerLine - filterWidth + newCursorPosition + cwOffsetPixels, SPECTRUM_TOP_Y + 20, filterWidth, SPECTRUM_HEIGHT - 20, FILTER_WIN);
         break;
 
@@ -1734,8 +1733,9 @@ void Display::DrawBandWidthIndicatorBar()  // AFP 10-30-22
     }
   }
 
-  tft.drawFastVLine(centerLine + oldCursorPosition, SPECTRUM_TOP_Y + 20, h - 10, RA8875_BLACK);  // refactored from above JJP 7/12/23
-  tft.drawFastVLine(centerLine + newCursorPosition, SPECTRUM_TOP_Y + 20, h - 10, RA8875_CYAN);
+// Draw tuning alignment line in blue bandwidth bar.
+//  tft.drawFastVLine(centerLine + oldCursorPosition, SPECTRUM_TOP_Y + 20, h - 10, RA8875_BLACK);  // refactored from above JJP 7/12/23
+  tft.drawFastVLine(centerLine + newCursorPosition, SPECTRUM_TOP_Y + 20, h - 6, RA8875_CYAN);
   oldCursorPosition = newCursorPosition;
   tft.writeTo(L1);  //AFP 03-27-22 Layers
 }

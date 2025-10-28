@@ -1,7 +1,7 @@
 
 //====================== User Specific Preferences =============
 const char RIGNAME[] = "T41-EP SDT";
-const int RIGNAME_X_OFFSET = 570;   // Pixel count to rig name field.
+const int RIGNAME_X_OFFSET = 570;  // Pixel count to rig name field.
 //#define DEBUG 		                                                        // Uncommented for debugging, comment out for normal use
 //#define DEBUG1                                                            // Uncomment to see temperature and load information.
 //#define DEBUG_SWITCH_CAL                                                  // Uncomment to run switch cal by pushing and holding a button at power-up.
@@ -65,11 +65,9 @@ const int RIGNAME_X_OFFSET = 570;   // Pixel count to rig name field.
 
 // Customizable definitions for center and fine tune defaults and increments.  Larry K3PTO June 24, 2024
 #define CENTER_TUNE_DEFAULT 1000  // Set to the desired default in the CENTER_TUNE_ARRAY.
-#define CENTER_TUNE_ARRAY \
-  { 1000, 10000, 100000, 1000000 }
+#define CENTER_TUNE_ARRAY { 1000, 10000, 100000, 1000000 }
 #define FINE_TUNE_DEFAULT 50  // Set to the desired default in the FINE_TUNE_ARRAY.
-#define FINE_TUNE_ARRAY \
-  { 10, 20, 50, 100, 200, 500 }
+#define FINE_TUNE_ARRAY { 10, 20, 50, 100, 200, 500 }
 
 // Uncomment for the original T41 audio mute control.
 //#define UNMUTEAUDIO LOW
@@ -79,8 +77,8 @@ const int RIGNAME_X_OFFSET = 570;   // Pixel count to rig name field.
 #define MUTEAUDIO LOW
 
 // The audio amplifier gain may need to be adjusted for the best volume range.
-#define SPEAKERSCALE 1.0     // Increase or decrease this value depending on your amplifier gain.
-#define HEADPHONESCALE 2.0  // Same as for the speaker.  Adjust to your preference for volume range.
+#define SPEAKERSCALE 1.0    // Increase or decrease this value depending on your amplifier gain.
+#define HEADPHONESCALE 4.0  // Same as for the speaker.  Adjust to your preference for volume range.
 
 #define RFGAINSCALE 1000.0  // This adjusts for RF gain differences in the QSD.  QSD should use a value of 3000.  QSD2 should use a value of 1000.0.
 
