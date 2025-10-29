@@ -357,8 +357,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       connect0.disconnect();      // Disconnect microphone input data stream.
       mixer_rxtx_I.gain(0, 1.0);  // Connect transmitter back-end to Audio Adapter.
       mixer_rxtx_Q.gain(0, 1.0);
-      mixer_rxtx_I.gain(1, 0.0);  // Disconnect headphone path to Audio Adapter.
-      mixer_rxtx_Q.gain(1, 0.0);
+      mixer_rxtx_I.gain(1, 0);  // Disconnect headphone path to Audio Adapter.
+      mixer_rxtx_Q.gain(1, 0);
 
       if (ConfigData.compressorFlag) {
         switch4_tx.setChannel(0);

@@ -576,7 +576,7 @@ void EncoderFineTune() {
     ConfigData.currentFreqB = ConfigData.centerFreq + NCOFreq;  //AFP 10-05-22
     ConfigData.lastFrequencies[ConfigData.currentBand][1] = ConfigData.currentFreqB;
   }
-  // ===============  Recentering at band edges ==========
+  // Recentering at band edges.
   if (ConfigData.spectrum_zoom != 0) {
     if (NCOFreq >= static_cast<int32_t>((95000 / (1 << ConfigData.spectrum_zoom))) || NCOFreq < static_cast<int32_t>((-93000 / (1 << ConfigData.spectrum_zoom)))) {  // 47500 with 2x zoom.
       centerTuneFlag = 0;

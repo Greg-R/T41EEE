@@ -274,7 +274,8 @@ void SetTransmitDitLength(int wpm) {
 
 
 /*****
-  Purpose: Select straight key or keyer
+  Purpose: Select straight key or keyer.  All this does is control
+           the pullups on the GPIs connected to the key or keyer paddle.
 
   Parameter list:
     void
@@ -289,8 +290,15 @@ void SetKeyType() {
   // Make sure the ConfigData.paddleDit and ConfigData.paddleDah variables are set correctly for straight key.
   // Paddle flip can reverse these, making the straight key inoperative.  KF5N August 9, 2023
   if (ConfigData.keyType == 0) {
-    ConfigData.paddleDit = KEYER_DIT_INPUT_TIP;
-    ConfigData.paddleDah = KEYER_DAH_INPUT_RING;
+//    ConfigData.paddleDit = KEYER_DIT_INPUT_TIP;  // Straight key connects to this.
+//    ConfigData.paddleDah = KEYER_DAH_INPUT_RING;
+    pinMode(KEYER_DAH_INPUT_RING, INPUT);  // Disable the pullup, because the straight key connector may short the ring to ground.
+  }
+    if (ConfigData.keyType == 1) {
+//    ConfigData.paddleDit = KEYER_DIT_INPUT_TIP;  // Straight key connects to this.
+//    ConfigData.paddleDah = KEYER_DAH_INPUT_RING;
+    pinMode(KEYER_DAH_INPUT_RING, INPUT_PULLUP);  // Enable pullups on both.
+//    pinMode(KEYER_DIT_INPUT_TIP, INPUT_PULLUP); // Tip is always pullup.
   }
   eeprom.ConfigDataWrite();
 }
@@ -307,10 +315,12 @@ void SetKeyType() {
 *****/
 FLASHMEM void SetKeyPowerUp() {
   if (ConfigData.keyType == 0) {
-    ConfigData.paddleDit = KEYER_DIT_INPUT_TIP;
+    ConfigData.paddleDit = KEYER_DIT_INPUT_TIP;  // Straight key.
     ConfigData.paddleDah = KEYER_DAH_INPUT_RING;
+    pinMode(KEYER_DAH_INPUT_RING, INPUT);  // Disable the pullup, because the straight key connector may short the ring to ground.
     return;
   }
+  // Tip and ring are pullup in setup(), so no need to set here.
   if (ConfigData.paddleFlip) {  // Means right-paddle dit
     ConfigData.paddleDit = KEYER_DAH_INPUT_RING;
     ConfigData.paddleDah = KEYER_DIT_INPUT_TIP;

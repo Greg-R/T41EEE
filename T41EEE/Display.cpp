@@ -1362,7 +1362,7 @@ void Display::UpdateAudioGraphics() {
   tft.writeTo(L2);    // This has to be written to L2 or it will be erased by the audio spectrum eraser.
   tft.clearMemory();  // Deletes audio filter delimiter bars.
 
-  // Update CW decoder status in information window.
+  /* Update CW decoder status in information window.
   if (ConfigData.decoderFlag) {
     tft.setCursor(FIELD_OFFSET_X, DECODER_Y - 5);
     tft.print("    WPM");
@@ -1370,8 +1370,9 @@ void Display::UpdateAudioGraphics() {
     tft.fillRect(FIELD_OFFSET_X, DECODER_Y - 5, 140, 17, RA8875_BLACK);  // Erase
     tft.print("Off");
   }
+  */
 
-  //  The following code was moved from ShowSpectrum() in Display.cpp.
+  //  Calculate position and draw filter delimiters in audio spectrum box.
   int filterLoPositionMarker{ 0 };
   int filterHiPositionMarker{ 0 };
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER or bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
@@ -1454,7 +1455,7 @@ void Display::UpdateAudioGraphics() {
   //  ShowBandwidth();
   //  DrawFrequencyBarValue();  // This calls ShowBandwidth().  YES, this function is useful here.
 
-  DrawBandWidthIndicatorBar();
+  DrawBandWidthIndicatorBar();  // This method has to be run BEFORE UpdateAudioGraphics().  It can cause erasure.
   ShowBandwidth();
   tft.writeTo(L1);
 }

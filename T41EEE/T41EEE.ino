@@ -874,7 +874,7 @@ FLASHMEM void setup() {
   }
 
   // Configure Teensy.
-  // GPOs used to control hardware.
+  // GPIOs used to control hardware.
   pinMode(FILTERPIN15M, OUTPUT);
   pinMode(FILTERPIN20M, OUTPUT);
   pinMode(FILTERPIN40M, OUTPUT);
@@ -884,8 +884,8 @@ FLASHMEM void setup() {
   digitalWrite(MUTE, MUTEAUDIO);  // Keep audio junk out of the speakers/headphones until configuration is complete.
   pinMode(PTT, INPUT_PULLUP);
   pinMode(BUSY_ANALOG_PIN, INPUT);  // Pin 39.  Switch matrix output connects to this pin.
-  pinMode(KEYER_DIT_INPUT_TIP, INPUT_PULLUP);
-  pinMode(KEYER_DAH_INPUT_RING, INPUT_PULLUP);
+  pinMode(KEYER_DIT_INPUT_TIP, INPUT_PULLUP);  // Straight key and keyer paddle.
+  pinMode(KEYER_DAH_INPUT_RING, INPUT_PULLUP); // The other keyer paddle.
 
   // SPI bus to display.
   pinMode(TFT_MOSI, OUTPUT);
@@ -1057,9 +1057,11 @@ FLASHMEM void setup() {
 
 // Timer and loop counting code.
 elapsedMicros usec = 0;  // Automatically increases as time passes; no ++ necessary.
+#ifdef LOOP_TIMER
 elapsedMicros usec1 = 0;
 uint32_t usec1Old = 0;
 uint32_t loopCounter = 0;
+#endif
 
 /*****
   Purpose: Code here executes forever, or until: 1) power is removed, 2) user does a reset, 3) a component
@@ -1342,16 +1344,20 @@ void loop() {
   }
 
   if (audioGraphicsFlag) {
+//    display.DrawBandWidthIndicatorBar();
     display.UpdateAudioGraphics();
+
     audioGraphicsFlag = false;
   }
 
+#ifdef LOOP_TIMER
   loopCounter = loopCounter + 1;
   if (loopCounter > 49) {
-////    Serial.printf("Loop us = %u\n", (static_cast<uint32_t>(usec1) - usec1Old));
+    Serial.printf("Loop us = %u\n", (static_cast<uint32_t>(usec1) - usec1Old));
     loopCounter = 0;
   }
   usec1Old = usec1;
+#endif
 
   if (ms_500.check() == 1) {  // For clock updates AFP 10-26-22
     display.DisplayClock();

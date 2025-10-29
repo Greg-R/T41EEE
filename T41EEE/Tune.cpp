@@ -187,11 +187,13 @@ void ResetTuning() {
   tft.writeTo(L2);                                 // Clear layer 2.  KF5N July 31, 2023
   tft.clearMemory();
   SetFreq();  // For new tuning scheme.  KF5N July 22, 2023
-  display.UpdateAudioGraphics();
+
   display.BandInformation();
   display.DrawFrequencyBarValue();
   display.ShowFrequency();
-  //  UpdateAudioGraphics();  // Update Morse decoder if used.
+  display.UpdateAudioGraphics();
+  display.UpdateAudioGraphics();  // The 2nd update is required because in higher zooms. the right edge of the tuning bar
+                                  // will "eat" the delimiter graphics in the audio spectrum box.
 ////  FilterSetSSB();
 }
 
