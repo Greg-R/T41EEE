@@ -235,7 +235,6 @@ void Eeprom::SetFavoriteFrequency() {
 //    val = ReadSelectedPushButton();  // Read pin that controls all switches
 //    val = ProcessButtonPress(val);
 menu = readButton();
-    delay(150L);
     if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
       display.EraseMenus();
       ConfigData.favoriteFreqs[index] = TxRxFreq;
@@ -293,7 +292,6 @@ MenuSelect menu = MenuSelect::DEFAULT;
 
 //    val = ReadSelectedPushButton();  // Read pin that controls all switches
 //    val = ProcessButtonPress(val);
-//    delay(150L);
     menu = readButton();
 
     if (ConfigData.centerFreq >= bands.bands[BAND_80M].fBandLow && ConfigData.centerFreq <= bands.bands[BAND_80M].fBandHigh) {

@@ -259,7 +259,7 @@ void RxCalibrate::CalibrateEpilogue(bool radioCal, bool saveToEeprom) {
   tft.clearMemory();
   tft.writeTo(L1);  // Exit function in layer 1.  KF5N August 3, 2023
   calOnFlag = false;
-  if (not radioCal) display.RedrawDisplayScreen();  // Redraw everything!
+  if (not radioCal) display.RedrawAll();  // Redraw everything!
   else tft.fillWindow();                            // Clear the display.
   fftOffset = 0;                                    // Some reboots may be caused by large fftOffset values when Auto-Spectrum is on.
   if ((MASTER_CLK_MULT_RX == 2) or (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();

@@ -61,8 +61,8 @@ void ShowFrequency();  // Show Main frequency display at top.  This shows VFO A 
 void DisplaydbM();  // Display signal level in dBm.
 void ShowTempAndLoad();  // Display the current temperature and load figures for Teensy 4.1.
 void MyDrawFloat(float val, int decimals, int x, int y, char *buff);  // Format a floating point number.
-void UpdateInfoWindow();  // Shows the startup settings for the information displayed int the lower-right box.
-void UpdateAudioField();  // Updates the displayed states of the speaker and headphone.
+void DrawInfoWindow();  // Shows the startup settings for the information displayed int the lower-right box.
+void UpdateAudioOutputField();  // Updates the displayed states of the speaker and headphone.
 void UpdateVolumeField();  // Updates the Volume setting on the display.
 void UpdateAGCField();  // Updates the AGC setting on the display.
 void DisplayIncrementField();  // Updates the frequency increment setting on the display.
@@ -74,7 +74,7 @@ void UpdateEqualizerField(bool rxEqState, bool txEqState);  // Updates the displ
 void UpdateWPMField();  // Updates the displayed Keyer and WPM settings.
 void UpdateNoiseField();  // Updates the noise field on the display.
 //void DrawInfoWindowFrame();  // This function draws the Info Window frame.
-void RedrawDisplayScreen();  // This function redraws the entire display screen.
+void RedrawAll();  // This function redraws the entire display.
 void DrawBandWidthIndicatorBar();  // Draw Tuned Bandwidth on Spectrum Plot.
 void EraseSpectrumDisplayContainer();  // This function removes the spectrum display container.
 //void EraseSpectrumWindow();  // This function erases the contents of the spectrum display.

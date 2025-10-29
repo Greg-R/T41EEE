@@ -212,6 +212,7 @@ void DoExciterEQ() //AFP 10-02-22
 *****/
 void FilterBandwidth()
 {
+Serial.printf("FilterBandwidth\n");
 ////  AudioNoInterrupts();
 
 //Serial.printf("FilterBandwidth()\n");

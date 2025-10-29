@@ -313,7 +313,7 @@ void Button::ExecuteButtonPress(MenuSelect val) {
           break;
         }
       }
-      display.RedrawDisplayScreen();
+      display.RedrawAll();
       break;
 
     case MenuSelect::BOGUS_PIN_READ:  // 18
@@ -640,16 +640,17 @@ void Button::BandSet(int band) {
 }
 
 
-/***** AFP 09-27-22
-  Purpose: Chnage the horizontal scale of the frequency display
+/***** 
+  Purpose: Change the horizontal scale of the frequency display.  AFP 09-27-22
 
   Parameter list:
     void
 
   Return value:
-    int             index of the option selected
+    void
 *****/
 void Button::ButtonZoom() {
+  Serial.printf("ButtonZoom\n");
   zoomIndex++;
 
   if (zoomIndex == MAX_ZOOM_ENTRIES) {
@@ -856,36 +857,9 @@ void Button::ButtonMuteAudio() {
       break;
   }
   controlAudioOut(ConfigData.audioOut, false);  // Don't mute all.
-  display.UpdateAudioField();  // Update display.
+  display.UpdateAudioOutputField();  // Update display.
 }
 
-
-/*****
-  Purpose: Draw in a red line at the new floor position
-
-  Parameter list:
-    int floor     the pixel position for the new floor
-
-  Return value;
-    int           the current noise floor value
-*****
-int Button::DrawNewFloor(int floor) {
-  static int oldY = SPECTRUM_BOTTOM;
-
-  if (floor < 0) {
-    floor = 0;
-    oldY = SPECTRUM_BOTTOM - floor;
-    return floor;
-  }
-
-  tft.drawFastHLine(SPECTRUM_LEFT_X + 30, oldY - floor, 100, RA8875_BLACK);
-  tft.drawFastHLine(SPECTRUM_LEFT_X + 30, oldY - floor - 1, 100, RA8875_BLACK);
-  tft.drawFastHLine(SPECTRUM_LEFT_X + 30, oldY - floor, 100, RA8875_RED);
-  tft.drawFastHLine(SPECTRUM_LEFT_X + 30, oldY - floor - 1, 100, RA8875_RED);
-  oldY = SPECTRUM_BOTTOM - floor;
-  return floor;
-}
-*/
 
 /*****
   Purpose: Reset Zoom to zoomIndex
@@ -895,7 +869,7 @@ int Button::DrawNewFloor(int floor) {
 
   Return value;
     int           the current noise floor value
-*****/
+*****
 void Button::ResetZoom(int zoomIndex1) {
   if (zoomIndex1 == MAX_ZOOM_ENTRIES) {
     zoomIndex1 = 0;
@@ -911,7 +885,7 @@ void Button::ResetZoom(int zoomIndex1) {
   display.DrawFrequencyBarValue();
   display.ShowFrequency();
 }
-
+*/
 
 /*****
   Purpose: Direct Frequency Entry
@@ -1147,7 +1121,7 @@ void Button::ButtonFrequencyEntry() {
   tft.clearMemory();
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) display.BandInformation();
   display.DrawBandWidthIndicatorBar();
-  display.RedrawDisplayScreen();  // KD0RC
+  display.RedrawAll();  // KD0RC
   FilterSetSSB();
 }
 

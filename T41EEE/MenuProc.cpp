@@ -217,7 +217,7 @@ void CalibrateOptions() {
     case 14:  // Calibrate buttons
       SaveAnalogSwitchValues();
       calibrateFlag = 0;
-      display.RedrawDisplayScreen();
+      display.RedrawAll();
       eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
@@ -686,7 +686,7 @@ void ProcessEqualizerChoices(int EQType, char *title) {
     }    // end outer while
     eeprom.ConfigDataWrite();
   }
-  display.RedrawDisplayScreen();
+  display.RedrawAll();
   lastState = RadioState::NOSTATE;  // Force update of operating state.
 }
 
@@ -1075,7 +1075,7 @@ void ConfigDataOptions() {  //           0               1                2     
       tft.writeTo(L2);                                     // This is specifically to clear the bandwidth indicator bar.  KF5N August 7, 2023
       tft.clearMemory();
       tft.writeTo(L1);
-      display.RedrawDisplayScreen();  // Assume there are lots of changes and do a heavy-duty refresh.  KF5N August 7, 2023
+      display.RedrawAll();  // Assume there are lots of changes and do a heavy-duty refresh.  KF5N August 7, 2023
       break;
 
     case 6:  // ConfigData->Serial
@@ -1153,7 +1153,7 @@ void CalDataOptions() {  //           0               1                2        
       tft.writeTo(L2);                             // This is specifically to clear the bandwidth indicator bar.  KF5N August 7, 2023
       tft.clearMemory();
       tft.writeTo(L1);
-      display.RedrawDisplayScreen();  // Assume there are lots of changes and do a heavy-duty refresh.  KF5N August 7, 2023
+      display.RedrawAll();  // Assume there are lots of changes and do a heavy-duty refresh.  KF5N August 7, 2023
       break;
 
     case 4:  // CalData->Serial

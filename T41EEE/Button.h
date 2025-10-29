@@ -39,6 +39,6 @@ public:
   void ButtonMuteAudio();
 //  int DrawNewFloor(int floor);
   void ExecuteModeChange();
-  void ResetZoom(int zoomIndex1);
+//  void ResetZoom(int zoomIndex1);
   void ButtonFrequencyEntry();
 };

@@ -180,6 +180,7 @@ void SetFreq() {                              //AFP 09-22-22   Revised July 7 KF
   void
 *****/
 void ResetTuning() {
+  Serial.printf("ResetTuning\n");
   currentFreq = ConfigData.centerFreq + NCOFreq;  // currentFreqA changed to currentFreq.  KF5N August 7, 2023
   NCOFreq = 0L;
   ConfigData.centerFreq = TxRxFreq = currentFreq;  //AFP 10-28-22  // currentFreqA changed to currentFreq.  KF5N August 7, 2023

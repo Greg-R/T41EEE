@@ -148,6 +148,7 @@ const float32_t atanTable[68] = {
 
 /*****
   Purpose: Correct Phase angle between I and Q channels.  Not used with SSB.
+  Used in RX and TX calibration and RX DSP.
   Parameter list:
     float32_t *I_buffer, float32_t *Q_buffer, float32_t factor, uint32_t blocksize
   Return value;
@@ -550,72 +551,6 @@ void SaveAnalogSwitchValues() {
 }
 
 
-
-/*****
-  Purpose: DisplayClock()
-  Parameter list:
-    void
-  Return value;
-    void
-*****
-void DisplayClock() {
-  char timeBuffer[15];
-  char temp[5];
-
-  temp[0] = '\0';
-  timeBuffer[0] = '\0';
-  strcpy(timeBuffer, MY_TIMEZONE);  // e.g., EST
-#ifdef TIME_24H
-  //DB2OO, 29-AUG-23: use 24h format
-  itoa(hour(), temp, DEC);
-#else
-  itoa(hourFormat12(), temp, DEC);
-#endif
-  if (strlen(temp) < 2) {
-    strcat(timeBuffer, "0");
-  }
-  strcat(timeBuffer, temp);
-  strcat(timeBuffer, ":");
-
-  itoa(minute(), temp, DEC);
-  if (strlen(temp) < 2) {
-    strcat(timeBuffer, "0");
-  }
-  strcat(timeBuffer, temp);
-  strcat(timeBuffer, ":");
-
-  itoa(second(), temp, DEC);
-  if (strlen(temp) < 2) {
-    strcat(timeBuffer, "0");
-  }
-  strcat(timeBuffer, temp);
-
-  tft.setFontScale((enum RA8875tsize)1);
-
-  tft.fillRect(TIME_X, TIME_Y, XPIXELS - TIME_X - 1, CHAR_HEIGHT, RA8875_BLACK);
-  tft.setCursor(TIME_X, TIME_Y);
-  tft.setTextColor(RA8875_WHITE);
-  tft.print(timeBuffer);
-}  // end function displayTime
-*/
-
-
-/*****
-  Purpose: set Band
-  Parameter list:
-    void
-  Return value;
-    void
-*****
-void SetBand() {
-  old_demod_mode = -99;  // used in setup_mode and when changing bands, so that LoCut and HiCut are not changed!
-////  SetupMode(radioMode, bands[ConfigData.currentBand].sideband);  // Not required here?
-  SetFreq();
-  ShowFrequency();
-  FilterBandwidth();
-}
-*/
-
 /*****
   Purpose: Tries to open the EEPROM SD file to see if an SD card is present in the system
 
@@ -664,6 +599,7 @@ FLASHMEM void initPowerCoefficients() {
 
 
 FLASHMEM void initUserDefinedStuff() {
+  Serial.printf("initUserDefinedStuff\n");
   NR_Index = ConfigData.nrOptionSelect;
   TxRxFreq = ConfigData.centerFreq = ConfigData.lastFrequencies[ConfigData.currentBand][ConfigData.activeVFO];
   SetKeyPowerUp();  // Use ConfigData.keyType and ConfigData.paddleFlip to configure key GPIs.  KF5N August 27, 2023
@@ -676,6 +612,8 @@ FLASHMEM void initUserDefinedStuff() {
   initCWShaping();
   initPowerCoefficients();
   ResetHistograms();  // KF5N February 20, 2024
+  zoomIndex = ConfigData.spectrum_zoom - 1;  // ButtonZoom() increments zoomIndex, so this cancels it so the read from EEPROM is accurately restored.  KF5N August 3, 2023
+  button.ButtonZoom();                       // Restore zoom settings.  KF5N August 3, 2023
 }
 
 
