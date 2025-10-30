@@ -134,10 +134,10 @@ void ReceiveDSP::ProcessIQData() {
       If the buffers are full, the Teensy needs much more time.
       In that case, we clear the buffers to keep the whole audio chain running smoothly.
       **********************************************************************************/
-    if (ADC_RX_I.available() > 50) {
-      ADC_RX_I.clear();
-      ADC_RX_Q.clear();
-    }
+//    if (ADC_RX_I.available() > 50) {
+//      ADC_RX_I.clear();
+//      ADC_RX_Q.clear();
+//    }
 
     /**********************************************************************************  AFP 12-31-20
       IQ amplitude and phase correction.  For this scaled down version the I an Q channels are

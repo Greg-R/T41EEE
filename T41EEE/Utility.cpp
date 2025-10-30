@@ -602,7 +602,6 @@ FLASHMEM void initUserDefinedStuff() {
   Serial.printf("initUserDefinedStuff\n");
   NR_Index = ConfigData.nrOptionSelect;
   TxRxFreq = ConfigData.centerFreq = ConfigData.lastFrequencies[ConfigData.currentBand][ConfigData.activeVFO];
-  SetKeyPowerUp();  // Use ConfigData.keyType and ConfigData.paddleFlip to configure key GPIs.  KF5N August 27, 2023
   SetDitLength(ConfigData.currentWPM);
   SetTransmitDitLength(ConfigData.currentWPM);
   // Initialize buffers used by the CW transmitter and CW decoder.

@@ -884,8 +884,8 @@ FLASHMEM void setup() {
   digitalWrite(MUTE, MUTEAUDIO);  // Keep audio junk out of the speakers/headphones until configuration is complete.
   pinMode(PTT, INPUT_PULLUP);
   pinMode(BUSY_ANALOG_PIN, INPUT);  // Pin 39.  Switch matrix output connects to this pin.
-  pinMode(KEYER_DIT_INPUT_TIP, INPUT_PULLUP);  // Straight key and keyer paddle.
-  pinMode(KEYER_DAH_INPUT_RING, INPUT_PULLUP); // The other keyer paddle.
+//  pinMode(KEYER_DIT_INPUT_TIP, INPUT_PULLUP);  // Straight key and keyer paddle.
+//  pinMode(KEYER_DAH_INPUT_RING, INPUT_PULLUP); // The other keyer paddle.
 
   // SPI bus to display.
   pinMode(TFT_MOSI, OUTPUT);
@@ -906,8 +906,11 @@ FLASHMEM void setup() {
   fineTuneEncoder.begin(true);
   attachInterrupt(digitalPinToInterrupt(FINETUNE_ENCODER_A), EncoderFineTune, CHANGE);
   attachInterrupt(digitalPinToInterrupt(FINETUNE_ENCODER_B), EncoderFineTune, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(KEYER_DIT_INPUT_TIP), KeyTipOn, CHANGE);  // Changed to keyTipOn from KeyOn everywhere JJP 8/31/22
-  attachInterrupt(digitalPinToInterrupt(KEYER_DAH_INPUT_RING), KeyRingOn, CHANGE);
+//  attachInterrupt(digitalPinToInterrupt(KEYER_DIT_INPUT_TIP), KeyTipOn, CHANGE);  // Changed to keyTipOn from KeyOn everywhere JJP 8/31/22
+//  attachInterrupt(digitalPinToInterrupt(KEYER_DAH_INPUT_RING), KeyRingOn, CHANGE);
+
+// This is done here because the function manipulates GPIs and attaches/detaches interrupts.
+SetKeyPowerUp();
 
   // Configure clock.
   setSyncProvider(getTeensy3Time);  // get TIME from real time clock with 3V backup battery
@@ -1007,6 +1010,9 @@ FLASHMEM void setup() {
   si5351.output_enable(SI5351_CLK1, 1);
 #endif
   si5351.drive_strength(SI5351_CLK2, SI5351_DRIVE_8MA);  // CWP AFP 10-13-22
+SetFreq();
+// Reset flip-flops in QSD2 and/or QSE2.  Required only for QSD2/QSE2.
+  if ((MASTER_CLK_MULT_RX == 2) or (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
 
   InitializeDataArrays();
   // Initialize user defined stuff
@@ -1041,13 +1047,9 @@ FLASHMEM void setup() {
 
   // Miscellaneous configurations.
   mainMenuIndex = 0;                         // Changed from middle to first. Do Menu Down to get to Calibrate quickly
-
 //  FilterSetSSB();                            // This is not updated until bandwidth is adjusted, so it needs to be done here in setup.
   ConfigData.rfGainCurrent = 0;              // Start with lower gain so you don't get blasted.
   lastState = RadioState::NOSTATE;           // Forces an update.
-                                             // Reset flip-flops in QSD2 and/or QSE2.  Required only for QSD2/QSE2.
-  if ((MASTER_CLK_MULT_RX == 2) or (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
-
   powerUp = true;  // This delays receiver start-up to allow transients to settle.
 
   //  Draw the entire radio display.
@@ -1095,9 +1097,10 @@ void loop() {
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE and SerialUSB1.rts() == LOW) radioState = RadioState::FT8_RECEIVE_STATE;
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE and SerialUSB1.rts() == HIGH) radioState = RadioState::FT8_TRANSMIT_STATE;
 
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and (digitalRead(ConfigData.paddleDit) == HIGH and digitalRead(ConfigData.paddleDah) == HIGH)) radioState = RadioState::CW_RECEIVE_STATE;  // Was using symbolic constants. Also changed in code below.  KF5N August 8, 2023
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and (keyPressedOn == true and bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE && ConfigData.keyType == 0)) radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and (keyPressedOn == true and bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE && ConfigData.keyType == 1)) radioState = RadioState::CW_TRANSMIT_KEYER_STATE;
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and (ConfigData.keyType == 1  and digitalRead(ConfigData.paddleDit) == HIGH and digitalRead(ConfigData.paddleDah) == HIGH)) radioState = RadioState::CW_RECEIVE_STATE;
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and ConfigData.keyType == 0  and digitalRead(ConfigData.paddleDit) == HIGH) radioState = RadioState::CW_RECEIVE_STATE;
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and (keyPressedOn == true and bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and ConfigData.keyType == 0)) radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and (keyPressedOn == true and bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and ConfigData.keyType == 1)) radioState = RadioState::CW_TRANSMIT_KEYER_STATE;
 
   // Transition to new state if required.
   if (lastState != radioState) {
