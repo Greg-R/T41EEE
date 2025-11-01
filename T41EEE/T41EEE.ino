@@ -1358,12 +1358,12 @@ void loop() {
     loopCounter = 0;
     Serial.printf("AudioProcessorUsageMax() = %d\n", static_cast<uint32_t>(AudioProcessorUsageMax()));
     AudioProcessorUsageMaxReset();
-    Serial.printf("keyPressedOn = %d\n", keyPressedOn);
-    Serial.printf("Ring = %d\n", digitalRead(KEYER_DAH_INPUT_RING));
-    Serial.printf("Tip = %d\n", digitalRead(KEYER_DIT_INPUT_TIP));
-    Serial.printf("ConfigData.keyType = %d\n", ConfigData.keyType);
-    Serial.printf("transmitDitLength = %d\n", transmitDitLength);
-    Serial.printf("keyPressedOn = %d\n", keyPressedOn);
+//    Serial.printf("keyPressedOn = %d\n", keyPressedOn);
+//    Serial.printf("Ring = %d\n", digitalRead(KEYER_DAH_INPUT_RING));
+//    Serial.printf("Tip = %d\n", digitalRead(KEYER_DIT_INPUT_TIP));
+//    Serial.printf("ConfigData.keyType = %d\n", ConfigData.keyType);
+//    Serial.printf("transmitDitLength = %d\n", transmitDitLength);
+//    Serial.printf("keyPressedOn = %d\n", keyPressedOn);
   }
   usec1Old = usec1;
 #endif

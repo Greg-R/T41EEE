@@ -799,14 +799,14 @@ void Display::SwitchVFO() {
   Serial.printf("SwitchVFO\n");
   char freqBuffer[15] = "              ";                                       // Initialize to blanks.
   tft.fillRect(0, FREQUENCY_Y - 8, tft.getFontWidth() * 33, 34, RA8875_BLACK);  // Erase both VFO frequencies.
-                                                                                // Write VFO A as active VFO.
+// Write VFO A as active VFO.
   if (ConfigData.activeVFO == VFO_A) {
-    if (TxRxFreq < bands.bands[ConfigData.currentBandA].fBandLow or TxRxFreq > bands.bands[ConfigData.currentBandA].fBandHigh) {
+    if (ConfigData.currentFreqA < bands.bands[ConfigData.currentBandA].fBandLow or ConfigData.currentFreqA > bands.bands[ConfigData.currentBandA].fBandHigh) {
       tft.setTextColor(RA8875_RED);  // Out of band
     } else {
       tft.setTextColor(RA8875_GREEN);  // In band
     }
-    FormatFrequency(TxRxFreq, freqBuffer);
+    FormatFrequency(ConfigData.currentFreqA, freqBuffer);
     tft.setFontScale(3, 2);              // Larger font for active VFO.
     tft.setCursor(0, FREQUENCY_Y - 18);  // To adjust for Greg's font change jjp 7/14/23
     tft.print(freqBuffer);               // Print VFOA frequency.
@@ -819,12 +819,12 @@ void Display::SwitchVFO() {
   }
   // Write VFO B as active VFO.
   if (ConfigData.activeVFO == VFO_B) {
-    if (TxRxFreq < bands.bands[ConfigData.currentBandB].fBandLow or TxRxFreq > bands.bands[ConfigData.currentBandB].fBandHigh) {
+    if (ConfigData.currentFreqB < bands.bands[ConfigData.currentBandB].fBandLow or ConfigData.currentFreqB > bands.bands[ConfigData.currentBandB].fBandHigh) {
       tft.setTextColor(RA8875_RED);  // Out of band
     } else {
       tft.setTextColor(RA8875_GREEN);  // In band
     }
-    FormatFrequency(TxRxFreq, freqBuffer);
+    FormatFrequency(ConfigData.currentFreqB, freqBuffer);
     tft.setFontScale(3, 2);                                   // Larger font for active VFO.
     tft.setCursor(FREQUENCY_X_SPLIT - 80, FREQUENCY_Y - 18);  // To adjust for Greg's font change jjp 7/14/23
     tft.print(freqBuffer);                                    // Print VFOB frequency.
@@ -832,7 +832,7 @@ void Display::SwitchVFO() {
     tft.setFontScale(1, 2);                                   // Smaller font for inactive VFO.
     tft.setTextColor(RA8875_LIGHT_GREY);
     tft.setCursor(0, FREQUENCY_Y - 18);
-    FormatFrequency(ConfigData.currentFreqB, freqBuffer);
+    FormatFrequency(ConfigData.currentFreqA, freqBuffer);
     tft.print(freqBuffer);  // Print VFOB frequency.
   }
 }
