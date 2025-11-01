@@ -530,7 +530,7 @@ extern float32_t float_buffer_R_EX[];
 extern float32_t float_buffer_LTemp[];
 extern float32_t float_buffer_RTemp[];
 
-void ExciterIQData();
+void SSB_ExciterIQData();
 
 //==================== End Excite Variables ================================
 
@@ -735,12 +735,12 @@ extern uint32_t s_hotTemp;    /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] a
 extern uint32_t s_hotCount;   /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] at the hot temperature.*/
 extern uint32_t s_roomC_hotC; /*!< The value of s_roomCount minus s_hotCount.*/
 extern uint32_t currentFreq;
-extern unsigned long ditLength;
-extern unsigned long transmitDitLength;  // JJP 8/19/23
-extern unsigned long transmitDitUnshapedBlocks;
-extern unsigned long transmitDahUnshapedBlocks;
+//extern uint32_t ditLength;
+extern uint32_t transmitDitLength;  // JJP 8/19/23
+extern uint32_t transmitDitUnshapedBlocks;
+extern uint32_t transmitDahUnshapedBlocks;
 extern uint32_t TxRxFreq;              // = centerFreq+NCOFreq  NCOFreq from FreqShift2()
-extern unsigned long cwTransmitDelay;  // ms to keep relay on after last atom read
+extern uint32_t cwTransmitDelay;  // ms to keep relay on after last atom read
 extern long lastFrequencies[][2];
 extern long int n_clear;
 

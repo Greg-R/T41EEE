@@ -513,9 +513,6 @@ void ReceiveDSP::ProcessIQData() {
     **********************************************************************************/
 
     q15_t q15_buffer_LTemp[2048];  //KF5N
-                                   //    q15_t q15_buffer_RTemp[2048];  // KF5N  Unused audio channel deactivated.
-                                   //    Q_out_L.setBehaviour(AudioPlayQueue::NON_STALLING);
-                                   //    Q_out_R.setBehaviour(AudioPlayQueue::NON_STALLING);
     arm_float_to_q15(float_buffer_L, q15_buffer_LTemp, 2048);
     Q_out_L.play(q15_buffer_LTemp, 2048);
 

@@ -71,7 +71,9 @@ void UpdateZoomField();  // Updates the zoom setting on the display.
 void UpdateCompressionField();  // Updates the compression setting in the info window.
 void UpdateAudioGraphics();  // Updates Morse decoder related graphics including CW, highpass, and lowpass filter bandwidths.
 void UpdateEqualizerField(bool rxEqState, bool txEqState);  // Updates the displayed Rx and Tx equalizer states.
-void UpdateWPMField();  // Updates the displayed Keyer and WPM settings.
+void UpdateKeyType();  // Updates the displayed key configuration.
+void UpdateDecoderStatus();
+void UpdateKeyField();
 void UpdateNoiseField();  // Updates the noise field on the display.
 //void DrawInfoWindowFrame();  // This function draws the Info Window frame.
 void RedrawAll();  // This function redraws the entire display.

@@ -1161,8 +1161,8 @@ void TxCalibrate::MakeFFTData() {
   uint32_t dataWidth = 2048;  // was 2048
   float32_t powerScale = 0;
 
-  float32_t* iBuffer;  // I and Q pointers needed for one-time read of record queues.
-  float32_t* qBuffer;
+  float32_t* iBuffer = nullptr;  // I and Q pointers needed for one-time read of record queues.
+  float32_t* qBuffer = nullptr;
 
 // Read incoming I and Q audio blocks from the SSB exciter.
   // Are there at least N_BLOCKS buffers in each channel available ?

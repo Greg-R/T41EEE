@@ -203,16 +203,17 @@ void SetAudioOperatingState(RadioState operatingState) {
       InitializeDataArrays();    // I2S sample rate set in this function.
       sgtl5000_1.muteLineout();  // Shut off I and Q baseband to QSE.
       // Stop and clear the data buffers.
-      Q_out_L.setMaxBuffers(64);
+//      Q_out_L.setMaxBuffers(64);  Done in setup().
       ADC_RX_I.end();    // Receiver I channel
       ADC_RX_Q.end();    // Receiver Q channel
-      ADC_RX_I.clear();  // Receiver I channel
-      ADC_RX_Q.clear();  // Receiver Q channel
+      ADC_RX_I.clear();
+      ADC_RX_Q.clear();
+      connect0.disconnect();  // Disconnect microphone input data stream.
       Q_in_L_Ex.end();   // Transmit I channel path.
       Q_in_R_Ex.end();   // Transmit Q channel path.
       Q_in_L_Ex.clear();
       Q_in_R_Ex.clear();
-      connect0.disconnect();  // Disconnect microphone input data stream.
+
       // Deactivate microphone and tones.
       mixer1_tx.gain(0, 0.0);
       mixer1_tx.gain(1, 0.0);
@@ -236,6 +237,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       patchCord1.connect();
       patchCord2.connect();
       patchCord3.connect();
+      Q_out_L.setBehaviour(AudioPlayQueue::NON_STALLING);
 
       // Configure audio compressor (AGC)
       if (ConfigData.AGCMode == true) {  // Activate compressor2_1 path.
@@ -313,18 +315,12 @@ void SetAudioOperatingState(RadioState operatingState) {
       ////      Q_out_R_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
       Q_in_L_Ex.begin();  // I channel Microphone audio
       Q_in_R_Ex.begin();  // Q channel Microphone audio
-                          ////      patchCord25.disconnect();  // Disconnect headphone.
-                          ////      patchCord26.disconnect();
 
       // Update equalizer.  Update first 14 only.  Last two are constant.
       for (int i = 0; i < 14; i = i + 1) dbBand1[i] = static_cast<float32_t>(ConfigData.equalizerXmt[i]);
 
       txEqualizer.equalizerNew(16, &fBand1[0], &dbBand1[0], 249, &equalizeCoeffs[0], 65.0f);
       updateMic();
-      ////      connect17.connect();  // Transmitter I channel
-      ////      connect18.connect();  // Transmitter Q channel
-      ////      connect19.connect();  // Transmitter I channel
-      ////      connect20.connect();  // Transmitter Q channel
 
       break;
 
@@ -387,18 +383,12 @@ void SetAudioOperatingState(RadioState operatingState) {
       Q_in_R_Ex.begin();  // Q channel Microphone audio
       ADC_RX_I.begin();   // Calibration is full duplex!  Activate receiver data.  No demodulation during calibrate, spectrum only.
       ADC_RX_Q.begin();
-      ////      patchCord25.disconnect();  // Disconnect headphone.
-      ////      patchCord26.disconnect();  // Disconnect headphone.
 
       // Update equalizer.  Update first 14 only.  Last two are constant.
       for (int i = 0; i < 14; i = i + 1) dbBand1[i] = ConfigData.equalizerXmt[i];
 
       txEqualizer.equalizerNew(16, &fBand1[0], &dbBand1[0], 249, &equalizeCoeffs[0], 65.0f);
       updateMic();
-      ////      connect17.connect();  // Transmitter I channel
-      ////      connect18.connect();  // Transmitter Q channel
-      ////      connect19.connect();  // Transmitter I channel
-      ////      connect20.connect();  // Transmitter Q channel
 
       break;
 
@@ -471,10 +461,6 @@ void SetAudioOperatingState(RadioState operatingState) {
 
       txEqualizer.equalizerNew(16, &fBand1[0], &dbBand1[0], 249, &equalizeCoeffs[0], 65.0f);
       updateMic();
-      ////      connect17.connect();  // Transmitter I channel
-      ////      connect18.connect();  // Transmitter Q channel
-      ////      connect19.connect();  // Transmitter I channel
-      ////      connect20.connect();  // Transmitter Q channel
 
       break;
 
@@ -483,9 +469,10 @@ void SetAudioOperatingState(RadioState operatingState) {
 
       SampleRate = SAMPLE_RATE_48K;
       InitializeDataArrays();  // I2S sample rate set in this function.
-      // QSD disabled and disconnected
+
       controlAudioOut(ConfigData.audioOut, true);  // Mute all audio.
       sgtl5000_1.unmuteLineout();
+      // QSD disabled and disconnected
       patchCord1.disconnect();  // Receiver I channel
       patchCord2.disconnect();  // Receiver Q channel
       patchCord3.connect();     // Sidetone

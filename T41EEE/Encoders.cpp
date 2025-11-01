@@ -410,7 +410,7 @@ int SetWPM() {
     menu = readButton();
     if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
       ConfigData.currentWPM = lastWPM;
-      display.UpdateWPMField();
+      display.UpdateKeyType();
       break;
     }
   }

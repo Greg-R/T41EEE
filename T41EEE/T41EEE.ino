@@ -225,12 +225,12 @@ int32_t fineTuneEncoderMove = 0;
 int selectedMapIndex;
 
 bool centerTuneFlag = false;
-unsigned long cwTimer;
-unsigned long ditTimerOn;
-unsigned long ditLength;
-unsigned long transmitDitLength;  // JJP 8/19/23
-unsigned long transmitDitUnshapedBlocks;
-unsigned long transmitDahUnshapedBlocks;
+uint32_t cwTimer;
+uint32_t ditTimerOn;
+//uint32_t ditLength;
+uint32_t transmitDitLength;  // JJP 8/19/23
+uint32_t transmitDitUnshapedBlocks;
+uint32_t transmitDahUnshapedBlocks;
 
 // ============ end new stuff =======
 // Global variables used by audio filter encoder.
@@ -884,8 +884,8 @@ FLASHMEM void setup() {
   digitalWrite(MUTE, MUTEAUDIO);  // Keep audio junk out of the speakers/headphones until configuration is complete.
   pinMode(PTT, INPUT_PULLUP);
   pinMode(BUSY_ANALOG_PIN, INPUT);  // Pin 39.  Switch matrix output connects to this pin.
-//  pinMode(KEYER_DIT_INPUT_TIP, INPUT_PULLUP);  // Straight key and keyer paddle.
-//  pinMode(KEYER_DAH_INPUT_RING, INPUT_PULLUP); // The other keyer paddle.
+                                    //  pinMode(KEYER_DIT_INPUT_TIP, INPUT_PULLUP);  // Straight key and keyer paddle.
+                                    //  pinMode(KEYER_DAH_INPUT_RING, INPUT_PULLUP); // The other keyer paddle.
 
   // SPI bus to display.
   pinMode(TFT_MOSI, OUTPUT);
@@ -906,11 +906,10 @@ FLASHMEM void setup() {
   fineTuneEncoder.begin(true);
   attachInterrupt(digitalPinToInterrupt(FINETUNE_ENCODER_A), EncoderFineTune, CHANGE);
   attachInterrupt(digitalPinToInterrupt(FINETUNE_ENCODER_B), EncoderFineTune, CHANGE);
-//  attachInterrupt(digitalPinToInterrupt(KEYER_DIT_INPUT_TIP), KeyTipOn, CHANGE);  // Changed to keyTipOn from KeyOn everywhere JJP 8/31/22
-//  attachInterrupt(digitalPinToInterrupt(KEYER_DAH_INPUT_RING), KeyRingOn, CHANGE);
+  //  attachInterrupt(digitalPinToInterrupt(KEYER_DIT_INPUT_TIP), KeyTipOn, CHANGE);  // Changed to keyTipOn from KeyOn everywhere JJP 8/31/22
+  //  attachInterrupt(digitalPinToInterrupt(KEYER_DAH_INPUT_RING), KeyRingOn, CHANGE);
 
-// This is done here because the function manipulates GPIs and attaches/detaches interrupts.
-SetKeyPowerUp();
+
 
   // Configure clock.
   setSyncProvider(getTeensy3Time);  // get TIME from real time clock with 3V backup battery
@@ -954,8 +953,8 @@ SetKeyPowerUp();
 #else
   sgtl5000_1.lineOutLevel(20);  // Setting of 20 limits line-out level to 2.14 volts p-p.
 #endif
-  //  sgtl5000_1.adcHighPassFilterEnable();  // This is required for QSE2DC, specifically for carrier calibration.
-  sgtl5000_1.adcHighPassFilterDisable();  //reduces noise.  https://forum.pjrc.com/threads/27215-24-bit-audio-boards?p=78831&viewfull=1#post78831
+  sgtl5000_1.adcHighPassFilterEnable();  // This is required for QSE2DC, specifically for carrier calibration.
+                                         //  sgtl5000_1.adcHighPassFilterDisable();  //reduces noise.  https://forum.pjrc.com/threads/27215-24-bit-audio-boards?p=78831&viewfull=1#post78831
 
   // Configure transmitter and receiver.
 
@@ -1010,8 +1009,8 @@ SetKeyPowerUp();
   si5351.output_enable(SI5351_CLK1, 1);
 #endif
   si5351.drive_strength(SI5351_CLK2, SI5351_DRIVE_8MA);  // CWP AFP 10-13-22
-SetFreq();
-// Reset flip-flops in QSD2 and/or QSE2.  Required only for QSD2/QSE2.
+  SetFreq();
+  // Reset flip-flops in QSD2 and/or QSE2.  Required only for QSD2/QSE2.
   if ((MASTER_CLK_MULT_RX == 2) or (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
 
   InitializeDataArrays();
@@ -1021,7 +1020,7 @@ SetFreq();
   headphoneVolume.setGain(0.0);
   volumeChangeFlag = true;  // Adjust volume to saved value.
 
-  lastState = RadioState::NOSTATE;  // To make sure the receiver will be configured on the first pass through.  KF5N September 3, 2023
+  //  lastState = RadioState::NOSTATE;  // To make sure the receiver will be configured on the first pass through.  KF5N September 3, 2023
   /* Set up the initial state/mode.
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) {
     radioState = RadioState::CW_RECEIVE_STATE;
@@ -1046,11 +1045,11 @@ SetFreq();
   */
 
   // Miscellaneous configurations.
-  mainMenuIndex = 0;                         // Changed from middle to first. Do Menu Down to get to Calibrate quickly
-//  FilterSetSSB();                            // This is not updated until bandwidth is adjusted, so it needs to be done here in setup.
-  ConfigData.rfGainCurrent = 0;              // Start with lower gain so you don't get blasted.
-  lastState = RadioState::NOSTATE;           // Forces an update.
-  powerUp = true;  // This delays receiver start-up to allow transients to settle.
+  mainMenuIndex = 0;                // Changed from middle to first. Do Menu Down to get to Calibrate quickly
+                                    //  FilterSetSSB();                            // This is not updated until bandwidth is adjusted, so it needs to be done here in setup.
+  ConfigData.rfGainCurrent = 0;     // Start with lower gain so you don't get blasted.
+  lastState = RadioState::NOSTATE;  // Forces an update.
+  powerUp = true;                   // This delays receiver start-up to allow transients to settle.
 
   //  Draw the entire radio display.
   display.RedrawAll();
@@ -1097,8 +1096,8 @@ void loop() {
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE and SerialUSB1.rts() == LOW) radioState = RadioState::FT8_RECEIVE_STATE;
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE and SerialUSB1.rts() == HIGH) radioState = RadioState::FT8_TRANSMIT_STATE;
 
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and (ConfigData.keyType == 1  and digitalRead(ConfigData.paddleDit) == HIGH and digitalRead(ConfigData.paddleDah) == HIGH)) radioState = RadioState::CW_RECEIVE_STATE;
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and ConfigData.keyType == 0  and digitalRead(ConfigData.paddleDit) == HIGH) radioState = RadioState::CW_RECEIVE_STATE;
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and (ConfigData.keyType == 1 and digitalRead(ConfigData.paddleDit) == HIGH and digitalRead(ConfigData.paddleDah) == HIGH)) radioState = RadioState::CW_RECEIVE_STATE;
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and ConfigData.keyType == 0 and digitalRead(KEYER_DIT_INPUT_TIP) == HIGH) radioState = RadioState::CW_RECEIVE_STATE;
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and (keyPressedOn == true and bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and ConfigData.keyType == 0)) radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and (keyPressedOn == true and bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and ConfigData.keyType == 1)) radioState = RadioState::CW_TRANSMIT_KEYER_STATE;
 
@@ -1108,6 +1107,7 @@ void loop() {
 
     if (radioState == RadioState::CW_RECEIVE_STATE) modecontrol.CWReceiveMode();
     if (radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE) modecontrol.CWTransmitMode();
+    if (radioState == RadioState::CW_TRANSMIT_KEYER_STATE) modecontrol.CWTransmitMode();
 
     if (radioState == RadioState::SSB_RECEIVE_STATE) modecontrol.SSBReceiveMode();
     if (radioState == RadioState::SSB_TRANSMIT_STATE) modecontrol.SSBTransmitMode();
@@ -1118,9 +1118,9 @@ void loop() {
     if (radioState == RadioState::AM_RECEIVE_STATE) modecontrol.AMReceiveMode();
     if (radioState == RadioState::SAM_RECEIVE_STATE) modecontrol.SAMReceiveMode();
   }
-  if (radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE and lastState == RadioState::CW_RECEIVE_STATE) {
-    Serial.printf("spectrumErased = %d\n", display.spectrumErased);
-  }
+//  if (radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE and lastState == RadioState::CW_RECEIVE_STATE) {
+//    Serial.printf("spectrumErased = %d\n", display.spectrumErased);
+//  }
   //    if(lastState == RadioState::CW_TRANSMIT_STRAIGHT_STATE and (radioState == RadioState::CW_RECEIVE_STATE or lastState == RadioState::NOSTATE)) {
   //     button.ExecuteModeChange();
 
@@ -1166,7 +1166,7 @@ void loop() {
 
       display.ShowTransmitReceiveStatus();
       while (digitalRead(PTT) == LOW) {
-        ExciterIQData();
+        SSB_ExciterIQData();
 
 #ifdef DEBUG_CESSB
         struct levelsZ *cessbData;
@@ -1199,7 +1199,7 @@ void loop() {
 
       display.ShowTransmitReceiveStatus();
       while (SerialUSB1.rts() == HIGH) {
-        ExciterIQData();
+        SSB_ExciterIQData();
       }
       break;
 
@@ -1214,7 +1214,7 @@ void loop() {
     case RadioState::CW_RECEIVE_STATE:
       if (lastState != radioState) {  // G0ORX 01092023
         display.ShowTransmitReceiveStatus();
-        keyPressedOn = 0;
+        keyPressedOn = false;
       }
       display.ShowSpectrum(drawSpectrum);  // if removed CW signal on is 2 mS
       break;
@@ -1224,8 +1224,8 @@ void loop() {
       cwTimer = millis();
       while (millis() - cwTimer <= ConfigData.cwTransmitDelay) {  //Start CW transmit timer on
         digitalWrite(RXTX, HIGH);
-        if (digitalRead(ConfigData.paddleDit) == LOW and ConfigData.keyType == 0) {  // AFP 09-25-22  Turn on CW signal
-          cwTimer = millis();                                                        //Reset timer
+        if (digitalRead(KEYER_DIT_INPUT_TIP) == LOW and ConfigData.keyType == 0) {  // AFP 09-25-22  Turn on CW signal
+          cwTimer = millis();                                                       //Reset timer
 
           if (cwKeyDown == false) {
             cwexciter.CW_ExciterIQData(CW_SHAPING_RISE);
@@ -1234,7 +1234,7 @@ void loop() {
             cwexciter.CW_ExciterIQData(CW_SHAPING_NONE);
           }
         } else {
-          if (digitalRead(ConfigData.paddleDit) == HIGH && ConfigData.keyType == 0) {  //Turn off CW signal
+          if (digitalRead(KEYER_DIT_INPUT_TIP) == HIGH and ConfigData.keyType == 0) {  //Turn off CW signal
             keyPressedOn = false;
             if (cwKeyDown) {  // Initiate falling CW signal.
               cwexciter.CW_ExciterIQData(CW_SHAPING_FALL);
@@ -1242,13 +1242,11 @@ void loop() {
             } else cwexciter.CW_ExciterIQData(CW_SHAPING_ZERO);  //  No waveforms; but DC offset is still present.
           }
         }
-      }  // end CW transmit while loop
-      //      digitalWrite(MUTE, MUTEAUDIO);  // mutes audio
+      }                         // end CW transmit while loop
       digitalWrite(RXTX, LOW);  // End Straight Key Mode
       break;
     case RadioState::CW_TRANSMIT_KEYER_STATE:
       display.ShowTransmitReceiveStatus();
-      //      digitalWrite(MUTE, UNMUTEAUDIO);  // unmutes audio for sidetone
       cwTimer = millis();
       while (millis() - cwTimer <= ConfigData.cwTransmitDelay) {
         digitalWrite(RXTX, HIGH);
@@ -1312,7 +1310,7 @@ void loop() {
   //  End radio state machine
   if (lastState != radioState) {  // G0ORX 09012023
     lastState = radioState;
-    display.ShowTransmitReceiveStatus();
+//    display.ShowTransmitReceiveStatus();
   }
 
 #ifdef DEBUG1
@@ -1347,7 +1345,7 @@ void loop() {
   }
 
   if (audioGraphicsFlag) {
-//    display.DrawBandWidthIndicatorBar();
+    //    display.DrawBandWidthIndicatorBar();
     display.UpdateAudioGraphics();
 
     audioGraphicsFlag = false;
@@ -1358,11 +1356,19 @@ void loop() {
   if (loopCounter > 49) {
     Serial.printf("Loop us = %u\n", (static_cast<uint32_t>(usec1) - usec1Old));
     loopCounter = 0;
+    Serial.printf("AudioProcessorUsageMax() = %d\n", static_cast<uint32_t>(AudioProcessorUsageMax()));
+    AudioProcessorUsageMaxReset();
+    Serial.printf("keyPressedOn = %d\n", keyPressedOn);
+    Serial.printf("Ring = %d\n", digitalRead(KEYER_DAH_INPUT_RING));
+    Serial.printf("Tip = %d\n", digitalRead(KEYER_DIT_INPUT_TIP));
+    Serial.printf("ConfigData.keyType = %d\n", ConfigData.keyType);
+    Serial.printf("transmitDitLength = %d\n", transmitDitLength);
+    Serial.printf("keyPressedOn = %d\n", keyPressedOn);
   }
   usec1Old = usec1;
 #endif
 
-  if (ms_500.check() == 1) {  // For clock updates AFP 10-26-22
-    display.DisplayClock();
-  }
+//  if (ms_500.check() == 1) {  // For clock updates AFP 10-26-22
+//    display.DisplayClock();
+//  }
 }  // end loop()

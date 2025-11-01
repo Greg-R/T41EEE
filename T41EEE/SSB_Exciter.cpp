@@ -2,6 +2,8 @@
 #include "SDT.h"
 
 //int micGainChoice;
+  float32_t* iBuffer = nullptr;  // I and Q pointers needed for one-time read of record queues.
+  float32_t* qBuffer = nullptr;
 
 // This function sets the microphone gain and compressor parameters.  Greg KF5N March 9, 2025.
 void updateMic() {
@@ -39,7 +41,7 @@ void updateMic() {
         at 48ksps.
 *****/
 
-void ExciterIQData() {
+void SSB_ExciterIQData() {
   uint32_t N_BLOCKS_EX = N_B_EX;
   float32_t powerScale;
 
@@ -59,16 +61,11 @@ void ExciterIQData() {
   // Get audio samples from the audio buffers and convert them to float.
   for (unsigned i = 0; i < N_BLOCKS_EX; i++) {
 
+    iBuffer = Q_in_L_Ex.readBuffer();
+    qBuffer = Q_in_R_Ex.readBuffer();
+    std::copy(iBuffer, iBuffer + 128, &float_buffer_L_EX[128 * i]);
+    std::copy(qBuffer, qBuffer + 128, &float_buffer_R_EX[128 * i]);
 
-
-
-
-    /**********************************************************************************  AFP 12-31-20
-          Using arm_Math library, convert to float one buffer_size.
-          Float_buffer samples are now standardized from > -1.0 to < 1.0
-      **********************************************************************************/
-//    arm_q15_to_float(Q_in_L_Ex.readBuffer(), &float_buffer_L_EX[BUFFER_SIZE * i], BUFFER_SIZE);  // convert int_buffer to float 32bit
-//    arm_q15_to_float(Q_in_R_Ex.readBuffer(), &float_buffer_R_EX[BUFFER_SIZE * i], BUFFER_SIZE);  // Right channel not used.  KF5N March 11, 2024
     Q_in_L_Ex.freeBuffer();
     Q_in_R_Ex.freeBuffer();  // Right channel not used.  KF5N March 11, 2024
   }

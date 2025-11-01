@@ -260,7 +260,7 @@ void Button::ExecuteButtonPress(MenuSelect val) {
 
     case MenuSelect::DECODER_TOGGLE:  // 13
       ConfigData.decoderFlag = not ConfigData.decoderFlag;
-      display.UpdateAudioGraphics();
+      display.UpdateDecoderStatus();
       break;
 
     case MenuSelect::MAIN_TUNE_INCREMENT:  // 14

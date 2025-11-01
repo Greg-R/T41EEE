@@ -213,12 +213,12 @@ void DoCWReceiveProcessing() {  // All New AFP 09-19-22
     //    Serial.printf("combinedCoeff = %f\n", combinedCoeff);  // Use this to tune decoder.
     //  Changed CW decode "lock" indicator
     if (combinedCoeff > 50) {  // AFP 10-26-22
-      tft.fillRect(700, 442, 15, 15, RA8875_GREEN);
+      tft.fillRect(699, 442, 14, 14, RA8875_GREEN);
     } else if (combinedCoeff < 50) {  // AFP 10-26-22
       CWLevelTimer = millis();
       if (CWLevelTimer - CWLevelTimerOld > 2000) {
         CWLevelTimerOld = millis();
-        tft.fillRect(700, 442, 15, 15, RA8875_BLACK);  // Erase
+//        tft.fillRect(700, 442, 15, 15, RA8875_BLACK);  // Erase
       }
     }
     if (combinedCoeff > 50) {  // if  have a reasonable corr coeff, >50, then we have a keeper. // AFP 10-26-22
@@ -242,9 +242,9 @@ void DoCWReceiveProcessing() {  // All New AFP 09-19-22
   Return value:
     void
 *****/
-void SetDitLength(int wpm) {
-  ditLength = 1200 / wpm;
-}
+//void SetDitLength(int wpm) {
+//  transmitDitLength = 1200 / wpm;
+//}
 
 
 /*****
@@ -276,6 +276,7 @@ void SetTransmitDitLength(int wpm) {
 /*****
   Purpose: Select straight key or keyer.  All this does is control
            the pullups on the GPIs connected to the key or keyer paddle.
+           This should be part of the menus used by the operator.
 
   Parameter list:
     void
@@ -321,7 +322,8 @@ void SetKeyType() {
 
 
 /*****
-  Purpose: Set up key at power-up.  Don't run after power-up!  Greg Raven KF5N Oct 2025
+  Purpose: Set up key configuration at power-up.  Don't run after power-up!  Greg Raven KF5N Oct 2025
+           This function should be in setup(), just after configuration of GPIOs.
 
   Parameter list:
     void
@@ -344,6 +346,8 @@ FLASHMEM void SetKeyPowerUp() {
 
   // Keyer paddle.
   if (ConfigData.keyType == 1) {
+    pinMode(KEYER_DAH_INPUT_RING, INPUT_PULLUP);  // Activate pullup on dah.
+    Serial.printf("Pullup added to DAH\n");
     attachInterrupt(digitalPinToInterrupt(KEYER_DIT_INPUT_TIP), KeyTipOn, CHANGE);
     attachInterrupt(digitalPinToInterrupt(KEYER_DAH_INPUT_RING), KeyRingOn, CHANGE);
     // Flip dit and dah if so configured.
@@ -490,10 +494,10 @@ FLASHMEM void SetKeyPowerUp() {
     void
 *****/
   void ResetHistograms() {
-    gapAtom = ditLength = transmitDitLength;
+    gapAtom = transmitDitLength;
     gapChar = dahLength = transmitDitLength * 3;
-    thresholdGeometricMean = (ditLength + dahLength) / 2;  // Use simple mean for starters so we don't have 0
-    aveDitLength = ditLength;
+    thresholdGeometricMean = (transmitDitLength + dahLength) / 2;  // Use simple mean for starters so we don't have 0
+    aveDitLength = transmitDitLength;
     aveDahLength = dahLength;
     valRef1 = 0;
     valRef2 = 0;
@@ -575,7 +579,7 @@ FLASHMEM void SetKeyPowerUp() {
           break;                  // End state1
 
         case state2:                                                                             // Determine if a timed signal was a dit or a dah and increment the decode tree.
-          if (signalElapsedTime > (0.5 * ditLength) && signalElapsedTime < (1.5 * dahLength)) {  // All this does is provide a wide boundary for dit and dah lengths.
+          if (signalElapsedTime > (0.5 * transmitDitLength) && signalElapsedTime < (1.5 * dahLength)) {  // All this does is provide a wide boundary for dit and dah lengths.
             currentDashJump = currentDashJump >> 1;                                              // Fast divide by 2
             if (signalElapsedTime < (int)thresholdGeometricMean) {                               // It was a dit
               charProcessFlag = true;
@@ -738,7 +742,7 @@ FLASHMEM void SetKeyPowerUp() {
       }
     }
 
-    JackClusteredArrayMax(signalHistogram, offset, &tempDit, (int32_t *)&ditLength, &firstNonEmpty, (int32_t)1);
+    JackClusteredArrayMax(signalHistogram, offset, &tempDit, (int32_t *)&transmitDitLength, &firstNonEmpty, (int32_t)1);
     // dah calculation
     // Elements above the geomean. Note larger spread: higher variance
     JackClusteredArrayMax(&signalHistogram[offset], HISTOGRAM_ELEMENTS - offset, &tempDah, (int32_t *)&dahLength, &firstNonEmpty, (uint32_t)3);

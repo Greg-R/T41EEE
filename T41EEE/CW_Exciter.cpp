@@ -55,12 +55,12 @@ void CW_Exciter::CW_ExciterIQData(int shaping)  //AFP 08-20-22
   // Make Q15 data for CW sidetone.
   arm_float_to_q15(float_buffer_cw, q15_buffer_Sidetone, 512);
 
-  Q_out_L.setBehaviour(AudioPlayQueue::NON_STALLING);
+//  Q_out_L.setBehaviour(AudioPlayQueue::NON_STALLING);  Now set in AudioSignal.h.
 
   float32_t float_buffer_i[512] = { 0.0 };
   float32_t float_buffer_q[512] = { 0.0 };
-  float32_t* iBuffer;  // I and Q pointers needed for one-time read of record queues.
-  float32_t* qBuffer;
+  float32_t* iBuffer = nullptr;  // I and Q pointers needed for one-time read of record queues.
+  float32_t* qBuffer = nullptr;
 
 // Read incoming I and Q audio blocks from the SSB exciter.
   if (Q_in_L_Ex.available() > 3 and Q_in_R_Ex.available() > 3) {

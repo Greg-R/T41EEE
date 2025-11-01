@@ -456,8 +456,7 @@ void CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
 
     case 6:          // Type of key:
       SetKeyType();  // Straight key or keyer? Stored in ConfigData.keyType.
-      SetKeyPowerUp();
-      display.UpdateWPMField();
+      display.UpdateKeyType();
       break;
 
     case 7:  // Flip paddles
@@ -838,7 +837,7 @@ void SSBOptions() {
         imdAmplitude = volumeLog[static_cast<int>(imdAmplitudedB)];
         toneSSBCal1.amplitude(imdAmplitude);
         toneSSBCal2.amplitude(imdAmplitude);
-        ExciterIQData();
+        SSB_ExciterIQData();
       }
       radioState = RadioState::SSB_RECEIVE_STATE;
       digitalWrite(RXTX, LOW);  // Transmitter off.
@@ -972,7 +971,7 @@ void DoPaddleFlip() {
         ConfigData.paddleFlip = 0;  // KD0RC
       }
       display.EraseMenus();
-      display.UpdateWPMField();  // KD0RC
+      display.UpdateKeyType();  // KD0RC
       break;
     }
   }

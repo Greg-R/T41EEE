@@ -598,11 +598,20 @@ FLASHMEM void initPowerCoefficients() {
 }
 
 
+/*****
+  Purpose: Initialize user defined things.  Make sure this runs after the configuration struct has been read.
+
+  Parameter list:
+    void
+
+  Return value;
+    void
+*****/
 FLASHMEM void initUserDefinedStuff() {
   Serial.printf("initUserDefinedStuff\n");
   NR_Index = ConfigData.nrOptionSelect;
   TxRxFreq = ConfigData.centerFreq = ConfigData.lastFrequencies[ConfigData.currentBand][ConfigData.activeVFO];
-  SetDitLength(ConfigData.currentWPM);
+//  SetTransmitDitLength(ConfigData.currentWPM);
   SetTransmitDitLength(ConfigData.currentWPM);
   // Initialize buffers used by the CW transmitter and CW decoder.
   sineTone(ConfigData.CWOffset + 6);  // This function takes "number of cycles" which is the offset + 6.  Used by CW decoder.
@@ -610,6 +619,7 @@ FLASHMEM void initUserDefinedStuff() {
   si5351.set_correction(CalData.freqCorrectionFactor, SI5351_PLL_INPUT_XO);
   initCWShaping();
   initPowerCoefficients();
+SetKeyPowerUp();
   ResetHistograms();  // KF5N February 20, 2024
   zoomIndex = ConfigData.spectrum_zoom - 1;  // ButtonZoom() increments zoomIndex, so this cancels it so the read from EEPROM is accurately restored.  KF5N August 3, 2023
   button.ButtonZoom();                       // Restore zoom settings.  KF5N August 3, 2023
