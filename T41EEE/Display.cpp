@@ -205,6 +205,7 @@ void Display::ShowSpectrum(bool drawSpectrum) {
     if (keyPressedOn) {
       //  Quickly erase the spectrum on the display.
       for (int i = 0; i < 511; i = i + 1) {
+        if(i == (centerLine - 3)) continue;  // Don't erase center line.
         // Erase old spectrum.
         if (i > x1) {
           y1_old = 247 - pixelold[i];
