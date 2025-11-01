@@ -1,5 +1,4 @@
 
-
 // ShowMenu
 // CalibrateOptions
 // CWOptions
@@ -441,7 +440,7 @@ void CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
       SelectCWOffset();  //  Located in CWProcessing.cpp
       break;
 
-    case 3:  // WPM
+    case 3:  // Keyer WPM.
       SetWPM();
       SetTransmitDitLength(ConfigData.currentWPM);  //Afp 09-22-22     // JJP 8/19/23
       break;

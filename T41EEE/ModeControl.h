@@ -1,7 +1,6 @@
+// Added October 2025.  Greg Raven KF5N
 
 #pragma once
-
-
 
 struct ModeControl {
 

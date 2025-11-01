@@ -11,6 +11,18 @@
 class TxCalibrate {
 public:
 
+
+  void DoXmitCalibrate(int calMode, bool radio, bool refine, bool toEeprom);
+  void DoXmitCarrierCalibrate(int calMode, bool radio, bool refine, bool toEeprom);
+  const char *calFreqs[2]{ "750 Hz", "3.0 kHz" };
+  void ShowSpectrum();
+  float PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins);
+  void RadioCal(int mode, bool refineCal);
+  void buttonTasks();
+  void writeToCalData(float ichannel, float qchannel);
+
+  private:
+
   int32_t IQCalType = 0;
   int val;
   float xmitIncrement = 0.002;   // Increment for transmit calibration.
@@ -68,6 +80,13 @@ public:
   std::vector<float> sub_vectorAmpResult = std::vector<float>(21);
   std::vector<float> sub_vectorPhaseResult = std::vector<float>(21);
 
+  void warmUpCal();
+    void PrintMode();
+      void printCalType(bool autoCal, bool autoCalDone);
+  void CalibratePreamble(int setZoom);
+  void CalibrateEpilogue();
+    void plotCalGraphics(int calType);
+  void MakeFFTData();
   enum class State { warmup,
                      refineCal,
                      state0,
@@ -81,19 +100,4 @@ public:
 
   State state = State::exit;
 
-  void plotCalGraphics(int calType);
-  void MakeFFTData();
-  void warmUpCal();
-  void PrintMode();
-  void printCalType(bool autoCal, bool autoCalDone);
-  void CalibratePreamble(int setZoom);
-  void CalibrateEpilogue();
-  void DoXmitCalibrate(int calMode, bool radio, bool refine, bool toEeprom);
-  void DoXmitCarrierCalibrate(int calMode, bool radio, bool refine, bool toEeprom);
-  const char *calFreqs[2]{ "750 Hz", "3.0 kHz" };
-  void ShowSpectrum();
-  float PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins);
-  void RadioCal(int mode, bool refineCal);
-  void buttonTasks();
-  void writeToCalData(float ichannel, float qchannel);
 };

@@ -88,24 +88,25 @@ void FilterSetSSB() {
     void
 *****/
 void EncoderCenterTune() {
-  long tuneChange = 0L;
+  int32_t tuneChange = 0;
 
   unsigned char result = tuneEncoder.process();  // Read the encoder
 
   if (result == 0)  // Nothing read
     return;
 
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE && ConfigData.decoderFlag) {  // No reason to reset if we're not doing decoded CW AFP 09-27-22
+// This is an alternate function of the coarse frequency tune.  This resets the Morse decoder.
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and ConfigData.decoderFlag) {
     ResetHistograms();
   }
 
   switch (result) {
     case DIR_CW:  // Turned it clockwise, 16
-      tuneChange = 1L;
+      tuneChange = 1;
       break;
 
     case DIR_CCW:  // Turned it counter-clockwise
-      tuneChange = -1L;
+      tuneChange = -1;
       break;
   }
 
@@ -114,7 +115,6 @@ void EncoderCenterTune() {
   TxRxFreq = ConfigData.centerFreq + NCOFreq;
   ConfigData.lastFrequencies[ConfigData.currentBand][ConfigData.activeVFO] = TxRxFreq;
   SetFreq();  //  Change to receiver tuning process.  KF5N July 22, 2023
-              //  display.DrawBandWidthIndicatorBar();  // AFP 10-20-22  This only needed for fine tune?
   display.ShowFrequency();
   display.BandInformation();
   display.DrawFrequencyBarValue();

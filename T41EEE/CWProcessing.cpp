@@ -55,6 +55,7 @@ enum states { state0,
               state6 };
 states decodeStates = state0;
 
+//void DoGapHistogram(uint32_t gapLen);
 
 /*****
   Purpose: This function replaces the arm_max_float32() function that finds the maximum element in an array.
@@ -121,7 +122,6 @@ void JackClusteredArrayMax(int32_t *array, int32_t elements, int32_t *maxCount, 
 FLASHMEM void SelectCWFilter() {
   const std::string CWFilter[] = { "0.8kHz", "1.0kHz", "1.3kHz", "1.8kHz", "2.0kHz", " Off " };
   ConfigData.CWFilterIndex = SubmenuSelect(CWFilter, 6, ConfigData.CWFilterIndex);  // CWFilter is an array of strings.
-  //  BandInformation();
 
   if (ConfigData.CWFilterIndex != 5) switchFilterSideband = true;  // Sets current delimiter to FLow.
   display.UpdateAudioGraphics();                                   // This draws decoder delimiters and CW bandwidth box (red);
@@ -139,16 +139,16 @@ FLASHMEM void SelectCWFilter() {
     void
 *****/
 FLASHMEM void SelectCWOffset() {
-  bool tempDecoderFlag;
+//  bool tempDecoderFlag;
   int tempCWOffset;
   const std::string CWOffsets[] = { "562.5 Hz", "656.5 Hz", "750 Hz", "843.75 Hz", " Cancel " };
   const int numCycles[4] = { 6, 7, 8, 9 };
 
   tempCWOffset = ConfigData.CWOffset;
-  tempDecoderFlag = ConfigData.decoderFlag;                                // Remember current status of decoder.
-  ConfigData.decoderFlag = false;                                          // Set to false to erase decoder delimiters.
-  display.UpdateAudioGraphics();                                           // Erase graphics if they exist.
-  ConfigData.decoderFlag = tempDecoderFlag;                                // Restore the decoder flag value.
+//  tempDecoderFlag = ConfigData.decoderFlag;                                // Remember current status of decoder.
+//  ConfigData.decoderFlag = false;                                          // Set to false to erase decoder delimiters.
+//  display.UpdateAudioGraphics();                                           // Erase graphics if they exist.
+//  ConfigData.decoderFlag = tempDecoderFlag;                                // Restore the decoder flag value.
   ConfigData.CWOffset = SubmenuSelect(CWOffsets, 5, ConfigData.CWOffset);  // CWFilter is an array of strings.
 
   //  If user selects cancel, CWOffset will be set to the bogus value of 4.  So keep the old value.
@@ -425,7 +425,6 @@ FLASHMEM void SetKeyPowerUp() {
       sgtl5000_1.volume(static_cast<float32_t>(ConfigData.sidetoneHeadphone) / 100.0);  // This control has a range of 0.0 to 1.0.
       menu = readButton();
       if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Exit and save to EEPROM.
-                                                     // ConfigData.ConfigData.sidetoneVolume = ConfigData.sidetoneVolume;
         eeprom.ConfigDataWrite();
         break;
       }
@@ -504,6 +503,66 @@ FLASHMEM void SetKeyPowerUp() {
     // Clear graph arrays
     memset(signalHistogram, 0, HISTOGRAM_ELEMENTS * sizeof(uint32_t));
     memset(gapHistogram, 0, HISTOGRAM_ELEMENTS * sizeof(uint32_t));
+  }
+
+
+  /*****
+  Purpose: This function creates a distribution of the gaps between signals, expressed
+           in milliseconds. The result is a tri-modal distribution around three timings:
+            1. inter-atom time (one dit length)
+            2. inter-character (three dit lengths)
+            3. word end (seven dit lengths)
+
+  Parameter list:
+    long val  The duration of the signal gap (ms).
+
+  Return value;
+    void
+*****/
+  void DoGapHistogram(uint32_t gapLen) {
+    int32_t tempAtom, tempChar;
+    int32_t atomIndex, charIndex, firstDit, temp;
+    uint32_t offset;
+
+    if (gapHistogram[gapLen] > 10) {  // Need over 1 so we don't have fractional value
+      for (int k = 0; k < HISTOGRAM_ELEMENTS; k++) {
+        gapHistogram[k] = (uint32_t)(.8 * (float)gapHistogram[k]);
+      }
+    }
+
+    gapHistogram[gapLen]++;  // Add new signal to distribution
+
+    atomIndex = charIndex = 0;
+    if (gapLen <= thresholdGeometricMean) {                                                                                 // Find new dit length
+      JackClusteredArrayMax(gapHistogram, (uint32_t)thresholdGeometricMean, &tempAtom, &atomIndex, &firstDit, (int32_t)1);  // Find max dit gap
+      if (atomIndex) {                                                                                                      // if something found
+        gapAtom = atomIndex;
+      }
+      for (int j = 0; j < HISTOGRAM_ELEMENTS; j++) {                        // count down
+        if (gapHistogram[HISTOGRAM_ELEMENTS - j] > 0 && endGapFlag == 0) {  //Look for non-zero entries in the histogram
+          if (HISTOGRAM_ELEMENTS - j < gapAtom * 2) {                       // limit search to probable gapAtom entries
+            topGapIndex = HISTOGRAM_ELEMENTS - j;                           //Upper end of gapAtom range
+            endGapFlag = 1;                                                 // set flag so we know tha this is the top of the gapAtom range
+          }
+        }
+        if (topGapIndex > 2 * gapAtom) topGapIndex = topGapIndexOld;  // discard outliers
+      }
+      endGapFlag = 0;                //reset flag
+      topGapIndexOld = topGapIndex;  //Keep good value for reference
+    } else {                         // dah calculation
+      if (gapLen <= thresholdGeometricMean * 2) {
+        offset = (uint32_t)(thresholdGeometricMean * 2);  // Find number of elements to check
+        JackClusteredArrayMax(&gapHistogram[(int32_t)thresholdGeometricMean + 1], offset, &tempChar, &charIndex, &temp, (int32_t)3);
+        if (charIndex)  // if something found
+          gapChar = charIndex;
+      }
+    }
+    if (atomIndex) {
+      gapAtom = atomIndex;
+    }
+    if (charIndex) {
+      gapChar = charIndex;
+    }
   }
 
 
@@ -624,64 +683,7 @@ FLASHMEM void SetKeyPowerUp() {
   }
 
 
-  /*****
-  Purpose: This function creates a distribution of the gaps between signals, expressed
-           in milliseconds. The result is a tri-modal distribution around three timings:
-            1. inter-atom time (one dit length)
-            2. inter-character (three dit lengths)
-            3. word end (seven dit lengths)
 
-  Parameter list:
-    long val        the duration of the signal gap (ms)
-
-  Return value;
-    void
-*****/
-  void DoGapHistogram(long gapLen) {
-    int32_t tempAtom, tempChar;
-    int32_t atomIndex, charIndex, firstDit, temp;
-    uint32_t offset;
-
-    if (gapHistogram[gapLen] > 10) {  // Need over 1 so we don't have fractional value
-      for (int k = 0; k < HISTOGRAM_ELEMENTS; k++) {
-        gapHistogram[k] = (uint32_t)(.8 * (float)gapHistogram[k]);
-      }
-    }
-
-    gapHistogram[gapLen]++;  // Add new signal to distribution
-
-    atomIndex = charIndex = 0;
-    if (gapLen <= thresholdGeometricMean) {                                                                                 // Find new dit length
-      JackClusteredArrayMax(gapHistogram, (uint32_t)thresholdGeometricMean, &tempAtom, &atomIndex, &firstDit, (int32_t)1);  // Find max dit gap
-      if (atomIndex) {                                                                                                      // if something found
-        gapAtom = atomIndex;
-      }
-      for (int j = 0; j < HISTOGRAM_ELEMENTS; j++) {                        // count down
-        if (gapHistogram[HISTOGRAM_ELEMENTS - j] > 0 && endGapFlag == 0) {  //Look for non-zero entries in the histogram
-          if (HISTOGRAM_ELEMENTS - j < gapAtom * 2) {                       // limit search to probable gapAtom entries
-            topGapIndex = HISTOGRAM_ELEMENTS - j;                           //Upper end of gapAtom range
-            endGapFlag = 1;                                                 // set flag so we know tha this is the top of the gapAtom range
-          }
-        }
-        if (topGapIndex > 2 * gapAtom) topGapIndex = topGapIndexOld;  // discard outliers
-      }
-      endGapFlag = 0;                //reset flag
-      topGapIndexOld = topGapIndex;  //Keep good value for reference
-    } else {                         // dah calculation
-      if (gapLen <= thresholdGeometricMean * 2) {
-        offset = (uint32_t)(thresholdGeometricMean * 2);  // Find number of elements to check
-        JackClusteredArrayMax(&gapHistogram[(int32_t)thresholdGeometricMean + 1], offset, &tempChar, &charIndex, &temp, (int32_t)3);
-        if (charIndex)  // if something found
-          gapChar = charIndex;
-      }
-    }
-    if (atomIndex) {
-      gapAtom = atomIndex;
-    }
-    if (charIndex) {
-      gapChar = charIndex;
-    }
-  }
 
 
   /*****

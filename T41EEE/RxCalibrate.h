@@ -9,11 +9,6 @@
 // Re-factored into class RxCalibrate.cpp.  This class does receive calibrate only.
 // Greg Raven KF5N October 20, 2025.
 
-#pragma once
-
-//#include <vector>
-//#include <algorithm>
-
 class RxCalibrate {
 public:
 
