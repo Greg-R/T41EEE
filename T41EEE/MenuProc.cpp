@@ -260,7 +260,7 @@ void CalibrateOptions() {
   switch (IQChoice) {
 
     case 0:  // Calibrate Frequency  - uses WWV
-      CalData.freqCorrectionFactor = GetEncoderValueLive(-200000, 200000, CalData.freqCorrectionFactor, increment, freqCal, false, true);
+      CalData.freqCorrectionFactor = GetEncoderValueLive(-200000, 200000, CalData.freqCorrectionFactor, increment, "Freq Cal: ", true, true);
       if (CalData.freqCorrectionFactor != freqCorrectionFactorOld) {
         si5351.set_correction(CalData.freqCorrectionFactor, SI5351_PLL_INPUT_XO);
         freqCorrectionFactorOld = CalData.freqCorrectionFactor;
@@ -271,7 +271,7 @@ void CalibrateOptions() {
           tft.setCursor(0, 1);
           tft.print("                ");  // Erase.
           eeprom.CalDataWrite();
-          calibrateFlag = false;
+          calibrateFlag = 0;
         }
       }
       break;

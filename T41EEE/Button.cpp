@@ -1080,20 +1080,21 @@ void Button::ButtonFrequencyEntry() {
   }
   tft.fillRect(0, 0, 799, 479, RA8875_BLACK);  // Clear layer 2  JJP 7/23/23
   tft.writeTo(L1);
-  display.EraseSpectrumDisplayContainer();
-  display.DrawSpectrumDisplayContainer();
-  display.DrawFrequencyBarValue();
+//  display.EraseSpectrumDisplayContainer();
+//  display.DrawSpectrumDisplayContainer();
+//  display.DrawFrequencyBarValue();
   //  SetBand();
   SetFreq();
-  display.ShowFrequency();
-  display.ShowSpectrumdBScale();
+//  display.ShowFrequency();
+//  display.ShowSpectrumdBScale();
   // Draw or not draw CW filter graphics to audio spectrum area.  KF5N July 30, 2023
-  tft.writeTo(L2);
+  
   tft.clearMemory();
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) display.BandInformation();
-  display.DrawBandWidthIndicatorBar();
+//  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) display.BandInformation();
+//  display.DrawBandWidthIndicatorBar();
   display.RedrawAll();  // KD0RC
-  FilterSetSSB();
+//  FilterSetSSB();
+tft.writeTo(L2);
 }
 
 

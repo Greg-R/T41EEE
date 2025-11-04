@@ -1814,6 +1814,8 @@ void Display::RedrawAll() {
   UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
   ShowCurrentPowerSetting();
   UpdateAudioOutputField();
+  BandInformation();
+  UpdateVolumeField();
   ShowFrequency();
   SetBandRelay();                   // Set LPF relays for current band.
 //  lastState = RadioState::NOSTATE;  // Force an update.
