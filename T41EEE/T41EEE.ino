@@ -1048,7 +1048,7 @@ FLASHMEM void setup() {
   mainMenuIndex = 0;                // Changed from middle to first. Do Menu Down to get to Calibrate quickly
                                     //  FilterSetSSB();                            // This is not updated until bandwidth is adjusted, so it needs to be done here in setup.
   ConfigData.rfGainCurrent = 0;     // Start with lower gain so you don't get blasted.
-//  lastState = RadioState::NOSTATE;  // Forces an update.
+  lastState = RadioState::NOSTATE;  // Forces an update.
   powerUp = true;                   // This delays receiver start-up to allow transients to settle.
 
   //  Draw the entire radio display.
