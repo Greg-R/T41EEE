@@ -26,7 +26,6 @@ public:
   void ButtonNotchFilter();
   void ButtonMuteAudio();
   void ExecuteModeChange();
-  //  void ResetZoom(int zoomIndex1);
   void ButtonFrequencyEntry();
 
 private:

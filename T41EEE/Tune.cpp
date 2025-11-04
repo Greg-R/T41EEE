@@ -182,7 +182,7 @@ void SetFreq() {                              //AFP 09-22-22   Revised July 7 KF
 void ResetTuning() {
   Serial.printf("ResetTuning\n");
   currentFreq = ConfigData.centerFreq + NCOFreq;  // currentFreqA changed to currentFreq.  KF5N August 7, 2023
-  NCOFreq = 0L;
+  NCOFreq = 0;
   ConfigData.centerFreq = TxRxFreq = currentFreq;  //AFP 10-28-22  // currentFreqA changed to currentFreq.  KF5N August 7, 2023
   tft.writeTo(L2);                                 // Clear layer 2.  KF5N July 31, 2023
   tft.clearMemory();

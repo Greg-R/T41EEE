@@ -5,8 +5,7 @@ const float sample_rate_Hz = 48000.0;  // The transmitter operates at 48ksps.
 const int audio_block_samples = 128;   // Always 128
 AudioSettings_F32 audio_settings(sample_rate_Hz, audio_block_samples);
 AudioInputI2SQuad i2s_quadIn;  // 4 inputs available only in Teensy audio and not Open Audio library.
-//AudioOutputI2SQuad_F32 i2s_quadOut_f32(audio_settings);
-AudioOutputI2SQuad_F32 i2s_quadOut_f32;
+AudioOutputI2SQuad_F32 i2s_quadOut_f32(audio_settings);
 
 // Transmitter
 AudioControlSGTL5000 sgtl5000_1;                                                  // Controller for the Teensy Audio Adapter.
@@ -203,7 +202,6 @@ void SetAudioOperatingState(RadioState operatingState) {
       InitializeDataArrays();    // I2S sample rate set in this function.
       sgtl5000_1.muteLineout();  // Shut off I and Q baseband to QSE.
       // Stop and clear the data buffers.
-//      Q_out_L.setMaxBuffers(64);  Done in setup().
       ADC_RX_I.end();    // Receiver I channel
       ADC_RX_Q.end();    // Receiver Q channel
       ADC_RX_I.clear();

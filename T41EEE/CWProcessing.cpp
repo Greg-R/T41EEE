@@ -377,6 +377,7 @@ FLASHMEM void SetKeyPowerUp() {
     int sidetoneDisplay;
     bool keyDown;
     MenuSelect menu;
+    RadioState temp = radioState;
 
     SetAudioOperatingState(RadioState::SET_CW_SIDETONE);
     tft.setFontScale((enum RA8875tsize)1);
@@ -430,7 +431,8 @@ FLASHMEM void SetKeyPowerUp() {
       }
     }  // end while loop
     display.EraseMenus();
-    lastState = RadioState::NOSTATE;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 7, 2023
+    SetAudioOperatingState(temp);  // Restore the radio state.
+  //  lastState = RadioState::NOSTATE;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 7, 2023
   }
 
 

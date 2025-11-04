@@ -299,7 +299,7 @@ void TxCalibrate::CalibratePreamble(int setZoom) {
   ConfigData.currentScale = 1;          //  Set vertical scale to 10 dB during calibration.  KF5N
   updateDisplayFlag = false;
   ConfigData.centerFreq = TxRxFreq;
-  NCOFreq = 0L;
+  NCOFreq = 0;
   digitalWrite(MUTE, MUTEAUDIO);  // Mute Audio.
   digitalWrite(RXTX, HIGH);       // Turn on transmitter.
   rawSpectrumPeak = 0;
@@ -339,9 +339,9 @@ void TxCalibrate::CalibrateEpilogue() {
   InitializeDataArrays();  // Re-initialize the filters back to 192ksps.
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) bands.bands[ConfigData.currentBand].sideband = tempSideband;
   bands.bands[ConfigData.currentBand].mode = tempMode;
-  radioState = tempState;
+//  radioState = tempState;
   ConfigData.centerFreq = TxRxFreq;
-  NCOFreq = 0L;
+  NCOFreq = 0;
   calibrateFlag = 0;                                       // KF5N
   ConfigData.CWOffset = cwFreqOffsetTemp;                  // Return user selected CW offset frequency.
   sineTone(ConfigData.CWOffset + 6);                       // This function takes "number of cycles" which is the offset + 6.
@@ -358,7 +358,9 @@ void TxCalibrate::CalibrateEpilogue() {
   else tft.fillWindow();                                         // Clear the display in radioCal.
   fftOffset = 0;                                                 // Some reboots may be caused by large fftOffset values when Auto-Spectrum is on.
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
-  lastState = RadioState::NOSTATE;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 16, 2023
+//  lastState = RadioState::NOSTATE;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 16, 2023
+  radioState = tempState;
+  SetAudioOperatingState(radioState);  // Restore state.
   powerUp = true;
 }
 

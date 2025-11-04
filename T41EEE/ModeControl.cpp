@@ -8,8 +8,10 @@ void ModeControl::CWReceiveMode() {
   SetFreq();
   display.BandInformation();  // Updates center frequency, band, mode, and sideband at top of spectrum.
 
-  display.UpdateAudioGraphics();
-  FilterBandwidth();  // Required to set up filter properly for this mode.
+encoderFilterFlag = true;
+
+//  display.UpdateAudioGraphics();
+//  FilterBandwidth();  // Required to set up filter properly for this mode.
   //  display.ShowBandwidth();  Run by UpdateAudioGraphics().
 }
 
@@ -27,8 +29,9 @@ void ModeControl::SSBReceiveMode() {
   SetFreq();
   display.BandInformation();  // Updates center frequency, band, mode, and sideband at top of spectrum.
 
-  display.UpdateAudioGraphics();
-  FilterBandwidth();  // Required to set up filter properly for this mode.
+encoderFilterFlag = true;
+//  display.UpdateAudioGraphics();
+//  FilterBandwidth();  // Required to set up filter properly for this mode.
 //  display.ShowBandwidth();
 }
 
@@ -44,8 +47,9 @@ void ModeControl::FT8ReceiveMode() {
   SetFreq();
   display.BandInformation();  // Updates center frequency, band, mode, and sideband at top of spectrum.
 
-  display.UpdateAudioGraphics();
-  FilterBandwidth();  // Required to set up filter properly for this mode.
+//  display.UpdateAudioGraphics();
+//  FilterBandwidth();  // Required to set up filter properly for this mode.
+encoderFilterFlag = true;
   display.ShowBandwidth();
 }
 
@@ -61,8 +65,9 @@ void ModeControl::AMReceiveMode() {
   SetFreq();
   display.BandInformation();  // Updates center frequency, band, mode, and sideband at top of spectrum.
 
-  display.UpdateAudioGraphics();
-  FilterBandwidth();  // Required to set up filter properly for this mode.
+encoderFilterFlag = true;
+//  display.UpdateAudioGraphics();
+//  FilterBandwidth();  // Required to set up filter properly for this mode.
   display.ShowBandwidth();
 }
 
@@ -73,8 +78,9 @@ void ModeControl::SAMReceiveMode() {
   //  bands.bands[ConfigData.currentBand].sideband = Sideband::BOTH_SAM;
   display.BandInformation();  // Updates center frequency, band, mode, and sideband at top of spectrum.
 
-  display.UpdateAudioGraphics();
+encoderFilterFlag = true;
+//  display.UpdateAudioGraphics();
   //    FilterSetSSB();  // Required to set up filter properly for this mode.
-  FilterBandwidth();
+//  FilterBandwidth();
   display.ShowBandwidth();
 }

@@ -200,7 +200,7 @@ void RxCalibrate::CalibratePreamble(int setZoom) {
   ConfigData.currentScale = 1;          //  Set vertical scale to 10 dB during calibration.  KF5N
   updateDisplayFlag = false;
   ConfigData.centerFreq = TxRxFreq;
-  NCOFreq = 0L;
+  NCOFreq = 0;
   digitalWrite(MUTE, MUTEAUDIO);  //  Mute Audio  (HIGH=Mute)
   digitalWrite(RXTX, HIGH);       // Turn on transmitter.
   radioState = RadioState::RECEIVE_CALIBRATE_STATE;
@@ -242,7 +242,7 @@ void RxCalibrate::CalibrateEpilogue(bool radioCal, bool saveToEeprom) {
   ADC_RX_Q.end();
   ADC_RX_Q.clear();
   ConfigData.centerFreq = TxRxFreq;
-  NCOFreq = 0L;
+  NCOFreq = 0;
   calibrateFlag = 0;                       // KF5N
   ConfigData.CWOffset = cwFreqOffsetTemp;  // Return user selected CW offset frequency.
   sineTone(ConfigData.CWOffset + 6);       // This function takes "number of cycles" which is the offset + 6.
@@ -251,7 +251,6 @@ void RxCalibrate::CalibrateEpilogue(bool radioCal, bool saveToEeprom) {
   ConfigData.transmitPowerLevel = transmitPowerLevelTemp;  // Restore the user's transmit power level setting.  KF5N August 15, 2023
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) bands.bands[ConfigData.currentBand].sideband = tempSideband;
   bands.bands[ConfigData.currentBand].mode = tempMode;
-  radioState = tempState;
   zoomIndex = userZoomIndex - 1;
   button.ButtonZoom();                      // Restore the user's zoom setting.  Note that this function also modifies ConfigData.spectrum_zoom.
   if (saveToEeprom) eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
@@ -263,7 +262,9 @@ void RxCalibrate::CalibrateEpilogue(bool radioCal, bool saveToEeprom) {
   else tft.fillWindow();                            // Clear the display.
   fftOffset = 0;                                    // Some reboots may be caused by large fftOffset values when Auto-Spectrum is on.
   if ((MASTER_CLK_MULT_RX == 2) or (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
-  lastState = RadioState::NOSTATE;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 16, 2023
+  radioState = tempState;
+//  lastState = RadioState::NOSTATE;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 16, 2023
+SetAudioOperatingState(radioState);
   powerUp = true;                   // Clip off transient.
   return;
 }

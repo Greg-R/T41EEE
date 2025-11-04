@@ -1779,7 +1779,7 @@ void Display::RedrawAll() {
   ShowCurrentPowerSetting();
   UpdateAudioOutputField();
   SetBandRelay();                   // Set LPF relays for current band.
-  lastState = RadioState::NOSTATE;  // Force an update.
+//  lastState = RadioState::NOSTATE;  // Force an update.
 }
 */
 /*****
@@ -1814,8 +1814,9 @@ void Display::RedrawAll() {
   UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
   ShowCurrentPowerSetting();
   UpdateAudioOutputField();
+  ShowFrequency();
   SetBandRelay();                   // Set LPF relays for current band.
-  lastState = RadioState::NOSTATE;  // Force an update.
+//  lastState = RadioState::NOSTATE;  // Force an update.
 }
 
 

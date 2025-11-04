@@ -492,7 +492,7 @@ void SpectrumOptions() {
   ConfigData.currentScale = spectrumSet;  // Yep...
   eeprom.ConfigDataWrite();
   display.ShowSpectrumdBScale();
-  lastState = RadioState::NOSTATE;  // Force update of operating state.
+//  lastState = RadioState::NOSTATE;  // Force update of operating state.
 }
 
 
@@ -684,8 +684,9 @@ void ProcessEqualizerChoices(int EQType, char *title) {
     }    // end outer while
     eeprom.ConfigDataWrite();
   }
+  SetAudioOperatingState(radioState);
   display.RedrawAll();
-  lastState = RadioState::NOSTATE;  // Force update of operating state.
+//  lastState = RadioState::NOSTATE;  // Force update of operating state.
 }
 
 
@@ -1223,9 +1224,6 @@ int SubmenuSelect(const std::string options[], int numberOfChoices, int defaultS
 
   while (true) {
     menu = readButton();                       // Read the ladder value
-                                               //    delay(150L);
-                                               //    if (val != -1 && val < (ConfigData.switchValues[0] + WIGGLE_ROOM)) {
-                                               //      menu = ProcessButtonPress(val);  // Use ladder value to get menu choice
     if (menu != MenuSelect::BOGUS_PIN_READ) {  // Valid choice?
       switch (menu) {
         case MenuSelect::MENU_OPTION_SELECT:  // They made a choice

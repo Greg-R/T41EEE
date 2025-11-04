@@ -59,7 +59,7 @@ Rotary tuneEncoder = Rotary(TUNE_ENCODER_A, TUNE_ENCODER_B);              // (16
 Rotary filterEncoder = Rotary(FILTER_ENCODER_A, FILTER_ENCODER_B);        // (15, 14)
 Rotary fineTuneEncoder = Rotary(FINETUNE_ENCODER_A, FINETUNE_ENCODER_B);  // ( 4,  5)
 
-Metro ms_500 = Metro(500);  // Set up a Metro
+Metro ms_500 = Metro(500);  // Set up a Metro.
 
 Si5351 si5351;  // Instantiate the PLL device.
 
@@ -1021,7 +1021,7 @@ FLASHMEM void setup() {
   volumeChangeFlag = true;  // Adjust volume to saved value.
 
   //  lastState = RadioState::NOSTATE;  // To make sure the receiver will be configured on the first pass through.  KF5N September 3, 2023
-  /* Set up the initial state/mode.
+  // Set up the initial state/mode.
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) {
     radioState = RadioState::CW_RECEIVE_STATE;
     bands.bands[ConfigData.currentBand].mode = RadioMode::CW_MODE;
@@ -1042,13 +1042,13 @@ FLASHMEM void setup() {
     radioState = RadioState::SAM_RECEIVE_STATE;
     bands.bands[ConfigData.currentBand].mode = RadioMode::SAM_MODE;
   }
-  */
+  SetAudioOperatingState(radioState);
 
   // Miscellaneous configurations.
   mainMenuIndex = 0;                // Changed from middle to first. Do Menu Down to get to Calibrate quickly
                                     //  FilterSetSSB();                            // This is not updated until bandwidth is adjusted, so it needs to be done here in setup.
   ConfigData.rfGainCurrent = 0;     // Start with lower gain so you don't get blasted.
-  lastState = RadioState::NOSTATE;  // Forces an update.
+//  lastState = RadioState::NOSTATE;  // Forces an update.
   powerUp = true;                   // This delays receiver start-up to allow transients to settle.
 
   //  Draw the entire radio display.
@@ -1088,9 +1088,9 @@ void loop() {
   if (menu != MenuSelect::BOGUS_PIN_READ and (radioState != RadioState::SSB_TRANSMIT_STATE) and (radioState != RadioState::FT8_TRANSMIT_STATE) and (radioState != RadioState::CW_TRANSMIT_STRAIGHT_STATE) and (radioState != RadioState::CW_TRANSMIT_KEYER_STATE)) {
     button.ExecuteButtonPress(menu);
   }
-  //  State detection for modes which can transmit.  AM and SAM don't transmit, so there is not a state transition required.
+
+  //  State detection before entering the primary radio loop.  AM and SAM don't transmit, so there is not a state transition required.
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE and digitalRead(PTT) == HIGH) radioState = RadioState::SSB_RECEIVE_STATE;
-  //  if (bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE and digitalRead(PTT) == HIGH) radioState = RadioState::SSB_CALIBRATE_STATE;
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE and digitalRead(PTT) == LOW) radioState = RadioState::SSB_TRANSMIT_STATE;
 
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE and SerialUSB1.rts() == LOW) radioState = RadioState::FT8_RECEIVE_STATE;
@@ -1103,8 +1103,23 @@ void loop() {
 
   // Transition to new state if required.
   if (lastState != radioState) {
-    SetAudioOperatingState(radioState);
 
+// Avoid changing the audio system if possible.
+// If moving from one receive state to another, audio system update is not required.  Demodulation selection is done in ReceiverDSP.
+// So updating the audio system is only required when moving from receive to transmit, or vice versa.
+if(radioState == RadioState::SSB_RECEIVE_STATE and lastState == RadioState::SSB_TRANSMIT_STATE) SetAudioOperatingState(radioState);
+if(radioState == RadioState::SSB_TRANSMIT_STATE and lastState == RadioState::SSB_RECEIVE_STATE) SetAudioOperatingState(radioState);
+
+if(radioState == RadioState::FT8_RECEIVE_STATE and lastState == RadioState::FT8_TRANSMIT_STATE) SetAudioOperatingState(radioState);
+if(radioState == RadioState::FT8_TRANSMIT_STATE and lastState == RadioState::FT8_RECEIVE_STATE) SetAudioOperatingState(radioState);
+
+if(radioState == RadioState::CW_RECEIVE_STATE and lastState == RadioState::CW_TRANSMIT_STRAIGHT_STATE) SetAudioOperatingState(radioState);
+if(radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE and lastState == RadioState::CW_RECEIVE_STATE) SetAudioOperatingState(radioState);
+
+if(radioState == RadioState::CW_RECEIVE_STATE and lastState == RadioState::CW_TRANSMIT_KEYER_STATE) SetAudioOperatingState(radioState);
+if(radioState == RadioState::CW_TRANSMIT_KEYER_STATE and lastState == RadioState::CW_RECEIVE_STATE) SetAudioOperatingState(radioState);
+
+// Customization dependent on required mode.
     if (radioState == RadioState::CW_RECEIVE_STATE) modecontrol.CWReceiveMode();
     if (radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE) modecontrol.CWTransmitMode();
     if (radioState == RadioState::CW_TRANSMIT_KEYER_STATE) modecontrol.CWTransmitMode();
@@ -1117,6 +1132,7 @@ void loop() {
 
     if (radioState == RadioState::AM_RECEIVE_STATE) modecontrol.AMReceiveMode();
     if (radioState == RadioState::SAM_RECEIVE_STATE) modecontrol.SAMReceiveMode();
+//    AudioInterrupts();
   }
 //  if (radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE and lastState == RadioState::CW_RECEIVE_STATE) {
 //    Serial.printf("spectrumErased = %d\n", display.spectrumErased);
@@ -1206,7 +1222,7 @@ void loop() {
     default:
       break;
   }
-  //======================  End SSB Mode =================
+  // End SSB Mode
 
   // Begin CW Mode state machine
 
@@ -1305,13 +1321,14 @@ void loop() {
       break;
     default:
       break;
-  }
+  }  // End CW Mode
 
   //  End radio state machine
-  if (lastState != radioState) {  // G0ORX 09012023
+//  if (lastState != radioState) {  // G0ORX 09012023
+// lastState is used to indicate configuration is required if the state has changed at the top of the next loop.
     lastState = radioState;
 //    display.ShowTransmitReceiveStatus();
-  }
+//  }
 
 #ifdef DEBUG1
   if (elapsed_micros_idx_t > (SR[SampleRate].rate / 960)) {
