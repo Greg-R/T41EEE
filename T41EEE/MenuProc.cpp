@@ -367,7 +367,7 @@ void CalibrateOptions() {
     case 12:  // Calibrate buttons
       SaveAnalogSwitchValues();
       calibrateFlag = 0;
-      display.RedrawDisplayScreen();
+      display.RedrawAll();
       eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
