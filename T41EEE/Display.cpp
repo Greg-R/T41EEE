@@ -723,7 +723,7 @@ void Display::ShowCurrentPowerSetting() {
   tft.setCursor(OPERATION_STATS_X + 275, FREQUENCY_Y + 30);
   tft.setTextColor(RA8875_RED, RA8875_BLACK);
   tft.print(ConfigData.transmitPowerLevel, 1);  // Power output is a float
-  tft.print(" Watts");
+  tft.print(" Watts  ");
   tft.setTextColor(RA8875_WHITE);
 }
 

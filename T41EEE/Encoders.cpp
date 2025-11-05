@@ -219,6 +219,76 @@ float GetEncoderValueLive(float minValue, float maxValue, float startValue, floa
 
 /*****
   Purpose: Use the encoder to change the value of a number in some other function.
+           This function does not have a while loop, thus it must be used inside
+           some other loop.  Major revision Greg Raven KF5N October 24, 2025.
+
+  Parameter list:
+    int minValue                The lowest value allowed.
+    int maxValue                The largest value allowed.
+    int startValue              The starting numeric value.
+    int increment               The amount by which each increment changes the value.
+    std:string prompt[]         The input textual prompt.
+    bool left                   Put in left or right slot at top of display.
+    bool colorRed               If true, the revised value is displayed in red.
+  Return value;
+    int                         The revised value.
+*****/
+float GetEncoderValueLoopFloat(float minValue, float maxValue, float startValue, float increment, int precision, std::string prompt, bool left, bool colorRed) {
+//  int currentValue = startValue;
+  MenuSelect menu;
+  float currentValue = startValue;
+  tft.setFontScale((enum RA8875tsize)1);
+  tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
+  if (left) tft.setCursor(0, 1);
+  else tft.setCursor(290, 1);  //// 260
+  tft.print(prompt.c_str());
+  if (colorRed) tft.setTextColor(RA8875_RED, RA8875_BLACK);  // Make value red if active.
+  if (abs(startValue) > 0) {
+    tft.print(startValue, precision);
+  } else {
+    if (0 >= increment and increment < 0.1) tft.print(startValue, 5);
+    else tft.print(startValue, precision);
+  }
+
+  while (true) {
+    if (filterEncoderMove != 0) {
+      currentValue += filterEncoderMove * increment;  // Bump up or down...
+      if (currentValue < minValue)
+        currentValue = minValue;
+      else if (currentValue > maxValue)
+        currentValue = maxValue;
+  if (left) tft.setCursor(0, 1);
+  else tft.setCursor(290, 1);  //// 260
+  tft.print("             ");  // Erase old
+   if (left) tft.setCursor(0, 1);
+  else tft.setCursor(290, 1);  //// 260 
+  tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
+  tft.print(prompt.c_str());
+//      tft.print(" ");
+      tft.setTextColor(RA8875_RED, RA8875_BLACK);
+      tft.print(currentValue, precision);
+      filterEncoderMove = 0;
+    }
+    menu = readButton();                           // Use ladder value to get menu choice
+    if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
+  if (left) tft.setCursor(0, 1);
+  else tft.setCursor(290, 1);
+tft.print("            ");  // Erase
+      return currentValue;
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+/*****
+  Purpose: Use the encoder to change the value of a number in some other function.
            This function does not have a while loop.  Thus it must be used inside
            some other loop.
 

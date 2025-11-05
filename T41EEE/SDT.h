@@ -953,6 +953,7 @@ int GetEncoderValue(int minValue, int maxValue, int startValue, int increment, s
 float GetEncoderValueLive(float minValue, float maxValue, float startValue, float increment, std::string prompt, bool left, bool colorRed);
 float GetEncoderValueLiveString(float minValue, float maxValue, float startValue, float increment, std::string prompt, bool left);  //AFP 10-22-22
 q15_t GetEncoderValueLiveQ15t(int minValue, int maxValue, int startValue, int increment, std::string prompt, bool left);
+float GetEncoderValueLoopFloat(float minValue, float maxValue, float startValue, float increment, int precision, std::string prompt, bool left, bool colorRed);
 void GetFavoriteFrequency();
 float HaversineDistance(float dxLat, float dxLon);
 void initializeAudioPaths();  // Greg KF5N March 9, 2025

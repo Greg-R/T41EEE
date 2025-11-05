@@ -875,11 +875,25 @@ void SSBOptions() {
 void RFOptions() {
   const std::string rfOptions[] = { "TX Power Set", "RF Gain Set", "RF Auto-Gain On", "RF Auto-Gain Off", "Auto-Spectrum On", "AutoSpectrum Off", "Cancel" };
   int rfSet = 0;
+
   rfSet = SubmenuSelect(rfOptions, 7, rfSet);
 
   switch (rfSet) {
-    case 0:  // TX Power Set.  AFP 10-21-22
-      ConfigData.transmitPowerLevel = static_cast<float32_t>(GetEncoderValue(1, 20, ConfigData.transmitPowerLevel, 1, "Power: "));
+    case 0:  // TX Power Set.
+//    calibrateFlag = true;
+//      ConfigData.transmitPowerLevel = static_cast<float32_t>(GetEncoderValue(1, 20, ConfigData.transmitPowerLevel, 1, "Power: ", true, true));
+ConfigData.transmitPowerLevel = GetEncoderValueLoopFloat(1, 20, ConfigData.transmitPowerLevel, 1, 1, "Power: ", true, true);
+      /*
+      menu = readButton();
+      if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
+        if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
+          tft.setCursor(0, 1);
+          tft.print("                ");  // Erase.
+          eeprom.CalDataWrite();
+          calibrateFlag = 0;
+        }
+      }
+      */
       // When the transmit power level is set, this means ALL of the power coefficients must be revised!
       // powerOutCW and powerOutSSB must be updated.
       initPowerCoefficients();
