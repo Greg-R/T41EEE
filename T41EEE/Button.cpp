@@ -723,7 +723,11 @@ void Button::ButtonSelectSideband() {
     default:
       break;
   }
-  ExecuteModeChange();
+////  ExecuteModeChange();
+SetFreq();
+encoderFilterFlag = true;
+display.BandInformation();
+//display.UpdateAudioGraphics();
 }
 
 
