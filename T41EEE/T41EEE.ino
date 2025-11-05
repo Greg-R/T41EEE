@@ -1385,7 +1385,7 @@ if(radioState == RadioState::CW_TRANSMIT_KEYER_STATE and lastState == RadioState
   usec1Old = usec1;
 #endif
 
-//  if (ms_500.check() == 1) {  // For clock updates AFP 10-26-22
-//    display.DisplayClock();
-//  }
+  if (ms_500.check() == 1) {  // For clock updates AFP 10-26-22
+    display.DisplayClock();
+  }
 }  // end loop()

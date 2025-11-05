@@ -149,7 +149,8 @@ void RxCalibrate::printCalType(bool autoCal, bool autoCalDone) {
       void
  *****/
 void RxCalibrate::CalibratePreamble(int setZoom) {
-  cessb1.processorUsageMaxReset();
+//  cessb1.processorUsageMaxReset();
+controlAudioOut(ConfigData.audioOut, true);  // Mute all receiver audio.
   calOnFlag = true;
   exitManual = false;
   transmitPowerLevelTemp = ConfigData.transmitPowerLevel;  //AFP 05-11-23
@@ -263,8 +264,8 @@ void RxCalibrate::CalibrateEpilogue(bool radioCal, bool saveToEeprom) {
   fftOffset = 0;                                    // Some reboots may be caused by large fftOffset values when Auto-Spectrum is on.
   if ((MASTER_CLK_MULT_RX == 2) or (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   radioState = tempState;
-//  lastState = RadioState::NOSTATE;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 16, 2023
-SetAudioOperatingState(radioState);
+  lastState = RadioState::NOSTATE;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 16, 2023
+  SetAudioOperatingState(radioState);
   powerUp = true;                   // Clip off transient.
   return;
 }

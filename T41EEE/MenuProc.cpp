@@ -246,7 +246,6 @@ void CalibrateOptions() {
 void CalibrateOptions() {
   int freqCorrectionFactorOld = 0;
   int32_t increment = 100;
-  char freqCal[] = "Freq Cal: ";
   MenuSelect menu;
 
   //  tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 30, CHAR_HEIGHT, RA8875_BLACK);

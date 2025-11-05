@@ -243,7 +243,8 @@ void TxCalibrate::printCalType(bool autoCal, bool autoCalDone) {
       void
  *****/
 void TxCalibrate::CalibratePreamble(int setZoom) {
-  cessb1.processorUsageMaxReset();
+//  cessb1.processorUsageMaxReset();
+controlAudioOut(ConfigData.audioOut, true);  // Mute all receiver audio.
   calOnFlag = true;  // Used for the special display during calibration and also high-dynamic range FFT.
   exitManual = false;
   transmitPowerLevelTemp = ConfigData.transmitPowerLevel;  //AFP 05-11-23
@@ -358,7 +359,7 @@ void TxCalibrate::CalibrateEpilogue() {
   else tft.fillWindow();                                         // Clear the display in radioCal.
   fftOffset = 0;                                                 // Some reboots may be caused by large fftOffset values when Auto-Spectrum is on.
   if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
-//  lastState = RadioState::NOSTATE;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 16, 2023
+  lastState = RadioState::NOSTATE;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 16, 2023
   radioState = tempState;
   SetAudioOperatingState(radioState);  // Restore state.
   powerUp = true;
