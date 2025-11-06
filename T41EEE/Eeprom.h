@@ -16,11 +16,11 @@ public:
 
 void ConfigDataWrite();
 void ConfigDataRead();
-void ConfigDataRead(config_t configStruct);
+void ConfigDataRead(config_t &configStruct);
 void ConfigDataWriteSize(uint32_t structSize);
 void CalDataWrite();
 void CalDataRead();
-void CalDataRead(calibration_t calStruct);
+void CalDataRead(calibration_t &calStruct);
 void CalDataWriteSize(uint32_t structSize);
 void BandsWrite();
 void BandsRead();

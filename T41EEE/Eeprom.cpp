@@ -40,7 +40,7 @@ void Eeprom::ConfigDataRead() {
   Return value;
     void
 *****/
-void Eeprom::ConfigDataRead(config_t configStruct) {
+void Eeprom::ConfigDataRead(config_t &configStruct) {
   EEPROM.get(EEPROM_BASE_ADDRESS + 4, configStruct);  // Read as one large chunk
 }
 
@@ -98,8 +98,8 @@ void Eeprom::CalDataRead() {
   Return value;
     void
 *****/
-void Eeprom::CalDataRead(calibration_t calStruct) {
-  EEPROM.get(EEPROM_BASE_ADDRESS + 4, calStruct);  // Read as one large chunk
+void Eeprom::CalDataRead(calibration_t &calStruct) {
+  EEPROM.get(CAL_BASE_ADDRESS + 4, calStruct);  // Read as one large chunk
 }
 
 
@@ -129,7 +129,6 @@ void Eeprom::CalDataWriteSize(uint32_t structSize) {
 *****/
 void Eeprom::BandsWrite() {
   EEPROM.put(BANDS_BASE_ADDRESS + 4, bands);
-//  Serial.printf("bands write!\n");
 }
 
 

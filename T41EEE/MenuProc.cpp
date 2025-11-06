@@ -772,7 +772,7 @@ void SSBOptions() {
   float imdAmplitude = 0.0;
   float imdAmplitudedB = 10.0;
   MenuSelect menu = MenuSelect::BOGUS_PIN_READ;
-  const std::string micChoices[] = { "CESSB", "SSB", "FT8", "Comp On", "Comp Off", "Mic Gain", "Comp Threshold", "Comp Ratio", "IMD Test", "Cancel" };
+  const std::string micChoices[] = { "CESSB", "SSB", "FT8", "Comp On", "Comp Off", "Mic Gain", "Comp Threshold", "Comp Ratio", "IMD Test ", "Cancel" };
 
   micChoice = SubmenuSelect(micChoices, 10, micChoice);
   switch (micChoice) {
@@ -824,20 +824,21 @@ void SSBOptions() {
       radioState = RadioState::SSB_IM3TEST_STATE;
       bands.bands[ConfigData.currentBand].mode = RadioMode::SSB_MODE;
       SetAudioOperatingState(radioState);
-      button.ExecuteModeChange();
+//      button.ExecuteModeChange();
       SetFreq();
       digitalWrite(RXTX, HIGH);  //xmit on
       display.ShowTransmitReceiveStatus();
-
       while (menu != MenuSelect::MENU_OPTION_SELECT) {
         menu = readButton();  // Use this to quit.
         // Return IMD amplitude in dB.
-        imdAmplitudedB = GetEncoderValueLive(0.0, 100.0, imdAmplitudedB, 1.0, micChoices[8], false, true);
+        imdAmplitudedB = GetEncoderValueLive(0.0, 100.0, imdAmplitudedB, 1.0, micChoices[8], true, true);
         imdAmplitude = volumeLog[static_cast<int>(imdAmplitudedB)];
         toneSSBCal1.amplitude(imdAmplitude);
         toneSSBCal2.amplitude(imdAmplitude);
         SSB_ExciterIQData();
       }
+tft.setCursor(0, 1);
+tft.print("            ");  // Erase
       radioState = RadioState::SSB_RECEIVE_STATE;
       digitalWrite(RXTX, LOW);  // Transmitter off.
       SetAudioOperatingState(radioState);
@@ -1138,13 +1139,13 @@ void ConfigDataOptions() {  //           0               1                2     
     void
 *****/
 void CalDataOptions() {  //           0               1                2               3               4               5                  6               7          8
-  const std::string CalDataOpts[] = { "Save Current", "Load Defaults", "Copy Cal->SD", "Copy SD->Cal", "Cal->Serial", "Default->Serial", "Stack->Serial", "SD->Serial", "Cancel" };
+  const std::string CalDataOpts[] = { "Save Current", "Load Defaults", "Copy Cal->SD", "Copy SD->Cal", "Cal EEPROM->Serial", "Default->Serial", "Stack->Serial", "SD->Serial", "Cancel" };
   int defaultOpt = 0;
   calibration_t tempCal;     // A temporary calibration_t struct to copy CalData data into.
   calibration_t defaultCal;  // The configuration defaults.
   defaultOpt = SubmenuSelect(CalDataOpts, 9, defaultOpt);
   switch (defaultOpt) {
-    case 0:  // Save current CalData struct to ConfigData non-volatile memory.
+    case 0:  // Save current CalData struct to CalData non-volatile memory.
       eeprom.CalDataWrite();
       break;
 
@@ -1168,13 +1169,13 @@ void CalDataOptions() {  //           0               1                2        
       display.RedrawAll();  // Assume there are lots of changes and do a heavy-duty refresh.  KF5N August 7, 2023
       break;
 
-    case 4:  // CalData->Serial
+    case 4:  // CalData EEPROM->Serial
       {
         Serial.println(F("\nBegin CalData from CalData"));
         // Don't want to overwrite the stack.  Need a temporary struct, read the CalData data into that.
-        //        calibration_t CalData_temp;
-        //        EEPROM.get(CAL_BASE_ADDRESS + 4, CalData_temp);
+//                EEPROM.get(CAL_BASE_ADDRESS + 4, tempCal);
         eeprom.CalDataRead(tempCal);
+        Serial.printf("tempCal.CWPowerCalibrationFactor[0] = %f\n", tempCal.CWPowerCalibrationFactor[0]);
         json.saveCalibration(calFilename, tempCal, false);  // Write the temporary struct to the serial monitor.
         Serial.println(F("\nEnd CalData from CalData\n"));
       }
@@ -1186,7 +1187,7 @@ void CalDataOptions() {  //           0               1                2        
       Serial.println(F("\nEnd CalData defaults\n"));
       break;
 
-    case 6:  // Current->Serial
+    case 6:  // Stack->Serial
       Serial.println(F("Begin CalData on the stack"));
       json.saveCalibration(calFilename, CalData, false);  // Write current CalData struct to the Serial monitor.
       Serial.println(F("\nEnd CalData on the stack\n"));

@@ -281,8 +281,6 @@ void SetAudioOperatingState(RadioState operatingState) {
 
       mixer1_tx.gain(0, 1);       // microphone audio on.
       mixer1_tx.gain(1, 0);       // testTone off.
-                                  ////      switch1_tx.setChannel(0);   // Connect microphone path.
-                                  //    switch2_tx.setChannel(1);  // Disonnect 1 kHz test tone path.
       mixer_rxtx_I.gain(0, 1.0);  // Connect transmitter back-end to Audio Adapter.
       mixer_rxtx_Q.gain(0, 1.0);
       mixer_rxtx_I.gain(1, 0.0);  // Disconnect headphone path to Audio Adapter.
@@ -329,6 +327,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       sgtl5000_1.unmuteLineout();
       patchCord1.connect();  // Receiver I channel
       patchCord2.connect();  // Receiver Q channel
+      patchCord3.disconnect();  // Receiver audio
 
       ADC_RX_I.end();
       ADC_RX_I.clear();
@@ -396,8 +395,10 @@ void SetAudioOperatingState(RadioState operatingState) {
       // QSD disabled and disconnected
       controlAudioOut(AudioState::MUTE_BOTH, true);  // Mute all audio.
       sgtl5000_1.unmuteLineout();
-      //      patchCord1.connect();  // Receiver I channel
-      //      patchCord2.connect();  // Receiver Q channel
+      patchCord1.disconnect();  // Receiver I channel
+      patchCord2.disconnect();  // Receiver Q channel
+      patchCord3.disconnect();  // Receiver audio
+      connect0.disconnect();       // Disconnect microphone input data stream.
 
       ADC_RX_I.end();
       ADC_RX_I.clear();
@@ -449,10 +450,6 @@ void SetAudioOperatingState(RadioState operatingState) {
       ////      Q_out_R_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
       Q_in_L_Ex.begin();  // I channel Microphone audio
       Q_in_R_Ex.begin();  // Q channel Microphone audio
-                          //      ADC_RX_I.begin();   // Calibration is full duplex!  Activate receiver data.  No demodulation during calibrate, spectrum only.
-                          //      ADC_RX_Q.begin();
-                          ////      patchCord25.disconnect();
-                          ////      patchCord26.disconnect();
 
       // Update equalizer.  Update first 14 only.  Last two are constant.
       for (int i = 0; i < 14; i = i + 1) dbBand1[i] = ConfigData.equalizerXmt[i];

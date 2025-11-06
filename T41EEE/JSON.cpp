@@ -160,8 +160,8 @@ FLASHMEM void JSON::saveConfiguration(const char *filename, const config_t &Conf
   // Set the values in the document
   doc["versionSettings"] = ConfigData.versionSettings;    // Fix for version not updating in JSON file.  KF5N March 18, 2024.
   doc["AGCMode"] = ConfigData.AGCMode;
-  doc["audioVolume"] = ConfigData.speakerVolume;
-  doc["audioVolume"] = ConfigData.headphoneVolume;
+  doc["speakerVolume"] = ConfigData.speakerVolume;
+  doc["headphoneVolume"] = ConfigData.headphoneVolume;
   doc["audioOut"] = ConfigData.audioOut;
   doc["rfGainCurrent"] = ConfigData.rfGainCurrent;
   for (int i = 0; i < NUMBER_OF_BANDS; i++) doc["rfGain"][i] = ConfigData.rfGain[i];

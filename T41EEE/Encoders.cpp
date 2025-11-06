@@ -280,13 +280,6 @@ tft.print("            ");  // Erase
 }
 
 
-
-
-
-
-
-
-
 /*****
   Purpose: Use the encoder to change the value of a number in some other function.
            This function does not have a while loop.  Thus it must be used inside
