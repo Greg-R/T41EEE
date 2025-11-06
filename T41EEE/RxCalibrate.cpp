@@ -263,6 +263,7 @@ void RxCalibrate::CalibrateEpilogue(bool radioCal, bool saveToEeprom) {
   else tft.fillWindow();                            // Clear the display.
   fftOffset = 0;                                    // Some reboots may be caused by large fftOffset values when Auto-Spectrum is on.
   if ((MASTER_CLK_MULT_RX == 2) or (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
+  bands.bands[ConfigData.currentBand].sideband = tempSideband;  // Restore the sideband.
   radioState = tempState;
   lastState = RadioState::NOSTATE;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 16, 2023
   SetAudioOperatingState(radioState);

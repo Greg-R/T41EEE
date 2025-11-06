@@ -1817,7 +1817,7 @@ void Display::RedrawAll() {
   UpdateVolumeField();
   ShowFrequency();
   SetBandRelay();                   // Set LPF relays for current band.
-//  lastState = RadioState::NOSTATE;  // Force an update.
+  lastState = RadioState::NOSTATE;  // Force an update.
 }
 
 

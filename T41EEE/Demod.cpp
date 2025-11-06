@@ -32,7 +32,7 @@ float32_t Cos = 0.0;
   // http://svn.tapr.org/repos_sdr_hpsdr/trunk/W5WC/PowerSDR_HPSDR_mRX_PS/Source/wdsp/
 *****/
 void AMDecodeSAM() {
-
+//Serial.printf("DecodeSAM\n");
   int zeta_help = 65;
   float32_t zeta = (float32_t)zeta_help / 100.0;  // PLL step response: smaller, slower response 1.0 - 0.1
   float32_t g1 = 1.0 - exp(-2.0 * ConfigData.omegaN * zeta * 1 / 24000);
@@ -47,8 +47,6 @@ void AMDecodeSAM() {
   float32_t onem_mtauI = 1.0 - mtauI;
   uint8_t fade_leveler = 1;
   float32_t Sin, Cos;
-
-//  tft.print("(SAM) ");  //AFP 11-01-22
 
   for (unsigned i = 0; i < FFT_length / 2; i++) {
     Sin = arm_sin_f32(phzerror);

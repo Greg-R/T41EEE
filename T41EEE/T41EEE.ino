@@ -1022,23 +1022,23 @@ FLASHMEM void setup() {
   // Set up the initial state/mode.
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) {
     radioState = RadioState::CW_RECEIVE_STATE;
-    bands.bands[ConfigData.currentBand].mode = RadioMode::CW_MODE;
+  //  bands.bands[ConfigData.currentBand].mode = RadioMode::CW_MODE;
   }
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE) {
     radioState = RadioState::SSB_RECEIVE_STATE;
-    bands.bands[ConfigData.currentBand].mode = RadioMode::SSB_MODE;
+  //  bands.bands[ConfigData.currentBand].mode = RadioMode::SSB_MODE;
   }
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) {
     radioState = RadioState::FT8_RECEIVE_STATE;
-    bands.bands[ConfigData.currentBand].mode = RadioMode::FT8_MODE;
+  //  bands.bands[ConfigData.currentBand].mode = RadioMode::FT8_MODE;
   }
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::AM_MODE) {
     radioState = RadioState::AM_RECEIVE_STATE;
-    bands.bands[ConfigData.currentBand].mode = RadioMode::AM_MODE;
+  //  bands.bands[ConfigData.currentBand].mode = RadioMode::AM_MODE;
   }
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::SAM_MODE) {
     radioState = RadioState::SAM_RECEIVE_STATE;
-    bands.bands[ConfigData.currentBand].mode = RadioMode::SAM_MODE;
+  //  bands.bands[ConfigData.currentBand].mode = RadioMode::SAM_MODE;
   }
   SetAudioOperatingState(radioState);
 
@@ -1116,6 +1116,9 @@ if(radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE and lastState == RadioSt
 
 if(radioState == RadioState::CW_RECEIVE_STATE and lastState == RadioState::CW_TRANSMIT_KEYER_STATE) SetAudioOperatingState(radioState);
 if(radioState == RadioState::CW_TRANSMIT_KEYER_STATE and lastState == RadioState::CW_RECEIVE_STATE) SetAudioOperatingState(radioState);
+
+if(radioState == RadioState::SAM_RECEIVE_STATE and lastState != RadioState::SAM_RECEIVE_STATE) SetAudioOperatingState(radioState);
+if(radioState == RadioState::AM_RECEIVE_STATE and lastState != RadioState::AM_RECEIVE_STATE) SetAudioOperatingState(radioState);
 
 // Customization dependent on required mode.
     if (radioState == RadioState::CW_RECEIVE_STATE) modecontrol.CWReceiveMode();
