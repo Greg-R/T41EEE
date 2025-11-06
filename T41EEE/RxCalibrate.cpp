@@ -163,7 +163,7 @@ controlAudioOut(ConfigData.audioOut, true);  // Mute all receiver audio.
     tempSideband = bands.bands[ConfigData.currentBand].sideband;
     // Use the last upper or lower sideband (CW, SSB, or FT8) during calibration.
     bands.bands[ConfigData.currentBand].sideband = ConfigData.lastSideband[ConfigData.currentBand];
-  }
+  } else tempSideband = bands.bands[ConfigData.currentBand].sideband;
   ConfigData.CWOffset = 2;                   // 750 Hz for TX calibration.  Epilogue restores user selected offset.
   userZoomIndex = ConfigData.spectrum_zoom;  // Save the zoom index so it can be reset at the conclusion.  KF5N August 12, 2023
   zoomIndex = setZoom - 1;

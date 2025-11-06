@@ -748,31 +748,31 @@ void Button::ButtonMode()  //  Greg KF5N March 11, 2025
     case RadioMode::CW_MODE:  // Toggle the current mode
       bands.bands[ConfigData.currentBand].mode = RadioMode::SSB_MODE;
       radioState = RadioState::SSB_RECEIVE_STATE;
-      bands.bands[ConfigData.currentBand].mode = RadioMode::SSB_MODE;
+//      bands.bands[ConfigData.currentBand].mode = RadioMode::SSB_MODE;
       bands.bands[ConfigData.currentBand].sideband = ConfigData.lastSideband[ConfigData.currentBand];
       break;
     case RadioMode::SSB_MODE:
       bands.bands[ConfigData.currentBand].mode = RadioMode::FT8_MODE;
       radioState = RadioState::FT8_RECEIVE_STATE;
-      bands.bands[ConfigData.currentBand].mode = RadioMode::FT8_MODE;
+//      bands.bands[ConfigData.currentBand].mode = RadioMode::FT8_MODE;
       bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER;  // FT8 always USB.
       break;
     case RadioMode::FT8_MODE:  // Toggle the current mode
       bands.bands[ConfigData.currentBand].mode = RadioMode::AM_MODE;
       radioState = RadioState::AM_RECEIVE_STATE;
-      bands.bands[ConfigData.currentBand].mode = RadioMode::AM_MODE;
+//      bands.bands[ConfigData.currentBand].mode = RadioMode::AM_MODE;
       bands.bands[ConfigData.currentBand].sideband = Sideband::BOTH_AM;
       break;
     case RadioMode::AM_MODE:  // Toggle the current mode
       bands.bands[ConfigData.currentBand].mode = RadioMode::SAM_MODE;
       radioState = RadioState::SAM_RECEIVE_STATE;
-      bands.bands[ConfigData.currentBand].mode = RadioMode::SAM_MODE;
+//      bands.bands[ConfigData.currentBand].mode = RadioMode::SAM_MODE;
       bands.bands[ConfigData.currentBand].sideband = Sideband::BOTH_SAM;
       break;
     case RadioMode::SAM_MODE:  // Toggle the current mode
       bands.bands[ConfigData.currentBand].mode = RadioMode::CW_MODE;
       radioState = RadioState::CW_RECEIVE_STATE;
-      bands.bands[ConfigData.currentBand].mode = RadioMode::CW_MODE;
+//      bands.bands[ConfigData.currentBand].mode = RadioMode::CW_MODE;
       bands.bands[ConfigData.currentBand].sideband = ConfigData.lastSideband[ConfigData.currentBand];
       break;
     default:

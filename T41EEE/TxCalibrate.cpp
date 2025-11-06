@@ -261,7 +261,7 @@ controlAudioOut(ConfigData.audioOut, true);  // Mute all receiver audio.
     tempSideband = bands.bands[ConfigData.currentBand].sideband;
     // Use the last upper or lower sideband.
     bands.bands[ConfigData.currentBand].sideband = ConfigData.lastSideband[ConfigData.currentBand];
-  }
+  } else tempSideband = bands.bands[ConfigData.currentBand].sideband;
   ConfigData.CWOffset = 2;                   // 750 Hz for TX calibration.  Epilogue restores user selected offset.
                                              //  userxmtMode = ConfigData.xmtMode;          // Store the user's mode setting.  KF5N July 22, 2023
   userZoomIndex = ConfigData.spectrum_zoom;  // Save the zoom index so it can be reset at the conclusion.  KF5N August 12, 2023
