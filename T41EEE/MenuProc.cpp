@@ -1045,19 +1045,20 @@ void VFOSelect() {
 
 /*****
   Purpose: Allow user to set current user configuration values or restore default settings.
-
+           "Get favorite" and "Set favorite" are currently removed.
   Parameter list:
     void
 
   Return value
     void
 *****/
-void ConfigDataOptions() {  //           0               1                2               3               4                  5                  6                  7                  8              9           10
-  const std::string ConfigDataOpts[] = { "Save Current", "Load Defaults", "Get Favorite", "Set Favorite", "Copy Config->SD", "Copy SD->Config", "Config->Serial", "Default->Serial", "Stack->Serial", "SD->Serial", "Cancel" };
+void ConfigDataOptions() {  //           0               1                2                  3                  4                  5                  6                7                  8              9           10
+//  const std::string ConfigDataOpts[] = { "Save Current", "Load Defaults", "Get Favorite", "Set Favorite", "Copy Config->SD", "Copy SD->Config", "Config->Serial", "Default->Serial", "Stack->Serial", "SD->Serial", "Cancel" };
+  const std::string ConfigDataOpts[] = { "Save Current", "Load Defaults", "Copy Config->SD", "Copy SD->Config", "EEPROM->Serial", "Default->Serial", "Stack->Serial", "SD->Serial", "Cancel" };
   int defaultOpt = 0;
   config_t tempConfig;     // A temporary config_t struct to copy ConfigData data into.
   config_t defaultConfig;  // The configuration defaults.
-  defaultOpt = SubmenuSelect(ConfigDataOpts, 11, defaultOpt);
+  defaultOpt = SubmenuSelect(ConfigDataOpts, 9, defaultOpt);
   switch (defaultOpt) {
     case 0:  // Save current ConfigData struct to ConfigData non-volatile memory.  Also save the bands struct at the same time!
       eeprom.ConfigDataWrite();
@@ -1067,7 +1068,7 @@ void ConfigDataOptions() {  //           0               1                2     
     case 1:
       eeprom.ConfigDataDefaults();  // Restore defaults to ConfigData struct and refresh display.
       break;
-
+/*
     case 2:
       eeprom.GetFavoriteFrequency();  // Get a stored frequency and store in active VFO
       break;
@@ -1075,47 +1076,47 @@ void ConfigDataOptions() {  //           0               1                2     
     case 3:
       eeprom.SetFavoriteFrequency();  // Set favorites
       break;
-
-    case 4:                                                      // Copy ConfigData->SD.
+*/
+    case 2:                                                      // Copy ConfigData->SD.
       eeprom.ConfigDataRead(tempConfig);                         // Read as one large chunk
       json.saveConfiguration(configFilename, tempConfig, true);  // Save ConfigData struct to SD
       break;
 
-    case 5:                                                // Copy SD->ConfigData
+    case 3:                                                // Copy SD->ConfigData
       json.loadConfiguration(configFilename, ConfigData);  // Copy from SD to struct in active memory (on the stack) ConfigData.
       eeprom.ConfigDataWrite();                            // Write to ConfigData non-volatile memory.
       initUserDefinedStuff();                              // Various things must be initialized.  This is normally done in setup().  KF5N February 21, 2024
-      tft.writeTo(L2);                                     // This is specifically to clear the bandwidth indicator bar.  KF5N August 7, 2023
-      tft.clearMemory();
-      tft.writeTo(L1);
+//      tft.writeTo(L2);                                     // This is specifically to clear the bandwidth indicator bar.  KF5N August 7, 2023
+//      tft.clearMemory();
+//      tft.writeTo(L1);
       display.RedrawAll();  // Assume there are lots of changes and do a heavy-duty refresh.  KF5N August 7, 2023
       break;
 
-    case 6:  // ConfigData->Serial
+    case 4:  // EEPROM->Serial
       {
-        Serial.println(F("\nBegin ConfigData from ConfigData"));
+        Serial.println(F("\nBegin ConfigData from EEPROM"));
         // Don't want to overwrite the stack.  Need a temporary struct, read the ConfigData data into that.
         //  config_t ConfigData_temp;
         //  EEPROM.get(EEPROM_BASE_ADDRESS + 4, ConfigData_temp);
         eeprom.ConfigDataRead(tempConfig);
         json.saveConfiguration(configFilename, tempConfig, false);  // Write the temporary struct to the serial monitor.
-        Serial.println(F("\nEnd ConfigData from ConfigData\n"));
+        Serial.println(F("\nEnd ConfigData from EEPROM\n"));
       }
       break;
 
-    case 7:  // Defaults->Serial
+    case 5:  // Defaults->Serial
       Serial.println(F("\nBegin ConfigData defaults"));
       json.saveConfiguration(configFilename, defaultConfig, false);  // Write default ConfigData struct to the Serial monitor.
       Serial.println(F("\nEnd ConfigData defaults\n"));
       break;
 
-    case 8:  // Current->Serial
+    case 6:  // Stack->Serial
       Serial.println(F("Begin ConfigData on the stack"));
       json.saveConfiguration(configFilename, ConfigData, false);  // Write current ConfigData struct to the Serial monitor.
       Serial.println(F("\nEnd ConfigData on the stack\n"));
       break;
 
-    case 9:  // SDConfigData->Serial
+    case 7:  // SD ConfigData->Serial
       Serial.println(F("Begin ConfigData on the SD card"));
       json.printFile(configFilename);  // Write SD card ConfigData struct to the Serial monitor.
       Serial.println(F("End ConfigData on the SD card\n"));
@@ -1138,8 +1139,8 @@ void ConfigDataOptions() {  //           0               1                2     
   Return value
     void
 *****/
-void CalDataOptions() {  //           0               1                2               3               4               5                  6               7          8
-  const std::string CalDataOpts[] = { "Save Current", "Load Defaults", "Copy Cal->SD", "Copy SD->Cal", "Cal EEPROM->Serial", "Default->Serial", "Stack->Serial", "SD->Serial", "Cancel" };
+void CalDataOptions() {  //           0               1                2               3               4                     5                  6               7          8
+  const std::string CalDataOpts[] = { "Save Current", "Load Defaults", "Copy Cal->SD", "Copy SD->Cal", "EEPROM->Serial", "Defaults->Serial", "Stack->Serial", "SD->Serial", "Cancel" };
   int defaultOpt = 0;
   calibration_t tempCal;     // A temporary calibration_t struct to copy CalData data into.
   calibration_t defaultCal;  // The configuration defaults.
@@ -1154,7 +1155,6 @@ void CalDataOptions() {  //           0               1                2        
       break;
 
     case 2:  // Copy CalData->SD.
-             //      EEPROM.get(CAL_BASE_ADDRESS + 4, tempCal);         // Read as one large chunk
       eeprom.CalDataRead(tempCal);
       json.saveCalibration(calFilename, tempCal, true);  // Save ConfigData struct to SD
       break;
@@ -1162,22 +1162,22 @@ void CalDataOptions() {  //           0               1                2        
     case 3:                                        // Copy SD->CalData
       json.loadCalibration(calFilename, CalData);  // Copy from SD to struct in active memory (on the stack) ConfigData.
       eeprom.CalDataWrite();                       // Write to ConfigData non-volatile memory.
-      initUserDefinedStuff();                      // Various things must be initialized.  This is normally done in setup().  KF5N February 21, 2024
-      tft.writeTo(L2);                             // This is specifically to clear the bandwidth indicator bar.  KF5N August 7, 2023
-      tft.clearMemory();
-      tft.writeTo(L1);
-      display.RedrawAll();  // Assume there are lots of changes and do a heavy-duty refresh.  KF5N August 7, 2023
+//      initUserDefinedStuff();                      // Various things must be initialized.  This is normally done in setup().  KF5N February 21, 2024
+//      tft.writeTo(L2);                             // This is specifically to clear the bandwidth indicator bar.  KF5N August 7, 2023
+//      tft.clearMemory();
+//      tft.writeTo(L1);
+//      display.RedrawAll();  // Assume there are lots of changes and do a heavy-duty refresh.  KF5N August 7, 2023
       break;
 
     case 4:  // CalData EEPROM->Serial
       {
-        Serial.println(F("\nBegin CalData from CalData"));
+        Serial.println(F("\nBegin CalData from EEPROM"));
         // Don't want to overwrite the stack.  Need a temporary struct, read the CalData data into that.
 //                EEPROM.get(CAL_BASE_ADDRESS + 4, tempCal);
         eeprom.CalDataRead(tempCal);
-        Serial.printf("tempCal.CWPowerCalibrationFactor[0] = %f\n", tempCal.CWPowerCalibrationFactor[0]);
+//        Serial.printf("tempCal.CWPowerCalibrationFactor[0] = %f\n", tempCal.CWPowerCalibrationFactor[0]);
         json.saveCalibration(calFilename, tempCal, false);  // Write the temporary struct to the serial monitor.
-        Serial.println(F("\nEnd CalData from CalData\n"));
+        Serial.println(F("\nEnd CalData from EEPROM\n"));
       }
       break;
 

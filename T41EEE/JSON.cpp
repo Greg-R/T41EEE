@@ -441,7 +441,7 @@ FLASHMEM void JSON::saveCalibration(const char *filename, const calibration_t &C
 }
 
 
-// Prints the content of a file to the Serial
+// Prints the content of a file to the Serial monitor.
 void JSON::printFile(const char *filename) {
   // Open file for reading
   File file = SD.open(filename);

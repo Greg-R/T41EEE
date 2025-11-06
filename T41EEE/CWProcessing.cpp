@@ -44,6 +44,8 @@ long signalStart;
 long signalEnd;  // Start-end of dit or dah
 uint32_t gapLength;
 float freq[4] = { 562.5, 656.5, 750.0, 843.75 };
+bool drewGreenLastLoop{false};  // Variables used to control drawing of CW decode
+bool drewBlackLastLoop{false};  // indicator square.
 
 // This enum is used by an experimental Morse decoder.
 enum states { state0,
@@ -204,21 +206,25 @@ void DoCWReceiveProcessing() {  // All New AFP 09-19-22
     // Running average of corr coeff. L
     aveCorrResultL = .7 * corrResultL + .3 * aveCorrResultL;
     aveCorrResult = (corrResultR + corrResultL) / 2;
-    // Calculate Goertzel Mahnitude of incomming signal
+    // Calculate Goertzel Mahnitude of incoming signal.
     goertzelMagnitude1 = goertzel_mag(256, freq[ConfigData.CWOffset], 24000, float_buffer_L_CW);  //AFP 10-25-22
     goertzelMagnitude2 = goertzel_mag(256, freq[ConfigData.CWOffset], 24000, float_buffer_R_CW);  //AFP 10-25-22
     goertzelMagnitude = (goertzelMagnitude1 + goertzelMagnitude2) / 2;
     //Combine Correlation and Gowetzel Coefficients.  Tuning coefficient added.  Greg KF5N March 9, 2025
     combinedCoeff = static_cast<float32_t>(ConfigData.morseDecodeSensitivity) * aveCorrResult * goertzelMagnitude;
     //    Serial.printf("combinedCoeff = %f\n", combinedCoeff);  // Use this to tune decoder.
-    //  Changed CW decode "lock" indicator
-    if (combinedCoeff > 50) {  // AFP 10-26-22
+    //  Don't draw CW decode "lock" indicator if not required.
+    if (combinedCoeff > 50 and drewGreenLastLoop == false) {  // AFP 10-26-22
       tft.fillRect(699, 442, 14, 14, RA8875_GREEN);
-    } else if (combinedCoeff < 50) {  // AFP 10-26-22
+      drewGreenLastLoop = true;
+      drewBlackLastLoop = false;
+    } else if (combinedCoeff < 50 and drewBlackLastLoop == false) {  // AFP 10-26-22
       CWLevelTimer = millis();
       if (CWLevelTimer - CWLevelTimerOld > 2000) {
         CWLevelTimerOld = millis();
-//        tft.fillRect(700, 442, 15, 15, RA8875_BLACK);  // Erase
+        tft.fillRect(699, 442, 14, 14, RA8875_BLACK);  // Erase
+        drewBlackLastLoop = true;
+        drewGreenLastLoop = false;
       }
     }
     if (combinedCoeff > 50) {  // if  have a reasonable corr coeff, >50, then we have a keeper. // AFP 10-26-22

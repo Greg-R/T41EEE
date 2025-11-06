@@ -428,8 +428,8 @@ struct calibration_t {
   float32_t qDCoffsetCW[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
   float32_t iDCoffsetSSB[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
   float32_t qDCoffsetSSB[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
-  float32_t dacOffsetCW = 0.0;  // This must be "tuned" for each radio and/or Audio Adapter board.
-  float32_t dacOffsetSSB = 0.0;  // This must be "tuned" for each radio and/or Audio Adapter board.
+  float32_t dacOffsetCW = 0.0;   // The offsets may no longer be necessary.
+  float32_t dacOffsetSSB = 0.0;  // Leaving for now until more experience with F32.
 #endif
   bool CWradioCalComplete = false;
   bool SSBradioCalComplete = false;
@@ -952,7 +952,7 @@ float goertzel_mag(int numSamples, int TARGET_FREQUENCY, int SAMPLING_RATE, floa
 int GetEncoderValue(int minValue, int maxValue, int startValue, int increment, std::string);
 float GetEncoderValueLive(float minValue, float maxValue, float startValue, float increment, std::string prompt, bool left, bool colorRed);
 float GetEncoderValueLiveString(float minValue, float maxValue, float startValue, float increment, std::string prompt, bool left);  //AFP 10-22-22
-q15_t GetEncoderValueLiveQ15t(int minValue, int maxValue, int startValue, int increment, std::string prompt, bool left);
+////q15_t GetEncoderValueLiveQ15t(int minValue, int maxValue, int startValue, int increment, std::string prompt, bool left);
 float GetEncoderValueLoopFloat(float minValue, float maxValue, float startValue, float increment, int precision, std::string prompt, bool left, bool colorRed);
 void GetFavoriteFrequency();
 float HaversineDistance(float dxLat, float dxLon);

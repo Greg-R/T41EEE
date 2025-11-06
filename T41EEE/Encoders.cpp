@@ -345,7 +345,7 @@ float GetEncoderValueLiveString(float minValue, float maxValue, float startValue
     bool left                   true to print left (IQ Gain or IDC Offset)
   Return value;
     int                         the new value
-*****/
+*****
 q15_t GetEncoderValueLiveQ15t(int minValue, int maxValue, int startValue, int increment, std::string prompt, bool left)  //AFP 10-22-22
 {
   int currentValue = startValue;
@@ -382,7 +382,7 @@ q15_t GetEncoderValueLiveQ15t(int minValue, int maxValue, int startValue, int in
   }
   return static_cast<q15_t>(currentValue);
 }
-
+*/
 
 /*****
   Purpose: Use the encoder to change the value of a number in some other function.

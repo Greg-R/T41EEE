@@ -1143,13 +1143,12 @@ void Display::UpdateVolumeField() {
 void Display::UpdateAGCField() {
   Serial.printf("UpdateAGCField\n");
   tft.setFontScale((enum RA8875tsize)1);
-  ////  tft.fillRect(AGC_X_OFFSET - 10, AGC_Y_OFFSET, tft.getFontWidth() * 7 + 2, tft.getFontHeight(), RA8875_BLACK);
+      tft.setTextColor(RA8875_YELLOW, RA8875_BLACK);
   tft.setCursor(BAND_INDICATOR_X + 133, BAND_INDICATOR_Y);
   if (ConfigData.AGCMode) {  // The option for AGC
-    tft.setTextColor(RA8875_YELLOW, RA8875_BLACK);
     tft.print("AGC ON ");
   } else {
-    tft.setTextColor(DARKGREY);
+    tft.setTextColor(DARKGREY, RA8875_BLACK);
     tft.print("AGC OFF");
   }
 }
