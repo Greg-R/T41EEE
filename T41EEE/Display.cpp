@@ -605,7 +605,7 @@ void Display::ShowAutoStatus() {
   tft.setCursor(SPECTRUM_LEFT_X + 350, SPECTRUM_TOP_Y + 2);
   tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
   if (ConfigData.autoGain) {
-    tft.print("Auto-Gain On");
+    tft.print("Auto-Gain On    ");
   } else if (ConfigData.autoSpectrum) {
     tft.print("Auto-Spectrum On");
   } else
