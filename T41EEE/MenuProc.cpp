@@ -683,7 +683,7 @@ void ProcessEqualizerChoices(int EQType, char *title) {
     }    // end outer while
     eeprom.ConfigDataWrite();
   }
-  SetAudioOperatingState(radioState);
+  SetAudioOperatingState(radioState);  // Equalizer adjusted.
   display.RedrawAll();
 //  lastState = RadioState::NOSTATE;  // Force update of operating state.
 }
@@ -707,11 +707,12 @@ void EqualizerRecOptions() {
   switch (EQChoice) {
     case 0:
       ConfigData.receiveEQFlag = true;
-      button.ExecuteModeChange();
+//      button.ExecuteModeChange();
+FilterSetSSB();
       break;
     case 1:
       ConfigData.receiveEQFlag = false;
-      button.ExecuteModeChange();
+//      button.ExecuteModeChange();
       break;
     case 2:
       ProcessEqualizerChoices(0, (char *)"Receive Equalizer");

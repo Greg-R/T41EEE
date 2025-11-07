@@ -243,7 +243,8 @@ const float32_t DF1 = 4.0;                                         // decimation
 const float32_t DF2 = 2.0;                                         // decimation factor
 const float32_t DF = DF1 * DF2;                                    // decimation factor
 const float32_t n_samplerate = 176.0;                              // sample rate before decimation
-const uint32_t N_B = FFT_LENGTH / 2 / BUFFER_SIZE * (uint32_t)DF;  // 512/2/128 * 8 = 16
+//const uint32_t N_B = FFT_LENGTH / 2 / BUFFER_SIZE * (uint32_t)DF;  // 512/2/128 * 8 = 16
+const uint32_t N_B{16};
 const uint32_t N_DEC_B = N_B / (uint32_t)DF;
 const uint32_t NR_add_counter = 128;
 const float32_t n_desired_BW = 9.0;  // desired max BW of the filters
@@ -1049,6 +1050,7 @@ FLASHMEM void setup() {
   lastState = RadioState::NOSTATE;  // Forces an update.
   powerUp = true;                   // This delays receiver start-up to allow transients to settle.
 
+FilterSetSSB();  // This is important!  If this is not run up front various other filters go into never never land.
   //  Draw the entire radio display.
   display.RedrawAll();
 }
@@ -1360,6 +1362,7 @@ if(radioState == RadioState::AM_RECEIVE_STATE and lastState != RadioState::AM_RE
 
     volumeChangeFlag = false;
     display.UpdateVolumeField();
+
   }
 
   if (audioGraphicsFlag) {
