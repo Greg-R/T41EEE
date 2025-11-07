@@ -385,7 +385,7 @@ FLASHMEM void SetKeyPowerUp() {
     MenuSelect menu;
     RadioState temp = radioState;
 
-    SetAudioOperatingState(RadioState::SET_CW_SIDETONE);
+    SetAudioOperatingState(RadioState::CW_TRANSMIT_STRAIGHT_STATE);
     tft.setFontScale((enum RA8875tsize)1);
     tft.fillRect(SECONDARY_MENU_X - 50, MENUS_Y, EACH_MENU_WIDTH + 60, CHAR_HEIGHT, RA8875_MAGENTA);
     tft.setTextColor(RA8875_WHITE);
@@ -399,7 +399,7 @@ FLASHMEM void SetKeyPowerUp() {
 
     // This is going to run the CW transmitter, however, the power amplifier is not enabled.
     while (true) {
-      if (digitalRead(ConfigData.paddleDit) == LOW || digitalRead(ConfigData.paddleDah) == LOW) {
+      if (digitalRead(KEYER_DIT_INPUT_TIP) == LOW) {
         if (keyDown) {
           cwexciter.CW_ExciterIQData(CW_SHAPING_NONE);
         } else {
@@ -438,6 +438,7 @@ FLASHMEM void SetKeyPowerUp() {
     }  // end while loop
     display.EraseMenus();
     SetAudioOperatingState(temp);  // Restore the radio state.
+    keyPressedOn = false;  // Prevent the transmitter from being keyed upon exit.
   //  lastState = RadioState::NOSTATE;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 7, 2023
   }
 

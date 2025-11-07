@@ -680,7 +680,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       break;
 
     case RadioState::SET_CW_SIDETONE:
-
+/*
       SampleRate = SAMPLE_RATE_48K;
       InitializeDataArrays();  // I2S sample rate set in this function.
       // QSD disabled and disconnected
@@ -750,7 +750,7 @@ void SetAudioOperatingState(RadioState operatingState) {
 
       break;
 
-      /*
+      ///////
       SampleRate = SAMPLE_RATE_192K;
       SetI2SFreq(SR[SampleRate].rate);
       sgtl5000_1.muteLineout();
@@ -773,9 +773,9 @@ void SetAudioOperatingState(RadioState operatingState) {
       //  Disconnect
       connect19.connect();  // Transmitter I channel
       connect20.connect();  // Transmitter Q channel
-
+*/
       break;
-      */
+
 
     case RadioState::NOSTATE:
       break;

@@ -905,7 +905,7 @@ ConfigData.transmitPowerLevel = GetEncoderValueLoopFloat(1, 20, ConfigData.trans
       break;
 
     case 1:  // Manual gain set.
-      ConfigData.rfGain[ConfigData.currentBand] = GetEncoderValue(-60, 20, ConfigData.rfGain[ConfigData.currentBand], 5, (char *)"RF Gain dB: ");
+      ConfigData.rfGain[ConfigData.currentBand] = static_cast<int>(GetEncoderValueLoopFloat(-60, 20, ConfigData.rfGain[ConfigData.currentBand], 5, 1, "RF Gain dB: ", true, true));
       eeprom.ConfigDataWrite();
       break;
 
