@@ -88,11 +88,13 @@ void CalibrateOptions() {
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.setCursor(0, 1);
-          tft.print("                ");  // Erase.
+          tft.print("                    ");  // Erase.
           eeprom.CalDataWrite();
+          display.EraseMenus();
           calibrateFlag = 0;
         }
       }
+
       break;
 
     case 1:  // CW PA Cal

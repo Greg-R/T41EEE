@@ -60,10 +60,10 @@ const int RIGNAME_X_OFFSET = 570;  // Pixel count to rig name field.
 #define MASTER_CLK_MULT_TX 2
 
 // Uncomment this line for QSE2.
-//#define QSE2
+#define QSE2
 
 // Uncomment this line if using an external PLL module.
-//#define PLLMODULE
+#define PLLMODULE
 
 // Customizable definitions for center and fine tune defaults and increments.  Larry K3PTO June 24, 2024
 #define CENTER_TUNE_DEFAULT 1000  // Set to the desired default in the CENTER_TUNE_ARRAY.

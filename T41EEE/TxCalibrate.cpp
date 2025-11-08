@@ -518,11 +518,11 @@ void TxCalibrate::DoXmitCalibrate(int calMode, bool radio, bool refine, bool toE
   tft.fillRect(405, 125, 50, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(405, 125);
   tft.print(xmitIncrement, 3);
-  if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) {
+  if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) // {
     ResetFlipFlops();
-  } else {
-    delay(1000);
-  }
+//  } else {
+//    delay(1000);
+//  }
   SetFreqCal(freqOffset);
   printCalType(autoCal, false);
   // Get current values into the iOptimal and qOptimal amplitude and phase working variables.

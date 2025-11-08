@@ -277,10 +277,12 @@ void Button::ExecuteButtonPress(MenuSelect val) {
       break;
 
     case MenuSelect::BEARING:  // 17  // AFP 10-11-22
+    /*
       int doneViewing;
       float retVal;
       MenuSelect menu;
 
+   Disabled in this release (0.91).  Greg Raven November 2025
       tft.clearScreen(RA8875_BLACK);
 
       DrawKeyboard();
@@ -313,6 +315,7 @@ void Button::ExecuteButtonPress(MenuSelect val) {
         }
       }
       display.RedrawAll();
+      */
       break;
 
     case MenuSelect::BOGUS_PIN_READ:  // 18
