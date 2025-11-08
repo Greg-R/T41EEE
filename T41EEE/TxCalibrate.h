@@ -77,8 +77,7 @@ public:
                         SSB_CARRIER,
   };
 
-  std::vector<float> sub_vectorAmpResult = std::vector<float>(21);
-  std::vector<float> sub_vectorPhaseResult = std::vector<float>(21);
+
 
   void warmUpCal();
     void PrintMode();

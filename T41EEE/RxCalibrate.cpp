@@ -35,8 +35,8 @@ void RxCalibrate::loadCalToneBuffers(float toneFreq) {
 void RxCalibrate::plotCalGraphics() {
   tft.writeTo(L2);
   // Note, the spectrum bins begin at x = 2.
-  tft.fillRect(rx_red_usb - capture_bins/2 + 0, SPECTRUM_TOP_Y + 20, capture_bins, 341, DARK_RED);      // SPECTRUM_TOP_Y = 100, h = 135
-  tft.fillRect(rx_blue_usb - capture_bins/2 + 0, SPECTRUM_TOP_Y + 20, capture_bins, 341, RA8875_BLUE);  // h = SPECTRUM_HEIGHT + 3
+  tft.fillRect(rx_red_usb - capture_bins / 2 + 0, SPECTRUM_TOP_Y + 20, capture_bins, 341, DARK_RED);      // SPECTRUM_TOP_Y = 100, h = 135
+  tft.fillRect(rx_blue_usb - capture_bins / 2 + 0, SPECTRUM_TOP_Y + 20, capture_bins, 341, RA8875_BLUE);  // h = SPECTRUM_HEIGHT + 3
   tft.writeTo(L1);
 }
 
@@ -55,19 +55,19 @@ void RxCalibrate::warmUpCal() {
   uint32_t count{ 0 };
   uint32_t i;
   // MakeFFTData() has to be called enough times for transients to settle out before computing FFT.
-//  delay(5000);
+  //  delay(5000);
   for (i = 0; i < 128; i = i + 1) {
     fftActive = true;
     updateDisplayFlag = true;
     RxCalibrate::MakeFFTData();  // Note, FFT not called if buffers are not sufficiently filled.
     arm_max_q15(pixelnew, 512, &rawSpectrumPeak, &index_of_max);
-    if(index_of_max > 380 and index_of_max < 388) {  // The peak is in the correct bin?
-      count = count + 1;    
-    }  else count = 0;  // Reset count in case of failure.
-    if( count == 5) break;  // If five in a row, exit the loop.  Warm-up is complete.
+    if (index_of_max > 380 and index_of_max < 388) {  // The peak is in the correct bin?
+      count = count + 1;
+    } else count = 0;       // Reset count in case of failure.
+    if (count == 5) break;  // If five in a row, exit the loop.  Warm-up is complete.
   }
-  updateDisplayFlag = true;  // This flag is used by the normal receiver process.
-  fftActive = true;          // This is a flag local to this class.
+  updateDisplayFlag = true;    // This flag is used by the normal receiver process.
+  fftActive = true;            // This is a flag local to this class.
   RxCalibrate::MakeFFTData();  // Now FFT will be calculated.
   updateDisplayFlag = false;
   fftActive = false;
@@ -75,7 +75,7 @@ void RxCalibrate::warmUpCal() {
   arm_max_q15(pixelnew, 512, &rawSpectrumPeak, &index_of_max);
   Serial.printf("RX rawSpectrumPeak = %d count = %d i = %d\n", rawSpectrumPeak, count, i);
   Serial.printf("RX index_of_max = %d\n", index_of_max);
-if(index_of_max < 380 or index_of_max > 388) Serial.printf("Problem with RX warmUpCal\n");
+  if (index_of_max < 380 or index_of_max > 388) Serial.printf("Problem with RX warmUpCal\n");
 }
 
 
@@ -149,8 +149,8 @@ void RxCalibrate::printCalType(bool autoCal, bool autoCalDone) {
       void
  *****/
 void RxCalibrate::CalibratePreamble(int setZoom) {
-//  cessb1.processorUsageMaxReset();
-controlAudioOut(ConfigData.audioOut, true);  // Mute all receiver audio.
+  //  cessb1.processorUsageMaxReset();
+  controlAudioOut(ConfigData.audioOut, true);  // Mute all receiver audio.
   calOnFlag = true;
   exitManual = false;
   transmitPowerLevelTemp = ConfigData.transmitPowerLevel;  //AFP 05-11-23
@@ -189,7 +189,7 @@ controlAudioOut(ConfigData.audioOut, true);  // Mute all receiver audio.
   tft.setCursor(left_text_edge, 235);
   tft.print("Filter - Refine-Cal");
   tft.setTextColor(RA8875_CYAN);
-////  tft.fillRect(left_text_edge, 125, 100, tft.getFontHeight(), RA8875_BLACK);
+  ////  tft.fillRect(left_text_edge, 125, 100, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(left_text_edge + 90, 142);
   tft.setFontScale((enum RA8875tsize)1);
   tft.print("dB");
@@ -244,11 +244,11 @@ void RxCalibrate::CalibrateEpilogue(bool radioCal, bool saveToEeprom) {
   ADC_RX_Q.clear();
   ConfigData.centerFreq = TxRxFreq;
   NCOFreq = 0;
-  calibrateFlag = 0;                       // KF5N
-  ConfigData.CWOffset = cwFreqOffsetTemp;  // Return user selected CW offset frequency.
-  sineTone(ConfigData.CWOffset + 6);       // This function takes "number of cycles" which is the offset + 6.
-  ConfigData.currentScale = userScale;     //  Restore vertical scale to user preference.  KF5N
-////  display.ShowSpectrumdBScale();
+  calibrateFlag = 0;                                       // KF5N
+  ConfigData.CWOffset = cwFreqOffsetTemp;                  // Return user selected CW offset frequency.
+  sineTone(ConfigData.CWOffset + 6);                       // This function takes "number of cycles" which is the offset + 6.
+  ConfigData.currentScale = userScale;                     //  Restore vertical scale to user preference.  KF5N
+                                                           ////  display.ShowSpectrumdBScale();
   ConfigData.transmitPowerLevel = transmitPowerLevelTemp;  // Restore the user's transmit power level setting.  KF5N August 15, 2023
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) bands.bands[ConfigData.currentBand].sideband = tempSideband;
   bands.bands[ConfigData.currentBand].mode = tempMode;
@@ -260,14 +260,14 @@ void RxCalibrate::CalibrateEpilogue(bool radioCal, bool saveToEeprom) {
   tft.writeTo(L1);  // Exit function in layer 1.  KF5N August 3, 2023
   calOnFlag = false;
   if (not radioCal) display.RedrawAll();  // Redraw everything!
-  else tft.fillWindow();                            // Clear the display.
-  fftOffset = 0;                                    // Some reboots may be caused by large fftOffset values when Auto-Spectrum is on.
+  else tft.fillWindow();                  // Clear the display.
+  fftOffset = 0;                          // Some reboots may be caused by large fftOffset values when Auto-Spectrum is on.
   if ((MASTER_CLK_MULT_RX == 2) or (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
   bands.bands[ConfigData.currentBand].sideband = tempSideband;  // Restore the sideband.
   radioState = tempState;
   lastState = RadioState::NOSTATE;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 16, 2023
   SetAudioOperatingState(radioState);
-  powerUp = true;                   // Clip off transient.
+  powerUp = true;  // Clip off transient.
   return;
 }
 
@@ -332,7 +332,7 @@ void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool 
   tft.setTextColor(RA8875_WHITE);
   tft.fillRect(left_text_edge + 60, 125, 50, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(left_text_edge + 60, 125);
-  float increment = 0.002;
+  float increment = 0.002;  // Used in initial sweeps.
   tft.print(increment, 3);
   printCalType(autoCal, false);
   IQCalType = 0;                // Start with IG Gain calibration.
@@ -345,7 +345,10 @@ void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool 
   float qOptimal = 0.0;
   std::vector<float32_t> sweepVector(201);
   std::vector<float32_t> sweepVectorValue(201);
-
+  std::vector<float> sub_vectorAmp = std::vector<float>(21);
+  std::vector<float> sub_vectorPhase = std::vector<float>(21);
+  std::vector<float> sub_vectorAmpResult = std::vector<float>(21);
+  std::vector<float> sub_vectorPhaseResult = std::vector<float>(21);
   int startTimer = 0;  // Used to time display of results.
   bool averageFlag = false;
   std::vector<float>::iterator result;
@@ -497,11 +500,11 @@ void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool 
         case State::state0:
           // Starting values for sweeps.  First sweep is amplitude (gain).
           phase = 0.0;
-          amplitude = 1.0 - maxSweepAmp;                                               // Begin sweep at low end and move upwards.
-                                                                                       ////          if (mode == 0)
+          amplitude = 1.0 - maxSweepAmp;                                                // Begin sweep at low end and move upwards.
+                                                                                        ////          if (mode == 0)
           GetEncoderValueLive(-2.0, 2.0, phase, increment, "IQ Phase ", false, false);  // Display the phase value.
-                                                                                       ////          if (mode == 1)
-                                                                                       ////            GetEncoderValueLive(-2.0, 2.0, phase, increment, (char *)"IQ Phase", false);
+                                                                                        ////          if (mode == 1)
+                                                                                        ////            GetEncoderValueLive(-2.0, 2.0, phase, increment, (char *)"IQ Phase", false);
           adjdB = 0;
           adjdB_avg = 0;
           index = 0;
@@ -698,8 +701,8 @@ void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool 
       void
  *****/
 void RxCalibrate::MakeFFTData() {
-  float rfGainValue, powerScale;                                   // AFP 2-11-23.  Greg KF5N February 13, 2023
-//  float recBandFactor[7] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };  // AFP 2-11-23  KF5N uniform values
+  float rfGainValue, powerScale;  // AFP 2-11-23.  Greg KF5N February 13, 2023
+                                  //  float recBandFactor[7] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };  // AFP 2-11-23  KF5N uniform values
 
   /**********************************************************************************  AFP 12-31-20
         Get samples from queue buffers
@@ -757,11 +760,11 @@ void RxCalibrate::MakeFFTData() {
   // This code block was introduced after TeensyDuino 1.58 appeared.  It doesn't use a for loop, but processes the entire 2048 buffer in one pass.
   // Revised I and Q calibration signal generation using large buffers.  Greg KF5N June 4 2023
   //  if (static_cast<uint32_t>(ADC_RX_I.available()) > 16 && static_cast<uint32_t>(ADC_RX_Q.available()) > 16) {  // Audio Record Queues!!!
-//  q15_t q15_buffer_LTemp[2048];  //KF5N
-//  q15_t q15_buffer_RTemp[2048];  //KF5N
+  //  q15_t q15_buffer_LTemp[2048];  //KF5N
+  //  q15_t q15_buffer_RTemp[2048];  //KF5N
 
-//  arm_float_to_q15(float_buffer_L_EX, q15_buffer_LTemp, 2048);
-//  arm_float_to_q15(float_buffer_R_EX, q15_buffer_RTemp, 2048);
+  //  arm_float_to_q15(float_buffer_L_EX, q15_buffer_LTemp, 2048);
+  //  arm_float_to_q15(float_buffer_R_EX, q15_buffer_RTemp, 2048);
 
 #ifdef QSE2
   if (mode == 0) {
@@ -805,8 +808,8 @@ void RxCalibrate::MakeFFTData() {
     /**********************************************************************************  AFP 12-31-20
       Scale the data buffers by the RFgain value defined in bands.bands[ConfigData.currentBand] structure
     **********************************************************************************/
-//    arm_scale_f32(float_buffer_L, recBandFactor[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 2-11-23
-//    arm_scale_f32(float_buffer_R, recBandFactor[ConfigData.currentBand], float_buffer_R, BUFFER_SIZE * N_BLOCKS);  //AFP 2-11-23
+    //    arm_scale_f32(float_buffer_L, recBandFactor[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 2-11-23
+    //    arm_scale_f32(float_buffer_R, recBandFactor[ConfigData.currentBand], float_buffer_R, BUFFER_SIZE * N_BLOCKS);  //AFP 2-11-23
 
     // IQ amplitude and phase correction.  Mode 0 is for CW and Mode 1 is for SSB.
     if (mode == 0) {
@@ -857,7 +860,7 @@ void RxCalibrate::MakeFFTData() {
 void RxCalibrate::ShowSpectrum()  //AFP 2-10-23
 {
   int x1 = 0;
-//  int capture_bins = 8;  // Sets the number of bins to scan for signal peak.
+  //  int capture_bins = 8;  // Sets the number of bins to scan for signal peak.
 
   pixelnew[0] = 0;
   pixelnew[1] = 0;
@@ -881,8 +884,8 @@ void RxCalibrate::ShowSpectrum()  //AFP 2-10-23
   }  // Receive calibration, USB.  KF5N
 
   //  There are 2 for-loops, one for the reference signal and another for the undesired sideband.
-  for (x1 = cal_bins[0] - capture_bins/2; x1 < cal_bins[0] + capture_bins/2; x1++) adjdB = PlotCalSpectrum(x1, cal_bins, capture_bins);
-  for (x1 = cal_bins[1] - capture_bins/2; x1 < cal_bins[1] + capture_bins/2; x1++) adjdB = PlotCalSpectrum(x1, cal_bins, capture_bins);
+  for (x1 = cal_bins[0] - capture_bins / 2; x1 < cal_bins[0] + capture_bins / 2; x1++) adjdB = PlotCalSpectrum(x1, cal_bins, capture_bins);
+  for (x1 = cal_bins[1] - capture_bins / 2; x1 < cal_bins[1] + capture_bins / 2; x1++) adjdB = PlotCalSpectrum(x1, cal_bins, capture_bins);
 
   tft.setCursor(left_text_edge, 142);
   tft.setFontScale((enum RA8875tsize)1);
@@ -913,10 +916,10 @@ float RxCalibrate::PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
   int y_new_plot, y1_new_plot, y_old_plot, y_old2_plot;
 
   // The FFT should be performed only at the beginning of the sweep, and buffers must be full.
-  if (x1 == (cal_bins[0] - capture_bins/2)) {  // Set flag at revised beginning.  KF5N
-    updateDisplayFlag = true;                // This flag is used in ZoomFFTExe().
-    RxCalibrate::MakeFFTData();              // Compute FFT and draw it on the display.
-  } else updateDisplayFlag = false;          //  Do not save the the display data for the remainder of the sweep.
+  if (x1 == (cal_bins[0] - capture_bins / 2)) {  // Set flag at revised beginning.  KF5N
+    updateDisplayFlag = true;                    // This flag is used in ZoomFFTExe().
+    RxCalibrate::MakeFFTData();                  // Compute FFT and draw it on the display.
+  } else updateDisplayFlag = false;              //  Do not save the the display data for the remainder of the sweep.
 
   // Call the Audio process from within the display routine to eliminate conflicts with drawing the spectrum.
 
@@ -928,12 +931,12 @@ float RxCalibrate::PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
   // Find the maximums of the desired and undesired signals.
 
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-    arm_max_q15(&pixelnew[(cal_bins[0] - capture_bins/2)], capture_bins, &refAmplitude, &index_of_max);
-    arm_max_q15(&pixelnew[(cal_bins[1] - capture_bins/2)], capture_bins, &adjAmplitude, &index_of_max);
+    arm_max_q15(&pixelnew[(cal_bins[0] - capture_bins / 2)], capture_bins, &refAmplitude, &index_of_max);
+    arm_max_q15(&pixelnew[(cal_bins[1] - capture_bins / 2)], capture_bins, &adjAmplitude, &index_of_max);
   }
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-    arm_max_q15(&pixelnew[(cal_bins[0] - capture_bins/2)], capture_bins, &refAmplitude, &index_of_max);
-    arm_max_q15(&pixelnew[(cal_bins[1] - capture_bins/2)], capture_bins, &adjAmplitude, &index_of_max);
+    arm_max_q15(&pixelnew[(cal_bins[0] - capture_bins / 2)], capture_bins, &refAmplitude, &index_of_max);
+    arm_max_q15(&pixelnew[(cal_bins[1] - capture_bins / 2)], capture_bins, &adjAmplitude, &index_of_max);
   }
 
   y_old2_plot = 135 + (-y_old2 + rawSpectrumPeak);
@@ -957,7 +960,7 @@ float RxCalibrate::PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
   tft.drawLine(x1 + 0, y_old2_plot, x1 + 0, y_old_plot, RA8875_BLACK);   // Erase old...
   tft.drawLine(x1 + 0, y1_new_plot, x1 + 0, y_new_plot, RA8875_YELLOW);  // Draw new
 
-//  pixelCurrent[x1] = pixelnew[x1];  //  This is the actual "old" spectrum! Copied to pixelold by the FFT function.
+  //  pixelCurrent[x1] = pixelnew[x1];  //  This is the actual "old" spectrum! Copied to pixelold by the FFT function.
 
   adjdB = (static_cast<float>(adjAmplitude) - static_cast<float>(refAmplitude)) / (1.95 * 2.0);  // Cast to float and calculate the dB level.  Needs further refinement for accuracy.  KF5N
   adjdB_avg = adjdB * alpha + adjdBold * (1.0 - alpha);                                          // Exponential average.

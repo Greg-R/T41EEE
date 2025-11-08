@@ -487,7 +487,7 @@ void TxCalibrate::DoXmitCalibrate(int calMode, bool radio, bool refine, bool toE
   //  State state = State::warmup;  // Start calibration state machine in warmup state.
   float maxSweepAmp = 0.2;
   float maxSweepPhase = 0.1;
-  xmitIncrement = 0.002;  // Coarse increment used during initial calibration.
+  xmitIncrement = 0.002;  // Coarse increment used during initial amplitude calibration.
   //  int averageCount = 0;
   IQCalType = 0;  // Begin with IQ gain optimization.
                   //  float iOptimal = 1.0;
@@ -496,8 +496,8 @@ void TxCalibrate::DoXmitCalibrate(int calMode, bool radio, bool refine, bool toE
   std::vector<float32_t> sweepVectorValue(201);
   std::vector<float32_t> sub_vectorAmp = std::vector<float>(21);  // Can these arrays be commonized?
   std::vector<float32_t> sub_vectorPhase = std::vector<float>(21);
-  //  std::vector<float> sub_vectorAmpResult = std::vector<float>(21);
-  //  std::vector<float> sub_vectorPhaseResult = std::vector<float>(21);
+  std::vector<float> sub_vectorAmpResult = std::vector<float>(21);
+  std::vector<float> sub_vectorPhaseResult = std::vector<float>(21);
   elapsedMillis fiveSeconds;
   int startTimer = 0;
   TxCalibrate::autoCal = false;
@@ -592,10 +592,10 @@ void TxCalibrate::DoXmitCalibrate(int calMode, bool radio, bool refine, bool toE
         case State::refineCal:
           // Prep the refinement arrays based on saved values.
           for (int i = 0; i < 21; i = i + 1) {
-            sub_vectorAmp[i] = (iOptimal - 10 * 0.001) + (0.001 * i);  // The next array to sweep.
+            sub_vectorAmp[i] = (iOptimal - 10 * 0.001) + (0.001 * static_cast<float32_t>(i));  // The next array to sweep.
           }
           for (int i = 0; i < 21; i = i + 1) {
-            sub_vectorPhase[i] = (qOptimal - 10 * 0.001) + (0.001 * i);  // The next array to sweep.
+            sub_vectorPhase[i] = (qOptimal - 10 * 0.001) + (0.001 * static_cast<float32_t>(i));  // The next array to sweep.
           }
           IQCalType = 0;  // Start in IQ Gain.
           index = 0;
@@ -610,6 +610,7 @@ void TxCalibrate::DoXmitCalibrate(int calMode, bool radio, bool refine, bool toE
           adjdB_avg = 0;
           index = 0;
           IQCalType = 0;                   // IQ Gain
+          xmitIncrement = 0.002;  // Reset in case initial cal is run twice.
           state = State::initialSweepAmp;  // Let this fall through.
 
         case State::initialSweepAmp:
@@ -628,7 +629,7 @@ void TxCalibrate::DoXmitCalibrate(int calMode, bool radio, bool refine, bool toE
             GetEncoderValueLive(-2.0, 2.0, amplitude, xmitIncrement, "IQ Gain ", true, false);
             // Save the sub_vector which will be used to refine the optimal result.
             for (int i = 0; i < 21; i = i + 1) {
-              sub_vectorAmp[i] = (iOptimal - 10 * 0.001) + (0.001 * i);
+              sub_vectorAmp[i] = (iOptimal - 10 * 0.001) + (0.001 * static_cast<float32_t>(i));
             }
             IQCalType = 1;           // Prepare for phase.
             phase = -maxSweepPhase;  // The starting value for phase.
@@ -636,6 +637,7 @@ void TxCalibrate::DoXmitCalibrate(int calMode, bool radio, bool refine, bool toE
             // Clear the vector before moving to phase.
             std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
             std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
+            xmitIncrement = 0.001;  // The initial increment can be reduced because the sweep range is half.
             state = State::initialSweepPhase;  // Initial sweeps done; proceed to refine phase.
             break;
           }
@@ -657,7 +659,7 @@ void TxCalibrate::DoXmitCalibrate(int calMode, bool radio, bool refine, bool toE
             GetEncoderValueLive(-2.0, 2.0, phase, xmitIncrement, "IQ Phase ", false, false);
             // Save the sub_vector which will be used to refine the optimal result.
             for (int i = 0; i < 21; i = i + 1) {
-              sub_vectorPhase[i] = (qOptimal - 10 * 0.001) + (0.001 * i);
+              sub_vectorPhase[i] = (qOptimal - 10 * 0.001) + (0.001 * static_cast<float32_t>(i));
             }
             IQCalType = 0;
             adjdB = 0.0;
@@ -812,10 +814,10 @@ void TxCalibrate::DoXmitCarrierCalibrate(int calMode, bool radio, bool refine, b
   TxCalibrate::saveToEeprom = toEeprom;     // Save to EEPROM
   std::vector<float32_t> sweepVector(201);  // 0 + 450 * 2 / 5
   std::vector<float32_t> sweepVectorValue(201);
-  //  std::vector<float> sub_vectorAmpResult = std::vector<float>(21);
-  //  std::vector<float> sub_vectorPhaseResult = std::vector<float>(21);
   std::vector<float32_t> sub_vectorIoffset = std::vector<float32_t>(21);
   std::vector<float32_t> sub_vectorQoffset = std::vector<float32_t>(21);
+  std::vector<float> sub_vectorAmpResult = std::vector<float>(21);
+  std::vector<float> sub_vectorPhaseResult = std::vector<float>(21);
   std::vector<float>::iterator result;
   int startTimer = 0;
   TxCalibrate::CalibratePreamble(2);  // Set zoom to 4X.  Note this is using 48ksps sample rate.
@@ -852,7 +854,7 @@ void TxCalibrate::DoXmitCarrierCalibrate(int calMode, bool radio, bool refine, b
     warmup = 0;
     index = 0;
     IQCalType = 0;
-    std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0);
+    std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0.0);
     std::fill(sweepVector.begin(), sweepVector.end(), 0.0);
     state = State::warmup;
   }
@@ -886,10 +888,10 @@ void TxCalibrate::DoXmitCarrierCalibrate(int calMode, bool radio, bool refine, b
           break;
         case State::refineCal:
           // Prep the refinement arrays based on saved values.
-          for (int i = 0; i < 21; i = i + 1) {
+          for (uint32_t i = 0; i < sub_vectorIoffset.size(); i = i + 1) {
             sub_vectorIoffset[i] = (iDCoffset - 10 * 0.0005) + (0.0005 * static_cast<float32_t>(i));  // The next array to sweep.
           }
-          for (int i = 0; i < 21; i = i + 1) {
+          for (uint32_t i = 0; i < sub_vectorQoffset.size(); i = i + 1) {
             sub_vectorQoffset[i] = (qDCoffset - 10 * 0.0005) + (0.0005 * static_cast<float32_t>(i));  // The next array to sweep.
           }
           IQCalType = 0;             // Start with the I offset.
@@ -897,11 +899,12 @@ void TxCalibrate::DoXmitCarrierCalibrate(int calMode, bool radio, bool refine, b
           state = State::refineAmp;  // Skip the initial sweeps.
           break;
         case State::state0:
-          qDCoffset = 0;
+          qDCoffset = 0.0;
           iDCoffset = -maxSweepAmp;  // Begin sweep at low end and move upwards.
           GetEncoderValueLive(-1.0, 1.0, qDCoffset, carrIncrement, "Q Offset ", false, false);
           index = 0;
           IQCalType = 0;
+          carrIncrement = 0.0010;  // Reset in case initial cal is run twice.
           state = State::initialSweepAmp;  // Let this fall through.
 
         case State::initialSweepAmp:
@@ -920,7 +923,7 @@ void TxCalibrate::DoXmitCarrierCalibrate(int calMode, bool radio, bool refine, b
             // Update display to optimal value and change from red to white.
             GetEncoderValueLive(-1.0, 1.0, iDCoffset, carrIncrement, "I Offset ", true, false);
             // Save the sub_vector which will be used to refine the optimal result.
-            for (int i = 0; i < 21; i = i + 1) {
+            for (uint32_t i = 0; i < sub_vectorIoffset.size(); i = i + 1) {
               sub_vectorIoffset[i] = (iOptimal - 10.0 * 0.0005) + (0.0005 * static_cast<float32_t>(i));
             }
             IQCalType = 1;  // Prepare for phase.
@@ -952,7 +955,7 @@ void TxCalibrate::DoXmitCarrierCalibrate(int calMode, bool radio, bool refine, b
             qDCoffset = qOptimal;                        // Set to the discovered minimum.
             // Update display to optimal value and change from red to white.
             GetEncoderValueLive(-1.0, 1.0, qDCoffset, carrIncrement, "Q Offset ", false, false);
-            for (int i = 0; i < 21; i = i + 1) {
+            for (uint32_t i = 0; i < sub_vectorQoffset.size(); i = i + 1) {
               sub_vectorQoffset[i] = (qOptimal - 10.0 * 0.0005) + (0.0005 * static_cast<float32_t>(i));
             }
             IQCalType = 0;
@@ -986,7 +989,7 @@ void TxCalibrate::DoXmitCarrierCalibrate(int calMode, bool radio, bool refine, b
             iDCoffset = iOptimal;                         // Set to optimal value before refining phase.
             // Update display to optimal value and change from red to white.
             GetEncoderValueLive(-1.0, 1.0, iDCoffset, carrIncrement, "I Offset ", true, false);
-            for (int i = 0; i < 21; i = i + 1) {
+            for (uint32_t i = 0; i < sub_vectorIoffset.size(); i = i + 1) {
               sub_vectorIoffset[i] = (iOptimal - 10 * 0.0005) + (0.0005 * static_cast<float32_t>(i));  // The next array to sweep.
             }
             IQCalType = 1;
@@ -1019,7 +1022,7 @@ void TxCalibrate::DoXmitCarrierCalibrate(int calMode, bool radio, bool refine, b
             qDCoffset = qOptimal;
             // Update display to optimal value and change from red to white.
             GetEncoderValueLive(-1.0, 1.0, qDCoffset, carrIncrement, "Q Offset ", false, false);
-            for (int i = 0; i < 21; i = i + 1) {
+            for (uint32_t i = 0; i < sub_vectorQoffset.size(); i = i + 1) {
               sub_vectorQoffset[i] = (qOptimal - 10 * 0.0005) + (0.0005 * static_cast<float32_t>(i));
             }
             IQCalType = 0;

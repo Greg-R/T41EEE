@@ -52,10 +52,7 @@ Sideband tempSideband;
 RadioMode tempMode;
 RadioState tempState;
 
-std::vector<float> sub_vectorAmp = std::vector<float>(21);
-std::vector<float> sub_vectorPhase = std::vector<float>(21);
-std::vector<float> sub_vectorAmpResult = std::vector<float>(21);
-std::vector<float> sub_vectorPhaseResult = std::vector<float>(21);
+
 
   enum class State { warmup,
                      refineCal,

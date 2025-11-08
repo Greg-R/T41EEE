@@ -181,6 +181,7 @@ void initializeAudioPaths() {
 
 *****/
 void SetAudioOperatingState(RadioState operatingState) {
+  Serial.printf("AudioOperatingState\n");
 #ifdef DEBUG
   Serial.printf("lastState=%d radioState=%d memory_used=%d memory_used_max=%d f32_memory_used=%d f32_memory_used_max=%d\n",
                 lastState,
