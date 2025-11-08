@@ -395,7 +395,7 @@ void CalibrateOptions() {
 
 /*****
   Purpose: Present the CW options available to the user.  Change and store to ConfigData.
-Partially updated to revised parameter entry.  Greg Raven KF5N November 2025
+  Partially updated to revised parameter entry.  Greg Raven KF5N November 2025
   Parameter list:
     void
 
@@ -593,7 +593,8 @@ void ProcessEqualizerChoices(int EQType, char *title) {
   tft.drawFastHLine(xOrigin - 4, yOrigin + (high / 2), wide + 4, RA8875_RED);  // Print center zero line center
   tft.setFontScale((enum RA8875tsize)0);
 
-  tft.setTextColor(RA8875_WHITE);
+// Print y-axis scale numbers.
+  tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
   tft.setCursor(xOrigin - 4 - tft.getFontWidth() * 3, yOrigin + tft.getFontHeight());
   tft.print("+12");
   tft.setCursor(xOrigin - 4 - tft.getFontWidth() * 3, yOrigin + (high / 2) - tft.getFontHeight());
@@ -604,11 +605,20 @@ void ProcessEqualizerChoices(int EQType, char *title) {
   barTopY = yOrigin + (high / 2);                // 50 + (300 / 2) = 200
   barBottomY = barTopY + DEFAULT_EQUALIZER_BAR;  // Default 200 + 100
 
+// Print x-axis frequencies and rectangular bars proportional to yLevel.
   for (iFreq = 0; iFreq < EQUALIZER_CELL_COUNT; iFreq++) {
     tft.fillRect(xOrigin + (barWidth + 4) * iFreq, barTopY - (yLevel[iFreq] - DEFAULT_EQUALIZER_BAR), barWidth, yLevel[iFreq], RA8875_CYAN);
     tft.setCursor(xOrigin + (barWidth + 4) * iFreq, yOrigin + high - tft.getFontHeight() * 2);
+    // Make the first one red to indicate it is active.
+
+if(iFreq == 0) tft.setTextColor(RA8875_RED, RA8875_BLACK);
+else tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
+
     if (EQType == 0) tft.print(rXeqFreq[iFreq].c_str());
     else tft.print(tXeqFreq[iFreq].c_str());
+
+
+
     tft.setCursor(xOrigin + (barWidth + 4) * iFreq + tft.getFontWidth() * 1.5, yOrigin + high + tft.getFontHeight() * 2);
     if (EQType == 0) tft.print(yLevel[iFreq]);
     if (EQType == 1) tft.print(ConfigData.equalizerXmt[iFreq]);
@@ -616,21 +626,16 @@ void ProcessEqualizerChoices(int EQType, char *title) {
 
   columnIndex = 0;  // Get ready to set values for columns
   newValue = 0;
+  // Nested while loops for adjusting equalizer values.  This is the outer loop.
   while (columnIndex < EQUALIZER_CELL_COUNT) {
     xOffset = xOrigin + (barWidth + 4) * columnIndex;  // Just do the math once
-                                                       //    tft.fillRect(xOffset,                               // Indent to proper bar... Removed this rectangle.  Seems unnecessary.  KF5N November 12, 2023
-                                                       //                 barBottomY - yLevel[columnIndex] - 1,  // Start at red line
-                                                       //                 barBottomY - 1,
-                                                       //                 barWidth,                              // Set bar width
-                                                       //                 newValue + 1,                          // Erase old bar
-                                                       //                 -100,
-                                                       //                 RA8875_BLACK);
-
+// Draw the bar above the x-axis frequency.
     tft.fillRect(xOffset,                           // Indent to proper bar...
                  barBottomY - yLevel[columnIndex],  // Start at red line
                  barWidth,                          // Set bar width
                  yLevel[columnIndex],               // Draw new bar
                  RA8875_MAGENTA);
+// User adjusts the value of the bar in the inner loop.                 
     while (true) {
       newValue = yLevel[columnIndex];  // Get current value
       if (filterEncoderMove != 0) {
@@ -640,20 +645,26 @@ void ProcessEqualizerChoices(int EQType, char *title) {
                      barWidth,                   // Set bar width
                      yLevel[columnIndex] + 1,    // Erase old bar
                      RA8875_BLACK);
-        //        newValue += (PIXELS_PER_EQUALIZER_DELTA * filterEncoderMove);  // Find new bar height. OK since filterEncoderMove equals 1 or -1. PIXELS_PER_EQUALIZER_DELTA = 10
+
         yLevel[columnIndex] += (PIXELS_PER_EQUALIZER_DELTA * filterEncoderMove);
         tft.fillRect(xOffset,                           // Indent to proper bar...
                      barBottomY - yLevel[columnIndex],  // Start at red line
                      barWidth,                          // Set bar width
                      yLevel[columnIndex],               // Draw new bar
                      RA8875_MAGENTA);
-        //        yLevel[columnIndex] = newValue;
 
         tft.fillRect(xOffset + tft.getFontWidth() * 1.5 - 1, yOrigin + high + tft.getFontHeight() * 2,  // Update bottom number
                      barWidth, CHAR_HEIGHT, RA8875_BLACK);
         tft.setCursor(xOffset + tft.getFontWidth() * 1.5, yOrigin + high + tft.getFontHeight() * 2);
-        if (EQType == 0) tft.print(yLevel[columnIndex]);
-        else tft.print((yLevel[columnIndex] - 100) / 10);
+
+        tft.setTextColor(RA8875_RED, RA8875_BLACK);
+        if (EQType == 0) { 
+          tft.print(yLevel[columnIndex]);
+        }
+        else {
+           tft.print((yLevel[columnIndex] - 100) / 10);
+        }
+
         if (yLevel[columnIndex] < DEFAULT_EQUALIZER_BAR) {                             // Repaint red center line if erased
           tft.drawFastHLine(xOrigin - 4, yOrigin + (high / 2), wide + 4, RA8875_RED);  // Clear hole in display center
         }
@@ -677,12 +688,43 @@ void ProcessEqualizerChoices(int EQType, char *title) {
         }
 
         filterEncoderMove = 0;
+
+// Redraw in white.
+        tft.setCursor(xOffset + tft.getFontWidth() * 1.5, yOrigin + high + tft.getFontHeight() * 2);
+        tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
+        if (EQType == 0) { 
+          tft.print(yLevel[columnIndex]);
+tft.setCursor(xOrigin + (barWidth + 4) * columnIndex, yOrigin + high - tft.getFontHeight() * 2);
+tft.print(rXeqFreq[columnIndex].c_str());
+        }
+        else {
+           tft.print((yLevel[columnIndex] - 100) / 10);
+tft.setCursor(xOrigin + (barWidth + 4) * columnIndex, yOrigin + high - tft.getFontHeight() * 2);
+tft.print(tXeqFreq[columnIndex].c_str());
+        }
+
         columnIndex++;
-        break;
-      }  // end inner while
-    }    // end outer while
-    eeprom.ConfigDataWrite();
-  }
+
+// Redraw next in red before proceeding.
+        xOffset = xOrigin + (barWidth + 4) * columnIndex;
+        tft.setCursor(xOffset + tft.getFontWidth() * 1.5, yOrigin + high + tft.getFontHeight() * 2);
+        tft.setTextColor(RA8875_RED, RA8875_BLACK);
+        if (EQType == 0) { 
+          tft.print(yLevel[columnIndex]);
+tft.setCursor(xOrigin + (barWidth + 4) * columnIndex, yOrigin + high - tft.getFontHeight() * 2);
+tft.print(rXeqFreq[columnIndex].c_str());
+        }
+        else {
+           tft.print((yLevel[columnIndex] - 100) / 10);
+tft.setCursor(xOrigin + (barWidth + 4) * columnIndex, yOrigin + high - tft.getFontHeight() * 2);
+tft.print(tXeqFreq[columnIndex].c_str());
+        }
+
+        break;  // Leave inner loop.
+      }  
+    }    // end inner while
+  }      // end outer while    
+eeprom.ConfigDataWrite();
   SetAudioOperatingState(radioState);  // Equalizer adjusted.
   display.RedrawAll();
 //  lastState = RadioState::NOSTATE;  // Force update of operating state.

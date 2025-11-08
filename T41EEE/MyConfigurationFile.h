@@ -56,8 +56,8 @@ const int RIGNAME_X_OFFSET = 570;  // Pixel count to rig name field.
 //#define                           FOURSQRP
 
 // Set multiplication factors for your QSD and QSE boards.  Default values here and below are for V10/V11 boards.
-#define MASTER_CLK_MULT_RX 4
-#define MASTER_CLK_MULT_TX 4
+#define MASTER_CLK_MULT_RX 2
+#define MASTER_CLK_MULT_TX 2
 
 // Uncomment this line for QSE2.
 //#define QSE2
@@ -72,16 +72,16 @@ const int RIGNAME_X_OFFSET = 570;  // Pixel count to rig name field.
 #define FINE_TUNE_ARRAY { 10, 20, 50, 100, 200, 500 }
 
 // Uncomment for the original T41 audio mute control.
-#define UNMUTEAUDIO LOW
-#define MUTEAUDIO   HIGH
+//#define UNMUTEAUDIO LOW
+//#define MUTEAUDIO   HIGH
 // Use this for external amp with mute LOW, unmute HIGH.
-//#define UNMUTEAUDIO HIGH
-//#define MUTEAUDIO LOW
+#define UNMUTEAUDIO HIGH
+#define MUTEAUDIO LOW
 
 // The audio amplifier gain may need to be adjusted for the best volume range.
 #define SPEAKERSCALE 1.0    // Increase or decrease this value depending on your amplifier gain.
 #define HEADPHONESCALE 4.0  // Same as for the speaker.  Adjust to your preference for volume range.
 
-#define RFGAINSCALE 3000.0  // This adjusts for RF gain differences in the QSD.  QSD should use a value of 3000.  QSD2 should use a value of 1000.0.
+#define RFGAINSCALE 1000.0  // This adjusts for RF gain differences in the QSD.  QSD should use a value of 3000.  QSD2 should use a value of 1000.0.
 
 #define FREQUENCYCAL 100000  // The nominal frequency calibration.  This can be set here permanently after determining the unique value for your radio.
