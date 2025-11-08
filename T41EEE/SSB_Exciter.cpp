@@ -146,7 +146,7 @@ void SetBandRelay() {
 
   Return value;
     void
-*****/
+*****
 void SetCompressionThreshold() {
   MenuSelect menu, lastUsedTask = MenuSelect::DEFAULT;
 
@@ -171,11 +171,7 @@ void SetCompressionThreshold() {
       tft.print(ConfigData.micThreshold, 0);
       filterEncoderMove = 0;
     }
-    /*
-    val = ReadSelectedPushButton();  // Read pin that controls all switches
-    menu = ProcessButtonPress(val);
-    delay(150L);
-    */
+
     menu = readButton(lastUsedTask);
     if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
       updateMic();
@@ -186,7 +182,7 @@ void SetCompressionThreshold() {
   }
   display.EraseMenus();
 }
-
+*/
 
 /*****
   Purpose: Allow user to set the microphone compression ratio.
@@ -196,7 +192,7 @@ void SetCompressionThreshold() {
 
   Return value;
     void
-*****/
+*****
 void SetCompressionRatio() {
   MenuSelect menu, lastUsedTask = MenuSelect::DEFAULT;
 
@@ -223,11 +219,7 @@ void SetCompressionRatio() {
       filterEncoderMove = 0;
     }
     menu = readButton(lastUsedTask);
-    /*
-    val = ReadSelectedPushButton();  // Read pin that controls all switches
-    menu = ProcessButtonPress(val);
-    delay(150L);
-    */
+
 
     if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
       // ConfigData.ConfigData.micCompRatio = ConfigData.micCompRatio;
@@ -238,7 +230,7 @@ void SetCompressionRatio() {
   }
   display.EraseMenus();
 }
-
+*/
 
 /*****
   Purpose: Set microphone gain.  The default is 0 dB.
@@ -248,7 +240,7 @@ void SetCompressionRatio() {
 
   Return value
     int           an index into the band array
-*****/
+*****
 void MicGainSet() {
   MenuSelect menu, lastUsedTask = MenuSelect::DEFAULT;
   tft.setFontScale((enum RA8875tsize)1);
@@ -270,10 +262,6 @@ void MicGainSet() {
       tft.print(ConfigData.micGain, 1);
       filterEncoderMove = 0;
     }
-    /*
-    val = ReadSelectedPushButton();
-    menu = ProcessButtonPress(val);
-    */
     menu = readButton(lastUsedTask);
     if (menu == MenuSelect::MENU_OPTION_SELECT) {
       updateMic();  // Update the Open Audio compressor and microphone gain.
@@ -282,7 +270,7 @@ void MicGainSet() {
     }
   }
 }
-
+*/
 
 
 /*****

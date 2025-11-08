@@ -45,14 +45,14 @@ Button button;
 ModeControl modecontrol;
 
 const char *topMenus[] = { "CW Options", "RF Set", "VFO Select",
-                           "Config EEPROM", "Cal EEPROM", "AGC", "Spectrum Options",
+                           "Config EEPROM", "Cal EEPROM", "AGC",
                            "SSB Options", "EQ Tx Set",  // Noise floor removed.  Greg KF5N February 14, 2025
-                           "EQ Rec Set", "Calibrate", "Bearing" };
+                           "EQ Rec Set", "Calibrate" };  // Bearing temporarily removed.
 // Pointers to functions which execute the menu options.  Do these functions used the returned integer???
 void (*functionPtr[])() = { &CWOptions, &RFOptions, &VFOSelect,
-                            &ConfigDataOptions, &CalDataOptions, &AGCOptions, &SpectrumOptions,
+                            &ConfigDataOptions, &CalDataOptions, &AGCOptions,
                             &SSBOptions, &EqualizerXmtOptions,
-                            &EqualizerRecOptions, &CalibrateOptions, &BearingMaps };
+                            &EqualizerRecOptions, &CalibrateOptions };  // &BearingMaps temporarily removed.
 
 Rotary volumeEncoder = Rotary(VOLUME_ENCODER_A, VOLUME_ENCODER_B);        // ( 2,  3)
 Rotary tuneEncoder = Rotary(TUNE_ENCODER_A, TUNE_ENCODER_B);              // (16, 17)

@@ -988,9 +988,9 @@ void ResetHistograms();
 void ResetTuning();  // AFP 10-11-22
 void RFOptions();
 int SDPresentCheck();
-void SetCompressionThreshold();
-void SetCompressionRatio();
-void MicGainSet();
+//void SetCompressionThreshold();
+//void SetCompressionRatio();
+// void MicGainSet();
 void SaveAnalogSwitchValues();
 void SelectCWFilter();  // AFP 10-18-22
 void SelectCWOffset();  // KF5N December 13, 2023
@@ -1004,16 +1004,16 @@ void SetIIRCoeffs(float32_t f0, float32_t Q, float32_t sample_rate, uint8_t filt
 void SetKeyType();
 void SetKeyPowerUp();
 void SetSideToneVolume(bool speaker);  // This function uses encoder to set sidetone volume.  KF5N August 29, 2023
-uint32_t SetTransmitDelay();
+//uint32_t SetTransmitDelay();
 void SetTransmitDitLength(int wpm);  // JJP 8/19/23
-int SetWPM();
+//int SetWPM();
 //void ShowAutoStatus();
-void ShowBandwidth();
+//void ShowBandwidth();
 //void ShowCurrentPowerSetting();
 void ShowDecoderMessage();
 void sineTone(int numCycles);
 void initCWShaping();
-void SpectrumOptions();
+//void SpectrumOptions();
 //void UpdateInfoWindow();
 void SetFreqCal(int calFreqShift);
 //void ShowFrequency();

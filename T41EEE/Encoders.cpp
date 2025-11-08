@@ -259,7 +259,7 @@ float GetEncoderValueLoopFloat(float minValue, float maxValue, float startValue,
         currentValue = maxValue;
   if (left) tft.setCursor(0, 1);
   else tft.setCursor(290, 1);  //// 260
-  tft.print("                 ");  // Erase old
+  tft.print("                    ");  // Erase old
    if (left) tft.setCursor(0, 1);
   else tft.setCursor(290, 1);  //// 260 
   tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
@@ -273,7 +273,7 @@ float GetEncoderValueLoopFloat(float minValue, float maxValue, float startValue,
     if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
   if (left) tft.setCursor(0, 1);
   else tft.setCursor(290, 1);
-tft.print("                 ");  // Erase
+tft.print("                    ");  // Erase
       return currentValue;
     }
   }
@@ -440,7 +440,7 @@ int GetEncoderValue(int minValue, int maxValue, int startValue, int increment, s
 
   Return value;
     int           the current WPM
-*****/
+*****
 int SetWPM() {
   //  int val;
   MenuSelect menu;
@@ -482,7 +482,7 @@ int SetWPM() {
   display.EraseMenus();
   return ConfigData.currentWPM;
 }
-
+*/
 
 /*****
   Purpose: Determines how long the transmit relay remains on after last CW atom is sent.
@@ -492,7 +492,7 @@ int SetWPM() {
 
   Return value;
     long            the delay length in milliseconds
-*****/
+*****
 uint32_t SetTransmitDelay() {
   MenuSelect menu;
   long lastDelay = ConfigData.cwTransmitDelay;
@@ -530,6 +530,7 @@ uint32_t SetTransmitDelay() {
   display.EraseMenus();
   return ConfigData.cwTransmitDelay;
 }
+*/
 
 #ifdef FAST_TUNE
 /*****

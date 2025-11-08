@@ -30,7 +30,7 @@ public:
 
 private:
 
-  const int32_t TOP_MENU_COUNT{ 11 };
+  const int32_t TOP_MENU_COUNT{ 10 };
   IntervalTimer buttonInterrupts;
   int buttonRead = 0;
   int minPinRead = 1024;

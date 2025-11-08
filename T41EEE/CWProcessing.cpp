@@ -127,7 +127,6 @@ FLASHMEM void SelectCWFilter() {
 
   if (ConfigData.CWFilterIndex != 5) switchFilterSideband = true;  // Sets current delimiter to FLow.
   display.UpdateAudioGraphics();                                   // This draws decoder delimiters and CW bandwidth box (red);
-  eeprom.ConfigDataWrite();
 }
 
 
@@ -162,7 +161,6 @@ FLASHMEM void SelectCWOffset() {
     cwexciter.writeSineBuffer(numCycles[ConfigData.CWOffset]);
   }
   display.UpdateAudioGraphics();
-  eeprom.ConfigDataWrite();  // Save to EEPROM.
 }
 
 
@@ -322,8 +320,6 @@ void SetKeyType() {
     ConfigData.paddleDit = KEYER_DIT_INPUT_TIP;
     ConfigData.paddleDah = KEYER_DAH_INPUT_RING;
   }
-  // Save configuration to EEPROM.
-  eeprom.ConfigDataWrite();
 }
 
 
@@ -431,8 +427,7 @@ FLASHMEM void SetKeyPowerUp() {
       // This is the only practical way to set headphone sidetone volume.
       sgtl5000_1.volume(static_cast<float32_t>(ConfigData.sidetoneHeadphone) / 100.0);  // This control has a range of 0.0 to 1.0.
       menu = readButton();
-      if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Exit and save to EEPROM.
-        eeprom.ConfigDataWrite();
+      if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Exit
         break;
       }
     }  // end while loop

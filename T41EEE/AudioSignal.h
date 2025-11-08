@@ -264,6 +264,12 @@ void SetAudioOperatingState(RadioState operatingState) {
     case RadioState::SSB_TRANSMIT_STATE:
     case RadioState::FT8_TRANSMIT_STATE:
 
+// Don't use compressor or CESSB in FT8 mode.
+if(bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) { 
+  ConfigData.compressorFlag = false;
+      ConfigData.cessb = false;
+      cessb1.setProcessing(ConfigData.cessb);
+}
       SampleRate = SAMPLE_RATE_48K;
       InitializeDataArrays();  // I2S sample rate set in this function.
       // QSD disabled and disconnected

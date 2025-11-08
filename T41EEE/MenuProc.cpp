@@ -2,7 +2,6 @@
 // ShowMenu
 // CalibrateOptions
 // CWOptions
-// Spectrum Options
 // AGC Options
 // Receive Equalizer Options
 // SSB Options
@@ -396,7 +395,7 @@ void CalibrateOptions() {
 
 /*****
   Purpose: Present the CW options available to the user.  Change and store to ConfigData.
-==============  AFP 10-22-22 ==================
+Partially updated to revised parameter entry.  Greg Raven KF5N November 2025
   Parameter list:
     void
 
@@ -418,14 +417,13 @@ void CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
 
   switch (CWChoice) {
 
-    case 0:  // Set Morse decoder sensitivity.
+    case 0:  // Set Morse decoder sensitivity.  This runs in active receive loop!
       ConfigData.morseDecodeSensitivity = GetEncoderValueLiveString(0, 10000, ConfigData.morseDecodeSensitivity, 100, cwChoices[CWChoice], false);
       if (ConfigData.morseDecodeSensitivity != morseDecodeSensitivityOld) morseDecodeSensitivityOld = ConfigData.morseDecodeSensitivity;
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X - 1, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT + 1, RA8875_BLACK);
-          eeprom.ConfigDataWrite();
           morseDecodeAdjustFlag = false;
         }
       }
@@ -440,7 +438,7 @@ void CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
       break;
 
     case 3:  // Keyer WPM.
-      SetWPM();
+ConfigData.currentWPM = static_cast<uint32_t>(GetEncoderValueLoopFloat(5, 60, ConfigData.currentWPM, 1, 0, "Keyer WPM: ", true, true));
       SetTransmitDitLength(ConfigData.currentWPM);  //Afp 09-22-22     // JJP 8/19/23
       break;
 
@@ -462,12 +460,14 @@ void CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
       break;
 
     case 8:                // new function JJP 9/1/22
-      SetTransmitDelay();  // Transmit relay hold delay
+//      SetTransmitDelay();  // Transmit relay hold delay
+ConfigData.cwTransmitDelay = static_cast<uint32_t>(GetEncoderValueLoopFloat(250, 3000, ConfigData.cwTransmitDelay, 250, 0, "Transmit Delay: ", true, true));
       break;
 
     default:  // Cancel
       break;
   }
+    eeprom.ConfigDataWrite();
 }
 
 
@@ -479,7 +479,7 @@ void CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
 
   Return value
     int           an index into displayScale[] array, or -1 on cancel
-*****/
+*****
 void SpectrumOptions() {
   const std::string spectrumChoices[] = { "20 dB/unit", "10 dB/unit", "Cancel" };
   int spectrumSet = ConfigData.currentScale;  // JJP 7/14/23
@@ -493,7 +493,7 @@ void SpectrumOptions() {
   display.ShowSpectrumdBScale();
 //  lastState = RadioState::NOSTATE;  // Force update of operating state.
 }
-
+*/
 
 /*****
   Purpose: Adjust the receiver's AGC configuration.
@@ -769,14 +769,14 @@ void EqualizerXmtOptions() {
     none
 *****/
 void SSBOptions() {
-  static int micChoice = 0;
+  static int ssbChoice = 0;
   float imdAmplitude = 0.0;
   float imdAmplitudedB = 10.0;
   MenuSelect menu = MenuSelect::BOGUS_PIN_READ;
-  const std::string micChoices[] = { "CESSB", "SSB", "FT8", "Comp On", "Comp Off", "Mic Gain", "Comp Threshold", "Comp Ratio", "IMD Test ", "Cancel" };
+  const std::string ssbChoices[] = { "CESSB", "SSB", "Comp On", "Comp Off", "Mic Gain", "Comp Ratio", "Comp Threshold", "IMD Test ", "Cancel" };
 
-  micChoice = SubmenuSelect(micChoices, 10, micChoice);
-  switch (micChoice) {
+  ssbChoice = SubmenuSelect(ssbChoices, 9, ssbChoice);
+  switch (ssbChoice) {
 
     case 0:  // CESSB on
       ConfigData.cessb = true;
@@ -789,38 +789,39 @@ void SSBOptions() {
       cessb1.setProcessing(ConfigData.cessb);
       display.BandInformation();
       break;
-
+/*
     case 2:  // FT8
-      ConfigData.cessb = false;
-      cessb1.setProcessing(ConfigData.cessb);
       display.BandInformation();
       break;
-
-    case 3:  // Compressor On
+*/
+    case 2:  // Compressor On
       ConfigData.compressorFlag = true;
       display.UpdateCompressionField();
       break;
 
-    case 4:  // Compressor Off
+    case 3:  // Compressor Off
       ConfigData.compressorFlag = false;
       display.UpdateCompressionField();
       break;
 
-    case 5:  // Adjust mic gain in dB.  Default 0 db.
-      MicGainSet();
+    case 4:  // Adjust mic gain in dB.  Default 0 db.
+    ConfigData.micGain = GetEncoderValueLoopFloat(-20, 20, ConfigData.micGain, 1, 1, "Mic Gain dB: ", true, true);
+//      MicGainSet();
       break;
 
-    case 6:  // Set compression ratio.  Default -10 dB.
-      SetCompressionThreshold();
+    case 5:  // Set compression ratio.  Default 5.
+    ConfigData.micCompRatio = GetEncoderValueLoopFloat(1, 1000, ConfigData.micCompRatio, 1, 1, "Comp Ratio: ", true, true);
+//      SetCompressionThreshold();
       display.UpdateCompressionField();
       break;
 
-    case 7:  // Set compressor threshold.  Default 100.0.
-      SetCompressionRatio();
+    case 6:  // Set compressor threshold.  Default -15.0 dB.
+//      SetCompressionRatio();
+ConfigData.micThreshold = GetEncoderValueLoopFloat(-60, 0, ConfigData.micThreshold, 1, 1, "Comp Thresh dB: ", true, true);
       display.UpdateCompressionField();
       break;
 
-    case 8:  // IMD test.  This is a self-contained loop which uses the SSB exciter.
+    case 7:  // IMD test.  This is a self-contained loop which uses the SSB exciter.
 
       radioState = RadioState::SSB_IM3TEST_STATE;
       bands.bands[ConfigData.currentBand].mode = RadioMode::SSB_MODE;
@@ -832,7 +833,7 @@ void SSBOptions() {
       while (menu != MenuSelect::MENU_OPTION_SELECT) {
         menu = readButton();  // Use this to quit.
         // Return IMD amplitude in dB.
-        imdAmplitudedB = GetEncoderValueLive(0.0, 100.0, imdAmplitudedB, 1.0, micChoices[8], true, true);
+        imdAmplitudedB = GetEncoderValueLive(0.0, 100.0, imdAmplitudedB, 1.0, ssbChoices[7], true, true);
         imdAmplitude = volumeLog[static_cast<int>(imdAmplitudedB)];
         toneSSBCal1.amplitude(imdAmplitude);
         toneSSBCal2.amplitude(imdAmplitude);
@@ -852,7 +853,7 @@ tft.print("            ");  // Erase
       }
       break;
 
-    case 9:  // Cancel
+    case 8:  // Cancel
       return;
       break;
 
@@ -990,7 +991,6 @@ void DoPaddleFlip() {
       break;
     }
   }
-  eeprom.ConfigDataWrite();
 }
 
 
