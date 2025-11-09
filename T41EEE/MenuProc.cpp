@@ -108,6 +108,7 @@ void CalibrateOptions() {
           eeprom.ConfigDataWrite();
           eeprom.CalDataWrite();
           calibrateFlag = 0;
+          display.EraseMenus();
         }
       }
       break;
@@ -287,6 +288,7 @@ void CalibrateOptions() {
           eeprom.ConfigDataWrite();
           eeprom.CalDataWrite();
           calibrateFlag = 0;
+          display.EraseMenus();
         }
       }
 

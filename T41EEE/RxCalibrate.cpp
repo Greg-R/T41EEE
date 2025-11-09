@@ -509,7 +509,7 @@ void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool 
           adjdB_avg = 0;
           index = 0;
           IQCalType = 0;
-          float increment = 0.002;  // Reset increment in case initial cal is run twice.
+          increment = 0.002;  // Reset increment in case initial cal is run twice.
           state = State::initialSweepAmp;  // Let this fall through.
 
         case State::initialSweepAmp:

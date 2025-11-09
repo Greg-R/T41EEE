@@ -30,47 +30,47 @@
 
 // Constants and #defines first:
 //======================================== Symbolic Constants for the T41 ===================================================
-const int NUMBER_OF_SWITCHES = 18;  // Number of push button switches.
-const int TEMPMON_ROOMTEMP = 25.0;
+constexpr int NUMBER_OF_SWITCHES = 18;  // Number of push button switches.
+constexpr int TEMPMON_ROOMTEMP = 25.0;
 #define SD_CS BUILTIN_SDCARD  // Works on T_3.6 and T_4.1 ...
 
 //======================================== Symbolic constants ==========================================================
 
 // These constants are used by the voltage divider network so only 1 analog pin is used for the 16 option switches. These may need
 // to be changed for the exact value for your system. They are initialized in the INO file.
-const int BUSY_ANALOG_PIN = 39;       // This is the analog pin that controls the 18 switches
-const int NOTHING_TO_SEE_HERE = 950;  // If the analog pin is greater than this value, nothing's going on
-const int BOGUS_PIN_READ = -1;        // If no push button read. GET RID OF THIS!!!
-const int WIGGLE_ROOM = 20;           // This is the maximum value that can added to a BUSY_ANALOG_PIN pin read value of a push
+constexpr int BUSY_ANALOG_PIN = 39;       // This is the analog pin that controls the 18 switches
+constexpr int NOTHING_TO_SEE_HERE = 950;  // If the analog pin is greater than this value, nothing's going on
+constexpr int BOGUS_PIN_READ = -1;        // If no push button read. GET RID OF THIS!!!
+constexpr int WIGGLE_ROOM = 20;           // This is the maximum value that can added to a BUSY_ANALOG_PIN pin read value of a push
                                       // button and still have the switch value be associated with the correct push button.
-const int PRIMARY_MENU = 0;
-const int SECONDARY_MENU = 1;
-const int PRIMARY_MENU_X = 0;
-const int SECONDARY_MENU_X = 250;
-const int MENUS_Y = 0;
-const int EACH_MENU_WIDTH = 260;
-const int BOTH_MENU_WIDTHS = (EACH_MENU_WIDTH * 2 + 30);
-const int MENU_OPTION_SELECT = 0;  // These are the expected values from the switch ladder
+constexpr int PRIMARY_MENU = 0;
+constexpr int SECONDARY_MENU = 1;
+constexpr int PRIMARY_MENU_X = 0;
+constexpr int SECONDARY_MENU_X = 250;
+constexpr int MENUS_Y = 0;
+constexpr int EACH_MENU_WIDTH = 260;
+constexpr int BOTH_MENU_WIDTHS = (EACH_MENU_WIDTH * 2 + 30);
+constexpr int MENU_OPTION_SELECT = 0;  // These are the expected values from the switch ladder
  
 //=======================================================
-const int XPIXELS = 800;  // This is for the 5.0" display
-const int YPIXELS = 480;
-const int CHAR_HEIGHT = 32;
-#define PIXELS_PER_EQUALIZER_DELTA 10  // Number of pixels per detent of encoder for equalizer changes
-#define SPECTRUM_LEFT_X 3              // Used to plot left edge of spectrum display  AFP 12-14-21
-#define WATERFALL_LEFT_X SPECTRUM_LEFT_X
+constexpr int XPIXELS = 800;  // This is for the 5.0" display
+constexpr int YPIXELS = 480;
+constexpr int CHAR_HEIGHT = 32;
+constexpr int PIXELS_PER_EQUALIZER_DELTA = 10;  // Number of pixels per detent of encoder for equalizer changes
+constexpr int SPECTRUM_LEFT_X = 3;             // Used to plot left edge of spectrum display  AFP 12-14-21
+constexpr int WATERFALL_LEFT_X = SPECTRUM_LEFT_X;
 //#define SPECTRUM_RES 512                                        // The value used in the original open-source code is 256.  Al uses 512.
-#define SPECTRUM_TOP_Y 100                                      // Start of spectrum plot space
-#define SPECTRUM_HEIGHT 150                                     // This is the pixel height of spectrum plot area without disturbing the axes
-#define SPECTRUM_BOTTOM (SPECTRUM_TOP_Y + SPECTRUM_HEIGHT - 3)  // 247 = 100 + 150 - 3
-#define AUDIO_SPECTRUM_TOP 129
-#define AUDIO_SPECTRUM_BOTTOM SPECTRUM_BOTTOM
-#define MAX_WATERFALL_WIDTH 512                                       // Pixel width of waterfall
-#define MAX_WATERFALL_ROWS 170                                        // Waterfall rows
-#define WATERFALL_RIGHT_X (WATERFALL_LEFT_X + MAX_WATERFALL_WIDTH)    // 3 + 512
-#define WATERFALL_TOP_Y (SPECTRUM_TOP_Y + SPECTRUM_HEIGHT + 5)        // 130 + 120 + 5 = 255
-#define FIRST_WATERFALL_LINE (WATERFALL_TOP_Y + 20)                   // 255 + 35 = 290
-#define WATERFALL_BOTTOM (FIRST_WATERFALL_LINE + MAX_WATERFALL_ROWS)  // 290 + 170 = 460
+constexpr int SPECTRUM_TOP_Y = 100;                                    // Start of spectrum plot space
+constexpr int SPECTRUM_HEIGHT = 150;                                    // This is the pixel height of spectrum plot area without disturbing the axes
+constexpr int SPECTRUM_BOTTOM = (SPECTRUM_TOP_Y + SPECTRUM_HEIGHT - 3);  // 247 = 100 + 150 - 3
+constexpr int AUDIO_SPECTRUM_TOP = 129;
+constexpr int AUDIO_SPECTRUM_BOTTOM = SPECTRUM_BOTTOM;
+constexpr int MAX_WATERFALL_WIDTH = 512;                                    // Pixel width of waterfall
+constexpr int MAX_WATERFALL_ROWS = 170;                                 // Waterfall rows
+constexpr int WATERFALL_RIGHT_X = (WATERFALL_LEFT_X + MAX_WATERFALL_WIDTH);   // 3 + 512
+constexpr int WATERFALL_TOP_Y = (SPECTRUM_TOP_Y + SPECTRUM_HEIGHT + 5);        // 130 + 120 + 5 = 255
+constexpr int FIRST_WATERFALL_LINE = (WATERFALL_TOP_Y + 20);                   // 255 + 35 = 290
+constexpr int WATERFALL_BOTTOM = (FIRST_WATERFALL_LINE + MAX_WATERFALL_ROWS);  // 290 + 170 = 460
 
 #define AGC_Y_OFFSET 292
 #define AGC_X_OFFSET 680

@@ -853,6 +853,25 @@ void KeyRingOn()  //AFP 09-25-22
 }
 
 
+/*****
+  Purpose: Enable/disable the transmitter.
+
+  Parameter list: bool transmitOn
+
+  Return value; void
+*****/
+void enableTransmitter(bool transmitOn) {
+if(transmitOn) {
+        digitalWrite(RXTX, HIGH);  //xmit on
+        display.ShowTransmitReceiveStatus();
+} else {
+        digitalWrite(RXTX, LOW);  //xmit on
+        display.ShowTransmitReceiveStatus();
+}
+        keyPressedOn = false;  // Reset isr().
+}
+
+
 bool powerUp = false;
 uint32_t afterPowerUp = 0;
 /*****
@@ -993,6 +1012,9 @@ FLASHMEM void setup() {
   eeprom.EEPROMStartup();
 #endif
 
+// GPIOs should be configured at this point.  Make sure transmitter is disabled.
+  enableTransmitter(false);
+
   //  Entry graphics
   Splash();
 
@@ -1052,6 +1074,7 @@ FLASHMEM void setup() {
 
 FilterSetSSB();  // This is important!  If this is not run up front various other filters go into never never land.
   //  Draw the entire radio display.
+
   display.RedrawAll();
 }
 //============================================================== END setup() =================================================================
@@ -1175,15 +1198,16 @@ if(radioState == RadioState::AM_RECEIVE_STATE and lastState != RadioState::AM_RE
     case RadioState::FT8_RECEIVE_STATE:
     case RadioState::SSB_RECEIVE_STATE:
       if (lastState != radioState) {  // G0ORX 01092023
-        digitalWrite(RXTX, LOW);      //xmit off
-        display.ShowTransmitReceiveStatus();
+      enableTransmitter(false);       // Disable transmitter.
+//        digitalWrite(RXTX, LOW);      //xmit off
+//        display.ShowTransmitReceiveStatus();
       }
       display.ShowSpectrum(drawSpectrum);
       break;
     case RadioState::SSB_TRANSMIT_STATE:
-      digitalWrite(RXTX, HIGH);  //xmit on
-
-      display.ShowTransmitReceiveStatus();
+      enableTransmitter(true);
+//      digitalWrite(RXTX, HIGH);  //xmit on
+//      display.ShowTransmitReceiveStatus();
       while (digitalRead(PTT) == LOW) {
         SSB_ExciterIQData();
 
@@ -1214,9 +1238,9 @@ if(radioState == RadioState::AM_RECEIVE_STATE and lastState != RadioState::AM_RE
       break;
 
     case RadioState::FT8_TRANSMIT_STATE:
-      digitalWrite(RXTX, HIGH);  //xmit on
-
-      display.ShowTransmitReceiveStatus();
+        enableTransmitter(true);
+//      digitalWrite(RXTX, HIGH);  //xmit on
+//      display.ShowTransmitReceiveStatus();
       while (SerialUSB1.rts() == HIGH) {
         SSB_ExciterIQData();
       }
@@ -1232,17 +1256,19 @@ if(radioState == RadioState::AM_RECEIVE_STATE and lastState != RadioState::AM_RE
   switch (radioState) {
     case RadioState::CW_RECEIVE_STATE:
       if (lastState != radioState) {  // G0ORX 01092023
-        display.ShowTransmitReceiveStatus();
-        keyPressedOn = false;
+      enableTransmitter(false);
+//        display.ShowTransmitReceiveStatus();
+//        keyPressedOn = false;
       }
       display.ShowSpectrum(drawSpectrum);  // if removed CW signal on is 2 mS
       break;
     case RadioState::CW_TRANSMIT_STRAIGHT_STATE:
-      display.ShowTransmitReceiveStatus();
+    enableTransmitter(true);
+//      display.ShowTransmitReceiveStatus();
       cwKeyDown = false;  // false initiates CW_SHAPING_RISE.
       cwTimer = millis();
       while (millis() - cwTimer <= ConfigData.cwTransmitDelay) {  //Start CW transmit timer on
-        digitalWrite(RXTX, HIGH);
+//        digitalWrite(RXTX, HIGH);
         if (digitalRead(KEYER_DIT_INPUT_TIP) == LOW and ConfigData.keyType == 0) {  // AFP 09-25-22  Turn on CW signal
           cwTimer = millis();                                                       //Reset timer
 
@@ -1262,13 +1288,14 @@ if(radioState == RadioState::AM_RECEIVE_STATE and lastState != RadioState::AM_RE
           }
         }
       }                         // end CW transmit while loop
-      digitalWrite(RXTX, LOW);  // End Straight Key Mode
+//      digitalWrite(RXTX, LOW);  // End Straight Key Mode
       break;
     case RadioState::CW_TRANSMIT_KEYER_STATE:
-      display.ShowTransmitReceiveStatus();
+    enableTransmitter(true);
+//      display.ShowTransmitReceiveStatus();
       cwTimer = millis();
       while (millis() - cwTimer <= ConfigData.cwTransmitDelay) {
-        digitalWrite(RXTX, HIGH);
+//        digitalWrite(RXTX, HIGH);
 
         if (digitalRead(ConfigData.paddleDit) == LOW) {  // Keyer Dit
           ditTimerOn = millis();
@@ -1318,7 +1345,7 @@ if(radioState == RadioState::AM_RECEIVE_STATE and lastState != RadioState::AM_RE
         keyPressedOn = 0;  // Fix for keyer click-clack.  KF5N August 16, 2023
       }                    //End Relay timer
 
-      digitalWrite(RXTX, LOW);  // End Straight Key Mode
+//      digitalWrite(RXTX, LOW);  // End Straight Key Mode
       break;
     case RadioState::NOSTATE:
       break;
