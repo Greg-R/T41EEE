@@ -1108,7 +1108,8 @@ void loop() {
   unsigned long cwBlockIndex;
 
   menu = readButton();
-  if (menu != MenuSelect::BOGUS_PIN_READ and (radioState != RadioState::SSB_TRANSMIT_STATE) and (radioState != RadioState::FT8_TRANSMIT_STATE) and (radioState != RadioState::CW_TRANSMIT_STRAIGHT_STATE) and (radioState != RadioState::CW_TRANSMIT_KEYER_STATE)) {
+  // SSB and FT8 transmit operate via the main loop().  CW modes operate within independent while loops.  Don't stop in SSB and FT8 modes to read the buttons.
+  if (menu != MenuSelect::BOGUS_PIN_READ and (radioState != RadioState::SSB_TRANSMIT_STATE) and (radioState != RadioState::FT8_TRANSMIT_STATE)) {
     button.ExecuteButtonPress(menu);
   }
 
