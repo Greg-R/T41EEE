@@ -133,6 +133,7 @@ void CalibrateOptions() {
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.setCursor(0, 1);
           tft.print("                  ");  // Erase.
+          display.EraseMenus();
           eeprom.CalDataWrite();
           eeprom.ConfigDataWrite();
           calibrateFlag = 0;
@@ -255,7 +256,7 @@ void CalibrateOptions() {
   // Select the type of calibration, and then skip this during the loop() function.
   if (calibrateFlag == 0) {
     const std::string IQOptions[]{ "Freq Cal", "CW PA Cal", "CW Rec Cal", "CW Xmit Cal", "SSB PA Cal", "SSB Rec Cal", "SSB Transmit Cal", "CW Radio Cal", "CW Refine Cal", "SSB Radio Cal", "SSB Refine Cal", "dBm Level Cal", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
-    IQChoice = SubmenuSelect(IQOptions, 15, 0);                                                                                                                                                                                                                        //AFP 10-21-22
+    IQChoice = SubmenuSelect(IQOptions, 15, 0);                                                                                                                                                                                                                      //AFP 10-21-22
   }
   calibrateFlag = true;
   switch (IQChoice) {
@@ -272,6 +273,7 @@ void CalibrateOptions() {
           tft.setCursor(0, 1);
           tft.print("                ");  // Erase.
           eeprom.CalDataWrite();
+          display.EraseMenus();
           calibrateFlag = 0;
         }
       }
@@ -314,6 +316,7 @@ void CalibrateOptions() {
           tft.print("                  ");  // Erase.
           eeprom.ConfigDataWrite();
           eeprom.CalDataWrite();
+          display.EraseMenus();
           calibrateFlag = 0;
         }
       }
@@ -442,7 +445,7 @@ void CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
       break;
 
     case 3:  // Keyer WPM.
-ConfigData.currentWPM = static_cast<uint32_t>(GetEncoderValueLoopFloat(5, 60, ConfigData.currentWPM, 1, 0, "Keyer WPM: ", true, true));
+      ConfigData.currentWPM = static_cast<uint32_t>(GetEncoderValueLoopFloat(5, 60, ConfigData.currentWPM, 1, 0, "Keyer WPM: ", true, true));
       SetTransmitDitLength(ConfigData.currentWPM);  //Afp 09-22-22     // JJP 8/19/23
       break;
 
@@ -463,15 +466,15 @@ ConfigData.currentWPM = static_cast<uint32_t>(GetEncoderValueLoopFloat(5, 60, Co
       DoPaddleFlip();
       break;
 
-    case 8:                // new function JJP 9/1/22
-//      SetTransmitDelay();  // Transmit relay hold delay
-ConfigData.cwTransmitDelay = static_cast<uint32_t>(GetEncoderValueLoopFloat(250, 3000, ConfigData.cwTransmitDelay, 250, 0, "Transmit Delay: ", true, true));
+    case 8:  // new function JJP 9/1/22
+      //      SetTransmitDelay();  // Transmit relay hold delay
+      ConfigData.cwTransmitDelay = static_cast<uint32_t>(GetEncoderValueLoopFloat(250, 3000, ConfigData.cwTransmitDelay, 250, 0, "Transmit Delay: ", true, true));
       break;
 
     default:  // Cancel
       break;
   }
-    eeprom.ConfigDataWrite();
+  eeprom.ConfigDataWrite();
 }
 
 
@@ -597,7 +600,7 @@ void ProcessEqualizerChoices(int EQType, char *title) {
   tft.drawFastHLine(xOrigin - 4, yOrigin + (high / 2), wide + 4, RA8875_RED);  // Print center zero line center
   tft.setFontScale((enum RA8875tsize)0);
 
-// Print y-axis scale numbers.
+  // Print y-axis scale numbers.
   tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
   tft.setCursor(xOrigin - 4 - tft.getFontWidth() * 3, yOrigin + tft.getFontHeight());
   tft.print("+12");
@@ -609,14 +612,14 @@ void ProcessEqualizerChoices(int EQType, char *title) {
   barTopY = yOrigin + (high / 2);                // 50 + (300 / 2) = 200
   barBottomY = barTopY + DEFAULT_EQUALIZER_BAR;  // Default 200 + 100
 
-// Print x-axis frequencies and rectangular bars proportional to yLevel.
+  // Print x-axis frequencies and rectangular bars proportional to yLevel.
   for (iFreq = 0; iFreq < EQUALIZER_CELL_COUNT; iFreq++) {
     tft.fillRect(xOrigin + (barWidth + 4) * iFreq, barTopY - (yLevel[iFreq] - DEFAULT_EQUALIZER_BAR), barWidth, yLevel[iFreq], RA8875_CYAN);
     tft.setCursor(xOrigin + (barWidth + 4) * iFreq, yOrigin + high - tft.getFontHeight() * 2);
     // Make the first one red to indicate it is active.
 
-if(iFreq == 0) tft.setTextColor(RA8875_RED, RA8875_BLACK);
-else tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
+    if (iFreq == 0) tft.setTextColor(RA8875_RED, RA8875_BLACK);
+    else tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
 
     if (EQType == 0) tft.print(rXeqFreq[iFreq].c_str());
     else tft.print(tXeqFreq[iFreq].c_str());
@@ -633,13 +636,13 @@ else tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
   // Nested while loops for adjusting equalizer values.  This is the outer loop.
   while (columnIndex < EQUALIZER_CELL_COUNT) {
     xOffset = xOrigin + (barWidth + 4) * columnIndex;  // Just do the math once
-// Draw the bar above the x-axis frequency.
-    tft.fillRect(xOffset,                           // Indent to proper bar...
-                 barBottomY - yLevel[columnIndex],  // Start at red line
-                 barWidth,                          // Set bar width
-                 yLevel[columnIndex],               // Draw new bar
+                                                       // Draw the bar above the x-axis frequency.
+    tft.fillRect(xOffset,                              // Indent to proper bar...
+                 barBottomY - yLevel[columnIndex],     // Start at red line
+                 barWidth,                             // Set bar width
+                 yLevel[columnIndex],                  // Draw new bar
                  RA8875_MAGENTA);
-// User adjusts the value of the bar in the inner loop.                 
+    // User adjusts the value of the bar in the inner loop.
     while (true) {
       newValue = yLevel[columnIndex];  // Get current value
       if (filterEncoderMove != 0) {
@@ -662,11 +665,10 @@ else tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
         tft.setCursor(xOffset + tft.getFontWidth() * 1.5, yOrigin + high + tft.getFontHeight() * 2);
 
         tft.setTextColor(RA8875_RED, RA8875_BLACK);
-        if (EQType == 0) { 
+        if (EQType == 0) {
           tft.print(yLevel[columnIndex]);
-        }
-        else {
-           tft.print((yLevel[columnIndex] - 100) / 10);
+        } else {
+          tft.print((yLevel[columnIndex] - 100) / 10);
         }
 
         if (yLevel[columnIndex] < DEFAULT_EQUALIZER_BAR) {                             // Repaint red center line if erased
@@ -693,45 +695,43 @@ else tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
 
         filterEncoderMove = 0;
 
-// Redraw in white.
+        // Redraw in white.
         tft.setCursor(xOffset + tft.getFontWidth() * 1.5, yOrigin + high + tft.getFontHeight() * 2);
         tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
-        if (EQType == 0) { 
+        if (EQType == 0) {
           tft.print(yLevel[columnIndex]);
-tft.setCursor(xOrigin + (barWidth + 4) * columnIndex, yOrigin + high - tft.getFontHeight() * 2);
-tft.print(rXeqFreq[columnIndex].c_str());
-        }
-        else {
-           tft.print((yLevel[columnIndex] - 100) / 10);
-tft.setCursor(xOrigin + (barWidth + 4) * columnIndex, yOrigin + high - tft.getFontHeight() * 2);
-tft.print(tXeqFreq[columnIndex].c_str());
+          tft.setCursor(xOrigin + (barWidth + 4) * columnIndex, yOrigin + high - tft.getFontHeight() * 2);
+          tft.print(rXeqFreq[columnIndex].c_str());
+        } else {
+          tft.print((yLevel[columnIndex] - 100) / 10);
+          tft.setCursor(xOrigin + (barWidth + 4) * columnIndex, yOrigin + high - tft.getFontHeight() * 2);
+          tft.print(tXeqFreq[columnIndex].c_str());
         }
 
         columnIndex++;
 
-// Redraw next in red before proceeding.
+        // Redraw next in red before proceeding.
         xOffset = xOrigin + (barWidth + 4) * columnIndex;
         tft.setCursor(xOffset + tft.getFontWidth() * 1.5, yOrigin + high + tft.getFontHeight() * 2);
         tft.setTextColor(RA8875_RED, RA8875_BLACK);
-        if (EQType == 0) { 
+        if (EQType == 0) {
           tft.print(yLevel[columnIndex]);
-tft.setCursor(xOrigin + (barWidth + 4) * columnIndex, yOrigin + high - tft.getFontHeight() * 2);
-tft.print(rXeqFreq[columnIndex].c_str());
-        }
-        else {
-           tft.print((yLevel[columnIndex] - 100) / 10);
-tft.setCursor(xOrigin + (barWidth + 4) * columnIndex, yOrigin + high - tft.getFontHeight() * 2);
-tft.print(tXeqFreq[columnIndex].c_str());
+          tft.setCursor(xOrigin + (barWidth + 4) * columnIndex, yOrigin + high - tft.getFontHeight() * 2);
+          tft.print(rXeqFreq[columnIndex].c_str());
+        } else {
+          tft.print((yLevel[columnIndex] - 100) / 10);
+          tft.setCursor(xOrigin + (barWidth + 4) * columnIndex, yOrigin + high - tft.getFontHeight() * 2);
+          tft.print(tXeqFreq[columnIndex].c_str());
         }
 
         break;  // Leave inner loop.
-      }  
-    }    // end inner while
-  }      // end outer while    
-eeprom.ConfigDataWrite();
+      }
+    }  // end inner while
+  }    // end outer while
+  eeprom.ConfigDataWrite();
   SetAudioOperatingState(radioState);  // Equalizer adjusted.
   display.RedrawAll();
-//  lastState = RadioState::NOSTATE;  // Force update of operating state.
+  //  lastState = RadioState::NOSTATE;  // Force update of operating state.
 }
 
 
@@ -753,12 +753,12 @@ void EqualizerRecOptions() {
   switch (EQChoice) {
     case 0:
       ConfigData.receiveEQFlag = true;
-//      button.ExecuteModeChange();
-FilterSetSSB();
+      //      button.ExecuteModeChange();
+      FilterSetSSB();
       break;
     case 1:
       ConfigData.receiveEQFlag = false;
-//      button.ExecuteModeChange();
+      //      button.ExecuteModeChange();
       break;
     case 2:
       ProcessEqualizerChoices(0, (char *)"Receive Equalizer");
@@ -835,7 +835,7 @@ void SSBOptions() {
       cessb1.setProcessing(ConfigData.cessb);
       display.BandInformation();
       break;
-/*
+      /*
     case 2:  // FT8
       display.BandInformation();
       break;
@@ -851,19 +851,19 @@ void SSBOptions() {
       break;
 
     case 4:  // Adjust mic gain in dB.  Default 0 db.
-    ConfigData.micGain = GetEncoderValueLoopFloat(-20, 20, ConfigData.micGain, 1, 1, "Mic Gain dB: ", true, true);
-//      MicGainSet();
+      ConfigData.micGain = GetEncoderValueLoopFloat(-20, 20, ConfigData.micGain, 1, 1, "Mic Gain dB: ", true, true);
+      //      MicGainSet();
       break;
 
     case 5:  // Set compression ratio.  Default 5.
-    ConfigData.micCompRatio = GetEncoderValueLoopFloat(1, 1000, ConfigData.micCompRatio, 1, 1, "Comp Ratio: ", true, true);
-//      SetCompressionThreshold();
+      ConfigData.micCompRatio = GetEncoderValueLoopFloat(1, 1000, ConfigData.micCompRatio, 1, 1, "Comp Ratio: ", true, true);
+      //      SetCompressionThreshold();
       display.UpdateCompressionField();
       break;
 
     case 6:  // Set compressor threshold.  Default -15.0 dB.
-//      SetCompressionRatio();
-ConfigData.micThreshold = GetEncoderValueLoopFloat(-60, 0, ConfigData.micThreshold, 1, 1, "Comp Thresh dB: ", true, true);
+      //      SetCompressionRatio();
+      ConfigData.micThreshold = GetEncoderValueLoopFloat(-60, 0, ConfigData.micThreshold, 1, 1, "Comp Thresh dB: ", true, true);
       display.UpdateCompressionField();
       break;
 
@@ -872,7 +872,7 @@ ConfigData.micThreshold = GetEncoderValueLoopFloat(-60, 0, ConfigData.micThresho
       radioState = RadioState::SSB_IM3TEST_STATE;
       bands.bands[ConfigData.currentBand].mode = RadioMode::SSB_MODE;
       SetAudioOperatingState(radioState);
-//      button.ExecuteModeChange();
+      //      button.ExecuteModeChange();
       SetFreq();
       digitalWrite(RXTX, HIGH);  //xmit on
       display.ShowTransmitReceiveStatus();
@@ -885,8 +885,8 @@ ConfigData.micThreshold = GetEncoderValueLoopFloat(-60, 0, ConfigData.micThresho
         toneSSBCal2.amplitude(imdAmplitude);
         SSB_ExciterIQData();
       }
-tft.setCursor(0, 1);
-tft.print("            ");  // Erase
+      tft.setCursor(0, 1);
+      tft.print("            ");  // Erase
       radioState = RadioState::SSB_RECEIVE_STATE;
       digitalWrite(RXTX, LOW);  // Transmitter off.
       SetAudioOperatingState(radioState);
@@ -929,9 +929,9 @@ void RFOptions() {
 
   switch (rfSet) {
     case 0:  // TX Power Set.
-//    calibrateFlag = true;
-//      ConfigData.transmitPowerLevel = static_cast<float32_t>(GetEncoderValue(1, 20, ConfigData.transmitPowerLevel, 1, "Power: ", true, true));
-ConfigData.transmitPowerLevel = GetEncoderValueLoopFloat(1, 20, ConfigData.transmitPowerLevel, 1, 1, "Power: ", true, true);
+      //    calibrateFlag = true;
+      //      ConfigData.transmitPowerLevel = static_cast<float32_t>(GetEncoderValue(1, 20, ConfigData.transmitPowerLevel, 1, "Power: ", true, true));
+      ConfigData.transmitPowerLevel = GetEncoderValueLoopFloat(1, 20, ConfigData.transmitPowerLevel, 1, 1, "Power: ", true, true);
       /*
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
@@ -1100,7 +1100,7 @@ void VFOSelect() {
     void
 *****/
 void ConfigDataOptions() {  //           0               1                2                  3                  4                  5                  6                7                  8              9           10
-//  const std::string ConfigDataOpts[] = { "Save Current", "Load Defaults", "Get Favorite", "Set Favorite", "Copy Config->SD", "Copy SD->Config", "Config->Serial", "Default->Serial", "Stack->Serial", "SD->Serial", "Cancel" };
+                            //  const std::string ConfigDataOpts[] = { "Save Current", "Load Defaults", "Get Favorite", "Set Favorite", "Copy Config->SD", "Copy SD->Config", "Config->Serial", "Default->Serial", "Stack->Serial", "SD->Serial", "Cancel" };
   const std::string ConfigDataOpts[] = { "Save Current", "Load Defaults", "Copy Config->SD", "Copy SD->Config", "EEPROM->Serial", "Default->Serial", "Stack->Serial", "SD->Serial", "Cancel" };
   int defaultOpt = 0;
   config_t tempConfig;     // A temporary config_t struct to copy ConfigData data into.
@@ -1115,7 +1115,7 @@ void ConfigDataOptions() {  //           0               1                2     
     case 1:
       eeprom.ConfigDataDefaults();  // Restore defaults to ConfigData struct and refresh display.
       break;
-/*
+      /*
     case 2:
       eeprom.GetFavoriteFrequency();  // Get a stored frequency and store in active VFO
       break;
@@ -1133,10 +1133,10 @@ void ConfigDataOptions() {  //           0               1                2     
       json.loadConfiguration(configFilename, ConfigData);  // Copy from SD to struct in active memory (on the stack) ConfigData.
       eeprom.ConfigDataWrite();                            // Write to ConfigData non-volatile memory.
       initUserDefinedStuff();                              // Various things must be initialized.  This is normally done in setup().  KF5N February 21, 2024
-//      tft.writeTo(L2);                                     // This is specifically to clear the bandwidth indicator bar.  KF5N August 7, 2023
-//      tft.clearMemory();
-//      tft.writeTo(L1);
-      display.RedrawAll();  // Assume there are lots of changes and do a heavy-duty refresh.  KF5N August 7, 2023
+                                                           //      tft.writeTo(L2);                                     // This is specifically to clear the bandwidth indicator bar.  KF5N August 7, 2023
+                                                           //      tft.clearMemory();
+                                                           //      tft.writeTo(L1);
+      display.RedrawAll();                                 // Assume there are lots of changes and do a heavy-duty refresh.  KF5N August 7, 2023
       break;
 
     case 4:  // EEPROM->Serial
@@ -1209,20 +1209,20 @@ void CalDataOptions() {  //           0               1                2        
     case 3:                                        // Copy SD->CalData
       json.loadCalibration(calFilename, CalData);  // Copy from SD to struct in active memory (on the stack) ConfigData.
       eeprom.CalDataWrite();                       // Write to ConfigData non-volatile memory.
-//      initUserDefinedStuff();                      // Various things must be initialized.  This is normally done in setup().  KF5N February 21, 2024
-//      tft.writeTo(L2);                             // This is specifically to clear the bandwidth indicator bar.  KF5N August 7, 2023
-//      tft.clearMemory();
-//      tft.writeTo(L1);
-//      display.RedrawAll();  // Assume there are lots of changes and do a heavy-duty refresh.  KF5N August 7, 2023
+                                                   //      initUserDefinedStuff();                      // Various things must be initialized.  This is normally done in setup().  KF5N February 21, 2024
+                                                   //      tft.writeTo(L2);                             // This is specifically to clear the bandwidth indicator bar.  KF5N August 7, 2023
+                                                   //      tft.clearMemory();
+                                                   //      tft.writeTo(L1);
+                                                   //      display.RedrawAll();  // Assume there are lots of changes and do a heavy-duty refresh.  KF5N August 7, 2023
       break;
 
     case 4:  // CalData EEPROM->Serial
       {
         Serial.println(F("\nBegin CalData from EEPROM"));
         // Don't want to overwrite the stack.  Need a temporary struct, read the CalData data into that.
-//                EEPROM.get(CAL_BASE_ADDRESS + 4, tempCal);
+        //                EEPROM.get(CAL_BASE_ADDRESS + 4, tempCal);
         eeprom.CalDataRead(tempCal);
-//        Serial.printf("tempCal.CWPowerCalibrationFactor[0] = %f\n", tempCal.CWPowerCalibrationFactor[0]);
+        //        Serial.printf("tempCal.CWPowerCalibrationFactor[0] = %f\n", tempCal.CWPowerCalibrationFactor[0]);
         json.saveCalibration(calFilename, tempCal, false);  // Write the temporary struct to the serial monitor.
         Serial.println(F("\nEnd CalData from EEPROM\n"));
       }

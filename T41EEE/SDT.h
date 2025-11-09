@@ -1,8 +1,5 @@
 #pragma once
 
-//======================================== User section that might need to be changed ===================================
-#include "MyConfigurationFile.h"  // This file name should remain unchanged
-
 //======================================== Library include files ========================================================
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,6 +24,9 @@
 #include <vector>
 #include <algorithm>
 #include <string.h>
+
+//======================================== User section that might need to be changed ===================================
+#include "MyConfigurationFile.h"  // This file name should remain unchanged
 
 // Constants and #defines first:
 //======================================== Symbolic Constants for the T41 ===================================================

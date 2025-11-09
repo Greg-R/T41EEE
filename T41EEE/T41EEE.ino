@@ -1107,12 +1107,6 @@ void loop() {
   bool cwKeyDown;
   unsigned long cwBlockIndex;
 
-  menu = readButton();
-  // SSB and FT8 transmit operate via the main loop().  CW modes operate within independent while loops.  Don't stop in SSB and FT8 modes to read the buttons.
-  if (menu != MenuSelect::BOGUS_PIN_READ and (radioState != RadioState::SSB_TRANSMIT_STATE) and (radioState != RadioState::FT8_TRANSMIT_STATE)) {
-    button.ExecuteButtonPress(menu);
-  }
-
   //  State detection before entering the primary radio loop.  AM and SAM don't transmit, so there is not a state transition required.
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE and digitalRead(PTT) == HIGH) radioState = RadioState::SSB_RECEIVE_STATE;
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE and digitalRead(PTT) == LOW) radioState = RadioState::SSB_TRANSMIT_STATE;
@@ -1125,7 +1119,14 @@ void loop() {
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and (keyPressedOn == true and bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and ConfigData.keyType == 0)) radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and (keyPressedOn == true and bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and ConfigData.keyType == 1)) radioState = RadioState::CW_TRANSMIT_KEYER_STATE;
 
-  // Transition to new state if required.
+  // Top menu button read.
+  // SSB and FT8 transmit operate via the main loop().  CW modes operate within independent while loops.  Don't stop in SSB and FT8 modes to read the buttons.
+  if ((radioState != RadioState::SSB_TRANSMIT_STATE) and (radioState != RadioState::FT8_TRANSMIT_STATE)) {
+     menu = readButton();
+  if (menu != MenuSelect::BOGUS_PIN_READ) button.ExecuteButtonPress(menu);
+  }
+
+  // Transition to new state if required and only if the radio state has changed.
   if (lastState != radioState) {
 
 // Avoid changing the audio system if possible.
