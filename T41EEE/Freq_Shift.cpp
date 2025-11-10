@@ -86,10 +86,10 @@ void FreqShift1()
     Requires 4 complex multiplies and two adds per data point within the time domain buffer.  Applied after the data
     stream is sent to the Zoom FFT , but before decimation.
 *****/
+const float32_t freq[4] = { 562.5, 656.5, 750.0, 843.75 };  // Exact CW offset frequencies.
 void FreqShift2()
 {
-//  uint i;
-  //long currentFreqAOld;  Not used.  KF5N July 22, 2023
+// Are 64 bit floats really required?  Greg KF5N November 2025
   float64_t sideToneShift = 0.0;
   float64_t cwFreqOffset = 0.0;
 
@@ -121,7 +121,8 @@ void FreqShift2()
   } 
   
     if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE ) {
-      cwFreqOffset = static_cast<float64_t>((ConfigData.CWOffset + 6)) * 24000.0 / 256.0;
+//      cwFreqOffset = static_cast<float64_t>((ConfigData.CWOffset + 6)) * 24000.0 / 256.0;
+cwFreqOffset = freq[ConfigData.CWOffset];
         if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) sideToneShift =  -cwFreqOffset;
         if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) sideToneShift =  cwFreqOffset;
         }

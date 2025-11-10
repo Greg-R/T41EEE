@@ -9,7 +9,7 @@ class Button {
 public:
 
 // Initialize the object with user selected tuning increments specified by the user in MyConfigurationFile.h.
-  Button(std::vector<uint32_t>& fineTuneArray, std::vector<uint32_t>& centerTuneArray): fineTuneArray{fineTuneArray}, centerTuneArray{centerTuneArray} {};
+  Button(std::vector<uint32_t>& fineTuneArray, std::vector<uint32_t>& centerTuneArray): fineTuneArray(fineTuneArray), centerTuneArray(centerTuneArray) {}
 //Button() {
 //std::vector<uint32_t> centerTuneArray { 1000, 10000, 100000, 1000000 };
 //std::vector<uint32_t> fineTuneArray { 10, 20, 50, 100, 200, 500 };
@@ -39,10 +39,8 @@ public:
 
 private:
 
-//std::vector<uint32_t>& fineTuneArray;
-//std::vector<uint32_t>& centerTuneArray;  // k3pto
-std::vector<uint32_t> centerTuneArray;
-std::vector<uint32_t> fineTuneArray;
+std::vector<uint32_t>& fineTuneArray;
+std::vector<uint32_t>& centerTuneArray;
 std::vector<uint32_t>::iterator result;
   const int32_t TOP_MENU_COUNT{ 10 };
   IntervalTimer buttonInterrupts;

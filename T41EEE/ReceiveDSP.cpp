@@ -323,11 +323,11 @@ void ReceiveDSP::ProcessIQData() {
         if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
 //Serial.printf("spectrumPeak = %f index_of_max = %d\n", spectrumPeak, (1023 - index_of_max));
    //       audioYPixel[k] = 65 + map(15 * log10f((audioSpectBuffer[1023 - k] + audioSpectBuffer[1023 - k + 1] + audioSpectBuffer[1023 - k + 2]) / 3.0), 0, 100, 0, 120) + audioFFToffset;
-         audioYPixel[k] = 65 + map(15 * log10f((audioSpectBuffer[1023 - k]) / 1.0), 0, 100, 0, 100) + audioFFToffset; 
+         audioYPixel[k] = 65 + 15 * log10f(audioSpectBuffer[1023 - k]) + audioFFToffset; 
         } else if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
    //       audioYPixel[k] = 65 + map(15 * log10f((audioSpectBuffer[k] + audioSpectBuffer[k + 1] + audioSpectBuffer[k + 2]) / 3.0), 0, 100, 0, 120) + audioFFToffset;
 //   Serial.printf("spectrumPeak = %f index_of_max = %d\n", spectrumPeak, index_of_max);
-          audioYPixel[k] = 65 + map(15 * log10f((audioSpectBuffer[k]) / 1.0), 0, 100, 0, 100) + audioFFToffset;
+          audioYPixel[k] = 65 + 15 * log10f(audioSpectBuffer[k]) + audioFFToffset;
         }
         if (audioYPixel[k] < 0)
           audioYPixel[k] = 0;

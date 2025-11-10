@@ -1,6 +1,6 @@
 
 // setup() and loop() are at the bottom of this file.
-//#include "MyConfigurationFile.h"
+
 #include "SDT.h"
 
 //#include <charconv>
@@ -31,7 +31,7 @@ bool agc_action = false;
 
 // Teensy and OpenAudio dataflow code.
 #include "AudioSignal.h"
-//End dataflow
+// End dataflow
 
 //#include "ReceiveDSP.h"
 
@@ -42,10 +42,9 @@ TxCalibrate txcalibrater;
 CW_Exciter cwexciter;
 JSON json;
 Eeprom eeprom;  // Eeprom object.
-std::vector<uint32_t> CENTER_TUNE_ARRAY = { 1000, 10000, 100000, 1000000 };
-std::vector<uint32_t> FINE_TUNE_ARRAY = { 10, 20, 50, 100, 200, 500 };
-//Button button;
-Button button(FINE_TUNE_ARRAY, CENTER_TUNE_ARRAY);
+std::vector<uint32_t> center_tune_array = CENTER_TUNE_ARRAY;
+std::vector<uint32_t> fine_tune_array = FINE_TUNE_ARRAY;
+Button button(fine_tune_array, center_tune_array);
 ModeControl modecontrol;
 
 const char *topMenus[] = { "CW Options", "RF Set", "VFO Select",

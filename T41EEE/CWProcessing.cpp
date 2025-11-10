@@ -201,7 +201,8 @@ void DoCWReceiveProcessing() {  // All New AFP 09-19-22
     arm_max_f32(float_Corr_BufferL, 511, &corrResultL, &corrResultIndexL);
     // Running average of corr coeff. L
     aveCorrResultL = .7 * corrResultL + .3 * aveCorrResultL;
-    aveCorrResult = (corrResultR + corrResultL) / 2;
+    // aveCorrResult reduced by factor of 2 to emphasize Goertzel a little more.
+    aveCorrResult = (corrResultR + corrResultL) / 4.0;  // Divisor was 2.0.
 
     // Calculate Goertzel Mahnitude of incoming signal.
     goertzelMagnitude1 = goertzel_mag(256, freq[ConfigData.CWOffset], 24000, float_buffer_L_CW);  //AFP 10-25-22
