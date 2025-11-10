@@ -1,7 +1,8 @@
 
 // setup() and loop() are at the bottom of this file.
-
+//#include "MyConfigurationFile.h"
 #include "SDT.h"
+
 //#include <charconv>
 
 const char *configFilename = "/config.txt";    // <- SD library uses 8.3 filenames
@@ -41,7 +42,10 @@ TxCalibrate txcalibrater;
 CW_Exciter cwexciter;
 JSON json;
 Eeprom eeprom;  // Eeprom object.
-Button button;
+std::vector<uint32_t> CENTER_TUNE_ARRAY = { 1000, 10000, 100000, 1000000 };
+std::vector<uint32_t> FINE_TUNE_ARRAY = { 10, 20, 50, 100, 200, 500 };
+//Button button;
+Button button(FINE_TUNE_ARRAY, CENTER_TUNE_ARRAY);
 ModeControl modecontrol;
 
 const char *topMenus[] = { "CW Options", "RF Set", "VFO Select",
@@ -412,7 +416,7 @@ float32_t DMAMEM R_BufferOffset[BUFFER_SIZE * N_B];
 float32_t tmp;
 float32_t w;
 float angl;
-float pi = 3.14159265358979;
+////float pi = 3.14159265358979;
 float tau;
 float temp;
 bool volumeChangeFlag = false;

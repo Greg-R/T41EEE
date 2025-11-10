@@ -32,7 +32,6 @@ float32_t Cos = 0.0;
   // http://svn.tapr.org/repos_sdr_hpsdr/trunk/W5WC/PowerSDR_HPSDR_mRX_PS/Source/wdsp/
 *****/
 void AMDecodeSAM() {
-//Serial.printf("DecodeSAM\n");
   int zeta_help = 65;
   float32_t zeta = (float32_t)zeta_help / 100.0;  // PLL step response: smaller, slower response 1.0 - 0.1
   float32_t g1 = 1.0 - exp(-2.0 * ConfigData.omegaN * zeta * 1 / 24000);

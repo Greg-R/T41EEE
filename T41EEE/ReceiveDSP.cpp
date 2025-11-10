@@ -134,10 +134,10 @@ void ReceiveDSP::ProcessIQData() {
       If the buffers are full, the Teensy needs much more time.
       In that case, we clear the buffers to keep the whole audio chain running smoothly.
       **********************************************************************************/
-//    if (ADC_RX_I.available() > 50) {
-//      ADC_RX_I.clear();
-//      ADC_RX_Q.clear();
-//    }
+    if (ADC_RX_I.available() > 50) {
+      ADC_RX_I.clear();
+      ADC_RX_Q.clear();
+    }
 
     /**********************************************************************************  AFP 12-31-20
       IQ amplitude and phase correction.  For this scaled down version the I an Q channels are
@@ -312,14 +312,22 @@ void ReceiveDSP::ProcessIQData() {
     if (updateDisplayFlag == true) {
       // audioSpectBuffer[1024]
       for (int k = 0; k < 1024; k++) {
-        audioSpectBuffer[1023 - k] = (iFFT_buffer[k] * iFFT_buffer[k]);  // iFFT_buffer[1025]
+        audioSpectBuffer[1023 - k] = (iFFT_buffer[k] * iFFT_buffer[k]);  // iFFT_buffer[1025]?
       }
-      for (int k = 3; k < 256; k++) {
+      uint32_t index_of_max = 0;
+      float32_t spectrumPeak = 0;
+        arm_max_f32(audioSpectBuffer, 1024, &spectrumPeak, &index_of_max);
+//        Serial.printf("spectrumPeak = %f index_of_max = %d\n", spectrumPeak, index_of_max);
+      for (int k = 0; k < 256; k++) {
         audioYPixelold[k] = audioYPixelcurrent[k];  // Store the existing audio spectrum so it can be erased.
         if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
-          audioYPixel[k] = 65 + map(15 * log10f((audioSpectBuffer[1024 - k] + audioSpectBuffer[1024 - k + 1] + audioSpectBuffer[1024 - k + 2]) / 3), 0, 100, 0, 120) + audioFFToffset;
+//Serial.printf("spectrumPeak = %f index_of_max = %d\n", spectrumPeak, (1023 - index_of_max));
+   //       audioYPixel[k] = 65 + map(15 * log10f((audioSpectBuffer[1023 - k] + audioSpectBuffer[1023 - k + 1] + audioSpectBuffer[1023 - k + 2]) / 3.0), 0, 100, 0, 120) + audioFFToffset;
+         audioYPixel[k] = 65 + map(15 * log10f((audioSpectBuffer[1023 - k]) / 1.0), 0, 100, 0, 100) + audioFFToffset; 
         } else if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-          audioYPixel[k] = 65 + map(15 * log10f((audioSpectBuffer[k] + audioSpectBuffer[k + 1] + audioSpectBuffer[k + 2]) / 3), 0, 100, 0, 120) + audioFFToffset;
+   //       audioYPixel[k] = 65 + map(15 * log10f((audioSpectBuffer[k] + audioSpectBuffer[k + 1] + audioSpectBuffer[k + 2]) / 3.0), 0, 100, 0, 120) + audioFFToffset;
+//   Serial.printf("spectrumPeak = %f index_of_max = %d\n", spectrumPeak, index_of_max);
+          audioYPixel[k] = 65 + map(15 * log10f((audioSpectBuffer[k]) / 1.0), 0, 100, 0, 100) + audioFFToffset;
         }
         if (audioYPixel[k] < 0)
           audioYPixel[k] = 0;
@@ -384,7 +392,6 @@ void ReceiveDSP::ProcessIQData() {
           float_buffer_L[i] = iFFT_buffer[FFT_length + (i * 2)];
           float_buffer_R[i] = float_buffer_L[i];
           audiotmp = AlphaBetaMag(iFFT_buffer[FFT_length + (i * 2)], iFFT_buffer[FFT_length + (i * 2) + 1]);
-          //}
         }
         break;
       case Sideband::BOTH_AM:

@@ -3,9 +3,9 @@
 
 #include "SDT.h"
 
-#define HISTOGRAM_ELEMENTS 750
-#define MAX_DECODE_CHARS 32      // Max chars that can appear on decoder line.  Increased to 32.  KF5N October 29, 2023
-#define DECODER_BUFFER_SIZE 128  // Max chars in binary search string with , . ?
+constexpr int32_t HISTOGRAM_ELEMENTS = 750;
+constexpr int32_t MAX_DECODE_CHARS = 32;      // Max chars that can appear on decoder line.  Increased to 32.  KF5N October 29, 2023
+constexpr uint32_t DECODER_BUFFER_SIZE = 128;  // Max chars in binary search string with , . ?
 
 byte currentDashJump = DECODER_BUFFER_SIZE;
 byte currentDecoderIndex = 0;
@@ -43,7 +43,7 @@ long signalElapsedTime;
 long signalStart;
 long signalEnd;  // Start-end of dit or dah
 uint32_t gapLength;
-float freq[4] = { 562.5, 656.5, 750.0, 843.75 };
+float32_t freq[4] = { 562.5, 656.5, 750.0, 843.75 };
 bool drewGreenLastLoop{false};  // Variables used to control drawing of CW decode
 bool drewBlackLastLoop{false};  // indicator square.
 
@@ -157,8 +157,8 @@ FLASHMEM void SelectCWOffset() {
 
   // Now generate the values for the buffer which is used to create the CW tone.  The values are discrete because there must be whole cycles.
   if (ConfigData.CWOffset < 4) {
-    sineTone(numCycles[ConfigData.CWOffset]);  // This is for the CW decoder.
-    cwexciter.writeSineBuffer(numCycles[ConfigData.CWOffset]);
+    sineTone(numCycles[ConfigData.CWOffset]);  // This is for the CW decoder only.
+    cwexciter.writeSineBuffer(numCycles[ConfigData.CWOffset]);  // For the CW exciter only.
   }
   display.UpdateAudioGraphics();
 }
@@ -189,11 +189,9 @@ void DoCWReceiveProcessing() {  // All New AFP 09-19-22
   if (ConfigData.decoderFlag) {  // JJP 7/20/23
 
     arm_fir_f32(&FIR_CW_DecodeL, float_buffer_L, float_buffer_L_CW, 256);  // AFP 10-25-22  Park McClellan FIR filter const Group delay
-    arm_fir_f32(&FIR_CW_DecodeR, float_buffer_R, float_buffer_R_CW, 256);  // AFP 10-25-22
+    arm_fir_f32(&FIR_CW_DecodeR, float_buffer_R, float_buffer_R_CW, 256);
 
-    // ----------------------  Correlation calculation  AFP 02-04-22 -------------------------
-    //Calculate correlation between calc sine and incoming signal
-
+    //Calculate correlation between sine and incoming signal.  AFP 02-04-22
     arm_correlate_f32(float_buffer_R_CW, 256, sinBuffer, 256, float_Corr_BufferR);
     arm_max_f32(float_Corr_BufferR, 511, &corrResultR, &corrResultIndexR);
     // Running average of corr coeff. R
@@ -204,9 +202,11 @@ void DoCWReceiveProcessing() {  // All New AFP 09-19-22
     // Running average of corr coeff. L
     aveCorrResultL = .7 * corrResultL + .3 * aveCorrResultL;
     aveCorrResult = (corrResultR + corrResultL) / 2;
+
     // Calculate Goertzel Mahnitude of incoming signal.
     goertzelMagnitude1 = goertzel_mag(256, freq[ConfigData.CWOffset], 24000, float_buffer_L_CW);  //AFP 10-25-22
     goertzelMagnitude2 = goertzel_mag(256, freq[ConfigData.CWOffset], 24000, float_buffer_R_CW);  //AFP 10-25-22
+
     goertzelMagnitude = (goertzelMagnitude1 + goertzelMagnitude2) / 2;
     //Combine Correlation and Gowetzel Coefficients.  Tuning coefficient added.  Greg KF5N March 9, 2025
     combinedCoeff = static_cast<float32_t>(ConfigData.morseDecodeSensitivity) * aveCorrResult * goertzelMagnitude;

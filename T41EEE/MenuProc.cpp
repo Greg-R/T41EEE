@@ -425,13 +425,15 @@ void CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
   switch (CWChoice) {
 
     case 0:  // Set Morse decoder sensitivity.  This runs in active receive loop!
-      ConfigData.morseDecodeSensitivity = GetEncoderValueLiveString(0, 10000, ConfigData.morseDecodeSensitivity, 100, cwChoices[CWChoice], false);
+//      ConfigData.morseDecodeSensitivity = GetEncoderValueLiveString(0, 10000, ConfigData.morseDecodeSensitivity, 100, cwChoices[CWChoice], false);
+ConfigData.morseDecodeSensitivity = static_cast<uint32_t>(GetEncoderValueLive(0, 10000, ConfigData.morseDecodeSensitivity, 100, "Decode Sens: ", true, true));
       if (ConfigData.morseDecodeSensitivity != morseDecodeSensitivityOld) morseDecodeSensitivityOld = ConfigData.morseDecodeSensitivity;
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.fillRect(SECONDARY_MENU_X - 1, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT + 1, RA8875_BLACK);
           morseDecodeAdjustFlag = false;
+          display.EraseMenus();
         }
       }
       break;
@@ -531,8 +533,8 @@ void AGCOptions() {
       break;
 
     case 2:  // Set AGC threshold
-      ConfigData.AGCThreshold = static_cast<float32_t>(GetEncoderValue(-60, -20, ConfigData.AGCThreshold, 1, "AGC Threshold "));
-
+//      ConfigData.AGCThreshold = static_cast<float32_t>(GetEncoderValue(-60, -20, ConfigData.AGCThreshold, 1, "AGC Threshold "));
+ConfigData.AGCThreshold = GetEncoderValueLoopFloat(-60, -20, ConfigData.AGCThreshold, 1.0, 0, "AGC Threshold: ", true, true);
       initializeAudioPaths();
       break;
 

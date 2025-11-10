@@ -69,9 +69,9 @@ constexpr uint32_t RAY_LENGTH = 190;
 
 // Customizable definitions for center and fine tune defaults and increments.  Larry K3PTO June 24, 2024
 constexpr uint32_t CENTER_TUNE_DEFAULT = 1000;  // Set to the desired default in the CENTER_TUNE_ARRAY.
-#define CENTER_TUNE_ARRAY { 1000, 10000, 100000, 1000000 }
+//const std::vector<uint32_t> CENTER_TUNE_ARRAY = { 1000, 10000, 100000, 1000000 };  // The number of elements is not fixed.
 constexpr uint32_t FINE_TUNE_DEFAULT = 50;  // Set to the desired default in the FINE_TUNE_ARRAY.
-#define FINE_TUNE_ARRAY { 10, 20, 50, 100, 200, 500 }
+//const std::vector<uint32_t> FINE_TUNE_ARRAY = { 10, 20, 50, 100, 200, 500 };  // The number of elements is not fixed.
 
 // Uncomment for the original T41 audio mute control.
 //#define UNMUTEAUDIO LOW

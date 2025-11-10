@@ -4,7 +4,7 @@
 float32_t DMAMEM float_buffer_L_3[2048];
 float32_t DMAMEM float_buffer_R_3[2048];
 
-float32_t NCO_INC;
+float64_t NCO_INC;
 float64_t OSC_COS;
 float64_t OSC_SIN;
 float64_t Osc_Vect_Q = 1.0;
@@ -84,14 +84,14 @@ void FreqShift1()
     Wheatley, M. (2011): CuteSDR Technical Manual Ver. 1.01. - http://sourceforge.net/projects/cutesdr/
     Lyons, R.G. (2011): Understanding Digital Processing. – Pearson, 3rd edition.
     Requires 4 complex multiplies and two adds per data point within the time domain buffer.  Applied after the data
-    stream is sent to the Zoom FFT , but befor decimation.
+    stream is sent to the Zoom FFT , but before decimation.
 *****/
 void FreqShift2()
 {
-  uint i;
+//  uint i;
   //long currentFreqAOld;  Not used.  KF5N July 22, 2023
-  int sideToneShift = 0;
-  int cwFreqOffset;
+  float64_t sideToneShift = 0.0;
+  float64_t cwFreqOffset = 0.0;
 
   if (fineTuneEncoderMove != 0L) {
    // SetFreq();           //AFP 10-04-22
@@ -100,8 +100,8 @@ void FreqShift2()
     // ); //AFP 10-04-22
     // EncoderFineTune();      //AFP 10-04-22
 
-    if (NCOFreq > 40000L) {
-      NCOFreq = 40000L;
+    if (NCOFreq > 40000) {
+      NCOFreq = 40000;
     }
     // ConfigData.centerFreq += ConfigData.freqIncrement;
     currentFreq = ConfigData.centerFreq + NCOFreq;
@@ -121,19 +121,19 @@ void FreqShift2()
   } 
   
     if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE ) {
-      cwFreqOffset = (ConfigData.CWOffset + 6) * 24000 / 256;
-        if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) sideToneShift = -cwFreqOffset;
+      cwFreqOffset = static_cast<float64_t>((ConfigData.CWOffset + 6)) * 24000.0 / 256.0;
+        if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) sideToneShift =  -cwFreqOffset;
         if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) sideToneShift =  cwFreqOffset;
         }
 
-  NCO_INC = 2.0 * PI * (NCOFreq + sideToneShift) / SR[SampleRate].rate; // 192000 SPS is the actual sample rate used in the Receive ADC
+  NCO_INC = static_cast<float64_t>(2.0 * PI) * (static_cast<float64_t>(NCOFreq) + sideToneShift) / static_cast<float64_t>(SR[SampleRate].rate); // 192000 SPS is the actual sample rate used in the Receive ADC
 
-//  if(NCO_INC > 0) Serial.printf("NCO_INC\n");
+//  Serial.printf("NCOFreq = %d NCO_INC = %f sideToneShift = %f PI = %f\n", NCOFreq, NCO_INC, sideToneShift, PI);
 
   OSC_COS = cos (NCO_INC);
   OSC_SIN = sin (NCO_INC);
 
-  for (i = 0; i < BUFFER_SIZE * N_BLOCKS; i++) {
+  for (uint32_t i = 0; i < BUFFER_SIZE * N_BLOCKS; i++) {
     // generate local oscillator on-the-fly:  This takes a lot of processor time!
     Osc_Q = (Osc_Vect_Q * OSC_COS) - (Osc_Vect_I * OSC_SIN);  // Q channel of oscillator
     Osc_I = (Osc_Vect_I * OSC_COS) + (Osc_Vect_Q * OSC_SIN);  // I channel of oscillator

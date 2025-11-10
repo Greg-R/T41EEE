@@ -1,7 +1,6 @@
 
 #include "SDT.h"
 
-
 /*
 The button interrupt routine implements a first-order recursive filter, or "leaky integrator,"
 as described at:
@@ -338,8 +337,6 @@ void Button::ExecuteButtonPress(MenuSelect val) {
   Return value:
     void
 *****/
-std::vector<uint32_t>::iterator result;                   // This is also used by fine tuning.  Greg KF5N June 29, 2024
-std::vector<uint32_t> centerTuneArray CENTER_TUNE_ARRAY;  // k3pto
 void Button::ButtonCenterFreqIncrement() {
   uint32_t index = 0;
   // Find the index of the current fine tune setting.
@@ -364,7 +361,7 @@ void Button::ButtonCenterFreqIncrement() {
     void
 *****/
 //std::vector<uint32_t>::iterator result;
-std::vector<uint32_t> fineTuneArray FINE_TUNE_ARRAY;  // K3PTO
+//std::vector<uint32_t> fineTuneArray FINE_TUNE_ARRAY;  // K3PTO
 void Button::ButtonFineFreqIncrement() {
   uint32_t index = 0;
   // Find the index of the current fine tune setting.
@@ -375,6 +372,7 @@ void Button::ButtonFineFreqIncrement() {
     index = 0;
   }
   ConfigData.fineTuneStep = fineTuneArray[index];
+  Serial.printf("index = %d fineTuneArray = %d\n", index, fineTuneArray[index]);
   display.DisplayIncrementField();
 }
 

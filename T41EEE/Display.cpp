@@ -237,7 +237,7 @@ void Display::ShowSpectrum(bool drawSpectrum) {
     }
 
     // Draw audio spectrum.  The audio spectrum width is smaller than the RF spectrum width.
-    // The audio spectrum arrays are generated in the ReceiveDSP by method ProcessIQData()
+    // The audio spectrum arrays are generated in ReceiveDSP.cpp by method ProcessIQData().
     if (x1 < 253) {                                                                      //AFP 09-01-22
       if (keyPressedOn == true) {                                                        //AFP 09-01-22
                                                                                          ////        return;                                                                          //AFP 09-01-22
@@ -1119,11 +1119,12 @@ void Display::UpdateVolumeField() {
   tft.writeTo(L1);
   tft.setFontScale((enum RA8875tsize)1);
   tft.setCursor(BAND_INDICATOR_X + 10, BAND_INDICATOR_Y);  // Volume
-  tft.setTextColor(RA8875_WHITE);
-  tft.print("Vol:");
+  tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
+  tft.print("Vol:   ");
   tft.setTextColor(RA8875_GREEN, RA8875_BLACK);
   //  tft.fillRect(BAND_INDICATOR_X + 80, BAND_INDICATOR_Y, tft.getFontWidth() * 3 + 2, tft.getFontHeight(), RA8875_BLACK);
-  tft.setCursor(FIELD_OFFSET_X - 10, BAND_INDICATOR_Y);
+//   tft.print("   ");
+  tft.setCursor(FIELD_OFFSET_X - 17, BAND_INDICATOR_Y);
   // When both speaker and headphone are active, volume control is speaker only.  This is intended for monitoring FT8.
   if (ConfigData.audioOut == AudioState::SPEAKER or ConfigData.audioOut == AudioState::BOTH) tft.print(ConfigData.speakerVolume);
   if (ConfigData.audioOut == AudioState::HEADPHONE) tft.print(ConfigData.headphoneVolume);
@@ -1241,14 +1242,18 @@ void Display::DisplayIncrementField() {
   tft.setCursor(INCREMENT_X - 3, INCREMENT_Y - 1);
   tft.print("Fine Inc: ");
 
-  tft.fillRect(INCREMENT_X + 67, INCREMENT_Y, tft.getFontWidth() * 4, tft.getFontHeight(), RA8875_BLACK);
+  tft.setTextColor(RA8875_GREEN, RA8875_BLACK);
+//  tft.fillRect(INCREMENT_X + 67, INCREMENT_Y, tft.getFontWidth() * 4, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(FIELD_OFFSET_X - 23, INCREMENT_Y - 1);
-  tft.setTextColor(RA8875_GREEN);
+tft.print("   ");
+  tft.setCursor(FIELD_OFFSET_X - 23, INCREMENT_Y - 1);
   tft.print(ConfigData.fineTuneStep);
 
-  tft.fillRect(INCREMENT_X + 188, INCREMENT_Y, tft.getFontWidth() * 7 + 2, tft.getFontHeight(), RA8875_BLACK);
+//  tft.fillRect(INCREMENT_X + 188, INCREMENT_Y, tft.getFontWidth() * 7 + 2, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(FIELD_OFFSET_X + 95, INCREMENT_Y - 1);
-  tft.setTextColor(RA8875_GREEN);
+  tft.print("       ");
+    tft.setCursor(FIELD_OFFSET_X + 95, INCREMENT_Y - 1);
+//  tft.setTextColor(RA8875_GREEN);
   tft.print(ConfigData.centerTuneStep);
 }
 
@@ -1462,7 +1467,7 @@ void Display::UpdateAudioGraphics() {
     void
 *****/
 void Display::UpdateAudioGraphics() {
-//  Serial.printf("UpdateAudioGraphics\n");
+  Serial.printf("UpdateAudioGraphics\n");
   float CWFilterPosition = 0.0;
   // Update text
 
@@ -1536,20 +1541,20 @@ void Display::UpdateAudioGraphics() {
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) {  // and ConfigData.decoderFlag) {  CW delimiters always shown in CW mode.  Greg KF5N October 2025
     // Draw delimiter bars for CW offset frequency.  This depends on the user selected offset.
     if (ConfigData.CWOffset == 0) {  // 562.5
-      tft.drawFastVLine(BAND_INDICATOR_X + 15, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_GREEN);  //CW lower freq indicator
-      tft.drawFastVLine(BAND_INDICATOR_X + 21, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_GREEN);  //CW upper freq indicator
+      tft.drawFastVLine(BAND_INDICATOR_X + 12, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_GREEN);  //CW lower freq indicator 15 10
+      tft.drawFastVLine(BAND_INDICATOR_X + 18, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_GREEN);  //CW upper freq indicator 21 16
     }
     if (ConfigData.CWOffset == 1) {  // 656.5
-      tft.drawFastVLine(BAND_INDICATOR_X + 19, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_GREEN);  //CW lower freq indicator
-      tft.drawFastVLine(BAND_INDICATOR_X + 25, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_GREEN);  //CW upper freq indicator
+      tft.drawFastVLine(BAND_INDICATOR_X + 16, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_GREEN);  //CW lower freq indicator 19 14
+      tft.drawFastVLine(BAND_INDICATOR_X + 22, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_GREEN);  //CW upper freq indicator 25 20
     }
     if (ConfigData.CWOffset == 2) {
-      tft.drawFastVLine(BAND_INDICATOR_X + 23, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_GREEN);  //CW lower freq indicator
-      tft.drawFastVLine(BAND_INDICATOR_X + 29, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_GREEN);  //CW upper freq indicator
+      tft.drawFastVLine(BAND_INDICATOR_X + 20, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_GREEN);  //CW lower freq indicator 23 18
+      tft.drawFastVLine(BAND_INDICATOR_X + 26, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_GREEN);  //CW upper freq indicator 29 24
     }
     if (ConfigData.CWOffset == 3) {
-      tft.drawFastVLine(BAND_INDICATOR_X + 27, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_GREEN);  //CW lower freq indicator
-      tft.drawFastVLine(BAND_INDICATOR_X + 33, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_GREEN);  //CW upper freq indicator
+      tft.drawFastVLine(BAND_INDICATOR_X + 24, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_GREEN);  //CW lower freq indicator 27 22
+      tft.drawFastVLine(BAND_INDICATOR_X + 30, AUDIO_SPECTRUM_BOTTOM - 118, 118, RA8875_GREEN);  //CW upper freq indicator 33 28
     }
   }
 

@@ -35,8 +35,8 @@ FLASHMEM void sineTone(int numCycles) {
   freqSideTone = numCycles * 24000.0 / 256.0;
   for (kf = 0, increment = 0.0; kf < 256; increment += 1.0, kf++) {        // Calc: numCycles = 8, 750 hz sine wave.
     theta = increment * 2.0 * PI * freqSideTone / 24000.0;
-    sinBuffer[kf] = sin(theta);  // Used in CW decoder and CW_Excit.cpp.
-    cosBuffer[kf] = cos(theta);  // Used in CW_Excite.cpp
+    sinBuffer[kf] = sin(theta);  // Used in CW decoder and CW_Exciter.cpp.
+    cosBuffer[kf] = cos(theta);  // Used only in receive calibration to generate Q channel.
   }
 }
 
