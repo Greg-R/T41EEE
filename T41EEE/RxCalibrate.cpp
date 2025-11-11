@@ -325,7 +325,11 @@ void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool 
   loadCalToneBuffers(750.0);
   CalibratePreamble(0);      // Set zoom to 1X.
   int calFreqShift = 96000;  // Transmit frequency to 2 times IF, the image.
-  if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) ResetFlipFlops();
+  if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) {
+    ResetFlipFlops();  // This function has delay.
+  } else {
+    delay(1000);  // Allow V10/V11 transients to settle.
+  }
   SetFreqCal(calFreqShift);
   plotCalGraphics();
   tft.setFontScale((enum RA8875tsize)0);

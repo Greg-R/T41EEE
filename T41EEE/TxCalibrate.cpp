@@ -243,7 +243,6 @@ void TxCalibrate::printCalType(bool autoCal, bool autoCalDone) {
       void
  *****/
 void TxCalibrate::CalibratePreamble(int setZoom) {
-//  cessb1.processorUsageMaxReset();
 controlAudioOut(ConfigData.audioOut, true);  // Mute all receiver audio.
   calOnFlag = true;  // Used for the special display during calibration and also high-dynamic range FFT.
   exitManual = false;
@@ -518,11 +517,11 @@ void TxCalibrate::DoXmitCalibrate(int calMode, bool radio, bool refine, bool toE
   tft.fillRect(405, 125, 50, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(405, 125);
   tft.print(xmitIncrement, 3);
-  if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) // {
-    ResetFlipFlops();
-//  } else {
-//    delay(1000);
-//  }
+  if ((MASTER_CLK_MULT_RX == 2) || (MASTER_CLK_MULT_TX == 2)) {
+    ResetFlipFlops();  // This has a delay.
+  } else {
+    delay(1000);  // Delay for V10/V11 to allow transients to settle.
+  }
   SetFreqCal(freqOffset);
   printCalType(autoCal, false);
   // Get current values into the iOptimal and qOptimal amplitude and phase working variables.
@@ -1250,7 +1249,7 @@ void TxCalibrate::MakeFFTData() {
     Q_out_R_Ex.play(float_buffer_R_EX, dataWidth);  // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.
   } else {
     fftSuccess = false;  // Not enough transmit data.
-    Serial.printf("Failed to get enough I and Q transmitter data!\n");
+//    Serial.printf("Failed to get enough I and Q transmitter data!\n");
   }
   // End of transmit code.  Begin receive code.
 
@@ -1312,7 +1311,7 @@ void TxCalibrate::MakeFFTData() {
   }  // End of receive code
   else {
     fftSuccess = false;  // Insufficient receive buffers to make FFT.  Do not plot FFT data!
-    Serial.printf("FFT failed due to insufficient I and Q receive data!\n");
+//    Serial.printf("FFT failed due to insufficient I and Q receive data!\n");
   }
 }
 
