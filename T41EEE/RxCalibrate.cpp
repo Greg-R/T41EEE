@@ -1,4 +1,4 @@
-// Class Calibrate replaces Process2.cpp.  Greg KF5N June 16, 2024
+// RxCalibrate class
 // Class extensively modified to perform receive calibration only.  Greg KF5N August 2025
 
 #include "SDT.h"
@@ -55,7 +55,6 @@ void RxCalibrate::warmUpCal() {
   uint32_t count{ 0 };
   uint32_t i;
   // MakeFFTData() has to be called enough times for transients to settle out before computing FFT.
-  //  delay(5000);
   for (i = 0; i < 128; i = i + 1) {
     fftActive = true;
     updateDisplayFlag = true;
@@ -73,8 +72,8 @@ void RxCalibrate::warmUpCal() {
   fftActive = false;
   // Find peak of spectrum, which is 512 wide.  Use this to adjust spectrum peak to top of spectrum display.
   arm_max_q15(pixelnew, 512, &rawSpectrumPeak, &index_of_max);
-  Serial.printf("RX rawSpectrumPeak = %d count = %d i = %d\n", rawSpectrumPeak, count, i);
-  Serial.printf("RX index_of_max = %d\n", index_of_max);
+  //  Serial.printf("RX rawSpectrumPeak = %d count = %d i = %d\n", rawSpectrumPeak, count, i);
+  //  Serial.printf("RX index_of_max = %d\n", index_of_max);
   if (index_of_max < 380 or index_of_max > 388) Serial.printf("Problem with RX warmUpCal\n");
 }
 
@@ -189,7 +188,6 @@ void RxCalibrate::CalibratePreamble(int setZoom) {
   tft.setCursor(left_text_edge, 235);
   tft.print("Filter - Refine-Cal");
   tft.setTextColor(RA8875_CYAN);
-  ////  tft.fillRect(left_text_edge, 125, 100, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(left_text_edge + 90, 142);
   tft.setFontScale((enum RA8875tsize)1);
   tft.print("dB");
@@ -248,7 +246,6 @@ void RxCalibrate::CalibrateEpilogue(bool radioCal, bool saveToEeprom) {
   ConfigData.CWOffset = cwFreqOffsetTemp;                  // Return user selected CW offset frequency.
   sineTone(ConfigData.CWOffset + 6);                       // This function takes "number of cycles" which is the offset + 6.
   ConfigData.currentScale = userScale;                     //  Restore vertical scale to user preference.  KF5N
-                                                           ////  display.ShowSpectrumdBScale();
   ConfigData.transmitPowerLevel = transmitPowerLevelTemp;  // Restore the user's transmit power level setting.  KF5N August 15, 2023
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) bands.bands[ConfigData.currentBand].sideband = tempSideband;
   bands.bands[ConfigData.currentBand].mode = tempMode;
@@ -314,7 +311,6 @@ void RxCalibrate::writeToCalData(float ichannel, float qchannel) {
  *****/
 void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool toEeprom) {
   MenuSelect task = MenuSelect::DEFAULT;
-
   bool autoCal = false;
 
   RxCalibrate::mode = calMode;           // CW or SSB.  This is an object state variable.
@@ -400,11 +396,7 @@ void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool 
       RxCalibrate::CalibrateEpilogue(radioCal, saveToEeprom);
       return;
     }
-    //            if (exit) {
-    //                Serial.printf("Audio memory usage = %d\n", AudioMemoryUsage());
-    //        return;  //  exit variable set in buttonTasks() if button pushed by user.
-    //        }
-    //    if (refineCal) task = MenuSelect::FILTER;
+
     switch (task) {
       // Activate automatic calibration (initial calibration).
       case MenuSelect::ZOOM:  // 2nd row, 1st column button
@@ -449,9 +441,9 @@ void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool 
       case MenuSelect::BEARING:  // UNUSED_2 is now called BEARING
         corrChange = not corrChange;
         if (corrChange == true) {  // Toggle increment value
-          increment = 0.001;       // AFP 2-11-23
+          increment = 0.001;
         } else {
-          increment = 0.002;  // AFP 2-11-23
+          increment = 0.002;
         }
         tft.setFontScale((enum RA8875tsize)0);
         tft.fillRect(left_text_edge + 60, 125, 50, tft.getFontHeight(), RA8875_BLACK);
@@ -459,9 +451,6 @@ void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool 
         tft.print(increment, 3);
         break;
       case MenuSelect::MENU_OPTION_SELECT:  // Save values and exit calibration.
-        //        tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-        //        state = State::exit;
-        //        autoCal = true;  // Set autoCal = true to access State::exit even during manual.
         exitManual = true;
         break;
       default:
@@ -513,7 +502,7 @@ void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool 
           adjdB_avg = 0;
           index = 0;
           IQCalType = 0;
-          increment = 0.002;  // Reset increment in case initial cal is run twice.
+          increment = 0.002;               // Reset increment in case initial cal is run twice.
           state = State::initialSweepAmp;  // Let this fall through.
 
         case State::initialSweepAmp:
@@ -684,7 +673,6 @@ void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool 
       }
     }  // end automatic calibration state machine
 
-    //    if (task != MenuSelect::DEFAULT) lastUsedTask = task;  //  Save the last used task.
     task = MenuSelect::DEFAULT;  // Reset task after it is used.
 
     //  Read encoder and update values.  This is manual calibration.
@@ -762,15 +750,6 @@ void RxCalibrate::MakeFFTData() {
   arm_scale_f32(float_buffer_L_EX, powerScale, float_buffer_L_EX, 2048);  //Scale to compensate for losses in Interpolation
   arm_scale_f32(float_buffer_R_EX, powerScale, float_buffer_R_EX, 2048);
 
-  // This code block was introduced after TeensyDuino 1.58 appeared.  It doesn't use a for loop, but processes the entire 2048 buffer in one pass.
-  // Revised I and Q calibration signal generation using large buffers.  Greg KF5N June 4 2023
-  //  if (static_cast<uint32_t>(ADC_RX_I.available()) > 16 && static_cast<uint32_t>(ADC_RX_Q.available()) > 16) {  // Audio Record Queues!!!
-  //  q15_t q15_buffer_LTemp[2048];  //KF5N
-  //  q15_t q15_buffer_RTemp[2048];  //KF5N
-
-  //  arm_float_to_q15(float_buffer_L_EX, q15_buffer_LTemp, 2048);
-  //  arm_float_to_q15(float_buffer_R_EX, q15_buffer_RTemp, 2048);
-
 #ifdef QSE2
   if (mode == 0) {
     arm_offset_f32(float_buffer_L_EX, CalData.iDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, float_buffer_L_EX, 2048);
@@ -784,13 +763,11 @@ void RxCalibrate::MakeFFTData() {
 
   Q_out_L_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
   Q_out_R_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
-  //  Q_out_L_Ex.play(q15_buffer_LTemp, 2048);
-  //  Q_out_R_Ex.play(q15_buffer_RTemp, 2048);
   Q_out_L_Ex.play(float_buffer_L_EX, 2048);
   Q_out_R_Ex.play(float_buffer_R_EX, 2048);
 
 
-  // }   // End of transmit code.  Begin receive code.
+  // End of transmit code.  Begin receive code.
 
   // Get I16 audio blocks from the record queues and convert them to float.
   // Read in 16 blocks of 128 samples in I and Q if available.
@@ -809,12 +786,6 @@ void RxCalibrate::MakeFFTData() {
     rfGainValue = pow(10, (float)ConfigData.rfGain[ConfigData.currentBand] / 20);        //AFP 2-11-23
     arm_scale_f32(float_buffer_L, rfGainValue, float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 2-11-23
     arm_scale_f32(float_buffer_R, rfGainValue, float_buffer_R, BUFFER_SIZE * N_BLOCKS);  //AFP 2-11-23
-
-    /**********************************************************************************  AFP 12-31-20
-      Scale the data buffers by the RFgain value defined in bands.bands[ConfigData.currentBand] structure
-    **********************************************************************************/
-    //    arm_scale_f32(float_buffer_L, recBandFactor[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 2-11-23
-    //    arm_scale_f32(float_buffer_R, recBandFactor[ConfigData.currentBand], float_buffer_R, BUFFER_SIZE * N_BLOCKS);  //AFP 2-11-23
 
     // IQ amplitude and phase correction.  Mode 0 is for CW and Mode 1 is for SSB.
     if (mode == 0) {
@@ -865,7 +836,6 @@ void RxCalibrate::MakeFFTData() {
 void RxCalibrate::ShowSpectrum()  //AFP 2-10-23
 {
   int x1 = 0;
-  //  int capture_bins = 8;  // Sets the number of bins to scan for signal peak.
 
   pixelnew[0] = 0;
   pixelnew[1] = 0;
@@ -964,8 +934,6 @@ float RxCalibrate::PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
   // Erase the old spectrum and draw the new spectrum.
   tft.drawLine(x1 + 0, y_old2_plot, x1 + 0, y_old_plot, RA8875_BLACK);   // Erase old...
   tft.drawLine(x1 + 0, y1_new_plot, x1 + 0, y_new_plot, RA8875_YELLOW);  // Draw new
-
-  //  pixelCurrent[x1] = pixelnew[x1];  //  This is the actual "old" spectrum! Copied to pixelold by the FFT function.
 
   adjdB = (static_cast<float>(adjAmplitude) - static_cast<float>(refAmplitude)) / (1.95 * 2.0);  // Cast to float and calculate the dB level.  Needs further refinement for accuracy.  KF5N
   adjdB_avg = adjdB * alpha + adjdBold * (1.0 - alpha);                                          // Exponential average.

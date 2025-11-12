@@ -1,8 +1,7 @@
-// SaveAnalogSwitchValues
+// Stand-alone "utility" functions
 
 
 #include "SDT.h"
-
 
 #define TABLE_SIZE_64 64
 
@@ -13,7 +12,6 @@ int pos_x_frequency = 12;
 float32_t dbmhz = -145.0;
 float32_t m_AttackAlpha = 0.03;
 float32_t m_DecayAlpha = 0.01;
-
 
 
 /*****
@@ -28,7 +26,7 @@ FLASHMEM void sineTone(int numCycles) {
   float theta, increment;
   float freqSideTone;
   freqSideTone = numCycles * 24000.0 / 256.0;
-  for (kf = 0, increment = 0.0; kf < 256; increment += 1.0, kf++) {        // Calc: numCycles = 8, 750 hz sine wave.
+  for (kf = 0, increment = 0.0; kf < 256; increment += 1.0, kf++) {  // Calc: numCycles = 8, 750 hz sine wave.
     theta = increment * 2.0 * PI * freqSideTone / 24000.0;
     sinBuffer[kf] = sin(theta);  // Used in CW decoder and CW_Exciter.cpp.
     cosBuffer[kf] = cos(theta);  // Used only in receive calibration to generate Q channel.
@@ -49,7 +47,7 @@ FLASHMEM void initCWShaping() {
 
   // Rising waveform
   //  Raised cosine increasing amplitude for 128 samples (roughly 5ms)
-  for (pos = 0, deg = -180; pos < 256; deg += 1.40625/2.0 /* 180 / 128 */, pos++) {
+  for (pos = 0, deg = -180; pos < 256; deg += 1.40625 / 2.0 /* 180 / 128 */, pos++) {
     cwRiseBuffer[pos] = (1.0 + cos(deg / 57.3 /* fixed conversion to radians */)) / 2.0;
   }
   //  Full amplitude for the remainder
@@ -63,7 +61,7 @@ FLASHMEM void initCWShaping() {
     cwFallBuffer[pos] = 1.0;
   }
   //  Raised cosine decreasing amplitude for the final 128 samples (roughly 5ms)
-  for (deg = 0; pos < 512; deg += 1.40625/2.0 /* 180 / 128 */, pos++) {
+  for (deg = 0; pos < 512; deg += 1.40625 / 2.0 /* 180 / 128 */, pos++) {
     cwFallBuffer[pos] = (1.0 + cos(deg / 57.3 /* fixed conversion to radians */)) / 2.0;
   }
 }
@@ -277,7 +275,8 @@ void Calculatedbm() {
 
   //  Determine Lbin and Ubin from ts.dmod_mode and FilterInfo.width.
   //  LSB and USB filter bandwidth calculated the same way due to mode changes.  Greg KF5N March 16, 2025.
-  bw_LSB = bands.bands[ConfigData.currentBand].FHiCut - bands.bands[ConfigData.currentBand].FLoCut;;
+  bw_LSB = bands.bands[ConfigData.currentBand].FHiCut - bands.bands[ConfigData.currentBand].FLoCut;
+  ;
   bw_USB = bw_LSB;
   // calculate upper and lower limit for determination of signal strength
   // = filter passband is between the lower bin Lbin and the upper bin Ubin
@@ -463,15 +462,15 @@ float ApproxAtan(float z) {
 *****/
 void SaveAnalogSwitchValues() {
   const char *labels[] = { "Select", "Menu Up", "Band Up",
-                         "Zoom", "Menu Dn", "Band Dn",
-                         "Filter", "DeMod", "Mode",
-                         "NR", "Notch", "Noise Floor",
-                         "Coarse Incr", "Decoder", "Fine Increment",
-                         "Reset Tuning", "Frequ Entry", "User 2" };
-  int index{0};
-  int minVal{0};
-  int value{0};
-  int origRepeatDelay{0};
+                           "Zoom", "Menu Dn", "Band Dn",
+                           "Filter", "DeMod", "Mode",
+                           "NR", "Notch", "Noise Floor",
+                           "Coarse Incr", "Decoder", "Fine Increment",
+                           "Reset Tuning", "Frequ Entry", "User 2" };
+  int index{ 0 };
+  int minVal{ 0 };
+  int value{ 0 };
+  int origRepeatDelay{ 0 };
 
   tft.clearMemory();  // Need to clear overlay too
   tft.writeTo(L2);
@@ -583,10 +582,10 @@ int SDPresentCheck() {
     void
 *****/
 FLASHMEM void initPowerCoefficients() {
-      for(int i = 0; i < NUMBER_OF_BANDS; i = i + 1) {        
-         ConfigData.powerOutCW[i] = sqrt(ConfigData.transmitPowerLevel/20.0) * CalData.CWPowerCalibrationFactor[i];
-         ConfigData.powerOutSSB[i] =  sqrt(ConfigData.transmitPowerLevel/20.0) * CalData.SSBPowerCalibrationFactor[i];
-      }
+  for (int i = 0; i < NUMBER_OF_BANDS; i = i + 1) {
+    ConfigData.powerOutCW[i] = sqrt(ConfigData.transmitPowerLevel / 20.0) * CalData.CWPowerCalibrationFactor[i];
+    ConfigData.powerOutSSB[i] = sqrt(ConfigData.transmitPowerLevel / 20.0) * CalData.SSBPowerCalibrationFactor[i];
+  }
 }
 
 
@@ -600,19 +599,18 @@ FLASHMEM void initPowerCoefficients() {
     void
 *****/
 FLASHMEM void initUserDefinedStuff() {
-  Serial.printf("initUserDefinedStuff\n");
   NR_Index = ConfigData.nrOptionSelect;
   TxRxFreq = ConfigData.centerFreq = ConfigData.lastFrequencies[ConfigData.currentBand][ConfigData.activeVFO];
-//  SetTransmitDitLength(ConfigData.currentWPM);
+  //  SetTransmitDitLength(ConfigData.currentWPM);
   SetTransmitDitLength(ConfigData.currentWPM);
   // Initialize buffers used by the CW transmitter and CW decoder.
-  sineTone(ConfigData.CWOffset + 6);  // This function takes "number of cycles" which is the offset + 6.  Used by CW decoder.
+  sineTone(ConfigData.CWOffset + 6);                   // This function takes "number of cycles" which is the offset + 6.  Used by CW decoder.
   cwexciter.writeSineBuffer(ConfigData.CWOffset + 6);  // Used to create CW sinusoidal tone.
   si5351.set_correction(CalData.freqCorrectionFactor, SI5351_PLL_INPUT_XO);
   initCWShaping();
   initPowerCoefficients();
-SetKeyPowerUp();
-  ResetHistograms();  // KF5N February 20, 2024
+  SetKeyPowerUp();
+  ResetHistograms();                         // KF5N February 20, 2024
   zoomIndex = ConfigData.spectrum_zoom - 1;  // ButtonZoom() increments zoomIndex, so this cancels it so the read from EEPROM is accurately restored.  KF5N August 3, 2023
   button.ButtonZoom();                       // Restore zoom settings.  KF5N August 3, 2023
 }
@@ -624,20 +622,18 @@ SetKeyPowerUp();
   https://www.keil.com/pack/doc/cmsis/dsp/html/arm__clip__f32_8c.html
 
 *****/
-void arm_clip_f32(const float32_t * pSrc, 
-  float32_t * pDst, 
-  float32_t low, 
-  float32_t high, 
-  uint32_t numSamples)
-{
-    uint32_t i;
-    for (i = 0; i < numSamples; i++)
-    {                                        
-        if (pSrc[i] > high)                  
-            pDst[i] = high;                  
-        else if (pSrc[i] < low)              
-            pDst[i] = low;                   
-        else                                 
-            pDst[i] = pSrc[i];               
-    }
+void arm_clip_f32(const float32_t *pSrc,
+                  float32_t *pDst,
+                  float32_t low,
+                  float32_t high,
+                  uint32_t numSamples) {
+  uint32_t i;
+  for (i = 0; i < numSamples; i++) {
+    if (pSrc[i] > high)
+      pDst[i] = high;
+    else if (pSrc[i] < low)
+      pDst[i] = low;
+    else
+      pDst[i] = pSrc[i];
+  }
 }

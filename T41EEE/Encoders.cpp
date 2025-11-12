@@ -1,4 +1,4 @@
-//#include <charconv>
+// Encoder functions
 
 #include "SDT.h"
 
@@ -31,25 +31,6 @@ const int FT_step = 500;                 // Hz step in Fast Tune
 // This version limits the result to an fhigh and an flow number.  Note that this function works in concert with EncoderFilter()
 // which is attached to an interrupt.  Graphics changes are handled by UpdateAudioGraphics() in Display.cpp.
 void FilterSetSSB() {
-  Serial.printf("FilterSetSSB\n");
-  /*
-  int32_t filter_change;
-  ////  int filterWidth = static_cast<int>((bands.bands[ConfigData.currentBand].FHiCut - bands.bands[ConfigData.currentBand].FLoCut) / 1000.0 * pixel_per_khz);
-  if (filter_pos != last_filter_pos) {  // This decision is required as this function is required to be used in many locations.  KF5N April 21, 2024
-////    if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) display.BandInformation();  This shouldn't be necessary.
-    filter_change = (filter_pos - last_filter_pos);
-    if (filter_change >= 1) {
-      filterWidth--;  // filterWidth is used in graphics only!
-      if (filterWidth < 10)
-        filterWidth = 10;
-    }
-    if (filter_change <= -1) {
-      filterWidth++;
-      if (filterWidth > 100)
-        filterWidth = 50;
-    }
-    last_filter_pos = filter_pos;
-    */
 
   // Change the FLoCut and FhiCut variables which adjust the DSP filters.
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER or bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
@@ -74,9 +55,6 @@ void FilterSetSSB() {
   audioCompensateFlag = true;  // Compensate for volume due to filter setting.  Done in loop().
   encoderFilterFlag = false;   // The flag is set by the EncoderFilter() isr.
   audioGraphicsFlag = true;    // Need to adjust things in the display.  Done in loop().
-
-  ////  display.UpdateAudioGraphics();  // Updates graphics associated with filter bandwidth including bandwidth indicator bar.
-  ////  display.ShowBandwidth();  // This updates the filter settings numbers at the top of the spectrum display.
 }
 
 
@@ -95,7 +73,7 @@ void EncoderCenterTune() {
   if (result == 0)  // Nothing read
     return;
 
-// This is an alternate function of the coarse frequency tune.  This resets the Morse decoder.
+  // This is an alternate function of the coarse frequency tune.  This resets the Morse decoder.
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and ConfigData.decoderFlag) {
     ResetHistograms();
   }
@@ -133,7 +111,6 @@ void EncoderCenterTune() {
 void EncoderVolume()  //============================== AFP 10-22-22  Begin new
 {
   char result;
-  //  int increment [[maybe_unused]] = 0;
 
   result = volumeEncoder.process();  // Read the encoder
 
@@ -234,7 +211,6 @@ float GetEncoderValueLive(float minValue, float maxValue, float startValue, floa
     int                         The revised value.
 *****/
 float GetEncoderValueLoopFloat(float minValue, float maxValue, float startValue, float increment, int precision, std::string prompt, bool left, bool colorRed) {
-//  int currentValue = startValue;
   MenuSelect menu;
   float currentValue = startValue;
   tft.setFontScale((enum RA8875tsize)1);
@@ -257,23 +233,22 @@ float GetEncoderValueLoopFloat(float minValue, float maxValue, float startValue,
         currentValue = minValue;
       else if (currentValue > maxValue)
         currentValue = maxValue;
-  if (left) tft.setCursor(0, 1);
-  else tft.setCursor(290, 1);  //// 260
-  tft.print("                    ");  // Erase old
-   if (left) tft.setCursor(0, 1);
-  else tft.setCursor(290, 1);  //// 260 
-  tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
-  tft.print(prompt.c_str());
-//      tft.print(" ");
+      if (left) tft.setCursor(0, 1);
+      else tft.setCursor(290, 1);         //// 260
+      tft.print("                    ");  // Erase old
+      if (left) tft.setCursor(0, 1);
+      else tft.setCursor(290, 1);  //// 260
+      tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
+      tft.print(prompt.c_str());
       tft.setTextColor(RA8875_RED, RA8875_BLACK);
       tft.print(currentValue, precision);
       filterEncoderMove = 0;
     }
     menu = readButton();                           // Use ladder value to get menu choice
     if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
-  if (left) tft.setCursor(0, 1);
-  else tft.setCursor(290, 1);
-tft.print("                    ");  // Erase
+      if (left) tft.setCursor(0, 1);
+      else tft.setCursor(290, 1);
+      tft.print("                    ");  // Erase
       return currentValue;
     }
   }
@@ -414,29 +389,19 @@ void EncoderFilter() {
   result = filterEncoder.process();  // Read the encoder
 
   if (result == 0) {
-    //    filterEncoderMove = 0;// Nothing read
     return;
   }
 
   switch (result) {
     case DIR_CW:  // Turned it clockwise
       filterEncoderMove = 1;
-      //filter_pos = last_filter_pos - 5 * filterEncoderMove;  // AFP 10-22-22
       break;
 
     case DIR_CCW:  // Turned it counter-clockwise
       filterEncoderMove = -1;
-      // filter_pos = last_filter_pos - 5 * filterEncoderMove;   // AFP 10-22-22
       break;
   }
-  /*
-  if (calibrateFlag == false and morseDecodeAdjustFlag == false) {  // This is done so that filter adjustment is not affected during these operations.
-//  if(last_filter_pos != filter_pos) setFilter = true;
-    if(last_filter_pos <= 0) last_filter_pos = 0;
-    filter_pos = last_filter_pos + 5 * filterEncoderMove;           // AFP 10-22-22.  Hmmm.  Why multiply by 5???  Greg KF5N April 21, 2024
-    if(filter_pos <= 0) filter_pos = 0;
-  }                                                                 // AFP 10-22-22   filter_pos is allowed to go negative.  This may be a problem.
-*/
-// Don't adjust the filter if doing frequency calibration or adjusting Morse decode sensitivity.
-  if (calibrateFlag == false and morseDecodeAdjustFlag == false)  encoderFilterFlag = true;
+
+  // Don't adjust the filter if doing frequency calibration or adjusting Morse decode sensitivity.
+  if (calibrateFlag == false and morseDecodeAdjustFlag == false) encoderFilterFlag = true;
 }

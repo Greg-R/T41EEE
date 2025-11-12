@@ -1,3 +1,5 @@
+// JSON class primarily for serializing/deserializing structures to and from the SD card.
+
 #pragma once
 
 #include "SDT.h"

@@ -1,3 +1,5 @@
+// FFT functions from the Teensy SDR Convolution Radio
+
 
 #include "SDT.h"
 
@@ -111,7 +113,7 @@ void ZoomFFTExe(uint32_t blockSize) {
   // decimation stage 1
   arm_fir_decimate_f32(&Fir_Zoom_FFT_Decimate_I1, float_buffer_L, x_buffer, blockSize);
   arm_fir_decimate_f32(&Fir_Zoom_FFT_Decimate_Q1, float_buffer_R, y_buffer, blockSize);
-//  if (high_Zoom == 1) flag_2nd_decimation++;
+  //  if (high_Zoom == 1) flag_2nd_decimation++;
   // decimation stage 2
   arm_fir_decimate_f32(&Fir_Zoom_FFT_Decimate_I2, x_buffer, x_buffer, blockSize / Zoom_FFT_M1);
   arm_fir_decimate_f32(&Fir_Zoom_FFT_Decimate_Q2, y_buffer, y_buffer, blockSize / Zoom_FFT_M1);
@@ -145,8 +147,6 @@ void ZoomFFTExe(uint32_t blockSize) {
   float32_t multiplier = static_cast<float32_t>(ConfigData.spectrum_zoom) * static_cast<float32_t>(ConfigData.spectrum_zoom);
 
   for (int idx = 0; idx < fftWidth; idx++) {
-    //   buffer_spec_FFT[idx * 2 + 0] =  multiplier * FFT_ring_buffer_x[zoom_sample_ptr] * nuttallWindow256[idx];
-    //   buffer_spec_FFT[idx * 2 + 1] =  multiplier * FFT_ring_buffer_y[zoom_sample_ptr] * nuttallWindow256[idx];
     buffer_spec_FFT[idx * 2 + 0] = multiplier * FFT_ring_buffer_x[zoom_sample_ptr] * (0.5 - 0.5 * cos(6.28 * idx / SPECTRUM_RES));  //Hanning Window AFP 03-12-21
     buffer_spec_FFT[idx * 2 + 1] = multiplier * FFT_ring_buffer_y[zoom_sample_ptr] * (0.5 - 0.5 * cos(6.28 * idx / SPECTRUM_RES));
     zoom_sample_ptr++;
@@ -166,10 +166,8 @@ void ZoomFFTExe(uint32_t blockSize) {
   // The rest of the function is activated when the buffers are full and ready.
   // Save old pixels for lowpass filter.
   if (updateDisplayFlag == true) {
-//    Serial.printf("Calculate FFT\n");
     for (int i = 0; i < fftWidth; i++) {
-pixelold[i] = pixelnew[i];
-//pixelCurrent[i] = pixelnew[i];
+      pixelold[i] = pixelnew[i];
     }
     // Perform complex FFT
     // Calculation is performed in-place the FFT_buffer [re, im, re, im, re, im . . .]

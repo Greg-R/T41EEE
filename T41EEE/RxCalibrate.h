@@ -12,47 +12,45 @@
 class RxCalibrate {
 public:
 
-// Blue and red bar variables.  These should be 256 (bins) apart.
-// These variables identify the center of the bars, not the left edge.
-// The exact bins should be 127 and 383, however, for some reason, the
-// peak is a couple of bins to the right.
-int32_t rx_blue_usb = 385;  // Image frequency.
-int32_t rx_red_usb = 129;   // Receive frequency. Exact bin 127.
-int32_t capture_bins = 32;      // Make bar_width divisible by 2.
-int32_t left_text_edge = 165;
+  // Blue and red bar variables.  These should be 256 (bins) apart.
+  // These variables identify the center of the bars, not the left edge.
+  // The exact bins should be 127 and 383, however, for some reason, the
+  // peak is a couple of bins to the right.
+  int32_t rx_blue_usb = 385;  // Image frequency.
+  int32_t rx_red_usb = 129;   // Receive frequency. Exact bin 127.
+  int32_t capture_bins = 32;  // Make bar_width divisible by 2.
+  int32_t left_text_edge = 165;
 
-uint32_t IQCalType = 0;  // 0 is IQ Gain; 1 is Phase.
+  uint32_t IQCalType = 0;  // 0 is IQ Gain; 1 is Phase.
   bool refineCal = false;
   bool radioCal = false;
-  bool averageFlag = false;  
+  bool averageFlag = false;
   bool saveToEeprom = false;
-int val;
-//float increment = 0.002;
-int userScale, userZoomIndex, userxmtMode;
-int transmitPowerLevelTemp, cwFreqOffsetTemp, calFreqTemp;
-uint16_t base_y = 460;  // 247
-int calTypeFlag = 0;
-float adjdB = 0.0;
-float adjdBold = 0.0;  // Used in exponential averager.  KF5N May 19, 2024
-float adjdB_avg = 0.0;
-uint32_t adjdBMinIndex;
-float32_t amplitude = 0.0;
-float32_t phase = 0.0;
-q15_t rawSpectrumPeak = 0;
-uint32_t index = 0;
-uint32_t count = 0;
-uint32_t warmup = 0;
-bool exitManual = false;
-bool corrChange = false;
-bool fftActive = false;
-bool fftSuccess = false;
-elapsedMillis milliTimer;
-int mode;
-Sideband tempSideband;
-RadioMode tempMode;
-RadioState tempState;
-
-
+  int val;
+  //float increment = 0.002;
+  int userScale, userZoomIndex, userxmtMode;
+  int transmitPowerLevelTemp, cwFreqOffsetTemp, calFreqTemp;
+  uint16_t base_y = 460;  // 247
+  int calTypeFlag = 0;
+  float adjdB = 0.0;
+  float adjdBold = 0.0;  // Used in exponential averager.  KF5N May 19, 2024
+  float adjdB_avg = 0.0;
+  uint32_t adjdBMinIndex;
+  float32_t amplitude = 0.0;
+  float32_t phase = 0.0;
+  q15_t rawSpectrumPeak = 0;
+  uint32_t index = 0;
+  uint32_t count = 0;
+  uint32_t warmup = 0;
+  bool exitManual = false;
+  bool corrChange = false;
+  bool fftActive = false;
+  bool fftSuccess = false;
+  elapsedMillis milliTimer;
+  int mode;
+  Sideband tempSideband;
+  RadioMode tempMode;
+  RadioState tempState;
 
   enum class State { warmup,
                      refineCal,
@@ -65,16 +63,16 @@ RadioState tempState;
                      setOptimal,
                      exit };
 
-void loadCalToneBuffers(float toneFreq);
-void plotCalGraphics();
-void PrintMode();
-void MakeFFTData();
-void warmUpCal();
-void printCalType(bool autoCal, bool autoCalDone);
-void CalibratePreamble(int setZoom);
-void CalibrateEpilogue(bool radioCal, bool saveToEeprom);
-void DoReceiveCalibrate(int calMode, bool radio, bool refine, bool toEeprom);  // Mode determines CW versus SSB.
-void ShowSpectrum();
-float PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins);
-void writeToCalData(float ichannel, float qchannel);
+  void loadCalToneBuffers(float toneFreq);
+  void plotCalGraphics();
+  void PrintMode();
+  void MakeFFTData();
+  void warmUpCal();
+  void printCalType(bool autoCal, bool autoCalDone);
+  void CalibratePreamble(int setZoom);
+  void CalibrateEpilogue(bool radioCal, bool saveToEeprom);
+  void DoReceiveCalibrate(int calMode, bool radio, bool refine, bool toEeprom);  // Mode determines CW versus SSB.
+  void ShowSpectrum();
+  float PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins);
+  void writeToCalData(float ichannel, float qchannel);
 };

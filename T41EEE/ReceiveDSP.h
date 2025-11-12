@@ -1,3 +1,5 @@
+// Receive DSP class.  This is a primary part of the receiver loop.
+
 #pragma once
 
 class ReceiveDSP {

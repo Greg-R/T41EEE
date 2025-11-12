@@ -1,3 +1,5 @@
+// Transmit calibrate class.  This calibrates both CW and SSB exciters.
+
 
 #pragma once
 
@@ -21,11 +23,11 @@ public:
   void buttonTasks();
   void writeToCalData(float ichannel, float qchannel);
 
-  private:
+private:
 
   int32_t IQCalType = 0;
   int val;
-  float xmitIncrement = 0.002;   // Increment for transmit calibration.
+  float xmitIncrement = 0.002;       // Increment for transmit calibration.
   float32_t carrIncrement = 0.0005;  // Increment for carrier calibration.
   int userScale, userZoomIndex;
   int transmitPowerLevelTemp, cwFreqOffsetTemp, calFreqTemp;
@@ -53,17 +55,16 @@ public:
   elapsedMillis milliTimer;
   int mode = 0;
   MenuSelect task = MenuSelect::DEFAULT;
-//  MenuSelect lastUsedTask = MenuSelect::DEFAULT;
   bool autoCal = false;
   bool refineCal = false;
   bool radioCal = false;
-  bool averageFlag = false;  
+  bool averageFlag = false;
   bool saveToEeprom = false;
   int averageCount = 0;
   bool fftSuccess = false;  // A flag for debugging FFT inadequate data problems.
-  bool fftActive = true;  // This variable is used to deactive creation of the FFT result.
-                          // This is false when desired to push data through the system
-                          // to wring out the transient response.
+  bool fftActive = true;    // This variable is used to deactive creation of the FFT result.
+                            // This is false when desired to push data through the system
+                            // to wring out the transient response.
   bool exitManual = false;
 
   // Blue and red bar variables:
@@ -77,14 +78,12 @@ public:
                         SSB_CARRIER,
   };
 
-
-
   void warmUpCal();
-    void PrintMode();
-      void printCalType(bool autoCal, bool autoCalDone);
+  void PrintMode();
+  void printCalType(bool autoCal, bool autoCalDone);
   void CalibratePreamble(int setZoom);
   void CalibrateEpilogue();
-    void plotCalGraphics(int calType);
+  void plotCalGraphics(int calType);
   void MakeFFTData();
   enum class State { warmup,
                      refineCal,
@@ -98,5 +97,4 @@ public:
                      exit };
 
   State state = State::exit;
-
 };

@@ -1,3 +1,5 @@
+// Includes and global variables.
+
 #pragma once
 
 //======================================== Library include files ========================================================
@@ -25,8 +27,8 @@
 #include <algorithm>
 #include <string.h>
 
-//======================================== User section that might need to be changed ===================================
-#include "MyConfigurationFile.h"  // This file name should remain unchanged
+// User section which is customizable.
+#include "MyConfigurationFile.h"
 
 // Constants and #defines first:
 //======================================== Symbolic Constants for the T41 ===================================================
@@ -59,7 +61,6 @@ constexpr int CHAR_HEIGHT = 32;
 constexpr int PIXELS_PER_EQUALIZER_DELTA = 10;  // Number of pixels per detent of encoder for equalizer changes
 constexpr int SPECTRUM_LEFT_X = 3;             // Used to plot left edge of spectrum display  AFP 12-14-21
 constexpr int WATERFALL_LEFT_X = SPECTRUM_LEFT_X;
-//#define SPECTRUM_RES 512                                        // The value used in the original open-source code is 256.  Al uses 512.
 constexpr int SPECTRUM_TOP_Y = 100;                                    // Start of spectrum plot space
 constexpr int SPECTRUM_HEIGHT = 150;                                    // This is the pixel height of spectrum plot area without disturbing the axes
 constexpr int SPECTRUM_BOTTOM = (SPECTRUM_TOP_Y + SPECTRUM_HEIGHT - 3);  // 247 = 100 + 150 - 3
@@ -473,9 +474,7 @@ extern float32_t cwFallBuffer[];
 extern int filterWidth;
 
 //===== New histogram stuff
-//extern float32_t pixel_per_khz;  //AFP
 extern int pos_left;
-// extern int centerLine;
 extern int h;
 extern bool centerTuneFlag;
 
@@ -551,13 +550,8 @@ extern AudioRecordQueue_F32 Q_in_L_Ex;
 extern AudioRecordQueue_F32 Q_in_R_Ex;
 
 extern AudioPlayQueue Q_out_L;
-//#ifndef F32
-//extern AudioPlayQueue Q_out_L_Ex;
-//extern AudioPlayQueue Q_out_R_Ex;
-//#else
 extern AudioPlayQueue_F32 Q_out_L_Ex;
 extern AudioPlayQueue_F32 Q_out_R_Ex;
-//#endif
 
 extern AudioPlayQueue_F32 cwToneData;
 
@@ -670,7 +664,6 @@ extern char keyboardBuffer[];
 extern const char *topMenus[];
 extern const char *zoomOptions[];
 extern bool ANR_notch;  // KF5N March 2, 2024
-//extern uint8_t display_S_meter_or_spectrum_state;
 extern bool keyPressedOn;  // State changed by CW key isr()s.
 extern uint8_t NR_first_time;
 extern uint8_t NR_Kim;
@@ -682,7 +675,6 @@ extern bool encoderFilterFlag;  // Set by EncoderFilter() isr.
 extern bool audioCompensateFlag;  // Set by FilterSetSSB().
 extern bool audioGraphicsFlag;
 extern bool startRxFlag;
-//extern int16_t pixelCurrent[];
 extern int16_t y_old, y_new, y1_new, y1_old, y_old2;
 extern const uint16_t gradient[];
 extern const uint32_t IIR_biquad_Zoom_FFT_N_stages;
@@ -735,7 +727,6 @@ extern uint32_t s_hotTemp;    /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] a
 extern uint32_t s_hotCount;   /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] at the hot temperature.*/
 extern uint32_t s_roomC_hotC; /*!< The value of s_roomCount minus s_hotCount.*/
 extern uint32_t currentFreq;
-//extern uint32_t ditLength;
 extern uint32_t transmitDitLength;  // JJP 8/19/23
 extern uint32_t transmitDitUnshapedBlocks;
 extern uint32_t transmitDahUnshapedBlocks;
@@ -913,8 +904,6 @@ void CWOptions();
 
 void CW_ExciterIQData(int shaping);  // AFP 08-18-22
 void DisplayClock();
-//void DisplaydbM();
-//void DisplayIncrementField();
 void DoCWDecoding(int audioValue);
 void DoCWReceiveProcessing();  //AFP 09-19-22
 void DoExciterEQ();
@@ -924,12 +913,7 @@ void DoGapHistogram(long val);
 int DoSplitVFO();
 void DoPaddleFlip();
 void DrawActiveLetter(int row, int horizontalSpacer, int whichLetterIndex, int keyWidth, int keyHeight);
-//void DrawBandWidthIndicatorBar();  // AFP 03-27-22 Layers
-//void DrawFrequencyBarValue();
-//void DrawInfoWindowFrame();
 void DrawKeyboard();
-//void DrawSMeterContainer();
-//void DrawSpectrumDisplayContainer();
 
 void EncoderFineTune();
 void EncoderFilter();
@@ -937,22 +921,14 @@ void EncoderCenterTune();
 void EncoderVolume();
 void EqualizerRecOptions();
 void EqualizerXmtOptions();
-//void EraseMenus();
-//void ErasePrimaryMenu();
-//void EraseSpectrumDisplayContainer();
-//void EraseSpectrumWindow();
 void FilterBandwidth();
 void FilterOverlay();
 void FilterSetSSB();
 int FindCountry(char *prefix);
-//void FormatFrequency(uint32_t f, char *b);
 void FreqShift1();
 void FreqShift2();
 float goertzel_mag(int numSamples, int TARGET_FREQUENCY, int SAMPLING_RATE, float *data);
-//int GetEncoderValue(int minValue, int maxValue, int startValue, int increment, std::string);
 float GetEncoderValueLive(float minValue, float maxValue, float startValue, float increment, std::string prompt, bool left, bool colorRed);
-//float GetEncoderValueLiveString(float minValue, float maxValue, float startValue, float increment, std::string prompt, bool left);  //AFP 10-22-22
-////q15_t GetEncoderValueLiveQ15t(int minValue, int maxValue, int startValue, int increment, std::string prompt, bool left);
 float GetEncoderValueLoopFloat(float minValue, float maxValue, float startValue, float increment, int precision, std::string prompt, bool left, bool colorRed);
 void GetFavoriteFrequency();
 float HaversineDistance(float dxLat, float dxLon);
@@ -975,22 +951,17 @@ float32_t log10f_fast(float32_t X);
 int ModeOptions();
 //DB2OO, 29-AUG-23: added
 void MorseCharacterDisplay(char currentLetter);
-//void MyDrawFloat(float val, int decimals, int x, int y, char *buff);
 float MSinc(int m, float fc);
 void printFile(const char *filename);
 void playTransmitData();  // KF5N February 23, 2024
 void ProcessEqualizerChoices(int EQType, char *title);
 MenuSelect readButton(MenuSelect lastUsedTask);
 MenuSelect readButton();
-//void RedrawDisplayScreen();
 void ResetFlipFlops();
 void ResetHistograms();
 void ResetTuning();  // AFP 10-11-22
 void RFOptions();
 int SDPresentCheck();
-//void SetCompressionThreshold();
-//void SetCompressionRatio();
-// void MicGainSet();
 void SaveAnalogSwitchValues();
 void SelectCWFilter();  // AFP 10-18-22
 void SelectCWOffset();  // KF5N December 13, 2023
@@ -1004,26 +975,12 @@ void SetIIRCoeffs(float32_t f0, float32_t Q, float32_t sample_rate, uint8_t filt
 void SetKeyType();
 void SetKeyPowerUp();
 void SetSideToneVolume(bool speaker);  // This function uses encoder to set sidetone volume.  KF5N August 29, 2023
-//uint32_t SetTransmitDelay();
 void SetTransmitDitLength(int wpm);  // JJP 8/19/23
-//int SetWPM();
-//void ShowAutoStatus();
-//void ShowBandwidth();
-//void ShowCurrentPowerSetting();
 void ShowDecoderMessage();
 void sineTone(int numCycles);
 void initCWShaping();
-//void SpectrumOptions();
-//void UpdateInfoWindow();
 void SetFreqCal(int calFreqShift);
-//void ShowFrequency();
 void ShowMenu(const char *menu[], int where);
-//void ShowName();
-//void ShowSpectrum();
-//void ShowSpectrumdBScale();
-//void ShowTempAndLoad();
-//void ShowTransmitReceiveStatus();
-//void BandInformation();
 void SpectralNoiseReduction(void);
 void SpectralNoiseReductionInit();
 void Splash();
@@ -1032,27 +989,12 @@ int SubmenuSelect(const std::string options[], int numberOfChoices, int defaultS
 int SubmenuSelectString(std::string options[], int numberOfChoices, int defaultStart);
 void T4_rtc_set(unsigned long t);
 float TGetTemp();
-
-//void UpdateAGCField();
-//void UpdateAudioField();
-//void UpdateCompressionField();
-//void UpdateAudioGraphics();
-//void UpdateEqualizerField(bool rxEqState, bool txEqState);
 void updateMic();  // This updates the Open Audio compressor.
-//void UpdateNoiseField();
-//void UpdateNotchField();
-//void UpdateVolumeField();
-//void UpdateWPMField();
-//void UpdateZoomField();
-
 void VFOSelect();
-
 void WaitforWRComplete();
 int WhichOneToUse(char ptrMaps[][50], int count);
 void writeClippedRect(int x, int y, int cx, int cy, uint16_t *pixels, bool waitForWRC);
 inline void writeRect(int x, int y, int cx, int cy, uint16_t *pixels);
-
 void Xanr();
-
 void ZoomFFTPrep();
 void ZoomFFTExe(uint32_t blockSize);

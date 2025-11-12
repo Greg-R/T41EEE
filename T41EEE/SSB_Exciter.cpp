@@ -1,9 +1,9 @@
+// The SSB exciter sketch code.  Most of the exciter is in AudioSignal.h.
 
 #include "SDT.h"
 
-//int micGainChoice;
-  float32_t* iBuffer = nullptr;  // I and Q pointers needed for one-time read of record queues.
-  float32_t* qBuffer = nullptr;
+float32_t* iBuffer = nullptr;  // I and Q pointers needed for one-time read of record queues.
+float32_t* qBuffer = nullptr;
 
 // This function sets the microphone gain and compressor parameters.  Greg KF5N March 9, 2025.
 void updateMic() {
@@ -125,7 +125,6 @@ void SSB_ExciterIQData() {
     void
 *****/
 void SetBandRelay() {
-  Serial.printf("SetBandRelay\n");
   // There are 4 physical relays in the case of the V10/V11 LPF board.
   for (int i = 0; i < 5; i = i + 1) {
     if (i == ConfigData.currentBand) {

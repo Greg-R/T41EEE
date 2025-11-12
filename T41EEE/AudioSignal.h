@@ -17,25 +17,21 @@ radioCESSB_Z_transmit_F32 cessb1;
 
 AudioConvert_F32toI16 float2Int1_tx, float2Int2_tx;  // Converts Float to Int16.  See class in AudioStream_F32.h
 
-////AudioSwitch4_OA_F32 switch1_tx, switch3_tx, switch4_tx;
 AudioSwitch4_OA_F32 switch3_tx, switch4_tx;
 AudioMixer4_F32 mixer1_tx, mixer2_tx, mixer3_tx;      // Used to switch in tone during calibration.
 AudioSynthWaveformSine_F32 toneSSBCal1, toneSSBCal2;  // Tones for SSB calibration and IMD testing.
 
-AudioRecordQueue_F32 Q_in_L_Ex;                       // I channel from SSB exciter.
-AudioRecordQueue_F32 Q_in_R_Ex;                       // Q channel from SSB exciter.
+AudioRecordQueue_F32 Q_in_L_Ex;  // I channel from SSB exciter.
+AudioRecordQueue_F32 Q_in_R_Ex;  // Q channel from SSB exciter.
 
-AudioPlayQueue_F32 Q_out_L_Ex;                        // AudioPlayQueue for driving the I channel (CW/SSB) to the QSE.
-AudioPlayQueue_F32 Q_out_R_Ex;                        // AudioPlayQueue for driving the Q channel (CW/SSB) to the QSE.
-AudioPlayQueue_F32 cwToneData;                        // The tone from the CW Exciter.
+AudioPlayQueue_F32 Q_out_L_Ex;  // AudioPlayQueue for driving the I channel (CW/SSB) to the QSE.
+AudioPlayQueue_F32 Q_out_R_Ex;  // AudioPlayQueue for driving the Q channel (CW/SSB) to the QSE.
+AudioPlayQueue_F32 cwToneData;  // The tone from the CW Exciter.
 
 //  Begin transmit signal chain.
 AudioConnection connect0(i2s_quadIn, 0, int2Float1_tx, 0);  // Microphone audio channel.  Must use int2Float because Open Audio does not have quad input.
 
-//AudioConnection_F32 connect1(int2Float1_tx, 0, switch1_tx, 0);  // Used switches here because it appeared necessary to stop flow of data.
-
 // Need a mixer to switch between microphone audio and tones used for calibration, testing, and CW.
-//AudioConnection_F32 connect3(switch1_tx, 0, mixer1_tx, 0);  // Connect microphone mixer1 output 0 via gain control.
 AudioConnection_F32 connect3(int2Float1_tx, 0, mixer1_tx, 0);  // Connect microphone mixer1 output 0 via gain control.
 
 AudioConnection_F32 connect4(toneSSBCal1, 0, mixer1_tx, 1);   // Connect tone for SSB calibration and IM3 testing.
@@ -63,13 +59,6 @@ AudioConnection_F32 connect23(compGainCompensate, 0, mixer3_tx, 1);
 AudioConnection_F32 connect14(mixer3_tx, 0, cessb1, 0);
 
 // Controlled envelope SSB from Open Audio library.
-
-//AudioConnection_F32 connect15(cessb1, 0, float2Int1_tx, 0);
-//AudioConnection_F32 connect16(cessb1, 1, float2Int2_tx, 0);
-
-//AudioConnection connect17(float2Int1_tx, 0, Q_in_L_Ex, 0);  // Stream I and Q into the sketch.
-//AudioConnection connect18(float2Int2_tx, 0, Q_in_R_Ex, 0);  // Tones for SSB calibration and IMD testing.
-
 AudioConnection_F32 connect15(cessb1, 0, Q_in_L_Ex, 0);
 AudioConnection_F32 connect16(cessb1, 1, Q_in_R_Ex, 0);
 
@@ -181,7 +170,6 @@ void initializeAudioPaths() {
 
 *****/
 void SetAudioOperatingState(RadioState operatingState) {
-  Serial.printf("AudioOperatingState\n");
   AudioNoInterrupts();
 #ifdef DEBUG
   Serial.printf("lastState=%d radioState=%d memory_used=%d memory_used_max=%d f32_memory_used=%d f32_memory_used_max=%d\n",
@@ -204,13 +192,13 @@ void SetAudioOperatingState(RadioState operatingState) {
       InitializeDataArrays();    // I2S sample rate set in this function.
       sgtl5000_1.muteLineout();  // Shut off I and Q baseband to QSE.
       // Stop and clear the data buffers.
-      ADC_RX_I.end();    // Receiver I channel
-      ADC_RX_Q.end();    // Receiver Q channel
+      ADC_RX_I.end();  // Receiver I channel
+      ADC_RX_Q.end();  // Receiver Q channel
       ADC_RX_I.clear();
       ADC_RX_Q.clear();
 
-      Q_in_L_Ex.end();   // Transmit I channel path.
-      Q_in_R_Ex.end();   // Transmit Q channel path.
+      Q_in_L_Ex.end();  // Transmit I channel path.
+      Q_in_R_Ex.end();  // Transmit Q channel path.
       Q_in_L_Ex.clear();
       Q_in_R_Ex.clear();
 
@@ -264,12 +252,12 @@ void SetAudioOperatingState(RadioState operatingState) {
     case RadioState::SSB_TRANSMIT_STATE:
     case RadioState::FT8_TRANSMIT_STATE:
 
-// Don't use compressor or CESSB in FT8 mode.
-if(bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) { 
-  ConfigData.compressorFlag = false;
-      ConfigData.cessb = false;
-      cessb1.setProcessing(ConfigData.cessb);
-}
+      // Don't use compressor or CESSB in FT8 mode.
+      if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) {
+        ConfigData.compressorFlag = false;
+        ConfigData.cessb = false;
+        cessb1.setProcessing(ConfigData.cessb);
+      }
       SampleRate = SAMPLE_RATE_48K;
       InitializeDataArrays();  // I2S sample rate set in this function.
       // QSD disabled and disconnected
@@ -312,8 +300,7 @@ if(bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) {
         mixer2_tx.gain(0, 0.0);
         mixer2_tx.gain(1, 1.0);
       }
-      ////      Q_out_L_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);  // Need this as CW will put into wrong mode.  Greg KF5N August 4, 2024.
-      ////      Q_out_R_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
+
       Q_in_L_Ex.begin();  // I channel Microphone audio
       Q_in_R_Ex.begin();  // Q channel Microphone audio
 
@@ -330,8 +317,8 @@ if(bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) {
       InitializeDataArrays();                        // I2S sample rate set in this function.
       controlAudioOut(AudioState::MUTE_BOTH, true);  // Mute all audio.
       sgtl5000_1.unmuteLineout();
-      patchCord1.connect();  // Receiver I channel
-      patchCord2.connect();  // Receiver Q channel
+      patchCord1.connect();     // Receiver I channel
+      patchCord2.connect();     // Receiver Q channel
       patchCord3.disconnect();  // Receiver audio
 
       ADC_RX_I.end();
@@ -343,14 +330,13 @@ if(bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) {
 
       // Test tone enabled and connected
       toneSSBCal1.setSampleRate_Hz(48000);
-      //      toneSSBCal1.pureSpectrum(true);
       toneSSBCal1.amplitude(0.12);  // Set to same amplitude as CW tone.
       toneSSBCal1.frequency(750.0);
       toneSSBCal1.begin();
       toneSSBCal2.end();
-      mixer1_tx.gain(0, 0);       // microphone audio off.
-      mixer1_tx.gain(1, 1);       // testTone on.
-      mixer1_tx.gain(2, 0);       // testTone 2 off.
+      mixer1_tx.gain(0, 0);  // microphone audio off.
+      mixer1_tx.gain(1, 1);  // testTone on.
+      mixer1_tx.gain(2, 0);  // testTone 2 off.
 
       connect0.disconnect();      // Disconnect microphone input data stream.
       mixer_rxtx_I.gain(0, 1.0);  // Connect transmitter back-end to Audio Adapter.
@@ -403,7 +389,7 @@ if(bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) {
       patchCord1.disconnect();  // Receiver I channel
       patchCord2.disconnect();  // Receiver Q channel
       patchCord3.disconnect();  // Receiver audio
-      connect0.disconnect();       // Disconnect microphone input data stream.
+      connect0.disconnect();    // Disconnect microphone input data stream.
 
       ADC_RX_I.end();
       ADC_RX_I.clear();
@@ -448,8 +434,6 @@ if(bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) {
         mixer2_tx.gain(1, 1.0);
       }
 
-      ////      Q_out_L_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);  // Need this as CW will put into wrong mode.  Greg KF5N August 4, 2024.
-      ////      Q_out_R_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
       Q_in_L_Ex.begin();  // I channel Microphone audio
       Q_in_R_Ex.begin();  // Q channel Microphone audio
 
@@ -473,7 +457,7 @@ if(bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) {
       patchCord1.disconnect();  // Receiver I channel
       patchCord2.disconnect();  // Receiver Q channel
       patchCord3.connect();     // Sidetone
-      connect0.disconnect();      // Disconnect microphone input data stream.
+      connect0.disconnect();    // Disconnect microphone input data stream.
       // Speaker and headphones should be unmuted according to current audio out state for sidetone.
       controlAudioOut(ConfigData.audioOut, false);
 
@@ -503,9 +487,9 @@ if(bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) {
       mixer3_tx.gain(1, 1.0);
       compGainCompensate.setGain_dB(10.0);  // Use compressor's below threshold gain.
 
-        // Set the sideband.
-  if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) cessb1.setSideband(false);
-  if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) cessb1.setSideband(true);
+      // Set the sideband.
+      if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) cessb1.setSideband(false);
+      if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) cessb1.setSideband(true);
 
       // Set CW calibration factors.
       if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
@@ -533,7 +517,7 @@ if(bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) {
       InitializeDataArrays();                        // I2S sample rate set in this function.
       controlAudioOut(AudioState::MUTE_BOTH, true);  // Mute all audio.
       sgtl5000_1.unmuteLineout();
-      connect0.disconnect();      // Disconnect microphone input data stream.
+      connect0.disconnect();  // Disconnect microphone input data stream.
 
       ADC_RX_I.end();
       ADC_RX_I.clear();

@@ -1,3 +1,5 @@
+// EEPROM class
+
 
 #include "SDT.h"
 
@@ -40,7 +42,7 @@ void Eeprom::ConfigDataRead() {
   Return value;
     void
 *****/
-void Eeprom::ConfigDataRead(config_t &configStruct) {
+void Eeprom::ConfigDataRead(config_t& configStruct) {
   EEPROM.get(EEPROM_BASE_ADDRESS + 4, configStruct);  // Read as one large chunk
 }
 
@@ -98,7 +100,7 @@ void Eeprom::CalDataRead() {
   Return value;
     void
 *****/
-void Eeprom::CalDataRead(calibration_t &calStruct) {
+void Eeprom::CalDataRead(calibration_t& calStruct) {
   EEPROM.get(CAL_BASE_ADDRESS + 4, calStruct);  // Read as one large chunk
 }
 
@@ -169,7 +171,7 @@ void Eeprom::BandsWriteSize(uint32_t structSize) {
   Return value;
     void
 *****/
-int Eeprom::EEPROMReadSize(uint32_t address ) {
+int Eeprom::EEPROMReadSize(uint32_t address) {
   int structSize;
   EEPROM.get(address, structSize);  // Read as one large chunk
   return structSize;
@@ -231,22 +233,17 @@ void Eeprom::SetFavoriteFrequency() {
       filterEncoderMove = 0;
     }
 
-//    val = ReadSelectedPushButton();  // Read pin that controls all switches
-//    val = ProcessButtonPress(val);
-menu = readButton();
+    menu = readButton();
     if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
       display.EraseMenus();
       ConfigData.favoriteFreqs[index] = TxRxFreq;
-      //UpdateEEPROMSyncIndicator(0);       //  JJP 7/25/23
       if (ConfigData.activeVFO == VFO_A) {
         ConfigData.currentFreqA = TxRxFreq;
       } else {
         ConfigData.currentFreqB = TxRxFreq;
       }
-      //      EEPROMWrite();
       SetFreq();
       display.BandInformation();
-//      ShowBandwidth();
       FilterBandwidth();
       display.ShowFrequency();
       break;
@@ -266,8 +263,8 @@ menu = readButton();
 *****/
 void Eeprom::GetFavoriteFrequency() {
   int index = 0;
-//  int val;
-MenuSelect menu = MenuSelect::DEFAULT;
+  //  int val;
+  MenuSelect menu = MenuSelect::DEFAULT;
   int currentBand2 = 0;
   tft.setFontScale((enum RA8875tsize)1);
   tft.setTextColor(RA8875_WHITE);
@@ -289,8 +286,6 @@ MenuSelect menu = MenuSelect::DEFAULT;
       filterEncoderMove = 0;
     }
 
-//    val = ReadSelectedPushButton();  // Read pin that controls all switches
-//    val = ProcessButtonPress(val);
     menu = readButton();
 
     if (ConfigData.centerFreq >= bands.bands[BAND_80M].fBandLow && ConfigData.centerFreq <= bands.bands[BAND_80M].fBandHigh) {
@@ -339,10 +334,8 @@ MenuSelect menu = MenuSelect::DEFAULT;
     }
     if (menu == MenuSelect::MENU_OPTION_SELECT) {
       display.EraseSpectrumDisplayContainer();
-//      currentMode = bands.bands[ConfigData.currentBand].mode;
       display.DrawSpectrumDisplayContainer();
       display.DrawFrequencyBarValue();
-//      SetBandRelay();
       SetFreq();
       display.ShowFrequency();
       display.ShowSpectrumdBScale();
@@ -352,11 +345,8 @@ MenuSelect menu = MenuSelect::DEFAULT;
       display.BandInformation();
       NCOFreq = 0L;
       display.DrawBandWidthIndicatorBar();  // AFP 10-20-22
-//      digitalWrite(bandswitchPins[ConfigData.currentBand], LOW);
       SetFreq();
       display.ShowSpectrumdBScale();
-//      display.ShowSpectrum();
-      //bands.bands[currentBand].mode = currentBand;
       return;
     }
   }
@@ -378,7 +368,6 @@ void Eeprom::ConfigDataDefaults() {
   ConfigData = *defaultConfig;                    // Copy the defaults to ConfigData struct.
   // Initialize the frequency setting based on the last used frequency stored to EEPROM.
   TxRxFreq = ConfigData.centerFreq = ConfigData.lastFrequencies[ConfigData.currentBand][ConfigData.activeVFO];
-////  RedrawDisplayScreen();  //  Need to refresh display here.
 }
 
 
@@ -394,10 +383,9 @@ void Eeprom::ConfigDataDefaults() {
 
 void Eeprom::CalDataDefaults() {
   struct calibration_t* defaultCal = new calibration_t;  // Create a copy of the default configuration.
-  CalData = *defaultCal;                    // Copy the defaults to ConfigData struct.
+  CalData = *defaultCal;                                 // Copy the defaults to ConfigData struct.
   // Initialize the frequency setting based on the last used frequency stored to EEPROM.
   TxRxFreq = ConfigData.centerFreq = ConfigData.lastFrequencies[ConfigData.currentBand][ConfigData.activeVFO];
-////  RedrawDisplayScreen();  //  Need to refresh display here.
 }
 
 
@@ -428,7 +416,6 @@ void Eeprom::EEPROMStartup() {
 
   BandsEEPROMSize = EEPROMReadSize(BANDS_BASE_ADDRESS);
   BandsStackSize = sizeof(bands);
-//  Serial.printf("BandsStackSize = %d\n", BandsStackSize);
 
   // For minor revisions to the code, we don't want to overwrite the EEPROM.
   // We will assume the switch matrix and other items are calibrated or configured by the user, and are not to be lost.
@@ -440,24 +427,21 @@ void Eeprom::EEPROMStartup() {
 
   // The case where struct sizes are the same, indicating no changes to the struct.  Nothing more to do, return.
   if (ConfigDataEEPROMSize == ConfigDataStackSize and CalDataEEPROMSize == CalDataStackSize and BandsEEPROMSize == BandsStackSize) {
-//    Serial.printf("Got to stack versus EEPROM comparison\n");
-//    Serial.printf("ConfigDataEEPROMSize = %d ConfigDataStackSize = %d\n", ConfigDataEEPROMSize, ConfigDataStackSize);
-//    Serial.printf("CalDataEEPROMSize = %d CalDataStackSize = %d\n", CalDataEEPROMSize, CalDataStackSize);
+
     ConfigDataRead();  // Read the ConfigData into active memory.
-    CalDataRead();  // Read the CalData into active memory.
-    BandsRead();    // Read the bands array into active memory.
-    return;        // Done, begin radio operation.
+    CalDataRead();     // Read the CalData into active memory.
+    BandsRead();       // Read the bands array into active memory.
+    return;            // Done, begin radio operation.
   }
 
   // If the flow proceeds here, it is time to initialize some things.
   // The rest of the code will require a switch matrix calibration, and will write the ConfigData struct to EEPROM.
 
-  SaveAnalogSwitchValues();          // Calibrate the switch matrix.
+  SaveAnalogSwitchValues();                  // Calibrate the switch matrix.
   ConfigDataWriteSize(ConfigDataStackSize);  // Write the size of the struct to EEPROM.
-  ConfigDataWrite();  // Write the ConfigData struct to non-volatile memory.
-  CalDataWriteSize(CalDataStackSize);  // Write the size of the struct to EEPROM.
-  CalDataWrite();  // Write the ConfigData struct to non-volatile memory.
-  BandsWriteSize(BandsStackSize);  // Write the size of the bands array to EEPROM.
-  BandsWrite();  // Write the bands array to non-volatile memory.
-
+  ConfigDataWrite();                         // Write the ConfigData struct to non-volatile memory.
+  CalDataWriteSize(CalDataStackSize);        // Write the size of the struct to EEPROM.
+  CalDataWrite();                            // Write the ConfigData struct to non-volatile memory.
+  BandsWriteSize(BandsStackSize);            // Write the size of the bands array to EEPROM.
+  BandsWrite();                              // Write the bands array to non-volatile memory.
 }

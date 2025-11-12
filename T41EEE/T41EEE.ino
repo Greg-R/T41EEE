@@ -1,3 +1,5 @@
+// T41 Transceiver Arduino Sketch
+// Gregory Raven KF5N November 2025
 
 // setup() and loop() are at the bottom of this file.
 
@@ -30,8 +32,6 @@ bool agc_action = false;
 #include "AudioSignal.h"
 // End dataflow
 
-//#include "ReceiveDSP.h"
-
 Display display;
 ReceiveDSP process;        // Receiver process object.
 RxCalibrate rxcalibrater;  // Instantiate the calibration objects.
@@ -46,7 +46,7 @@ ModeControl modecontrol;
 
 const char *topMenus[] = { "CW Options", "RF Set", "VFO Select",
                            "Config EEPROM", "Cal EEPROM", "AGC",
-                           "SSB Options", "EQ Tx Set",  // Noise floor removed.  Greg KF5N February 14, 2025
+                           "SSB Options", "EQ Tx Set",   // Noise floor removed.  Greg KF5N February 14, 2025
                            "EQ Rec Set", "Calibrate" };  // Bearing temporarily removed.
 // Pointers to functions which execute the menu options.  Do these functions used the returned integer???
 void (*functionPtr[])() = { &CWOptions, &RFOptions, &VFOSelect,
@@ -65,14 +65,8 @@ Si5351 si5351;  // Instantiate the PLL device.
 
 RadioState radioState, lastState;  // KF5N
 int resetTuningFlag = 0;
-//uint32_t RA8875_CS {TFT_CS};  // Used?
-//uint32_t RA8875_RESET {TFT_DC};  // any pin or nothing!  Used?
-//RA8875 tft = RA8875(RA8875_CS, RA8875_RESET);
 // Display object.
 RA8875 tft = RA8875(TFT_CS, TFT_DC);
-
-// This setting actually used?
-// SPISettings settingsA(70000000UL, MSBFIRST, SPI_MODE1);
 
 const uint32_t N_B_EX = 16;
 
@@ -171,6 +165,7 @@ arm_fir_interpolate_instance_f32 FIR_int2_I;
 arm_fir_interpolate_instance_f32 FIR_int2_Q;
 arm_lms_norm_instance_f32 LMS_Norm_instance;
 
+// This is no longer used.  It needs to be removed.
 dispSc displayScale[] =  // dbText, dBScale, baseOffset
   {
     { "20 dB/", 10.0, 24 },
@@ -191,16 +186,8 @@ float32_t DMAMEM cwFallBuffer[512]{ 0 };
 char keyboardBuffer[10];  // Set for call prefixes. May be increased later
 const char *tune_text = "Fast Tune";
 const char *zoomOptions[] = { "1x ", "2x ", "4x ", "8x ", "16x" };
-
-//float32_t pixel_per_khz = ((1 << ConfigData.spectrum_zoom) * SPECTRUM_RES * 1000.0 / SR[SampleRate].rate);
-//int pos_left = centerLine - (int)(bands.bands[ConfigData.currentBand].FLoCut / 1000.0 * pixel_per_khz);
-
-//int centerLine = (MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2;
 int16_t fftOffset = 100;
 int16_t audioFFToffset = 100;
-//int fLoCutOld;
-//int fHiCutOld;
-//int filterWidth = static_cast<int>((bands.bands[ConfigData.currentBand].FHiCut - bands.bands[ConfigData.currentBand].FLoCut) / 1000.0 * pixel_per_khz);
 int filterWidth{ 0 };
 int h = 135;  // SPECTRUM_HEIGHT + 3;
 bool ANR_notch = false;
@@ -214,7 +201,6 @@ uint32_t SampleRate = SAMPLE_RATE_192K;
 uint32_t zoom_display = 1;
 
 //  These arrays are used to create the RF spectrum plot in the display.
-//int16_t pixelCurrent[SPECTRUM_RES]{ 0 };
 int16_t pixelnew[SPECTRUM_RES]{ 0 };
 int16_t pixelold[SPECTRUM_RES]{ 0 };
 
@@ -227,7 +213,6 @@ int selectedMapIndex;
 bool centerTuneFlag = false;
 uint32_t cwTimer;
 uint32_t ditTimerOn;
-//uint32_t ditLength;
 uint32_t transmitDitLength;  // JJP 8/19/23
 uint32_t transmitDitUnshapedBlocks;
 uint32_t transmitDahUnshapedBlocks;
@@ -239,12 +224,11 @@ int filter_pos = 1;
 
 int16_t y_old, y_new, y1_new, y1_old, y_old2;  //A
 
-const float32_t DF1 = 4.0;                                         // decimation factor
-const float32_t DF2 = 2.0;                                         // decimation factor
-const float32_t DF = DF1 * DF2;                                    // decimation factor
-const float32_t n_samplerate = 176.0;                              // sample rate before decimation
-//const uint32_t N_B = FFT_LENGTH / 2 / BUFFER_SIZE * (uint32_t)DF;  // 512/2/128 * 8 = 16
-const uint32_t N_B{16};
+const float32_t DF1 = 4.0;             // decimation factor
+const float32_t DF2 = 2.0;             // decimation factor
+const float32_t DF = DF1 * DF2;        // decimation factor
+const float32_t n_samplerate = 176.0;  // sample rate before decimation
+const uint32_t N_B{ 16 };
 const uint32_t N_DEC_B = N_B / (uint32_t)DF;
 const uint32_t NR_add_counter = 128;
 const float32_t n_desired_BW = 9.0;  // desired max BW of the filters
@@ -298,7 +282,6 @@ int n_R;
 int newCursorPosition = 0;
 int oldCursorPosition = 256;
 bool switchFilterSideband = false;
-//int x2 = 0;  //AFP
 
 int zoomIndex = 1;  //AFP 9-26-22
 bool updateDisplayFlag = false;
@@ -412,7 +395,6 @@ float32_t DMAMEM R_BufferOffset[BUFFER_SIZE * N_B];
 float32_t tmp;
 float32_t w;
 float angl;
-////float pi = 3.14159265358979;
 float tau;
 float temp;
 bool volumeChangeFlag = false;
@@ -584,7 +566,6 @@ FLASHMEM void InitializeDataArrays() {
   uint16_t temp_check_frequency;
   uint32_t highAlarmTemp, lowAlarmTemp, panicAlarmTemp;
   int LP_F_help;
-//  uint32_t m_NumTaps = (FFT_LENGTH / 2) + 1;
 //DB2OO, 11-SEP-23: don't use the fixed sizes, but use the caculated ones, otherwise a code change will create very difficult to find problems
 #define CLEAR_VAR(x) memset(x, 0, sizeof(x))
   memset(FFT_spec_old, 0, sizeof(FFT_spec_old));
@@ -593,10 +574,6 @@ FLASHMEM void InitializeDataArrays() {
   Serial.printf("\tsizeof(NR_output_audio_buffer) %d", sizeof(NR_output_audio_buffer));
   Serial.println();
 #endif
-  //  CLEAR_VAR(FFT_spec_old);             //memset(FFT_spec_old, 0, 4096);            // SPECTRUM_RES = 512 * 4 = 2048
-  //  CLEAR_VAR(pixelnew);                 //memset(pixelnew, 0, 1024);                // 512 * 2
-  //  CLEAR_VAR(pixelold);                 //memset(pixelold, 0, 1024);                // 512 * 2
-  //  CLEAR_VAR(pixelCurrent);             //memset(pixelCurrent, 0, 1024);            // 512 * 2  KF5N JJP  7/14/23
   CLEAR_VAR(buffer_spec_FFT);          //memset(buffer_spec_FFT, 0, 4096);         // SPECTRUM_RES = 512 * 2 = 1024
   CLEAR_VAR(NR_FFT_buffer);            //memset(NR_FFT_buffer, 0, 2048);           // NR_FFT_L * sizeof(NR_FFT_buffer[0]));
   CLEAR_VAR(NR_output_audio_buffer);   //memset(NR_output_audio_buffer, 0, 1024);  // 256 * sizeof(NR_output_audio_buffer[0]));
@@ -613,8 +590,6 @@ FLASHMEM void InitializeDataArrays() {
   CLEAR_VAR(NR_Nest);                  //memset(NR_Nest, 0, 1024);
   CLEAR_VAR(NR_Gts);                   //memset(NR_Gts, 0, 1024);
   CLEAR_VAR(NR_E);                     //memset(NR_E, 0, 7680);
-
-  //  CalcCplxFIRCoeffs(FIR_Coef_I, FIR_Coef_Q, m_NumTaps, (float32_t)bands.bands[ConfigData.currentBand].FLoCut, (float32_t)bands.bands[ConfigData.currentBand].FHiCut, (float)SR[SampleRate].rate / DF);
 
   /****************************************************************************************
      init complex FFTs
@@ -640,11 +615,6 @@ FLASHMEM void InitializeDataArrays() {
   spec_FFT = &arm_cfft_sR_f32_len512;  //Changed specification to 512 instance
   NR_FFT = &arm_cfft_sR_f32_len256;
   NR_iFFT = &arm_cfft_sR_f32_len256;
-
-  /****************************************************************************************
-     Calculate the FFT of the FIR filter coefficients once to produce the FIR filter mask
-  ****************************************************************************************/
-  //  InitFilterMask();
 
   /****************************************************************************************
      Set sample rate
@@ -676,7 +646,6 @@ FLASHMEM void InitializeDataArrays() {
      Initiate decimation and interpolation FIR filters
   ****************************************************************************************/
   // Decimation filter 1, M1 = DF1
-  //    CalcFIRCoeffs(FIR_dec1_coeffs, 25, (float32_t)5100.0, 80, 0, 0.0, (float32_t)SR[SampleRate].rate);
   CalcFIRCoeffs(FIR_dec1_coeffs, n_dec1_taps, (float32_t)(n_desired_BW * 1000.0), n_att, 0, 0.0, (float32_t)SR[SampleRate].rate);
 
   if (arm_fir_decimate_init_f32(&FIR_dec1_I, n_dec1_taps, (uint32_t)DF1, FIR_dec1_coeffs, FIR_dec1_I_state, BUFFER_SIZE * N_BLOCKS)) {
@@ -861,14 +830,14 @@ void KeyRingOn()  //AFP 09-25-22
   Return value; void
 *****/
 void enableTransmitter(bool transmitOn) {
-if(transmitOn) {
-        digitalWrite(RXTX, HIGH);  //xmit on
-        display.ShowTransmitReceiveStatus();
-} else {
-        digitalWrite(RXTX, LOW);  //xmit on
-        display.ShowTransmitReceiveStatus();
-}
-        keyPressedOn = false;  // Reset isr().
+  if (transmitOn) {
+    digitalWrite(RXTX, HIGH);  //xmit on
+    display.ShowTransmitReceiveStatus();
+  } else {
+    digitalWrite(RXTX, LOW);  //xmit on
+    display.ShowTransmitReceiveStatus();
+  }
+  keyPressedOn = false;  // Reset isr().
 }
 
 
@@ -885,9 +854,9 @@ uint32_t afterPowerUp = 0;
 *****/
 FLASHMEM void setup() {
 
-  Serial.begin(115200);      // Use this serial for Teensy programming.
-//  SerialUSB1.begin(115200);  // Use this serial for FT8 keying.
-                             /* check for CrashReport stored from previous run */
+  Serial.begin(115200);  // Use this serial for Teensy programming.
+                         //  SerialUSB1.begin(115200);  // Use this serial for FT8 keying.
+                         /* check for CrashReport stored from previous run */
   if (CrashReport) {
     /* print info (hope Serial Monitor windows is open) */
     Serial.print(CrashReport);
@@ -994,7 +963,7 @@ FLASHMEM void setup() {
   // Switch matrix debug code.
   // Push and hold a button at power up to activate switch matrix calibration.
 #ifdef DEBUG_SWITCH_CAL
-  eeprom.CalDataRead(); // If this is not done, the calibration data will be overwritten.
+  eeprom.CalDataRead();  // If this is not done, the calibration data will be overwritten.
   if (analogRead(BUSY_ANALOG_PIN) < NOTHING_TO_SEE_HERE) {
     tft.fillWindow(RA8875_BLACK);
     tft.setFontScale(1);
@@ -1011,7 +980,7 @@ FLASHMEM void setup() {
   eeprom.EEPROMStartup();
 #endif
 
-// GPIOs should be configured at this point.  Make sure transmitter is disabled.
+  // GPIOs should be configured at this point.  Make sure transmitter is disabled.
   enableTransmitter(false);
 
   //  Entry graphics
@@ -1044,36 +1013,30 @@ FLASHMEM void setup() {
   // Set up the initial state/mode.
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) {
     radioState = RadioState::CW_RECEIVE_STATE;
-  //  bands.bands[ConfigData.currentBand].mode = RadioMode::CW_MODE;
   }
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE) {
     radioState = RadioState::SSB_RECEIVE_STATE;
-  //  bands.bands[ConfigData.currentBand].mode = RadioMode::SSB_MODE;
   }
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) {
     radioState = RadioState::FT8_RECEIVE_STATE;
-  //  bands.bands[ConfigData.currentBand].mode = RadioMode::FT8_MODE;
   }
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::AM_MODE) {
     radioState = RadioState::AM_RECEIVE_STATE;
-  //  bands.bands[ConfigData.currentBand].mode = RadioMode::AM_MODE;
   }
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::SAM_MODE) {
     radioState = RadioState::SAM_RECEIVE_STATE;
-  //  bands.bands[ConfigData.currentBand].mode = RadioMode::SAM_MODE;
   }
   SetAudioOperatingState(radioState);
 
   // Miscellaneous configurations.
   mainMenuIndex = 0;                // Changed from middle to first. Do Menu Down to get to Calibrate quickly
-                                    //  FilterSetSSB();                            // This is not updated until bandwidth is adjusted, so it needs to be done here in setup.
   ConfigData.rfGainCurrent = 0;     // Start with lower gain so you don't get blasted.
   lastState = RadioState::NOSTATE;  // Forces an update.
   powerUp = true;                   // This delays receiver start-up to allow transients to settle.
 
-FilterSetSSB();  // This is important!  If this is not run up front various other filters go into never never land.
-  //  Draw the entire radio display.
+  FilterSetSSB();  // This is important!  If this is not run up front various other filters go into never never land.
 
+  //  Draw the entire radio display.
   display.RedrawAll();
 }
 //============================================================== END setup() =================================================================
@@ -1121,32 +1084,32 @@ void loop() {
   // Top menu button read.
   // SSB and FT8 transmit operate via the main loop().  CW modes operate within independent while loops.  Don't stop in SSB and FT8 modes to read the buttons.
   if ((radioState != RadioState::SSB_TRANSMIT_STATE) and (radioState != RadioState::FT8_TRANSMIT_STATE)) {
-     menu = readButton();
-  if (menu != MenuSelect::BOGUS_PIN_READ) button.ExecuteButtonPress(menu);
+    menu = readButton();
+    if (menu != MenuSelect::BOGUS_PIN_READ) button.ExecuteButtonPress(menu);
   }
 
   // Transition to new state if required and only if the radio state has changed.
   if (lastState != radioState) {
 
-// Avoid changing the audio system if possible.
-// If moving from one receive state to another, audio system update is not required.  Demodulation selection is done in ReceiverDSP.
-// So updating the audio system is only required when moving from receive to transmit, or vice versa.
-if(radioState == RadioState::SSB_RECEIVE_STATE and lastState == RadioState::SSB_TRANSMIT_STATE) SetAudioOperatingState(radioState);
-if(radioState == RadioState::SSB_TRANSMIT_STATE and lastState == RadioState::SSB_RECEIVE_STATE) SetAudioOperatingState(radioState);
+    // Avoid changing the audio system if possible.
+    // If moving from one receive state to another, audio system update is not required.  Demodulation selection is done in ReceiverDSP.
+    // So updating the audio system is only required when moving from receive to transmit, or vice versa.
+    if (radioState == RadioState::SSB_RECEIVE_STATE and lastState == RadioState::SSB_TRANSMIT_STATE) SetAudioOperatingState(radioState);
+    if (radioState == RadioState::SSB_TRANSMIT_STATE and lastState == RadioState::SSB_RECEIVE_STATE) SetAudioOperatingState(radioState);
 
-if(radioState == RadioState::FT8_RECEIVE_STATE and lastState == RadioState::FT8_TRANSMIT_STATE) SetAudioOperatingState(radioState);
-if(radioState == RadioState::FT8_TRANSMIT_STATE and lastState == RadioState::FT8_RECEIVE_STATE) SetAudioOperatingState(radioState);
+    if (radioState == RadioState::FT8_RECEIVE_STATE and lastState == RadioState::FT8_TRANSMIT_STATE) SetAudioOperatingState(radioState);
+    if (radioState == RadioState::FT8_TRANSMIT_STATE and lastState == RadioState::FT8_RECEIVE_STATE) SetAudioOperatingState(radioState);
 
-if(radioState == RadioState::CW_RECEIVE_STATE and lastState == RadioState::CW_TRANSMIT_STRAIGHT_STATE) SetAudioOperatingState(radioState);
-if(radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE and lastState == RadioState::CW_RECEIVE_STATE) SetAudioOperatingState(radioState);
+    if (radioState == RadioState::CW_RECEIVE_STATE and lastState == RadioState::CW_TRANSMIT_STRAIGHT_STATE) SetAudioOperatingState(radioState);
+    if (radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE and lastState == RadioState::CW_RECEIVE_STATE) SetAudioOperatingState(radioState);
 
-if(radioState == RadioState::CW_RECEIVE_STATE and lastState == RadioState::CW_TRANSMIT_KEYER_STATE) SetAudioOperatingState(radioState);
-if(radioState == RadioState::CW_TRANSMIT_KEYER_STATE and lastState == RadioState::CW_RECEIVE_STATE) SetAudioOperatingState(radioState);
+    if (radioState == RadioState::CW_RECEIVE_STATE and lastState == RadioState::CW_TRANSMIT_KEYER_STATE) SetAudioOperatingState(radioState);
+    if (radioState == RadioState::CW_TRANSMIT_KEYER_STATE and lastState == RadioState::CW_RECEIVE_STATE) SetAudioOperatingState(radioState);
 
-if(radioState == RadioState::SAM_RECEIVE_STATE and lastState != RadioState::SAM_RECEIVE_STATE) SetAudioOperatingState(radioState);
-if(radioState == RadioState::AM_RECEIVE_STATE and lastState != RadioState::AM_RECEIVE_STATE) SetAudioOperatingState(radioState);
+    if (radioState == RadioState::SAM_RECEIVE_STATE and lastState != RadioState::SAM_RECEIVE_STATE) SetAudioOperatingState(radioState);
+    if (radioState == RadioState::AM_RECEIVE_STATE and lastState != RadioState::AM_RECEIVE_STATE) SetAudioOperatingState(radioState);
 
-// Customization dependent on required mode.
+    // Customization dependent on required mode.
     if (radioState == RadioState::CW_RECEIVE_STATE) modecontrol.CWReceiveMode();
     if (radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE) modecontrol.CWTransmitMode();
     if (radioState == RadioState::CW_TRANSMIT_KEYER_STATE) modecontrol.CWTransmitMode();
@@ -1189,16 +1152,12 @@ if(radioState == RadioState::AM_RECEIVE_STATE and lastState != RadioState::AM_RE
     case RadioState::FT8_RECEIVE_STATE:
     case RadioState::SSB_RECEIVE_STATE:
       if (lastState != radioState) {  // G0ORX 01092023
-      enableTransmitter(false);       // Disable transmitter.
-//        digitalWrite(RXTX, LOW);      //xmit off
-//        display.ShowTransmitReceiveStatus();
+        enableTransmitter(false);     // Disable transmitter.
       }
       display.ShowSpectrum(drawSpectrum);
       break;
     case RadioState::SSB_TRANSMIT_STATE:
       enableTransmitter(true);
-//      digitalWrite(RXTX, HIGH);  //xmit on
-//      display.ShowTransmitReceiveStatus();
       while (digitalRead(PTT) == LOW) {
         SSB_ExciterIQData();
 
@@ -1229,9 +1188,7 @@ if(radioState == RadioState::AM_RECEIVE_STATE and lastState != RadioState::AM_RE
       break;
 
     case RadioState::FT8_TRANSMIT_STATE:
-        enableTransmitter(true);
-//      digitalWrite(RXTX, HIGH);  //xmit on
-//      display.ShowTransmitReceiveStatus();
+      enableTransmitter(true);
       while (SerialUSB1.rts() == HIGH) {
         SSB_ExciterIQData();
       }
@@ -1247,15 +1204,13 @@ if(radioState == RadioState::AM_RECEIVE_STATE and lastState != RadioState::AM_RE
   switch (radioState) {
     case RadioState::CW_RECEIVE_STATE:
       if (lastState != radioState) {  // G0ORX 01092023
-      enableTransmitter(false);
-//        display.ShowTransmitReceiveStatus();
-//        keyPressedOn = false;
+        enableTransmitter(false);
       }
       display.ShowSpectrum(drawSpectrum);  // if removed CW signal on is 2 mS
       break;
 
     case RadioState::CW_TRANSMIT_STRAIGHT_STATE:
-    enableTransmitter(true);
+      enableTransmitter(true);
 
       cwKeyDown = false;  // false initiates CW_SHAPING_RISE.
       cwTimer = millis();
@@ -1283,7 +1238,7 @@ if(radioState == RadioState::AM_RECEIVE_STATE and lastState != RadioState::AM_RE
       break;
 
     case RadioState::CW_TRANSMIT_KEYER_STATE:
-    enableTransmitter(true);
+      enableTransmitter(true);
 
       cwTimer = millis();
       while (millis() - cwTimer <= ConfigData.cwTransmitDelay) {
@@ -1344,11 +1299,8 @@ if(radioState == RadioState::AM_RECEIVE_STATE and lastState != RadioState::AM_RE
   }  // End CW Mode
 
   //  End radio state machine
-//  if (lastState != radioState) {  // G0ORX 09012023
-// lastState is used to indicate configuration is required if the state has changed at the top of the next loop.
-    lastState = radioState;
-//    display.ShowTransmitReceiveStatus();
-//  }
+
+  lastState = radioState;
 
 #ifdef DEBUG1
   if (elapsed_micros_idx_t > (SR[SampleRate].rate / 960)) {
@@ -1379,11 +1331,9 @@ if(radioState == RadioState::AM_RECEIVE_STATE and lastState != RadioState::AM_RE
 
     volumeChangeFlag = false;
     display.UpdateVolumeField();
-
   }
 
   if (audioGraphicsFlag) {
-    //    display.DrawBandWidthIndicatorBar();
     display.UpdateAudioGraphics();
 
     audioGraphicsFlag = false;
@@ -1396,12 +1346,6 @@ if(radioState == RadioState::AM_RECEIVE_STATE and lastState != RadioState::AM_RE
     loopCounter = 0;
     Serial.printf("AudioProcessorUsageMax() = %d\n", static_cast<uint32_t>(AudioProcessorUsageMax()));
     AudioProcessorUsageMaxReset();
-//    Serial.printf("keyPressedOn = %d\n", keyPressedOn);
-//    Serial.printf("Ring = %d\n", digitalRead(KEYER_DAH_INPUT_RING));
-//    Serial.printf("Tip = %d\n", digitalRead(KEYER_DIT_INPUT_TIP));
-//    Serial.printf("ConfigData.keyType = %d\n", ConfigData.keyType);
-//    Serial.printf("transmitDitLength = %d\n", transmitDitLength);
-//    Serial.printf("keyPressedOn = %d\n", keyPressedOn);
   }
   usec1Old = usec1;
 #endif

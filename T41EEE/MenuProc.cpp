@@ -1,3 +1,4 @@
+// User menus and associated graphics drivers.
 
 // ShowMenu
 // CalibrateOptions
@@ -66,12 +67,10 @@ void CalibrateOptions() {
   int freqCorrectionFactorOld = 0;
   int32_t increment = 100;
   MenuSelect menu;
-  //  tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 30, CHAR_HEIGHT, RA8875_BLACK);
 
   // Select the type of calibration, and then skip this during the loop() function.
   // Note that some calibrate options run inside the loop() function!
   if (calibrateFlag == 0) {  //    0             1           2               3                4              5             6              7                  8                  9               10                11               12                13               14               15              16          17           18
-                             //    const std::string IQOptions[]{ "Freq Cal", "CW PA Cal", "CW Rec Cal", "CW Carrier Cal", "CW Xmit Cal", "SSB PA Cal", "SSB Rec Cal", "SSB Carrier Cal", "SSB Transmit Cal", "CW Radio Cal", "CW Refine Cal", "SSB Radio Cal", "SSB Refine Cal", "dBm Level Cal", "DAC Offset CW", "DAC Offset SSB", "Btn Cal", "Btn Repeat", "Cancel" };
     const std::string IQOptions[]{ "Freq Cal", "CW PA Cal", "CW Rec Cal", "CW Carrier Cal", "CW Xmit Cal", "SSB PA Cal", "SSB Rec Cal", "SSB Carrier Cal", "SSB Transmit Cal", "CW Radio Cal", "CW Refine Cal", "SSB Radio Cal", "SSB Refine Cal", "dBm Level Cal", "Btn Cal", "Btn Repeat", "Cancel" };
     IQChoice = SubmenuSelect(IQOptions, 17, 0);
   }
@@ -189,33 +188,7 @@ void CalibrateOptions() {
         }
       }
       break;
-      /*
-    case 14:  // Set DAC offset for CW carrier cancellation.
-      CalData.dacOffsetCW = GetEncoderValueLiveQ15t(-5000, 5000, CalData.dacOffsetCW, 50, "DC Offset:", false);
-      menu = readButton();
-      if (menu != MenuSelect::BOGUS_PIN_READ) {
-        if (menu == MenuSelect::MENU_OPTION_SELECT) {
-          tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-          eeprom.CalDataWrite();
-          calibrateFlag = 0;
-        }
-      }
-      //      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
-      break;
 
-    case 15:  // Set DAC offset for SSB carrier cancellation.
-      CalData.dacOffsetSSB = GetEncoderValueLiveQ15t(-5000, 5000, CalData.dacOffsetSSB, 50, (char *)"DC Offset:", false);
-      menu = readButton();
-      if (menu != MenuSelect::BOGUS_PIN_READ) {
-        if (menu == MenuSelect::MENU_OPTION_SELECT) {
-          tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 35, CHAR_HEIGHT, RA8875_BLACK);
-          eeprom.CalDataWrite();
-          calibrateFlag = 0;
-        }
-      }
-      //      eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
-      break;
-*/
     case 14:  // Calibrate buttons
       SaveAnalogSwitchValues();
       calibrateFlag = 0;
@@ -250,8 +223,6 @@ void CalibrateOptions() {
   int freqCorrectionFactorOld = 0;
   int32_t increment = 100;
   MenuSelect menu;
-
-  //  tft.fillRect(SECONDARY_MENU_X, MENUS_Y, EACH_MENU_WIDTH + 30, CHAR_HEIGHT, RA8875_BLACK);
 
   // Select the type of calibration, and then skip this during the loop() function.
   if (calibrateFlag == 0) {
@@ -321,7 +292,7 @@ void CalibrateOptions() {
         }
       }
 
-      break;  // Missing break.  KF5N August 12, 2023
+      break;
 
     case 5:                                                    // SSB IQ Receive Cal - Gain and Phase
       rxcalibrater.DoReceiveCalibrate(1, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
@@ -425,8 +396,7 @@ void CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
   switch (CWChoice) {
 
     case 0:  // Set Morse decoder sensitivity.  This runs in active receive loop!
-//      ConfigData.morseDecodeSensitivity = GetEncoderValueLiveString(0, 10000, ConfigData.morseDecodeSensitivity, 100, cwChoices[CWChoice], false);
-ConfigData.morseDecodeSensitivity = static_cast<uint32_t>(GetEncoderValueLive(100, 10000, ConfigData.morseDecodeSensitivity, 100, "Decode Sens: ", true, true));
+      ConfigData.morseDecodeSensitivity = static_cast<uint32_t>(GetEncoderValueLive(100, 10000, ConfigData.morseDecodeSensitivity, 100, "Decode Sens: ", true, true));
       if (ConfigData.morseDecodeSensitivity != morseDecodeSensitivityOld) morseDecodeSensitivityOld = ConfigData.morseDecodeSensitivity;
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
@@ -481,30 +451,6 @@ ConfigData.morseDecodeSensitivity = static_cast<uint32_t>(GetEncoderValueLive(10
 
 
 /*****
-  Purpose: Show the list of scales for the spectrum divisions
-
-  Parameter list:
-    void
-
-  Return value
-    int           an index into displayScale[] array, or -1 on cancel
-*****
-void SpectrumOptions() {
-  const std::string spectrumChoices[] = { "20 dB/unit", "10 dB/unit", "Cancel" };
-  int spectrumSet = ConfigData.currentScale;  // JJP 7/14/23
-
-  spectrumSet = SubmenuSelect(spectrumChoices, 3, spectrumSet);
-  if (strcmp(spectrumChoices[spectrumSet].c_str(), "Cancel") == 0) {
-    return;
-  }
-  ConfigData.currentScale = spectrumSet;  // Yep...
-  eeprom.ConfigDataWrite();
-  display.ShowSpectrumdBScale();
-//  lastState = RadioState::NOSTATE;  // Force update of operating state.
-}
-*/
-
-/*****
   Purpose: Adjust the receiver's AGC configuration.
 
   Parameter list:
@@ -533,8 +479,8 @@ void AGCOptions() {
       break;
 
     case 2:  // Set AGC threshold
-//      ConfigData.AGCThreshold = static_cast<float32_t>(GetEncoderValue(-60, -20, ConfigData.AGCThreshold, 1, "AGC Threshold "));
-ConfigData.AGCThreshold = GetEncoderValueLoopFloat(-60, -20, ConfigData.AGCThreshold, 1.0, 0, "AGC Threshold: ", true, true);
+
+      ConfigData.AGCThreshold = GetEncoderValueLoopFloat(-60, -20, ConfigData.AGCThreshold, 1.0, 0, "AGC Threshold: ", true, true);
       initializeAudioPaths();
       break;
 
@@ -755,12 +701,10 @@ void EqualizerRecOptions() {
   switch (EQChoice) {
     case 0:
       ConfigData.receiveEQFlag = true;
-      //      button.ExecuteModeChange();
       FilterSetSSB();
       break;
     case 1:
       ConfigData.receiveEQFlag = false;
-      //      button.ExecuteModeChange();
       break;
     case 2:
       ProcessEqualizerChoices(0, (char *)"Receive Equalizer");
@@ -802,7 +746,7 @@ void EqualizerXmtOptions() {
       break;
   }
   eeprom.ConfigDataWrite();
-  //  RedrawDisplayScreen();
+
   display.UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
 }
 
@@ -837,11 +781,7 @@ void SSBOptions() {
       cessb1.setProcessing(ConfigData.cessb);
       display.BandInformation();
       break;
-      /*
-    case 2:  // FT8
-      display.BandInformation();
-      break;
-*/
+
     case 2:  // Compressor On
       ConfigData.compressorFlag = true;
       display.UpdateCompressionField();
@@ -854,17 +794,14 @@ void SSBOptions() {
 
     case 4:  // Adjust mic gain in dB.  Default 0 db.
       ConfigData.micGain = GetEncoderValueLoopFloat(-20, 20, ConfigData.micGain, 1, 1, "Mic Gain dB: ", true, true);
-      //      MicGainSet();
       break;
 
     case 5:  // Set compression ratio.  Default 5.
       ConfigData.micCompRatio = GetEncoderValueLoopFloat(1, 1000, ConfigData.micCompRatio, 1, 1, "Comp Ratio: ", true, true);
-      //      SetCompressionThreshold();
       display.UpdateCompressionField();
       break;
 
     case 6:  // Set compressor threshold.  Default -15.0 dB.
-      //      SetCompressionRatio();
       ConfigData.micThreshold = GetEncoderValueLoopFloat(-60, 0, ConfigData.micThreshold, 1, 1, "Comp Thresh dB: ", true, true);
       display.UpdateCompressionField();
       break;
@@ -874,7 +811,6 @@ void SSBOptions() {
       radioState = RadioState::SSB_IM3TEST_STATE;
       bands.bands[ConfigData.currentBand].mode = RadioMode::SSB_MODE;
       SetAudioOperatingState(radioState);
-      //      button.ExecuteModeChange();
       SetFreq();
       digitalWrite(RXTX, HIGH);  //xmit on
       display.ShowTransmitReceiveStatus();
@@ -931,20 +867,8 @@ void RFOptions() {
 
   switch (rfSet) {
     case 0:  // TX Power Set.
-      //    calibrateFlag = true;
-      //      ConfigData.transmitPowerLevel = static_cast<float32_t>(GetEncoderValue(1, 20, ConfigData.transmitPowerLevel, 1, "Power: ", true, true));
       ConfigData.transmitPowerLevel = GetEncoderValueLoopFloat(1, 20, ConfigData.transmitPowerLevel, 1, 1, "Power: ", true, true);
-      /*
-      menu = readButton();
-      if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
-        if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
-          tft.setCursor(0, 1);
-          tft.print("                ");  // Erase.
-          eeprom.CalDataWrite();
-          calibrateFlag = 0;
-        }
-      }
-      */
+
       // When the transmit power level is set, this means ALL of the power coefficients must be revised!
       // powerOutCW and powerOutSSB must be updated.
       initPowerCoefficients();
@@ -1102,7 +1026,6 @@ void VFOSelect() {
     void
 *****/
 void ConfigDataOptions() {  //           0               1                2                  3                  4                  5                  6                7                  8              9           10
-                            //  const std::string ConfigDataOpts[] = { "Save Current", "Load Defaults", "Get Favorite", "Set Favorite", "Copy Config->SD", "Copy SD->Config", "Config->Serial", "Default->Serial", "Stack->Serial", "SD->Serial", "Cancel" };
   const std::string ConfigDataOpts[] = { "Save Current", "Load Defaults", "Copy Config->SD", "Copy SD->Config", "EEPROM->Serial", "Default->Serial", "Stack->Serial", "SD->Serial", "Cancel" };
   int defaultOpt = 0;
   config_t tempConfig;     // A temporary config_t struct to copy ConfigData data into.
@@ -1117,15 +1040,7 @@ void ConfigDataOptions() {  //           0               1                2     
     case 1:
       eeprom.ConfigDataDefaults();  // Restore defaults to ConfigData struct and refresh display.
       break;
-      /*
-    case 2:
-      eeprom.GetFavoriteFrequency();  // Get a stored frequency and store in active VFO
-      break;
 
-    case 3:
-      eeprom.SetFavoriteFrequency();  // Set favorites
-      break;
-*/
     case 2:                                                      // Copy ConfigData->SD.
       eeprom.ConfigDataRead(tempConfig);                         // Read as one large chunk
       json.saveConfiguration(configFilename, tempConfig, true);  // Save ConfigData struct to SD
@@ -1135,9 +1050,6 @@ void ConfigDataOptions() {  //           0               1                2     
       json.loadConfiguration(configFilename, ConfigData);  // Copy from SD to struct in active memory (on the stack) ConfigData.
       eeprom.ConfigDataWrite();                            // Write to ConfigData non-volatile memory.
       initUserDefinedStuff();                              // Various things must be initialized.  This is normally done in setup().  KF5N February 21, 2024
-                                                           //      tft.writeTo(L2);                                     // This is specifically to clear the bandwidth indicator bar.  KF5N August 7, 2023
-                                                           //      tft.clearMemory();
-                                                           //      tft.writeTo(L1);
       display.RedrawAll();                                 // Assume there are lots of changes and do a heavy-duty refresh.  KF5N August 7, 2023
       break;
 
@@ -1145,8 +1057,6 @@ void ConfigDataOptions() {  //           0               1                2     
       {
         Serial.println(F("\nBegin ConfigData from EEPROM"));
         // Don't want to overwrite the stack.  Need a temporary struct, read the ConfigData data into that.
-        //  config_t ConfigData_temp;
-        //  EEPROM.get(EEPROM_BASE_ADDRESS + 4, ConfigData_temp);
         eeprom.ConfigDataRead(tempConfig);
         json.saveConfiguration(configFilename, tempConfig, false);  // Write the temporary struct to the serial monitor.
         Serial.println(F("\nEnd ConfigData from EEPROM\n"));
@@ -1175,7 +1085,6 @@ void ConfigDataOptions() {  //           0               1                2     
       defaultOpt = -1;  // No choice made
       break;
   }
-  //  return defaultOpt;
 }
 
 
@@ -1211,20 +1120,13 @@ void CalDataOptions() {  //           0               1                2        
     case 3:                                        // Copy SD->CalData
       json.loadCalibration(calFilename, CalData);  // Copy from SD to struct in active memory (on the stack) ConfigData.
       eeprom.CalDataWrite();                       // Write to ConfigData non-volatile memory.
-                                                   //      initUserDefinedStuff();                      // Various things must be initialized.  This is normally done in setup().  KF5N February 21, 2024
-                                                   //      tft.writeTo(L2);                             // This is specifically to clear the bandwidth indicator bar.  KF5N August 7, 2023
-                                                   //      tft.clearMemory();
-                                                   //      tft.writeTo(L1);
-                                                   //      display.RedrawAll();  // Assume there are lots of changes and do a heavy-duty refresh.  KF5N August 7, 2023
       break;
 
     case 4:  // CalData EEPROM->Serial
       {
         Serial.println(F("\nBegin CalData from EEPROM"));
         // Don't want to overwrite the stack.  Need a temporary struct, read the CalData data into that.
-        //                EEPROM.get(CAL_BASE_ADDRESS + 4, tempCal);
         eeprom.CalDataRead(tempCal);
-        //        Serial.printf("tempCal.CWPowerCalibrationFactor[0] = %f\n", tempCal.CWPowerCalibrationFactor[0]);
         json.saveCalibration(calFilename, tempCal, false);  // Write the temporary struct to the serial monitor.
         Serial.println(F("\nEnd CalData from EEPROM\n"));
       }
@@ -1252,7 +1154,6 @@ void CalDataOptions() {  //           0               1                2        
       defaultOpt = -1;  // No choice made
       break;
   }
-  //  return defaultOpt;
 }
 
 
@@ -1283,7 +1184,6 @@ int SubmenuSelect(const std::string options[], int numberOfChoices, int defaultS
     tft.print(options[encoderReturnValue].c_str());  // Secondary Menu
     refreshFlag = 1;
   }
-  //  delay(150L);
 
   while (true) {
     menu = readButton();                       // Read the ladder value
@@ -1316,7 +1216,6 @@ int SubmenuSelect(const std::string options[], int numberOfChoices, int defaultS
         tft.setTextColor(RA8875_BLACK);
         tft.setCursor(SECONDARY_MENU_X + 1, MENUS_Y + 1);
         tft.print(options[encoderReturnValue].c_str());
-        //          delay(50L);
         refreshFlag = 0;
       }
     }
@@ -1350,13 +1249,9 @@ int SubmenuSelectString(std::string options[], int numberOfChoices, int defaultS
     tft.print(options[encoderReturnValue].c_str());  // Secondary Menu
     refreshFlag = 1;
   }
-  //  delay(150L);
 
   while (true) {
     menu = readButton();                       // Read the ladder value
-                                               //    delay(150L);
-                                               //    if (val != -1 && val < (ConfigData.switchValues[0] + WIGGLE_ROOM)) {
-                                               //      menu = ProcessButtonPress(val);  // Use ladder value to get menu choice
     if (menu != MenuSelect::BOGUS_PIN_READ) {  // Valid choice?
       switch (menu) {
         case MenuSelect::MENU_OPTION_SELECT:  // They made a choice
@@ -1386,7 +1281,6 @@ int SubmenuSelectString(std::string options[], int numberOfChoices, int defaultS
         tft.setTextColor(RA8875_BLACK);
         tft.setCursor(SECONDARY_MENU_X + 1, MENUS_Y + 1);
         tft.print(options[encoderReturnValue].c_str());
-        //          delay(50L);
         refreshFlag = 0;
       }
     }

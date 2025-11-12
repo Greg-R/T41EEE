@@ -1,3 +1,4 @@
+// Receive DSP.  This is a primary part of the receiver loop.
 
 #include "SDT.h"
 
@@ -47,9 +48,6 @@ float32_t sign(float32_t x) {
       void
  *****/
 void ReceiveDSP::ProcessIQData() {
-////  if (keyPressedOn == true) {  //AFP 09-01-22
-////    return;
-////  }
   /**********************************************************************************  AFP 12-31-20
         Get samples from queue buffers
         Teensy Audio Library stores ADC data in two buffers size=128, Q_in_L and Q_in_R as initiated from the audio lib.
@@ -81,9 +79,6 @@ void ReceiveDSP::ProcessIQData() {
       ADC_RX_Q.freeBuffer();
     }  // end for loop
 
-////    if (keyPressedOn == true) {  //AFP 09-01-22.  Bail out if transmitting but ignore in AM mode.
-////      return;
-////    }
     // Set frequency here only to minimize interruption to signal stream during tuning.
     // This code was unnecessary in the revised tuning scheme.  KF5N July 22, 2023
     if (centerTuneFlag == 1) {  //  This flag is set by EncoderFineTune().
@@ -169,11 +164,6 @@ void ReceiveDSP::ProcessIQData() {
         }
       }
     }
-
-    //  Display_S_meter_or_spectrum_state++
-    //  if (keyPressedOn == true) {  ////AFP 09-01-22.  Is this a duplicate here???  Removed Oct 14 2025 KF5N
-    //    return;
-    //  }
 
     /**********************************************************************************  AFP 12-31-20
         Frequency translation by Fs/4 without multiplication from Lyons (2011): chapter 13.1.2 page 646
@@ -314,20 +304,18 @@ void ReceiveDSP::ProcessIQData() {
       for (int k = 0; k < 1024; k++) {
         audioSpectBuffer[1023 - k] = (iFFT_buffer[k] * iFFT_buffer[k]);  // iFFT_buffer[1025]?
       }
-      uint32_t index_of_max = 0;
-      float32_t spectrumPeak = 0;
-        arm_max_f32(audioSpectBuffer, 1024, &spectrumPeak, &index_of_max);
-//        Serial.printf("spectrumPeak = %f index_of_max = %d\n", spectrumPeak, index_of_max);
+      //      uint32_t index_of_max = 0;
+      //      float32_t spectrumPeak = 0;
+      //        arm_max_f32(audioSpectBuffer, 1024, &spectrumPeak, &index_of_max);
+      //        Serial.printf("spectrumPeak = %f index_of_max = %d\n", spectrumPeak, index_of_max);
       for (int k = 0; k < 256; k++) {
         audioYPixelold[k] = audioYPixelcurrent[k];  // Store the existing audio spectrum so it can be erased.
         if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
-//Serial.printf("spectrumPeak = %f index_of_max = %d\n", spectrumPeak, (1023 - index_of_max));
-   //       audioYPixel[k] = 65 + map(15 * log10f((audioSpectBuffer[1023 - k] + audioSpectBuffer[1023 - k + 1] + audioSpectBuffer[1023 - k + 2]) / 3.0), 0, 100, 0, 120) + audioFFToffset;
-         audioYPixel[k] = 65 + 15 * log10f(audioSpectBuffer[1023 - k]) + audioFFToffset; 
+          //       audioYPixel[k] = 65 + map(15 * log10f((audioSpectBuffer[1023 - k] + audioSpectBuffer[1023 - k + 1] + audioSpectBuffer[1023 - k + 2]) / 3.0), 0, 100, 0, 120) + audioFFToffset;
+          audioYPixel[k] = 65 + 15 * log10f(audioSpectBuffer[1023 - k]) + audioFFToffset;  // Simplified for T41EEE.91.
         } else if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-   //       audioYPixel[k] = 65 + map(15 * log10f((audioSpectBuffer[k] + audioSpectBuffer[k + 1] + audioSpectBuffer[k + 2]) / 3.0), 0, 100, 0, 120) + audioFFToffset;
-//   Serial.printf("spectrumPeak = %f index_of_max = %d\n", spectrumPeak, index_of_max);
-          audioYPixel[k] = 65 + 15 * log10f(audioSpectBuffer[k]) + audioFFToffset;
+          //       audioYPixel[k] = 65 + map(15 * log10f((audioSpectBuffer[k] + audioSpectBuffer[k + 1] + audioSpectBuffer[k + 2]) / 3.0), 0, 100, 0, 120) + audioFFToffset;
+          audioYPixel[k] = 65 + 15 * log10f(audioSpectBuffer[k]) + audioFFToffset;  // Simplified for T41EEE.91.
         }
         if (audioYPixel[k] < 0)
           audioYPixel[k] = 0;
@@ -363,7 +351,6 @@ void ReceiveDSP::ProcessIQData() {
     arm_cfft_f32(iS, iFFT_buffer, 1, 1);
 
     // Adjust for level alteration because of filters.
-
     //  Need to scale iFFT_buffer[] here.
 
     for (unsigned i = 0; i < FFT_length / 2; i++) {
@@ -525,6 +512,5 @@ void ReceiveDSP::ProcessIQData() {
 
     elapsed_micros_sum = elapsed_micros_sum + usec;
     elapsed_micros_idx_t++;
-  }                         // end of if(audio blocks available)
-
+  }  // end of if(audio blocks available)
 }

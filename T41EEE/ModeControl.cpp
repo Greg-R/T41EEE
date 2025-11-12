@@ -1,38 +1,29 @@
+// Mode control members.
+
 
 #include "SDT.h"
 
 
 void ModeControl::CWReceiveMode() {
-  Serial.printf("CWReceiveMode()\n");
   startRxFlag = true;
   SetFreq();
   display.BandInformation();  // Updates center frequency, band, mode, and sideband at top of spectrum.
 
-encoderFilterFlag = true;
-
-//  display.UpdateAudioGraphics();
-//  FilterBandwidth();  // Required to set up filter properly for this mode.
-  //  display.ShowBandwidth();  Run by UpdateAudioGraphics().
+  encoderFilterFlag = true;
 }
 
 
 void ModeControl::CWTransmitMode() {
-  Serial.printf("CWTransmitMode()\n");
-  Serial.printf("radioState = %d\n", radioState);
   SetFreq();
 }
 
 
 void ModeControl::SSBReceiveMode() {
-  Serial.printf("SSBReceiveMode()\n");
   startRxFlag = true;
   SetFreq();
   display.BandInformation();  // Updates center frequency, band, mode, and sideband at top of spectrum.
 
-encoderFilterFlag = true;
-//  display.UpdateAudioGraphics();
-//  FilterBandwidth();  // Required to set up filter properly for this mode.
-//  display.ShowBandwidth();
+  encoderFilterFlag = true;
 }
 
 
@@ -47,9 +38,7 @@ void ModeControl::FT8ReceiveMode() {
   SetFreq();
   display.BandInformation();  // Updates center frequency, band, mode, and sideband at top of spectrum.
 
-//  display.UpdateAudioGraphics();
-//  FilterBandwidth();  // Required to set up filter properly for this mode.
-encoderFilterFlag = true;
+  encoderFilterFlag = true;
   display.ShowBandwidth();
 }
 
@@ -65,9 +54,7 @@ void ModeControl::AMReceiveMode() {
   SetFreq();
   display.BandInformation();  // Updates center frequency, band, mode, and sideband at top of spectrum.
 
-encoderFilterFlag = true;
-//  display.UpdateAudioGraphics();
-//  FilterBandwidth();  // Required to set up filter properly for this mode.
+  encoderFilterFlag = true;
   display.ShowBandwidth();
 }
 
@@ -75,12 +62,8 @@ encoderFilterFlag = true;
 void ModeControl::SAMReceiveMode() {
 
   SetFreq();
-  //  bands.bands[ConfigData.currentBand].sideband = Sideband::BOTH_SAM;
   display.BandInformation();  // Updates center frequency, band, mode, and sideband at top of spectrum.
 
-encoderFilterFlag = true;
-//  display.UpdateAudioGraphics();
-  //    FilterSetSSB();  // Required to set up filter properly for this mode.
-//  FilterBandwidth();
+  encoderFilterFlag = true;
   display.ShowBandwidth();
 }
