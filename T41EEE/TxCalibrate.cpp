@@ -613,6 +613,7 @@ void TxCalibrate::DoXmitCalibrate(int calMode, bool radio, bool refine, bool toE
           state = State::initialSweepAmp;  // Let this fall through.
 
         case State::initialSweepAmp:
+        TxCalibrate::ShowSpectrum();  // This slows down the loop to improve accuracy.
           sweepVectorValue[index] = amplitude;
           sweepVector[index] = adjdB;
           // Increment for next measurement.
