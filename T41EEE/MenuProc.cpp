@@ -426,7 +426,7 @@ void CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
 
     case 0:  // Set Morse decoder sensitivity.  This runs in active receive loop!
 //      ConfigData.morseDecodeSensitivity = GetEncoderValueLiveString(0, 10000, ConfigData.morseDecodeSensitivity, 100, cwChoices[CWChoice], false);
-ConfigData.morseDecodeSensitivity = static_cast<uint32_t>(GetEncoderValueLive(0, 10000, ConfigData.morseDecodeSensitivity, 100, "Decode Sens: ", true, true));
+ConfigData.morseDecodeSensitivity = static_cast<uint32_t>(GetEncoderValueLive(100, 10000, ConfigData.morseDecodeSensitivity, 100, "Decode Sens: ", true, true));
       if (ConfigData.morseDecodeSensitivity != morseDecodeSensitivityOld) morseDecodeSensitivityOld = ConfigData.morseDecodeSensitivity;
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??

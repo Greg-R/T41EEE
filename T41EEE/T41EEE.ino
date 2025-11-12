@@ -889,7 +889,7 @@ uint32_t afterPowerUp = 0;
 FLASHMEM void setup() {
 
   Serial.begin(115200);      // Use this serial for Teensy programming.
-  SerialUSB1.begin(115200);  // Use this serial for FT8 keying.
+//  SerialUSB1.begin(115200);  // Use this serial for FT8 keying.
                              /* check for CrashReport stored from previous run */
   if (CrashReport) {
     /* print info (hope Serial Monitor windows is open) */
@@ -1117,10 +1117,10 @@ void loop() {
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE and SerialUSB1.rts() == LOW) radioState = RadioState::FT8_RECEIVE_STATE;
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE and SerialUSB1.rts() == HIGH) radioState = RadioState::FT8_TRANSMIT_STATE;
 
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and (ConfigData.keyType == 1 and digitalRead(ConfigData.paddleDit) == HIGH and digitalRead(ConfigData.paddleDah) == HIGH)) radioState = RadioState::CW_RECEIVE_STATE;
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and ConfigData.keyType == 1 and (digitalRead(ConfigData.paddleDit) == HIGH) and (digitalRead(ConfigData.paddleDah) == HIGH)) radioState = RadioState::CW_RECEIVE_STATE;
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and ConfigData.keyType == 0 and digitalRead(KEYER_DIT_INPUT_TIP) == HIGH) radioState = RadioState::CW_RECEIVE_STATE;
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and (keyPressedOn == true and bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and ConfigData.keyType == 0)) radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and (keyPressedOn == true and bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and ConfigData.keyType == 1)) radioState = RadioState::CW_TRANSMIT_KEYER_STATE;
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and keyPressedOn == true and ConfigData.keyType == 0) radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and keyPressedOn == true and ConfigData.keyType == 1) radioState = RadioState::CW_TRANSMIT_KEYER_STATE;
 
   // Top menu button read.
   // SSB and FT8 transmit operate via the main loop().  CW modes operate within independent while loops.  Don't stop in SSB and FT8 modes to read the buttons.
@@ -1163,17 +1163,7 @@ if(radioState == RadioState::AM_RECEIVE_STATE and lastState != RadioState::AM_RE
 
     if (radioState == RadioState::AM_RECEIVE_STATE) modecontrol.AMReceiveMode();
     if (radioState == RadioState::SAM_RECEIVE_STATE) modecontrol.SAMReceiveMode();
-//    AudioInterrupts();
   }
-//  if (radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE and lastState == RadioState::CW_RECEIVE_STATE) {
-//    Serial.printf("spectrumErased = %d\n", display.spectrumErased);
-//  }
-  //    if(lastState == RadioState::CW_TRANSMIT_STRAIGHT_STATE and (radioState == RadioState::CW_RECEIVE_STATE or lastState == RadioState::NOSTATE)) {
-  //     button.ExecuteModeChange();
-
-  //    if(false) button.ExecuteModeChange();
-  //    Serial.printf("Set audio state, begin loop. radioState = %d lastState = %d\n", radioState, lastState);
-
 
   // Don't turn off audio in the case of CW for sidetone.
   if (powerUp and not(radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE or radioState == RadioState::CW_TRANSMIT_KEYER_STATE)) {
@@ -1267,13 +1257,14 @@ if(radioState == RadioState::AM_RECEIVE_STATE and lastState != RadioState::AM_RE
       }
       display.ShowSpectrum(drawSpectrum);  // if removed CW signal on is 2 mS
       break;
+
     case RadioState::CW_TRANSMIT_STRAIGHT_STATE:
     enableTransmitter(true);
-//      display.ShowTransmitReceiveStatus();
+
       cwKeyDown = false;  // false initiates CW_SHAPING_RISE.
       cwTimer = millis();
-      while (millis() - cwTimer <= ConfigData.cwTransmitDelay) {  //Start CW transmit timer on
-//        digitalWrite(RXTX, HIGH);
+      while (millis() - cwTimer <= ConfigData.cwTransmitDelay) {  // Start CW transmit timer.
+
         if (digitalRead(KEYER_DIT_INPUT_TIP) == LOW and ConfigData.keyType == 0) {  // AFP 09-25-22  Turn on CW signal
           cwTimer = millis();                                                       //Reset timer
 
@@ -1292,15 +1283,14 @@ if(radioState == RadioState::AM_RECEIVE_STATE and lastState != RadioState::AM_RE
             } else cwexciter.CW_ExciterIQData(CW_SHAPING_ZERO);  //  No waveforms; but DC offset is still present.
           }
         }
-      }                         // end CW transmit while loop
-//      digitalWrite(RXTX, LOW);  // End Straight Key Mode
+      }  // End CW straight key while loop.
       break;
+
     case RadioState::CW_TRANSMIT_KEYER_STATE:
     enableTransmitter(true);
-//      display.ShowTransmitReceiveStatus();
+
       cwTimer = millis();
       while (millis() - cwTimer <= ConfigData.cwTransmitDelay) {
-//        digitalWrite(RXTX, HIGH);
 
         if (digitalRead(ConfigData.paddleDit) == LOW) {  // Keyer Dit
           ditTimerOn = millis();
@@ -1347,11 +1337,10 @@ if(radioState == RadioState::AM_RECEIVE_STATE and lastState != RadioState::AM_RE
         } else {
           cwexciter.CW_ExciterIQData(CW_SHAPING_ZERO);
         }
-        keyPressedOn = 0;  // Fix for keyer click-clack.  KF5N August 16, 2023
-      }                    //End Relay timer
+      }  // End keyer relay timer.
 
-//      digitalWrite(RXTX, LOW);  // End Straight Key Mode
       break;
+
     case RadioState::NOSTATE:
       break;
     default:

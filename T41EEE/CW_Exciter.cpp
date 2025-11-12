@@ -86,9 +86,7 @@ void CW_Exciter::CW_ExciterIQData(int shaping)  //AFP 08-20-22
   } else return;
   */
 
-  // Set the sideband.
-  if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) cessb1.setSideband(false);
-  if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) cessb1.setSideband(true);
+
 
     //  This is the correct place in the data flow to inject the scaling for power.
 #ifdef QSE2

@@ -97,9 +97,6 @@ arm_biquad_cascade_df2T_instance_f32 S14_Xmt = { IIR_NUMSTAGES, xmt_EQ_Band14_st
 *****/
 void DoReceiveEQ() //AFP 08-09-22
 {
-//  for (int i = 0; i < 14; i++) {
-//    recEQ_LevelScale[i] = (float)ConfigData.equalizerRec[i] / 100.0;
-//  }
   arm_biquad_cascade_df2T_f32(&S1_Rec, float_buffer_L, EQ1_float_buffer_L, 256);
   arm_biquad_cascade_df2T_f32(&S2_Rec, float_buffer_L, EQ2_float_buffer_L, 256);
   arm_biquad_cascade_df2T_f32(&S3_Rec, float_buffer_L, EQ3_float_buffer_L, 256);

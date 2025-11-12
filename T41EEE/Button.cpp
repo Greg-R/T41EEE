@@ -756,8 +756,10 @@ void Button::ButtonMode()  //  Greg KF5N March 11, 2025
       bands.bands[ConfigData.currentBand].mode = RadioMode::FT8_MODE;
       radioState = RadioState::FT8_RECEIVE_STATE;
       bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER;  // FT8 always USB.
+      SerialUSB1.begin(115200);  // Activate Serial1.
       break;
-    case RadioMode::FT8_MODE:  // Toggle the current mode
+    case RadioMode::FT8_MODE:  // Toggle the current mode.
+      SerialUSB1.end();  // Deactivate Serial1.
       bands.bands[ConfigData.currentBand].mode = RadioMode::AM_MODE;
       radioState = RadioState::AM_RECEIVE_STATE;
 //      bands.bands[ConfigData.currentBand].mode = RadioMode::AM_MODE;
