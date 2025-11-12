@@ -172,6 +172,7 @@ int Button::ReadSelectedPushButton() {
   if (!buttonInterruptsEnabled) {
     delay(100L);
   }
+  Serial.printf("Button = %d\n", minPinRead);
   return minPinRead;
 }
 
@@ -189,93 +190,89 @@ int Button::ReadSelectedPushButton() {
 void Button::ExecuteButtonPress(MenuSelect val) {
 
   switch (val) {
-    case MenuSelect::MENU_OPTION_SELECT:  // 0
+    case MenuSelect::MENU_OPTION_SELECT:  // 1
 
       ShowMenu(&topMenus[mainMenuIndex], PRIMARY_MENU);
       functionPtr[mainMenuIndex]();  // These are processed in MenuProcessing.cpp
-                                     ////      display.EraseMenus();
       break;
 
-    case MenuSelect::MAIN_MENU_UP:  // 1
-      ButtonMenuIncrease();         // This makes sure the increment does go outta range.
+    case MenuSelect::MAIN_MENU_UP:  // 2
+      ButtonMenuIncrease();
       ShowMenu(&topMenus[mainMenuIndex], PRIMARY_MENU);
 
       break;
 
-    case MenuSelect::BAND_UP:
-      ////      display.EraseMenus();
+    case MenuSelect::BAND_UP:  // 3
       ButtonBandIncrease();
-//      NCOFreq = 0;
       break;
 
-    case MenuSelect::ZOOM:  // 3
+    case MenuSelect::ZOOM:  // 4
       ButtonZoom();
       break;
 
-    case MenuSelect::MAIN_MENU_DN:  // 4
+    case MenuSelect::MAIN_MENU_DN:  // 5
       ButtonMenuDecrease();
       ShowMenu(&topMenus[mainMenuIndex], PRIMARY_MENU);
       break;
 
-    case MenuSelect::BAND_DN:  // 5
-                               ////      display.EraseMenus();
+    case MenuSelect::BAND_DN:  // 6
       ButtonBandDecrease();
-//      NCOFreq = 0L;
       break;
 
-    case MenuSelect::FILTER:  // 6
+    case MenuSelect::FILTER:  // 7
       display.EraseMenus();
       ButtonFilter();
       break;
 
-    case MenuSelect::DEMODULATION:  // 7
+    case MenuSelect::DEMODULATION:  // 8
       display.EraseMenus();
       ButtonSelectSideband();
       break;
 
-    case MenuSelect::SET_MODE:  // 8
+    case MenuSelect::SET_MODE:  // 9
       ButtonMode();
 //      display.ShowSpectrumdBScale();
       break;
 
-    case MenuSelect::NOISE_REDUCTION:  // 9
+    case MenuSelect::NOISE_REDUCTION:  // 10
       ButtonNR();
       display.UpdateNoiseField();  // This is required because LMS NR must turn off AutoNotch.
       break;
 
-    case MenuSelect::NOTCH_FILTER:  // 10
+    case MenuSelect::NOTCH_FILTER:  // 11
       ButtonNotchFilter();
       display.UpdateNotchField();
       break;
 
-    case MenuSelect::MUTE_AUDIO:  // 11.  Was noise floor.  Greg KF5N February 12, 2025
+    case MenuSelect::MUTE_AUDIO:  // 12.  Was noise floor.  Greg KF5N February 12, 2025
       ButtonMuteAudio();
       break;
 
-    case MenuSelect::FINE_TUNE_INCREMENT:  // 12
+    case MenuSelect::FINE_TUNE_INCREMENT:  // 13
       ButtonFineFreqIncrement();
       break;
 
-    case MenuSelect::DECODER_TOGGLE:  // 13
+    case MenuSelect::DECODER_TOGGLE:  // 14
       ConfigData.decoderFlag = not ConfigData.decoderFlag;
       display.UpdateDecoderStatus();
       break;
 
-    case MenuSelect::MAIN_TUNE_INCREMENT:  // 14
+    case MenuSelect::MAIN_TUNE_INCREMENT:  // 15
       ButtonCenterFreqIncrement();
       break;
 
-    case MenuSelect::RESET_TUNING:  // 15   AFP 10-11-22
-      ResetTuning();                // AFP 10-11-22
-      break;                        // AFP 10-11-22
+    case MenuSelect::RESET_TUNING:  // 16
+      ResetTuning();
+      break;
 
-    case MenuSelect::UNUSED_1:  // 16
+    case MenuSelect::UNUSED_1:  // 17
       if (calOnFlag == 0) {
         ButtonFrequencyEntry();
       }
       break;
 
-    case MenuSelect::BEARING:  // 17  // AFP 10-11-22
+// Bearing is temporarily removed in T41EEE.91.
+    case MenuSelect::BEARING:  // 18
     /*
       int doneViewing;
       float retVal;

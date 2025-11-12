@@ -451,7 +451,7 @@ void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool 
         if (corrChange == true) {  // Toggle increment value
           increment = 0.001;       // AFP 2-11-23
         } else {
-          increment = 0.01;  // AFP 2-11-23
+          increment = 0.002;  // AFP 2-11-23
         }
         tft.setFontScale((enum RA8875tsize)0);
         tft.fillRect(left_text_edge + 60, 125, 50, tft.getFontHeight(), RA8875_BLACK);

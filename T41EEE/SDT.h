@@ -422,7 +422,7 @@ struct calibration_t {
 
   int buttonThresholdPressed = 944;   // switchValues[0] + WIGGLE_ROOM
   int buttonThresholdReleased = 964;  // buttonThresholdPressed + WIGGLE_ROOM
-  uint32_t buttonRepeatDelay = 300000;     // Increased to 300000 from 200000 to better handle cheap, wornout buttons.
+  uint32_t buttonRepeatDelay = 200000;
 #ifdef QSE2
   float32_t iDCoffsetCW[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };
   float32_t qDCoffsetCW[NUMBER_OF_BANDS] = { 0, 0, 0, 0, 0, 0, 0 };

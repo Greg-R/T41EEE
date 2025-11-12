@@ -13,12 +13,7 @@ int pos_x_frequency = 12;
 float32_t dbmhz = -145.0;
 float32_t m_AttackAlpha = 0.03;
 float32_t m_DecayAlpha = 0.01;
-PROGMEM const char *labels[] = { "Select", "Menu Up", "Band Up",
-                         "Zoom", "Menu Dn", "Band Dn",
-                         "Filter", "DeMod", "Mode",
-                         "NR", "Notch", "Noise Floor",
-                         "Coarse Incr", "Decoder", "Fine Increment",
-                         "Reset Tuning", "Frequ Entry", "User 2" };
+
 
 
 /*****
@@ -467,19 +462,16 @@ float ApproxAtan(float z) {
     void
 *****/
 void SaveAnalogSwitchValues() {
-  /*                                                                        This list is new with V017
-    const char *labels[]        = {"Select",       "Menu Up",  "Band Up",
-                                 "Zoom",         "Menu Dn",  "Band Dn",
-                                 "Filter",       "DeMod",    "Mode",
-                                 "NR",           "Notch",    "Noise Floor",
-                                 "Fine Tune",    "Decoder",  "Tune incrment",
-                                 "User 1",       "User 2",   "User 3"
-                                };
-  */
-  int index;
-  int minVal;
-  int value;
-  int origRepeatDelay;
+  const char *labels[] = { "Select", "Menu Up", "Band Up",
+                         "Zoom", "Menu Dn", "Band Dn",
+                         "Filter", "DeMod", "Mode",
+                         "NR", "Notch", "Noise Floor",
+                         "Coarse Incr", "Decoder", "Fine Increment",
+                         "Reset Tuning", "Frequ Entry", "User 2" };
+  int index{0};
+  int minVal{0};
+  int value{0};
+  int origRepeatDelay{0};
 
   tft.clearMemory();  // Need to clear overlay too
   tft.writeTo(L2);

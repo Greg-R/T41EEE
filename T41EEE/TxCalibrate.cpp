@@ -428,7 +428,7 @@ void TxCalibrate::buttonTasks() {
         if (corrChange == true) {  // Toggle increment value
           xmitIncrement = 0.001;   // AFP 2-11-23
         } else {
-          xmitIncrement = 0.01;  // AFP 2-11-23
+          xmitIncrement = 0.002;  // AFP 2-11-23
         }
         tft.print(xmitIncrement, 3);
         break;

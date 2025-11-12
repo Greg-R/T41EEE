@@ -3,13 +3,12 @@
 
 #include "SDT.h"
 
-//#include <charconv>
-
 const char *configFilename = "/config.txt";    // <- SD library uses 8.3 filenames
 const char *calFilename = "/calibration.txt";  // <- SD library uses 8.3 filenames
 
 extern const int32_t SPECTRUM_RES{ 512 };
 
+// Bearing functionality is not implemented in T41EEE.91.
 struct maps myMapFiles[10] = {
   { "Cincinnati.bmp", 39.07466, -84.42677 },  // Map name and coordinates for QTH
   { "Denver.bmp", 39.61331, -105.01664 },
@@ -21,8 +20,6 @@ struct maps myMapFiles[10] = {
   { "", 0.0, 0.0 },
   { "", 0.0, 0.0 }
 };
-
-// Button array labels array is located in Utility.cpp.
 
 uint32_t FFT_length = FFT_LENGTH;
 
@@ -929,8 +926,6 @@ FLASHMEM void setup() {
   fineTuneEncoder.begin(true);
   attachInterrupt(digitalPinToInterrupt(FINETUNE_ENCODER_A), EncoderFineTune, CHANGE);
   attachInterrupt(digitalPinToInterrupt(FINETUNE_ENCODER_B), EncoderFineTune, CHANGE);
-  //  attachInterrupt(digitalPinToInterrupt(KEYER_DIT_INPUT_TIP), KeyTipOn, CHANGE);  // Changed to keyTipOn from KeyOn everywhere JJP 8/31/22
-  //  attachInterrupt(digitalPinToInterrupt(KEYER_DAH_INPUT_RING), KeyRingOn, CHANGE);
 
   // Configure clock.
   setSyncProvider(getTeensy3Time);  // get TIME from real time clock with 3V backup battery
@@ -999,6 +994,7 @@ FLASHMEM void setup() {
   // Switch matrix debug code.
   // Push and hold a button at power up to activate switch matrix calibration.
 #ifdef DEBUG_SWITCH_CAL
+  eeprom.CalDataRead(); // If this is not done, the calibration data will be overwritten.
   if (analogRead(BUSY_ANALOG_PIN) < NOTHING_TO_SEE_HERE) {
     tft.fillWindow(RA8875_BLACK);
     tft.setFontScale(1);
