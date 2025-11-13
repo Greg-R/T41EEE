@@ -109,6 +109,7 @@ AudioConnection_F32 patchCord13(switch2_rx, 1, headphoneScale, 0);  // headphone
 AudioConnection_F32 patchCord14(headphoneScale, 0, headphoneVolume, 0);
 
 // Now connect both headphone and speaker paths to the same output (2) of the switch.
+// This is for both speaker and headphone paths to be active.
 AudioConnection_F32 patchCord27(switch2_rx, 2, speakerScale, 0);    // Headphone right
 AudioConnection_F32 patchCord28(switch2_rx, 2, headphoneScale, 0);  // Headphone right
 
@@ -661,4 +662,5 @@ void controlAudioOut(AudioState audioState, bool mute) {
     digitalWrite(MUTE, MUTEAUDIO);  // Mute speaker audio amplifier.
     return;
   }
+      volumeChangeFlag = true;  // Update physical audio configuration.
 }

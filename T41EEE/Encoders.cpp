@@ -145,6 +145,17 @@ void EncoderVolume()  //============================== AFP 10-22-22  Begin new
         ConfigData.headphoneVolume = 0;
     }
   }
+  // This is so FT8 can be monitored out of the speaker.
+  // The FT8 signal is sent to the USB coded via the headphone output.
+  if (ConfigData.audioOut == AudioState::BOTH) {
+    ConfigData.speakerVolume += adjustVolEncoder;
+    if (ConfigData.speakerVolume > 100) {
+      ConfigData.speakerVolume = 100;
+    } else {
+      if (ConfigData.speakerVolume < 0)
+        ConfigData.speakerVolume = 0;
+    }
+  }
 
   volumeChangeFlag = true;  // Need this because of unknown timing in display updating.
 }

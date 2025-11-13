@@ -830,7 +830,6 @@ void Button::ButtonMuteAudio() {
       ConfigData.audioOut = AudioState::BOTH;
       break;
     case AudioState::BOTH:         //  Headphones mute, speaker on
-      sgtl5000_1.muteHeadphone();  //  Mute headphone
       ConfigData.audioOut = AudioState::SPEAKER;
       break;
     default:

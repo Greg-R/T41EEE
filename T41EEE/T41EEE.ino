@@ -1327,7 +1327,7 @@ void loop() {
     if (ConfigData.audioOut == AudioState::SPEAKER) speakerVolume.setGain(volumeLog[ConfigData.speakerVolume]);
     if (ConfigData.audioOut == AudioState::HEADPHONE) headphoneVolume.setGain(volumeLog[ConfigData.headphoneVolume]);
     // In the case of BOTH, volume controls speaker only.  This is intended for monitoring FT8.
-    if (ConfigData.audioOut == AudioState::BOTH) headphoneVolume.setGain(volumeLog[ConfigData.speakerVolume]);
+    if (ConfigData.audioOut == AudioState::BOTH) speakerVolume.setGain(volumeLog[ConfigData.speakerVolume]);
 
     volumeChangeFlag = false;
     display.UpdateVolumeField();
