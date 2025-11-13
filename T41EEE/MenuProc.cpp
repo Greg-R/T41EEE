@@ -885,13 +885,13 @@ void RFOptions() {
     case 2:  // Auto-Gain On
       ConfigData.autoGain = true;
       ConfigData.autoSpectrum = false;  // Make sure Auto-Spectrum is off.
-                                        //      fftOffset = 0;
       display.ShowAutoStatus();
       eeprom.ConfigDataWrite();
       break;
 
     case 3:  // Auto-Gain Off
       ConfigData.autoGain = false;
+      fftOffset = 0;
       display.ShowAutoStatus();
       eeprom.ConfigDataWrite();
       break;
@@ -905,7 +905,7 @@ void RFOptions() {
 
     case 5:  // Auto-Spectrum Off
       ConfigData.autoSpectrum = false;
-      //      fftOffset = 0;
+      fftOffset = 0;
       display.ShowAutoStatus();
       eeprom.ConfigDataWrite();
       break;

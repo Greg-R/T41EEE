@@ -188,11 +188,13 @@ void ZoomFFTExe(uint32_t blockSize) {
     // Write the FFT bins into the display buffer.
     if (calOnFlag)  // Expanded dynamic range during calibration.
       for (int16_t x = 0; x < fftWidth; x++) {
-        pixelnew[x] = displayScale[ConfigData.currentScale].baseOffset + (int16_t)(40.0 * log10f_fast(FFT_spec[x]));
+//        pixelnew[x] = displayScale[ConfigData.currentScale].baseOffset + (int16_t)(40.0 * log10f_fast(FFT_spec[x]));
+pixelnew[x] = (int16_t)(40.0 * log10f_fast(FFT_spec[x]));
       }
     else
       for (int16_t x = 0; x < fftWidth; x++) {
-        pixelnew[x] = displayScale[ConfigData.currentScale].baseOffset + (int16_t)(displayScale[ConfigData.currentScale].dBScale * log10f_fast(FFT_spec[x])) + fftOffset;
+//        pixelnew[x] = displayScale[ConfigData.currentScale].baseOffset + (int16_t)(displayScale[ConfigData.currentScale].dBScale * log10f_fast(FFT_spec[x])) + fftOffset;
+pixelnew[x] = static_cast<int16_t>(displayScale[ConfigData.currentScale].dBScale * log10f_fast(FFT_spec[x])) + fftOffset + 110;
       }
   }
 }

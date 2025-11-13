@@ -186,7 +186,7 @@ float32_t DMAMEM cwFallBuffer[512]{ 0 };
 char keyboardBuffer[10];  // Set for call prefixes. May be increased later
 const char *tune_text = "Fast Tune";
 const char *zoomOptions[] = { "1x ", "2x ", "4x ", "8x ", "16x" };
-int16_t fftOffset = 100;
+int16_t fftOffset = 0;
 int16_t audioFFToffset = 100;
 int filterWidth{ 0 };
 int h = 135;  // SPECTRUM_HEIGHT + 3;
@@ -1346,6 +1346,7 @@ void loop() {
     loopCounter = 0;
     Serial.printf("AudioProcessorUsageMax() = %d\n", static_cast<uint32_t>(AudioProcessorUsageMax()));
     AudioProcessorUsageMaxReset();
+    Serial.printf("fftOffset = %d\n", fftOffset);
   }
   usec1Old = usec1;
 #endif

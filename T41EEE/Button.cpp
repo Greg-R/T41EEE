@@ -1090,7 +1090,7 @@ void Button::ExecuteModeChange() {
   display.ShowFrequency();
   display.BandInformation();  // Called by default?
   display.DrawFrequencyBarValue();
-  fftOffset = 140;
+  fftOffset = 0;
   SetBandRelay();  // Set relays in LPF for current band.
   SetFreq();       // Must update frequency, for example moving from SSB to CW, the RX LO is shifted.  KF5N
   powerUp = true;
