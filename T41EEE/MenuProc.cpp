@@ -66,7 +66,7 @@ void ShowMenu(const char *menu[], int where) {
 void CalibrateOptions() {
   int freqCorrectionFactorOld = 0;
   int32_t increment = 100;
-  MenuSelect menu;
+  MenuSelect menu = MenuSelect::BOGUS_PIN_READ;
 
   // Select the type of calibration, and then skip this during the loop() function.
   // Note that some calibrate options run inside the loop() function!
@@ -90,7 +90,7 @@ void CalibrateOptions() {
           tft.print("                    ");  // Erase.
           eeprom.CalDataWrite();
           display.EraseMenus();
-          calibrateFlag = 0;
+          calibrateFlag = false;
         }
       }
 
@@ -106,7 +106,7 @@ void CalibrateOptions() {
           tft.print("                 ");  // Erase.
           eeprom.ConfigDataWrite();
           eeprom.CalDataWrite();
-          calibrateFlag = 0;
+          calibrateFlag = false;
           display.EraseMenus();
         }
       }
@@ -135,7 +135,7 @@ void CalibrateOptions() {
           display.EraseMenus();
           eeprom.CalDataWrite();
           eeprom.ConfigDataWrite();
-          calibrateFlag = 0;
+          calibrateFlag = false;
         }
       }
       break;
@@ -155,22 +155,22 @@ void CalibrateOptions() {
 
     case 9:  // CW fully automatic radio calibration.  (mode, initial cal = false, refinecal = true)
       txcalibrater.RadioCal(0, false);
-      calibrateFlag = 0;
+      calibrateFlag = false;
       break;
 
     case 10:  // CW full automatic calibration refinement.
       txcalibrater.RadioCal(0, true);
-      calibrateFlag = 0;
+      calibrateFlag = false;
       break;
 
     case 11:  // SSB fully automatic radio calibration.
       txcalibrater.RadioCal(1, false);
-      calibrateFlag = 0;
+      calibrateFlag = false;
       break;
 
     case 12:  // SSB fully automatic calibration refinement.
       txcalibrater.RadioCal(1, true);
-      calibrateFlag = 0;
+      calibrateFlag = false;
       break;
 
     case 13:  // dBm level cal.
@@ -184,14 +184,14 @@ void CalibrateOptions() {
           tft.setCursor(0, 1);
           tft.print("                ");  // Erase.
           eeprom.CalDataWrite();
-          calibrateFlag = 0;
+          calibrateFlag = false;
         }
       }
       break;
 
     case 14:  // Calibrate buttons
       SaveAnalogSwitchValues();
-      calibrateFlag = 0;
+      calibrateFlag = false;
       display.RedrawAll();
       eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
@@ -204,7 +204,7 @@ void CalibrateOptions() {
           tft.setCursor(0, 1);
           tft.print("                ");  // Erase.
           eeprom.CalDataWrite();
-          calibrateFlag = 0;
+          calibrateFlag = false;
         }
       }
       break;
@@ -222,7 +222,7 @@ void CalibrateOptions() {
 void CalibrateOptions() {
   int freqCorrectionFactorOld = 0;
   int32_t increment = 100;
-  MenuSelect menu;
+  MenuSelect menu = MenuSelect::BOGUS_PIN_READ;
 
   // Select the type of calibration, and then skip this during the loop() function.
   if (calibrateFlag == 0) {
@@ -242,10 +242,10 @@ void CalibrateOptions() {
       if (menu != MenuSelect::BOGUS_PIN_READ) {        // Any button press??
         if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Yep. Make a choice??
           tft.setCursor(0, 1);
-          tft.print("                ");  // Erase.
+          tft.print("                 ");  // Erase.
           eeprom.CalDataWrite();
           display.EraseMenus();
-          calibrateFlag = 0;
+          calibrateFlag = false;
         }
       }
       break;
