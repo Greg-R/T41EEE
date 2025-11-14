@@ -601,7 +601,6 @@ FLASHMEM void initPowerCoefficients() {
 FLASHMEM void initUserDefinedStuff() {
   NR_Index = ConfigData.nrOptionSelect;
   TxRxFreq = ConfigData.centerFreq = ConfigData.lastFrequencies[ConfigData.currentBand][ConfigData.activeVFO];
-  //  SetTransmitDitLength(ConfigData.currentWPM);
   SetTransmitDitLength(ConfigData.currentWPM);
   // Initialize buffers used by the CW transmitter and CW decoder.
   sineTone(ConfigData.CWOffset + 6);                   // This function takes "number of cycles" which is the offset + 6.  Used by CW decoder.
@@ -635,5 +634,49 @@ void arm_clip_f32(const float32_t *pSrc,
       pDst[i] = low;
     else
       pDst[i] = pSrc[i];
+  }
+}
+
+
+/*****
+  Purpose: Detect PTT, straight key or keyer, or SerialUSB1.rts() (used for FT8)
+           active.  Used to disable transmitter when required.  This is a safety feature.
+
+  Parameter list:
+    void
+
+  Return value;
+    void
+*****/
+void isTransmitterKeyed() {
+  tft.setFontScale((enum RA8875tsize)1);
+  tft.setTextColor(RA8875_RED, RA8875_BLACK);
+  tft.setCursor(0, 1);
+  // Check straight key.
+  if (ConfigData.keyType == 0 and digitalRead(KEYER_DIT_INPUT_TIP) == LOW) {
+    std::string prompt = "The straight key is closed. Fix and restart.";
+    tft.print(prompt.c_str());
+    while (true) { delay(1000); }  // Delay indefinitely.  User must restart radio.
+  }
+
+  // Check keyer paddle.
+  if (ConfigData.keyType == 1 and ((digitalRead(KEYER_DIT_INPUT_TIP) == LOW) or (digitalRead(KEYER_DAH_INPUT_RING) == LOW))) {
+    std::string prompt = "The paddle is closed. Fix and restart.";
+    tft.print(prompt.c_str());
+    while (true) { delay(1000); }  // Delay indefinitely.  User must restart radio.
+  }
+
+  // Check PTT.
+  if (digitalRead(PTT) == LOW) {
+    std::string prompt = "The PTT is closed. Fix and restart.";
+    tft.print(prompt.c_str());
+    while (true) { delay(1000); }  // Delay indefinitely.  User must restart radio.
+  }
+
+  // Check SerialUSB1.rts().
+  if (SerialUSB1.rts() == HIGH) {
+    std::string prompt = "SerialUSB1.rts is HIGH. Fix and restart.";
+    tft.print(prompt.c_str());
+    while (true) { delay(1000); }  // Delay indefinitely.  User must restart radio.
   }
 }

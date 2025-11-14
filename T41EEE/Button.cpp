@@ -732,6 +732,8 @@ void Button::ButtonSelectSideband() {
 *****/
 void Button::ButtonMode()  //  Greg KF5N March 11, 2025
 {
+// Don't allow mode change if something is keyed.  User must fix and restart radio.
+    isTransmitterKeyed();
   // Toggle modes:
   switch (bands.bands[ConfigData.currentBand].mode) {
 

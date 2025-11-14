@@ -1038,6 +1038,9 @@ FLASHMEM void setup() {
 
   //  Draw the entire radio display.
   display.RedrawAll();
+
+  // Don't start up if something is keyed.  Warn the user to resolve and restart.
+  isTransmitterKeyed();
 }
 //============================================================== END setup() =================================================================
 
