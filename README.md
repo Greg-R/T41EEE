@@ -9,7 +9,7 @@ introduced in the next releases.
 Purchase the book "Digital Signal Processing and Software Defined Radio" by
 Albert Peter and Jack Purdum here:
 
-<https://www.amazon.com/Digital-Signal-Processing-Software-Defined/dp/B0D25FV48C>
+<https://www.amazon.com/Digital-Signal-Processing-Software-Defined/dp/B0F5BDQZW3>
 
 Please bring your questions, bug reports, and complaints about this software to this
 group:
@@ -20,7 +20,7 @@ This software is licensed according to:
 GNU GENERAL PUBLIC LICENSE  
 Version 3, 29 June 2007  
 Please refer to the included LICENSE file.  
-Greg Raven, November 22 2025
+Greg Raven, November 14 2025
 
 T41EEE will be hosted at this public Github repository:
 
@@ -228,6 +228,8 @@ Here is the USB codec device:
 These use USB-C connectors.  You will need to get an adapter for the Teensy if you use these
 USB-C devices.  It was my preference to go with USB-C.  Others will work.
 
+Update:  I was successful running FT8 without the port expander.
+
 To connect the codec, you will need 3.5mm audio cables.  I used Cables with straight connectors
 on one end and a right angle on the other.  The codec headphone output connects to the T41
 microphone input (Main board).  The codec microphone input connects to the headphone output
@@ -355,9 +357,9 @@ high-pass filtering of the microphone audio.
 it bypasses the CESSB processing.  This mode can be used for conventional voice SSB if desired.  It can also
 be used with data (for example FT8) which is normally fed into the SSB microphone input.
 
-### CESSB Automatic Calibration
+### SSB Automatic Calibration
 
-Automated calibration of the CESSB transmit signal chain is included in the Calibration menu.
+Automated calibration of the SSB transmit signal chain is included in the Calibration menu.
 Similar to the previously deployed automatic calibration, SSB Radio Cal and SSB Radio Refine Cal
 commands will run the automatic calibration routines on all bands.  The automated calibrations can
 also be run on a per-band basis.
@@ -452,6 +454,10 @@ output of the QSE to the input of the QSD must be connected.  An attenuator, in 
 empirically.  If a spectrum analyzer is available, it is strongly recommended to view the result
 in a narrow sweep (~10kHz) to determine if the undesired sideband (and carrier in the case of QSE2DC)
 is adequately suppressed.
+
+The loop-back attenuation should be approximately 30dB.  If there is excess noise or unstable signals
+seen in the spectrum during calibration, the receiver may be overdriven.  Try increasing the attenuation
+to see if the spectrum cleans up and is more stable.
 
 After the loop-back path is inserted, use the following command from the main function buttons (2 and 5):
 
