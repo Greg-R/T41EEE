@@ -1,5 +1,5 @@
 // T41 Transceiver Arduino Sketch
-// Gregory Raven KF5N November 2025
+// Gregory Raven KF5N November 14 2025
 
 // setup() and loop() are at the bottom of this file.
 
