@@ -89,6 +89,7 @@ The bullet "Memory Wipe & LED Blink Restore" has the instructions.
     wide range.
 4.  The CW transmitter uses the excellent IQ modulator from the Open Audio Library CESSB
     object.  Code for CW and SSB modulation is almost completely consolidated.
+5.  The Morse decoder was tweaked to decrease its sensitivity to frequency.
 5.  A general clean-up and re-factoring was completed.  More variables and functions are
     encapsulated in C++ classes.  This is part of a long-term plan to remake the entire
     code base in modern embedded C++.
