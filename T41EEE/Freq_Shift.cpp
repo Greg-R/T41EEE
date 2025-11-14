@@ -1,10 +1,12 @@
+// Frequency shift algorithms for the 48kHz IF and the fine tuning.
+
 
 #include "SDT.h"
 
 float32_t DMAMEM float_buffer_L_3[2048];
 float32_t DMAMEM float_buffer_R_3[2048];
 
-float32_t NCO_INC;
+float64_t NCO_INC;
 float64_t OSC_COS;
 float64_t OSC_SIN;
 float64_t Osc_Vect_Q = 1.0;
@@ -35,23 +37,22 @@ float32_t hh2 = 0.0;
   Return value:
     void
 *****/
-void FreqShift1()
-{
+void FreqShift1() {
   for (unsigned i = 0; i < BUFFER_SIZE * N_BLOCKS; i += 4) {
-    hh1 = - float_buffer_R[i + 1];  // xnew(1) =  - ximag(1) + jxreal(1)
-    hh2 =   float_buffer_L[i + 1];
+    hh1 = -float_buffer_R[i + 1];  // xnew(1) =  - ximag(1) + jxreal(1)
+    hh2 = float_buffer_L[i + 1];
     float_buffer_L[i + 1] = hh1;
     float_buffer_R[i + 1] = hh2;
-    hh1 = - float_buffer_L[i + 2];
-    hh2 = - float_buffer_R[i + 2];
+    hh1 = -float_buffer_L[i + 2];
+    hh2 = -float_buffer_R[i + 2];
     float_buffer_L[i + 2] = hh1;
     float_buffer_R[i + 2] = hh2;
-    hh1 =   float_buffer_R[i + 3];
-    hh2 = - float_buffer_L[i + 3];
+    hh1 = float_buffer_R[i + 3];
+    hh2 = -float_buffer_L[i + 3];
     float_buffer_L[i + 3] = hh1;
     float_buffer_R[i + 3] = hh2;
   }
-  for (unsigned i = 0; i < BUFFER_SIZE * N_BLOCKS; i ++) {
+  for (unsigned i = 0; i < BUFFER_SIZE * N_BLOCKS; i++) {
     float_buffer_L_3[i] = float_buffer_L[i];
     float_buffer_R_3[i] = float_buffer_R[i];
   }
@@ -84,57 +85,43 @@ void FreqShift1()
     Wheatley, M. (2011): CuteSDR Technical Manual Ver. 1.01. - http://sourceforge.net/projects/cutesdr/
     Lyons, R.G. (2011): Understanding Digital Processing. – Pearson, 3rd edition.
     Requires 4 complex multiplies and two adds per data point within the time domain buffer.  Applied after the data
-    stream is sent to the Zoom FFT , but befor decimation.
+    stream is sent to the Zoom FFT , but before decimation.
 *****/
-void FreqShift2()
-{
-  uint i;
-  //long currentFreqAOld;  Not used.  KF5N July 22, 2023
-  int sideToneShift = 0;
-  int cwFreqOffset;
+const float32_t freq[4] = { 562.5, 656.5, 750.0, 843.75 };  // Exact CW offset frequencies.
+void FreqShift2() {
+  // Are 64 bit floats really required?  Greg KF5N November 2025
+  float64_t sideToneShift = 0.0;
+  float64_t cwFreqOffset = 0.0;
 
   if (fineTuneEncoderMove != 0L) {
-   // SetFreq();           //AFP 10-04-22
-   // ShowFrequency();
-   // DrawBandWidthIndicatorBar();
-    // ); //AFP 10-04-22
-    // EncoderFineTune();      //AFP 10-04-22
 
-    if (NCOFreq > 40000L) {
-      NCOFreq = 40000L;
+    if (NCOFreq > 40000) {
+      NCOFreq = 40000;
     }
-    // ConfigData.centerFreq += ConfigData.freqIncrement;
     currentFreq = ConfigData.centerFreq + NCOFreq;
-    //SetFreq(); //AFP 10-04-22
-    //ShowFrequency();
   }
 
   encoderStepOld = fineTuneEncoderMove;
-  //currentFreqAOld = TxRxFreq;
   TxRxFreq = ConfigData.centerFreq + NCOFreq;
-  //if (abs(currentFreqAOld - TxRxFreq) < 9 * ConfigData.stepFineTune && currentFreqAOld != TxRxFreq) {  // AFP 10-30-22
-  //  ShowFrequency();
-  //  DrawBandWidthIndicatorBar();
-  //}
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE ) {
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE) {
     sideToneShift = 0;
-  } 
-  
-    if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE ) {
-      cwFreqOffset = (ConfigData.CWOffset + 6) * 24000 / 256;
-        if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) sideToneShift = -cwFreqOffset;
-        if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) sideToneShift =  cwFreqOffset;
-        }
+  }
 
-  NCO_INC = 2.0 * PI * (NCOFreq + sideToneShift) / SR[SampleRate].rate; // 192000 SPS is the actual sample rate used in the Receive ADC
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) {
+    cwFreqOffset = freq[ConfigData.CWOffset];
+    if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) sideToneShift = -cwFreqOffset;
+    if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) sideToneShift = cwFreqOffset;
+  }
 
-  OSC_COS = cos (NCO_INC);
-  OSC_SIN = sin (NCO_INC);
+  NCO_INC = static_cast<float64_t>(2.0 * PI) * (static_cast<float64_t>(NCOFreq) + sideToneShift) / static_cast<float64_t>(SR[SampleRate].rate);  // 192000 SPS is the actual sample rate used in the Receive ADC
 
-  for (i = 0; i < BUFFER_SIZE * N_BLOCKS; i++) {
+  OSC_COS = cos(NCO_INC);
+  OSC_SIN = sin(NCO_INC);
+
+  for (uint32_t i = 0; i < BUFFER_SIZE * N_BLOCKS; i++) {
     // generate local oscillator on-the-fly:  This takes a lot of processor time!
-    Osc_Q = (Osc_Vect_Q * OSC_COS) - (Osc_Vect_I * OSC_SIN);  // Q channel of oscillator
-    Osc_I = (Osc_Vect_I * OSC_COS) + (Osc_Vect_Q * OSC_SIN);  // I channel of oscillator
+    Osc_Q = (Osc_Vect_Q * OSC_COS) - (Osc_Vect_I * OSC_SIN);                    // Q channel of oscillator
+    Osc_I = (Osc_Vect_I * OSC_COS) + (Osc_Vect_Q * OSC_SIN);                    // I channel of oscillator
     Osc_Gain = 1.95 - ((Osc_Vect_Q * Osc_Vect_Q) + (Osc_Vect_I * Osc_Vect_I));  // Amplitude control of oscillator
 
     // rotate vectors while maintaining constant oscillator amplitude
@@ -143,7 +130,7 @@ void FreqShift2()
     //
     // do actual frequency conversion
     float freqAdjFactor = 1.1;
-    float_buffer_L[i] = (float_buffer_L_3[i] * freqAdjFactor * Osc_Q) + (float_buffer_R_3[i] * freqAdjFactor * Osc_I); // multiply I/Q data by sine/cosine data to do translation
+    float_buffer_L[i] = (float_buffer_L_3[i] * freqAdjFactor * Osc_Q) + (float_buffer_R_3[i] * freqAdjFactor * Osc_I);  // multiply I/Q data by sine/cosine data to do translation
     float_buffer_R[i] = (float_buffer_R_3[i] * freqAdjFactor * Osc_Q) - (float_buffer_L_3[i] * freqAdjFactor * Osc_I);
   }
 }

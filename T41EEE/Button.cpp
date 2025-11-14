@@ -1,6 +1,6 @@
+// Button class
 
 #include "SDT.h"
-
 
 /*
 The button interrupt routine implements a first-order recursive filter, or "leaky integrator,"
@@ -182,7 +182,7 @@ int Button::ReadSelectedPushButton() {
            a button press.
 
   Parameter list:
-    MenuSelect val               The value from analogRead in loop()
+    MenuSelect val  val is what is returned from readButton();
 
   Return value;
     void
@@ -190,99 +190,94 @@ int Button::ReadSelectedPushButton() {
 void Button::ExecuteButtonPress(MenuSelect val) {
 
   switch (val) {
-    case MenuSelect::MENU_OPTION_SELECT:  // 0
+    case MenuSelect::MENU_OPTION_SELECT:  // 1
 
       ShowMenu(&topMenus[mainMenuIndex], PRIMARY_MENU);
       functionPtr[mainMenuIndex]();  // These are processed in MenuProcessing.cpp
-      EraseMenus();
       break;
 
-    case MenuSelect::MAIN_MENU_UP:  // 1
-      ButtonMenuIncrease();         // This makes sure the increment does go outta range
-                                    //      if (menuStatus != NO_MENUS_ACTIVE) {  // Doing primary menu
+    case MenuSelect::MAIN_MENU_UP:  // 2
+      ButtonMenuIncrease();
       ShowMenu(&topMenus[mainMenuIndex], PRIMARY_MENU);
-      //      }
+
       break;
 
-    case MenuSelect::BAND_UP:  // 2 Now calls ProcessIQData and Encoders calls
-      EraseMenus();
+    case MenuSelect::BAND_UP:  // 3
       ButtonBandIncrease();
-      NCOFreq = 0L;
       break;
 
-    case MenuSelect::ZOOM:  // 3
+    case MenuSelect::ZOOM:  // 4
       ButtonZoom();
       break;
 
-    case MenuSelect::MAIN_MENU_DN:  // 4
+    case MenuSelect::MAIN_MENU_DN:  // 5
       ButtonMenuDecrease();
       ShowMenu(&topMenus[mainMenuIndex], PRIMARY_MENU);
       break;
 
-    case MenuSelect::BAND_DN:  // 5
-      EraseMenus();
+    case MenuSelect::BAND_DN:  // 6
       ButtonBandDecrease();
-      NCOFreq = 0L;
       break;
 
-    case MenuSelect::FILTER:  // 6
-      EraseMenus();
+    case MenuSelect::FILTER:  // 7
+      display.EraseMenus();
       ButtonFilter();
       break;
 
-    case MenuSelect::DEMODULATION:  // 7
-      EraseMenus();
+    case MenuSelect::DEMODULATION:  // 8
+      display.EraseMenus();
       ButtonSelectSideband();
       break;
 
-    case MenuSelect::SET_MODE:  // 8
+    case MenuSelect::SET_MODE:  // 9
       ButtonMode();
-      ShowSpectrumdBScale();
       break;
 
-    case MenuSelect::NOISE_REDUCTION:  // 9
+    case MenuSelect::NOISE_REDUCTION:  // 10
       ButtonNR();
-      UpdateNoiseField();  // This is required because LMS NR must turn off AutoNotch.
+      display.UpdateNoiseField();  // This is required because LMS NR must turn off AutoNotch.
       break;
 
-    case MenuSelect::NOTCH_FILTER:  // 10
+    case MenuSelect::NOTCH_FILTER:  // 11
       ButtonNotchFilter();
-      UpdateNotchField();
+      display.UpdateNotchField();
       break;
 
-    case MenuSelect::MUTE_AUDIO:  // 11.  Was noise floor.  Greg KF5N February 12, 2025
-                                  //      ButtonSetNoiseFloor();
+    case MenuSelect::MUTE_AUDIO:  // 12.  Was noise floor.  Greg KF5N February 12, 2025
       ButtonMuteAudio();
       break;
 
-    case MenuSelect::FINE_TUNE_INCREMENT:  // 12
+    case MenuSelect::FINE_TUNE_INCREMENT:  // 13
       ButtonFineFreqIncrement();
       break;
 
-    case MenuSelect::DECODER_TOGGLE:  // 13
+    case MenuSelect::DECODER_TOGGLE:  // 14
       ConfigData.decoderFlag = not ConfigData.decoderFlag;
-      UpdateAudioGraphics();
+      display.UpdateDecoderStatus();
       break;
 
-    case MenuSelect::MAIN_TUNE_INCREMENT:  // 14
+    case MenuSelect::MAIN_TUNE_INCREMENT:  // 15
       ButtonCenterFreqIncrement();
       break;
 
-    case MenuSelect::RESET_TUNING:  // 15   AFP 10-11-22
-      ResetTuning();                // AFP 10-11-22
-      break;                        // AFP 10-11-22
+    case MenuSelect::RESET_TUNING:  // 16
+      ResetTuning();
+      break;
 
-    case MenuSelect::UNUSED_1:  // 16
+    case MenuSelect::UNUSED_1:  // 17
       if (calOnFlag == 0) {
         ButtonFrequencyEntry();
       }
       break;
 
-    case MenuSelect::BEARING:  // 17  // AFP 10-11-22
+      // Bearing is temporarily removed in T41EEE.91.
+    case MenuSelect::BEARING:  // 18
+                               /*
       int doneViewing;
       float retVal;
       MenuSelect menu;
 
+   Disabled in this release (0.91).  Greg Raven November 2025
       tft.clearScreen(RA8875_BLACK);
 
       DrawKeyboard();
@@ -314,7 +309,8 @@ void Button::ExecuteButtonPress(MenuSelect val) {
           break;
         }
       }
-      RedrawDisplayScreen();
+      display.RedrawAll();
+      */
       break;
 
     case MenuSelect::BOGUS_PIN_READ:  // 18
@@ -337,8 +333,6 @@ void Button::ExecuteButtonPress(MenuSelect val) {
   Return value:
     void
 *****/
-std::vector<uint32_t>::iterator result;                   // This is also used by fine tuning.  Greg KF5N June 29, 2024
-std::vector<uint32_t> centerTuneArray CENTER_TUNE_ARRAY;  // k3pto
 void Button::ButtonCenterFreqIncrement() {
   uint32_t index = 0;
   // Find the index of the current fine tune setting.
@@ -349,7 +343,7 @@ void Button::ButtonCenterFreqIncrement() {
     index = 0;
   }
   ConfigData.centerTuneStep = centerTuneArray[index];
-  DisplayIncrementField();
+  display.DisplayIncrementField();
 }
 
 
@@ -362,8 +356,6 @@ void Button::ButtonCenterFreqIncrement() {
   Return value;
     void
 *****/
-//std::vector<uint32_t>::iterator result;
-std::vector<uint32_t> fineTuneArray FINE_TUNE_ARRAY;  // K3PTO
 void Button::ButtonFineFreqIncrement() {
   uint32_t index = 0;
   // Find the index of the current fine tune setting.
@@ -374,7 +366,7 @@ void Button::ButtonFineFreqIncrement() {
     index = 0;
   }
   ConfigData.fineTuneStep = fineTuneArray[index];
-  DisplayIncrementField();
+  display.DisplayIncrementField();
 }
 
 
@@ -427,7 +419,6 @@ void Button::ButtonBandIncrease() {
   if (ConfigData.currentBand == NUMBER_OF_BANDS) {  // Incremented too far?
     ConfigData.currentBand = 0;                     // Yep. Roll to list front.
   }
-  NCOFreq = 0;
   switch (ConfigData.activeVFO) {
     case VFO_A:
       tempIndex = ConfigData.currentBandA;
@@ -570,6 +561,7 @@ void Button::ButtonBandDecrease() {
 
 /*****
   Purpose: Set the radio to a band using the band parameter.  This function is probably obsolete thanks to the new modal states.
+           It is still used in TX calibration!  Can it be replaced?
 
   Parameter list:
     int band
@@ -583,7 +575,7 @@ void Button::BandSet(int band) {
   if (ConfigData.currentBand == NUMBER_OF_BANDS) {  // Incremented too far?
     ConfigData.currentBand = 0;                     // Yep. Roll to list front.
   }
-  NCOFreq = 0L;
+  NCOFreq = 0;
   switch (ConfigData.activeVFO) {
     case VFO_A:
       tempIndex = ConfigData.currentBandA;
@@ -641,14 +633,14 @@ void Button::BandSet(int band) {
 }
 
 
-/***** AFP 09-27-22
-  Purpose: Chnage the horizontal scale of the frequency display
+/***** 
+  Purpose: Change the horizontal scale of the frequency display.  AFP 09-27-22
 
   Parameter list:
     void
 
   Return value:
-    int             index of the option selected
+    void
 *****/
 void Button::ButtonZoom() {
   zoomIndex++;
@@ -661,15 +653,14 @@ void Button::ButtonZoom() {
   else
     ConfigData.spectrum_zoom = zoomIndex;
   ZoomFFTPrep();
-  UpdateZoomField();
+  display.UpdateZoomField();
   tft.writeTo(L2);  // Clear layer 2.  KF5N July 31, 2023
   tft.clearMemory();
   tft.writeTo(L1);  // Always exit function in L1.  KF5N August 15, 2023
-  DrawBandWidthIndicatorBar();
-  DrawFrequencyBarValue();
-  ShowFrequency();
+
+  display.DrawFrequencyBarValue();
   ResetTuning();  // AFP 10-11-22
-  FilterSetSSB();
+  display.UpdateAudioGraphics();
 }
 
 
@@ -724,8 +715,9 @@ void Button::ButtonSelectSideband() {
     default:
       break;
   }
-
-  ExecuteModeChange();
+  SetFreq();
+  encoderFilterFlag = true;
+  display.BandInformation();
 }
 
 
@@ -740,37 +732,36 @@ void Button::ButtonSelectSideband() {
 *****/
 void Button::ButtonMode()  //  Greg KF5N March 11, 2025
 {
+// Don't allow mode change if something is keyed.  User must fix and restart radio.
+    isTransmitterKeyed();
   // Toggle modes:
   switch (bands.bands[ConfigData.currentBand].mode) {
 
     case RadioMode::CW_MODE:  // Toggle the current mode
       bands.bands[ConfigData.currentBand].mode = RadioMode::SSB_MODE;
       radioState = RadioState::SSB_RECEIVE_STATE;
-      bands.bands[ConfigData.currentBand].mode = RadioMode::SSB_MODE;
       bands.bands[ConfigData.currentBand].sideband = ConfigData.lastSideband[ConfigData.currentBand];
       break;
     case RadioMode::SSB_MODE:
       bands.bands[ConfigData.currentBand].mode = RadioMode::FT8_MODE;
       radioState = RadioState::FT8_RECEIVE_STATE;
-      bands.bands[ConfigData.currentBand].mode = RadioMode::FT8_MODE;
       bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER;  // FT8 always USB.
+      SerialUSB1.begin(115200);                                        // Activate Serial1.
       break;
-    case RadioMode::FT8_MODE:  // Toggle the current mode
+    case RadioMode::FT8_MODE:  // Toggle the current mode.
+      SerialUSB1.end();        // Deactivate Serial1.
       bands.bands[ConfigData.currentBand].mode = RadioMode::AM_MODE;
       radioState = RadioState::AM_RECEIVE_STATE;
-      bands.bands[ConfigData.currentBand].mode = RadioMode::AM_MODE;
       bands.bands[ConfigData.currentBand].sideband = Sideband::BOTH_AM;
       break;
     case RadioMode::AM_MODE:  // Toggle the current mode
       bands.bands[ConfigData.currentBand].mode = RadioMode::SAM_MODE;
       radioState = RadioState::SAM_RECEIVE_STATE;
-      bands.bands[ConfigData.currentBand].mode = RadioMode::SAM_MODE;
       bands.bands[ConfigData.currentBand].sideband = Sideband::BOTH_SAM;
       break;
     case RadioMode::SAM_MODE:  // Toggle the current mode
       bands.bands[ConfigData.currentBand].mode = RadioMode::CW_MODE;
       radioState = RadioState::CW_RECEIVE_STATE;
-      bands.bands[ConfigData.currentBand].mode = RadioMode::CW_MODE;
       bands.bands[ConfigData.currentBand].sideband = ConfigData.lastSideband[ConfigData.currentBand];
       break;
     default:
@@ -795,7 +786,7 @@ void Button::ButtonNR()  //AFP 09-19-22 update
     ConfigData.nrOptionSelect = 0;
   }
   if (ConfigData.nrOptionSelect == 3) ANR_notch = false;  // Turn off AutoNotch if LMS NR is selected.
-  UpdateNoiseField();
+  display.UpdateNoiseField();
 }
 
 
@@ -813,14 +804,16 @@ void Button::ButtonNotchFilter() {
   //  If the notch is activated and LMS NR is also active, turn off NR and update display.
   if (ANR_notch && ConfigData.nrOptionSelect == 3) {
     ConfigData.nrOptionSelect = 0;  // Turn off noise reduction.  Other NR selections will be valid.
-    UpdateNoiseField();
+    display.UpdateNoiseField();
   }
 }
 
 
 /*****
   Purpose: Mute speaker, headphone, or both with button pushes.  Greg KF5N February 12, 2025.
-
+           This function rotates through the 4 possible permuations of mute/unmute.
+           The state is rotated and then audio configuration updated by controlAudioOut(...).
+           The function controlAudioOut() is in the file AudioSignal.h.
   Parameter list:
     void
 
@@ -829,84 +822,24 @@ void Button::ButtonNotchFilter() {
 *****/
 void Button::ButtonMuteAudio() {
   switch (ConfigData.audioOut) {
-    case AudioState::SPEAKER:         // Speaker is on, mute and unmute headphones.
-      digitalWrite(MUTE, MUTEAUDIO);  //  Speaker mute
-      sgtl5000_1.unmuteHeadphone();   // Make the headphone output active.
+    case AudioState::SPEAKER:  // Speaker is on, mute and unmute headphones.
       ConfigData.audioOut = AudioState::HEADPHONE;
       break;
-    case AudioState::HEADPHONE:       // Mute both speaker and headphones.
-      digitalWrite(MUTE, MUTEAUDIO);  // Speaker unmute
-      sgtl5000_1.muteHeadphone();     // Mute headphonts
+    case AudioState::HEADPHONE:  // Mute both speaker and headphones.
       ConfigData.audioOut = AudioState::MUTE_BOTH;
       break;
-    case AudioState::MUTE_BOTH:         //  Unmute both.
-      digitalWrite(MUTE, UNMUTEAUDIO);  //  Mute Speaker
-      sgtl5000_1.unmuteHeadphone();     // Make the headphone output active.
+    case AudioState::MUTE_BOTH:  //  Unmute both.
       ConfigData.audioOut = AudioState::BOTH;
       break;
-    case AudioState::BOTH:              //  Headphones mute, speaker on
-      digitalWrite(MUTE, UNMUTEAUDIO);  //  Unmute Speaker
-      sgtl5000_1.muteHeadphone();       //  Mute headphone
+    case AudioState::BOTH:         //  Headphones mute, speaker on
       ConfigData.audioOut = AudioState::SPEAKER;
       break;
     default:
       return;
       break;
   }
-  UpdateAudioField();
-}
-
-
-/*****
-  Purpose: Draw in a red line at the new floor position
-
-  Parameter list:
-    int floor     the pixel position for the new floor
-
-  Return value;
-    int           the current noise floor value
-*****/
-int Button::DrawNewFloor(int floor) {
-  static int oldY = SPECTRUM_BOTTOM;
-
-  if (floor < 0) {
-    floor = 0;
-    oldY = SPECTRUM_BOTTOM - floor;
-    return floor;
-  }
-
-  tft.drawFastHLine(SPECTRUM_LEFT_X + 30, oldY - floor, 100, RA8875_BLACK);
-  tft.drawFastHLine(SPECTRUM_LEFT_X + 30, oldY - floor - 1, 100, RA8875_BLACK);
-  tft.drawFastHLine(SPECTRUM_LEFT_X + 30, oldY - floor, 100, RA8875_RED);
-  tft.drawFastHLine(SPECTRUM_LEFT_X + 30, oldY - floor - 1, 100, RA8875_RED);
-  oldY = SPECTRUM_BOTTOM - floor;
-  return floor;
-}
-
-
-/*****
-  Purpose: Reset Zoom to zoomIndex
-
-  Parameter list:
-    void
-
-  Return value;
-    int           the current noise floor value
-*****/
-void Button::ResetZoom(int zoomIndex1) {
-  if (zoomIndex1 == MAX_ZOOM_ENTRIES) {
-    zoomIndex1 = 0;
-  }
-  if (zoomIndex1 <= 0)
-    ConfigData.spectrum_zoom = 0;
-  else
-    ConfigData.spectrum_zoom = zoomIndex1;
-
-  ZoomFFTPrep();
-  UpdateZoomField();
-  DrawBandWidthIndicatorBar();
-  DrawFrequencyBarValue();
-  ShowFrequency();
+  controlAudioOut(ConfigData.audioOut, false);  // Don't mute all.
+  display.UpdateAudioOutputField();             // Update display.
 }
 
 
@@ -922,6 +855,7 @@ void Button::ResetZoom(int zoomIndex1) {
 *****/
 void Button::ButtonFrequencyEntry() {
   bool valid_frequency = false;
+  int centerLine = (MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2;
   TxRxFreqOld = TxRxFreq;
 
 #define show_FEHelp
@@ -943,7 +877,7 @@ void Button::ButtonFrequencyEntry() {
                     0x31, 0x32, 0x33,
                     0x30, 0x7F, 0x7F,
                     0x7F, 0x7F, 0x99 };
-  EraseMenus();
+  display.EraseMenus();
 #ifdef show_FEHelp
   int keyCol[] = { YELLOW, RED, RED,
                    RA8875_BLUE, RA8875_GREEN, RA8875_GREEN,
@@ -986,7 +920,7 @@ void Button::ButtonFrequencyEntry() {
 
   // Draw keypad box
   tft.fillRect(KEYPAD_LEFT, KEYPAD_TOP, KEYPAD_WIDTH, KEYPAD_HEIGHT, DARKGREY);
-  // put some circles
+  // Put some circles
   tft.setFontScale((enum RA8875tsize)1);
   for (unsigned i = 0; i < 6; i++) {
     for (unsigned j = 0; j < 3; j++) {
@@ -1117,7 +1051,7 @@ void Button::ButtonFrequencyEntry() {
   if (key != 0x58) {
     TxRxFreq = enteredF;
   }
-  NCOFreq = 0L;
+  NCOFreq = 0;
   directFreqFlag = 1;
   ConfigData.centerFreq = TxRxFreq;
   centerTuneFlag = 1;  // Put back in so tuning bar is refreshed.  KF5N July 31, 2023
@@ -1131,20 +1065,12 @@ void Button::ButtonFrequencyEntry() {
   }
   tft.fillRect(0, 0, 799, 479, RA8875_BLACK);  // Clear layer 2  JJP 7/23/23
   tft.writeTo(L1);
-  EraseSpectrumDisplayContainer();
-  DrawSpectrumDisplayContainer();
-  DrawFrequencyBarValue();
-  //  SetBand();
   SetFreq();
-  ShowFrequency();
-  ShowSpectrumdBScale();
-  // Draw or not draw CW filter graphics to audio spectrum area.  KF5N July 30, 2023
-  tft.writeTo(L2);
+
   tft.clearMemory();
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) BandInformation();
-  DrawBandWidthIndicatorBar();
-  RedrawDisplayScreen();  // KD0RC
-  FilterSetSSB();
+  display.RedrawAll();  // KD0RC
+
+  tft.writeTo(L2);
 }
 
 
@@ -1160,19 +1086,12 @@ void Button::ButtonFrequencyEntry() {
     void
 *****/
 void Button::ExecuteModeChange() {
-  tft.writeTo(L2);  // Destroy the bandwidth indicator bar.  KF5N July 30, 2023
-  tft.clearMemory();
-  tft.writeTo(L1);
-  UpdateAudioGraphics();         // KF5N December 28 2023.
-  FilterSetSSB();
-  FilterBandwidth();
-  ShowBandwidth();
-  ShowFrequency();
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) BandInformation();
-  DrawBandWidthIndicatorBar();  // Restore the bandwidth indicator bar.  KF5N July 30, 2023
-  BandInformation();
-  fftOffset = 140;
-//  Serial.printf("Execute Mode Change\n");
+  encoderFilterFlag = true;
+  NCOFreq = 0;
+  display.ShowFrequency();
+  display.BandInformation();  // Called by default?
+  display.DrawFrequencyBarValue();
+  fftOffset = 0;
   SetBandRelay();  // Set relays in LPF for current band.
   SetFreq();       // Must update frequency, for example moving from SSB to CW, the RX LO is shifted.  KF5N
   powerUp = true;

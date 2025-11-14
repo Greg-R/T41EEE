@@ -1,5 +1,39 @@
+// Receive DSP.  This is a primary part of the receiver loop.
 
 #include "SDT.h"
+
+uint32_t IQ_counter = 0;
+float32_t I_sum = 0.0;
+float32_t IQ_sum = 0.0;
+float32_t Q_sum = 0.0;
+uint32_t n_para = 512;
+float32_t K_est = 1.0;
+float32_t K_est_old = 0.0;
+float32_t P_est = 0.0;
+float32_t P_est_old = 0.0;
+float32_t P_est_mult = 1.0 / (sqrtf(1.0 - P_est * P_est));
+
+uint8_t twinpeaks_tested = 2;  // initial value --> 2 !!
+uint32_t twinpeaks_counter = 0;
+float32_t teta1 = 0.0;
+float32_t teta2 = 0.0;
+float32_t teta3 = 0.0;
+float32_t teta1_old = 0.0;
+float32_t teta2_old = 0.0;
+float32_t teta3_old = 0.0;
+float32_t M_c1 = 0.0;
+float32_t M_c2 = 0.0;
+uint8_t codec_restarts = 0;
+
+
+float32_t sign(float32_t x) {
+  if (x < 0)
+    return -1.0f;
+  else if (x > 0)
+    return 1.0f;
+  else return 0.0f;
+}
+
 
 /*****
   Purpose: Read audio from Teensy Audio Library
@@ -13,10 +47,7 @@
    Return value:
       void
  *****/
-void Process::ProcessIQData() {
-  if (keyPressedOn == 1) {  //AFP 09-01-22
-    return;
-  }
+void ReceiveDSP::ProcessIQData() {
   /**********************************************************************************  AFP 12-31-20
         Get samples from queue buffers
         Teensy Audio Library stores ADC data in two buffers size=128, Q_in_L and Q_in_R as initiated from the audio lib.
@@ -48,14 +79,11 @@ void Process::ProcessIQData() {
       ADC_RX_Q.freeBuffer();
     }  // end for loop
 
-    if (keyPressedOn == 1) {  //AFP 09-01-22.  Bail out if transmitting but ignore in AM mode.
-      return;
-    }
     // Set frequency here only to minimize interruption to signal stream during tuning.
     // This code was unnecessary in the revised tuning scheme.  KF5N July 22, 2023
     if (centerTuneFlag == 1) {  //  This flag is set by EncoderFineTune().
-      DrawBandWidthIndicatorBar();
-      ShowFrequency();
+      display.DrawBandWidthIndicatorBar();
+      display.ShowFrequency();
     }                    //AFP 10-04-22
     centerTuneFlag = 0;  //AFP 10-04-22
     if (resetTuningFlag == 1) {
@@ -63,10 +91,12 @@ void Process::ProcessIQData() {
     }
     resetTuningFlag = 0;
 
+    // What is the correct RF gain value for maximum dynamic range?
+
     //  Set RFGain for all bands.
-    if (ConfigData.autoGain) rfGain = ConfigData.rfGainCurrent;                          // Auto-gain
-    else rfGain = ConfigData.rfGain[ConfigData.currentBand] - 20;                        // Manual gain adjust.
-    rfGainValue = pow(10, static_cast<float32_t>(rfGain) / 20.0);                        // DSPGAINSCALE removed in T41EEE.9.  Greg KF5N February 24, 2024
+    if (ConfigData.autoGain) rfGain = ConfigData.rfGainCurrent - 20;    // Auto-gain.  Note the constant must be the same as below!
+    else rfGain = ConfigData.rfGain[ConfigData.currentBand] - 20;  // Manual gain adjust.  The constant is a critical determinant of dynamic range.
+    rfGainValue = pow(10, static_cast<float32_t>(rfGain) / 20.0);  // DSPGAINSCALE removed in T41EEE.9.  Greg KF5N February 24, 2024
 
     rfGainValue = rfGainValue * audioGainCompensate;
 
@@ -80,7 +110,7 @@ void Process::ProcessIQData() {
         to manipulate the arrays.  Arrays are all BUFFER_SIZE * N_BLOCKS long
     **********************************************************************************/
 
-/*    arm_mean_f32(float_buffer_L, BUFFER_SIZE * N_BLOCKS, &sample_meanL);
+    /*    arm_mean_f32(float_buffer_L, BUFFER_SIZE * N_BLOCKS, &sample_meanL);
     arm_mean_f32(float_buffer_R, BUFFER_SIZE * N_BLOCKS, &sample_meanR);
 
     for (uint32_t j = 0; j < BUFFER_SIZE * N_BLOCKS  ; j++) {
@@ -107,37 +137,34 @@ void Process::ProcessIQData() {
     }
 
     /**********************************************************************************  AFP 12-31-20
-      IQ amplitude and phase correction.  For this scaled down version the I an Q chnnels are
+      IQ amplitude and phase correction.  For this scaled down version the I an Q channels are
       equalized and phase corrected manually. This is done by applying a correction, which is the difference, to
       the L channel only.  The phase is corrected in the IQPhaseCorrection() function.
     ***********************************************************************************************/
 
-    // Manual IQ amplitude correction
-    if (radioState == RadioState::CW_RECEIVE_STATE or radioState == RadioState::AM_RECEIVE_STATE or radioState == RadioState::SAM_RECEIVE_STATE) {
-      if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
+    // IQ amplitude and phase correction
+    // Correct using CW calibration if using CW or FT8.
+    if (radioState == RadioState::CW_RECEIVE_STATE or radioState == RadioState::FT8_RECEIVE_STATE) {
+      if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
         arm_scale_f32(float_buffer_L, CalData.IQCWRXAmpCorrectionFactorLSB[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
         IQPhaseCorrection(float_buffer_L, float_buffer_R, CalData.IQCWRXPhaseCorrectionFactorLSB[ConfigData.currentBand], BUFFER_SIZE * N_BLOCKS);
       } else {
-        if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
+        if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
           arm_scale_f32(float_buffer_L, CalData.IQCWRXAmpCorrectionFactorUSB[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
           IQPhaseCorrection(float_buffer_L, float_buffer_R, CalData.IQCWRXPhaseCorrectionFactorUSB[ConfigData.currentBand], BUFFER_SIZE * N_BLOCKS);
         }
       }
-    } else if (radioState == RadioState::SSB_RECEIVE_STATE || radioState == RadioState::FT8_RECEIVE_STATE || radioState == RadioState::AM_RECEIVE_STATE) {
-      if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
+      // Correct using SSB calibration if using SSB or AM demodulation modes.
+    } else if (radioState == RadioState::SSB_RECEIVE_STATE or radioState == RadioState::AM_RECEIVE_STATE or radioState == RadioState::SAM_RECEIVE_STATE) {
+      if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER or bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
         arm_scale_f32(float_buffer_L, CalData.IQSSBRXAmpCorrectionFactorLSB[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
         IQPhaseCorrection(float_buffer_L, float_buffer_R, CalData.IQSSBRXPhaseCorrectionFactorLSB[ConfigData.currentBand], BUFFER_SIZE * N_BLOCKS);
       } else {
-        if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
+        if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER or bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
           arm_scale_f32(float_buffer_L, CalData.IQSSBRXAmpCorrectionFactorUSB[ConfigData.currentBand], float_buffer_L, BUFFER_SIZE * N_BLOCKS);  //AFP 04-14-22
           IQPhaseCorrection(float_buffer_L, float_buffer_R, CalData.IQSSBRXPhaseCorrectionFactorUSB[ConfigData.currentBand], BUFFER_SIZE * N_BLOCKS);
         }
       }
-    }
-
-  //  display_S_meter_or_spectrum_state++;
-    if (keyPressedOn == 1) {  ////AFP 09-01-22.  Is this a duplicate here???
-      return;
     }
 
     /**********************************************************************************  AFP 12-31-20
@@ -153,7 +180,7 @@ void Process::ProcessIQData() {
            xnew(1) =  - ximag(1) + jxreal(1)
     **********************************************************************************/
     // X1 zoom must be done before the frequency shift!
-    if ((ConfigData.spectrum_zoom == 0) && (updateDisplayCounter == 1)) {
+    if ((ConfigData.spectrum_zoom == 0) and (updateDisplayCounter == 1)) {
       updateDisplayFlag = true;
       CalcZoom1Magn();
     }
@@ -169,15 +196,15 @@ void Process::ProcessIQData() {
         Spectrum Zoom uses the shifted spectrum, so the center "hump" around DC is shifted by fs/4
     **********************************************************************************/
 
-    if ((ConfigData.spectrum_zoom == 1) && (updateDisplayCounter == 1)) ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
-    if ((ConfigData.spectrum_zoom == 2) && (updateDisplayCounter < 2)) ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
-    if ((ConfigData.spectrum_zoom == 3) && (updateDisplayCounter < 4)) ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
-    if ((ConfigData.spectrum_zoom == 4) && (updateDisplayCounter < 8)) ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
+    if ((ConfigData.spectrum_zoom == 1) and (updateDisplayCounter == 1)) ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
+    if ((ConfigData.spectrum_zoom == 2) and (updateDisplayCounter < 2)) ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
+    if ((ConfigData.spectrum_zoom == 3) and (updateDisplayCounter < 4)) ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
+    if ((ConfigData.spectrum_zoom == 4) and (updateDisplayCounter < 8)) ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
 
-    if (calibrateFlag == true) {
+    if (calibrateFlag == true) {  // This is required for frequency calibration as it runs with the receiver active.
       CalibrateOptions();
     }
-    if (morseDecodeAdjustFlag == true) {
+    if (morseDecodeAdjustFlag == true) {  // This is required for Morse decode sensitivity adjustment with receiver active.
       CWOptions();
     }
 
@@ -275,22 +302,29 @@ void Process::ProcessIQData() {
 
     // Create audio spectrum.
     if (updateDisplayFlag == true) {
+      // audioSpectBuffer[1024]
       for (int k = 0; k < 1024; k++) {
-        audioSpectBuffer[1024 - k] = (iFFT_buffer[k] * iFFT_buffer[k]);
+        audioSpectBuffer[1023 - k] = (iFFT_buffer[k] * iFFT_buffer[k]);  // iFFT_buffer[1025]?
       }
-      for (int k = 3; k < 256; k++) {
+      //      uint32_t index_of_max = 0;
+      //      float32_t spectrumPeak = 0;
+      //        arm_max_f32(audioSpectBuffer, 1024, &spectrumPeak, &index_of_max);
+      //        Serial.printf("spectrumPeak = %f index_of_max = %d\n", spectrumPeak, index_of_max);
+      for (int k = 0; k < 256; k++) {
         audioYPixelold[k] = audioYPixelcurrent[k];  // Store the existing audio spectrum so it can be erased.
-        if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {  //AFP 10-26-22
-          audioYPixel[k] = 65 + map(15 * log10f((audioSpectBuffer[1024 - k] + audioSpectBuffer[1024 - k + 1] + audioSpectBuffer[1024 - k + 2]) / 3), 0, 100, 0, 120) + audioFFToffset;
-        } else if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {  //AFP 10-26-22
-          audioYPixel[k] = 65 + map(15 * log10f((audioSpectBuffer[k] + audioSpectBuffer[k + 1] + audioSpectBuffer[k + 2]) / 3), 0, 100, 0, 120) + audioFFToffset;
+        if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
+          //       audioYPixel[k] = 65 + map(15 * log10f((audioSpectBuffer[1023 - k] + audioSpectBuffer[1023 - k + 1] + audioSpectBuffer[1023 - k + 2]) / 3.0), 0, 100, 0, 120) + audioFFToffset;
+          audioYPixel[k] = 65 + 15 * log10f(audioSpectBuffer[1023 - k]) + audioFFToffset;  // Simplified for T41EEE.91.
+        } else if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
+          //       audioYPixel[k] = 65 + map(15 * log10f((audioSpectBuffer[k] + audioSpectBuffer[k + 1] + audioSpectBuffer[k + 2]) / 3.0), 0, 100, 0, 120) + audioFFToffset;
+          audioYPixel[k] = 65 + 15 * log10f(audioSpectBuffer[k]) + audioFFToffset;  // Simplified for T41EEE.91.
         }
         if (audioYPixel[k] < 0)
           audioYPixel[k] = 0;
       }
       arm_max_f32(audioSpectBuffer, 1024, &audioMaxSquared, &AudioMaxIndex);  // AFP 09-18-22 Max value of squared abin magnitude in audio
-      audioMaxSquaredAve = .5 * audioMaxSquared + .5 * audioMaxSquaredAve;    //AFP 09-18-22Running averaged values
-      DisplaydbM();
+      audioMaxSquaredAve = .5 * audioMaxSquared + .5 * audioMaxSquaredAve;    // AFP 09-18-22 Running averaged values
+      display.DisplaydbM();
     }
 
     /**********************************************************************************
@@ -319,7 +353,6 @@ void Process::ProcessIQData() {
     arm_cfft_f32(iS, iFFT_buffer, 1, 1);
 
     // Adjust for level alteration because of filters.
-
     //  Need to scale iFFT_buffer[] here.
 
     for (unsigned i = 0; i < FFT_length / 2; i++) {
@@ -348,7 +381,6 @@ void Process::ProcessIQData() {
           float_buffer_L[i] = iFFT_buffer[FFT_length + (i * 2)];
           float_buffer_R[i] = float_buffer_L[i];
           audiotmp = AlphaBetaMag(iFFT_buffer[FFT_length + (i * 2)], iFFT_buffer[FFT_length + (i * 2) + 1]);
-          //}
         }
         break;
       case Sideband::BOTH_AM:
@@ -470,25 +502,17 @@ void Process::ProcessIQData() {
     **********************************************************************************/
 
     // Scale by 8 to compensate for interpolation.  Also compensate for audio filter bandwidth.
-//    arm_scale_f32(float_buffer_L, 8.0 * audioGainCompensate, float_buffer_L, BUFFER_SIZE * N_BLOCKS);
-arm_scale_f32(float_buffer_L, 8.0, float_buffer_L, BUFFER_SIZE * N_BLOCKS);
+    //    arm_scale_f32(float_buffer_L, 8.0 * audioGainCompensate, float_buffer_L, BUFFER_SIZE * N_BLOCKS);
+    arm_scale_f32(float_buffer_L, 8.0, float_buffer_L, BUFFER_SIZE * N_BLOCKS);
     /**********************************************************************************  AFP 12-31-20
       CONVERT TO INTEGER AND PLAY AUDIO
     **********************************************************************************/
 
     q15_t q15_buffer_LTemp[2048];  //KF5N
-                                   //    q15_t q15_buffer_RTemp[2048];  // KF5N  Unused audio channel deactivated.
-                                   //    Q_out_L.setBehaviour(AudioPlayQueue::NON_STALLING);
-                                   //    Q_out_R.setBehaviour(AudioPlayQueue::NON_STALLING);
     arm_float_to_q15(float_buffer_L, q15_buffer_LTemp, 2048);
     Q_out_L.play(q15_buffer_LTemp, 2048);
 
     elapsed_micros_sum = elapsed_micros_sum + usec;
     elapsed_micros_idx_t++;
-  }                         // end of if(audio blocks available)
-  if (ms_500.check() == 1)  // For clock updates AFP 10-26-22
-  {
-    //wait_flag = 0;
-    DisplayClock();
-  }
+  }  // end of if(audio blocks available)
 }

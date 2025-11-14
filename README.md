@@ -1,4 +1,4 @@
-### Version T41EEE.9 T41 Software Defined Transceiver Arduino Sketch
+### Version T41EEE.91 T41 Software Defined Transceiver Arduino Sketch
 
 This is the "T41 Extreme Experimenter's Edition" software for the 
 T41 Software Defined Transceiver.  The T41EEE was "forked" from the V049.2 version
@@ -20,7 +20,7 @@ This software is licensed according to:
 GNU GENERAL PUBLIC LICENSE  
 Version 3, 29 June 2007  
 Please refer to the included LICENSE file.  
-Greg Raven, October 22 2024
+Greg Raven, November 22 2025
 
 T41EEE will be hosted at this public Github repository:
 
@@ -42,7 +42,7 @@ successful.
 
 ## How to Compile T41EEE
 
-T41EEE.9 was developed and compiled using Arduino IDE version 2.3.4 with the following
+T41EEE.91 was developed and compiled using Arduino IDE version 2.3.6 with the following
 configuration:
 
 1.  Optimize is set to "Smallest Code" (Tools menu).
@@ -56,7 +56,8 @@ configuration:
 7.  You will need to install the Etherkit Si5351 library.  Install via the IDE
     library manager.
 8.  You will need to manually install the Open Audio Library.  The library was updated
-    on October 14, 2024:
+    in November, 2025.  It is mandatory to update this library!  T41EEE.91 uses the
+    recently developed quad I2S output class, which was recently added to the library:
 
 <https://github.com/chipaudette/OpenAudio_ArduinoLibrary>
 
@@ -73,6 +74,27 @@ The instructions for performing a FLASH erase of the Teensy are here:
 <https://www.pjrc.com/store/teensy41.html#programming>
 
 The bullet "Memory Wipe & LED Blink Restore" has the instructions.
+
+## Highlight of Changes included in T41EEE.91 November 5, 2025
+
+1.  A refinement of the calibration algorithms was completed.  Calibration will accept
+    larger variation in the hardware and still successfully calibrate.  Code redundancy
+    was eliminated which conserves memory.
+2.  Receiver calibration was adjusted to focus on cancellation of the "image" frequency
+    which is 96kHz above the desired receive frequency.
+3.  The audio signal chain uses the quad output object from the Open Audio Arduino Library.
+    Since this object uses 32-bit floating point number representation, the dynamic range
+    of the audio is extended compared to the 16-bit object from the Teensy Audio Library.
+    This is particularly noticeable in volume control which now works smoothly through a
+    wide range.
+4.  The CW transmitter uses the excellent IQ modulator from the Open Audio Library CESSB
+    object.  Code for CW and SSB modulation is almost completely consolidated.
+5.  A general clean-up and re-factoring was completed.  More variables and functions are
+    encapsulated in C++ classes.  This is part of a long-term plan to remake the entire
+    code base in modern embedded C++.
+
+There is no change to functionality of version T41EEE.91 versus T41EEE.9.  T41EEE.91 is
+a performance and technical improvement including reduction in required memory resources.
 
 ## Highlight of Changes included in T41EEE.9.  March 26, 2025
 

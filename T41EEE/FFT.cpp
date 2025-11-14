@@ -1,3 +1,5 @@
+// FFT functions from the Teensy SDR Convolution Radio
+
 
 #include "SDT.h"
 
@@ -5,6 +7,7 @@ int Zoom_FFT_M1;
 int Zoom_FFT_M2;
 int zoom_sample_ptr = 0;
 float32_t LPF_spectrum = 0.82;
+extern const int32_t SPECTRUM_RES;
 
 void ZoomFFTPrep() {  // take value of spectrum_zoom and initialize FIR decimation filters for the right values
 
@@ -110,7 +113,7 @@ void ZoomFFTExe(uint32_t blockSize) {
   // decimation stage 1
   arm_fir_decimate_f32(&Fir_Zoom_FFT_Decimate_I1, float_buffer_L, x_buffer, blockSize);
   arm_fir_decimate_f32(&Fir_Zoom_FFT_Decimate_Q1, float_buffer_R, y_buffer, blockSize);
-//  if (high_Zoom == 1) flag_2nd_decimation++;
+  //  if (high_Zoom == 1) flag_2nd_decimation++;
   // decimation stage 2
   arm_fir_decimate_f32(&Fir_Zoom_FFT_Decimate_I2, x_buffer, x_buffer, blockSize / Zoom_FFT_M1);
   arm_fir_decimate_f32(&Fir_Zoom_FFT_Decimate_Q2, y_buffer, y_buffer, blockSize / Zoom_FFT_M1);
@@ -144,8 +147,6 @@ void ZoomFFTExe(uint32_t blockSize) {
   float32_t multiplier = static_cast<float32_t>(ConfigData.spectrum_zoom) * static_cast<float32_t>(ConfigData.spectrum_zoom);
 
   for (int idx = 0; idx < fftWidth; idx++) {
-    //   buffer_spec_FFT[idx * 2 + 0] =  multiplier * FFT_ring_buffer_x[zoom_sample_ptr] * nuttallWindow256[idx];
-    //   buffer_spec_FFT[idx * 2 + 1] =  multiplier * FFT_ring_buffer_y[zoom_sample_ptr] * nuttallWindow256[idx];
     buffer_spec_FFT[idx * 2 + 0] = multiplier * FFT_ring_buffer_x[zoom_sample_ptr] * (0.5 - 0.5 * cos(6.28 * idx / SPECTRUM_RES));  //Hanning Window AFP 03-12-21
     buffer_spec_FFT[idx * 2 + 1] = multiplier * FFT_ring_buffer_y[zoom_sample_ptr] * (0.5 - 0.5 * cos(6.28 * idx / SPECTRUM_RES));
     zoom_sample_ptr++;
@@ -165,9 +166,8 @@ void ZoomFFTExe(uint32_t blockSize) {
   // The rest of the function is activated when the buffers are full and ready.
   // Save old pixels for lowpass filter.
   if (updateDisplayFlag == true) {
-//    Serial.printf("UpdateDisplayFlag\n");
     for (int i = 0; i < fftWidth; i++) {
-      pixelold[i] = pixelCurrent[i];
+      pixelold[i] = pixelnew[i];
     }
     // Perform complex FFT
     // Calculation is performed in-place the FFT_buffer [re, im, re, im, re, im . . .]
@@ -178,8 +178,8 @@ void ZoomFFTExe(uint32_t blockSize) {
       FFT_spec[i + fftWidth / 2] = (buffer_spec_FFT[i * 2] * buffer_spec_FFT[i * 2] + buffer_spec_FFT[i * 2 + 1] * buffer_spec_FFT[i * 2 + 1]);
       FFT_spec[i] = (buffer_spec_FFT[(i + fftWidth / 2) * 2] * buffer_spec_FFT[(i + fftWidth / 2) * 2] + buffer_spec_FFT[(i + fftWidth / 2) * 2 + 1] * buffer_spec_FFT[(i + fftWidth / 2) * 2 + 1]);
     }
-    // apply low pass filter and scale the magnitude values and convert to int for spectrum display
-    // apply spectrum AGC
+    // Apply low pass filter and scale the magnitude values and convert to int for spectrum display.
+    // Apply spectrum AGC.
     //
     for (int16_t x = 0; x < fftWidth; x++) {
       FFT_spec[x] = LPFcoeff * FFT_spec[x] + onem_LPFcoeff * FFT_spec_old[x];
@@ -188,11 +188,13 @@ void ZoomFFTExe(uint32_t blockSize) {
     // Write the FFT bins into the display buffer.
     if (calOnFlag)  // Expanded dynamic range during calibration.
       for (int16_t x = 0; x < fftWidth; x++) {
-        pixelnew[x] = displayScale[ConfigData.currentScale].baseOffset + (int16_t)(40.0 * log10f_fast(FFT_spec[x]));
+//        pixelnew[x] = displayScale[ConfigData.currentScale].baseOffset + (int16_t)(40.0 * log10f_fast(FFT_spec[x]));
+pixelnew[x] = (int16_t)(40.0 * log10f_fast(FFT_spec[x]));
       }
     else
       for (int16_t x = 0; x < fftWidth; x++) {
-        pixelnew[x] = displayScale[ConfigData.currentScale].baseOffset + (int16_t)(displayScale[ConfigData.currentScale].dBScale * log10f_fast(FFT_spec[x])) + fftOffset;
+//        pixelnew[x] = displayScale[ConfigData.currentScale].baseOffset + (int16_t)(displayScale[ConfigData.currentScale].dBScale * log10f_fast(FFT_spec[x])) + fftOffset;
+pixelnew[x] = static_cast<int16_t>(displayScale[ConfigData.currentScale].dBScale * log10f_fast(FFT_spec[x])) + fftOffset + 110;
       }
   }
 }
@@ -207,14 +209,14 @@ void ZoomFFTExe(uint32_t blockSize) {
     Used when Spectrum Zoom =1
 *****/
 void CalcZoom1Magn() {
-  if (updateDisplayFlag == 1) {
+  if (updateDisplayFlag == true) {
     float32_t spec_help = 0.0;
     float32_t LPFcoeff = 0.7;  // Is this a global or not?
     if (LPFcoeff > 1.0) {
       LPFcoeff = 1.0;
     }
     for (int i = 0; i < fftWidth; i++) {
-      pixelold[i] = pixelCurrent[i];
+      pixelold[i] = pixelnew[i];
     }
 
     for (int i = 0; i < fftWidth; i++) {                                                    // interleave real and imaginary input values [real, imag, real, imag . . .]

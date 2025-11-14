@@ -1,3 +1,4 @@
+// Demodulation algorithms
 
 #include "SDT.h"
 
@@ -32,7 +33,6 @@ float32_t Cos = 0.0;
   // http://svn.tapr.org/repos_sdr_hpsdr/trunk/W5WC/PowerSDR_HPSDR_mRX_PS/Source/wdsp/
 *****/
 void AMDecodeSAM() {
-
   int zeta_help = 65;
   float32_t zeta = (float32_t)zeta_help / 100.0;  // PLL step response: smaller, slower response 1.0 - 0.1
   float32_t g1 = 1.0 - exp(-2.0 * ConfigData.omegaN * zeta * 1 / 24000);
@@ -47,8 +47,6 @@ void AMDecodeSAM() {
   float32_t onem_mtauI = 1.0 - mtauI;
   uint8_t fade_leveler = 1;
   float32_t Sin, Cos;
-
-//  tft.print("(SAM) ");  //AFP 11-01-22
 
   for (unsigned i = 0; i < FFT_length / 2; i++) {
     Sin = arm_sin_f32(phzerror);
@@ -102,11 +100,10 @@ void AMDecodeSAM() {
 
   tft.setFontScale((enum RA8875tsize)0);
   tft.fillRect(OPERATION_STATS_X + 205, FREQUENCY_Y + 32, tft.getFontWidth() * 6, 14, RA8875_BLUE);  // AFP 11-01-22 Clear top-left menu area
-  tft.setCursor(OPERATION_STATS_X + 205, FREQUENCY_Y + 30);                                                       // AFP 11-01-22
+  tft.setCursor(OPERATION_STATS_X + 205, FREQUENCY_Y + 30);                                          // AFP 11-01-22
   tft.setTextColor(RA8875_WHITE);
 
   if (SAM_carrier_freq_offset != SAM_carrier_freq_offsetOld) {
-//    tft.fillRect(OPERATION_STATS_X + 200, FREQUENCY_Y + 30, tft.getFontWidth() * 8, tft.getFontHeight(), RA8875_BLUE);
 
     tft.print(0.20024 * SAM_carrier_freq_offset, 1);  //AFP 11-01-22
   }

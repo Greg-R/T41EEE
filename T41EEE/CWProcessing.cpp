@@ -1,19 +1,16 @@
 // Morse decode and other Morse related utilities.
 
-
 #include "SDT.h"
 
-#define HISTOGRAM_ELEMENTS 750
-#define MAX_DECODE_CHARS 32      // Max chars that can appear on decoder line.  Increased to 32.  KF5N October 29, 2023
-#define DECODER_BUFFER_SIZE 128  // Max chars in binary search string with , . ?
+constexpr int32_t HISTOGRAM_ELEMENTS = 750;
+constexpr int32_t MAX_DECODE_CHARS = 32;       // Max chars that can appear on decoder line.  Increased to 32.  KF5N October 29, 2023
+constexpr uint32_t DECODER_BUFFER_SIZE = 128;  // Max chars in binary search string with , . ?
 
 byte currentDashJump = DECODER_BUFFER_SIZE;
 byte currentDecoderIndex = 0;
 
 float32_t aveCorrResultR;  // Used in running averages; must not be inside function.
 float32_t aveCorrResultL;
-//float32_t float_Corr_BufferR[511] = {0};  // DMAMEM may cause problems with these two buffers and CW decode.
-//float32_t float_Corr_BufferL[511] = {0};
 float32_t *float_Corr_BufferR = new float32_t[511];
 float32_t *float_Corr_BufferL = new float32_t[511];
 float CWLevelTimer;
@@ -23,8 +20,6 @@ char decodeBuffer[33] = { 0 };  // The buffer for holding the decoded characters
 int endGapFlag = 0;
 int topGapIndex;
 int topGapIndexOld;
-//int32_t gapHistogram[HISTOGRAM_ELEMENTS];  // DMAMEM???
-//int32_t signalHistogram[HISTOGRAM_ELEMENTS];
 int32_t *gapHistogram = new int32_t[HISTOGRAM_ELEMENTS];
 int32_t *signalHistogram = new int32_t[HISTOGRAM_ELEMENTS];
 long valRef1;
@@ -43,7 +38,9 @@ long signalElapsedTime;
 long signalStart;
 long signalEnd;  // Start-end of dit or dah
 uint32_t gapLength;
-float freq[4] = { 562.5, 656.5, 750.0, 843.75 };
+float32_t freq[4] = { 562.5, 656.5, 750.0, 843.75 };
+bool drewGreenLastLoop{ false };  // Variables used to control drawing of CW decode
+bool drewBlackLastLoop{ false };  // indicator square.
 
 // This enum is used by an experimental Morse decoder.
 enum states { state0,
@@ -55,6 +52,7 @@ enum states { state0,
               state6 };
 states decodeStates = state0;
 
+//void DoGapHistogram(uint32_t gapLen);
 
 /*****
   Purpose: This function replaces the arm_max_float32() function that finds the maximum element in an array.
@@ -121,11 +119,9 @@ void JackClusteredArrayMax(int32_t *array, int32_t elements, int32_t *maxCount, 
 FLASHMEM void SelectCWFilter() {
   const std::string CWFilter[] = { "0.8kHz", "1.0kHz", "1.3kHz", "1.8kHz", "2.0kHz", " Off " };
   ConfigData.CWFilterIndex = SubmenuSelect(CWFilter, 6, ConfigData.CWFilterIndex);  // CWFilter is an array of strings.
-//  BandInformation();
 
-if(ConfigData.CWFilterIndex != 5) switchFilterSideband = true;  // Sets current delimiter to FLow.
-  UpdateAudioGraphics();  // This draws decoder delimiters and CW bandwidth box (red);
-  eeprom.ConfigDataWrite();
+  if (ConfigData.CWFilterIndex != 5) switchFilterSideband = true;  // Sets current delimiter to FLow.
+  display.UpdateAudioGraphics();                                   // This draws decoder delimiters and CW bandwidth box (red);
 }
 
 
@@ -139,25 +135,22 @@ if(ConfigData.CWFilterIndex != 5) switchFilterSideband = true;  // Sets current 
     void
 *****/
 FLASHMEM void SelectCWOffset() {
-  bool tempDecoderFlag;
   int tempCWOffset;
   const std::string CWOffsets[] = { "562.5 Hz", "656.5 Hz", "750 Hz", "843.75 Hz", " Cancel " };
   const int numCycles[4] = { 6, 7, 8, 9 };
 
   tempCWOffset = ConfigData.CWOffset;
-  tempDecoderFlag = ConfigData.decoderFlag;                                // Remember current status of decoder.
-  ConfigData.decoderFlag = false;                                          // Set to false to erase decoder delimiters.
-  UpdateAudioGraphics();                                                    // Erase graphics if they exist.
-  ConfigData.decoderFlag = tempDecoderFlag;                                // Restore the decoder flag value.
   ConfigData.CWOffset = SubmenuSelect(CWOffsets, 5, ConfigData.CWOffset);  // CWFilter is an array of strings.
 
   //  If user selects cancel, CWOffset will be set to the bogus value of 4.  So keep the old value.
   if (ConfigData.CWOffset == 4) ConfigData.CWOffset = tempCWOffset;
 
   // Now generate the values for the buffer which is used to create the CW tone.  The values are discrete because there must be whole cycles.
-  if (ConfigData.CWOffset < 4) sineTone(numCycles[ConfigData.CWOffset]);
-  UpdateAudioGraphics();
-  eeprom.ConfigDataWrite();  // Save to EEPROM.
+  if (ConfigData.CWOffset < 4) {
+    sineTone(numCycles[ConfigData.CWOffset]);                   // This is for the CW decoder only.
+    cwexciter.writeSineBuffer(numCycles[ConfigData.CWOffset]);  // For the CW exciter only.
+  }
+  display.UpdateAudioGraphics();
 }
 
 
@@ -186,11 +179,9 @@ void DoCWReceiveProcessing() {  // All New AFP 09-19-22
   if (ConfigData.decoderFlag) {  // JJP 7/20/23
 
     arm_fir_f32(&FIR_CW_DecodeL, float_buffer_L, float_buffer_L_CW, 256);  // AFP 10-25-22  Park McClellan FIR filter const Group delay
-    arm_fir_f32(&FIR_CW_DecodeR, float_buffer_R, float_buffer_R_CW, 256);  // AFP 10-25-22
+    arm_fir_f32(&FIR_CW_DecodeR, float_buffer_R, float_buffer_R_CW, 256);
 
-    // ----------------------  Correlation calculation  AFP 02-04-22 -------------------------
-    //Calculate correlation between calc sine and incoming signal
-
+    //Calculate correlation between sine and incoming signal.  AFP 02-04-22
     arm_correlate_f32(float_buffer_R_CW, 256, sinBuffer, 256, float_Corr_BufferR);
     arm_max_f32(float_Corr_BufferR, 511, &corrResultR, &corrResultIndexR);
     // Running average of corr coeff. R
@@ -200,22 +191,29 @@ void DoCWReceiveProcessing() {  // All New AFP 09-19-22
     arm_max_f32(float_Corr_BufferL, 511, &corrResultL, &corrResultIndexL);
     // Running average of corr coeff. L
     aveCorrResultL = .7 * corrResultL + .3 * aveCorrResultL;
-    aveCorrResult = (corrResultR + corrResultL) / 2;
-    // Calculate Goertzel Mahnitude of incomming signal
+    // aveCorrResult reduced by factor of 2 to emphasize Goertzel a little more.
+    aveCorrResult = (corrResultR + corrResultL) / 4.0;  // Divisor was 2.0.
+
+    // Calculate Goertzel Mahnitude of incoming signal.
     goertzelMagnitude1 = goertzel_mag(256, freq[ConfigData.CWOffset], 24000, float_buffer_L_CW);  //AFP 10-25-22
     goertzelMagnitude2 = goertzel_mag(256, freq[ConfigData.CWOffset], 24000, float_buffer_R_CW);  //AFP 10-25-22
+
     goertzelMagnitude = (goertzelMagnitude1 + goertzelMagnitude2) / 2;
     //Combine Correlation and Gowetzel Coefficients.  Tuning coefficient added.  Greg KF5N March 9, 2025
     combinedCoeff = static_cast<float32_t>(ConfigData.morseDecodeSensitivity) * aveCorrResult * goertzelMagnitude;
     //    Serial.printf("combinedCoeff = %f\n", combinedCoeff);  // Use this to tune decoder.
-    //  Changed CW decode "lock" indicator
-    if (combinedCoeff > 50) {  // AFP 10-26-22
-      tft.fillRect(700, 442, 15, 15, RA8875_GREEN);
-    } else if (combinedCoeff < 50) {  // AFP 10-26-22
+    //  Don't draw CW decode "lock" indicator if not required.
+    if (combinedCoeff > 50 and drewGreenLastLoop == false) {  // AFP 10-26-22
+      tft.fillRect(699, 442, 14, 14, RA8875_GREEN);
+      drewGreenLastLoop = true;
+      drewBlackLastLoop = false;
+    } else if (combinedCoeff < 50 and drewBlackLastLoop == false) {  // AFP 10-26-22
       CWLevelTimer = millis();
       if (CWLevelTimer - CWLevelTimerOld > 2000) {
         CWLevelTimerOld = millis();
-        tft.fillRect(700, 442, 15, 15, RA8875_BLACK);  // Erase
+        tft.fillRect(699, 442, 14, 14, RA8875_BLACK);  // Erase
+        drewBlackLastLoop = true;
+        drewGreenLastLoop = false;
       }
     }
     if (combinedCoeff > 50) {  // if  have a reasonable corr coeff, >50, then we have a keeper. // AFP 10-26-22
@@ -226,21 +224,6 @@ void DoCWReceiveProcessing() {  // All New AFP 09-19-22
     //==============  acquire data on CW  ================
     DoCWDecoding(audioTemp);
   }
-}
-
-
-/*****
-  Purpose: establish the dit length for code transmission. Crucial since
-    all spacing is done using dit length
-
-  Parameter list:
-    int wpm
-
-  Return value:
-    void
-*****/
-void SetDitLength(int wpm) {
-  ditLength = 1200 / wpm;
 }
 
 
@@ -271,7 +254,9 @@ void SetTransmitDitLength(int wpm) {
 
 
 /*****
-  Purpose: Select straight key or keyer
+  Purpose: Select straight key or keyer.  All this does is control
+           the pullups on the GPIs connected to the key or keyer paddle.
+           This should be part of the menus used by the operator.
 
   Parameter list:
     void
@@ -280,34 +265,30 @@ void SetTransmitDitLength(int wpm) {
     void
 *****/
 void SetKeyType() {
+  uint32_t currentKey{ 0 };
   const std::string keyChoice[] = { "Straight Key", "Keyer" };
 
+  // What to do will depend on the current setting!
+  currentKey = ConfigData.keyType;
+  // Now the user selects the key type.
   ConfigData.keyType = SubmenuSelect(keyChoice, 2, ConfigData.keyType);
-  // Make sure the ConfigData.paddleDit and ConfigData.paddleDah variables are set correctly for straight key.
-  // Paddle flip can reverse these, making the straight key inoperative.  KF5N August 9, 2023
-  if (ConfigData.keyType == 0) {
-    ConfigData.paddleDit = KEYER_DIT_INPUT_TIP;
-    ConfigData.paddleDah = KEYER_DAH_INPUT_RING;
+  if (currentKey == ConfigData.keyType) return;
+
+  // We're switching to a keyer paddle.
+  if (currentKey == 0) {
+    // Set the pullup on the ring.
+    pinMode(KEYER_DAH_INPUT_RING, INPUT_PULLUP);  // The other keyer paddle.
+    // Attach the ring interrupt, because it was not needed for the straight key.
+    // The tip interrupt is always attached.
+    attachInterrupt(digitalPinToInterrupt(KEYER_DAH_INPUT_RING), KeyRingOn, CHANGE);
   }
-  eeprom.ConfigDataWrite();
-}
-
-
-/*****
-  Purpose: Set up key at power-up.
-
-  Parameter list:
-    void
-
-  Return value:
-    void
-*****/
-FLASHMEM void SetKeyPowerUp() {
-  if (ConfigData.keyType == 0) {
-    ConfigData.paddleDit = KEYER_DIT_INPUT_TIP;
-    ConfigData.paddleDah = KEYER_DAH_INPUT_RING;
-    return;
+  // We're switching to a straight key.
+  if (currentKey == 1) {
+    // Detach the ring interrupt.  It is not needed and can cause undesired interrupts.
+    detachInterrupt(digitalPinToInterrupt(KEYER_DAH_INPUT_RING));
+    pinMode(KEYER_DAH_INPUT_RING, INPUT);  // Remove the pullup.
   }
+  // Flip dit and dah as configured by operator.
   if (ConfigData.paddleFlip) {  // Means right-paddle dit
     ConfigData.paddleDit = KEYER_DAH_INPUT_RING;
     ConfigData.paddleDah = KEYER_DIT_INPUT_TIP;
@@ -319,7 +300,50 @@ FLASHMEM void SetKeyPowerUp() {
 
 
 /*****
+  Purpose: Set up key configuration at power-up.  Don't run after power-up!  Greg Raven KF5N Oct 2025
+           This function should be in setup(), just after configuration of GPIOs.
+
+  Parameter list:
+    void
+
+  Return value:
+    void
+*****/
+FLASHMEM void SetKeyPowerUp() {
+
+  pinMode(KEYER_DIT_INPUT_TIP, INPUT_PULLUP);  // Straight key and keyer paddle.
+  pinMode(KEYER_DAH_INPUT_RING, INPUT);        // The other keyer paddle.  Don't pullup if not used.
+
+  // Straight key, always uses tip.
+  if (ConfigData.keyType == 0) {
+    ConfigData.paddleDit = KEYER_DIT_INPUT_TIP;
+    ConfigData.paddleDah = KEYER_DAH_INPUT_RING;
+    // Attach the interrupt to the tip.  Ring doesn't need an interrupt.
+    attachInterrupt(digitalPinToInterrupt(KEYER_DIT_INPUT_TIP), KeyTipOn, CHANGE);
+  }
+
+  // Keyer paddle.
+  if (ConfigData.keyType == 1) {
+    pinMode(KEYER_DAH_INPUT_RING, INPUT_PULLUP);  // Activate pullup on dah.
+    Serial.printf("Pullup added to DAH\n");
+    attachInterrupt(digitalPinToInterrupt(KEYER_DIT_INPUT_TIP), KeyTipOn, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(KEYER_DAH_INPUT_RING), KeyRingOn, CHANGE);
+    // Flip dit and dah if so configured.
+    if (ConfigData.paddleFlip) {  // Means right-paddle dit
+      ConfigData.paddleDit = KEYER_DAH_INPUT_RING;
+      ConfigData.paddleDah = KEYER_DIT_INPUT_TIP;
+    } else {
+      ConfigData.paddleDit = KEYER_DIT_INPUT_TIP;
+      ConfigData.paddleDah = KEYER_DAH_INPUT_RING;
+    }
+  }
+}
+
+
+/*****
   Purpose: Allow user to set the sidetone volume.  KF5N August 31, 2023
+           Sidetone volume is set separately for speaker and headphone.
+           Headphone volume has to be set in the Audio Adapter hardware.
 
   Parameter list:
     bool speaker (true for speaker, false for headphone)
@@ -331,8 +355,9 @@ void SetSideToneVolume(bool speaker) {
   int sidetoneDisplay;
   bool keyDown;
   MenuSelect menu;
+  RadioState temp = radioState;
 
-  SetAudioOperatingState(RadioState::SET_CW_SIDETONE);
+  SetAudioOperatingState(RadioState::CW_TRANSMIT_STRAIGHT_STATE);
   tft.setFontScale((enum RA8875tsize)1);
   tft.fillRect(SECONDARY_MENU_X - 50, MENUS_Y, EACH_MENU_WIDTH + 60, CHAR_HEIGHT, RA8875_MAGENTA);
   tft.setTextColor(RA8875_WHITE);
@@ -344,17 +369,18 @@ void SetSideToneVolume(bool speaker) {
   keyDown = false;
   tft.print(sidetoneDisplay);  // Display in range of 0 to 100.
 
+  // This is going to run the CW transmitter, however, the power amplifier is not enabled.
   while (true) {
-    if (digitalRead(ConfigData.paddleDit) == LOW || digitalRead(ConfigData.paddleDah) == LOW) {
+    if (digitalRead(KEYER_DIT_INPUT_TIP) == LOW) {
       if (keyDown) {
-        CW_ExciterIQData(CW_SHAPING_NONE);
+        cwexciter.CW_ExciterIQData(CW_SHAPING_NONE);
       } else {
-        CW_ExciterIQData(CW_SHAPING_RISE);
+        cwexciter.CW_ExciterIQData(CW_SHAPING_RISE);
         keyDown = true;
       }
     } else {
       if (keyDown) {
-        CW_ExciterIQData(CW_SHAPING_FALL);
+        cwexciter.CW_ExciterIQData(CW_SHAPING_FALL);
         keyDown = false;
       }
     }
@@ -374,16 +400,16 @@ void SetSideToneVolume(bool speaker) {
       filterEncoderMove = 0;
     }
     speakerVolume.setGain(volumeLog[ConfigData.sidetoneSpeaker]);
+    // This is the only practical way to set headphone sidetone volume.
     sgtl5000_1.volume(static_cast<float32_t>(ConfigData.sidetoneHeadphone) / 100.0);  // This control has a range of 0.0 to 1.0.
     menu = readButton();
-    if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
-                                                   // ConfigData.ConfigData.sidetoneVolume = ConfigData.sidetoneVolume;
-      eeprom.ConfigDataWrite();
+    if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Exit
       break;
     }
-  }
-  EraseMenus();
-  lastState = RadioState::NOSTATE;  // This is required due to the function deactivating the receiver.  This forces a pass through the receiver set-up code.  KF5N October 7, 2023
+  }  // end while loop
+  display.EraseMenus();
+  SetAudioOperatingState(temp);  // Restore the radio state.
+  keyPressedOn = false;          // Prevent the transmitter from being keyed upon exit.
 }
 
 
@@ -446,16 +472,76 @@ void MorseCharacterDisplay(char currentLetter) {
     void
 *****/
 void ResetHistograms() {
-  gapAtom = ditLength = transmitDitLength;
+  gapAtom = transmitDitLength;
   gapChar = dahLength = transmitDitLength * 3;
-  thresholdGeometricMean = (ditLength + dahLength) / 2;  // Use simple mean for starters so we don't have 0
-  aveDitLength = ditLength;
+  thresholdGeometricMean = (transmitDitLength + dahLength) / 2;  // Use simple mean for starters so we don't have 0
+  aveDitLength = transmitDitLength;
   aveDahLength = dahLength;
   valRef1 = 0;
   valRef2 = 0;
   // Clear graph arrays
   memset(signalHistogram, 0, HISTOGRAM_ELEMENTS * sizeof(uint32_t));
   memset(gapHistogram, 0, HISTOGRAM_ELEMENTS * sizeof(uint32_t));
+}
+
+
+/*****
+  Purpose: This function creates a distribution of the gaps between signals, expressed
+           in milliseconds. The result is a tri-modal distribution around three timings:
+            1. inter-atom time (one dit length)
+            2. inter-character (three dit lengths)
+            3. word end (seven dit lengths)
+
+  Parameter list:
+    long val  The duration of the signal gap (ms).
+
+  Return value;
+    void
+*****/
+void DoGapHistogram(uint32_t gapLen) {
+  int32_t tempAtom, tempChar;
+  int32_t atomIndex, charIndex, firstDit, temp;
+  uint32_t offset;
+
+  if (gapHistogram[gapLen] > 10) {  // Need over 1 so we don't have fractional value
+    for (int k = 0; k < HISTOGRAM_ELEMENTS; k++) {
+      gapHistogram[k] = (uint32_t)(.8 * (float)gapHistogram[k]);
+    }
+  }
+
+  gapHistogram[gapLen]++;  // Add new signal to distribution
+
+  atomIndex = charIndex = 0;
+  if (gapLen <= thresholdGeometricMean) {                                                                                 // Find new dit length
+    JackClusteredArrayMax(gapHistogram, (uint32_t)thresholdGeometricMean, &tempAtom, &atomIndex, &firstDit, (int32_t)1);  // Find max dit gap
+    if (atomIndex) {                                                                                                      // if something found
+      gapAtom = atomIndex;
+    }
+    for (int j = 0; j < HISTOGRAM_ELEMENTS; j++) {                        // count down
+      if (gapHistogram[HISTOGRAM_ELEMENTS - j] > 0 && endGapFlag == 0) {  //Look for non-zero entries in the histogram
+        if (HISTOGRAM_ELEMENTS - j < gapAtom * 2) {                       // limit search to probable gapAtom entries
+          topGapIndex = HISTOGRAM_ELEMENTS - j;                           //Upper end of gapAtom range
+          endGapFlag = 1;                                                 // set flag so we know tha this is the top of the gapAtom range
+        }
+      }
+      if (topGapIndex > 2 * gapAtom) topGapIndex = topGapIndexOld;  // discard outliers
+    }
+    endGapFlag = 0;                //reset flag
+    topGapIndexOld = topGapIndex;  //Keep good value for reference
+  } else {                         // dah calculation
+    if (gapLen <= thresholdGeometricMean * 2) {
+      offset = (uint32_t)(thresholdGeometricMean * 2);  // Find number of elements to check
+      JackClusteredArrayMax(&gapHistogram[(int32_t)thresholdGeometricMean + 1], offset, &tempChar, &charIndex, &temp, (int32_t)3);
+      if (charIndex)  // if something found
+        gapChar = charIndex;
+    }
+  }
+  if (atomIndex) {
+    gapAtom = atomIndex;
+  }
+  if (charIndex) {
+    gapChar = charIndex;
+  }
 }
 
 
@@ -519,7 +605,6 @@ void DoCWDecoding(int audioValue) {
             decodeStates = state0;                     // False signal, start over.
             break;
           }
-          //        Serial.printf("SET = %d TGM = %f dit = %d dah = %d gapChar = %d gapAtom =%d\n", signalElapsedTime, thresholdGeometricMean, ditLength, dahLength, gapChar, gapAtom);
           if (signalElapsedTime > LOWEST_ATOM_TIME && signalElapsedTime < HISTOGRAM_ELEMENTS) {  // Valid elapsed time?
             DoSignalHistogram(signalElapsedTime);                                                //Yep
           }
@@ -530,10 +615,10 @@ void DoCWDecoding(int audioValue) {
         decodeStates = state1;  // Signal still present, stay in state1.
         break;                  // End state1
 
-      case state2:                                                                             // Determine if a timed signal was a dit or a dah and increment the decode tree.
-        if (signalElapsedTime > (0.5 * ditLength) && signalElapsedTime < (1.5 * dahLength)) {  // All this does is provide a wide boundary for dit and dah lengths.
-          currentDashJump = currentDashJump >> 1;                                              // Fast divide by 2
-          if (signalElapsedTime < (int)thresholdGeometricMean) {                               // It was a dit
+      case state2:                                                                                     // Determine if a timed signal was a dit or a dah and increment the decode tree.
+        if (signalElapsedTime > (0.5 * transmitDitLength) && signalElapsedTime < (1.5 * dahLength)) {  // All this does is provide a wide boundary for dit and dah lengths.
+          currentDashJump = currentDashJump >> 1;                                                      // Fast divide by 2
+          if (signalElapsedTime < (int)thresholdGeometricMean) {                                       // It was a dit
             charProcessFlag = true;
             currentDecoderIndex++;
           } else {  // It's a dah!
@@ -550,7 +635,7 @@ void DoCWDecoding(int audioValue) {
         charProcessFlag = false;  // Char printed and no longer in progress.
         decodeStates = state0;    // Start process for next incoming character.
         blankFlag = false;
-        //      Serial.printf("IEG = %d\n", interElementGap);
+
         break;      // End state5
       case state4:  //  Blank printing state.
         MorseCharacterDisplay(' ');
@@ -559,11 +644,9 @@ void DoCWDecoding(int audioValue) {
         tft.setTextColor(RA8875_GREEN);
         tft.fillRect(DECODER_X + 75, DECODER_Y - 5, tft.getFontWidth() * 3, tft.getFontHeight(), RA8875_BLACK);  // Erase old WPM.
         tft.setCursor(DECODER_X + 75, DECODER_Y - 5);
-        //        tft.print("(");
         tft.writeTo(L1);
         tft.print(1200L / (dahLength / 3));
         tft.writeTo(L1);
-        //        tft.print(" WPM)");
         tft.setTextColor(RA8875_WHITE);
         tft.setFontScale((enum RA8875tsize)3);
         blankFlag = true;
@@ -576,64 +659,7 @@ void DoCWDecoding(int audioValue) {
 }
 
 
-/*****
-  Purpose: This function creates a distribution of the gaps between signals, expressed
-           in milliseconds. The result is a tri-modal distribution around three timings:
-            1. inter-atom time (one dit length)
-            2. inter-character (three dit lengths)
-            3. word end (seven dit lengths)
 
-  Parameter list:
-    long val        the duration of the signal gap (ms)
-
-  Return value;
-    void
-*****/
-void DoGapHistogram(long gapLen) {
-  int32_t tempAtom, tempChar;
-  int32_t atomIndex, charIndex, firstDit, temp;
-  uint32_t offset;
-
-  if (gapHistogram[gapLen] > 10) {  // Need over 1 so we don't have fractional value
-    for (int k = 0; k < HISTOGRAM_ELEMENTS; k++) {
-      gapHistogram[k] = (uint32_t)(.8 * (float)gapHistogram[k]);
-    }
-  }
-
-  gapHistogram[gapLen]++;  // Add new signal to distribution
-
-  atomIndex = charIndex = 0;
-  if (gapLen <= thresholdGeometricMean) {                                                                                 // Find new dit length
-    JackClusteredArrayMax(gapHistogram, (uint32_t)thresholdGeometricMean, &tempAtom, &atomIndex, &firstDit, (int32_t)1);  // Find max dit gap
-    if (atomIndex) {                                                                                                      // if something found
-      gapAtom = atomIndex;
-    }
-    for (int j = 0; j < HISTOGRAM_ELEMENTS; j++) {                        // count down
-      if (gapHistogram[HISTOGRAM_ELEMENTS - j] > 0 && endGapFlag == 0) {  //Look for non-zero entries in the histogram
-        if (HISTOGRAM_ELEMENTS - j < gapAtom * 2) {                       // limit search to probable gapAtom entries
-          topGapIndex = HISTOGRAM_ELEMENTS - j;                           //Upper end of gapAtom range
-          endGapFlag = 1;                                                 // set flag so we know tha this is the top of the gapAtom range
-        }
-      }
-      if (topGapIndex > 2 * gapAtom) topGapIndex = topGapIndexOld;  // discard outliers
-    }
-    endGapFlag = 0;                //reset flag
-    topGapIndexOld = topGapIndex;  //Keep good value for reference
-  } else {                         // dah calculation
-    if (gapLen <= thresholdGeometricMean * 2) {
-      offset = (uint32_t)(thresholdGeometricMean * 2);  // Find number of elements to check
-      JackClusteredArrayMax(&gapHistogram[(int32_t)thresholdGeometricMean + 1], offset, &tempChar, &charIndex, &temp, (int32_t)3);
-      if (charIndex)  // if something found
-        gapChar = charIndex;
-    }
-  }
-  if (atomIndex) {
-    gapAtom = atomIndex;
-  }
-  if (charIndex) {
-    gapChar = charIndex;
-  }
-}
 
 
 /*****
@@ -694,7 +720,7 @@ void DoSignalHistogram(long val) {
     }
   }
 
-  JackClusteredArrayMax(signalHistogram, offset, &tempDit, (int32_t *)&ditLength, &firstNonEmpty, (int32_t)1);
+  JackClusteredArrayMax(signalHistogram, offset, &tempDit, (int32_t *)&transmitDitLength, &firstNonEmpty, (int32_t)1);
   // dah calculation
   // Elements above the geomean. Note larger spread: higher variance
   JackClusteredArrayMax(&signalHistogram[offset], HISTOGRAM_ELEMENTS - offset, &tempDah, (int32_t *)&dahLength, &firstNonEmpty, (uint32_t)3);

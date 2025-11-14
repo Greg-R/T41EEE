@@ -1,5 +1,4 @@
 
-
 #include "SDT.h"
 
 #define BUFFPIXEL 20  // Use buffer to read image rather than 1 pixel at a time
@@ -47,6 +46,7 @@ int g_WRCount;
 int keyCell;  // Where to place the cell in the X axis
 //const int chipSelect          = BUILTIN_SDCARD;
 uint8_t g_ra8875_layer_active = 0;
+int x2 = 0;  //AFP
 
 float bearingDegrees;
 float bearingRadians;
@@ -1477,8 +1477,8 @@ FLASHMEM void BearingMaps() {
   strcpy(ConfigData.mapFileName, (const char *)myMapFiles[selectedMapIndex].mapNames);
 
 ////  RedrawDisplayScreen();
-  ShowFrequency();
-  DrawFrequencyBarValue();
+  display.ShowFrequency();
+  display.DrawFrequencyBarValue();
 
 //  return selectedMapIndex;
 }

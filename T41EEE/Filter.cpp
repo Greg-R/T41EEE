@@ -1,3 +1,5 @@
+// DSP filter functions
+
 
 #include "SDT.h"
 
@@ -95,11 +97,8 @@ arm_biquad_cascade_df2T_instance_f32 S14_Xmt = { IIR_NUMSTAGES, xmt_EQ_Band14_st
   Return value;
     void
 *****/
-void DoReceiveEQ() //AFP 08-09-22
+void DoReceiveEQ()  //AFP 08-09-22
 {
-//  for (int i = 0; i < 14; i++) {
-//    recEQ_LevelScale[i] = (float)ConfigData.equalizerRec[i] / 100.0;
-//  }
   arm_biquad_cascade_df2T_f32(&S1_Rec, float_buffer_L, EQ1_float_buffer_L, 256);
   arm_biquad_cascade_df2T_f32(&S2_Rec, float_buffer_L, EQ2_float_buffer_L, 256);
   arm_biquad_cascade_df2T_f32(&S3_Rec, float_buffer_L, EQ3_float_buffer_L, 256);
@@ -130,23 +129,23 @@ void DoReceiveEQ() //AFP 08-09-22
   arm_scale_f32(EQ13_float_buffer_L, -(float)ConfigData.equalizerRec[12] / 100.0, EQ13_float_buffer_L, 256);
   arm_scale_f32(EQ14_float_buffer_L, (float)ConfigData.equalizerRec[13] / 100.0, EQ14_float_buffer_L, 256);
 
-  arm_add_f32(EQ1_float_buffer_L , EQ2_float_buffer_L, float_buffer_L , 256 ) ;
+  arm_add_f32(EQ1_float_buffer_L, EQ2_float_buffer_L, float_buffer_L, 256);
 
-  arm_add_f32(float_buffer_L , EQ3_float_buffer_L, float_buffer_L , 256 ) ;
-  arm_add_f32(float_buffer_L , EQ4_float_buffer_L, float_buffer_L , 256 ) ;
-  arm_add_f32(float_buffer_L , EQ5_float_buffer_L, float_buffer_L , 256 ) ;
-  arm_add_f32(float_buffer_L , EQ6_float_buffer_L, float_buffer_L , 256 ) ;
-  arm_add_f32(float_buffer_L , EQ7_float_buffer_L, float_buffer_L , 256 ) ;
-  arm_add_f32(float_buffer_L , EQ8_float_buffer_L, float_buffer_L , 256 ) ;
-  arm_add_f32(float_buffer_L , EQ9_float_buffer_L, float_buffer_L , 256 ) ;
-  arm_add_f32(float_buffer_L , EQ10_float_buffer_L, float_buffer_L , 256 ) ;
-  arm_add_f32(float_buffer_L , EQ11_float_buffer_L, float_buffer_L , 256 ) ;
-  arm_add_f32(float_buffer_L , EQ12_float_buffer_L, float_buffer_L , 256 ) ;
-  arm_add_f32(float_buffer_L , EQ13_float_buffer_L, float_buffer_L , 256 ) ;
-  arm_add_f32(float_buffer_L , EQ14_float_buffer_L, float_buffer_L , 256 ) ;
+  arm_add_f32(float_buffer_L, EQ3_float_buffer_L, float_buffer_L, 256);
+  arm_add_f32(float_buffer_L, EQ4_float_buffer_L, float_buffer_L, 256);
+  arm_add_f32(float_buffer_L, EQ5_float_buffer_L, float_buffer_L, 256);
+  arm_add_f32(float_buffer_L, EQ6_float_buffer_L, float_buffer_L, 256);
+  arm_add_f32(float_buffer_L, EQ7_float_buffer_L, float_buffer_L, 256);
+  arm_add_f32(float_buffer_L, EQ8_float_buffer_L, float_buffer_L, 256);
+  arm_add_f32(float_buffer_L, EQ9_float_buffer_L, float_buffer_L, 256);
+  arm_add_f32(float_buffer_L, EQ10_float_buffer_L, float_buffer_L, 256);
+  arm_add_f32(float_buffer_L, EQ11_float_buffer_L, float_buffer_L, 256);
+  arm_add_f32(float_buffer_L, EQ12_float_buffer_L, float_buffer_L, 256);
+  arm_add_f32(float_buffer_L, EQ13_float_buffer_L, float_buffer_L, 256);
+  arm_add_f32(float_buffer_L, EQ14_float_buffer_L, float_buffer_L, 256);
 }
 
-
+// This transmit equalizer is not used.  An equalizer from the Open Audio Library replaces it.
 /*****
   Purpose: void DoExciterEQ
 
@@ -154,7 +153,7 @@ void DoReceiveEQ() //AFP 08-09-22
     void
   Return value;
     void
-*****/
+*****
 void DoExciterEQ() //AFP 10-02-22
 {
   arm_biquad_cascade_df2T_f32(&S1_Xmt,  float_buffer_L_EX, EQ1_float_buffer_L, 256);
@@ -202,7 +201,7 @@ void DoExciterEQ() //AFP 10-02-22
   arm_add_f32(float_buffer_L_EX , EQ13_float_buffer_L, float_buffer_L_EX , 256 ) ;
   arm_add_f32(float_buffer_L_EX , EQ14_float_buffer_L, float_buffer_L_EX , 256 ) ;
 }
-
+*/
 
 /*****
   Purpose: Adjust the audio filter band limits based on user input from encoder.
@@ -210,38 +209,30 @@ void DoExciterEQ() //AFP 10-02-22
   Return value;
     void
 *****/
-void FilterBandwidth()
-{
-////  AudioNoInterrupts();
+void FilterBandwidth() {
 
-//Serial.printf("FilterBandwidth()\n");
-//Serial.printf("bands.bands[ConfigData.currentBand].FHiCut = %d bands.bands[ConfigData.currentBand].FLoCut = %d\n", bands.bands[ConfigData.currentBand].FHiCut, bands.bands[ConfigData.currentBand].FLoCut);
-//Serial.printf("bands.bands[ConfigData.currentBand].FAMCut = %d\n", bands.bands[ConfigData.currentBand].FAMCut);
-//Serial.printf("bands.bands[ConfigData.currentBand].sideband = %d\n", bands.bands[ConfigData.currentBand].sideband);
+  // The filter must be set up differently for AM and SAM modes.
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE or bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE or bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) {
 
+    switch (bands.bands[ConfigData.currentBand].sideband) {
 
-// The filter must be set up differently for AM and SAM modes.
-if(bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE or bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE or bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) {
+      case Sideband::LOWER:
+        CalcCplxFIRCoeffs(FIR_Coef_I, FIR_Coef_Q, m_NumTaps, static_cast<float>(-bands.bands[ConfigData.currentBand].FHiCut), static_cast<float>(-bands.bands[ConfigData.currentBand].FLoCut), static_cast<float>(SR[SampleRate].rate / DF));
+        break;
 
-switch(bands.bands[ConfigData.currentBand].sideband) {
+      case Sideband::UPPER:
+        CalcCplxFIRCoeffs(FIR_Coef_I, FIR_Coef_Q, m_NumTaps, static_cast<float>(bands.bands[ConfigData.currentBand].FLoCut), static_cast<float>(bands.bands[ConfigData.currentBand].FHiCut), static_cast<float>(SR[SampleRate].rate / DF));
+        break;
 
-case Sideband::LOWER:
-  CalcCplxFIRCoeffs(FIR_Coef_I, FIR_Coef_Q, m_NumTaps, static_cast<float>(-bands.bands[ConfigData.currentBand].FHiCut), static_cast<float>(-bands.bands[ConfigData.currentBand].FLoCut), static_cast<float>(SR[SampleRate].rate / DF));
-break;
+      default:
+        break;
+    }
+  }
 
-case Sideband::UPPER:
-CalcCplxFIRCoeffs(FIR_Coef_I, FIR_Coef_Q, m_NumTaps, static_cast<float>(bands.bands[ConfigData.currentBand].FLoCut), static_cast<float>(bands.bands[ConfigData.currentBand].FHiCut), static_cast<float>(SR[SampleRate].rate / DF));
-break;
-
-default:
-break;
-}
-}
-
-if(bands.bands[ConfigData.currentBand].mode == RadioMode::AM_MODE or bands.bands[ConfigData.currentBand].mode == RadioMode::SAM_MODE) {
-  CalcCplxFIRCoeffs(FIR_Coef_I, FIR_Coef_Q, m_NumTaps, static_cast<float>(-bands.bands[ConfigData.currentBand].FAMCut), static_cast<float>(bands.bands[ConfigData.currentBand].FAMCut), static_cast<float>(SR[SampleRate].rate / DF));
-}
-InitFilterMask();
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::AM_MODE or bands.bands[ConfigData.currentBand].mode == RadioMode::SAM_MODE) {
+    CalcCplxFIRCoeffs(FIR_Coef_I, FIR_Coef_Q, m_NumTaps, static_cast<float>(-bands.bands[ConfigData.currentBand].FAMCut), static_cast<float>(bands.bands[ConfigData.currentBand].FAMCut), static_cast<float>(SR[SampleRate].rate / DF));
+  }
+  InitFilterMask();
 
   for (int i = 0; i < 5; i++) {
     biquad_lowpass1_coeffs[i] = coefficient_set[i];
@@ -249,7 +240,7 @@ InitFilterMask();
 
   // And adjust decimation and interpolation filters
   SetDecIntFilters();
-} // end filter_bandwidth
+}  // end filter_bandwidth
 
 
 /*****
@@ -261,8 +252,7 @@ InitFilterMask();
   Return value;
     void
 *****/
-void InitFilterMask()
-{
+void InitFilterMask() {
   /****************************************************************************************
      Calculate the FFT of the FIR filter coefficients once to produce the FIR filter mask
   ****************************************************************************************/
@@ -273,8 +263,8 @@ void InitFilterMask()
   for (unsigned i = 0; i < m_NumTaps; i++) {
     // try out a window function to eliminate ringing of the filter at the stop frequency
     //             sd.FFT_Samples[i] = (float32_t)((0.53836 - (0.46164 * arm_cos_f32(PI*2 * (float32_t)i / (float32_t)(FFT_IQ_BUFF_LEN-1)))) * sd.FFT_Samples[i]);
-    FIR_filter_mask[i * 2] = FIR_Coef_I [i];
-    FIR_filter_mask[i * 2 + 1] = FIR_Coef_Q [i];
+    FIR_filter_mask[i * 2] = FIR_Coef_I[i];
+    FIR_filter_mask[i * 2 + 1] = FIR_Coef_Q[i];
   }
 
   for (unsigned i = FFT_length + 1; i < FFT_length * 2; i++) {
@@ -285,7 +275,7 @@ void InitFilterMask()
   // perform FFT (in-place), needs only to be done once (or every time the filter coeffs change)
   arm_cfft_f32(maskS, FIR_filter_mask, 0, 1);
 
-} // end init_filter_mask
+}  // end init_filter_mask
 
 
 /*****
@@ -295,24 +285,23 @@ void InitFilterMask()
   Return value;
     void
 *****/
-void SetDecIntFilters()
-{
+void SetDecIntFilters() {
   /****************************************************************************************
      Recalculate decimation and interpolation FIR filters
   ****************************************************************************************/
   int LP_F_help;
   int filter_BW_highest = bands.bands[ConfigData.currentBand].FHiCut;
 
-  if (filter_BW_highest < - bands.bands[ConfigData.currentBand].FLoCut) {
-    filter_BW_highest = - bands.bands[ConfigData.currentBand].FLoCut;
+  if (filter_BW_highest < -bands.bands[ConfigData.currentBand].FLoCut) {
+    filter_BW_highest = -bands.bands[ConfigData.currentBand].FLoCut;
   }
- LP_F_help = filter_BW_highest;
+  LP_F_help = filter_BW_highest;
 
-if (LP_F_help > 10000) {
+  if (LP_F_help > 10000) {
     LP_F_help = 10000;
   }
 
-//  LP_F_help = 10000;  // 
+  //  LP_F_help = 10000;  //
 
   CalcFIRCoeffs(FIR_dec1_coeffs, n_dec1_taps, (float32_t)(LP_F_help), n_att, 0, 0.0, (float32_t)(SR[SampleRate].rate));
   CalcFIRCoeffs(FIR_dec2_coeffs, n_dec2_taps, (float32_t)(LP_F_help), n_att, 0, 0.0, (float32_t)(SR[SampleRate].rate / DF1));

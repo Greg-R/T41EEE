@@ -1,37 +1,25 @@
+// CW Exciter class
 
 #include "SDT.h"
 
-
 /*****
-  Purpose: to send a Morse code dit
+  Purpose: Load buffers used to modulate the transmitter during calibration.
+          The epilogue must restore the buffers for normal operation!
 
-  Parameter list:
-    void
+   Parameter List:
+      void
 
-  Return value:
-    void
-*****/
-void KeyTipOn() {
-  if (digitalRead(KEYER_DIT_INPUT_TIP) == LOW and bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) {
-    keyPressedOn = 1;
-  }
-}
-
-/*****
-  Purpose: CW Key interrupt //AFP 09-01-22
-
-  Parameter list:
-
-  Return value;
-  voidKeyRingOn(
-
-*****/
-void KeyRingOn()  //AFP 09-25-22
-{
-  if (ConfigData.keyType == 1) {
-    if (digitalRead(KEYER_DAH_INPUT_RING) == LOW and bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) {
-      keyPressedOn = 1;
-    }
+   Return value:
+      void
+ *****/
+void CW_Exciter::writeSineBuffer(int numCycles) {
+  float32_t theta{ 0.0 };
+  float32_t freqSideTone{ 0.0 };
+  const float32_t amplitude{ 0.12 };  // Sets the peak amplitude of the sinusoid.
+  freqSideTone = static_cast<float>(numCycles) * 48000.0 / 512.0;
+  for (int kf = 0, increment = 0; kf < 512; increment += 1, kf++) {  // Calc: numCycles = 8, 750 hz sine wave.
+    theta = static_cast<float32_t>(increment) * 2.0 * PI * freqSideTone / 48000.0;
+    sineBuffer[kf] = amplitude * sin(theta);  // Create the CW tone waveform.
   }
 }
 
@@ -45,86 +33,65 @@ void KeyRingOn()  //AFP 09-25-22
   Return value;
     void
 *****/
-void CW_ExciterIQData(int shaping)  //AFP 08-20-22
+void CW_Exciter::CW_ExciterIQData(int shaping)  //AFP 08-20-22
 {
-  // uint32_t N_BLOCKS_EX = N_B_EX;
-  float32_t powerScale;
-  q15_t q15_buffer_LTemp[2048];  //KF5N
-  q15_t q15_buffer_RTemp[2048];  //KF5N
-  q15_t q15_buffer_Sidetone[2048];
-  float float_buffer_Sidetone[2048];
-
-  arm_scale_f32(cosBuffer, 0.20, float_buffer_L_EX, 256);  // AFP 10-13-22 Use pre-calculated sin & cos instead of Hilbert
-  arm_scale_f32(sinBuffer, 0.20, float_buffer_R_EX, 256);  // AFP 10-13-22
-
-  //  Apply amplitude and phase corrections.
-
-  if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-    arm_scale_f32(float_buffer_L_EX, -CalData.IQCWAmpCorrectionFactorLSB[ConfigData.currentBand], float_buffer_L_EX, 256);       //Adjust level of L buffer KF5N flipped sign, original was +.
-    IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, CalData.IQCWPhaseCorrectionFactorLSB[ConfigData.currentBand], 256);  // Adjust phase
-  } else {
-    if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-      arm_scale_f32(float_buffer_L_EX, +CalData.IQCWAmpCorrectionFactorUSB[ConfigData.currentBand], float_buffer_L_EX, 256);       // KF5N flipped sign, original was minus.
-      IQPhaseCorrection(float_buffer_L_EX, float_buffer_R_EX, CalData.IQCWPhaseCorrectionFactorUSB[ConfigData.currentBand], 256);  // Adjust phase
-    }
-  }
-
+  float32_t powerScale = 0;
 
   if (shaping == CW_SHAPING_RISE) {
-    arm_mult_f32(float_buffer_L_EX, cwRiseBuffer, float_buffer_L_EX, 256);
-    arm_mult_f32(float_buffer_R_EX, cwRiseBuffer, float_buffer_R_EX, 256);
+    arm_mult_f32(sineBuffer, cwRiseBuffer, float_buffer_cw, 512);
   } else if (shaping == CW_SHAPING_FALL) {
-    arm_mult_f32(float_buffer_L_EX, cwFallBuffer, float_buffer_L_EX, 256);
-    arm_mult_f32(float_buffer_R_EX, cwFallBuffer, float_buffer_R_EX, 256);
+    arm_mult_f32(sineBuffer, cwFallBuffer, float_buffer_cw, 512);
   } else if (shaping == CW_SHAPING_ZERO) {
-    arm_scale_f32(float_buffer_L_EX, 0.0, float_buffer_L_EX, 256);
-    arm_scale_f32(float_buffer_R_EX, 0.0, float_buffer_R_EX, 256);
+    arm_scale_f32(sineBuffer, 0.0, float_buffer_cw, 512);
+  } else {
+    arm_scale_f32(sineBuffer, 1.0, float_buffer_cw, 512);
   }
 
-  /**********************************************************************************
-              Interpolate (upsample the data streams by 8X to create the 192KHx sample rate for output
-              Requires a LPF FIR 48 tap 10KHz and 8KHz
-     **********************************************************************************/
-  //24KHz effective sample rate here
-  arm_fir_interpolate_f32(&FIR_int1_EX_I, float_buffer_L_EX, float_buffer_LTemp, 256);
-  arm_fir_interpolate_f32(&FIR_int1_EX_Q, float_buffer_R_EX, float_buffer_RTemp, 256);
+  cwToneData.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
+  cwToneData.setMaxBuffers(4);
+  cwToneData.play(float_buffer_cw, 512);  // Push CW waveform into SSB transmitter input.
 
-  // interpolation-by-4,  48KHz effective sample rate here
-  arm_fir_interpolate_f32(&FIR_int2_EX_I, float_buffer_LTemp, float_buffer_L_EX, 512);
-  arm_fir_interpolate_f32(&FIR_int2_EX_Q, float_buffer_RTemp, float_buffer_R_EX, 512);
+  // Make Q15 data for CW sidetone.
+  arm_float_to_q15(float_buffer_cw, q15_buffer_Sidetone, 512);
 
-  //  Need to have a sidetone which is independent of any scaling.  Re-use float_bufferL/RTemp and Q_out_L/Q_out_R buffers.
-  arm_scale_f32(float_buffer_L_EX, 20, float_buffer_Sidetone, 2048);
+  float32_t float_buffer_i[512] = { 0.0 };
+  float32_t float_buffer_q[512] = { 0.0 };
+  float32_t* iBuffer = nullptr;  // I and Q pointers needed for one-time read of record queues.
+  float32_t* qBuffer = nullptr;
 
-//  This is the correct place in the data stream to inject the scaling for power.
+  // Read incoming I and Q audio blocks from the SSB exciter.
+  if (Q_in_L_Ex.available() > 3 and Q_in_R_Ex.available() > 3) {
+    for (int i = 0; i < 4; i = i + 1) {
+      iBuffer = Q_in_L_Ex.readBuffer();
+      qBuffer = Q_in_R_Ex.readBuffer();
+      std::copy(iBuffer, iBuffer + 128, &float_buffer_i[128 * i]);
+      std::copy(qBuffer, qBuffer + 128, &float_buffer_q[128 * i]);
+      Q_in_L_Ex.freeBuffer();
+      Q_in_R_Ex.freeBuffer();
+    }
+  } else return;
+
+    //  This is the correct place in the data flow to inject the scaling for power.
 #ifdef QSE2
-  powerScale = 40.0 * ConfigData.powerOutCW[ConfigData.currentBand];
+  powerScale = 2.0 * ConfigData.powerOutCW[ConfigData.currentBand];
 #else
-  powerScale = 30.0 * ConfigData.powerOutCW[ConfigData.currentBand];
+  powerScale = 1.4 * ConfigData.powerOutCW[ConfigData.currentBand];
 #endif
 
-  //  192KHz effective sample rate here
-  arm_scale_f32(float_buffer_L_EX, powerScale, float_buffer_L_EX, 2048);  //Scale to compensate for losses in Interpolation
-  arm_scale_f32(float_buffer_R_EX, powerScale, float_buffer_R_EX, 2048);
+  arm_scale_f32(float_buffer_i, powerScale, float_buffer_i, 512);
+  arm_scale_f32(float_buffer_q, powerScale, float_buffer_q, 512);
 
-  /**********************************************************************************  AFP 12-31-20
-      CONVERT TO INTEGER AND PLAY AUDIO, I and Q of CW transmitter and also sidetone.
-    **********************************************************************************/
-
-  // Transmitter I and Q.  Cast the arrays from float to q15_t.  q15_t is equivalent to int16_t.
-  arm_float_to_q15(float_buffer_Sidetone, q15_buffer_Sidetone, 2048);  // source, destination, number of samples
-  arm_float_to_q15(float_buffer_L_EX, q15_buffer_LTemp, 2048);         // source, destination, number of samples
-  arm_float_to_q15(float_buffer_R_EX, q15_buffer_RTemp, 2048);
-
-// Inject the DC offset from carrier calibration.  There is an ARM function for this.
 #ifdef QSE2
-  arm_offset_q15(q15_buffer_LTemp, CalData.iDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_LTemp, 2048);
-  arm_offset_q15(q15_buffer_RTemp, CalData.qDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, q15_buffer_RTemp, 2048);
+  arm_offset_f32(float_buffer_i, CalData.iDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, float_buffer_i, 512);  // Carrier suppression offset.
+  arm_offset_f32(float_buffer_q, CalData.qDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, float_buffer_q, 512);
 #endif
 
-  Q_out_L_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);  // This mode is required when setting sidetone volume.
-  Q_out_R_Ex.setBehaviour(AudioPlayQueue::NON_STALLING);  // The process will stall due to disconnection of I and Q patchcords.
-  Q_out_L_Ex.play(q15_buffer_LTemp, 2048);                // Transmitter
-  Q_out_R_Ex.play(q15_buffer_RTemp, 2048);                // Transmitter
-  Q_out_L.play(q15_buffer_Sidetone, 2048);                // CW sidetone.  Connected to receiver audio path during transmit.
+  Q_out_L_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
+  Q_out_R_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
+
+  // Play audio.
+  Q_out_L_Ex.play(float_buffer_i, 512);  // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
+  Q_out_R_Ex.play(float_buffer_q, 512);  // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.
+
+  Q_out_L.play(q15_buffer_Sidetone, 512);
 }

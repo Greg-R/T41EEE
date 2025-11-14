@@ -1,24 +1,18 @@
 // Button class
+
 #pragma once
 
-#define TOP_MENU_COUNT 11  // Changed to 10 after noise floor removed.  Greg KF5N February 14, 2025
+#include <vector>
 
 class Button {
 
 public:
 
-  IntervalTimer buttonInterrupts;
+  // Initialize the object with user selected tuning increments specified by the user in MyConfigurationFile.h.
+  Button(std::vector<uint32_t>& fineTuneArray, std::vector<uint32_t>& centerTuneArray)
+    : fineTuneArray(fineTuneArray), centerTuneArray(centerTuneArray) {}
+
   bool buttonInterruptsEnabled = false;
-  int buttonRead = 0;
-  int minPinRead = 1024;
-  int secondaryMenuChoiceMade;
-
-  bool save_last_frequency = false;  // Make this the default behavior.  Greg KF5N October 16, 2024.
-  int directFreqFlag = 0;
-  int32_t subMenuMaxOptions = 0;  // Holds the number of submenu options.
-  uint32_t TxRxFreqOld = 0;
-  bool audioState = MUTEAUDIO;
-
   void EnableButtonInterrupts();
   MenuSelect ProcessButtonPress(int valPin);
   int ReadSelectedPushButton();
@@ -37,8 +31,22 @@ public:
   void ButtonNR();
   void ButtonNotchFilter();
   void ButtonMuteAudio();
-  int DrawNewFloor(int floor);
   void ExecuteModeChange();
-  void ResetZoom(int zoomIndex1);
   void ButtonFrequencyEntry();
+
+private:
+
+  std::vector<uint32_t>& fineTuneArray;
+  std::vector<uint32_t>& centerTuneArray;
+  std::vector<uint32_t>::iterator result;
+  const int32_t TOP_MENU_COUNT{ 10 };
+  IntervalTimer buttonInterrupts;
+  int buttonRead = 0;
+  int minPinRead = 1024;
+  int secondaryMenuChoiceMade;
+  bool save_last_frequency = false;  // Make this the default behavior.  Greg KF5N October 16, 2024.
+  int directFreqFlag = 0;
+  int32_t subMenuMaxOptions = 0;  // Holds the number of submenu options.
+  uint32_t TxRxFreqOld = 0;
+  bool audioState = MUTEAUDIO;
 };
