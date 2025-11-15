@@ -1349,7 +1349,6 @@ void loop() {
     loopCounter = 0;
     Serial.printf("AudioProcessorUsageMax() = %d\n", static_cast<uint32_t>(AudioProcessorUsageMax()));
     AudioProcessorUsageMaxReset();
-    Serial.printf("fftOffset = %d\n", fftOffset);
   }
   usec1Old = usec1;
 #endif
