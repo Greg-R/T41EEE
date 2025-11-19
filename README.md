@@ -133,6 +133,7 @@ The front-panel buttons are arranged in 3 columns and 6 rows.  The buttons are a
 follows:
 
 |       |Column1        |Column2     |Column3|
+| ----- | ------------- | ------------ | ------------ |
 |Row1   |Select          |Menu-Up      |Band-Up|
 |Row2   |Zoom            |Menu-Down    |Band-Down|
 |Row3   |Filter-Toggle   |LSB-USB      |Mode|
