@@ -75,6 +75,18 @@ The instructions for performing a FLASH erase of the Teensy are here:
 
 The bullet "Memory Wipe & LED Blink Restore" has the instructions.
 
+The compilation should conclude with results similar to this:
+
+Opening Teensy Loader...
+
+Memory Usage on Teensy 4.1:
+
+  FLASH: code:205672, data:98072, headers:8572   free for files:7814148
+  
+   RAM1: variables:149632, code:187736, padding:8872   free for local variables:178048
+   
+   RAM2: variables:332896  free for malloc/new:191392
+
 ## Highlight of Changes included in T41EEE.91 November 5, 2025
 
 1.  A refinement of the calibration algorithms was completed.  Calibration will accept
@@ -132,14 +144,14 @@ Split operation and the Bearing feature are still not supported.  That will happ
 The front-panel buttons are arranged in 3 columns and 6 rows.  The buttons are arranged as
 follows:
 
-|       |Column1         |Column2      |Column3       |
+|           | __Column1__    | __Column2__ | __Column3__ |
 | ----- | :------------: | :---------: | :----------: |
-|_Row1_   |Select          |Menu-Up      |Band-Up|
-|_Row2_   |Zoom            |Menu-Down    |Band-Down|
-|_Row3_   |Filter-Toggle   |LSB-USB      |Mode|
-|_Row4_   |Noise-Select    |AutoNotch    |Audio-Out|
-|_Row5_   |Fine-Increment  |CW-Decode    |Center-Tune|
-|_Row6_   |Reset-Tune      |Enter-Freq   |Cal-Increment|
+|__Row1__   |Select          |Menu-Up      |Band-Up|
+|__Row2__   |Zoom            |Menu-Down    |Band-Down|
+|__Row3__   |Filter-Toggle   |LSB-USB      |Mode|
+|__Row4__   |Noise-Select    |AutoNotch    |Audio-Out|
+|__Row5__   |Fine-Increment  |CW-Decode    |Center-Tune|
+|__Row6__   |Reset-Tune      |Enter-Freq   |Cal-Increment|
 
 ## Automatic Centering of the Audio Spectrum
 
@@ -242,7 +254,9 @@ Here is the USB codec device:
 These use USB-C connectors.  You will need to get an adapter for the Teensy if you use these
 USB-C devices.  It was my preference to go with USB-C.  Others will work.
 
-Update:  I was successful running FT8 without the port expander.
+**Update:  I was successful running FT8 without the port expander.**
+
+The same USB cable used for programming is working with FT8 as well.
 
 To connect the codec, you will need 3.5mm audio cables.  I used Cables with straight connectors
 on one end and a right angle on the other.  The codec headphone output connects to the T41
@@ -251,7 +265,8 @@ of the Audio Adapter.
 
 You will need to set the T41 to FT8 mode and adjust the frequency to the standard frequency.
 Also activate the headphone output.  Adjust the volume for optimal level as shown in the WSJTX
-program.
+program.  If both speaker and headphone are active, you can monitor the FT8 signal using
+the speaker.  The volume control will affect the speaker only!
 
 With the above, you should be able to be successful with FT8.  I will post a video showing
 my setup here soon.  Right now it is a bit of a haywire arrangement with the USB expander
@@ -272,6 +287,15 @@ frequency.
 It takes a long time.  But why not?  It's automated.  Set it up, and let it run to completion.
 The calibration numbers are automatically saved to EEPROM.  Don't forget to also save
 them to the SD card (not automatic)!
+
+## Notes on Running Receiver and Transmitter Calibration
+
+Before running calibration, you will need to connect the output of the QSE filter to
+the input of the receiver (QSD) with approximately 30 dB of attenuation.  Start with
+a 30 dB attenuator.  If the signal is unstable or noisy, try increasing the attenuation,
+by 3 to 6 dB.  My V10/V11 radio needs 33 dB of attenuation for good solid calibration.
+Yours may need a different value!  Try different values until you get good results
+on all bands.
 
 ## There are Two SD Card Files
 
