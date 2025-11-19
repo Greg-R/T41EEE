@@ -1,38 +1,6 @@
-// Receive DSP.  This is a primary part of the receiver loop.
+// Receive DSP.  ProcessIQData is the primary DSP function of the receiver.
 
 #include "SDT.h"
-
-uint32_t IQ_counter = 0;
-float32_t I_sum = 0.0;
-float32_t IQ_sum = 0.0;
-float32_t Q_sum = 0.0;
-uint32_t n_para = 512;
-float32_t K_est = 1.0;
-float32_t K_est_old = 0.0;
-float32_t P_est = 0.0;
-float32_t P_est_old = 0.0;
-float32_t P_est_mult = 1.0 / (sqrtf(1.0 - P_est * P_est));
-
-uint8_t twinpeaks_tested = 2;  // initial value --> 2 !!
-uint32_t twinpeaks_counter = 0;
-float32_t teta1 = 0.0;
-float32_t teta2 = 0.0;
-float32_t teta3 = 0.0;
-float32_t teta1_old = 0.0;
-float32_t teta2_old = 0.0;
-float32_t teta3_old = 0.0;
-float32_t M_c1 = 0.0;
-float32_t M_c2 = 0.0;
-uint8_t codec_restarts = 0;
-
-
-float32_t sign(float32_t x) {
-  if (x < 0)
-    return -1.0f;
-  else if (x > 0)
-    return 1.0f;
-  else return 0.0f;
-}
 
 
 /*****
