@@ -134,12 +134,12 @@ follows:
 
 |       |Column1         |Column2      |Column3       |
 | ----- | :------------: | :---------: | :----------: |
-|Row1   |Select          |Menu-Up      |Band-Up|
-|Row2   |Zoom            |Menu-Down    |Band-Down|
-|Row3   |Filter-Toggle   |LSB-USB      |Mode|
-|Row4   |Noise-Select    |AutoNotch    |Audio-Out|
-|Row5   |Fine-Increment  |CW-Decode    |Center-Tune|
-|Row6   |Reset-Tune      |Enter-Freq   |Cal-Increment|
+|_Row1_   |Select          |Menu-Up      |Band-Up|
+|_Row2_   |Zoom            |Menu-Down    |Band-Down|
+|_Row3_   |Filter-Toggle   |LSB-USB      |Mode|
+|_Row4_   |Noise-Select    |AutoNotch    |Audio-Out|
+|_Row5_   |Fine-Increment  |CW-Decode    |Center-Tune|
+|_Row6_   |Reset-Tune      |Enter-Freq   |Cal-Increment|
 
 ## Automatic Centering of the Audio Spectrum
 
