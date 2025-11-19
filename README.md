@@ -76,17 +76,13 @@ The instructions for performing a FLASH erase of the Teensy are here:
 The bullet "Memory Wipe & LED Blink Restore" has the instructions.
 
 The compilation should conclude with results similar to this:
-
+```
 Opening Teensy Loader...
-
 Memory Usage on Teensy 4.1:
-
-  FLASH: code:205672, data:98072, headers:8572   free for files:7814148
-  
-   RAM1: variables:149632, code:187736, padding:8872   free for local variables:178048
-   
+  FLASH: code:205672, data:98072, headers:8572   free for files:7814148  
+   RAM1: variables:149632, code:187736, padding:8872   free for local variables:178048  
    RAM2: variables:332896  free for malloc/new:191392
-
+```
 ## Highlight of Changes included in T41EEE.91 November 5, 2025
 
 1.  A refinement of the calibration algorithms was completed.  Calibration will accept
