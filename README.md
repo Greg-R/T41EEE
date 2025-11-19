@@ -127,6 +127,19 @@ operation should be done at your own risk.  It may work, it may not.
 
 Split operation and the Bearing feature are still not supported.  That will happen eventually.
 
+## Button Layout
+
+The front-panel buttons are arranged in 3 columns and 6 rows.  The buttons are arranged as
+follows:
+
+|       |Column1        |Column2     |Column3|
+|Row1   |Select          |Menu-Up      |Band-Up|
+|Row2   |Zoom            |Menu-Down    |Band-Down|
+|Row3   |Filter-Toggle   |LSB-USB      |Mode|
+|Row4   |Noise-Select    |AutoNotch    |Audio-Out|
+|Row5   |Fine-Increment  |CW-Decode    |Center-Tune|
+|Row6   |Reset-Tune      |Enter-Freq   |Cal-Increment|
+
 ## Automatic Centering of the Audio Spectrum
 
 The original "Auto Gain" code provided by Harry GM3RVL has been applied to the audio spectrum.
