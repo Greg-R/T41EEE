@@ -62,8 +62,8 @@ void ReceiveDSP::ProcessIQData() {
     // What is the correct RF gain value for maximum dynamic range?
 
     //  Set RFGain for all bands.
-    if (ConfigData.autoGain) rfGain = ConfigData.rfGainCurrent - 20;    // Auto-gain.  Note the constant must be the same as below!
-    else rfGain = ConfigData.rfGain[ConfigData.currentBand] - 20;  // Manual gain adjust.  The constant is a critical determinant of dynamic range.
+    if (ConfigData.autoGain) rfGain = ConfigData.rfGainCurrent - 25;    // Auto-gain.  Note the constant must be the same as below!
+    else rfGain = ConfigData.rfGain[ConfigData.currentBand] - 25;  // Manual gain adjust.  The constant is a critical determinant of dynamic range.
     rfGainValue = pow(10, static_cast<float32_t>(rfGain) / 20.0);  // DSPGAINSCALE removed in T41EEE.9.  Greg KF5N February 24, 2024
 
     rfGainValue = rfGainValue * audioGainCompensate;
