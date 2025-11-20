@@ -1,4 +1,27 @@
-// T41 Transceiver Arduino Sketch
+// T41 Transceiver Arduino Sketch: T41EEE
+// "T41 Extreme Experimenters Edition"
+//
+// Please refer to license file which is included in the repository.
+// Contributors:
+// Albert Peter AC8GY.  Co-creator of the T41 SDT project.
+// Dr. Jack Purdum.     Co-creater of the T41 SDT project.
+// TeensyDuino, which is the software foundation of the Teensy Audio Library.
+// The Open Audio Arduino Library.  This version of T41 software leans heavily on this library.
+// The Teensy Convolution SDR project.  Most of the receiver is derived from this project.
+// The ArduinoJSON library.  This library is used for reading and writing to the SD card.
+// The Etherkit Si5351 library.  Important for simplifying an not-so-easy to control device!
+// Brian Low's Rotary encoder library; paramount for the physical user interface of the radio.
+// Contributors to the code specific to T41EEE:
+// Larry Acklin KB3CUF
+// Harry Brash GM3RVL
+// Jonathan Burchmore KN6LFB
+// Len Koppl KD0RC
+// John Melton G0ORX
+// Neville Marr ZL2BNE
+// Martin Rod OK4MR
+// Jeorg Uthoff DB200
+// If I have neglected to mention a contributor, please send me a note!
+// I can be found here: https://groups.io/g/SoftwareControlledHamRadio
 // Gregory Raven KF5N November 20 2025
 
 // setup() and loop() are at the bottom of this file.
