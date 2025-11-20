@@ -4,12 +4,12 @@
 // Please refer to license file which is included in the repository.
 // Contributors:
 // Albert Peter AC8GY.  Co-creator of the T41 SDT project.
-// Dr. Jack Purdum.     Co-creater of the T41 SDT project.
+// Dr. Jack Purdum W8TEE.  Co-creater of the T41 SDT project.
 // TeensyDuino, which is the software foundation of the Teensy Audio Library.
 // The Open Audio Arduino Library.  This version of T41 software leans heavily on this library.
 // The Teensy Convolution SDR project.  Most of the receiver is derived from this project.
 // The ArduinoJSON library.  This library is used for reading and writing to the SD card.
-// The Etherkit Si5351 library.  Important for simplifying an not-so-easy to control device!
+// The Etherkit Si5351 library.  Important for simplifying a not-so-easy to control device!
 // Brian Low's Rotary encoder library; paramount for the physical user interface of the radio.
 // Contributors to the code specific to T41EEE:
 // Larry Acklin KB3CUF
