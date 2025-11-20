@@ -445,3 +445,26 @@ void Eeprom::EEPROMStartup() {
   BandsWriteSize(BandsStackSize);            // Write the size of the bands array to EEPROM.
   BandsWrite();                              // Write the bands array to non-volatile memory.
 }
+
+
+/*****
+  Purpose: Initialize the SD card
+
+  Parameter list:
+    void
+
+  Return value;
+    int                   0 if cannot initialize, 1 otherwise
+*****/
+int Eeprom::InitializeSDCard() {
+  tft.setFontScale((enum RA8875tsize)1);
+  tft.setTextColor(RA8875_RED, RA8875_BLACK);
+  tft.setCursor(100, 240);
+  if (!SD.begin(chipSelect)) {
+    tft.print("SD card cannot be initialized.");
+    delay(2000L);  // Given them time to read it.
+    return 0;
+  }
+
+  return 1;
+}

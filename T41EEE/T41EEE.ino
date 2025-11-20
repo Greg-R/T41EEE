@@ -10,7 +10,7 @@ const char *calFilename = "/calibration.txt";  // <- SD library uses 8.3 filenam
 
 extern const int32_t SPECTRUM_RES{ 512 };
 
-// Bearing functionality is not implemented in T41EEE.91.
+/* Bearing functionality is not implemented in T41EEE.91 (to return in a future release).
 struct maps myMapFiles[10] = {
   { "Cincinnati.bmp", 39.07466, -84.42677 },  // Map name and coordinates for QTH
   { "Denver.bmp", 39.61331, -105.01664 },
@@ -22,6 +22,7 @@ struct maps myMapFiles[10] = {
   { "", 0.0, 0.0 },
   { "", 0.0, 0.0 }
 };
+*/
 
 uint32_t FFT_length = FFT_LENGTH;
 
@@ -956,12 +957,9 @@ FLASHMEM void setup() {
   Q_out_R_Ex.setMaxBuffers(32);
   Q_out_L.setMaxBuffers(64);  // Receiver audio buffer limit.
 
-  // Configure and check SD card.
-  ConfigData.sdCardPresent = InitializeSDCard();  // Initialize mandatory SD card.
-  ConfigData.sdCardPresent = SDPresentCheck();    // JJP 7/18/23
-
   // Switch matrix debug code.
   // Push and hold a button at power up to activate switch matrix calibration.
+  // Please note that switch matrix calibration is also available in the Calibration menu.
 #ifdef DEBUG_SWITCH_CAL
   eeprom.CalDataRead();  // If this is not done, the calibration data will be overwritten.
   if (analogRead(BUSY_ANALOG_PIN) < NOTHING_TO_SEE_HERE) {
@@ -979,6 +977,10 @@ FLASHMEM void setup() {
   button.EnableButtonInterrupts();
   eeprom.EEPROMStartup();
 #endif
+
+  // Configure and check SD card.
+  ConfigData.sdCardPresent = eeprom.InitializeSDCard();  // Initialize mandatory SD card.
+  ConfigData.sdCardPresent = SDPresentCheck();    // JJP 7/18/23
 
   // GPIOs should be configured at this point.  Make sure transmitter is disabled.
   enableTransmitter(false);

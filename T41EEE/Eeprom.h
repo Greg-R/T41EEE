@@ -27,6 +27,9 @@ public:
   void ConfigDataDefaults();
   void EEPROMStartup();
 
+  // SD card
+  int InitializeSDCard();
+
 private:
   const uint32_t EEPROM_BASE_ADDRESS = 0;
   const uint32_t CAL_BASE_ADDRESS = 1024;
