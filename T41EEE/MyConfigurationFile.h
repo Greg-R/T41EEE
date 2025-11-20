@@ -2,8 +2,6 @@
 
 #pragma once
 
-//#include <cstdint>
-
 //====================== User Specific Preferences =============
 const char RIGNAME[] = "T41-EP SDT";
 const int RIGNAME_X_OFFSET = 570;  // Pixel count to rig name field.
