@@ -1,4 +1,4 @@
-// Stand-alone "utility" functions
+// Stand-alone "utility" functions.  These functions will be integrated into new classes in a future release.
 
 
 #include "SDT.h"
@@ -44,7 +44,6 @@ FLASHMEM void sineTone(int numCycles) {
 FLASHMEM void initCWShaping() {
   int pos;
   float deg;
-
   // Rising waveform
   //  Raised cosine increasing amplitude for 128 samples (roughly 5ms)
   for (pos = 0, deg = -180; pos < 256; deg += 1.40625 / 2.0 /* 180 / 128 */, pos++) {
@@ -276,7 +275,6 @@ void Calculatedbm() {
   //  Determine Lbin and Ubin from ts.dmod_mode and FilterInfo.width.
   //  LSB and USB filter bandwidth calculated the same way due to mode changes.  Greg KF5N March 16, 2025.
   bw_LSB = bands.bands[ConfigData.currentBand].FHiCut - bands.bands[ConfigData.currentBand].FLoCut;
-  ;
   bw_USB = bw_LSB;
   // calculate upper and lower limit for determination of signal strength
   // = filter passband is between the lower bin Lbin and the upper bin Ubin
@@ -452,7 +450,6 @@ float ApproxAtan(float z) {
 
 /*****
   Purpose: function reads the analog value for each matrix switch and stores that value in EEPROM.
-           Only called if STORE_SWITCH_VALUES is uncommented.
 
   Parameter list:
     void

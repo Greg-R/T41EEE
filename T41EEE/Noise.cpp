@@ -613,7 +613,7 @@ void SpectralNoiseReduction()
 
 
 /*****
-  Purpose: void LMSNoiseReduction(
+  Purpose: LMS noise reduction algorithm.
   
   Parameter list:
     void
@@ -636,7 +636,7 @@ void LMSNoiseReduction(int16_t blockSize, float32_t *nrbuffer) {
 
 
 /*****
-  Purpose: void InitLMSNoiseReduction()
+  Purpose: Initialize LMS noise reduction algorithm.
   
   Parameter list:
     void

@@ -307,8 +307,8 @@ float32_t EQ_Band14Coeffs[20] = {  //4000 919  4 pole Gaussian  1/3 octave
 };
 
 
-//===================End Excite Coefficients ============
-
+/*===================End Excite Coefficients ============
+Where was this used???  Greg KF5N November 2025
 float32_t* mag_coeffs[11] = {
   // for Index 0 [1xZoom == no zoom] the mag_coeffs will consist of  a NULL  ptr,
   // since the filter is not going to be used in this  mode!
@@ -602,7 +602,7 @@ float32_t* mag_coeffs[11] = {
     1.997347796837673830,
     -0.997938170303869221 }
 };
-
+*/
 
 const float32_t nuttallWindow256[] = {
   0.0000001, 0.0000073, 0.0000292, 0.0000663, 0.0001192, 0.0001891, 0.0002771, 0.0003851,

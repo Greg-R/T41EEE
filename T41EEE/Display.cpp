@@ -1456,7 +1456,6 @@ void Display::UpdateKeyField() {
     } else {
       tft.print("L ");
     }
-    //    tft.print(" ");
     // KD0RC end
     tft.print(ConfigData.currentWPM);
   } else {

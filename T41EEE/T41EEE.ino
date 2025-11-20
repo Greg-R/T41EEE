@@ -1,5 +1,5 @@
 // T41 Transceiver Arduino Sketch
-// Gregory Raven KF5N November 14 2025
+// Gregory Raven KF5N November 20 2025
 
 // setup() and loop() are at the bottom of this file.
 
@@ -26,7 +26,7 @@ struct maps myMapFiles[10] = {
 
 uint32_t FFT_length = FFT_LENGTH;
 
-//======================================== Global object definitions ==================================================
+//=========================== Global object definitions ============================
 bool agc_action = false;
 
 // Teensy and OpenAudio dataflow code.
@@ -36,14 +36,14 @@ bool agc_action = false;
 Display display;
 ReceiveDSP process;        // Receiver process object.
 RxCalibrate rxcalibrater;  // Instantiate the calibration objects.
-TxCalibrate txcalibrater;
-CW_Exciter cwexciter;
-JSON json;
-Eeprom eeprom;  // Eeprom object.
+TxCalibrate txcalibrater;  // Transmit calibration object.
+CW_Exciter cwexciter;      // CW exciter object.
+JSON json;                 // JSON object.  Used for reading/writing to SD card.
+Eeprom eeprom;             // Eeprom object.
 std::vector<uint32_t> center_tune_array = CENTER_TUNE_ARRAY;
 std::vector<uint32_t> fine_tune_array = FINE_TUNE_ARRAY;
 Button button(fine_tune_array, center_tune_array);
-ModeControl modecontrol;
+ModeControl modecontrol;  // Mode control struct.  This is a part of the "modal" radio configuration process.
 
 const char *topMenus[] = { "CW Options", "RF Set", "VFO Select",
                            "Config EEPROM", "Cal EEPROM", "AGC",
@@ -102,7 +102,6 @@ float32_t DMAMEM float_buffer_RTemp[2048];
 //==================== End Excite Variables================================
 
 //======================================== Global structure declarations ===============================================
-
 config_t ConfigData;
 calibration_t CalData;
 
@@ -173,8 +172,7 @@ dispSc displayScale[] =  // dbText, dBScale, baseOffset
     { "10 dB/", 20.0, 10 }  //  1, 2, and 5 dB options removed.  Greg KF5N July 30, 2024.
   };
 
-//======================================== Global variables declarations for Quad Oscillator 2 ===============================================
-int32_t NCOFreq = 0;
+int32_t NCOFreq = 0;  // Used for fine-tune frequency shift.
 
 //======================================== Global variables declarations ===============================================
 //================== Global CW Correlation and FFT Variables =================
@@ -802,6 +800,7 @@ MenuSelect readButton() {
   Return value: void
 *****/
 void KeyTipOn() {
+  // Make sure this is ignored in other modes!  Probably should detach in non-CW modes.
   if (digitalRead(KEYER_DIT_INPUT_TIP) == LOW and bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE)
     keyPressedOn = 1;
 }
@@ -817,6 +816,7 @@ void KeyTipOn() {
 void KeyRingOn()  //AFP 09-25-22
 {
   if (ConfigData.keyType == 1) {
+    // Make sure this is ignored in other modes!  Probably should detach in non-CW modes.
     if (digitalRead(KEYER_DAH_INPUT_RING) == LOW and bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE)
       keyPressedOn = 1;
   }
@@ -874,8 +874,7 @@ FLASHMEM void setup() {
   digitalWrite(MUTE, MUTEAUDIO);  // Keep audio junk out of the speakers/headphones until configuration is complete.
   pinMode(PTT, INPUT_PULLUP);
   pinMode(BUSY_ANALOG_PIN, INPUT);  // Pin 39.  Switch matrix output connects to this pin.
-                                    //  pinMode(KEYER_DIT_INPUT_TIP, INPUT_PULLUP);  // Straight key and keyer paddle.
-                                    //  pinMode(KEYER_DAH_INPUT_RING, INPUT_PULLUP); // The other keyer paddle.
+                                    // Straight key and paddle GPIOs are handled in special set-up function.
 
   // SPI bus to display.
   pinMode(TFT_MOSI, OUTPUT);
@@ -980,7 +979,7 @@ FLASHMEM void setup() {
 
   // Configure and check SD card.
   ConfigData.sdCardPresent = eeprom.InitializeSDCard();  // Initialize mandatory SD card.
-  ConfigData.sdCardPresent = SDPresentCheck();    // JJP 7/18/23
+  ConfigData.sdCardPresent = SDPresentCheck();           // JJP 7/18/23
 
   // GPIOs should be configured at this point.  Make sure transmitter is disabled.
   enableTransmitter(false);
@@ -1011,7 +1010,6 @@ FLASHMEM void setup() {
   headphoneVolume.setGain(0.0);
   volumeChangeFlag = true;  // Adjust volume to saved value.
 
-  //  lastState = RadioState::NOSTATE;  // To make sure the receiver will be configured on the first pass through.  KF5N September 3, 2023
   // Set up the initial state/mode.
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) {
     radioState = RadioState::CW_RECEIVE_STATE;
@@ -1036,7 +1034,7 @@ FLASHMEM void setup() {
   lastState = RadioState::NOSTATE;  // Forces an update.
   powerUp = true;                   // This delays receiver start-up to allow transients to settle.
 
-  FilterSetSSB();  // This is important!  If this is not run up front various other filters go into never never land.
+  FilterSetSSB();  // This is important!  If this is not run up front various other filters go into never-never land.
 
   //  Draw the entire radio display.
   display.RedrawAll();
@@ -1148,9 +1146,9 @@ void loop() {
     headphoneScale.setGain(HEADPHONESCALE);
   }
 
-  //  Begin radio state machines
+  //  Begin radio mode handlers.
 
-  //  Begin SSB Mode state machine
+  //  Begin SSB mode handler.
   switch (radioState) {
     case RadioState::AM_RECEIVE_STATE:
     case RadioState::SAM_RECEIVE_STATE:
@@ -1204,7 +1202,7 @@ void loop() {
   }
   // End SSB Mode
 
-  // Begin CW Mode state machine
+  // Begin CW Mode mode handler.
 
   switch (radioState) {
     case RadioState::CW_RECEIVE_STATE:

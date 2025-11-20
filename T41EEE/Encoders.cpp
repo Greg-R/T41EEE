@@ -108,7 +108,7 @@ void EncoderCenterTune() {
   Return value;
     void
 *****/
-void EncoderVolume()  //============================== AFP 10-22-22  Begin new
+void EncoderVolume()  // AFP 10-22-22  Begin new
 {
   char result;
 
@@ -146,7 +146,7 @@ void EncoderVolume()  //============================== AFP 10-22-22  Begin new
     }
   }
   // This is so FT8 can be monitored out of the speaker.
-  // The FT8 signal is sent to the USB coded via the headphone output.
+  // The FT8 signal is sent to the external USB codec via the headphone output.
   if (ConfigData.audioOut == AudioState::BOTH) {
     ConfigData.speakerVolume += adjustVolEncoder;
     if (ConfigData.speakerVolume > 100) {

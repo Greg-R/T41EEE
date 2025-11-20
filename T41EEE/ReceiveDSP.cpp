@@ -460,22 +460,16 @@ void ReceiveDSP::ProcessIQData() {
 
     // =================Interpolation up to 192ksps  ================
     //  Right channel audio deactivated.  KF5N March 11, 2024
-    arm_fir_interpolate_f32(&FIR_int1_I, float_buffer_L, iFFT_buffer, BUFFER_SIZE * N_BLOCKS / (uint32_t)(DF));  // Interpolation by 2?  To 48ksps???
-
+    arm_fir_interpolate_f32(&FIR_int1_I, float_buffer_L, iFFT_buffer, BUFFER_SIZE * N_BLOCKS / (uint32_t)(DF));
     // interpolation-by-4
-    arm_fir_interpolate_f32(&FIR_int2_I, iFFT_buffer, float_buffer_L, BUFFER_SIZE * N_BLOCKS / (uint32_t)(DF1));  // to 192ksps
+    arm_fir_interpolate_f32(&FIR_int2_I, iFFT_buffer, float_buffer_L, BUFFER_SIZE * N_BLOCKS / (uint32_t)(DF1));
 
-    /**********************************************************************************  AFP 12-31-20
-      Digital Volume Control
-    **********************************************************************************/
-
-    // Scale by 8 to compensate for interpolation.  Also compensate for audio filter bandwidth.
-    //    arm_scale_f32(float_buffer_L, 8.0 * audioGainCompensate, float_buffer_L, BUFFER_SIZE * N_BLOCKS);
+    // Scale by 8 to compensate for interpolation.
     arm_scale_f32(float_buffer_L, 8.0, float_buffer_L, BUFFER_SIZE * N_BLOCKS);
+
     /**********************************************************************************  AFP 12-31-20
       CONVERT TO INTEGER AND PLAY AUDIO
     **********************************************************************************/
-
     q15_t q15_buffer_LTemp[2048];  //KF5N
     arm_float_to_q15(float_buffer_L, q15_buffer_LTemp, 2048);
     Q_out_L.play(q15_buffer_LTemp, 2048);

@@ -5,11 +5,7 @@
 //======================================== Library include files ========================================================
 #include <stdio.h>
 #include <stdlib.h>
-//// #include <Adafruit_GFX.h> // Install the Adafruit GFX library via the IDE Library Manager.
 #include <ArduinoJson.h>  // Install the ArduinoJson library via the IDE Library Manager.
-////#include "Fonts/FreeMonoBold24pt7b.h"
-////#include "Fonts/FreeMonoBold18pt7b.h"
-////#include "Fonts/FreeMono9pt7b.h"
 #include <OpenAudio_ArduinoLibrary.h>  // Manually installed library.  Please see compilation instructions in the ino or README.
 #include <TimeLib.h>                   // Part of Teensy Time library.
 #include <SPI.h>
@@ -21,10 +17,8 @@
 #include <si5351.h>  // Install the Etherkit Si5351 library via the IDE Library Manager.
 #include <RA8875.h>  // This library is included with TeensyDuino.
 #include <Rotary.h>  // Manually installed library.  Please see compilation instructions in the ino or README.
-#include <utility/imxrt_hw.h>  // for setting I2S freq, Thanks, FrankB!
+#include <utility/imxrt_hw.h>  // For setting I2S freq, Thanks, FrankB!
 #include <EEPROM.h>
-#include <vector>
-#include <algorithm>
 #include <string.h>
 
 // User section which is customizable.
@@ -141,24 +135,17 @@ const int FFT_LENGTH = 512;
 #define WHITE 0xFFFF           /* 255, 255, 255 */
 #define ORANGE 0xFD20          /* 255, 165,   0 */
 #define FILTER_WIN 0x10        // Color of SSB filter width
-
 #define MAX_WPM 60
-
-                              // For other encoders or libs we use 1.0f.
 #define MAX_ZOOM_ENTRIES 5
 
-//============== Pin Assignments =====================================
-//============== Pins 0 and 1 are usually reserved for the USB COM port communications
-//============== On the Teensy 4.1 board, pins GND, 0-12, and pins 13-23, 3.3V, GND, and
-//============== Vin are "covered up" by the Audio board. However, not all of those pins are
-//============== actually used by the board. See: https://www.pjrc.com/store/teensy3_audio.html
-//========================================= Display pins
+//============== GPIO Pin Assignments
+//============== Display pins
 const int TFT_DC = 9;
 const int TFT_CS = 10;
 const int TFT_MOSI = 11;
 const int TFT_SCLK = 13;
 const int TFT_RST = 255;
-//========================================= Encoder pins  Jack Purdum W8TEE September 25, 2023
+//============== Encoder pins  Jack Purdum W8TEE September 25, 2023
 #ifdef FOURSQRP
 const int VOLUME_ENCODER_A = 2;
 const int VOLUME_ENCODER_B = 3;
@@ -179,7 +166,7 @@ const int TUNE_ENCODER_A = 16;
 const int TUNE_ENCODER_B = 17;
 #endif
 
-//========================================= Filter Board pins
+//======================================= Filter Board pins
 const int FILTERPIN80M = 30;  // 80M filter relay
 const int FILTERPIN40M = 31;  // 40M filter relay
 const int FILTERPIN20M = 28;  // 20M filter relay
@@ -191,7 +178,7 @@ const int MUTE = 38;          // Mute Audio, HIGH = "On" Audio PA, LOW = Mute Au
 const int KEYER_DAH_INPUT_RING = 35;  // Ring connection for keyer.  Default for righthanded user.  
 const int KEYER_DIT_INPUT_TIP = 36;   // Tip connection for keyer.  Also straight key.
 const int RESET = 0;  // QSD2/QSE2 reset pin
-//========================================================= End Pin Assignments =================================
+//====================================== End Pin Assignments
 #define TMS0_POWER_DOWN_MASK (0x1U)
 #define TMS1_MEASURE_FREQ(x) (((uint32_t)(((uint32_t)(x)) << 0U)) & 0xFFFFU)
 #define PIH 1.5707963267948966192313216916398f
@@ -248,7 +235,7 @@ const int RESET = 0;  // QSD2/QSE2 reset pin
 
 // End constants
 
-//  States used to control radio function.
+//  States and modes used to control radio function.
 enum class RadioState{SSB_RECEIVE_STATE, SSB_TRANSMIT_STATE, FT8_TRANSMIT_STATE, FT8_RECEIVE_STATE, CW_RECEIVE_STATE, CW_TRANSMIT_STRAIGHT_STATE, 
                       CW_TRANSMIT_KEYER_STATE, AM_RECEIVE_STATE, SAM_RECEIVE_STATE, SSB_CALIBRATE_STATE, SSB_IM3TEST_STATE, CW_CALIBRATE_STATE, 
                       RECEIVE_CALIBRATE_STATE, SET_CW_SIDETONE, NOSTATE};
@@ -259,13 +246,14 @@ enum class AudioState{SPEAKER, HEADPHONE, BOTH, MUTE_BOTH};
 enum class MenuSelect{MENU_OPTION_SELECT, MAIN_MENU_UP, BAND_UP, ZOOM, MAIN_MENU_DN, BAND_DN, FILTER, DEMODULATION, SET_MODE,
                       NOISE_REDUCTION, NOTCH_FILTER, MUTE_AUDIO, FINE_TUNE_INCREMENT, DECODER_TOGGLE,
                       MAIN_TUNE_INCREMENT, RESET_TUNING, UNUSED_1, BEARING, BOGUS_PIN_READ, DEFAULT};
-
+/*
 struct maps {
   char mapNames[50];
   float lat;
   float lon;
 };
 extern struct maps myMapFiles[];
+*/
 
 struct band {
   uint32_t freq;       // Current frequency in Hz * 100
@@ -451,7 +439,6 @@ extern struct calibration_t CalData;
 #include "ModeControl.h"
 
 //------------------------- Global CW Filter declarations ----------
-
 #define IIR_CW_NUMSTAGES 4
 extern float32_t CW_Filter_Coeffs[];
 extern float32_t HP_DC_Filter_Coeffs[];
@@ -479,7 +466,6 @@ extern int h;
 extern bool centerTuneFlag;
 
 //================== Global Excite Variables =================
-
 extern float32_t HP_DC_Butter_state2[2];                  //AFP 11-04-22
 extern float32_t HP_DC_Butter_state[6];                   //AFP 09-23-22
 extern arm_biquad_cascade_df2T_instance_f32 s1_Receive;   //AFP 09-23-22
@@ -533,15 +519,10 @@ void SSB_ExciterIQData();
 
 //==================== End Excite Variables ================================
 
-//======================================== Global object declarations ==================================================
-
+//==================== Global object declarations ==========================
 extern int32_t NCOFreq;  // AFP 04-16-22
 
-//======================================== Global object declarations ==================================================
-// Teensy and OpenAudio objects.  Revised by KF5N July 24, 2024
-extern AudioConnection_F32 patchCord15;  // Patch cords 15 and 16 are used to connect/disconnect the I and Q datastreams.
-extern AudioConnection patchCord16;
-
+// Teensy and OpenAudio objects which need to be global.  Revised by KF5N July 24, 2024
 extern AudioAmplifier volumeAdjust;
 extern AudioRecordQueue ADC_RX_I;
 extern AudioRecordQueue ADC_RX_Q;
@@ -564,9 +545,9 @@ extern AudioSynthWaveformSine_F32 toneSSBCal1, toneSSBCal2;
 extern AudioMixer4_F32 mixer1;
 extern AudioEffectCompressor2_F32  compressor1;   // Open Audio Compressor 2
 extern radioCESSB_Z_transmit_F32 cessb1;
-// end Teensy and OpenAudio objects
+// End Teensy Audio and OpenAudio objects.
 
-extern void SetAudioOperatingState(RadioState operatingState);  // Configures audio system for requested mode state.
+extern void SetAudioOperatingState(RadioState operatingState);  // Configures audio system for requested mode.
 extern void controlAudioOut(AudioState audioState, bool mute);  // Sets speaker and headphone mute/unmute.
 
 extern Rotary volumeEncoder;    // (2,  3)
@@ -576,20 +557,20 @@ extern Rotary fineTuneEncoder;  // (4,  5);
 
 extern Metro ms_500;
 
-extern Display display;
-extern ReceiveDSP process;              // Receiver DSP object.
+extern Display display;              // Display control object.
+extern ReceiveDSP process;           // Receiver DSP object.
 extern Eeprom eeprom;                // EEPROM memory object.
-extern JSON json;
-extern RxCalibrate rxcalibrater;         // CW mode calibration object.
-extern TxCalibrate txcalibrater;   // SSB mode calibration object.
+extern JSON json;                    // JSON object.
+extern RxCalibrate rxcalibrater;     // CW mode calibration object.
+extern TxCalibrate txcalibrater;     // SSB mode calibration object.
 extern CW_Exciter cwexciter;         // CW exciter object
-extern Button button;
+extern Button button;                // Front-panel button object.
 
-extern Si5351 si5351;
+extern Si5351 si5351;                // RF PLL object.
 
-extern RA8875 tft;
+extern RA8875 tft;                   // RA8875 display controller plus graphics object.
 
-//======================================== Global structure declarations ===============================================
+//====================== Global structure declarations ===============================
 
 struct secondaryMenuConfiguration {
   byte whichType;       // 0 = no options, 1 = list, 2 = encoder value
@@ -643,7 +624,7 @@ struct dispSc {
   uint16_t baseOffset;
 };
 
-extern struct dispSc displayScale[];
+extern struct dispSc displayScale[];  // This is planned to be deleted.
 
 typedef struct Menu_Descriptor {
   const uint8_t no;         // Menu ID
@@ -652,8 +633,8 @@ typedef struct Menu_Descriptor {
 } Menu_D;
 extern Menu_D Menus[];
 
-//======================================== Global variables declarations ===============================================
-//========================== Some are not in alpha order because of forward references =================================
+//============================= Global variables declarations ===============================================
+//=============== Some are not in alpha order because of forward references =================================
 
 extern int last_filter_pos;
 extern int filter_pos;
@@ -825,7 +806,7 @@ extern float32_t IQXPhaseCorrectionFactor[];
 extern float32_t /*DMAMEM*/ last_sample_buffer_L[];
 extern float32_t /*DMAMEM*/ last_sample_buffer_R[];
 extern float32_t L_BufferOffset[];
-extern float32_t *mag_coeffs[];
+//extern float32_t *mag_coeffs[];
 extern bool calOnFlag;
 extern float32_t mid;
 extern float32_t /*DMAMEM*/ NR_FFT_buffer[];

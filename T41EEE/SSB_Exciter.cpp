@@ -1,4 +1,4 @@
-// The SSB exciter sketch code.  Most of the exciter is in AudioSignal.h.
+// The SSB exciter sketch code.  Most of the SSB (and CW) exciter is in AudioSignal.h.
 
 #include "SDT.h"
 

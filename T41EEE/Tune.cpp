@@ -1,3 +1,4 @@
+// Most of the functions which follow are for control of the Si5351 PLL module.
 
 #include "SDT.h"
 
@@ -187,6 +188,7 @@ void ResetTuning() {
 
 /*****
   Purpose: Purpose is to set VFOA to receive frequency and VFOB to the transmit frequency.
+           This not currently working, and it will be implemented in a future release.
 
   Parameter list:
     void
@@ -198,7 +200,6 @@ void ResetTuning() {
 *****/
 int DoSplitVFO() {
   char freqBuffer[15];
-  //  int val;
   MenuSelect menu;
   long chunk = SPLIT_INCREMENT;
   long splitOffset;

@@ -1,4 +1,4 @@
-// Morse decode and other Morse related utilities.
+// Morse decode (ALPS decoder) and other CW related utilities.
 
 #include "SDT.h"
 
@@ -52,7 +52,6 @@ enum states { state0,
               state6 };
 states decodeStates = state0;
 
-//void DoGapHistogram(uint32_t gapLen);
 
 /*****
   Purpose: This function replaces the arm_max_float32() function that finds the maximum element in an array.

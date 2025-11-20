@@ -763,7 +763,6 @@ void TxCalibrate::DoXmitCalibrate(int calMode, bool radio, bool refine, bool toE
     if (IQCalType == 0) amplitude = GetEncoderValueLive(-2.0, 2.0, amplitude, xmitIncrement, "IQ Gain ", true, true);
     if (IQCalType == 1) phase = GetEncoderValueLive(-2.0, 2.0, phase, xmitIncrement, "IQ Phase ", false, true);
     writeToCalData(amplitude, phase);
-
   }  // end while
 }  // End Transmit calibration
 
@@ -906,7 +905,6 @@ void TxCalibrate::DoXmitCarrierCalibrate(int calMode, bool radio, bool refine, b
             index = 0;
             averageFlag = false;
             averageCount = 0;
-            //      count = 0;
             adjdB = 0;
             // Clear the vector before moving to phase.
             std::fill(sweepVectorValue.begin(), sweepVectorValue.end(), 0);
@@ -1402,7 +1400,6 @@ float TxCalibrate::PlotCalSpectrum(int x1, int cal_bins[3], int capture_bins) {
   adjdB = (static_cast<float32_t>(adjAmplitude) - static_cast<float32_t>(refAmplitude)) / (1.95 * 2.0);          // Cast to float and calculate the dB level.  Needs further refinement for accuracy.  KF5N
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER && not(calTypeFlag == 0)) adjdB = -adjdB;  // Flip sign for USB only for TX cal.
   adjdB_avg = adjdB * alpha + adjdBold * (1.0 - alpha);                                                          // Exponential average.
-                                                                                                                 //  adjdB_avg = adjdB;     // TEMPORARY EXPERIMENT
   adjdBold = adjdB_avg;
 
   tft.writeTo(L1);

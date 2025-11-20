@@ -1,4 +1,4 @@
-// Mode control members.
+// Mode control struct members.
 
 
 #include "SDT.h"
