@@ -1109,7 +1109,7 @@ void loop() {
 
   // Top menu button read.
   // SSB and FT8 transmit operate via the main loop().  CW modes operate within independent while loops.  Don't stop in SSB and FT8 modes to read the buttons.
-  if ((radioState != RadioState::SSB_TRANSMIT_STATE) and (radioState != RadioState::FT8_TRANSMIT_STATE)) {
+  if ((radioState != RadioState::SSB_TRANSMIT_STATE) and (radioState != RadioState::FT8_TRANSMIT_STATE) and (calibrateFlag == false)) {
     menu = readButton();
     if (menu != MenuSelect::BOGUS_PIN_READ) button.ExecuteButtonPress(menu);
   }

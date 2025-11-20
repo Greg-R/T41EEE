@@ -265,7 +265,7 @@ void Button::ExecuteButtonPress(MenuSelect val) {
       break;
 
     case MenuSelect::UNUSED_1:  // 17
-      if (calOnFlag == 0) {
+      if (calOnFlag == false) {
         ButtonFrequencyEntry();
       }
       break;
