@@ -5,11 +5,11 @@
 //======================================== Library include files ========================================================
 #include <stdio.h>
 #include <stdlib.h>
-#include <Adafruit_GFX.h> // Install the Adafruit GFX library via the IDE Library Manager.
+//// #include <Adafruit_GFX.h> // Install the Adafruit GFX library via the IDE Library Manager.
 #include <ArduinoJson.h>  // Install the ArduinoJson library via the IDE Library Manager.
-#include "Fonts/FreeMonoBold24pt7b.h"
-#include "Fonts/FreeMonoBold18pt7b.h"
-#include "Fonts/FreeMono9pt7b.h"
+////#include "Fonts/FreeMonoBold24pt7b.h"
+////#include "Fonts/FreeMonoBold18pt7b.h"
+////#include "Fonts/FreeMono9pt7b.h"
 #include <OpenAudio_ArduinoLibrary.h>  // Manually installed library.  Please see compilation instructions in the ino or README.
 #include <TimeLib.h>                   // Part of Teensy Time library.
 #include <SPI.h>

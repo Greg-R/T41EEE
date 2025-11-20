@@ -237,11 +237,11 @@ int DoSplitVFO() {
   display.FormatFrequency(ConfigData.currentFreqB, freqBuffer);
   tft.fillRect(FREQUENCY_X_SPLIT, FREQUENCY_Y - 12, VFOB_PIXEL_LENGTH, FREQUENCY_PIXEL_HI, RA8875_BLACK);
   tft.setCursor(FREQUENCY_X_SPLIT, FREQUENCY_Y);
-  tft.setFont(&FreeMonoBold24pt7b);
+////  tft.setFont(&FreeMonoBold24pt7b);
   tft.setTextColor(RA8875_GREEN);
   tft.print(freqBuffer);  // Show VFO_A
 
-  tft.setFont(&FreeMonoBold18pt7b);
+////  tft.setFont(&FreeMonoBold18pt7b);
   display.FormatFrequency(ConfigData.currentFreqA, freqBuffer);
   tft.setTextColor(RA8875_LIGHT_GREY);
   tft.setCursor(FREQUENCY_X, FREQUENCY_Y + 6);
@@ -253,7 +253,7 @@ int DoSplitVFO() {
   tft.clearMemory();
   tft.writeTo(L1);
 
-  tft.setFont(&FreeMono9pt7b);
+////  tft.setFont(&FreeMono9pt7b);
   tft.setTextColor(RA8875_RED);
   tft.setCursor(FILTER_PARAMETERS_X + 180, FILTER_PARAMETERS_Y + 6);
   tft.print("Split Active");
