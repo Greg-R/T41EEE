@@ -49,19 +49,17 @@ configuration:
 2.  CPU speed is set to 528 MHz (Tools menu).
 3.  Select USB Type: "Dual Serial" in the Tools menu.
 4.  TeensyDuino version is 1.59.0.  Install TeensyDuino using the IDE Board Manager.
-5.  You will need to install the Adafruit GFX library.  Install via the
+5.  You will need to install the ArduinoJson library.  Install via the
     IDE Library Manager.
-6.  You will need to install the ArduinoJson library.  Install via the
-    IDE Library Manager.
-7.  You will need to install the Etherkit Si5351 library.  Install via the IDE
+6.  You will need to install the Etherkit Si5351 library.  Install via the IDE
     library manager.
-8.  You will need to manually install the Open Audio Library.  The library was updated
+7.  You will need to manually install the Open Audio Library.  The library was updated
     in November, 2025.  It is mandatory to update this library!  T41EEE.91 uses the
     recently developed quad I2S output class, which was recently added to the library:
 
 <https://github.com/chipaudette/OpenAudio_ArduinoLibrary>
 
-9.  You will need to manually install the Rotary library:
+8.  You will need to manually install the Rotary library:
 
 <https://github.com/brianlow/Rotary>
 
