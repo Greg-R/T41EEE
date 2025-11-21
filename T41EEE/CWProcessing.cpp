@@ -324,7 +324,6 @@ FLASHMEM void SetKeyPowerUp() {
   // Keyer paddle.
   if (ConfigData.keyType == 1) {
     pinMode(KEYER_DAH_INPUT_RING, INPUT_PULLUP);  // Activate pullup on dah.
-    Serial.printf("Pullup added to DAH\n");
     attachInterrupt(digitalPinToInterrupt(KEYER_DIT_INPUT_TIP), KeyTipOn, CHANGE);
     attachInterrupt(digitalPinToInterrupt(KEYER_DAH_INPUT_RING), KeyRingOn, CHANGE);
     // Flip dit and dah if so configured.

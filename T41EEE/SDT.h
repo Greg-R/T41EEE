@@ -655,6 +655,7 @@ extern int16_t pixelold[];
 extern bool encoderFilterFlag;  // Set by EncoderFilter() isr.
 extern bool audioCompensateFlag;  // Set by FilterSetSSB().
 extern bool audioGraphicsFlag;
+extern bool ft8EnableFlag;
 extern bool startRxFlag;
 extern int16_t y_old, y_new, y1_new, y1_old, y_old2;
 extern const uint16_t gradient[];

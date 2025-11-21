@@ -648,7 +648,12 @@ void Display::BandInformation() {
 
   // Write FT8 mode to display.
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) {
-    tft.print("FT8");
+    if(not ft8EnableFlag) tft.print("FT8");
+    if(ft8EnableFlag) {
+      tft.setTextColor(RA8875_RED);
+      tft.print("FT8");  // Indicate that FT8 transmit is enabled.
+      tft.setTextColor(RA8875_GREEN);
+    }
   }
 
   // Write AM mode to display.

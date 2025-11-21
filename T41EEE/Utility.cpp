@@ -670,8 +670,8 @@ void isTransmitterKeyed() {
     while (true) { delay(1000); }  // Delay indefinitely.  User must restart radio.
   }
 
-  // Check SerialUSB1.rts().
-  if (SerialUSB1.rts() == HIGH) {
+  // Check SerialUSB1.rts().  Ignore if FT8 is not enabled.  FT8 always disabled at boot.
+  if (SerialUSB1.rts() == HIGH and ft8EnableFlag) {
     std::string prompt = "SerialUSB1.rts is HIGH. Fix and restart.";
     tft.print(prompt.c_str());
     while (true) { delay(1000); }  // Delay indefinitely.  User must restart radio.

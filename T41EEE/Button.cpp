@@ -746,7 +746,6 @@ void Button::ButtonMode()  //  Greg KF5N March 11, 2025
       bands.bands[ConfigData.currentBand].mode = RadioMode::FT8_MODE;
       radioState = RadioState::FT8_RECEIVE_STATE;
       bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER;  // FT8 always USB.
-      SerialUSB1.begin(115200);                                        // Activate Serial1.
       break;
     case RadioMode::FT8_MODE:  // Toggle the current mode.
       SerialUSB1.end();        // Deactivate Serial1.
@@ -856,7 +855,7 @@ void Button::ButtonMuteAudio() {
 void Button::ButtonFrequencyEntry() {
   bool valid_frequency = false;
   int centerLine = (MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2;
-  TxRxFreqOld = TxRxFreq;
+  TxRxFreqOld = TxRxFreq;  // Store current frequency in case it should be restored.
 
 #define show_FEHelp
   bool doneFE = false;                         // set to true when a valid frequency is entered
@@ -1055,12 +1054,13 @@ void Button::ButtonFrequencyEntry() {
   directFreqFlag = 1;
   ConfigData.centerFreq = TxRxFreq;
   centerTuneFlag = 1;  // Put back in so tuning bar is refreshed.  KF5N July 31, 2023
-  SetFreq();           // Used here instead of centerTuneFlag.  KF5N July 22, 2023
+//  SetFreq();           // Used here instead of centerTuneFlag.  KF5N July 22, 2023
+  // This determines if the entered frequency is permanent or temporary.
   if (save_last_frequency == true and valid_frequency == true) {
-    ConfigData.lastFrequencies[ConfigData.currentBand][ConfigData.activeVFO] = enteredF;
+    ConfigData.lastFrequencies[ConfigData.currentBand][ConfigData.activeVFO] = enteredF;  // Permanent.
   } else {
-    if (save_last_frequency == 0) {
-      ConfigData.lastFrequencies[ConfigData.currentBand][ConfigData.activeVFO] = TxRxFreqOld;
+    if (save_last_frequency == false) {
+      ConfigData.lastFrequencies[ConfigData.currentBand][ConfigData.activeVFO] = TxRxFreqOld;  // Revert to original.
     }
   }
   tft.fillRect(0, 0, 799, 479, RA8875_BLACK);  // Clear layer 2  JJP 7/23/23

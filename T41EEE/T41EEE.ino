@@ -70,7 +70,7 @@ ModeControl modecontrol;  // Mode control struct.  This is a part of the "modal"
 
 const char *topMenus[] = { "CW Options", "RF Set", "VFO Select",
                            "Config EEPROM", "Cal EEPROM", "AGC",
-                           "SSB Options", "EQ Tx Set",   // Noise floor removed.  Greg KF5N February 14, 2025
+                           "SSB/FT8 Options", "EQ Tx Set",   // Noise floor removed.  Greg KF5N February 14, 2025
                            "EQ Rec Set", "Calibrate" };  // Bearing temporarily removed.
 // Pointers to functions which execute the menu options.  Do these functions used the returned integer???
 void (*functionPtr[])() = { &CWOptions, &RFOptions, &VFOSelect,
@@ -285,6 +285,7 @@ bool calibrateFlag = false;
 bool encoderFilterFlag = false;    // Set by EncoderFilter() isr.
 bool audioCompensateFlag = false;  // Set by FilterSetSSB();
 bool audioGraphicsFlag = false;    // Set by FilterSetSSB();
+bool ft8EnableFlag = false;
 bool startRxFlag = false;
 // Using ARRL table: https://www.arrl.org/frequency-bands.  First frequency is CW, second is SSB.
 #if ITU_REGION == 1
@@ -878,9 +879,7 @@ uint32_t afterPowerUp = 0;
 *****/
 FLASHMEM void setup() {
 
-  Serial.begin(115200);  // Use this serial for Teensy programming.
-                         //  SerialUSB1.begin(115200);  // Use this serial for FT8 keying.
-                         /* check for CrashReport stored from previous run */
+// Check for CrashReport stored from previous run.
   if (CrashReport) {
     /* print info (hope Serial Monitor windows is open) */
     Serial.print(CrashReport);
@@ -1062,7 +1061,7 @@ FLASHMEM void setup() {
   //  Draw the entire radio display.
   display.RedrawAll();
 
-  // Don't start up if something is keyed.  Warn the user to resolve and restart.
+  // Don't start up if key/paddle or PTT is closed.  Warn the user to resolve and restart.
   isTransmitterKeyed();
 }
 //============================================================== END setup() =================================================================
@@ -1095,17 +1094,20 @@ void loop() {
   bool cwKeyDown;
   unsigned long cwBlockIndex;
 
-  //  State detection before entering the primary radio loop.  AM and SAM don't transmit, so there is not a state transition required.
+  //  Radio state detection before entering the primary radio loop.
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE and digitalRead(PTT) == HIGH) radioState = RadioState::SSB_RECEIVE_STATE;
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE and digitalRead(PTT) == LOW) radioState = RadioState::SSB_TRANSMIT_STATE;
 
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE and SerialUSB1.rts() == LOW) radioState = RadioState::FT8_RECEIVE_STATE;
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE and SerialUSB1.rts() == HIGH) radioState = RadioState::FT8_TRANSMIT_STATE;
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE and SerialUSB1.rts() == HIGH and ft8EnableFlag) radioState = RadioState::FT8_TRANSMIT_STATE;
 
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and ConfigData.keyType == 1 and (digitalRead(ConfigData.paddleDit) == HIGH) and (digitalRead(ConfigData.paddleDah) == HIGH)) radioState = RadioState::CW_RECEIVE_STATE;
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and ConfigData.keyType == 0 and digitalRead(KEYER_DIT_INPUT_TIP) == HIGH) radioState = RadioState::CW_RECEIVE_STATE;
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and keyPressedOn == true and ConfigData.keyType == 0) radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and keyPressedOn == true and ConfigData.keyType == 1) radioState = RadioState::CW_TRANSMIT_KEYER_STATE;
+  // AM modes.  No transmit.
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::AM_MODE) radioState = RadioState::AM_RECEIVE_STATE;
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::SAM_MODE) radioState = RadioState::SAM_RECEIVE_STATE;
 
   // Top menu button read.
   // SSB and FT8 transmit operate via the main loop().  CW modes operate within independent while loops.  Don't stop in SSB and FT8 modes to read the buttons.
@@ -1330,8 +1332,7 @@ void loop() {
 
 #ifdef DEBUG1
   if (elapsed_micros_idx_t > (SR[SampleRate].rate / 960)) {
-    ShowTempAndLoad();
-    // Used to monitor CPU temp and load factors
+    display.ShowTempAndLoad();    // Used to monitor CPU temp and load factors
   }
 #endif
 
