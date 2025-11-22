@@ -659,6 +659,7 @@ void Button::ButtonZoom() {
   tft.writeTo(L1);  // Always exit function in L1.  KF5N August 15, 2023
 
   display.DrawFrequencyBarValue();
+  fftOffset = 0;  // This helps solve a problem with moving from 1X to 2X zoom.
   ResetTuning();  // AFP 10-11-22
   display.UpdateAudioGraphics();
 }
