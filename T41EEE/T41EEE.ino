@@ -1163,10 +1163,6 @@ void loop() {
       drawSpectrum = true;  // Delay drawing the spectrum until the FFT transients are decreased.
     }
   }
-  //  if (radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE or radioState == RadioState::CW_TRANSMIT_KEYER_STATE) {
-  //    speakerScale.setGain(SPEAKERSCALE);
-  //    headphoneScale.setGain(HEADPHONESCALE);
-  //  }
 
   //  Begin radio mode handlers.
 
