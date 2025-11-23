@@ -234,7 +234,6 @@ int selectedMapIndex;
 
 bool centerTuneFlag = false;
 uint32_t cwTimer = 0;
-uint32_t ditTimerOn = 0;
 uint32_t transmitDitLength = 0;  // JJP 8/19/23
 uint32_t transmitDitUnshapedBlocks = 0;
 uint32_t transmitDahUnshapedBlocks = 0;
@@ -1090,7 +1089,6 @@ bool drawSpectrum = false;
 void loop() {
   MenuSelect menu;
   long ditTimerOff;  //AFP 09-22-22
-                     //  long dahTimerOn;
   bool cwKeyDown;
   unsigned long cwBlockIndex;
 
