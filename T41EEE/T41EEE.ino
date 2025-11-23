@@ -233,11 +233,11 @@ int32_t fineTuneEncoderMove = 0;
 int selectedMapIndex;
 
 bool centerTuneFlag = false;
-uint32_t cwTimer;
-uint32_t ditTimerOn;
-uint32_t transmitDitLength;  // JJP 8/19/23
-uint32_t transmitDitUnshapedBlocks;
-uint32_t transmitDahUnshapedBlocks;
+uint32_t cwTimer = 0;
+uint32_t ditTimerOn = 0;
+uint32_t transmitDitLength = 0;  // JJP 8/19/23
+uint32_t transmitDitUnshapedBlocks = 0;
+uint32_t transmitDahUnshapedBlocks = 0;
 
 // ============ end new stuff =======
 // Global variables used by audio filter encoder.
@@ -1303,7 +1303,7 @@ void loop() {
           cwexciter.CW_ExciterIQData(CW_SHAPING_FALL);
 
           // Wait for calculated dah time, allowing audio blocks to be played
-          while (millis() - dahTimerOn <= 3UL * transmitDitLength) {
+          while (millis() - dahTimerOn <= 3 * transmitDitLength) {
             ;
           }
 

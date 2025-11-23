@@ -70,7 +70,6 @@ public:
   void UpdateEqualizerField(bool rxEqState, bool txEqState);            // Updates the displayed Rx and Tx equalizer states.
   void UpdateKeyType();                                                 // Updates the displayed key configuration.
   void UpdateDecoderStatus();
-  void UpdateKeyField();
   void UpdateNoiseField();               // Updates the noise field on the display.
   void RedrawAll();                      // This function redraws the entire display.
   void DrawBandWidthIndicatorBar();      // Draw Tuned Bandwidth on Spectrum Plot.

@@ -419,6 +419,7 @@ void CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
     case 3:  // Keyer WPM.
       ConfigData.currentWPM = static_cast<uint32_t>(GetEncoderValueLoopFloat(5, 60, ConfigData.currentWPM, 1, 0, "Keyer WPM: ", true, true));
       SetTransmitDitLength(ConfigData.currentWPM);  //Afp 09-22-22     // JJP 8/19/23
+      display.UpdateKeyType();  // Update display to show revised WPM.
       break;
 
     case 4:  // Sidetone volume for speaker.

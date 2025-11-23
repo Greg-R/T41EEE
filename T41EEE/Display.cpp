@@ -1429,40 +1429,6 @@ void Display::UpdateDecoderStatus() {
 
 
 /*****
-  Purpose: Updates the displayed Keyer and WPM settings.
-
-  Parameter list:
-    void
-
-  Return value;
-    void
-*****/
-void Display::UpdateKeyField() {
-  tft.setFontScale((enum RA8875tsize)0);
-
-  tft.setTextColor(RA8875_WHITE);
-  tft.setCursor(WPM_X + 5, WPM_Y - 5);
-  tft.print("Keyer:");
-  tft.setTextColor(RA8875_GREEN);
-  tft.fillRect(WPM_X + 59, WPM_Y - 4, tft.getFontWidth() * 15, tft.getFontHeight(), RA8875_BLACK);
-  tft.setCursor(FIELD_OFFSET_X, WPM_Y - 5);
-  if (ConfigData.keyType == 1) {  // 1 is keyer.
-    // KD0RC start
-    tft.print("Paddles ");
-    if (ConfigData.paddleFlip == 0) {
-      tft.print("R ");
-    } else {
-      tft.print("L ");
-    }
-    // KD0RC end
-    tft.print(ConfigData.currentWPM);
-  } else {
-    tft.print("Straight Key");
-  }
-}
-
-
-/*****
   Purpose: Updates the noise field on the display.
 
   Parameter list:
@@ -1510,7 +1476,7 @@ void Display::RedrawAll() {
   UpdateNoiseField();
   UpdateZoomField();
   UpdateCompressionField();
-  UpdateKeyField();
+  UpdateKeyType();
   UpdateDecoderStatus();
   UpdateEqualizerField(ConfigData.receiveEQFlag, ConfigData.xmitEQFlag);
   ShowCurrentPowerSetting();
