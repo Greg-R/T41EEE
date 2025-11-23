@@ -507,7 +507,7 @@ void SetAudioOperatingState(RadioState operatingState) {
       controlAudioOut(ConfigData.audioOut, false);
       sgtl5000_1.unmuteLineout();
 
-      sgtl5000_1.volume(static_cast<float32_t>(ConfigData.sidetoneHeadphone) / 100.0);  // This is for scaling the sidetone in the headphone output.  This is                                               // Headphone sidetone is same as transmit I and Q!
+      sgtl5000_1.volume(static_cast<float32_t>(ConfigData.sidetoneHeadphone) / 100.0);  // This is for scaling the sidetone in the headphone output.
       speakerVolume.setGain(volumeLog[ConfigData.sidetoneSpeaker]);                     // Adjust sidetone volume.  Headphone sidetone done in hardware.
 
       break;
@@ -662,5 +662,4 @@ void controlAudioOut(AudioState audioState, bool mute) {
     digitalWrite(MUTE, MUTEAUDIO);  // Mute speaker audio amplifier.
     return;
   }
-      volumeChangeFlag = true;  // Update physical audio configuration.
 }

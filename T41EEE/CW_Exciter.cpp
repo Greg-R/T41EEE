@@ -86,8 +86,8 @@ void CW_Exciter::CW_ExciterIQData(int shaping)  //AFP 08-20-22
   arm_offset_f32(float_buffer_q, CalData.qDCoffsetCW[ConfigData.currentBand] + CalData.dacOffsetCW, float_buffer_q, 512);
 #endif
 
-  Q_out_L_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
-  Q_out_R_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
+//  Q_out_L_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
+//  Q_out_R_Ex.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
 
   // Play audio.
   Q_out_L_Ex.play(float_buffer_i, 512);  // play it!  This is the I channel from the Audio Adapter line out to QSE I input.

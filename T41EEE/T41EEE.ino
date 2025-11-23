@@ -70,8 +70,8 @@ ModeControl modecontrol;  // Mode control struct.  This is a part of the "modal"
 
 const char *topMenus[] = { "CW Options", "RF Set", "VFO Select",
                            "Config EEPROM", "Cal EEPROM", "AGC",
-                           "SSB/FT8 Options", "EQ Tx Set",   // Noise floor removed.  Greg KF5N February 14, 2025
-                           "EQ Rec Set", "Calibrate" };  // Bearing temporarily removed.
+                           "SSB/FT8 Options", "EQ Tx Set",  // Noise floor removed.  Greg KF5N February 14, 2025
+                           "EQ Rec Set", "Calibrate" };     // Bearing temporarily removed.
 // Pointers to functions which execute the menu options.  Do these functions used the returned integer???
 void (*functionPtr[])() = { &CWOptions, &RFOptions, &VFOSelect,
                             &ConfigDataOptions, &CalDataOptions, &AGCOptions,
@@ -879,7 +879,7 @@ uint32_t afterPowerUp = 0;
 *****/
 FLASHMEM void setup() {
 
-// Check for CrashReport stored from previous run.
+  // Check for CrashReport stored from previous run.
   if (CrashReport) {
     /* print info (hope Serial Monitor windows is open) */
     Serial.print(CrashReport);
@@ -1090,7 +1090,7 @@ bool drawSpectrum = false;
 void loop() {
   MenuSelect menu;
   long ditTimerOff;  //AFP 09-22-22
-  long dahTimerOn;
+                     //  long dahTimerOn;
   bool cwKeyDown;
   unsigned long cwBlockIndex;
 
@@ -1118,7 +1118,6 @@ void loop() {
 
   // Transition to new state if required and only if the radio state has changed.
   if (lastState != radioState) {
-
     // Avoid changing the audio system if possible.
     // If moving from one receive state to another, audio system update is not required.  Demodulation selection is done in ReceiverDSP.
     // So updating the audio system is only required when moving from receive to transmit, or vice versa.
@@ -1166,10 +1165,10 @@ void loop() {
       drawSpectrum = true;  // Delay drawing the spectrum until the FFT transients are decreased.
     }
   }
-  if (radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE or radioState == RadioState::CW_TRANSMIT_KEYER_STATE) {
-    speakerScale.setGain(SPEAKERSCALE);
-    headphoneScale.setGain(HEADPHONESCALE);
-  }
+  //  if (radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE or radioState == RadioState::CW_TRANSMIT_KEYER_STATE) {
+  //    speakerScale.setGain(SPEAKERSCALE);
+  //    headphoneScale.setGain(HEADPHONESCALE);
+  //  }
 
   //  Begin radio mode handlers.
 
@@ -1212,7 +1211,7 @@ void loop() {
         }
 #endif
       }
-
+      enableTransmitter(false);
       break;
 
     case RadioState::FT8_TRANSMIT_STATE:
@@ -1220,6 +1219,7 @@ void loop() {
       while (SerialUSB1.rts() == HIGH) {
         SSB_ExciterIQData();
       }
+      enableTransmitter(false);
       break;
 
     default:
@@ -1263,6 +1263,7 @@ void loop() {
           }
         }
       }  // End CW straight key while loop.
+      enableTransmitter(false);
       break;
 
     case RadioState::CW_TRANSMIT_KEYER_STATE:
@@ -1270,53 +1271,39 @@ void loop() {
 
       cwTimer = millis();
       while (millis() - cwTimer <= ConfigData.cwTransmitDelay) {
-
-        if (digitalRead(ConfigData.paddleDit) == LOW) {  // Keyer Dit
-          ditTimerOn = millis();
-          // Queue audio blocks--execution time of this loop will be between 0-20ms shorter
-          // than the desired dit time, due to audio buffering.
+        // Keyer Dit
+        if (digitalRead(ConfigData.paddleDit) == LOW) {
           cwexciter.CW_ExciterIQData(CW_SHAPING_RISE);
           for (cwBlockIndex = 0; cwBlockIndex < transmitDitUnshapedBlocks; cwBlockIndex++) {
             cwexciter.CW_ExciterIQData(CW_SHAPING_NONE);
           }
           cwexciter.CW_ExciterIQData(CW_SHAPING_FALL);
 
-          // Wait for calculated dit time, allowing audio blocks to be played
-          while (millis() - ditTimerOn <= transmitDitLength) {
-            ;
-          }
-
           // Pause for one dit length of silence
           ditTimerOff = millis();
           while (millis() - ditTimerOff <= transmitDitLength) {
             cwexciter.CW_ExciterIQData(CW_SHAPING_ZERO);
           }
-          cwTimer = millis();
-        } else if (digitalRead(ConfigData.paddleDah) == LOW) {  //Keyer DAH
-          dahTimerOn = millis();
-          // Queue audio blocks--execution time of this loop will be between 0-20ms shorter
-          // than the desired dah time, due to audio buffering
+          cwTimer = millis();  //  Reset delay timer only after a dit or dah is transmitted.
+                               //Keyer DAH
+        } else if (digitalRead(ConfigData.paddleDah) == LOW) {
           cwexciter.CW_ExciterIQData(CW_SHAPING_RISE);
           for (cwBlockIndex = 0; cwBlockIndex < transmitDahUnshapedBlocks; cwBlockIndex++) {
             cwexciter.CW_ExciterIQData(CW_SHAPING_NONE);
           }
           cwexciter.CW_ExciterIQData(CW_SHAPING_FALL);
 
-          // Wait for calculated dah time, allowing audio blocks to be played
-          while (millis() - dahTimerOn <= 3 * transmitDitLength) {
-            ;
-          }
-
           // Pause for one dit length of silence
           ditTimerOff = millis();
           while (millis() - ditTimerOff <= transmitDitLength) {
             cwexciter.CW_ExciterIQData(CW_SHAPING_ZERO);
           }
-          cwTimer = millis();
+          cwTimer = millis();  //  Reset delay timer only after a dit or dah is transmitted.
         } else {
           cwexciter.CW_ExciterIQData(CW_SHAPING_ZERO);
         }
-      }  // End keyer relay timer.
+      }  // End while.  End keyer relay timer.
+      enableTransmitter(false);
 
       break;
 
@@ -1332,7 +1319,7 @@ void loop() {
 
 #ifdef DEBUG1
   if (elapsed_micros_idx_t > (SR[SampleRate].rate / 960)) {
-    display.ShowTempAndLoad();    // Used to monitor CPU temp and load factors
+    display.ShowTempAndLoad();  // Used to monitor CPU temp and load factors
   }
 #endif
 
