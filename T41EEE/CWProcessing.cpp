@@ -121,6 +121,7 @@ FLASHMEM void SelectCWFilter() {
 
   if (ConfigData.CWFilterIndex != 5) switchFilterSideband = true;  // Sets current delimiter to FLow.
   display.UpdateAudioGraphics();                                   // This draws decoder delimiters and CW bandwidth box (red);
+  display.BandInformation();
 }
 
 
