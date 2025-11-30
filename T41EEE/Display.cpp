@@ -1,7 +1,6 @@
 // Display class
 
 #include "SDT.h"
-#include "Display.h"
 
 // DrawAudioSpectContainer()
 // ShowName()
@@ -484,24 +483,23 @@ void Display::DrawSpectrumDisplayContainer() {
     void
 *****/
 void Display::DrawFrequencyBarValue() {
-  char txt[16];
-  int bignum;
-  int centerIdx;
-  int pos_help;
-  int x{ 0 };
-  float disp_freq;
-  float freq_calc;
-  float grat;
+  int centerIdx{0};
+//  int pos_help;
+//  int x{ 0 };
+  float disp_freq{0.0};
+  float freq_calc{0.0};
+  float grat(0.0);
+  const uint32_t graticulePos[7]{ 2, 87, 174, 258, 343, 417, 515 };
+  const uint32_t cursorPos[7]{ 0, 75, 151, 233, 315, 393, 465 };     // 1X Zoom, don't print 999.
   // positions for graticules: first for ConfigData.spectrum_zoom < 3, then for ConfigData.spectrum_zoom > 2
-  const static int idx2pos[9] = { -43, 2, 48, 94, 140, 185, 231, 277, 314 };  //AFP 10-30-22
 
-  grat = static_cast<float>(SR[SampleRate].rate / 8000.0) / static_cast<float>(1 << ConfigData.spectrum_zoom);  // 1, 2, 4, 8, 16, 32, 64 . . . 4096
+  grat = static_cast<float>(SR[SampleRate].rate) / 6000.0 / static_cast<float>(1 << ConfigData.spectrum_zoom);  // 1, 2, 4, 8, 16, 32, 64 . . . 4096
 
   tft.writeTo(L1);  // Not writing to correct layer?  KF5N.  July 31, 2023
   tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
   tft.setFontScale((enum RA8875tsize)0);
 
-  freq_calc = static_cast<float>(static_cast<uint32_t>(ConfigData.centerFreq));  // get current frequency in Hz
+  freq_calc = static_cast<float>(static_cast<uint32_t>(ConfigData.centerFreq));  // Get current frequency in Hz.
 
   if (ConfigData.spectrum_zoom == 0) {
     freq_calc += static_cast<float>(SR[SampleRate].rate) / 4.0;
@@ -511,53 +509,68 @@ void Display::DrawFrequencyBarValue() {
     freq_calc = roundf(freq_calc / 100) / 10;  // round graticule frequency to the nearest 100Hz
   }
 
-  if (ConfigData.spectrum_zoom != 0)
-    centerIdx = 0;
-  else
-    centerIdx = -2;
+  if (ConfigData.spectrum_zoom != 0) centerIdx = 0;
+  else centerIdx = -2;
 
-  /**************************************************************************************************
-    CENTER FREQUENCY PRINT
-  **************************************************************************************************/
-  ultoa((freq_calc + (centerIdx * grat)), txt, DEC);
+//    CENTER FREQUENCY PRINT
   disp_freq = freq_calc + (centerIdx * grat);
-  bignum = static_cast<int>(disp_freq);
-  itoa(bignum, txt, DEC);  // Make into a string
-  //=================== AFP 10-21-22 =====
   tft.setTextColor(RA8875_GREEN, RA8875_BLACK);
 
-  //  ========= AFP 1-21-22 ======
-  if (ConfigData.spectrum_zoom == 0) {
-    tft.setCursor(centerLine - 148, WATERFALL_TOP_Y);  //AFP 10-20-22
+  if (ConfigData.spectrum_zoom == 0) {  // Zoom == 1
+    tft.setCursor(75, WATERFALL_TOP_Y);  // Erase other zoom's frequencies.
+    tft.print("                 ");
+    // Also erase graticules not used with 1X zoom.
+tft.drawFastVLine(graticulePos[1], WATERFALL_TOP_Y - 5, 7, RA8875_BLACK);
+tft.drawFastVLine(graticulePos[2], WATERFALL_TOP_Y - 5, 7, RA8875_BLACK);
+    tft.setCursor(centerLine - 148, WATERFALL_TOP_Y);
+    tft.print("       ");
+    tft.setCursor(centerLine - 148, WATERFALL_TOP_Y);
   } else {
-    tft.setCursor(centerLine - 20, WATERFALL_TOP_Y);  //AFP 10-20-22
+    tft.setCursor(centerLine - 148, WATERFALL_TOP_Y);  // Erase Zoom == 1 center frequency first!
+    tft.print("       ");
+    tft.drawFastVLine(130, WATERFALL_TOP_Y - 5, 7, RA8875_BLACK);  // Erase center frequency graticule for 1X zoom.
+    tft.setCursor(centerLine - 25, WATERFALL_TOP_Y);  // centerLine = 258
+    tft.print("       ");
+    tft.setCursor(centerLine - 25, WATERFALL_TOP_Y);
   }
-  //  ========= AFP 1-21-22 ====
-  tft.print(txt);
-  tft.print(" ");
+  tft.print(disp_freq, 1);
+  Serial.printf("centerLine = %d\n", centerLine);
 
   tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
-  /**************************************************************************************************
-     PRINT ALL OTHER FREQUENCIES (NON-CENTER)
-   **************************************************************************************************/
-  // snprint() extremely memory inefficient. replaced with simple str?? functions JJP
-  for (int idx = -4; idx < 5; idx++) {
-    pos_help = idx2pos[idx + 4];
-    if (idx != centerIdx) {
-      ultoa((freq_calc + (idx * grat)), txt, DEC);
-      x = WATERFALL_LEFT_X + pos_help * xExpand + 40;
-      if (idx == 4) x = x - 4;  // Scoot end frequency a little bit left so it doesn't collide with audio 0k index.
-        tft.setCursor(x, WATERFALL_TOP_Y);  // AFP 10-20-22
-      // ============  AFP 10-21-22
-      tft.print(txt);
-      tft.print(" ");
-      if (idx < 4) {
-        tft.drawFastVLine((WATERFALL_LEFT_X + pos_help * xExpand + 60), WATERFALL_TOP_Y - 5, 7, RA8875_YELLOW);  // Tick marks depending on zoom
-      } else {
-        tft.drawFastVLine((WATERFALL_LEFT_X + (pos_help + 9) * xExpand + 60), WATERFALL_TOP_Y - 5, 7, RA8875_YELLOW);
-      }
+
+//     PRINT ALL OTHER FREQUENCIES (NON-CENTER)
+  //  Hand-tweak the cursor positions because the numbers barely fit in the higher bands.
+
+//  const uint32_t cursorPosNot1xZoom[7]{ 0, 75, 151, 233, 315, 393, 465 };  // All other zooms, don't print 999.
+
+
+  // Zoom == 1
+  if (ConfigData.spectrum_zoom == 0) {
+  for (int idx = -3; idx < 4; idx++) {
+    // Don't print the center frequency, it was printed above.  Also skip the 2nd and 3rd.
+    if (idx == -3 or idx >= 0) {
+      disp_freq = freq_calc + (idx * grat);
+      tft.setCursor(cursorPos[idx + 3], WATERFALL_TOP_Y);
+      tft.print(disp_freq, 1);
+      tft.drawFastVLine(graticulePos[idx + 3], WATERFALL_TOP_Y - 5, 7, RA8875_YELLOW);
     }
   }
+  tft.drawFastVLine(130, WATERFALL_TOP_Y - 5, 7, RA8875_YELLOW);  // Center frequency graticule for 1X zoom.
+  }
+
+  // Zooms not equal to 1:
+    if (ConfigData.spectrum_zoom != 0) {
+  for (int idx = -3; idx < 4; idx++) {
+    // Don't print the center frequency, it was printed above.
+    if (idx != centerIdx) {
+      disp_freq = freq_calc + (idx * grat);
+      if (ConfigData.spectrum_zoom != 0) tft.setCursor(cursorPos[idx + 3], WATERFALL_TOP_Y);
+      tft.print(disp_freq, 1);
+      tft.drawFastVLine(graticulePos[idx + 3], WATERFALL_TOP_Y - 5, 7, RA8875_YELLOW);
+    }
+  }
+    }
+
   tft.writeTo(L1);  // Always leave on layer 1.  KF5N.  July 31, 2023
   tft.setFontScale((enum RA8875tsize)1);
 }
@@ -641,8 +654,8 @@ void Display::BandInformation() {
 
   // Write FT8 mode to display.
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) {
-    if(not ft8EnableFlag) tft.print("FT8");
-    if(ft8EnableFlag) {
+    if (not ft8EnableFlag) tft.print("FT8");
+    if (ft8EnableFlag) {
       tft.setTextColor(RA8875_RED);
       tft.print("FT8");  // Indicate that FT8 transmit is enabled.
       tft.setTextColor(RA8875_GREEN);

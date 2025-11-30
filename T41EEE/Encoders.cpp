@@ -20,7 +20,8 @@ const int FT_step = 500;                 // Hz step in Fast Tune
 
 /*****
   Purpose: Audio filter adjust with encoder.
-           This function runs only if the encoder has been rotated.
+           This function runs if the encoder has been rotated.  It is also called when the filter needs to be re-computed,
+           for example, when the band is changed, and the next band may have different filter parameters.
   Parameter list:
     void
   Return value;
@@ -50,6 +51,8 @@ void FilterSetSSB() {
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
     bands.bands[ConfigData.currentBand].FAMCut = bands.bands[ConfigData.currentBand].FAMCut + filterEncoderMove * 100 * ENCODER_FACTOR;
   }
+
+  Serial.printf("FilterSetSSB FloCut = %d FHiCut = %d\n", bands.bands[ConfigData.currentBand].FLoCut, bands.bands[ConfigData.currentBand].FHiCut);
 
   FilterBandwidth();
   audioCompensateFlag = true;  // Compensate for volume due to filter setting.  Done in loop().

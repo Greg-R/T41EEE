@@ -19,7 +19,10 @@
 #include <Rotary.h>  // Manually installed library.  Please see compilation instructions in the ino or README.
 #include <utility/imxrt_hw.h>  // For setting I2S freq, Thanks, FrankB!
 #include <EEPROM.h>
-#include <string.h>
+#include <string>
+
+
+//#include <charconv>
 
 // User section which is customizable.
 #include "MyConfigurationFile.h"
@@ -186,30 +189,15 @@ const int RESET = 0;  // QSD2/QSE2 reset pin
 #define SIXPI (3.0f * TWO_PI)
 #define Si_5351_crystal 25000000L
 
-#define SPECTRUM_ZOOM_1 0
-#define SPECTRUM_ZOOM_2 1
-#define SPECTRUM_ZOOM_4 2
-#define SPECTRUM_ZOOM_8 3
-#define SPECTRUM_ZOOM_16 4
+constexpr uint32_t SPECTRUM_ZOOM_1{ 0 };
+constexpr uint32_t SPECTRUM_ZOOM_2{ 1 };
+constexpr uint32_t SPECTRUM_ZOOM_4{ 2 };
+constexpr uint32_t SPECTRUM_ZOOM_8{ 3 };
+constexpr uint32_t SPECTRUM_ZOOM_16{ 4 };
 
-#define SAMPLE_RATE_8K 0
-#define SAMPLE_RATE_11K 1
-#define SAMPLE_RATE_16K 2
-#define SAMPLE_RATE_22K 3
-#define SAMPLE_RATE_32K 4
-#define SAMPLE_RATE_44K 5
-#define SAMPLE_RATE_48K 6
-#define SAMPLE_RATE_50K 7
-#define SAMPLE_RATE_88K 8
-#define SAMPLE_RATE_96K 9
-#define SAMPLE_RATE_100K 10
-#define SAMPLE_RATE_101K 11
-#define SAMPLE_RATE_176K 12
-#define SAMPLE_RATE_192K 13
-#define SAMPLE_RATE_234K 14
-#define SAMPLE_RATE_256K 15
-#define SAMPLE_RATE_281K 16  // ??
-#define SAMPLE_RATE_353K 17
+constexpr uint32_t SAMPLE_RATE_44K{ 0 };
+constexpr uint32_t SAMPLE_RATE_48K{ 1 };
+constexpr uint32_t SAMPLE_RATE_192K{ 2 };
 
 #define HAM_BAND 1
 

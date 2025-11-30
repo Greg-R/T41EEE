@@ -147,26 +147,11 @@ Bands bands = { { // Revised band struct with mode and sideband.  Greg KF5N Febr
                   { 24920000, 24890000, 24990000, "12M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 },
                   { 28350000, 28000000, 29700000, "10M", RadioMode::SSB_MODE, Sideband::UPPER, 3000, 200, 5000, 15, HAM_BAND, 1.0, 20 } } };
 
-const struct SR_Descriptor SR[18] = {
+const struct SR_Descriptor SR[3] = {
   //   SR_n,        rate,  text
-  { SAMPLE_RATE_8K, 8000, "  8k" },      // not OK
-  { SAMPLE_RATE_11K, 11025, " 11k" },    // not OK
-  { SAMPLE_RATE_16K, 16000, " 16k" },    // OK
-  { SAMPLE_RATE_22K, 22050, " 22k" },    // OK
-  { SAMPLE_RATE_32K, 32000, " 32k" },    // OK, one more indicator?
   { SAMPLE_RATE_44K, 44100, " 44k" },    // OK
   { SAMPLE_RATE_48K, 48000, " 48k" },    // OK
-  { SAMPLE_RATE_50K, 50223, " 50k" },    // NOT OK
-  { SAMPLE_RATE_88K, 88200, " 88k" },    // OK
-  { SAMPLE_RATE_96K, 96000, " 96k" },    // OK
-  { SAMPLE_RATE_100K, 100000, "100k" },  // NOT OK
-  { SAMPLE_RATE_101K, 100466, "101k" },  // NOT OK
-  { SAMPLE_RATE_176K, 176400, "176k" },  // OK
   { SAMPLE_RATE_192K, 192000, "192k" },  // OK    THIS IS USED IN THE T41
-  { SAMPLE_RATE_234K, 234375, "234k" },  // NOT OK
-  { SAMPLE_RATE_256K, 256000, "256k" },  // NOT OK
-  { SAMPLE_RATE_281K, 281000, "281k" },  // NOT OK
-  { SAMPLE_RATE_353K, 352800, "353k" }   // NOT OK
 };
 
 const arm_cfft_instance_f32 *S;

@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "SDT.h"
+
 class Display {
 
 public:
