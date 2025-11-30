@@ -1522,14 +1522,16 @@ void Display::DrawBandWidthIndicatorBar()  // AFP 10-30-22
 
   // newCursorPosition must take into account the high-pass filter setting.
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) newCursorPosition = static_cast<int>(NCOFreq / hz_per_pixel) + Zoom1Offset + hpf_offset;  // More accurate tuning bar position.  KF5N May 17, 2024
-  if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) newCursorPosition = static_cast<int>(NCOFreq / hz_per_pixel) + Zoom1Offset;
+  if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER or 
+       bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or 
+       bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) newCursorPosition = static_cast<int>(NCOFreq / hz_per_pixel) + Zoom1Offset;
 
   tft.writeTo(L2);  // Write graphics to Layer 2.
 
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER or bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER)
-    filterWidth = static_cast<int>((bands.bands[ConfigData.currentBand].FHiCut - bands.bands[ConfigData.currentBand].FLoCut) / hz_per_pixel);  // AFP 10-30-22
+    filterWidth = static_cast<int32_t>((bands.bands[ConfigData.currentBand].FHiCut - bands.bands[ConfigData.currentBand].FLoCut) / hz_per_pixel);  // AFP 10-30-22
   else if (bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM)
-    filterWidth = static_cast<int>((bands.bands[ConfigData.currentBand].FAMCut * 2.0) / hz_per_pixel);  // AFP 10-30-22
+    filterWidth = static_cast<int32_t>((static_cast<float32_t>(bands.bands[ConfigData.currentBand].FAMCut) * 2.0) / hz_per_pixel);  // AFP 10-30-22
 
   // Draw the bar, except for CW.
   if (radioState != RadioState::CW_RECEIVE_STATE) {
@@ -1546,8 +1548,8 @@ void Display::DrawBandWidthIndicatorBar()  // AFP 10-30-22
 
       case Sideband::BOTH_AM:
       case Sideband::BOTH_SAM:
-        tft.fillRect(centerLine - filterWidth / 2 + oldCursorPosition, SPECTRUM_TOP_Y + 20, filterWidth, SPECTRUM_HEIGHT - 20, RA8875_BLACK);              //AFP 10-30-22
-        tft.fillRect(centerLine - filterWidth / 2 * 0.93 + newCursorPosition, SPECTRUM_TOP_Y + 20, filterWidth * 0.95, SPECTRUM_HEIGHT - 20, FILTER_WIN);  //AFP 10-30-22
+        tft.fillRect(centerLine - oldFilterWidth / 2 + oldCursorPosition, SPECTRUM_TOP_Y + 20, oldFilterWidth, SPECTRUM_HEIGHT - 20, RA8875_BLACK);              //AFP 10-30-22
+        tft.fillRect(centerLine - filterWidth / 2 + newCursorPosition, SPECTRUM_TOP_Y + 20, filterWidth, SPECTRUM_HEIGHT - 20, FILTER_WIN);  //AFP 10-30-22
                                                                                                                                                            //      tft.drawFastVLine(centerLine + newCursorPosition, SPECTRUM_TOP_Y + 20, h - 10, RA8875_CYAN);                 //AFP 10-30-22*/
         break;
 
@@ -1591,6 +1593,10 @@ void Display::DrawBandWidthIndicatorBar()  // AFP 10-30-22
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
     tft.drawFastVLine(centerLine + oldCursorPosition - old_hpf_offset, SPECTRUM_TOP_Y + 20, h - 6, FILTER_WIN);
     tft.drawFastVLine(centerLine + newCursorPosition - hpf_offset, SPECTRUM_TOP_Y + 20, h - 6, RA8875_CYAN);
+  }
+  if (bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
+    tft.drawFastVLine(centerLine + oldCursorPosition, SPECTRUM_TOP_Y + 20, h - 6, FILTER_WIN);
+    tft.drawFastVLine(centerLine + newCursorPosition, SPECTRUM_TOP_Y + 20, h - 6, RA8875_CYAN);
   }
 
   oldFilterWidth = filterWidth;
