@@ -91,6 +91,8 @@ private:
   float32_t pixel_per_khz{ 0 };
   int pos_left{ 0 };
   int filterWidth{ 0 };
+  int32_t old_hpf_offset{ 0 };
+  int32_t oldFilterWidth{ 0 };
 
   const int TIME_X{ 550 };  // Upper-left corner for time
   const float32_t TIME_Y{ YPIXELS * 0.07 };

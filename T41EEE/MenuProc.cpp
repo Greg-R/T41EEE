@@ -410,7 +410,7 @@ void CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
 
     case 1:              // CW Filter BW:      // AFP 10-18-22
       SelectCWFilter();  // in CWProcessing    // AFP 10-18-22
-      break;             // AFP 10-18-22
+      break;
 
     case 2:              // Select a preferred CW offset frequency.
       SelectCWOffset();  //  Located in CWProcessing.cpp

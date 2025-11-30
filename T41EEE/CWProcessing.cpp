@@ -119,8 +119,8 @@ FLASHMEM void SelectCWFilter() {
   const std::string CWFilter[] = { "0.8kHz", "1.0kHz", "1.3kHz", "1.8kHz", "2.0kHz", " Off " };
   ConfigData.CWFilterIndex = SubmenuSelect(CWFilter, 6, ConfigData.CWFilterIndex);  // CWFilter is an array of strings.
 
-  if (ConfigData.CWFilterIndex != 5) switchFilterSideband = true;  // Sets current delimiter to FLow.
-  display.UpdateAudioGraphics();                                   // This draws decoder delimiters and CW bandwidth box (red);
+  if (ConfigData.CWFilterIndex != 5) switchFilterSideband = true;  // Sets current delimiter to FLow (high-pass filter adjust).
+  display.UpdateAudioGraphics();                                   // This draws decoder delimiters and CW bandwidth box (red).
   display.BandInformation();
 }
 

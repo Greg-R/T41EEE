@@ -256,7 +256,7 @@ int DoSplitVFO() {
 
 ////  tft.setFont(&FreeMono9pt7b);
   tft.setTextColor(RA8875_RED);
-  tft.setCursor(FILTER_PARAMETERS_X + 180, FILTER_PARAMETERS_Y + 6);
+  tft.setCursor(176 + 180, 102 + 6);
   tft.print("Split Active");
 
   tft.setFontDefault();

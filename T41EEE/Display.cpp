@@ -317,56 +317,38 @@ void Display::ShowSpectrum(bool drawSpectrum) {
 
 
 /*****
-  Purpose: Show filter bandwidth near center of spectrum.
+  Purpose: Show filter bandwidth settings near the top center of the RF spectrum.
 
   Parameter list:
     void
 
   Return value;
     void
-        // AudioNoInterrupts();
-        // M = demod_mode, FU & FL upper & lower frequency
-        // this routine prints the frequency bars under the spectrum display
 *****/
 void Display::ShowBandwidth() {
-  char buff[10];
-  int pos_left;
-
-  if (ConfigData.spectrum_zoom != SPECTRUM_ZOOM_1)
-    spectrum_pos_centre_f = 128 * xExpand - 1;  //AFP
-  else
-    spectrum_pos_centre_f = 64 * xExpand;  //AFP
-  pos_left = centerLine + static_cast<int>(bands.bands[ConfigData.currentBand].FLoCut / 1000.0 * pixel_per_khz);
-  if (pos_left < spectrum_x) {
-    pos_left = spectrum_x;
-  }
-
-  // Need to add in code for zoom factor here AFP 10-20-22
-
-  filterWidthX = pos_left + newCursorPosition - centerLine;
-  tft.writeTo(L2);
+  tft.writeTo(L2);  // Write to layer 2.
   tft.setFontScale((enum RA8875tsize)0);
   tft.setTextColor(RA8875_LIGHT_GREY);
-  if (switchFilterSideband == false)
-    tft.setTextColor(RA8875_WHITE);
-  else if (switchFilterSideband == true)
-    tft.setTextColor(RA8875_LIGHT_GREY);
 
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::SAM_MODE or bands.bands[ConfigData.currentBand].mode == RadioMode::AM_MODE)
-    MyDrawFloat(static_cast<float>(bands.bands[ConfigData.currentBand].FAMCut / 1000.0f), 1, FILTER_PARAMETERS_X, FILTER_PARAMETERS_Y, buff);
-  else MyDrawFloat(static_cast<float>(bands.bands[ConfigData.currentBand].FLoCut / 1000.0f), 1, FILTER_PARAMETERS_X, FILTER_PARAMETERS_Y, buff);
-  tft.print("kHz");
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::SAM_MODE or bands.bands[ConfigData.currentBand].mode == RadioMode::AM_MODE) {
+    tft.setCursor(200, 102);
+    tft.print(static_cast<float>(bands.bands[ConfigData.currentBand].FAMCut) / 1000.0f, 1);
+    tft.print("kHz");
+  } else {
+    tft.setCursor(200, 102);
+    tft.print(static_cast<float>(bands.bands[ConfigData.currentBand].FLoCut) / 1000.0f, 1);
+    tft.print("kHz");
+  }
 
-  if (switchFilterSideband == true)
-    tft.setTextColor(RA8875_WHITE);
-  else if (switchFilterSideband == false)
-    tft.setTextColor(RA8875_LIGHT_GREY);
-
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::SAM_MODE or bands.bands[ConfigData.currentBand].mode == RadioMode::AM_MODE)
-    MyDrawFloat(static_cast<float>(bands.bands[ConfigData.currentBand].FAMCut / 1000.0f), 1, FILTER_PARAMETERS_X + 80, FILTER_PARAMETERS_Y, buff);
-  else MyDrawFloat(static_cast<float>(bands.bands[ConfigData.currentBand].FHiCut / 1000.0f), 1, FILTER_PARAMETERS_X + 80, FILTER_PARAMETERS_Y, buff);
-  tft.print("kHz");
-
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::SAM_MODE or bands.bands[ConfigData.currentBand].mode == RadioMode::AM_MODE) {
+    tft.setCursor(276, 102);
+    tft.print(static_cast<float>(bands.bands[ConfigData.currentBand].FAMCut) / 1000.0f, 1);
+    tft.print("kHz");
+  } else {
+    tft.setCursor(276, 102);
+    tft.print(static_cast<float>(bands.bands[ConfigData.currentBand].FHiCut) / 1000.0f, 1);
+    tft.print("kHz");
+  }
   tft.setTextColor(RA8875_WHITE);  // set text color to white for other print routines not to get confused ;-)
   tft.writeTo(L1);
 }
@@ -483,45 +465,35 @@ void Display::DrawSpectrumDisplayContainer() {
     void
 *****/
 void Display::DrawFrequencyBarValue() {
-  int centerIdx{0};
-//  int pos_help;
-//  int x{ 0 };
-  float disp_freq{0.0};
-  float freq_calc{0.0};
+  int centerIdx{ 0 };
+  float disp_freq{ 0.0 };
+  float freq_calc{ 0.0 };
   float grat(0.0);
-  const uint32_t graticulePos[7]{ 2, 87, 174, 258, 343, 417, 515 };
-  const uint32_t cursorPos[7]{ 0, 75, 151, 233, 315, 393, 465 };     // 1X Zoom, don't print 999.
-  // positions for graticules: first for ConfigData.spectrum_zoom < 3, then for ConfigData.spectrum_zoom > 2
+  const uint32_t graticulePos[7]{ 2, 87, 174, 258, 343, 427, 515 };
+  const uint32_t cursorPos[7]{ 0, 76, 153, 233, 314, 391, 463 };
 
-  grat = static_cast<float>(SR[SampleRate].rate) / 6000.0 / static_cast<float>(1 << ConfigData.spectrum_zoom);  // 1, 2, 4, 8, 16, 32, 64 . . . 4096
+  // Used to calculate graticule frequency in most cases.  Zoom = 1 is the exception.
+  grat = static_cast<float>(SR[SampleRate].rate) / 6000.0 / static_cast<float>(1 << ConfigData.spectrum_zoom);
 
   tft.writeTo(L1);  // Not writing to correct layer?  KF5N.  July 31, 2023
   tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
   tft.setFontScale((enum RA8875tsize)0);
 
-  freq_calc = static_cast<float>(static_cast<uint32_t>(ConfigData.centerFreq));  // Get current frequency in Hz.
-
-  if (ConfigData.spectrum_zoom == 0) {
-    freq_calc += static_cast<float>(SR[SampleRate].rate) / 4.0;
-  }
-
-  if (ConfigData.spectrum_zoom < 5) {
-    freq_calc = roundf(freq_calc / 100) / 10;  // round graticule frequency to the nearest 100Hz
-  }
+  freq_calc = static_cast<float>(ConfigData.centerFreq) / 1000.0;  // Current frequency in kHz.
 
   if (ConfigData.spectrum_zoom != 0) centerIdx = 0;
   else centerIdx = -2;
 
-//    CENTER FREQUENCY PRINT
+  //    CENTER FREQUENCY PRINT
   disp_freq = freq_calc + (centerIdx * grat);
   tft.setTextColor(RA8875_GREEN, RA8875_BLACK);
 
-  if (ConfigData.spectrum_zoom == 0) {  // Zoom == 1
+  if (ConfigData.spectrum_zoom == 0) {   // Zoom == 1
     tft.setCursor(75, WATERFALL_TOP_Y);  // Erase other zoom's frequencies.
     tft.print("                 ");
     // Also erase graticules not used with 1X zoom.
-tft.drawFastVLine(graticulePos[1], WATERFALL_TOP_Y - 5, 7, RA8875_BLACK);
-tft.drawFastVLine(graticulePos[2], WATERFALL_TOP_Y - 5, 7, RA8875_BLACK);
+    tft.drawFastVLine(graticulePos[1], WATERFALL_TOP_Y - 5, 7, RA8875_BLACK);
+    tft.drawFastVLine(graticulePos[2], WATERFALL_TOP_Y - 5, 7, RA8875_BLACK);
     tft.setCursor(centerLine - 148, WATERFALL_TOP_Y);
     tft.print("       ");
     tft.setCursor(centerLine - 148, WATERFALL_TOP_Y);
@@ -529,47 +501,44 @@ tft.drawFastVLine(graticulePos[2], WATERFALL_TOP_Y - 5, 7, RA8875_BLACK);
     tft.setCursor(centerLine - 148, WATERFALL_TOP_Y);  // Erase Zoom == 1 center frequency first!
     tft.print("       ");
     tft.drawFastVLine(130, WATERFALL_TOP_Y - 5, 7, RA8875_BLACK);  // Erase center frequency graticule for 1X zoom.
-    tft.setCursor(centerLine - 25, WATERFALL_TOP_Y);  // centerLine = 258
+    tft.setCursor(centerLine - 25, WATERFALL_TOP_Y);               // centerLine = 258
     tft.print("       ");
     tft.setCursor(centerLine - 25, WATERFALL_TOP_Y);
   }
-  tft.print(disp_freq, 1);
-  Serial.printf("centerLine = %d\n", centerLine);
+  tft.print(freq_calc, 1);
 
   tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
 
-//     PRINT ALL OTHER FREQUENCIES (NON-CENTER)
-  //  Hand-tweak the cursor positions because the numbers barely fit in the higher bands.
-
-//  const uint32_t cursorPosNot1xZoom[7]{ 0, 75, 151, 233, 315, 393, 465 };  // All other zooms, don't print 999.
-
-
-  // Zoom == 1
+  // Print the frequencies.
+  // Zoom == 1.  This is a special case, and the x-axis is weird.
   if (ConfigData.spectrum_zoom == 0) {
-  for (int idx = -3; idx < 4; idx++) {
-    // Don't print the center frequency, it was printed above.  Also skip the 2nd and 3rd.
-    if (idx == -3 or idx >= 0) {
-      disp_freq = freq_calc + (idx * grat);
-      tft.setCursor(cursorPos[idx + 3], WATERFALL_TOP_Y);
-      tft.print(disp_freq, 1);
-      tft.drawFastVLine(graticulePos[idx + 3], WATERFALL_TOP_Y - 5, 7, RA8875_YELLOW);
+    for (int idx = -3; idx < 4; idx++) {
+      // Don't print the center frequency, it was printed above.  Also skip the 2nd and 3rd.
+      if (idx == -3 or idx >= 0) {
+        if (idx == -3) disp_freq = freq_calc - 48.0;  // Farthest left.
+        if (idx >= 0) disp_freq = freq_calc + (idx * grat) + 48.0;
+        tft.setCursor(cursorPos[idx + 3], WATERFALL_TOP_Y);
+        tft.print(disp_freq, 1);
+        tft.print(" ");
+        tft.drawFastVLine(graticulePos[idx + 3], WATERFALL_TOP_Y - 5, 7, RA8875_YELLOW);
+      }
     }
-  }
-  tft.drawFastVLine(130, WATERFALL_TOP_Y - 5, 7, RA8875_YELLOW);  // Center frequency graticule for 1X zoom.
+    tft.drawFastVLine(130, WATERFALL_TOP_Y - 5, 7, RA8875_YELLOW);  // Center frequency graticule for 1X zoom.
   }
 
   // Zooms not equal to 1:
-    if (ConfigData.spectrum_zoom != 0) {
-  for (int idx = -3; idx < 4; idx++) {
-    // Don't print the center frequency, it was printed above.
-    if (idx != centerIdx) {
-      disp_freq = freq_calc + (idx * grat);
-      if (ConfigData.spectrum_zoom != 0) tft.setCursor(cursorPos[idx + 3], WATERFALL_TOP_Y);
-      tft.print(disp_freq, 1);
-      tft.drawFastVLine(graticulePos[idx + 3], WATERFALL_TOP_Y - 5, 7, RA8875_YELLOW);
+  if (ConfigData.spectrum_zoom != 0) {
+    for (int idx = -3; idx < 4; idx++) {
+      // Don't print the center frequency, it was printed above.
+      if (idx != centerIdx) {
+        disp_freq = freq_calc + (idx * grat);
+        if (ConfigData.spectrum_zoom != 0) tft.setCursor(cursorPos[idx + 3], WATERFALL_TOP_Y);
+        tft.print(disp_freq, 1);
+        tft.print(" ");
+        tft.drawFastVLine(graticulePos[idx + 3], WATERFALL_TOP_Y - 5, 7, RA8875_YELLOW);
+      }
     }
   }
-    }
 
   tft.writeTo(L1);  // Always leave on layer 1.  KF5N.  July 31, 2023
   tft.setFontScale((enum RA8875tsize)1);
@@ -1513,10 +1482,13 @@ void Display::RedrawAll() {
 *****/
 void Display::DrawBandWidthIndicatorBar()  // AFP 10-30-22
 {
-  int Zoom1Offset = 0.0;
-  int cwOffsetPixels = 0;
-  int cwOffsets[4]{ 563, 657, 750, 844 };  // Rounded to nearest Hz.
+  int32_t Zoom1Offset = 0.0;
+  int32_t cwOffsetPixels = 0;
+  int32_t cwOffsets[4]{ 563, 657, 750, 844 };  // Rounded to nearest Hz.
   float hz_per_pixel = 0.0;
+  int32_t hpf_offset{ 0 };
+
+  int32_t cwFilterBW[5]{ 800, 1000, 1300, 1800, 2000 };  // CW filter bandwidths.
 
   switch (zoomIndex) {
     case 0:  // 1X
@@ -1544,27 +1516,31 @@ void Display::DrawBandWidthIndicatorBar()  // AFP 10-30-22
       Zoom1Offset = 0;
       break;
   }
-  newCursorPosition = static_cast<int>(NCOFreq / hz_per_pixel) + Zoom1Offset;  // More accurate tuning bar position.  KF5N May 17, 2024
-  tft.writeTo(L2);                                                             // Write graphics to Layer 2.
 
-  // Calculate the width of the tuning bar.
-  pixel_per_khz = ((1 << ConfigData.spectrum_zoom) * SPECTRUM_RES * 1000.0 / SR[SampleRate].rate);
+// Calculate the offset due to the high-pass filter.
+  hpf_offset = static_cast<int32_t>(static_cast<float>(bands.bands[ConfigData.currentBand].FLoCut) / hz_per_pixel);
+
+  // newCursorPosition must take into account the high-pass filter setting.
+  if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) newCursorPosition = static_cast<int>(NCOFreq / hz_per_pixel) + Zoom1Offset + hpf_offset;  // More accurate tuning bar position.  KF5N May 17, 2024
+  if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) newCursorPosition = static_cast<int>(NCOFreq / hz_per_pixel) + Zoom1Offset;
+
+  tft.writeTo(L2);  // Write graphics to Layer 2.
+
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER or bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER)
-    filterWidth = static_cast<int>(((bands.bands[ConfigData.currentBand].FHiCut - bands.bands[ConfigData.currentBand].FLoCut) / 1000.0) * pixel_per_khz * 1.06);  // AFP 10-30-22
+    filterWidth = static_cast<int>((bands.bands[ConfigData.currentBand].FHiCut - bands.bands[ConfigData.currentBand].FLoCut) / hz_per_pixel);  // AFP 10-30-22
   else if (bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM)
-    filterWidth = static_cast<int>(((bands.bands[ConfigData.currentBand].FAMCut * 2.0) / 1000.0) * pixel_per_khz * 1.06);  // AFP 10-30-22
+    filterWidth = static_cast<int>((bands.bands[ConfigData.currentBand].FAMCut * 2.0) / hz_per_pixel);  // AFP 10-30-22
 
   // Draw the bar, except for CW.
   if (radioState != RadioState::CW_RECEIVE_STATE) {
-
     switch (bands.bands[ConfigData.currentBand].sideband) {
       case Sideband::LOWER:
-        tft.fillRect(centerLine - filterWidth + oldCursorPosition, SPECTRUM_TOP_Y + 20, filterWidth + 1, SPECTRUM_HEIGHT - 20, RA8875_BLACK);  // Was 0.96.  KF5N July 31, 2023
-        tft.fillRect(centerLine - filterWidth + newCursorPosition, SPECTRUM_TOP_Y + 20, filterWidth + 1, SPECTRUM_HEIGHT - 20, FILTER_WIN);
+        tft.fillRect(centerLine - oldFilterWidth + oldCursorPosition, SPECTRUM_TOP_Y + 20, oldFilterWidth + 1, SPECTRUM_HEIGHT - 20, RA8875_BLACK);
+        tft.fillRect(centerLine - filterWidth + newCursorPosition - hpf_offset, SPECTRUM_TOP_Y + 20, filterWidth + 1, SPECTRUM_HEIGHT - 20, FILTER_WIN);
         break;
 
       case Sideband::UPPER:
-        tft.fillRect(centerLine + oldCursorPosition, SPECTRUM_TOP_Y + 20, filterWidth, SPECTRUM_HEIGHT - 20, RA8875_BLACK);  //AFP 03-27-22 Layers
+        tft.fillRect(centerLine + oldCursorPosition, SPECTRUM_TOP_Y + 20, oldFilterWidth, SPECTRUM_HEIGHT - 20, RA8875_BLACK);  //AFP 03-27-22 Layers
         tft.fillRect(centerLine + newCursorPosition, SPECTRUM_TOP_Y + 20, filterWidth, SPECTRUM_HEIGHT - 20, FILTER_WIN);    //AFP 03-27-22 Layers
         break;
 
@@ -1582,16 +1558,22 @@ void Display::DrawBandWidthIndicatorBar()  // AFP 10-30-22
 
   // Draw the offset bar for CW.
   if (radioState == RadioState::CW_RECEIVE_STATE) {
+
+    // If a CW filter is on, filterWidth needs to take this into account.
+    if (ConfigData.CWFilterIndex != 5) {
+      filterWidth = static_cast<int>((cwFilterBW[ConfigData.CWFilterIndex] - bands.bands[ConfigData.currentBand].FLoCut) / hz_per_pixel);
+    }
+
     // Calculate the number of bins to offset based on CW offset, which can be 562.5, 656.5, 750.0 or 843.75 Hz.
     cwOffsetPixels = cwOffsets[ConfigData.CWOffset] / hz_per_pixel;
     switch (bands.bands[ConfigData.currentBand].sideband) {
       case Sideband::LOWER:
-        tft.fillRect(centerLine - filterWidth + oldCursorPosition + cwOffsetPixels, SPECTRUM_TOP_Y + 20, filterWidth, SPECTRUM_HEIGHT - 20, RA8875_BLACK);
-        tft.fillRect(centerLine - filterWidth + newCursorPosition + cwOffsetPixels, SPECTRUM_TOP_Y + 20, filterWidth, SPECTRUM_HEIGHT - 20, FILTER_WIN);
+        tft.fillRect(centerLine + oldCursorPosition + cwOffsetPixels - (oldFilterWidth + old_hpf_offset), SPECTRUM_TOP_Y + 20, oldFilterWidth, SPECTRUM_HEIGHT - 20, RA8875_BLACK);
+        tft.fillRect(centerLine + newCursorPosition + cwOffsetPixels - (filterWidth + hpf_offset), SPECTRUM_TOP_Y + 20, filterWidth, SPECTRUM_HEIGHT - 20, FILTER_WIN);
         break;
 
       case Sideband::UPPER:
-        tft.fillRect(centerLine + oldCursorPosition - cwOffsetPixels, SPECTRUM_TOP_Y + 20, filterWidth, SPECTRUM_HEIGHT - 20, RA8875_BLACK);
+        tft.fillRect(centerLine + oldCursorPosition - cwOffsetPixels, SPECTRUM_TOP_Y + 20, oldFilterWidth, SPECTRUM_HEIGHT - 20, RA8875_BLACK);
         tft.fillRect(centerLine + newCursorPosition - cwOffsetPixels, SPECTRUM_TOP_Y + 20, filterWidth, SPECTRUM_HEIGHT - 20, FILTER_WIN);
         break;
 
@@ -1600,9 +1582,20 @@ void Display::DrawBandWidthIndicatorBar()  // AFP 10-30-22
     }
   }
 
-  // Draw tuning alignment line in blue bandwidth bar.
-  tft.drawFastVLine(centerLine + newCursorPosition, SPECTRUM_TOP_Y + 20, h - 6, RA8875_CYAN);
+  // Draw tuning alignment line in blue bandwidth bar.  Need to ignore the high-pass filter offset.
+  // The old bar needs to be erased first!
+  if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
+    tft.drawFastVLine(centerLine + oldCursorPosition, SPECTRUM_TOP_Y + 20, h - 6, FILTER_WIN);
+    tft.drawFastVLine(centerLine + newCursorPosition, SPECTRUM_TOP_Y + 20, h - 6, RA8875_CYAN);
+  }
+  if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
+    tft.drawFastVLine(centerLine + oldCursorPosition - old_hpf_offset, SPECTRUM_TOP_Y + 20, h - 6, FILTER_WIN);
+    tft.drawFastVLine(centerLine + newCursorPosition - hpf_offset, SPECTRUM_TOP_Y + 20, h - 6, RA8875_CYAN);
+  }
+
+  oldFilterWidth = filterWidth;
   oldCursorPosition = newCursorPosition;
+  old_hpf_offset = hpf_offset;
   tft.writeTo(L1);  //AFP 03-27-22 Layers
 }
 

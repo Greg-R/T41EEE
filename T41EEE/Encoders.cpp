@@ -52,7 +52,7 @@ void FilterSetSSB() {
     bands.bands[ConfigData.currentBand].FAMCut = bands.bands[ConfigData.currentBand].FAMCut + filterEncoderMove * 100 * ENCODER_FACTOR;
   }
 
-  Serial.printf("FilterSetSSB FloCut = %d FHiCut = %d\n", bands.bands[ConfigData.currentBand].FLoCut, bands.bands[ConfigData.currentBand].FHiCut);
+  //  Serial.printf("FilterSetSSB FloCut = %d FHiCut = %d\n", bands.bands[ConfigData.currentBand].FLoCut, bands.bands[ConfigData.currentBand].FHiCut);
 
   FilterBandwidth();
   audioCompensateFlag = true;  // Compensate for volume due to filter setting.  Done in loop().
@@ -342,6 +342,8 @@ void EncoderFineTune() {
   }
   fineTuneEncoderMove = 0L;
   TxRxFreq = ConfigData.centerFreq + NCOFreq;  // KF5N
+
+  audioGraphicsFlag = true;
 }
 #else
 /*****
@@ -393,6 +395,8 @@ void EncoderFineTune() {
   }
   fineTuneEncoderMove = 0L;
   TxRxFreq = ConfigData.centerFreq + NCOFreq;  // KF5N
+
+  audioGraphicsFlag = true;
 }
 #endif
 
