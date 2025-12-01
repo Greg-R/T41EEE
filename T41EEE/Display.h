@@ -45,13 +45,14 @@ public:
   void DrawAudioSpectContainer();                                       // Draw audio spectrum box.
   void ShowName();                                                      // Show the program name and version number.
   void ShowSpectrum(bool drawSpectrum);                                 // Draws the RF and audio spectrums.
+  void ShowRFGain();                                                    // Writes RF gain setting to the display.
   void ShowBandwidth();                                                 // Show filter bandwidth near center of spectrum.
   void DrawSMeterContainer();                                           // Draw the S-meter container.
   void ShowSpectrumdBScale();                                           // Print the vertical dB setting to the spectrum display.
   void DrawSpectrumDisplayContainer();                                  // This function draws RF spectrum display container.
   void DrawFrequencyBarValue();                                         // This function draws the frequency bar at the bottom of the spectrum scope, putting markers at every
                                                                         //  graticule and the full frequency.
-  void ShowAutoStatus();                                                // Indicate Auto-Gain or Auto-Spectrum is active.
+//  void ShowAutoStatus();                                                // Indicate Auto-Gain or Auto-Spectrum is active.
   void BandInformation();                                               // To display the current transmission frequency, band, mode, and sideband above the spectrum display
   void ShowCurrentPowerSetting();                                       // Display current power setting.
   void FormatFrequency(uint32_t freq, char *freqBuffer);                // Format frequency for printing.

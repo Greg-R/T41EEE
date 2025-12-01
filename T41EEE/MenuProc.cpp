@@ -868,10 +868,10 @@ void SSBOptions() {
     none
 *****/
 void RFOptions() {
-  const std::string rfOptions[] = { "TX Power Set", "RF Gain Set", "RF Auto-Gain On", "RF Auto-Gain Off", "Auto-Spectrum On", "AutoSpectrum Off", "Cancel" };
+  const std::string rfOptions[] = { "TX Power Set", "RF Gain Set", "Cancel" };
   int rfSet = 0;
 
-  rfSet = SubmenuSelect(rfOptions, 7, rfSet);
+  rfSet = SubmenuSelect(rfOptions, 3, rfSet);
 
   switch (rfSet) {
     case 0:  // TX Power Set.
@@ -887,34 +887,7 @@ void RFOptions() {
 
     case 1:  // Manual gain set.
       ConfigData.rfGain[ConfigData.currentBand] = static_cast<int>(GetEncoderValueLoopFloat(-60, 20, ConfigData.rfGain[ConfigData.currentBand], 5, 1, "RF Gain dB: ", true, true));
-      eeprom.ConfigDataWrite();
-      break;
-
-    case 2:  // Auto-Gain On
-      ConfigData.autoGain = true;
-      ConfigData.autoSpectrum = false;  // Make sure Auto-Spectrum is off.
-      display.ShowAutoStatus();
-      eeprom.ConfigDataWrite();
-      break;
-
-    case 3:  // Auto-Gain Off
-      ConfigData.autoGain = false;
-      fftOffset = 0;
-      display.ShowAutoStatus();
-      eeprom.ConfigDataWrite();
-      break;
-
-    case 4:  // Auto-Spectrum On
-      ConfigData.autoSpectrum = true;
-      ConfigData.autoGain = false;  // Make sure Auto-Gain is off.
-      display.ShowAutoStatus();
-      eeprom.ConfigDataWrite();
-      break;
-
-    case 5:  // Auto-Spectrum Off
-      ConfigData.autoSpectrum = false;
-      fftOffset = 0;
-      display.ShowAutoStatus();
+      display.ShowRFGain();
       eeprom.ConfigDataWrite();
       break;
 

@@ -78,17 +78,10 @@ void Display::ShowName() {
     void
 *****/
 void Display::ShowSpectrum(bool drawSpectrum) {
-  const int LOWERPIXTARGET{ 13 };  //  HB start
-  const int UPPERPIXTARGET{ 15 };
-  int16_t spectrumMin{ 0 };
-  uint32_t minIndex{ 0 };
 
   int AudioH_max = 0, AudioH_max_box = 0;  // Used to center audio spectrum.
-  char buff[10];
-  int frequ_hist[32]{ 0 };   // All values are initialized to zero using this syntax.
   int audio_hist[256]{ 0 };  // All values are initialized to zero using this syntax.
-  int j, k;
-  int FH_max = 0; // FH_max_box = 0;    //  HB finish
+  int k;
   int middleSlice = centerLine / 2;  // Approximate center element
   int x1 = 0;                        //AFP
                                      //  int h = SPECTRUM_HEIGHT + 7;
@@ -131,13 +124,6 @@ void Display::ShowSpectrum(bool drawSpectrum) {
 
     process.ProcessIQData();  // Call the Audio process from within the display routine to eliminate conflicts with drawing the spectrum and waterfall displays
 
-// Get the minimum value of the FFT.  Use this to adjust the spectrum in the window.
-//    if(updateDisplayFlag == true) {
-//    arm_min_q15(pixelnew, 512, &spectrumMin, &minIndex);
-//      y1_new = 247 - pixelnew[x1] - spectrumMin;
-//    Serial.printf("spectrumMin = %d pixelnew = %d\n", spectrumMin, y1_new);
-//    }
-
     // Don't call this function unless the filter bandwidth has been adjusted.
     if (encoderFilterFlag) {
       FilterSetSSB();
@@ -145,33 +131,10 @@ void Display::ShowSpectrum(bool drawSpectrum) {
 
     EncoderCenterTune();  //Moved the tuning encoder to reduce lag times and interference during tuning.
 
-//    pixelnew[x1] = pixelnew[x1] 
-
-//    y1_new = 247 - pixelnew[x1] + spectrumMin;
-//    y2_new = 247 - pixelnew[x1 + 1] + spectrumMin;
-//    y1_old = 247 - pixelold[x1];  // pixelold spectrum is saved by the FFT function prior to a new FFT which generates the pixelnew spectrum.  KF5N
-//    y2_old = 247 - pixelold[x1 + 1];
-
     y1_new = pixelnew[x1];
     y2_new = pixelnew[x1 + 1];
     y1_old = pixelold[x1];  // pixelold spectrum is saved by the FFT function prior to a new FFT which generates the pixelnew spectrum.  KF5N
     y2_old = pixelold[x1 + 1];
-
-    // Collect a histogram of RF spectrum values.  This is used in AutoGain and AutoSpectrum.
-    /* 247 is the spectral display bottom.  120 is the spectral display top.
-    if ((x1 > 51) && (x1 < 461))  //  HB start for auto RFgain collect frequency distribution. Limited to core of FFT and dividable by 4.
-    {
-      j = 247 - y1_new + 40;           // +40 to get 10 bins below zero - want to straddle zero to make the entire spectrum viewable.
-      k = j >> 2;                      // Divide by 4
-      if ((k > -1) && (k < 32)) {      // The index of the bin array.  This indicates a value within the defined spectral box.
-        frequ_hist[k] += 1;            // Add (accumulate) to the bin.
-        if (frequ_hist[k] > FH_max) {  // FH_max starts at 0.
-          FH_max = frequ_hist[k];      // Reset FH_max to the current bin value.
-          FH_max_box = k;              // Index of FH_max.
-        }
-      }
-    }    HB finish
-    */
 
     // Collect a histogram of audio spectral values.  This is used to keep the audio spectrum in the viewable area.
     // 247??? is the spectral display bottom.  129 is the audio spectrum display top.
@@ -272,47 +235,17 @@ void Display::ShowSpectrum(bool drawSpectrum) {
   }  // End for(...) Draw MAX_WATERFALL_WIDTH spectral points
 
   // Use the Block Transfer Engine (BTE) to move waterfall down a line
-  if (keyPressedOn == true) {
-    ////    return;
-  } else {
     tft.BTE_move(WATERFALL_LEFT_X, FIRST_WATERFALL_LINE, MAX_WATERFALL_WIDTH, MAX_WATERFALL_ROWS - 2, WATERFALL_LEFT_X, FIRST_WATERFALL_LINE + 1, 1, 2);
-    while (tft.readStatus())
-      ;  // Make sure it is done.  Memory moves can take time.
+    while (tft.readStatus());  // Make sure it is done.  Memory moves can take time.
 
     // Now bring waterfall back to the beginning of the 2nd row.
     tft.BTE_move(WATERFALL_LEFT_X, FIRST_WATERFALL_LINE + 1, MAX_WATERFALL_WIDTH, MAX_WATERFALL_ROWS - 2, WATERFALL_LEFT_X, FIRST_WATERFALL_LINE + 1, 2);
-    while (tft.readStatus())
-      ;  // Make sure it's done.
-  }
+    while (tft.readStatus());  // Make sure it's done.
+
   // Then write new row data into the missing top row to get a scroll effect using display hardware, not the CPU.
   tft.writeRect(WATERFALL_LEFT_X, FIRST_WATERFALL_LINE, MAX_WATERFALL_WIDTH, 1, waterfall);
 
-  /* Manage RF spectral display graphics.  Keep the spectrum within the viewable area.
-  if (ConfigData.autoGain || ConfigData.autoSpectrum) {
-    if (FH_max_box > UPPERPIXTARGET) {  // HB. Adjust rfGainAllBands 15 and 13 to alter to move target base up and down. UPPERPIXTARGET = 15
-      if (ConfigData.autoGain) ConfigData.rfGainCurrent = ConfigData.rfGainCurrent - 1;
-      if (ConfigData.autoSpectrum) {
-        ConfigData.rfGainCurrent = ConfigData.rfGain[ConfigData.currentBand];
-        fftOffset = fftOffset - 1;
-      }
-    }
-    if (FH_max_box < LOWERPIXTARGET) {  // LOWERPIXTARGET = 13
-      if (ConfigData.autoGain) {
-        ConfigData.rfGainCurrent = ConfigData.rfGainCurrent + 1;
-        if (ConfigData.rfGainCurrent > 25.0) ConfigData.rfGainCurrent = 25.0;  //  Do not allow RF gain greater than 25.
-      }
-      if (ConfigData.autoSpectrum) {
-        ConfigData.rfGainCurrent = ConfigData.rfGain[ConfigData.currentBand];
-        fftOffset = fftOffset + 1;
-      }
-    }
-  }
-  // Don't allow fftOffset to exceed 200:
-  if (fftOffset > 200) fftOffset = 200;
-*/
-
   // Manage audio spectral display graphics.  Keep the spectrum within the viewable area.
-
   if (AudioH_max_box > 30) {  // HB. Adjust rfGainAllBands 15 and 13 to alter to move target base up and down. UPPERPIXTARGET = 15
     audioFFToffset = audioFFToffset - 1;
   }
@@ -320,18 +253,29 @@ void Display::ShowSpectrum(bool drawSpectrum) {
     audioFFToffset = audioFFToffset + 1;
   }
 
+}  // End ShowSpectrum()
+
+
+/*****
+  Purpose: Show filter bandwidth settings near the top center of the RF spectrum.
+
+  Parameter list:
+    void
+
+  Return value;
+    void
+*****/
+void Display::ShowRFGain() {
   // Report the current RF "gain" setting.
-  tft.fillRect(SPECTRUM_LEFT_X + 125, SPECTRUM_TOP_Y + 2, 33, tft.getFontHeight(), RA8875_BLACK);
+//  tft.fillRect(SPECTRUM_LEFT_X + 125, SPECTRUM_TOP_Y + 2, 33, tft.getFontHeight(), RA8875_BLACK);
   tft.setFontScale((enum RA8875tsize)0);
   tft.setTextColor(RA8875_WHITE);
   tft.setCursor(SPECTRUM_LEFT_X + 64, SPECTRUM_TOP_Y + 2);
-  tft.print("RF GAIN");
-  tft.setCursor(SPECTRUM_LEFT_X + 129, SPECTRUM_TOP_Y + 2);
-  if (ConfigData.autoGain) itoa(ConfigData.rfGainCurrent, buff, DEC);  // Make into a string
-  else itoa(ConfigData.rfGain[ConfigData.currentBand], buff, DEC);
-
-  tft.print(buff);  // HB End
-}  // End ShowSpectrum()
+  tft.print("RF GAIN ");
+//  tft.setCursor(SPECTRUM_LEFT_X + 129, SPECTRUM_TOP_Y + 2);
+  tft.print(ConfigData.rfGain[ConfigData.currentBand]);
+  tft.print(" ");
+}
 
 
 /*****
@@ -346,28 +290,35 @@ void Display::ShowSpectrum(bool drawSpectrum) {
 void Display::ShowBandwidth() {
   tft.writeTo(L2);  // Write to layer 2.
   tft.setFontScale((enum RA8875tsize)0);
-  tft.setTextColor(RA8875_LIGHT_GREY);
+  tft.setTextColor(RA8875_LIGHT_GREY, RA8875_BLACK);
 
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::SAM_MODE or bands.bands[ConfigData.currentBand].mode == RadioMode::AM_MODE) {
     tft.setCursor(200, 102);
+    tft.print("LPF=");
     tft.print(static_cast<float>(bands.bands[ConfigData.currentBand].FAMCut) / 1000.0f, 1);
     tft.print("kHz");
-  } else {
+  }
+  /*
+   else {
     tft.setCursor(200, 102);
+    tft.print("HPF=")
     tft.print(static_cast<float>(bands.bands[ConfigData.currentBand].FLoCut) / 1000.0f, 1);
     tft.print("kHz");
   }
+  */
 
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::SAM_MODE or bands.bands[ConfigData.currentBand].mode == RadioMode::AM_MODE) {
     tft.setCursor(276, 102);
+        tft.print("HPF=");
     tft.print(static_cast<float>(bands.bands[ConfigData.currentBand].FAMCut) / 1000.0f, 1);
     tft.print("kHz");
   } else {
     tft.setCursor(276, 102);
+        tft.print("LPF=");
     tft.print(static_cast<float>(bands.bands[ConfigData.currentBand].FHiCut) / 1000.0f, 1);
     tft.print("kHz");
   }
-  tft.setTextColor(RA8875_WHITE);  // set text color to white for other print routines not to get confused ;-)
+  tft.setTextColor(RA8875_WHITE, RA8875_BLACK);  // set text color to white for other print routines not to get confused ;-)
   tft.writeTo(L1);
 }
 
@@ -571,7 +522,7 @@ void Display::DrawFrequencyBarValue() {
 
   Return value;
     void
-*****/
+*****
 void Display::ShowAutoStatus() {
   tft.setFontScale((enum RA8875tsize)0);
   tft.setCursor(SPECTRUM_LEFT_X + 350, SPECTRUM_TOP_Y + 2);
@@ -583,7 +534,7 @@ void Display::ShowAutoStatus() {
   } else
     tft.print("                ");
 }
-
+*/
 
 /*****
   Purpose: To display the current transmission frequency, band, mode, and sideband above the spectrum display.
@@ -600,15 +551,18 @@ void Display::BandInformation() {
 
   tft.writeTo(L1);
   tft.setFontScale((enum RA8875tsize)0);
-  tft.setTextColor(RA8875_GREEN);
+  tft.setTextColor(RA8875_GREEN, RA8875_BLACK);
   tft.setCursor(5, FREQUENCY_Y + 30);
-  tft.setTextColor(RA8875_WHITE);
-  tft.print("Center Freq");                                    // This is static, never changes.
-  tft.fillRect(100, FREQUENCY_Y + 31, 290, 15, RA8875_BLACK);  // Clear frequency, band, and mode.  This should be the only erase required.
+  // Need to erase all old information.
+  tft.print("                                                  ");
+  tft.setCursor(5, FREQUENCY_Y + 30);
+  tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
+  tft.print("Center Freq ");                                    // This is static, never changes.
+//  tft.fillRect(100, FREQUENCY_Y + 31, 290, 15, RA8875_BLACK);  // Clear frequency, band, and mode.  This should be the only erase required.
 
   // Write the center frequency to the display.
-  tft.setCursor(100, FREQUENCY_Y + 30);
-  tft.setTextColor(RA8875_LIGHT_ORANGE);
+//  tft.setCursor(100, FREQUENCY_Y + 30);
+  tft.setTextColor(RA8875_LIGHT_ORANGE, RA8875_BLACK);
   if (ConfigData.spectrum_zoom == SPECTRUM_ZOOM_1) {  // AFP 11-02-22
     tft.print(static_cast<int>(ConfigData.centerFreq) + 48000);
   } else {
@@ -616,7 +570,8 @@ void Display::BandInformation() {
   }
 
   // Write the band to the display.
-  tft.setTextColor(RA8875_LIGHT_ORANGE);
+  tft.print("  ");
+  tft.setTextColor(RA8875_LIGHT_ORANGE, RA8875_BLACK);
   tft.setCursor(OPERATION_STATS_X + 50, FREQUENCY_Y + 30);
   if (ConfigData.activeVFO == VFO_A) {
     tft.print(bands.bands[ConfigData.currentBandA].name);  // Write current band to the display.
@@ -624,44 +579,46 @@ void Display::BandInformation() {
     tft.print(bands.bands[ConfigData.currentBandB].name);
   }
 
+  // Write the word MODE in white.
+  tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
+  tft.print("  MODE ");
+
   // Write CW mode and filter bandwidth to display.
-  tft.setTextColor(RA8875_GREEN);
-  tft.setCursor(OPERATION_STATS_X + 90, FREQUENCY_Y + 30);  //AFP 10-18-22
+  tft.setTextColor(RA8875_GREEN, RA8875_BLACK);
+//  tft.setCursor(OPERATION_STATS_X + 90, FREQUENCY_Y + 30);  //AFP 10-18-22
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) {
-    tft.print("CW ");
-    tft.setCursor(OPERATION_STATS_X + 111, FREQUENCY_Y + 30);  //AFP 10-18-22
-    tft.print(CWFilter[ConfigData.CWFilterIndex].c_str());     //AFP 10-18-22
+    tft.print("CW  ");
   }
 
   // Write SSB mode to display
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE) {
-    if (ConfigData.cessb) tft.print("CESSB");  // Which mode
-    if (not ConfigData.cessb) tft.print("SSB");
+    if (ConfigData.cessb) tft.print("CESSB ");  // Which mode
+    if (not ConfigData.cessb) tft.print("SSB ");
   }
 
   // Write FT8 mode to display.
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE) {
-    if (not ft8EnableFlag) tft.print("FT8");
+    if (not ft8EnableFlag) tft.print("FT8 ");
     if (ft8EnableFlag) {
-      tft.setTextColor(RA8875_RED);
-      tft.print("FT8");  // Indicate that FT8 transmit is enabled.
-      tft.setTextColor(RA8875_GREEN);
+      tft.setTextColor(RA8875_RED, RA8875_BLACK);
+      tft.print("FT8  ");  // Indicate that FT8 transmit is enabled.
+      tft.setTextColor(RA8875_GREEN, RA8875_BLACK);
     }
   }
 
   // Write AM mode to display.
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::AM_MODE) {
-    tft.print("AM");
+    tft.print("AM  ");
   }
 
   // Write SAM mode to display.
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::SAM_MODE) {
-    tft.print("SAM");
+    tft.print("SAM ");
   }
 
   // Write sideband or AM demodulation type to display.
-  tft.setCursor(OPERATION_STATS_X + 165, FREQUENCY_Y + 30);
-  tft.setTextColor(RA8875_WHITE);
+//  tft.setCursor(OPERATION_STATS_X + 165, FREQUENCY_Y + 30);
+  tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
 
   switch (bands.bands[ConfigData.currentBand].sideband) {
     case Sideband::LOWER:
@@ -678,6 +635,17 @@ void Display::BandInformation() {
       break;
     default:
       break;
+  }
+
+// Printing the CW filter status needs to be done last.
+    if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) {
+    // Now print CW filter status and setting.
+    tft.setCursor(375, 102);
+    tft.print("CW FILTER ");
+    tft.print(CWFilter[ConfigData.CWFilterIndex].c_str());
+  } else {
+    tft.setCursor(375, 102);
+    tft.print("                 ");  // Erase if not in CW mode.
   }
 }
 
@@ -1469,7 +1437,7 @@ void Display::RedrawAll() {
   SwitchVFO();
   ShowSpectrumdBScale();
   DrawFrequencyBarValue();
-  ShowAutoStatus();
+//  ShowAutoStatus();
   UpdateAGCField();
   DisplayIncrementField();
   UpdateNotchField();
@@ -1483,6 +1451,7 @@ void Display::RedrawAll() {
   UpdateAudioOutputField();
   BandInformation();
   UpdateVolumeField();
+  ShowRFGain();
   ShowFrequency();
   SetBandRelay();                   // Set LPF relays for current band.
   lastState = RadioState::NOSTATE;  // Force an update.

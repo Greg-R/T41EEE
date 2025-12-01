@@ -1346,4 +1346,7 @@ void loop() {
   if (ms_500.check() == 1) {  // For clock updates AFP 10-26-22
     display.DisplayClock();
   }
+
+
+  
 }  // end loop()
