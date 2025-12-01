@@ -255,18 +255,19 @@ void CalcZoom1Magn() {
       spec_help = ConfigData.LPFcoeff * FFT_spec[x] + (1.0 - ConfigData.LPFcoeff) * FFT_spec_old[x];
       FFT_spec_old[x] = spec_help;
 
-      if (calOnFlag)  // Higher dynamic range spectral display during calibration.
-        pixelnew[x] = displayScale[ConfigData.currentScale].baseOffset + (int16_t)(40.0 * log10f_fast(FFT_spec[x]));
-      else
-        pixelnew[x] = displayScale[ConfigData.currentScale].baseOffset + (int16_t)(displayScale[ConfigData.currentScale].dBScale * log10f_fast(FFT_spec[x]));
-      }
-        // Find the minimum of the FFT and offset to fit in the spectrum display area.
-        arm_min_q15(pixelnew + 128, 256, &spectrumMin, &minIndex);
-        spectrumMinAvg = static_cast<int16_t>(static_cast<float32_t>(spectrumMin) * alpha + static_cast<float32_t>(spectrumMinOld) * (1.0 - alpha));  // Exponential average.
-        spectrumMinOld = spectrumMinAvg;
-        // Apply the offset to the entire array.
-        for (int16_t x = 0; x < fftWidth; x++) {
-          pixelnew[x] = 247 - pixelnew[x] + spectrumMinAvg;
-        }
-      }
+      if (calOnFlag) {  // Higher dynamic range spectral display during calibration.  The 24 is the legacy "baseOffset".
+        pixelnew[x] = 24 + static_cast<int16_t>(40.0 * log10f_fast(FFT_spec[x]));
+      } else pixelnew[x] = 24 + (int16_t)(10.0 * log10f_fast(FFT_spec[x]));
     }
+    if (calOnFlag) return;  // No more calculations necssary for calibration.
+    
+    // Find the minimum of the FFT and offset to fit in the spectrum display area.
+    arm_min_q15(pixelnew + 128, 256, &spectrumMin, &minIndex);
+    spectrumMinAvg = static_cast<int16_t>(static_cast<float32_t>(spectrumMin) * alpha + static_cast<float32_t>(spectrumMinOld) * (1.0 - alpha));  // Exponential average.
+    spectrumMinOld = spectrumMinAvg;
+    // Apply the offset to the entire array.
+    for (int16_t x = 0; x < fftWidth; x++) {
+      pixelnew[x] = 247 - pixelnew[x] + spectrumMinAvg;
+    }
+  }
+}
