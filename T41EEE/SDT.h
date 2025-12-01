@@ -118,7 +118,6 @@ constexpr int WATERFALL_BOTTOM = (FIRST_WATERFALL_LINE + MAX_WATERFALL_ROWS);  /
 #define AUDIO_POST_PROCESSOR_BANDS 8                          // Number of audio segments
 #define FLOAT_PRECISION 6                                     // Assumed precision for a float
 #define EQUALIZER_CELL_COUNT 14
-#define USE_LOG10FAST
 //--------------------- decoding stuff
 const int FFT_LENGTH = 512;
 #define BLACK 0x0000             /*   0,   0,   0 */

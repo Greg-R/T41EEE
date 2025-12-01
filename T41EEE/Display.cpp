@@ -80,13 +80,15 @@ void Display::ShowName() {
 void Display::ShowSpectrum(bool drawSpectrum) {
   const int LOWERPIXTARGET{ 13 };  //  HB start
   const int UPPERPIXTARGET{ 15 };
+  int16_t spectrumMin{ 0 };
+  uint32_t minIndex{ 0 };
 
   int AudioH_max = 0, AudioH_max_box = 0;  // Used to center audio spectrum.
   char buff[10];
   int frequ_hist[32]{ 0 };   // All values are initialized to zero using this syntax.
   int audio_hist[256]{ 0 };  // All values are initialized to zero using this syntax.
   int j, k;
-  int FH_max = 0, FH_max_box = 0;    //  HB finish
+  int FH_max = 0; // FH_max_box = 0;    //  HB finish
   int middleSlice = centerLine / 2;  // Approximate center element
   int x1 = 0;                        //AFP
                                      //  int h = SPECTRUM_HEIGHT + 7;
@@ -129,6 +131,13 @@ void Display::ShowSpectrum(bool drawSpectrum) {
 
     process.ProcessIQData();  // Call the Audio process from within the display routine to eliminate conflicts with drawing the spectrum and waterfall displays
 
+// Get the minimum value of the FFT.  Use this to adjust the spectrum in the window.
+//    if(updateDisplayFlag == true) {
+//    arm_min_q15(pixelnew, 512, &spectrumMin, &minIndex);
+//      y1_new = 247 - pixelnew[x1] - spectrumMin;
+//    Serial.printf("spectrumMin = %d pixelnew = %d\n", spectrumMin, y1_new);
+//    }
+
     // Don't call this function unless the filter bandwidth has been adjusted.
     if (encoderFilterFlag) {
       FilterSetSSB();
@@ -136,13 +145,20 @@ void Display::ShowSpectrum(bool drawSpectrum) {
 
     EncoderCenterTune();  //Moved the tuning encoder to reduce lag times and interference during tuning.
 
-    y1_new = 247 - pixelnew[x1];
-    y2_new = 247 - pixelnew[x1 + 1];
-    y1_old = 247 - pixelold[x1];  // pixelold spectrum is saved by the FFT function prior to a new FFT which generates the pixelnew spectrum.  KF5N
-    y2_old = 247 - pixelold[x1 + 1];
+//    pixelnew[x1] = pixelnew[x1] 
+
+//    y1_new = 247 - pixelnew[x1] + spectrumMin;
+//    y2_new = 247 - pixelnew[x1 + 1] + spectrumMin;
+//    y1_old = 247 - pixelold[x1];  // pixelold spectrum is saved by the FFT function prior to a new FFT which generates the pixelnew spectrum.  KF5N
+//    y2_old = 247 - pixelold[x1 + 1];
+
+    y1_new = pixelnew[x1];
+    y2_new = pixelnew[x1 + 1];
+    y1_old = pixelold[x1];  // pixelold spectrum is saved by the FFT function prior to a new FFT which generates the pixelnew spectrum.  KF5N
+    y2_old = pixelold[x1 + 1];
 
     // Collect a histogram of RF spectrum values.  This is used in AutoGain and AutoSpectrum.
-    // 247 is the spectral display bottom.  120 is the spectral display top.
+    /* 247 is the spectral display bottom.  120 is the spectral display top.
     if ((x1 > 51) && (x1 < 461))  //  HB start for auto RFgain collect frequency distribution. Limited to core of FFT and dividable by 4.
     {
       j = 247 - y1_new + 40;           // +40 to get 10 bins below zero - want to straddle zero to make the entire spectrum viewable.
@@ -154,7 +170,8 @@ void Display::ShowSpectrum(bool drawSpectrum) {
           FH_max_box = k;              // Index of FH_max.
         }
       }
-    }  //  HB finish
+    }    HB finish
+    */
 
     // Collect a histogram of audio spectral values.  This is used to keep the audio spectrum in the viewable area.
     // 247??? is the spectral display bottom.  129 is the audio spectrum display top.
@@ -270,7 +287,7 @@ void Display::ShowSpectrum(bool drawSpectrum) {
   // Then write new row data into the missing top row to get a scroll effect using display hardware, not the CPU.
   tft.writeRect(WATERFALL_LEFT_X, FIRST_WATERFALL_LINE, MAX_WATERFALL_WIDTH, 1, waterfall);
 
-  // Manage RF spectral display graphics.  Keep the spectrum within the viewable area.
+  /* Manage RF spectral display graphics.  Keep the spectrum within the viewable area.
   if (ConfigData.autoGain || ConfigData.autoSpectrum) {
     if (FH_max_box > UPPERPIXTARGET) {  // HB. Adjust rfGainAllBands 15 and 13 to alter to move target base up and down. UPPERPIXTARGET = 15
       if (ConfigData.autoGain) ConfigData.rfGainCurrent = ConfigData.rfGainCurrent - 1;
@@ -292,6 +309,7 @@ void Display::ShowSpectrum(bool drawSpectrum) {
   }
   // Don't allow fftOffset to exceed 200:
   if (fftOffset > 200) fftOffset = 200;
+*/
 
   // Manage audio spectral display graphics.  Keep the spectrum within the viewable area.
 
