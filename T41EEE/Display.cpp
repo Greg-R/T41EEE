@@ -270,11 +270,11 @@ void Display::ShowRFGain() {
 //  tft.fillRect(SPECTRUM_LEFT_X + 125, SPECTRUM_TOP_Y + 2, 33, tft.getFontHeight(), RA8875_BLACK);
   tft.setFontScale((enum RA8875tsize)0);
   tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
-  tft.setCursor(SPECTRUM_LEFT_X + 64, SPECTRUM_TOP_Y + 2);
+  tft.setCursor(SPECTRUM_LEFT_X + 61, SPECTRUM_TOP_Y + 2);
   tft.print("RF GAIN ");
 //  tft.setCursor(SPECTRUM_LEFT_X + 129, SPECTRUM_TOP_Y + 2);
   tft.print(ConfigData.rfGain[ConfigData.currentBand]);
-  tft.print(" ");
+  tft.print("  ");
 }
 
 
@@ -294,7 +294,7 @@ void Display::ShowBandwidth() {
 
 // Don't show HPF filter setting in AM modes, because it doesn't exist yet.
   if (bands.bands[ConfigData.currentBand].mode != RadioMode::SAM_MODE and bands.bands[ConfigData.currentBand].mode != RadioMode::AM_MODE) {
-    tft.setCursor(155, 102);
+    tft.setCursor(158, 102);
     tft.print("HPF = ");
     tft.print(static_cast<float>(bands.bands[ConfigData.currentBand].FLoCut) / 1000.0f, 1);
     tft.print("kHz");
