@@ -200,7 +200,8 @@ void ZoomFFTExe(uint32_t blockSize) {
         pixelnew[x] = static_cast<int16_t>(displayScale[ConfigData.currentScale].dBScale * log10f_fast(FFT_spec[x]));
       }
       // Find the minimum of the FFT and offset to fit in the spectrum display area.
-      arm_min_q15(pixelnew + 128, 256, &spectrumMin, &minIndex);
+//      arm_min_q15(pixelnew + 128, 256, &spectrumMin, &minIndex);
+      arm_min_q15(pixelnew, 512, &spectrumMin, &minIndex);
       spectrumMinAvg = static_cast<int16_t>(static_cast<float32_t>(spectrumMin) * alpha + static_cast<float32_t>(spectrumMinOld) * (1.0 - alpha));  // Exponential average.
       spectrumMinOld = spectrumMinAvg;
       // Apply the offset to the entire array.

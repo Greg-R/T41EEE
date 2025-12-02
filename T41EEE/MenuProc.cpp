@@ -1140,14 +1140,13 @@ void CalDataOptions() {  //           0               1                2        
   Purpose: To select an option from a submenu
 
   Parameter list:
-    char *options[]           submenus
+    std::string options[]     submenus
     int numberOfChoices       choices available
     int defaultState          the starting option
 
   Return value
     int           an index into the band array
 *****/
-//int SubmenuSelect(const char *options[], int numberOfChoices, int defaultStart) {
 int SubmenuSelect(const std::string options[], int numberOfChoices, int defaultStart) {
   int refreshFlag = 0;
   MenuSelect menu;

@@ -13,9 +13,9 @@
       void
 
    Return value:
-      void
+      bool true if audio blocks were processed.
  *****/
-void ReceiveDSP::ProcessIQData() {
+bool ReceiveDSP::ProcessIQData() {
   /**********************************************************************************  AFP 12-31-20
         Get samples from queue buffers
         Teensy Audio Library stores ADC data in two buffers size=128, Q_in_L and Q_in_R as initiated from the audio lib.
@@ -30,7 +30,7 @@ void ReceiveDSP::ProcessIQData() {
   int rfGain;
 
   // Are there at least N_BLOCKS buffers in each channel available ?  N_BLOCKS should be 16.  Fill float_buffer_L/R[2048].
-  if (static_cast<uint32_t>(ADC_RX_I.available()) > N_BLOCKS && static_cast<uint32_t>(ADC_RX_Q.available()) > N_BLOCKS) {
+  if (static_cast<uint32_t>(ADC_RX_I.available()) > 15 && static_cast<uint32_t>(ADC_RX_Q.available()) > 15) {
     usec = 0;
     // Get audio samples from the audio  buffers and convert them to float.
     // Read in 16 blocks and 128 samples in I and Q.  16 * 128 = 2048  (N_BLOCKS = 16)
@@ -62,9 +62,9 @@ void ReceiveDSP::ProcessIQData() {
     // What is the correct RF gain value for maximum dynamic range?
 
     //  Set RFGain for all bands.
-    if (ConfigData.autoGain) rfGain = ConfigData.rfGainCurrent - 25;    // Auto-gain.  Note the constant must be the same as below!
-    else rfGain = ConfigData.rfGain[ConfigData.currentBand] - 25;  // Manual gain adjust.  The constant is a critical determinant of dynamic range.
-    rfGainValue = pow(10, static_cast<float32_t>(rfGain) / 20.0);  // DSPGAINSCALE removed in T41EEE.9.  Greg KF5N February 24, 2024
+    if (ConfigData.autoGain) rfGain = ConfigData.rfGainCurrent - 25;  // Auto-gain.  Note the constant must be the same as below!
+    else rfGain = ConfigData.rfGain[ConfigData.currentBand] - 25;     // Manual gain adjust.  The constant is a critical determinant of dynamic range.
+    rfGainValue = pow(10, static_cast<float32_t>(rfGain) / 20.0);     // DSPGAINSCALE removed in T41EEE.9.  Greg KF5N February 24, 2024
 
     rfGainValue = rfGainValue * audioGainCompensate;
 
@@ -99,10 +99,10 @@ void ReceiveDSP::ProcessIQData() {
       If the buffers are full, the Teensy needs much more time.
       In that case, we clear the buffers to keep the whole audio chain running smoothly.
       **********************************************************************************/
-    if (ADC_RX_I.available() > 50) {
-      ADC_RX_I.clear();
-      ADC_RX_Q.clear();
-    }
+//    if (ADC_RX_I.available() > 50) {
+//      ADC_RX_I.clear();
+ //     ADC_RX_Q.clear();
+//    }
 
     /**********************************************************************************  AFP 12-31-20
       IQ amplitude and phase correction.  For this scaled down version the I an Q channels are
@@ -148,9 +148,9 @@ void ReceiveDSP::ProcessIQData() {
            xnew(1) =  - ximag(1) + jxreal(1)
     **********************************************************************************/
     // X1 zoom must be done before the frequency shift!
-    if ((ConfigData.spectrum_zoom == 0) and (updateDisplayCounter == 1)) {
-      updateDisplayFlag = true;
+    if ((ConfigData.spectrum_zoom == 0) and updateDisplayFlag) {
       CalcZoom1Magn();
+      updateDisplayFlag = false;
     }
 
     FreqShift1();
@@ -163,11 +163,16 @@ void ReceiveDSP::ProcessIQData() {
 
         Spectrum Zoom uses the shifted spectrum, so the center "hump" around DC is shifted by fs/4
     **********************************************************************************/
-
-    if ((ConfigData.spectrum_zoom == 1) and (updateDisplayCounter == 1)) ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
-    if ((ConfigData.spectrum_zoom == 2) and (updateDisplayCounter < 2)) ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
-    if ((ConfigData.spectrum_zoom == 3) and (updateDisplayCounter < 4)) ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
-    if ((ConfigData.spectrum_zoom == 4) and (updateDisplayCounter < 8)) ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
+// Zooms 2 and 4.  These need only 16 blocks, so can be done in a single pass.
+    if (updateDisplayFlag and (ConfigData.spectrum_zoom == 1 or ConfigData.spectrum_zoom == 2)) {
+      ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
+      updateDisplayFlag = false;  // Don't compute until enough data accumulates.
+    }
+// Zooms 8 and 16.  These have to be called repeatedly to accumulate data.
+if (ConfigData.spectrum_zoom == 3 or ConfigData.spectrum_zoom == 4) {
+      ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
+      updateDisplayFlag = false;
+    } 
 
     if (calibrateFlag == true) {  // This is required for frequency calibration as it runs with the receiver active.
       CalibrateOptions();
@@ -476,5 +481,8 @@ void ReceiveDSP::ProcessIQData() {
 
     elapsed_micros_sum = elapsed_micros_sum + usec;
     elapsed_micros_idx_t++;
-  }  // end of if(audio blocks available)
+
+    return true;  // Audio blocks were processed.
+  }               // end of if(audio blocks available)
+  return false;   // Audio blocks were NOT processed!
 }

@@ -6,7 +6,7 @@ class ReceiveDSP {
 
 public:
 
-  void ProcessIQData();
+  bool ProcessIQData();
 
   char atom, currentAtom;
   int8_t first_block = 1;
