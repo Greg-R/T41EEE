@@ -419,7 +419,7 @@ void CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
     case 3:  // Keyer WPM.
       ConfigData.currentWPM = static_cast<uint32_t>(GetEncoderValueLoopFloat(5, 60, ConfigData.currentWPM, 1, 0, "Keyer WPM: ", true, true));
       SetTransmitDitLength(ConfigData.currentWPM);  //Afp 09-22-22     // JJP 8/19/23
-      display.UpdateKeyType();  // Update display to show revised WPM.
+      display.UpdateKeyType();                      // Update display to show revised WPM.
       break;
 
     case 4:  // Sidetone volume for speaker.
@@ -864,8 +864,8 @@ void SSBOptions() {
   Parameter list:
     void
 
-  Return value12
-    none
+  Return value
+    void
 *****/
 void RFOptions() {
   const std::string rfOptions[] = { "TX Power Set", "RF Gain Set", "Cancel" };
@@ -880,20 +880,18 @@ void RFOptions() {
       // When the transmit power level is set, this means ALL of the power coefficients must be revised!
       // powerOutCW and powerOutSSB must be updated.
       initPowerCoefficients();
-      eeprom.ConfigDataWrite();  //AFP 10-21-22
-                                 //      BandInformation();
       display.ShowCurrentPowerSetting();
       break;
 
     case 1:  // Manual gain set.
-      ConfigData.rfGain[ConfigData.currentBand] = static_cast<int>(GetEncoderValueLoopFloat(-60, 20, ConfigData.rfGain[ConfigData.currentBand], 5, 1, "RF Gain dB: ", true, true));
+      ConfigData.rfGain[ConfigData.currentBand] = static_cast<int>(GetEncoderValueLoopFloat(-60, 20, ConfigData.rfGain[ConfigData.currentBand], 5, 0, "RF Gain dB: ", true, true));
       display.ShowRFGain();
-      eeprom.ConfigDataWrite();
       break;
 
     default:  // Cancel
       break;
   }
+  eeprom.ConfigDataWrite();
 }
 
 

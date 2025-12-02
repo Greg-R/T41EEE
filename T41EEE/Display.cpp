@@ -269,7 +269,7 @@ void Display::ShowRFGain() {
   // Report the current RF "gain" setting.
 //  tft.fillRect(SPECTRUM_LEFT_X + 125, SPECTRUM_TOP_Y + 2, 33, tft.getFontHeight(), RA8875_BLACK);
   tft.setFontScale((enum RA8875tsize)0);
-  tft.setTextColor(RA8875_WHITE);
+  tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
   tft.setCursor(SPECTRUM_LEFT_X + 64, SPECTRUM_TOP_Y + 2);
   tft.print("RF GAIN ");
 //  tft.setCursor(SPECTRUM_LEFT_X + 129, SPECTRUM_TOP_Y + 2);
@@ -292,29 +292,22 @@ void Display::ShowBandwidth() {
   tft.setFontScale((enum RA8875tsize)0);
   tft.setTextColor(RA8875_LIGHT_GREY, RA8875_BLACK);
 
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::SAM_MODE or bands.bands[ConfigData.currentBand].mode == RadioMode::AM_MODE) {
-    tft.setCursor(200, 102);
-    tft.print("LPF=");
-    tft.print(static_cast<float>(bands.bands[ConfigData.currentBand].FAMCut) / 1000.0f, 1);
-    tft.print("kHz");
-  }
-  /*
-   else {
-    tft.setCursor(200, 102);
-    tft.print("HPF=")
+// Don't show HPF filter setting in AM modes, because it doesn't exist yet.
+  if (bands.bands[ConfigData.currentBand].mode != RadioMode::SAM_MODE and bands.bands[ConfigData.currentBand].mode != RadioMode::AM_MODE) {
+    tft.setCursor(155, 102);
+    tft.print("HPF = ");
     tft.print(static_cast<float>(bands.bands[ConfigData.currentBand].FLoCut) / 1000.0f, 1);
     tft.print("kHz");
   }
-  */
 
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::SAM_MODE or bands.bands[ConfigData.currentBand].mode == RadioMode::AM_MODE) {
-    tft.setCursor(276, 102);
-        tft.print("HPF=");
+    tft.setCursor(265, 102);
+    tft.print("LPF = ");
     tft.print(static_cast<float>(bands.bands[ConfigData.currentBand].FAMCut) / 1000.0f, 1);
     tft.print("kHz");
   } else {
-    tft.setCursor(276, 102);
-        tft.print("LPF=");
+    tft.setCursor(265, 102);
+    tft.print("LPF = ");
     tft.print(static_cast<float>(bands.bands[ConfigData.currentBand].FHiCut) / 1000.0f, 1);
     tft.print("kHz");
   }
@@ -547,7 +540,7 @@ void Display::ShowAutoStatus() {
 
 *****/
 void Display::BandInformation() {
-  std::string CWFilter[] = { "0.8kHz", "1.0kHz", "1.3kHz", "1.8kHz", "2.0kHz", " Off " };
+  std::string CWFilter[] = { "0.8kHz", "1.0kHz", "1.3kHz", "1.8kHz", "2.0kHz", " Off  " };
 
   tft.writeTo(L1);
   tft.setFontScale((enum RA8875tsize)0);
@@ -1529,7 +1522,7 @@ void Display::DrawBandWidthIndicatorBar()  // AFP 10-30-22
         break;
 
       case Sideband::UPPER:
-        tft.fillRect(centerLine + oldCursorPosition, SPECTRUM_TOP_Y + 20, oldFilterWidth, SPECTRUM_HEIGHT - 20, RA8875_BLACK);  //AFP 03-27-22 Layers
+        tft.fillRect(centerLine + oldCursorPosition, SPECTRUM_TOP_Y + 20, oldFilterWidth + 1, SPECTRUM_HEIGHT - 20, RA8875_BLACK);  //AFP 03-27-22 Layers
         tft.fillRect(centerLine + newCursorPosition, SPECTRUM_TOP_Y + 20, filterWidth, SPECTRUM_HEIGHT - 20, FILTER_WIN);    //AFP 03-27-22 Layers
         break;
 
@@ -1574,15 +1567,12 @@ void Display::DrawBandWidthIndicatorBar()  // AFP 10-30-22
   // Draw tuning alignment line in blue bandwidth bar.  Need to ignore the high-pass filter offset.
   // The old bar needs to be erased first!
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
-    tft.drawFastVLine(centerLine + oldCursorPosition, SPECTRUM_TOP_Y + 20, h - 6, FILTER_WIN);
     tft.drawFastVLine(centerLine + newCursorPosition, SPECTRUM_TOP_Y + 20, h - 6, RA8875_CYAN);
   }
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) {
-    tft.drawFastVLine(centerLine + oldCursorPosition - old_hpf_offset, SPECTRUM_TOP_Y + 20, h - 6, FILTER_WIN);
     tft.drawFastVLine(centerLine + newCursorPosition - hpf_offset, SPECTRUM_TOP_Y + 20, h - 6, RA8875_CYAN);
   }
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
-    tft.drawFastVLine(centerLine + oldCursorPosition, SPECTRUM_TOP_Y + 20, h - 6, FILTER_WIN);
     tft.drawFastVLine(centerLine + newCursorPosition, SPECTRUM_TOP_Y + 20, h - 6, RA8875_CYAN);
   }
 
