@@ -14,6 +14,7 @@ void ModeControl::CWReceiveMode() {
 
 
 void ModeControl::CWTransmitMode() {
+  display.EraseRFSpectrum();
   SetFreq();
 }
 

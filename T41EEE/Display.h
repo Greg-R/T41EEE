@@ -50,6 +50,7 @@ public:
   void DrawSMeterContainer();                                           // Draw the S-meter container.
   void ShowSpectrumdBScale();                                           // Print the vertical dB setting to the spectrum display.
   void DrawSpectrumDisplayContainer();                                  // This function draws RF spectrum display container.
+  void EraseRFSpectrum();
   void DrawFrequencyBarValue();                                         // This function draws the frequency bar at the bottom of the spectrum scope, putting markers at every
                                                                         //  graticule and the full frequency.
   void BandInformation();                                               // To display the current transmission frequency, band, mode, and sideband above the spectrum display

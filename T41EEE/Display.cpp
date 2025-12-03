@@ -200,9 +200,10 @@ void Display::ShowSpectrum(bool drawSpectrum) {
 
     audioYPixelcurrent[x1] = audioYPixel[x1];
 
+/*
     if (keyPressedOn) {
       //  Quickly erase the spectrum on the display.
-      for (int i = 0; i < 511; i = i + 1) {
+      for (int i = 1; i < 511; i = i + 1) {
         if (i == (centerLine - 3)) continue;  // Don't erase center line.
         // Erase old spectrum.
         if (i > x1) {
@@ -229,13 +230,14 @@ void Display::ShowSpectrum(bool drawSpectrum) {
 
       return;  // Bail out of receive and quickly go to transmit mode.
     }
+*/
 
     // Draw audio spectrum.  The audio spectrum width is smaller than the RF spectrum width.
     // The audio spectrum arrays are generated in ReceiveDSP.cpp by method ProcessIQData().
     if (x1 < 253) {                                                                               //AFP 09-01-22
-      if (keyPressedOn == true) {                                                                 //AFP 09-01-22
-                                                                                                  ////        return;
-      } else {                                                                                    //AFP 09-01-22
+//      if (keyPressedOn == true) {                                                                 //AFP 09-01-22
+//                                                                                                  ////        return;
+//      } else {                                                                                    //AFP 09-01-22
         if (audioYPixelold[x1] > CLIP_AUDIO_PEAK) audioYPixelold[x1] = CLIP_AUDIO_PEAK;           // audioSpectrumHeight = 118
         tft.drawFastVLine(532 + x1, 245 - audioYPixelold[x1], audioYPixelold[x1], RA8875_BLACK);  // Erase
         if (audioYPixel[x1] != 0) {
@@ -248,7 +250,6 @@ void Display::ShowSpectrum(bool drawSpectrum) {
           tft.drawFastVLine(532 + x1, 245 - audioYPixel[x1], audioYPixel[x1], RA8875_MAGENTA);
         }
       }
-    }
 
     test1 = -y1_new + 230;  // Nudged waterfall towards blue.  KF5N July 23, 2023
     if (test1 < 0) test1 = 0;
@@ -438,6 +439,15 @@ void Display::DrawSpectrumDisplayContainer() {
     tft.drawRect(SPECTRUM_LEFT_X - 1, SPECTRUM_TOP_Y, MAX_WATERFALL_WIDTH + 2, SPECTRUM_HEIGHT, RA8875_YELLOW);  // Spectrum box.  SPECTRUM_HEIGHT = 150
     tft.drawFastVLine(centerLine, SPECTRUM_TOP_Y, h + 20, RA8875_GREEN);                                         // Draws centerline on spectrum display.
   }
+}
+
+
+void Display::EraseRFSpectrum() {
+  tft.writeTo(L1);
+  // Erase inside the spectrum display container.
+  tft.fillRect(SPECTRUM_LEFT_X, SPECTRUM_TOP_Y + 10 + 10, MAX_WATERFALL_WIDTH, SPECTRUM_HEIGHT - 2 - 9 - 10, RA8875_BLACK);
+  // Because the center line is on Layer1, it has to be re-drawn.
+  tft.drawFastVLine(centerLine, SPECTRUM_TOP_Y, h + 20, RA8875_GREEN);
 }
 
 
