@@ -174,7 +174,6 @@ void Display::ShowSpectrum(bool drawSpectrum) {
       }
     }  //  HB finish
 
-
     // Prevent spectrum from going below the bottom of the spectrum area.  KF5N
     if (y1_new > 247) y1_new = 247;
     if (y2_new > 247) y2_new = 247;
@@ -234,11 +233,11 @@ void Display::ShowSpectrum(bool drawSpectrum) {
 
     // Draw audio spectrum.  The audio spectrum width is smaller than the RF spectrum width.
     // The audio spectrum arrays are generated in ReceiveDSP.cpp by method ProcessIQData().
-    if (x1 < 253) {                                                                      //AFP 09-01-22
-      if (keyPressedOn == true) {                                                        //AFP 09-01-22
-                                                                                         ////        return;
-      } else {                                                                           //AFP 09-01-22
-        if (audioYPixelold[x1] > CLIP_AUDIO_PEAK) audioYPixelold[x1] = CLIP_AUDIO_PEAK;  // audioSpectrumHeight = 118
+    if (x1 < 253) {                                                                               //AFP 09-01-22
+      if (keyPressedOn == true) {                                                                 //AFP 09-01-22
+                                                                                                  ////        return;
+      } else {                                                                                    //AFP 09-01-22
+        if (audioYPixelold[x1] > CLIP_AUDIO_PEAK) audioYPixelold[x1] = CLIP_AUDIO_PEAK;           // audioSpectrumHeight = 118
         tft.drawFastVLine(532 + x1, 245 - audioYPixelold[x1], audioYPixelold[x1], RA8875_BLACK);  // Erase
         if (audioYPixel[x1] != 0) {
           if (audioYPixel[x1] > CLIP_AUDIO_PEAK)  // audioSpectrumHeight = 118
@@ -279,7 +278,6 @@ void Display::ShowSpectrum(bool drawSpectrum) {
   if (AudioH_max_box < 28) {  // LOWERPIXTARGET = 13
     audioFFToffset = audioFFToffset + 1;
   }
-
 
 }  // End ShowSpectrum()
 
@@ -418,7 +416,7 @@ void Display::DrawSMeterContainer() {
 *****/
 void Display::ShowSpectrumdBScale() {
   tft.setFontScale((enum RA8875tsize)0);
-//  tft.fillRect(SPECTRUM_LEFT_X + 1, SPECTRUM_TOP_Y + 2, 33, tft.getFontHeight(), RA8875_BLACK);
+  //  tft.fillRect(SPECTRUM_LEFT_X + 1, SPECTRUM_TOP_Y + 2, 33, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(SPECTRUM_LEFT_X + 5, SPECTRUM_TOP_Y + 2);
   tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
   tft.print("10 dB/");

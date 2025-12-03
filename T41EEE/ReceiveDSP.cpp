@@ -28,7 +28,6 @@ bool ReceiveDSP::ProcessIQData() {
   uint32_t AudioMaxIndex;
   float rfGainValue;
   int rfGain;
-  uint32_t minIndex{0};
 
   // Are there at least N_BLOCKS buffers in each channel available ?  N_BLOCKS should be 16.  Fill float_buffer_L/R[2048].
   if (static_cast<uint32_t>(ADC_RX_I.available()) > 15 && static_cast<uint32_t>(ADC_RX_Q.available()) > 15) {
@@ -36,8 +35,6 @@ bool ReceiveDSP::ProcessIQData() {
     // Get audio samples from the audio  buffers and convert them to float.
     // Read in 16 blocks and 128 samples in I and Q.  16 * 128 = 2048  (N_BLOCKS = 16)
     for (unsigned i = 0; i < N_BLOCKS; i++) {
-      // Find the maximum value and record.
-      //  void arm_absmax_q15	(	const q15_t * 	pSrc, uint32_t 	blockSize, q15_t * 	pResult, uint32_t * 	pIndex);
       /**********************************************************************************  AFP 12-31-20
           Using arm_Math library, convert to float one buffer_size.
           Float_buffer samples are now standardized from > -1.0 to < 1.0
@@ -100,10 +97,10 @@ bool ReceiveDSP::ProcessIQData() {
       If the buffers are full, the Teensy needs much more time.
       In that case, we clear the buffers to keep the whole audio chain running smoothly.
       **********************************************************************************/
-//    if (ADC_RX_I.available() > 50) {
-//      ADC_RX_I.clear();
- //     ADC_RX_Q.clear();
-//    }
+        if (ADC_RX_I.available() > 50) {
+          ADC_RX_I.clear();
+         ADC_RX_Q.clear();
+        }
 
     /**********************************************************************************  AFP 12-31-20
       IQ amplitude and phase correction.  For this scaled down version the I an Q channels are
@@ -151,7 +148,6 @@ bool ReceiveDSP::ProcessIQData() {
     // X1 zoom must be done before the frequency shift!
     if ((ConfigData.spectrum_zoom == 0) and updateDisplayFlag) {
       CalcZoom1Magn();
-//      updateDisplayFlag = false;
     }
 
     FreqShift1();
@@ -164,16 +160,14 @@ bool ReceiveDSP::ProcessIQData() {
 
         Spectrum Zoom uses the shifted spectrum, so the center "hump" around DC is shifted by fs/4
     **********************************************************************************/
-// Zooms 2 and 4.  These need only 16 blocks, so can be done in a single pass.
+    // Zooms 2 and 4.  These need only 16 blocks, so can be done in a single pass.
     if (updateDisplayFlag and (ConfigData.spectrum_zoom == 1 or ConfigData.spectrum_zoom == 2)) {
       ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
-//      updateDisplayFlag = false;  // Don't compute until enough data accumulates.
     }
-// Zooms 8 and 16.  These have to be called repeatedly to accumulate data.
-if (ConfigData.spectrum_zoom == 3 or ConfigData.spectrum_zoom == 4) {
+    // Zooms 8 and 16.  These have to be called repeatedly to accumulate data.
+    if (ConfigData.spectrum_zoom == 3 or ConfigData.spectrum_zoom == 4) {
       ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
-//      updateDisplayFlag = false;
-    } 
+    }
 
     if (calibrateFlag == true) {  // This is required for frequency calibration as it runs with the receiver active.
       CalibrateOptions();
@@ -280,18 +274,14 @@ if (ConfigData.spectrum_zoom == 3 or ConfigData.spectrum_zoom == 4) {
       for (int k = 0; k < 1024; k++) {
         audioSpectBuffer[1023 - k] = (iFFT_buffer[k] * iFFT_buffer[k]);  // iFFT_buffer[1025]?
       }
-      //      uint32_t index_of_max = 0;
-      //      float32_t spectrumPeak = 0;
-      //        arm_max_f32(audioSpectBuffer, 1024, &spectrumPeak, &index_of_max);
-      //        Serial.printf("spectrumPeak = %f index_of_max = %d\n", spectrumPeak, index_of_max);
       for (int k = 0; k < 256; k++) {
         audioYPixelold[k] = audioYPixelcurrent[k];  // Store the existing audio spectrum so it can be erased.
         if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
           //       audioYPixel[k] = 65 + map(15 * log10f((audioSpectBuffer[1023 - k] + audioSpectBuffer[1023 - k + 1] + audioSpectBuffer[1023 - k + 2]) / 3.0), 0, 100, 0, 120) + audioFFToffset;
-          audioYPixel[k] = 65 + 15 * static_cast<int16_t>(log10f(audioSpectBuffer[1023 - k])) + audioFFToffset;  // Simplified for T41EEE.91.
+          audioYPixel[k] = 65 + static_cast<int16_t>(15.0 * log10f(audioSpectBuffer[1023 - k])) + audioFFToffset;  // Simplified for T41EEE.91.
         } else if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
           //       audioYPixel[k] = 65 + map(15 * log10f((audioSpectBuffer[k] + audioSpectBuffer[k + 1] + audioSpectBuffer[k + 2]) / 3.0), 0, 100, 0, 120) + audioFFToffset;
-          audioYPixel[k] = 65 + 15 * static_cast<int16_t>(log10f(audioSpectBuffer[k])) + audioFFToffset;  // Simplified for T41EEE.91.
+          audioYPixel[k] = 65 + static_cast<int16_t>(15.0 * log10f(audioSpectBuffer[k])) + audioFFToffset;  // Simplified for T41EEE.91.
         }
         if (audioYPixel[k] < 0)
           audioYPixel[k] = 0;
@@ -299,19 +289,7 @@ if (ConfigData.spectrum_zoom == 3 or ConfigData.spectrum_zoom == 4) {
       arm_max_f32(audioSpectBuffer, 1024, &audioMaxSquared, &AudioMaxIndex);  // AFP 09-18-22 Max value of squared abin magnitude in audio
       audioMaxSquaredAve = .5 * audioMaxSquared + .5 * audioMaxSquaredAve;    // AFP 09-18-22 Running averaged values
       display.DisplaydbM();
-
-    /* Find the minimum of the FFT and offset to fit in the spectrum display area.
-    arm_min_q15(audioYPixel+32, 192, &spectrumMin, &minIndex);
-    spectrumMinAvg = static_cast<int16_t>(static_cast<float32_t>(spectrumMin) * alpha + static_cast<float32_t>(spectrumMinOld) * (1.0 - alpha));  // Exponential average.
-    spectrumMinOld = spectrumMinAvg;
-    Serial.printf("audioYPixel[128] = %d\n", audioYPixel[128]);
-    // Apply the offset to the entire array.
-    for (int16_t x = 0; x < 256; x++) {
-      audioYPixel[x] = audioYPixel[x] - spectrumMinAvg;
-    }
-    Serial.printf("audioYPixel[128] = %d spectrumMin = %d spectrumMinAvg = %d minIndex = %d\n", audioYPixel[128], spectrumMin, spectrumMinAvg, minIndex);
-    */
-updateDisplayFlag = false;
+      updateDisplayFlag = false;
     }
 
     /**********************************************************************************
