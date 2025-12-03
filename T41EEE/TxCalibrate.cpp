@@ -540,6 +540,11 @@ void TxCalibrate::DoXmitCalibrate(int calMode, bool radio, bool refine, bool toE
   while (true) {
     fftActive = true;
     TxCalibrate::ShowSpectrum();
+    // Slow it down if the numbers are better than -40.
+    if (adjdB < -40.0 and (state == State::initialSweepAmp or state == State::initialSweepPhase)) {
+      TxCalibrate::ShowSpectrum();
+      TxCalibrate::ShowSpectrum();
+    }
     // This function takes care of button presses and resultant control of the rest of the process.
     // The buttons are polled by the while loop.
     TxCalibrate::buttonTasks();  // This takes care of manual calls to the initial or refinement calibrations.
@@ -834,10 +839,15 @@ void TxCalibrate::DoXmitCarrierCalibrate(int calMode, bool radio, bool refine, b
     state = State::warmup;
   }
 
-  // Transmit Calibration Loop
+  // Carrier Calibration Loop
   while (true) {
     fftActive = true;
     TxCalibrate::ShowSpectrum();
+    // Slow things down if adjdB < -35.
+    if (adjdB < -35.0 and (state == State::initialSweepAmp or state == State::initialSweepPhase)) {
+      TxCalibrate::ShowSpectrum();
+      TxCalibrate::ShowSpectrum();
+    }
     TxCalibrate::buttonTasks();  // This takes care of manual calls to the initial or refinement calibrations.
     // Exit from manual calibration by button push.
     if (exitManual == true) {

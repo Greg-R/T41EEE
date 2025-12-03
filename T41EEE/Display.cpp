@@ -91,7 +91,6 @@ void Display::ShowSpectrum(bool drawSpectrum) {
   updateDisplayFlag = false;
   spectrumErased = false;
   bool plotInProgress = false;
-  bool processed = false;
   bool blocksAvailable = false;
 
   for (x1 = 1; x1 < 511; x1++)  // Bins on the ends are junk, don't plot.
@@ -141,7 +140,7 @@ void Display::ShowSpectrum(bool drawSpectrum) {
     startRxFlag = false;
 
     // This has to be repeatedly called for continuous audio.
-    processed = process.ProcessIQData();
+    process.ProcessIQData();
 
     // Don't call this function unless the filter bandwidth has been adjusted.
     if (encoderFilterFlag) {
