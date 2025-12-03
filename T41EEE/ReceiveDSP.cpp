@@ -270,7 +270,6 @@ bool ReceiveDSP::ProcessIQData() {
 
     // Create audio spectrum.
     if (updateDisplayFlag == true) {
-      // audioSpectBuffer[1024]
       for (int k = 0; k < 1024; k++) {
         audioSpectBuffer[1023 - k] = (iFFT_buffer[k] * iFFT_buffer[k]);  // iFFT_buffer[1025]?
       }

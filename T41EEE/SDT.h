@@ -21,9 +21,6 @@
 #include <EEPROM.h>
 #include <string>
 
-
-//#include <charconv>
-
 // User section which is customizable.
 #include "MyConfigurationFile.h"
 
@@ -376,7 +373,6 @@ struct config_t {
 
   Sideband lastSideband[NUMBER_OF_BANDS] = { Sideband::LOWER, Sideband::LOWER, Sideband::UPPER, Sideband::UPPER, Sideband::UPPER, Sideband::UPPER, Sideband::UPPER };
   uint32_t centerFreq = 7030000;  // 4 bytes
-  // New user config data                                JJP 7-3-23
   char mapFileName[50] = MAP_FILE_NAME;
   char myTimeZone[10] = MY_TIMEZONE;
   int separationCharacter = (int)'.';  // JJP 7/25/23
@@ -642,14 +638,6 @@ typedef struct DEMOD_Descriptor {
 } DEMOD_Desc;
 extern const DEMOD_Descriptor DEMOD[];
 
-//struct dispSc {
-//  const char *dbText;
-//  float32_t dBScale;
-//  uint16_t baseOffset;
-//};
-
-//extern struct dispSc displayScale[];  // This is planned to be deleted.
-
 typedef struct Menu_Descriptor {
   const uint8_t no;         // Menu ID
   const char *const text1;  // upper text
@@ -831,7 +819,6 @@ extern float32_t IQXPhaseCorrectionFactor[];
 extern float32_t /*DMAMEM*/ last_sample_buffer_L[];
 extern float32_t /*DMAMEM*/ last_sample_buffer_R[];
 extern float32_t L_BufferOffset[];
-//extern float32_t *mag_coeffs[];
 extern bool calOnFlag;
 extern float32_t mid;
 extern float32_t /*DMAMEM*/ NR_FFT_buffer[];

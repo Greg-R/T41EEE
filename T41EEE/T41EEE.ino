@@ -173,13 +173,6 @@ arm_fir_interpolate_instance_f32 FIR_int2_I;
 arm_fir_interpolate_instance_f32 FIR_int2_Q;
 arm_lms_norm_instance_f32 LMS_Norm_instance;
 
-// This is no longer used.  It needs to be removed.
-//dispSc displayScale[] =  // dbText, dBScale, baseOffset
-//  {
-//    { "20 dB/", 10.0, 24 },
-//    { "10 dB/", 20.0, 10 }  //  1, 2, and 5 dB options removed.  Greg KF5N July 30, 2024.
-//  };
-
 int32_t NCOFreq = 0;  // Used for fine-tune frequency shift.
 
 //======================================== Global variables declarations ===============================================
@@ -504,7 +497,7 @@ float TGetTemp() {
   while (!(TEMPMON_TEMPSENSE0 & 0x4U)) {
     ;
   }
-  // ready to read temperature code value
+  // Ready to read temperature code value.
   nmeas = (TEMPMON_TEMPSENSE0 & 0xFFF00U) >> 8U;
   tmeas = s_hotTemp - (float)((nmeas - s_hotCount) * s_hotT_ROOM / s_roomC_hotC);  // Calculate temperature
   return tmeas;
@@ -1347,6 +1340,4 @@ void loop() {
     display.DisplayClock();
   }
 
-
-  
 }  // end loop()

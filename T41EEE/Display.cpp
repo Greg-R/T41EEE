@@ -94,7 +94,7 @@ void Display::ShowSpectrum(bool drawSpectrum) {
   bool processed = false;
   bool blocksAvailable = false;
 
-  for (x1 = 1; x1 < 511; x1++)  // First few bins are junk.  Don't plot them.
+  for (x1 = 1; x1 < 511; x1++)  // Bins on the ends are junk, don't plot.
   //Draws the main Spectrum, Waterfall and Audio displays
   {
     // Is there enough data to calculate an FFT?

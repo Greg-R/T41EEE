@@ -658,9 +658,6 @@ void DoCWDecoding(int audioValue) {
 }
 
 
-
-
-
 /*****
   Purpose: This function creates a distribution of the dit and dahs lengths, expressed in
   milliseconds. The result is a bi-modal distribution around those two timings. The

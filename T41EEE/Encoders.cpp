@@ -52,8 +52,6 @@ void FilterSetSSB() {
     bands.bands[ConfigData.currentBand].FAMCut = bands.bands[ConfigData.currentBand].FAMCut + filterEncoderMove * 100 * ENCODER_FACTOR;
   }
 
-  //  Serial.printf("FilterSetSSB FloCut = %d FHiCut = %d\n", bands.bands[ConfigData.currentBand].FLoCut, bands.bands[ConfigData.currentBand].FHiCut);
-
   FilterBandwidth();
   audioCompensateFlag = true;  // Compensate for volume due to filter setting.  Done in loop().
   encoderFilterFlag = false;   // The flag is set by the EncoderFilter() isr.
