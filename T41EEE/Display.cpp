@@ -161,7 +161,7 @@ void Display::ShowSpectrum(bool drawSpectrum) {
     y2_old = pixelold[x1 + 1];
 
     // Collect a histogram of audio spectral values.  This is used to keep the audio spectrum in the viewable area.
-    /* 247??? is the spectral display bottom.  129 is the audio spectrum display top.
+    // 247??? is the spectral display bottom.  129 is the audio spectrum display top.
     if ((x1 < 256) and (audioYPixel[x1] > 0))  //  Collect audio frequency distribution to find noise floor.
     {
       k = audioYPixel[x1];               // +40 to get 10 bins below zero - want to straddle zero to make the entire spectrum viewable.
@@ -173,7 +173,7 @@ void Display::ShowSpectrum(bool drawSpectrum) {
                                          //        Serial.printf("k = %d AudioH_max_box = %d\n", k, AudioH_max_box);
       }
     }  //  HB finish
-*/
+
 
     // Prevent spectrum from going below the bottom of the spectrum area.  KF5N
     if (y1_new > 247) y1_new = 247;
@@ -199,7 +199,7 @@ void Display::ShowSpectrum(bool drawSpectrum) {
     // In the case of a CW interrupt, the array pixelnew should be saved as the actual spectrum.
     // This is the actual "old" spectrum!  This is required due to CW interrupts.  pixelCurrent
     // gets copied to pixelold by the FFT function.  Greg KF5N
-    //  pixelCurrent[x1] = pixelnew[x1];
+
     audioYPixelcurrent[x1] = audioYPixel[x1];
 
     if (keyPressedOn) {
@@ -236,10 +236,10 @@ void Display::ShowSpectrum(bool drawSpectrum) {
     // The audio spectrum arrays are generated in ReceiveDSP.cpp by method ProcessIQData().
     if (x1 < 253) {                                                                      //AFP 09-01-22
       if (keyPressedOn == true) {                                                        //AFP 09-01-22
-                                                                                         ////        return;                                                                          //AFP 09-01-22
+                                                                                         ////        return;
       } else {                                                                           //AFP 09-01-22
         if (audioYPixelold[x1] > CLIP_AUDIO_PEAK) audioYPixelold[x1] = CLIP_AUDIO_PEAK;  // audioSpectrumHeight = 118
-        tft.drawFastVLine(532 + x1, 245 - audioYPixelold[x1] - 0, audioYPixelold[x1], RA8875_BLACK);
+        tft.drawFastVLine(532 + x1, 245 - audioYPixelold[x1], audioYPixelold[x1], RA8875_BLACK);  // Erase
         if (audioYPixel[x1] != 0) {
           if (audioYPixel[x1] > CLIP_AUDIO_PEAK)  // audioSpectrumHeight = 118
             audioYPixel[x1] = CLIP_AUDIO_PEAK;
@@ -247,7 +247,7 @@ void Display::ShowSpectrum(bool drawSpectrum) {
             smeterLength = y_new;
           }
           // Draw a vertical line with the audio spectrum magnitude.  AUDIO_SPECTRUM_BOTTOM = 247
-          tft.drawFastVLine(532 + x1, 245 - audioYPixel[x1] - 0, audioYPixel[x1], RA8875_MAGENTA);
+          tft.drawFastVLine(532 + x1, 245 - audioYPixel[x1], audioYPixel[x1], RA8875_MAGENTA);
         }
       }
     }
@@ -272,14 +272,14 @@ void Display::ShowSpectrum(bool drawSpectrum) {
   // Then write new row data into the missing top row to get a scroll effect using display hardware, not the CPU.
   tft.writeRect(WATERFALL_LEFT_X, FIRST_WATERFALL_LINE, MAX_WATERFALL_WIDTH, 1, waterfall);
 
-  /* Manage audio spectral display graphics.  Keep the spectrum within the viewable area.
+  // Manage audio spectral display graphics.  Keep the spectrum within the viewable area.
   if (AudioH_max_box > 30) {  // HB. Adjust rfGainAllBands 15 and 13 to alter to move target base up and down. UPPERPIXTARGET = 15
     audioFFToffset = audioFFToffset - 1;
   }
   if (AudioH_max_box < 28) {  // LOWERPIXTARGET = 13
     audioFFToffset = audioFFToffset + 1;
   }
-*/
+
 
 }  // End ShowSpectrum()
 
@@ -418,10 +418,10 @@ void Display::DrawSMeterContainer() {
 *****/
 void Display::ShowSpectrumdBScale() {
   tft.setFontScale((enum RA8875tsize)0);
-  tft.fillRect(SPECTRUM_LEFT_X + 1, SPECTRUM_TOP_Y + 2, 33, tft.getFontHeight(), RA8875_BLACK);
+//  tft.fillRect(SPECTRUM_LEFT_X + 1, SPECTRUM_TOP_Y + 2, 33, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(SPECTRUM_LEFT_X + 5, SPECTRUM_TOP_Y + 2);
-  tft.setTextColor(RA8875_WHITE);
-  tft.print(displayScale[ConfigData.currentScale].dbText);
+  tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
+  tft.print("10 dB/");
 }
 
 

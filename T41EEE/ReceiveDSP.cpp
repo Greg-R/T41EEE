@@ -28,6 +28,7 @@ bool ReceiveDSP::ProcessIQData() {
   uint32_t AudioMaxIndex;
   float rfGainValue;
   int rfGain;
+  uint32_t minIndex{0};
 
   // Are there at least N_BLOCKS buffers in each channel available ?  N_BLOCKS should be 16.  Fill float_buffer_L/R[2048].
   if (static_cast<uint32_t>(ADC_RX_I.available()) > 15 && static_cast<uint32_t>(ADC_RX_Q.available()) > 15) {
@@ -150,7 +151,7 @@ bool ReceiveDSP::ProcessIQData() {
     // X1 zoom must be done before the frequency shift!
     if ((ConfigData.spectrum_zoom == 0) and updateDisplayFlag) {
       CalcZoom1Magn();
-      updateDisplayFlag = false;
+//      updateDisplayFlag = false;
     }
 
     FreqShift1();
@@ -166,12 +167,12 @@ bool ReceiveDSP::ProcessIQData() {
 // Zooms 2 and 4.  These need only 16 blocks, so can be done in a single pass.
     if (updateDisplayFlag and (ConfigData.spectrum_zoom == 1 or ConfigData.spectrum_zoom == 2)) {
       ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
-      updateDisplayFlag = false;  // Don't compute until enough data accumulates.
+//      updateDisplayFlag = false;  // Don't compute until enough data accumulates.
     }
 // Zooms 8 and 16.  These have to be called repeatedly to accumulate data.
 if (ConfigData.spectrum_zoom == 3 or ConfigData.spectrum_zoom == 4) {
       ZoomFFTExe(BUFFER_SIZE * N_BLOCKS);
-      updateDisplayFlag = false;
+//      updateDisplayFlag = false;
     } 
 
     if (calibrateFlag == true) {  // This is required for frequency calibration as it runs with the receiver active.
@@ -287,10 +288,10 @@ if (ConfigData.spectrum_zoom == 3 or ConfigData.spectrum_zoom == 4) {
         audioYPixelold[k] = audioYPixelcurrent[k];  // Store the existing audio spectrum so it can be erased.
         if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM || bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) {
           //       audioYPixel[k] = 65 + map(15 * log10f((audioSpectBuffer[1023 - k] + audioSpectBuffer[1023 - k + 1] + audioSpectBuffer[1023 - k + 2]) / 3.0), 0, 100, 0, 120) + audioFFToffset;
-          audioYPixel[k] = 65 + 15 * log10f(audioSpectBuffer[1023 - k]) + audioFFToffset;  // Simplified for T41EEE.91.
+          audioYPixel[k] = 65 + 15 * static_cast<int16_t>(log10f(audioSpectBuffer[1023 - k])) + audioFFToffset;  // Simplified for T41EEE.91.
         } else if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER) {
           //       audioYPixel[k] = 65 + map(15 * log10f((audioSpectBuffer[k] + audioSpectBuffer[k + 1] + audioSpectBuffer[k + 2]) / 3.0), 0, 100, 0, 120) + audioFFToffset;
-          audioYPixel[k] = 65 + 15 * log10f(audioSpectBuffer[k]) + audioFFToffset;  // Simplified for T41EEE.91.
+          audioYPixel[k] = 65 + 15 * static_cast<int16_t>(log10f(audioSpectBuffer[k])) + audioFFToffset;  // Simplified for T41EEE.91.
         }
         if (audioYPixel[k] < 0)
           audioYPixel[k] = 0;
@@ -298,6 +299,19 @@ if (ConfigData.spectrum_zoom == 3 or ConfigData.spectrum_zoom == 4) {
       arm_max_f32(audioSpectBuffer, 1024, &audioMaxSquared, &AudioMaxIndex);  // AFP 09-18-22 Max value of squared abin magnitude in audio
       audioMaxSquaredAve = .5 * audioMaxSquared + .5 * audioMaxSquaredAve;    // AFP 09-18-22 Running averaged values
       display.DisplaydbM();
+
+    /* Find the minimum of the FFT and offset to fit in the spectrum display area.
+    arm_min_q15(audioYPixel+32, 192, &spectrumMin, &minIndex);
+    spectrumMinAvg = static_cast<int16_t>(static_cast<float32_t>(spectrumMin) * alpha + static_cast<float32_t>(spectrumMinOld) * (1.0 - alpha));  // Exponential average.
+    spectrumMinOld = spectrumMinAvg;
+    Serial.printf("audioYPixel[128] = %d\n", audioYPixel[128]);
+    // Apply the offset to the entire array.
+    for (int16_t x = 0; x < 256; x++) {
+      audioYPixel[x] = audioYPixel[x] - spectrumMinAvg;
+    }
+    Serial.printf("audioYPixel[128] = %d spectrumMin = %d spectrumMinAvg = %d minIndex = %d\n", audioYPixel[128], spectrumMin, spectrumMinAvg, minIndex);
+    */
+updateDisplayFlag = false;
     }
 
     /**********************************************************************************

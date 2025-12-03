@@ -197,7 +197,7 @@ void ZoomFFTExe(uint32_t blockSize) {
       }
     else {
       for (int16_t x = 0; x < fftWidth; x++) {
-        pixelnew[x] = static_cast<int16_t>(displayScale[ConfigData.currentScale].dBScale * log10f_fast(FFT_spec[x]));
+        pixelnew[x] = static_cast<int16_t>(20.0 * log10f_fast(FFT_spec[x]));
       }
       // Find the minimum of the FFT and offset to fit in the spectrum display area.
 //      arm_min_q15(pixelnew + 128, 256, &spectrumMin, &minIndex);
@@ -258,7 +258,7 @@ void CalcZoom1Magn() {
 
       if (calOnFlag) {  // Higher dynamic range spectral display during calibration.  The 24 is the legacy "baseOffset".
         pixelnew[x] = 24 + static_cast<int16_t>(40.0 * log10f_fast(FFT_spec[x]));
-      } else pixelnew[x] = 24 + (int16_t)(10.0 * log10f_fast(FFT_spec[x]));
+      } else pixelnew[x] = 24 + (int16_t)(20.0 * log10f_fast(FFT_spec[x]));
     }
     if (calOnFlag) return;  // No more calculations necssary for calibration.
     

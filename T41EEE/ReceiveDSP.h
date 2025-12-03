@@ -17,6 +17,10 @@ public:
   float32_t sample_meanR = 0.0;
   float32_t wold = 0.0f;
   float32_t audioGainCompensate = 1.0;
+  int16_t spectrumMin{0};
+  int16_t spectrumMinAvg{0};
+  int16_t spectrumMinOld{0};
+  const float32_t alpha = 0.1;
 
   // 12 pole Chebyshev 24KSPS 840HZ Fc CW LPF  // AFP 10-18-22
   //   b0                     b1                   b2

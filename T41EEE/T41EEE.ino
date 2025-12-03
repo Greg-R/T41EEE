@@ -174,11 +174,11 @@ arm_fir_interpolate_instance_f32 FIR_int2_Q;
 arm_lms_norm_instance_f32 LMS_Norm_instance;
 
 // This is no longer used.  It needs to be removed.
-dispSc displayScale[] =  // dbText, dBScale, baseOffset
-  {
-    { "20 dB/", 10.0, 24 },
-    { "10 dB/", 20.0, 10 }  //  1, 2, and 5 dB options removed.  Greg KF5N July 30, 2024.
-  };
+//dispSc displayScale[] =  // dbText, dBScale, baseOffset
+//  {
+//    { "20 dB/", 10.0, 24 },
+//    { "10 dB/", 20.0, 10 }  //  1, 2, and 5 dB options removed.  Greg KF5N July 30, 2024.
+//  };
 
 int32_t NCOFreq = 0;  // Used for fine-tune frequency shift.
 
@@ -250,10 +250,10 @@ const uint16_t n_dec2_taps = (1 + (uint16_t)(n_att / (22.0 * (n_fstop2 - n_fpass
 
 int attenuator = 0;
 
-int audioYPixel[256]{ 0 };  // Will int16_t save memory here???  DMAMEM not working here.  Causes audio spectrum glitch.  KF5N February 26, 2024.
-int audioYPixelnew[256]{ 0 };
-int audioYPixelold[256]{ 0 };
-int audioYPixelcurrent[256]{ 0 };
+int16_t audioYPixel[256]{ 0 };  // Will int16_t save memory here???  DMAMEM not working here.  Causes audio spectrum glitch.  KF5N February 26, 2024.
+int16_t audioYPixelnew[256]{ 0 };
+int16_t audioYPixelold[256]{ 0 };
+int16_t audioYPixelcurrent[256]{ 0 };
 
 int bandswitchPins[] = {
   30,  // 80M

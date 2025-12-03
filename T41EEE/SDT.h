@@ -642,13 +642,13 @@ typedef struct DEMOD_Descriptor {
 } DEMOD_Desc;
 extern const DEMOD_Descriptor DEMOD[];
 
-struct dispSc {
-  const char *dbText;
-  float32_t dBScale;
-  uint16_t baseOffset;
-};
+//struct dispSc {
+//  const char *dbText;
+//  float32_t dBScale;
+//  uint16_t baseOffset;
+//};
 
-extern struct dispSc displayScale[];  // This is planned to be deleted.
+//extern struct dispSc displayScale[];  // This is planned to be deleted.
 
 typedef struct Menu_Descriptor {
   const uint8_t no;         // Menu ID
@@ -689,10 +689,10 @@ extern const uint16_t n_dec1_taps;
 extern const uint16_t n_dec2_taps;
 extern int attenuator;
 
-extern int audioYPixel[];
-extern int audioYPixelnew[];
-extern int audioYPixelold[];
-extern int audioYPixelcurrent[];
+extern int16_t audioYPixel[];
+extern int16_t audioYPixelnew[];
+extern int16_t audioYPixelold[];
+extern int16_t audioYPixelcurrent[];
 
 extern int bandswitchPins[];
 extern PROGMEM uint32_t calFrequencies[NUMBER_OF_BANDS][2];
