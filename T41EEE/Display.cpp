@@ -94,6 +94,11 @@ void Display::ShowSpectrum(bool drawSpectrum) {
   bool blocksAvailable = false;
 
   for (x1 = 1; x1 < 511; x1++)  // Bins on the ends are junk, don't plot.
+
+    // Quit and start transmitter if key is pressed.
+    if (keyPressedOn) {
+      return;
+    }
   //Draws the main Spectrum, Waterfall and Audio displays
   {
     // Is there enough data to calculate an FFT?
@@ -200,56 +205,24 @@ void Display::ShowSpectrum(bool drawSpectrum) {
 
     audioYPixelcurrent[x1] = audioYPixel[x1];
 
-/*
-    if (keyPressedOn) {
-      //  Quickly erase the spectrum on the display.
-      for (int i = 1; i < 511; i = i + 1) {
-        if (i == (centerLine - 3)) continue;  // Don't erase center line.
-        // Erase old spectrum.
-        if (i > x1) {
-          y1_old = 247 - pixelold[i];
-          y2_old = 247 - pixelold[i + 1];
-          y1_old = (y1_old > 247) ? 247 : y1_old;
-          y2_old = (y2_old > 247) ? 247 : y2_old;
-          y1_old = (y1_old < 120) ? 120 : y1_old;
-          y2_old = (y2_old < 120) ? 120 : y2_old;
-          tft.drawLine(i + 3, y1_old, i + 3, y2_old, RA8875_BLACK);
-        }
-        // Erase the most recently plotted spectrum.
-        if (i <= x1) {
-          y1_old = 247 - pixelnew[i];
-          y2_old = 247 - pixelnew[i + 1];
-        }
-        y1_old = (y1_old > 247) ? 247 : y1_old;
-        y2_old = (y2_old > 247) ? 247 : y2_old;
-        y1_old = (y1_old < 120) ? 120 : y1_old;
-        y2_old = (y2_old < 120) ? 120 : y2_old;
-        tft.drawLine(i + 3, y1_old, i + 3, y2_old, RA8875_BLACK);
-      }
-      spectrumErased = true;
-
-      return;  // Bail out of receive and quickly go to transmit mode.
-    }
-*/
-
     // Draw audio spectrum.  The audio spectrum width is smaller than the RF spectrum width.
     // The audio spectrum arrays are generated in ReceiveDSP.cpp by method ProcessIQData().
-    if (x1 < 253) {                                                                               //AFP 09-01-22
-//      if (keyPressedOn == true) {                                                                 //AFP 09-01-22
-//                                                                                                  ////        return;
-//      } else {                                                                                    //AFP 09-01-22
-        if (audioYPixelold[x1] > CLIP_AUDIO_PEAK) audioYPixelold[x1] = CLIP_AUDIO_PEAK;           // audioSpectrumHeight = 118
-        tft.drawFastVLine(532 + x1, 245 - audioYPixelold[x1], audioYPixelold[x1], RA8875_BLACK);  // Erase
-        if (audioYPixel[x1] != 0) {
-          if (audioYPixel[x1] > CLIP_AUDIO_PEAK)  // audioSpectrumHeight = 118
-            audioYPixel[x1] = CLIP_AUDIO_PEAK;
-          if (x1 == middleSlice) {
-            smeterLength = y_new;
-          }
-          // Draw a vertical line with the audio spectrum magnitude.  AUDIO_SPECTRUM_BOTTOM = 247
-          tft.drawFastVLine(532 + x1, 245 - audioYPixel[x1], audioYPixel[x1], RA8875_MAGENTA);
+    if (x1 < 253) {                                                                             //AFP 09-01-22
+                                                                                                //      if (keyPressedOn == true) {                                                                 //AFP 09-01-22
+                                                                                                //                                                                                                  ////        return;
+                                                                                                //      } else {                                                                                    //AFP 09-01-22
+      if (audioYPixelold[x1] > CLIP_AUDIO_PEAK) audioYPixelold[x1] = CLIP_AUDIO_PEAK;           // audioSpectrumHeight = 118
+      tft.drawFastVLine(532 + x1, 245 - audioYPixelold[x1], audioYPixelold[x1], RA8875_BLACK);  // Erase
+      if (audioYPixel[x1] != 0) {
+        if (audioYPixel[x1] > CLIP_AUDIO_PEAK)  // audioSpectrumHeight = 118
+          audioYPixel[x1] = CLIP_AUDIO_PEAK;
+        if (x1 == middleSlice) {
+          smeterLength = y_new;
         }
+        // Draw a vertical line with the audio spectrum magnitude.  AUDIO_SPECTRUM_BOTTOM = 247
+        tft.drawFastVLine(532 + x1, 245 - audioYPixel[x1], audioYPixel[x1], RA8875_MAGENTA);
       }
+    }
 
     test1 = -y1_new + 230;  // Nudged waterfall towards blue.  KF5N July 23, 2023
     if (test1 < 0) test1 = 0;
