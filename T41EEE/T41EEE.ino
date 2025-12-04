@@ -192,7 +192,9 @@ int filterWidth{ 0 };
 int h = 135;  // SPECTRUM_HEIGHT + 3;
 bool ANR_notch = false;
 uint8_t auto_codec_gain = 1;
-bool keyPressedOn = 0;
+bool keyPressedOn = false;
+bool keyerFirstDit = false;
+bool keyerFirstDah = false;
 uint8_t NR_first_time = 1;
 uint8_t NR_Kim;
 
@@ -802,8 +804,11 @@ MenuSelect readButton() {
 *****/
 void KeyTipOn() {
   // Make sure this is ignored in other modes!  Probably should detach in non-CW modes.
-  if (digitalRead(KEYER_DIT_INPUT_TIP) == LOW and bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE)
-    keyPressedOn = 1;
+  //  if (digitalRead(KEYER_DIT_INPUT_TIP) == LOW and bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE)
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE)
+    keyPressedOn = true;
+  if (ConfigData.paddleFlip == 0) keyerFirstDit = true;
+  else keyerFirstDah = true;
 }
 
 
@@ -818,8 +823,11 @@ void KeyRingOn()  //AFP 09-25-22
 {
   if (ConfigData.keyType == 1) {
     // Make sure this is ignored in other modes!  Probably should detach in non-CW modes.
-    if (digitalRead(KEYER_DAH_INPUT_RING) == LOW and bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE)
-      keyPressedOn = 1;
+    //    if (digitalRead(KEYER_DAH_INPUT_RING) == LOW and bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE)
+    if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE)
+      keyPressedOn = true;
+    if (ConfigData.paddleFlip == 0) keyerFirstDah = true;
+    else keyerFirstDit = true;
   }
 }
 
@@ -1244,7 +1252,8 @@ void loop() {
       cwTimer = millis();
       while (millis() - cwTimer <= ConfigData.cwTransmitDelay) {
         // Keyer Dit
-        if (digitalRead(ConfigData.paddleDit) == LOW) {
+        if (digitalRead(ConfigData.paddleDit) == LOW or keyerFirstDit) {
+
           cwexciter.CW_ExciterIQData(CW_SHAPING_RISE);
           for (cwBlockIndex = 0; cwBlockIndex < transmitDitUnshapedBlocks; cwBlockIndex++) {
             cwexciter.CW_ExciterIQData(CW_SHAPING_NONE);
@@ -1257,8 +1266,10 @@ void loop() {
             cwexciter.CW_ExciterIQData(CW_SHAPING_ZERO);
           }
           cwTimer = millis();  //  Reset delay timer only after a dit or dah is transmitted.
-                               //Keyer DAH
-        } else if (digitalRead(ConfigData.paddleDah) == LOW) {
+          keyerFirstDit = false;
+          //Keyer DAH
+        } else if (digitalRead(ConfigData.paddleDah) == LOW or keyerFirstDah) {
+
           cwexciter.CW_ExciterIQData(CW_SHAPING_RISE);
           for (cwBlockIndex = 0; cwBlockIndex < transmitDahUnshapedBlocks; cwBlockIndex++) {
             cwexciter.CW_ExciterIQData(CW_SHAPING_NONE);
@@ -1274,6 +1285,7 @@ void loop() {
         } else {
           cwexciter.CW_ExciterIQData(CW_SHAPING_ZERO);
         }
+        keyerFirstDah = false;
       }  // End while.  End keyer relay timer.
       enableTransmitter(false);
 
@@ -1332,6 +1344,10 @@ void loop() {
     loopCounter = 0;
     Serial.printf("AudioProcessorUsageMax() = %d\n", static_cast<uint32_t>(AudioProcessorUsageMax()));
     AudioProcessorUsageMaxReset();
+
+    Serial.printf("keyPressedOn = %d\n", keyPressedOn);
+    Serial.printf("keyerFirstDit = %d\n", keyerFirstDit);
+    Serial.printf("keyerFirstDah = %d\n", keyerFirstDah);
   }
   usec1Old = usec1;
 #endif
