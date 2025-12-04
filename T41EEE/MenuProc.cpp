@@ -768,7 +768,7 @@ void SSBOptions() {
   MenuSelect menu = MenuSelect::BOGUS_PIN_READ;
   const std::string ssbChoices[] = { "CESSB", "SSB", "FT8 Active", "Comp On", "Comp Off", "Mic Gain", "Comp Ratio", "Comp Threshold", "IMD Test ", "Cancel" };
 
-  ssbChoice = SubmenuSelect(ssbChoices, 9, ssbChoice);
+  ssbChoice = SubmenuSelect(ssbChoices, 10, ssbChoice);
   switch (ssbChoice) {
 
     case 0:  // CESSB on
