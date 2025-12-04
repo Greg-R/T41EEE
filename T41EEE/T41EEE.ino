@@ -961,7 +961,7 @@ FLASHMEM void setup() {
 
   Q_out_L_Ex.setMaxBuffers(32);  // Limits determined emperically.  These may need more adjustment.  Greg KF5N August 4, 2024.
   Q_out_R_Ex.setMaxBuffers(32);
-  Q_out_L.setMaxBuffers(64);  // Receiver audio buffer limit.
+  audioOutQueue.setMaxBuffers(64);  // Receiver audio buffer limit.
 
   // Switch matrix debug code.
   // Push and hold a button at power up to activate switch matrix calibration.
@@ -1344,10 +1344,6 @@ void loop() {
     loopCounter = 0;
     Serial.printf("AudioProcessorUsageMax() = %d\n", static_cast<uint32_t>(AudioProcessorUsageMax()));
     AudioProcessorUsageMaxReset();
-
-    Serial.printf("keyPressedOn = %d\n", keyPressedOn);
-    Serial.printf("keyerFirstDit = %d\n", keyerFirstDit);
-    Serial.printf("keyerFirstDah = %d\n", keyerFirstDah);
   }
   usec1Old = usec1;
 #endif

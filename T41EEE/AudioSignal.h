@@ -71,23 +71,24 @@ AudioEffectCompressor2_F32 *pc1 = &compressor2_1;
 
 AudioEffectGain_F32 speakerVolume, speakerScale, headphoneVolume, headphoneScale, compGain, buffer;
 AudioAmplifier testGain;
-AudioMixer4_F32 mixer4;
+AudioMixer4_F32 mixer4, mixer5;
+
 AudioSwitch4_OA_F32 switch1_rx, switch2_rx;
 AudioConvert_F32toI16 float2Int3, float2Int4, float2Int5, float2Int6;
 
 AudioRecordQueue ADC_RX_I;  // Receiver I channel from ADC PCM1808, 16 bit.
 AudioRecordQueue ADC_RX_Q;  // Receiver Q channel from ADC PCM1808, 16 bit.
 
-AudioPlayQueue Q_out_L;  // Receiver audio out and CW sidetone.
+AudioPlayQueue_F32 audioOutQueue;     // Receiver audio out and CW sidetone.
+AudioPlayQueue_F32 sidetoneOutQueue;  // Receiver audio out and CW sidetone.
 
-AudioConvert_I16toF32 int2Float2;
 AudioConnection patchCord1(i2s_quadIn, 3, ADC_RX_I, 0);  // Receiver I and Q channel data stream.
 AudioConnection patchCord2(i2s_quadIn, 2, ADC_RX_Q, 0);  // This data stream goes to sketch code for processing.
 
-AudioConnection patchCord3(Q_out_L, 0, int2Float2, 0);  // 192ksps Audio data stream from sketch code.  Receiver audio or CW sidetone.
+AudioConnection_F32 patchCord3(audioOutQueue, 0, mixer5, 0);  // mixer5 selects receiver or CW sidetone audio.
+AudioConnection_F32 patchCord35(sidetoneOutQueue, 0, mixer5, 1);
 
-// F32 from here forward.
-AudioConnection_F32 patchCord4(int2Float2, 0, switch1_rx, 0);  // Used to bypass compressor2_1.
+AudioConnection_F32 patchCord4(mixer5, 0, switch1_rx, 0);
 
 AudioConnection_F32 patchCord5(switch1_rx, 0, compressor2_1, 0);  // Compressor used as audio AGC.
 AudioConnection_F32 patchCord6(compressor2_1, 0, mixer4, 0);
@@ -221,9 +222,9 @@ void SetAudioOperatingState(RadioState operatingState) {
       // Connect audio paths
       patchCord1.connect();
       patchCord2.connect();
-      patchCord3.connect();
+      mixer5.gain(0, 1.0);    // Connect receiver audio from DSP.
+      mixer5.gain(1, 0);      // Disconnect CW sidetone.
       connect0.disconnect();  // Disconnect microphone input data stream.
-      Q_out_L.setBehaviour(AudioPlayQueue::NON_STALLING);
 
       // Configure audio compressor (AGC)
       if (ConfigData.AGCMode == true) {  // Activate compressor2_1 path.
@@ -265,7 +266,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       sgtl5000_1.unmuteLineout();
       patchCord1.disconnect();  // Receiver I channel
       patchCord2.disconnect();  // Receiver Q channel
-      patchCord3.disconnect();  // Receiver audio
+      mixer5.gain(0, 0);        // Stop receiver audio.
+      mixer5.gain(1, 0);        // Stop sidetone audio.
       connect0.connect();       // Connect microphone input data stream.
 
       ADC_RX_I.end();
@@ -317,10 +319,10 @@ void SetAudioOperatingState(RadioState operatingState) {
       InitializeDataArrays();                        // I2S sample rate set in this function.
       controlAudioOut(AudioState::MUTE_BOTH, true);  // Mute all audio.
       sgtl5000_1.unmuteLineout();
-      patchCord1.connect();     // Receiver I channel
-      patchCord2.connect();     // Receiver Q channel
-      patchCord3.disconnect();  // Receiver audio
-
+      patchCord1.connect();  // Receiver I channel
+      patchCord2.connect();  // Receiver Q channel
+      mixer5.gain(0, 0);     // Stop receiver audio.
+      mixer5.gain(1, 0);     // Stop sidetone audio.
       ADC_RX_I.end();
       ADC_RX_I.clear();
       ADC_RX_Q.end();
@@ -388,7 +390,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       sgtl5000_1.unmuteLineout();
       patchCord1.disconnect();  // Receiver I channel
       patchCord2.disconnect();  // Receiver Q channel
-      patchCord3.disconnect();  // Receiver audio
+      mixer5.gain(0, 0);        // Stop receiver audio.
+      mixer5.gain(1, 0);        // Stop sidetone audio.
       connect0.disconnect();    // Disconnect microphone input data stream.
 
       ADC_RX_I.end();
@@ -456,7 +459,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       // QSD disabled and disconnected
       patchCord1.disconnect();  // Receiver I channel
       patchCord2.disconnect();  // Receiver Q channel
-      patchCord3.connect();     // Sidetone
+      mixer5.gain(0, 0);        // Disconnect receiver audio from DSP.
+      mixer5.gain(1, 1.0);      // Connect CW sidetone.
       connect0.disconnect();    // Disconnect microphone input data stream.
       // Speaker and headphones should be unmuted according to current audio out state for sidetone.
       controlAudioOut(ConfigData.audioOut, false);
@@ -518,6 +522,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       controlAudioOut(AudioState::MUTE_BOTH, true);  // Mute all audio.
       sgtl5000_1.unmuteLineout();
       connect0.disconnect();  // Disconnect microphone input data stream.
+      mixer5.gain(0, 0);      // Stop receiver audio.
+      mixer5.gain(1, 0);      // Stop sidetone audio.
 
       ADC_RX_I.end();
       ADC_RX_I.clear();
@@ -574,6 +580,8 @@ void SetAudioOperatingState(RadioState operatingState) {
       // QSD receiver enabled.  Calibrate is full duplex.
       controlAudioOut(AudioState::MUTE_BOTH, true);  // Mute all audio.
       sgtl5000_1.unmuteLineout();
+      mixer5.gain(0, 0);  // Stop receiver audio.
+      mixer5.gain(1, 0);  // Stop sidetone audio.
 
       // CW does not use the transmitter front-end.
       Q_in_L_Ex.end();  // Transmit I channel path.

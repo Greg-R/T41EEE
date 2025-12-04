@@ -466,9 +466,10 @@ bool ReceiveDSP::ProcessIQData() {
     /**********************************************************************************  AFP 12-31-20
       CONVERT TO INTEGER AND PLAY AUDIO
     **********************************************************************************/
-    q15_t q15_buffer_LTemp[2048];  //KF5N
-    arm_float_to_q15(float_buffer_L, q15_buffer_LTemp, 2048);
-    Q_out_L.play(q15_buffer_LTemp, 2048);
+////    q15_t q15_buffer_LTemp[2048];  //KF5N
+////    arm_float_to_q15(float_buffer_L, q15_buffer_LTemp, 2048);
+////    Q_out_L.play(q15_buffer_LTemp, 2048);
+audioOutQueue.play(float_buffer_L, 2048);
 
     elapsed_micros_sum = elapsed_micros_sum + usec;
     elapsed_micros_idx_t++;

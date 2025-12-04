@@ -52,7 +52,7 @@ void CW_Exciter::CW_ExciterIQData(int shaping)  //AFP 08-20-22
   cwToneData.play(float_buffer_cw, 512);  // Push CW waveform into SSB transmitter input.
 
   // Make Q15 data for CW sidetone.
-  arm_float_to_q15(float_buffer_cw, q15_buffer_Sidetone, 512);
+//  arm_float_to_q15(float_buffer_cw, q15_buffer_Sidetone, 512);
 
   float32_t float_buffer_i[512] = { 0.0 };
   float32_t float_buffer_q[512] = { 0.0 };
@@ -93,5 +93,6 @@ void CW_Exciter::CW_ExciterIQData(int shaping)  //AFP 08-20-22
   Q_out_L_Ex.play(float_buffer_i, 512);  // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
   Q_out_R_Ex.play(float_buffer_q, 512);  // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.
 
-  Q_out_L.play(q15_buffer_Sidetone, 512);
+//  Q_out_L.play(q15_buffer_Sidetone, 512);
+  sidetoneOutQueue.play(float_buffer_cw, 512);
 }
