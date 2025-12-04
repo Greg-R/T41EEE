@@ -247,7 +247,7 @@ float GetEncoderValueLoopFloat(float minValue, float maxValue, float startValue,
         currentValue = maxValue;
       if (left) tft.setCursor(0, 1);
       else tft.setCursor(290, 1);         //// 260
-      tft.print("                    ");  // Erase old
+      tft.print("                     ");  // Erase old
       if (left) tft.setCursor(0, 1);
       else tft.setCursor(290, 1);  //// 260
       tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
@@ -260,7 +260,7 @@ float GetEncoderValueLoopFloat(float minValue, float maxValue, float startValue,
     if (menu == MenuSelect::MENU_OPTION_SELECT) {  // Make a choice??
       if (left) tft.setCursor(0, 1);
       else tft.setCursor(290, 1);
-      tft.print("                    ");  // Erase
+      tft.print("                     ");  // Erase
       return currentValue;
     }
   }

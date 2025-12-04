@@ -763,8 +763,8 @@ void EqualizerXmtOptions() {
 *****/
 void SSBOptions() {
   static int ssbChoice = 0;
-  float imdAmplitude = 0.0;
-  int imdAmplitudedB = 100;
+  float imdAmplitude = 1.0;
+  float imdAmplitudedB = 5;
   MenuSelect menu = MenuSelect::BOGUS_PIN_READ;
   const std::string ssbChoices[] = { "CESSB", "SSB", "FT8 Active", "Comp On", "Comp Off", "Mic Gain", "Comp Ratio", "Comp Threshold", "IMD Test ", "Cancel" };
 
@@ -825,7 +825,7 @@ void SSBOptions() {
       while (menu != MenuSelect::MENU_OPTION_SELECT) {
         menu = readButton();  // Use this to quit.
         // Return IMD amplitude in dB.
-        imdAmplitudedB = GetEncoderValueLive(0.0, 100.0, imdAmplitudedB, 1.0, ssbChoices[7], true, true);
+        imdAmplitudedB = GetEncoderValueLive(0.0, 100.0, imdAmplitudedB, 1.0, ssbChoices[8], true, true);
         imdAmplitude = volumeLog[static_cast<int>(imdAmplitudedB)];
         toneSSBCal1.amplitude(imdAmplitude);
         toneSSBCal2.amplitude(imdAmplitude);

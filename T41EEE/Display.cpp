@@ -93,14 +93,14 @@ void Display::ShowSpectrum(bool drawSpectrum) {
   bool plotInProgress = false;
   bool blocksAvailable = false;
 
-  for (x1 = 1; x1 < 511; x1++)  // Bins on the ends are junk, don't plot.
+  for (x1 = 1; x1 < 511; x1++) {  // Bins on the ends are junk, don't plot.
 
     // Quit and start transmitter if key is pressed.
     if (keyPressedOn) {
       return;
     }
-  //Draws the main Spectrum, Waterfall and Audio displays
-  {
+    //Draws the main Spectrum, Waterfall and Audio displays
+
     // Is there enough data to calculate an FFT?
     blocksAvailable = (static_cast<uint32_t>(ADC_RX_I.available()) > 15) and (static_cast<uint32_t>(ADC_RX_Q.available()) > 15);
 
@@ -639,14 +639,16 @@ void Display::BandInformation() {
   }
 
   // Printing the CW filter status needs to be done last.
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) {
-    // Now print CW filter status and setting.
-    tft.setCursor(375, 102);
-    tft.print("CW FILTER ");
-    tft.print(CWFilter[ConfigData.CWFilterIndex].c_str());
-  } else {
-    tft.setCursor(375, 102);
-    tft.print("                 ");  // Erase if not in CW mode.
+  if (not calOnFlag) {
+    if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) {
+      // Now print CW filter status and setting.
+      tft.setCursor(375, 102);
+      tft.print("CW FILTER ");
+      tft.print(CWFilter[ConfigData.CWFilterIndex].c_str());
+    } else {
+      tft.setCursor(375, 102);
+      tft.print("                 ");  // Erase if not in CW mode.
+    }
   }
 }
 
