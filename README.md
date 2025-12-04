@@ -1,4 +1,4 @@
-### Version T41EEE.91 T41 Software Defined Transceiver Arduino Sketch
+### Version T41EEE.92 T41 Software Defined Transceiver Arduino Sketch
 
 This is the "T41 Extreme Experimenter's Edition" software for the 
 T41 Software Defined Transceiver.  The T41EEE was "forked" from the V049.2 version
@@ -42,7 +42,7 @@ successful.
 
 ## How to Compile T41EEE
 
-T41EEE.91 was developed and compiled using Arduino IDE version 2.3.6 with the following
+T41EEE.92 was developed and compiled using Arduino IDE version 2.3.6 with the following
 configuration:
 
 1.  Optimize is set to "Smallest Code" (Tools menu).
@@ -75,12 +75,34 @@ The bullet "Memory Wipe & LED Blink Restore" has the instructions.
 
 The compilation should conclude with results similar to this:
 ```
-Opening Teensy Loader...
-Memory Usage on Teensy 4.1:
-  FLASH: code:205672, data:98072, headers:8572   free for files:7814148  
-   RAM1: variables:149632, code:187736, padding:8872   free for local variables:178048  
-   RAM2: variables:332896  free for malloc/new:191392
+   Opening Teensy Loader...
+   Memory Usage on Teensy 4.1:
+     FLASH: code:209180, data:83264, headers:8608   free for files:7825412
+      RAM1: variables:147104, code:190648, padding:5960   free for local variables:180576
+      RAM2: variables:332896  free for malloc/new:191392
 ```
+## Highlight of Changes included in T41EEE.92 December 3, 2025
+
+This release is to address bug fixes and usability issues in T41EEE.91.
+Note that it should be possible to overwrite T41EEE.91 with T41EEE.92,
+as nothing stored on the EEPROM changed.
+
+1.  CW keyer and sidetone bug fixes.  This code needed further refinement due to
+    the major changes in the CW modulator.
+2.  Certain conditions combined with 16X zoom could cause a crash.  This was related
+    to "AutoGain" and "AutoSpectrum" features which keep the RF spectrum in the 
+    viewable area.  An alternate approach to this problem was implemented and is
+    immune to the crashing problem.  "AutoGain" and "AutoSpectrum" are removed.
+    The centering of the RF spectrum is completely automated.
+3.  Lots of graphic related bugs were resolved.  These were not serious, but
+    only annoying.
+4.  The IMD test had a bug which caused it to start at the maximum amplitude, and 
+    under the wrong menu.  This was due to an array indexing error.
+5.  The way the operating mode and CW filter setting was presented was confusing.
+    This is changed to make it more explicit, and the mode setting is completely
+    separate from the CW filter setting text.
+6.  A refinement of transmit calibration improves the accuracy of the first sweeps.
+
 ## Highlight of Changes included in T41EEE.91 November 5, 2025
 
 1.  A refinement of the calibration algorithms was completed.  Calibration will accept
