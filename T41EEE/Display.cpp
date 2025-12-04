@@ -226,7 +226,7 @@ void Display::ShowSpectrum(bool drawSpectrum) {
 
     test1 = -y1_new + 230;  // Nudged waterfall towards blue.  KF5N July 23, 2023
     if (test1 < 0) test1 = 0;
-    if (test1 > 117) test1 = 117;
+    if (test1 > 116) test1 = 116;
     waterfall[x1] = gradient[test1];  // Try to put pixel values in middle of gradient array.  KF5N
     tft.writeTo(L1);
   }  // End for(...) Draw MAX_WATERFALL_WIDTH spectral points
