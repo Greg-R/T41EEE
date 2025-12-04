@@ -516,28 +516,6 @@ void Display::DrawFrequencyBarValue() {
 
 
 /*****
-  Purpose:  Indicate Auto-Gain or Auto-Spectrum is active.
-
-  Parameter list:
-    void
-
-  Return value;
-    void
-*****
-void Display::ShowAutoStatus() {
-  tft.setFontScale((enum RA8875tsize)0);
-  tft.setCursor(SPECTRUM_LEFT_X + 350, SPECTRUM_TOP_Y + 2);
-  tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
-  if (ConfigData.autoGain) {
-    tft.print("Auto-Gain On    ");
-  } else if (ConfigData.autoSpectrum) {
-    tft.print("Auto-Spectrum On");
-  } else
-    tft.print("                ");
-}
-*/
-
-/*****
   Purpose: To display the current transmission frequency, band, mode, and sideband above the spectrum display.
 
   Parameter list:
