@@ -1048,6 +1048,7 @@ FLASHMEM void setup() {
 
   // Don't start up if key/paddle or PTT is closed.  Warn the user to resolve and restart.
   isTransmitterKeyed();
+  keyPressedOn = false;  // Ignore key interrupts which may happen due to start-up transients.
 }
 //============================================================== END setup() =================================================================
 

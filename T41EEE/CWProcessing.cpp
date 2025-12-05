@@ -268,6 +268,8 @@ void SetKeyType() {
   uint32_t currentKey{ 0 };
   const std::string keyChoice[] = { "Straight Key", "Keyer" };
 
+  keyPressedOn = false;  // Guard against already fired key interrupt.
+
   // What to do will depend on the current setting!
   currentKey = ConfigData.keyType;
   // Now the user selects the key type.
@@ -296,6 +298,8 @@ void SetKeyType() {
     ConfigData.paddleDit = KEYER_DIT_INPUT_TIP;
     ConfigData.paddleDah = KEYER_DAH_INPUT_RING;
   }
+  delay(1000);           // This is required to allow GPIOs to settle out.
+  keyPressedOn = false;  // Guard against already fired key interrupt.
 }
 
 

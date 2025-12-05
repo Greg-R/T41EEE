@@ -20,6 +20,7 @@
 #include <utility/imxrt_hw.h>  // For setting I2S freq, Thanks, FrankB!
 #include <EEPROM.h>
 #include <string>
+#include <algorithm>
 
 // User section which is customizable.
 #include "MyConfigurationFile.h"
