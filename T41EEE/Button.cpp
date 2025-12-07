@@ -864,7 +864,7 @@ void Button::ButtonFrequencyEntry() {
   char strF[6] = { ' ', ' ', ' ', ' ', ' ' };  // container for frequency string during entry
   String stringF;
   MenuSelect menu = MenuSelect::DEFAULT;
-  int key;
+  int key{0};
   int numdigits = 0;  // number of digits entered
   int pushButtonSwitchIndex;
   // Arrays for allocating values associated with keys and switches - choose whether USB keypad or analogue switch matrix

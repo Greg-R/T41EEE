@@ -195,6 +195,7 @@ uint8_t auto_codec_gain = 1;
 bool keyPressedOn = false;
 bool keyerFirstDit = false;
 bool keyerFirstDah = false;
+bool straightKeyStart = false;
 uint8_t NR_first_time = 1;
 uint8_t NR_Kim;
 
@@ -807,6 +808,7 @@ void KeyTipOn() {
   //  if (digitalRead(KEYER_DIT_INPUT_TIP) == LOW and bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE)
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE)
     keyPressedOn = true;
+    straightKeyStart = true;
   if (ConfigData.paddleFlip == 0) keyerFirstDit = true;
   else keyerFirstDah = true;
 }
@@ -863,6 +865,7 @@ uint32_t afterPowerUp = 0;
     void
 *****/
 FLASHMEM void setup() {
+  Serial.begin(115200);
 
   // Check for CrashReport stored from previous run.
   if (CrashReport) {
@@ -1225,7 +1228,8 @@ void loop() {
       cwTimer = millis();
       while (millis() - cwTimer <= ConfigData.cwTransmitDelay) {  // Start CW transmit timer.
 
-        if (digitalRead(KEYER_DIT_INPUT_TIP) == LOW and ConfigData.keyType == 0) {  // AFP 09-25-22  Turn on CW signal
+        if (digitalRead(KEYER_DIT_INPUT_TIP) == LOW or straightKeyStart) {  // AFP 09-25-22  Turn on CW signal
+        straightKeyStart = false;
           cwTimer = millis();                                                       //Reset timer
 
           if (cwKeyDown == false) {
@@ -1235,8 +1239,9 @@ void loop() {
             cwexciter.CW_ExciterIQData(CW_SHAPING_NONE);
           }
         } else {
-          if (digitalRead(KEYER_DIT_INPUT_TIP) == HIGH and ConfigData.keyType == 0) {  //Turn off CW signal
+          if (digitalRead(KEYER_DIT_INPUT_TIP) == HIGH) {  //Turn off CW signal
             keyPressedOn = false;
+            straightKeyStart = false;
             if (cwKeyDown) {  // Initiate falling CW signal.
               cwexciter.CW_ExciterIQData(CW_SHAPING_FALL);
               cwKeyDown = false;
