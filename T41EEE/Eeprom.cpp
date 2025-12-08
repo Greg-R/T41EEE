@@ -365,12 +365,10 @@ void Eeprom::GetFavoriteFrequency() {
 *****/
 
 void Eeprom::ConfigDataDefaults() {
-//  struct config_t* defaultConfig = new config_t;  // Create a copy of the default configuration.
-std::unique_ptr<config_t> defaultConfig = std::make_unique<config_t>();
-  ConfigData = defaultConfig;                    // Copy the defaults to ConfigData struct.
+  config_t tempConfig;
+  ConfigData = tempConfig;  // Copy the defaults to ConfigData struct.
   // Initialize the frequency setting based on the last used frequency stored to EEPROM.
   TxRxFreq = ConfigData.centerFreq = ConfigData.lastFrequencies[ConfigData.currentBand][ConfigData.activeVFO];
-//  delete defaultConfig;
 }
 
 
@@ -385,10 +383,8 @@ std::unique_ptr<config_t> defaultConfig = std::make_unique<config_t>();
 *****/
 
 void Eeprom::CalDataDefaults() {
-  struct calibration_t* defaultCal = new calibration_t;  // Create a copy of the default configuration.
-  CalData = *defaultCal;                                 // Copy the defaults to ConfigData struct.
-  // Initialize the frequency setting based on the last used frequency stored to EEPROM.
-  TxRxFreq = ConfigData.centerFreq = ConfigData.lastFrequencies[ConfigData.currentBand][ConfigData.activeVFO];
+  calibration_t tempCal;
+  CalData = tempCal;  // Copy the defaults to CalData struct.
 }
 
 
@@ -408,7 +404,8 @@ void Eeprom::EEPROMStartup() {
   int CalDataStackSize{ 0 };
   int BandsEEPROMSize{ 0 };
   int BandsStackSize{ 0 };
-  std::unique_ptr<config_t> defaultConfig = std::make_unique<config_t>();
+  //  std::unique_ptr<config_t> defaultConfig = std::make_unique<config_t>();
+  config_t tempConfig;
 
   //  Determine if the structs ConfigData, CalData, and bands are compatible (same size) with the one stored in EEPROM.
 
@@ -438,12 +435,11 @@ void Eeprom::EEPROMStartup() {
 
     // Handle the special case of overwrite when none of the structs have changed size.  This can happen when a user wants to
     // upgrade without executing a FLASH erase.  The only thing which will be updated in this case is the version.
-    //    eeprom.ConfigDataRead(tempConfig);                                        // Read the default struct, which has the most recent version (a char array).
-    if (strcmp(defaultConfig->versionSettings, ConfigData.versionSettings) == 0) {
+    if (strcmp(tempConfig.versionSettings, ConfigData.versionSettings) == 0) {
       return;  // Versions the same, done.
     } else {
       for (int i = 0; i < 10; i = i + 1) {
-        ConfigData.versionSettings[i] = defaultConfig->versionSettings[i];  // Set to the new version.
+        ConfigData.versionSettings[i] = tempConfig.versionSettings[i];  // Set to the new version.
       }
       ConfigDataWrite();  // Write to EEPROM.
     }
