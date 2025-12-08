@@ -21,6 +21,7 @@
 #include <EEPROM.h>
 #include <string>
 #include <algorithm>
+#include <memory>
 
 // User section which is customizable.
 #include "MyConfigurationFile.h"

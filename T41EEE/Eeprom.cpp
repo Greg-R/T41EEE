@@ -1,3 +1,4 @@
+#include <memory>
 // EEPROM class
 
 
@@ -364,11 +365,12 @@ void Eeprom::GetFavoriteFrequency() {
 *****/
 
 void Eeprom::ConfigDataDefaults() {
-  struct config_t* defaultConfig = new config_t;  // Create a copy of the default configuration.
-  ConfigData = *defaultConfig;                    // Copy the defaults to ConfigData struct.
+//  struct config_t* defaultConfig = new config_t;  // Create a copy of the default configuration.
+std::unique_ptr<config_t> defaultConfig = std::make_unique<config_t>();
+  ConfigData = defaultConfig;                    // Copy the defaults to ConfigData struct.
   // Initialize the frequency setting based on the last used frequency stored to EEPROM.
   TxRxFreq = ConfigData.centerFreq = ConfigData.lastFrequencies[ConfigData.currentBand][ConfigData.activeVFO];
-  delete defaultConfig;
+//  delete defaultConfig;
 }
 
 
@@ -406,8 +408,7 @@ void Eeprom::EEPROMStartup() {
   int CalDataStackSize{ 0 };
   int BandsEEPROMSize{ 0 };
   int BandsStackSize{ 0 };
-  //  config_t tempConfig;
-  struct config_t* defaultConfig = new config_t;
+  std::unique_ptr<config_t> defaultConfig = std::make_unique<config_t>();
 
   //  Determine if the structs ConfigData, CalData, and bands are compatible (same size) with the one stored in EEPROM.
 
@@ -439,7 +440,6 @@ void Eeprom::EEPROMStartup() {
     // upgrade without executing a FLASH erase.  The only thing which will be updated in this case is the version.
     //    eeprom.ConfigDataRead(tempConfig);                                        // Read the default struct, which has the most recent version (a char array).
     if (strcmp(defaultConfig->versionSettings, ConfigData.versionSettings) == 0) {
-      delete defaultConfig;
       return;  // Versions the same, done.
     } else {
       for (int i = 0; i < 10; i = i + 1) {
@@ -447,7 +447,6 @@ void Eeprom::EEPROMStartup() {
       }
       ConfigDataWrite();  // Write to EEPROM.
     }
-    delete defaultConfig;
     return;  // Done, begin radio operation.
   }
 
@@ -461,8 +460,6 @@ void Eeprom::EEPROMStartup() {
   CalDataWrite();                            // Write the ConfigData struct to non-volatile memory.
   BandsWriteSize(BandsStackSize);            // Write the size of the bands array to EEPROM.
   BandsWrite();                              // Write the bands array to non-volatile memory.
-
-  delete defaultConfig;
 }
 
 
