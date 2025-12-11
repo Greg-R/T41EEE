@@ -1,4 +1,23 @@
 /*
+## Highlight of Changes included in T41EEE.92 December 11, 2025
+
+This release is to address bug fixes and usability issues in T41EEE.91.
+
+1.  CW keyer and sidetone bug fixes.  This code needed further refinement due to
+    the major changes in the CW modulator.
+2.  Certain conditions combined with 16X zoom could cause a crash.  This was related
+    to "AutoGain" and "AutoSpectrum" features which keep the RF spectrum in the
+    viewable area.  An alternate approach to this problem was implemented and is
+    immune to the crashing problem.  "AutoGain" and "AutoSpectrum" are removed.
+    The centering of the RF spectrum is completely automated.
+3.  Several annoying graphic related bugs were resolved.
+4.  The IMD test had a bug which caused it to start at the maximum amplitude, and
+    under the wrong menu.  This was due to an array indexing error.
+5.  The way the operating mode and CW filter setting was presented was confusing.
+    This is changed to make it more explicit, and the mode setting is completely
+    separate from the CW filter setting text.
+6.  A refinement of transmit calibration improves the accuracy of the first sweeps.
+
 ## Highlight of Changes included in T41EEE.91 November 5, 2025
 
 1.  A refinement of the calibration algorithms was completed.  Calibration will accept
@@ -41,7 +60,7 @@ a performance and technical improvement including reduction in required memory r
 
 ### Version T41EEE.8 T41 Software Defined Transceiver Arduino Sketch
 
-This is the "T41 Extreme Experimenter's Edition" software for the 
+This is the "T41 Extreme Experimenter's Edition" software for the
 T41 Software Defined Transceiver.  The T41EEE was "forked" from the V049.2 version
 of the T41-EP software.  T41EEE is fundamentally different from the mainstream T41-EP
 code in that it adopts C++ rather than C-style code.  C++ language features will be gradually
@@ -57,10 +76,10 @@ group:
 
 <https://groups.io/g/SoftwareControlledHamRadio>
 
-This software is licensed according to:  
-GNU GENERAL PUBLIC LICENSE  
-Version 3, 29 June 2007  
-Please refer to the included LICENSE file.  
+This software is licensed according to:
+GNU GENERAL PUBLIC LICENSE
+Version 3, 29 June 2007
+Please refer to the included LICENSE file.
 Greg Raven, October 22 2024
 
 T41EEE will be hosted at this public Github repository:
@@ -107,7 +126,7 @@ configuration:
 The file MyConfigurationFile.h includes several compiler options which add, subtract, or
 adjust parameters of some features.  Please review this file prior to compilation.
 
-Completing a FLASH erase of the Teensy is strongly recommended before uploading this new version. 
+Completing a FLASH erase of the Teensy is strongly recommended before uploading this new version.
 The instructions for performing a FLASH erase of the Teensy are here:
 
 <https://www.pjrc.com/store/teensy41.html#programming>
@@ -278,7 +297,7 @@ There is another issue here.  After all of that, is the output high enough to dr
 Automated calibration is available starting with version T41EEE.6.
 
 Automated calibration set-up is the same as for manual calibration.  A loop-back path from the
-output of the QSE to the input of the QSD must be connected.  An attenuator, in the value of 
+output of the QSE to the input of the QSD must be connected.  An attenuator, in the value of
 30 to 50 dB, must be inserted in this path.  The value for optimal calibration must be determined
 empirically.  If a spectrum analyzer is available, it is strongly recommended to view the result
 in a narrow sweep (~10kHz) to determine if the undesired sideband (and carrier in the case of QSE2DC)
@@ -330,10 +349,10 @@ A short movie showing the latest automatic calibration features in action:
   "TEENSY CONVOLUTION SDR" substantially modified by Jack Purdum, W8TEE, and Al Peter, AC8GY
 
   This software is made available under the GNU GPLv3 license agreement. If commercial use of this
-  software is planned, we would appreciate it if the interested parties contact Jack Purdum, W8TEE, 
+  software is planned, we would appreciate it if the interested parties contact Jack Purdum, W8TEE,
   and Al Peter, AC8GY.
 
-  Any and all other uses, written or implied, by the GPLv3 license are forbidden without written 
+  Any and all other uses, written or implied, by the GPLv3 license are forbidden without written
   permission from from Jack Purdum, W8TEE, and Al Peter, AC8GY.
 
 Please refer to the included file T41_Change_Log.txt which includes the description of changes made
@@ -421,7 +440,7 @@ The following change log documents changes to versions prior to the current.
 13.  Used arm functions to DC offset DAC outputs in the case of QSE2.
 14.  Added clipping function to receiver datastream.
 15.  Adjusted dataflow gain by 12 dB to increase volume.
-16.  Added AGC indicator.  
+16.  Added AGC indicator.
 17.  Increased CW decoding gain.  Earlier adjustment was too low.
 18.  Fixed AGC OFF indication.  RF gain set to 10dB when bandswitched.
 19.  Scaling factors for TX calibration were properly updated to match the CW exciter values.
@@ -639,7 +658,7 @@ V048 July 26, 2023 Jack Purdum (W8TEE)
   FLASH: code:249780, data:131680, headers:8676   free for files:7736328
    RAM1: variables:214496, code:246232, padding:15912   free for local variables:47648
    RAM2: variables:342944  free for malloc/new:181344
-  
+
 V047k July 22, 2023 Greg KF5N
   1. Update to calibration for improved button response.
   2. Added additional improvements for audio quality.
@@ -648,10 +667,10 @@ V047k July 22, 2023 Greg KF5N
   5. Fixed EEPROM so separator character displays correctly on EEPROM/SD dump
   FLASH: code:239700, data:131680, headers:8516   free for files:7746568
    RAM1: variables:214496, code:236152, padding:25992   free for local variables:47648
-   RAM2: variables:342944  free for malloc/new:181344  
-   
+   RAM2: variables:342944  free for malloc/new:181344
+
 V047i July 18, 2023 Jack Purdum (W8TEE)
-  1. Removed SD_CARD_PRESENT and set global ConfigData.sdCardPresent by call to SDPresentCheck() 
+  1. Removed SD_CARD_PRESENT and set global ConfigData.sdCardPresent by call to SDPresentCheck()
   FLASH: code:237972, data:134128, headers:8820   free for files:7745544
    RAM1: variables:214496, code:234424, padding:27720   free for local variables:47648
    RAM2: variables:342944  free for malloc/new:181344
@@ -662,7 +681,7 @@ V047h July 17, 2023 Jack Purdum (W8TEE)
   FLASH: code:233556, data:132040, headers:9180   free for files:7751688
    RAM1: variables:212384, code:230008, padding:32136   free for local variables:49760
    RAM2: variables:342944  free for malloc/new:181344
-  
+
 V047g July 17, 2023 Jack Purdum (W8TEE)
   1. Move several constants to MyConfigurationFile.h and rearranged them
   2. Increased Splash delay to 4 seconds
@@ -687,7 +706,7 @@ Vo47e July 15, 2023 Jack Purdum (W8TEE)
   FLASH: code:237012, data:134064, headers:8820   free for files:7746568
    RAM1: variables:228832, code:233464, padding:28680   free for local variables:33312
    RAM2: variables:328544  free for malloc/new:195744
- 
+
 V047c July 14, 2023 Jack Purdum (W8TEE)
   1. Merged Greg's latest code with Jack's. The main difference is the calibration and bearing code, plus the new header file.
   2. Main tuning fixed
@@ -732,7 +751,7 @@ V046e June 30, 2023  Jack Purdum (W8TEE) and includes changes by Greg:
 
 V046d June 27, 2023  Jack Purdum (W8TEE) and includes changes by Greg:
   1. Added Greg's changes to fix the SSB flip
-  2. Fixed sync indicators for EEPROM and SD. Those variables stored in EEPROM may differ from their 
+  2. Fixed sync indicators for EEPROM and SD. Those variables stored in EEPROM may differ from their
      current values (e.g. WPM) and this causes the EEPROM sync indicator to turn on. SD is RED for no
      SD card, green otherwise.
   3. During calibrate, automatically switch to CW mode and set spectrum scale to 10 dB
@@ -744,14 +763,14 @@ V046d June 27, 2023  Jack Purdum (W8TEE) and includes changes by Greg:
 
  V046c June 25, 2023  Jack Purdum (W8TEE) and includes changes by Greg:
   1. Added symbolic constant UPDATE_SWITCH_MATRIX that is set to 1 by default, which means run the switch calibration code. If set to 0,
-     the call to update the switch values is bypassed and the values stored in EEPROM are used. 
-  2. Removed the call to EEPROMSaveDefaults() from EEPROMStartup() because the defaults would be overwritten if just the version number 
+     the call to update the switch values is bypassed and the values stored in EEPROM are used.
+  2. Removed the call to EEPROMSaveDefaults() from EEPROMStartup() because the defaults would be overwritten if just the version number
     was changed. If the user wants to save the defaults, they can uncomment the call in setup().
   FLASH: code:231284, data:144320, headers:8388   free for files:7742472
    RAM1: variables:227616, code:227736, padding:1640   free for local variables:67296
    RAM2: variables:328544  free for malloc/new:195744
-  
-  
+
+
 
  V046b June 16, 2023  Jack Purdum (W8TEE) and includes changes by Greg:
   1.  Add PROGMEM to line 97 in Bearing.cpp (John's change).
@@ -767,7 +786,7 @@ V046d June 27, 2023  Jack Purdum (W8TEE) and includes changes by Greg:
   5.  in SDTVer045.ino, remove two calls to the function SetFreq() at lines 2493 and 2617.
   6.  Add new buffer play code in the file Process2.cpp at line 360.
   7.  Remove redundant call to ShowSpectrum() at line 246.
-  8. Fixed warning of uninitialized use of R[]. It actually was initialized via a pointer, 
+  8. Fixed warning of uninitialized use of R[]. It actually was initialized via a pointer,
      but the compiler doesn't recognize that. Used memset() call in DSP_Fn.cpp, line 103.
      Unneeded, but it bugged me (JJP).
   9. Change Fine Tune increment so it may have values 10, 50, 250, and 500. Press the Fine Tune inrement button
@@ -776,21 +795,21 @@ V046d June 27, 2023  Jack Purdum (W8TEE) and includes changes by Greg:
   10. Fixed the "ghosting" image after CW xmit is finished.
 
  V045 May 12, 2023  Jack Purdum (W8TEE):
-    fixed: Al reviewed, fixed, and test all of the Calibrate routines 
+    fixed: Al reviewed, fixed, and test all of the Calibrate routines
     fixed: The IDEs compiler was replaced with the latest incarnation, leading to an increase in the number of warnings. We have fixed those where possible. (Some can't be because of the way the parser works.)
     fixed: The fine tune increment is now stored in EEPROM
   FLASH: code:230964, data:144400, headers:8628   free for files:7742472
    RAM1: variables:256288, code:227416, padding:1960   free for local variables:38624
    RAM2: variables:328544  free for malloc/new:195744
- 
+
   V040a Feb 01, 2023  Jack Purdum (W8TEE):
-    Fixed: used wrong character array for first member of the CopyEEPROMToSD() routine. 
+    Fixed: used wrong character array for first member of the CopyEEPROMToSD() routine.
     Added: to main increment 100,000 and 1,000,000 to allow faster moves in frequency (i.e., Calibrate on WWV)
     Fixed: Calibration called the wrong function. Now calls the correct function.
   FLASH: code:227096, data:138388, headers:8272   free for files:7752708
    RAM1: variables:246592, code:223432, padding:5944   free for local variables:48320
    RAM2: variables:340864  free for malloc/new:183424
-     
+
   V040 Feb 01, 2023  Jack Purdum (W8TEE):
     Expanded EEPROM code
     Added code to use SD card for EEPROM back up and to calculate bearing heading.
@@ -981,4 +1000,3 @@ V046d June 27, 2023  Jack Purdum (W8TEE) and includes changes by Greg:
      12. Receive EQ connected with menu options
 
 *********************************************************************************************/
-

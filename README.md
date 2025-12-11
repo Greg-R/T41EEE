@@ -31,14 +31,8 @@ and feature enhancements become available.  You will be able to update and FLASH
 with the revised software quickly.
 
 Please note that the configuration structure is different than the predecessor V049.2
-It is recommended to perform a full FLASH erase before loading a new version of T41EEE.
-
-You will need to install the ArduinoJson library by Benoit Blanchon.  Using the IDE:
-Tools -> Manage Libraries ...
-Search for Arduinojson.  Note this is a single word, as there is another library
-with the name Arduino_JSON, which is not the correct library.  Install the library,
-and if you have the other dependencies for the V049.2 version, compilation will be
-successful.
+It is recommended to perform a full FLASH erase before loading a new version of T41EEE
+unless otherwise noted.
 
 ## How to Compile T41EEE
 
@@ -48,14 +42,15 @@ configuration:
 1.  Optimize is set to "Smallest Code" (Tools menu).
 2.  CPU speed is set to 528 MHz (Tools menu).
 3.  Select USB Type: "Dual Serial" in the Tools menu.
-4.  TeensyDuino version is 1.59.0.  Install TeensyDuino using the IDE Board Manager.
-5.  You will need to install the ArduinoJson library.  Install via the
-    IDE Library Manager.
+4.  Install TeensyDuino using the IDE Board Manager.  The TeensyDuino version is 1.59.0.  
+5.  You will need to install the ArduinoJson library by Benoit Blanchon.  Install via
+    the IDE Library Manager.
 6.  You will need to install the Etherkit Si5351 library.  Install via the IDE
     library manager.
 7.  You will need to manually install the Open Audio Library.  The library was updated
-    in November, 2025.  It is mandatory to update this library!  T41EEE.91 uses the
-    recently developed quad I2S output class, which was recently added to the library:
+    in November, 2025.  Update this library if you have installed an older copy!  
+    T41EEE.91 uses the recently developed quad I2S output class, which was recently
+    added to the library:
 
 <https://github.com/chipaudette/OpenAudio_ArduinoLibrary>
 
@@ -63,29 +58,32 @@ configuration:
 
 <https://github.com/brianlow/Rotary>
 
-The file MyConfigurationFile.h includes several compiler options which add, subtract, or
-adjust parameters of some features.  Please review this file prior to compilation.
+The file MyConfigurationFile.h includes several compiler options which add, subtract,
+or adjust parameters of some features.  Please review this file prior to compilation.
 
-Completing a FLASH erase of the Teensy is strongly recommended before uploading this new version.
-The instructions for performing a FLASH erase of the Teensy are here:
+Completing a FLASH erase of the Teensy is strongly recommended before uploading this
+new version.  The instructions for performing a FLASH erase of the Teensy are here:
 
 <https://www.pjrc.com/store/teensy41.html#programming>
 
 The bullet "Memory Wipe & LED Blink Restore" has the instructions.
 
+Please note a special exception for upgrading from T41EEE.91 to T41EEE.92.
+This upgrade does not require a FLASH erase.  An overwrite with the new version will work.
+The version number shown in the "splash" display at boot and in the upper right hand
+corner of the display during normal operation will show the correct version.
+
 The compilation should conclude with results similar to this:
 ```
-   Opening Teensy Loader...
-   Memory Usage on Teensy 4.1:
-     FLASH: code:209180, data:83264, headers:8608   free for files:7825412
-      RAM1: variables:147104, code:190648, padding:5960   free for local variables:180576
-      RAM2: variables:332896  free for malloc/new:191392
+Opening Teensy Loader...
+Memory Usage on Teensy 4.1:
+  FLASH: code:204860, data:83264, headers:8832   free for files:7829508
+   RAM1: variables:146496, code:186936, padding:9672   free for local variables:181184
+   RAM2: variables:332896  free for malloc/new:191392
 ```
-## Highlight of Changes included in T41EEE.92 December 3, 2025
+## Highlight of Changes included in T41EEE.92 December 11, 2025
 
 This release is to address bug fixes and usability issues in T41EEE.91.
-Note that it should be possible to overwrite T41EEE.91 with T41EEE.92,
-as nothing stored on the EEPROM changed.
 
 1.  CW keyer and sidetone bug fixes.  This code needed further refinement due to
     the major changes in the CW modulator.
@@ -94,8 +92,7 @@ as nothing stored on the EEPROM changed.
     viewable area.  An alternate approach to this problem was implemented and is
     immune to the crashing problem.  "AutoGain" and "AutoSpectrum" are removed.
     The centering of the RF spectrum is completely automated.
-3.  Lots of graphic related bugs were resolved.  These were not serious, but
-    only annoying.
+3.  Several annoying graphic related bugs were resolved.
 4.  The IMD test had a bug which caused it to start at the maximum amplitude, and 
     under the wrong menu.  This was due to an array indexing error.
 5.  The way the operating mode and CW filter setting was presented was confusing.
