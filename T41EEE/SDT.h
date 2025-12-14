@@ -22,6 +22,7 @@
 #include <string>
 #include <algorithm>
 #include <memory>
+#include <SimpleCwKeyer.h>
 
 // User section which is customizable.
 #include "MyConfigurationFile.h"
