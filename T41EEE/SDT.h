@@ -926,7 +926,6 @@ void FreqShift2();
 float goertzel_mag(int numSamples, int TARGET_FREQUENCY, int SAMPLING_RATE, float *data);
 float GetEncoderValueLive(float minValue, float maxValue, float startValue, float increment, std::string prompt, bool left, bool colorRed);
 float GetEncoderValueLoopFloat(float minValue, float maxValue, float startValue, float increment, int precision, std::string prompt, bool left, bool colorRed);
-void GetFavoriteFrequency();
 float HaversineDistance(float dxLat, float dxLon);
 void initializeAudioPaths();  // Greg KF5N March 9, 2025
 void InitializeDataArrays();
