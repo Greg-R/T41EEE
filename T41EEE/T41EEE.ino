@@ -806,9 +806,10 @@ MenuSelect readButton() {
 void KeyTipOn() {
   // Make sure this is ignored in other modes!  Probably should detach in non-CW modes.
   //  if (digitalRead(KEYER_DIT_INPUT_TIP) == LOW and bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE)
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE)
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) {
     keyPressedOn = true;
     straightKeyStart = true;
+  }
   if (ConfigData.paddleFlip == 0) keyerFirstDit = true;
   else keyerFirstDah = true;
 }
@@ -1229,8 +1230,8 @@ void loop() {
       while (millis() - cwTimer <= ConfigData.cwTransmitDelay) {  // Start CW transmit timer.
 
         if (digitalRead(KEYER_DIT_INPUT_TIP) == LOW or straightKeyStart) {  // AFP 09-25-22  Turn on CW signal
-        straightKeyStart = false;
-          cwTimer = millis();                                                       //Reset timer
+          straightKeyStart = false;
+          cwTimer = millis();  //Reset timer
 
           if (cwKeyDown == false) {
             cwexciter.CW_ExciterIQData(CW_SHAPING_RISE);

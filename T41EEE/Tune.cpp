@@ -197,7 +197,7 @@ void ResetTuning() {
     int           the offset as an int
 
   CAUTION: SI5351_FREQ_MULT is set in the si5253.h header file and is 100UL
-*****/
+*****
 int DoSplitVFO() {
   char freqBuffer[15];
   MenuSelect menu;
@@ -262,6 +262,7 @@ int DoSplitVFO() {
   tft.setFontDefault();
   return (int)splitOffset;  // Can be +/-
 }
+*/
 
 
 /*****

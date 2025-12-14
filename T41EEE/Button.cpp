@@ -468,9 +468,9 @@ void Button::ButtonBandIncrease() {
       ConfigData.centerFreq = TxRxFreq = ConfigData.currentFreqB = ConfigData.lastFrequencies[ConfigData.currentBandB][VFO_B] + NCOFreq;
       break;
 
-    case VFO_SPLIT:
-      DoSplitVFO();
-      break;
+//    case VFO_SPLIT:
+//      DoSplitVFO();
+//      break;
   }
   directFreqFlag = 0;
   ExecuteModeChange();
@@ -550,9 +550,9 @@ void Button::ButtonBandDecrease() {
       ConfigData.centerFreq = TxRxFreq = ConfigData.currentFreqB = ConfigData.lastFrequencies[ConfigData.currentBandB][VFO_B] + NCOFreq;
       break;
 
-    case VFO_SPLIT:
-      DoSplitVFO();
-      break;
+//    case VFO_SPLIT:
+//      DoSplitVFO();
+//      break;
   }
   directFreqFlag = 0;
   ExecuteModeChange();
@@ -625,9 +625,9 @@ void Button::BandSet(int band) {
       ConfigData.centerFreq = TxRxFreq = ConfigData.currentFreqB = ConfigData.lastFrequencies[ConfigData.currentBandB][VFO_B] + NCOFreq;
       break;
 
-    case VFO_SPLIT:
-      DoSplitVFO();
-      break;
+//    case VFO_SPLIT:
+//      DoSplitVFO();
+//      break;
   }
   directFreqFlag = 0;
 }

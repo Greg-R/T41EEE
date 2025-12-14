@@ -209,7 +209,7 @@ void Eeprom::EEPROMStuffFavorites(unsigned long current[]) {
            the current list of stored frequencies. Stop on the one that you wish to
            replace and press Select to save in EEPROM. The currently active VFO frequency
            is then stored to EEPROM.
-*****/
+*****
 void Eeprom::SetFavoriteFrequency() {
   int index;
   MenuSelect menu = MenuSelect::DEFAULT;
@@ -251,6 +251,7 @@ void Eeprom::SetFavoriteFrequency() {
     }
   }
 }
+*/
 
 
 /*****
@@ -261,7 +262,7 @@ void Eeprom::SetFavoriteFrequency() {
 
   Return value;
     void
-*****/
+*****
 void Eeprom::GetFavoriteFrequency() {
   int index = 0;
   //  int val;
@@ -352,7 +353,7 @@ void Eeprom::GetFavoriteFrequency() {
     }
   }
 }
-
+*/
 
 /*****
   Purpose: To load into active memory the default settings for EEPROM variables.

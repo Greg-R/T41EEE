@@ -960,7 +960,8 @@ void DoPaddleFlip() {
     none
 *****/
 void VFOSelect() {
-  const std::string VFOOptions[] = { "VFO A", "VFO B", "VFO Split", "Cancel" };
+//  const std::string VFOOptions[] = { "VFO A", "VFO B", "VFO Split", "Cancel" };
+    const std::string VFOOptions[] = { "VFO A", "VFO B", "Cancel" };
   int toggle;
   int choice, lastChoice;
 
@@ -971,7 +972,7 @@ void VFOSelect() {
   tft.setCursor(SECONDARY_MENU_X + 7, MENUS_Y + 1);
   tft.print(VFOOptions[choice].c_str());  // Show the default (right paddle = dah
 
-  choice = SubmenuSelect(VFOOptions, 4, 0);
+  choice = SubmenuSelect(VFOOptions, 3, 0);
   NCOFreq = 0L;
   switch (choice) {
     case VFO_A:  // VFO A
@@ -986,11 +987,11 @@ void VFOSelect() {
       ConfigData.currentBand = ConfigData.currentBandB;
 
       break;
+//
+//    case VFO_SPLIT:  // Split
+//      DoSplitVFO();
 
-    case VFO_SPLIT:  // Split
-      DoSplitVFO();
-
-      break;
+//      break;
 
     default:  // Cancel
       break;

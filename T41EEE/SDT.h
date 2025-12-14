@@ -906,7 +906,7 @@ void DoExciterEQ();
 void DoReceiveEQ();
 void DoSignalHistogram(long val);
 void DoGapHistogram(long val);
-int DoSplitVFO();
+// int DoSplitVFO();  // Temporarily removed
 void DoPaddleFlip();
 void DrawActiveLetter(int row, int horizontalSpacer, int whichLetterIndex, int keyWidth, int keyHeight);
 void DrawKeyboard();
@@ -964,7 +964,6 @@ void SelectCWOffset();  // KF5N December 13, 2023
 void SetBandRelay();
 void SetDecIntFilters();
 void SetDitLength(int wpm);
-void SetFavoriteFrequency();
 void SetFreq();
 int SetI2SFreq(int freq);
 void SetIIRCoeffs(float32_t f0, float32_t Q, float32_t sample_rate, uint8_t filter_type);

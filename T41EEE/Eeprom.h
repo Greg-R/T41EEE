@@ -21,8 +21,8 @@ public:
 
   int EEPROMReadSize(uint32_t address);
   void EEPROMStuffFavorites(uint32_t current[]);
-  void SetFavoriteFrequency();
-  void GetFavoriteFrequency();
+//  void SetFavoriteFrequency();  // Get and Set favorite frequency temporarily removed.
+//  void GetFavoriteFrequency();
   void CalDataDefaults();
   void ConfigDataDefaults();
   void EEPROMStartup();
