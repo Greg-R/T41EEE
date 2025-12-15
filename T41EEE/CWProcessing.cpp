@@ -141,6 +141,12 @@ FLASHMEM void SelectCWOffset() {
 
   tempCWOffset = ConfigData.CWOffset;
   ConfigData.CWOffset = SubmenuSelect(CWOffsets, 5, ConfigData.CWOffset);  // CWFilter is an array of strings.
+  if(ConfigData.CWOffset == -1) {
+    tft.setCursor(0, 1);
+    tft.println("Push Select");
+    ConfigData.CWOffset = tempCWOffset;  // Keep original value.
+    SelectCWOffset();  // User pushed the wrong button.  Start over.
+  }
 
   //  If user selects cancel, CWOffset will be set to the bogus value of 4.  So keep the old value.
   if (ConfigData.CWOffset == 4) ConfigData.CWOffset = tempCWOffset;
