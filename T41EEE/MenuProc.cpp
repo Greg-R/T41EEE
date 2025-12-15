@@ -431,7 +431,7 @@ void CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
       break;
 
     case 6:          // Type of key:
-      SetKeyType();  // Straight key or keyer? Stored in ConfigData.keyType.
+      SetKeyType();  // Straight key, keyer, or iambic keyer? Stored in ConfigData.keyType.
       display.UpdateKeyType();
       break;
 

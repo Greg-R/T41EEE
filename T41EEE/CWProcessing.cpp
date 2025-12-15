@@ -266,16 +266,17 @@ void SetTransmitDitLength(int wpm) {
 *****/
 void SetKeyType() {
   uint32_t currentKey{ 0 };
-  const std::string keyChoice[] = { "Straight Key", "Keyer" };
+  const std::string keyChoice[] = { "Straight Key", "Keyer", "Iambic" };
 
   keyPressedOn = false;  // Guard against already fired key interrupt.
 
   // What to do will depend on the current setting!
   currentKey = ConfigData.keyType;
   // Now the user selects the key type.
-  ConfigData.keyType = SubmenuSelect(keyChoice, 2, ConfigData.keyType);
+  ConfigData.keyType = SubmenuSelect(keyChoice, 3, ConfigData.keyType);
   if (currentKey == ConfigData.keyType) return;
 
+// This needs to be re-factored into a switch statement.
   // We're switching to a keyer paddle.
   if (currentKey == 0) {
     // Set the pullup on the ring.
