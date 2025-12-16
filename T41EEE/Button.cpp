@@ -468,9 +468,9 @@ void Button::ButtonBandIncrease() {
       ConfigData.centerFreq = TxRxFreq = ConfigData.currentFreqB = ConfigData.lastFrequencies[ConfigData.currentBandB][VFO_B] + NCOFreq;
       break;
 
-//    case VFO_SPLIT:
-//      DoSplitVFO();
-//      break;
+      //    case VFO_SPLIT:
+      //      DoSplitVFO();
+      //      break;
   }
   directFreqFlag = 0;
   ExecuteModeChange();
@@ -550,9 +550,9 @@ void Button::ButtonBandDecrease() {
       ConfigData.centerFreq = TxRxFreq = ConfigData.currentFreqB = ConfigData.lastFrequencies[ConfigData.currentBandB][VFO_B] + NCOFreq;
       break;
 
-//    case VFO_SPLIT:
-//      DoSplitVFO();
-//      break;
+      //    case VFO_SPLIT:
+      //      DoSplitVFO();
+      //      break;
   }
   directFreqFlag = 0;
   ExecuteModeChange();
@@ -625,9 +625,9 @@ void Button::BandSet(int band) {
       ConfigData.centerFreq = TxRxFreq = ConfigData.currentFreqB = ConfigData.lastFrequencies[ConfigData.currentBandB][VFO_B] + NCOFreq;
       break;
 
-//    case VFO_SPLIT:
-//      DoSplitVFO();
-//      break;
+      //    case VFO_SPLIT:
+      //      DoSplitVFO();
+      //      break;
   }
   directFreqFlag = 0;
 }
@@ -733,8 +733,8 @@ void Button::ButtonSelectSideband() {
 *****/
 void Button::ButtonMode()  //  Greg KF5N March 11, 2025
 {
-// Don't allow mode change if something is keyed.  User must fix and restart radio.
-    isTransmitterKeyed();
+  // Don't allow mode change if something is keyed.  User must fix and restart radio.
+  isTransmitterKeyed();
   // Toggle modes:
   switch (bands.bands[ConfigData.currentBand].mode) {
 
@@ -831,7 +831,7 @@ void Button::ButtonMuteAudio() {
     case AudioState::MUTE_BOTH:  //  Unmute both.
       ConfigData.audioOut = AudioState::BOTH;
       break;
-    case AudioState::BOTH:         //  Headphones mute, speaker on
+    case AudioState::BOTH:  //  Headphones mute, speaker on
       ConfigData.audioOut = AudioState::SPEAKER;
       break;
     default:
@@ -864,7 +864,7 @@ void Button::ButtonFrequencyEntry() {
   char strF[6] = { ' ', ' ', ' ', ' ', ' ' };  // container for frequency string during entry
   String stringF;
   MenuSelect menu = MenuSelect::DEFAULT;
-  int key{0};
+  int key{ 0 };
   int numdigits = 0;  // number of digits entered
   int pushButtonSwitchIndex;
   // Arrays for allocating values associated with keys and switches - choose whether USB keypad or analogue switch matrix
@@ -898,15 +898,15 @@ void Button::ButtonFrequencyEntry() {
                                "0", "D", "",
                                "", "", "S" };
 
-#define KEYPAD_LEFT 350
-#define KEYPAD_TOP SPECTRUM_TOP_Y + 35
-#define KEYPAD_WIDTH 150
-#define KEYPAD_HEIGHT 300
-#define BUTTONS_LEFT KEYPAD_LEFT + 30
-#define BUTTONS_TOP KEYPAD_TOP + 30
-#define BUTTONS_SPACE 45
-#define BUTTONS_RADIUS 15
-#define TEXT_OFFSET -8
+  constexpr uint32_t KEYPAD_LEFT{ 350 };
+  constexpr uint32_t KEYPAD_TOP{ SPECTRUM_TOP_Y + 35 };
+  constexpr uint32_t KEYPAD_WIDTH{ 150 };
+  constexpr uint32_t KEYPAD_HEIGHT{ 300 };
+  constexpr uint32_t BUTTONS_LEFT{ KEYPAD_LEFT + 30 };
+  constexpr uint32_t BUTTONS_TOP{ KEYPAD_TOP + 30 };
+  constexpr uint32_t BUTTONS_SPACE{ 45 };
+  constexpr uint32_t BUTTONS_RADIUS{ 15 };
+  constexpr int32_t TEXT_OFFSET{ -8 };
 
   tft.writeTo(L1);
   tft.fillRect(WATERFALL_LEFT_X, SPECTRUM_TOP_Y + 1, MAX_WATERFALL_WIDTH, WATERFALL_BOTTOM - SPECTRUM_TOP_Y, RA8875_BLACK);  // Make space for FEInfo
@@ -1055,7 +1055,7 @@ void Button::ButtonFrequencyEntry() {
   directFreqFlag = 1;
   ConfigData.centerFreq = TxRxFreq;
   centerTuneFlag = 1;  // Put back in so tuning bar is refreshed.  KF5N July 31, 2023
-//  SetFreq();           // Used here instead of centerTuneFlag.  KF5N July 22, 2023
+                       //  SetFreq();           // Used here instead of centerTuneFlag.  KF5N July 22, 2023
   // This determines if the entered frequency is permanent or temporary.
   if (save_last_frequency == true and valid_frequency == true) {
     ConfigData.lastFrequencies[ConfigData.currentBand][ConfigData.activeVFO] = enteredF;  // Permanent.
@@ -1096,4 +1096,146 @@ void Button::ExecuteModeChange() {
   SetBandRelay();  // Set relays in LPF for current band.
   SetFreq();       // Must update frequency, for example moving from SSB to CW, the RX LO is shifted.  KF5N
   powerUp = true;
+}
+
+
+/*****
+  Purpose: Input Parameter using Buttons
+
+  Parameter list:
+    const std::string parameterName          Name of the parameter being adjusted.
+    std::vector<std::string> selectionList   An array of the possible options.
+    uint32_t &parameter                      Reference to the currently set parameter.
+
+  Return value;
+    void
+    Base Code courtesy of Harry  GM3RVL
+*****/
+void Button::InputParameterButton(const std::string parameterName, std::vector<std::string> selectionList, uint32_t &parameter) {
+  int centerLine = (MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2;
+  bool notDone{ true };
+  int32_t buttonReturnValue{ 0 };
+
+  String stringF;
+  MenuSelect menu = MenuSelect::DEFAULT;
+
+  display.EraseMenus();
+  int keyCol[] = { RA8875_GREEN, RA8875_GREEN, RA8875_RED,
+                   RA8875_RED, RA8875_GREEN, RA8875_RED,
+                   RA8875_RED, RA8875_RED, RA8875_RED,
+                   RA8875_RED, RA8875_RED, RA8875_RED,
+                   RA8875_RED, RA8875_RED, RA8875_RED,
+                   RA8875_RED, RA8875_RED, RA8875_RED };
+  int textCol[] = { RA8875_BLACK, RA8875_BLACK, RA8875_WHITE,
+                    RA8875_WHITE, RA8875_BLACK, RA8875_BLACK,
+                    RA8875_WHITE, RA8875_WHITE, RA8875_WHITE,
+                    RA8875_WHITE, RA8875_WHITE, RA8875_WHITE,
+                    RA8875_WHITE, RA8875_WHITE, RA8875_WHITE,
+                    RA8875_BLACK, RA8875_BLACK, RA8875_WHITE };
+  const char key_labels[] = { 0x3C, 0x18, 0x58,  // 0x18 is up arrow symbol.
+                              0x00, 0x19, 0x00,
+                              0x00, 0x00, 0x00,
+                              0x00, 0x00, 0x00,
+                              0x00, 0x00, 0x00,
+                              0x00, 0x00, 0x00 };
+
+  constexpr uint32_t KEYPAD_LEFT{ 350 };
+  constexpr uint32_t KEYPAD_TOP{ SPECTRUM_TOP_Y + 35 };
+  constexpr uint32_t KEYPAD_WIDTH{ 150 };
+  constexpr uint32_t KEYPAD_HEIGHT{ 300 };
+  constexpr uint32_t BUTTONS_LEFT{ KEYPAD_LEFT + 30 };
+  constexpr uint32_t BUTTONS_TOP{ KEYPAD_TOP + 30 };
+  constexpr uint32_t BUTTONS_SPACE{ 45 };
+  constexpr uint32_t BUTTONS_RADIUS{ 15 };
+  constexpr int32_t TEXT_OFFSET{ -8 };
+
+  tft.writeTo(L1);
+  tft.fillRect(WATERFALL_LEFT_X, SPECTRUM_TOP_Y + 1, MAX_WATERFALL_WIDTH, WATERFALL_BOTTOM - SPECTRUM_TOP_Y, RA8875_BLACK);  // Make space for FEInfo
+  tft.fillRect(MAX_WATERFALL_WIDTH, WATERFALL_TOP_Y - 10, 15, 30, RA8875_BLACK);
+  tft.writeTo(L2);
+  tft.fillRect(WATERFALL_LEFT_X, SPECTRUM_TOP_Y + 1, MAX_WATERFALL_WIDTH, WATERFALL_BOTTOM - SPECTRUM_TOP_Y, RA8875_BLACK);
+  tft.setCursor(centerLine - 140, WATERFALL_TOP_Y);
+  tft.drawRect(SPECTRUM_LEFT_X - 1, SPECTRUM_TOP_Y, MAX_WATERFALL_WIDTH + 2, 360, RA8875_YELLOW);  // Spectrum box
+  // Draw keypad box
+  tft.fillRect(KEYPAD_LEFT, KEYPAD_TOP, KEYPAD_WIDTH, KEYPAD_HEIGHT, DARKGREY);
+  // Put some circles
+  tft.setFontScale((enum RA8875tsize)1);
+  for (unsigned i = 0; i < 6; i++) {
+    for (unsigned j = 0; j < 3; j++) {
+      tft.fillCircle(BUTTONS_LEFT + j * BUTTONS_SPACE, BUTTONS_TOP + i * BUTTONS_SPACE, BUTTONS_RADIUS, keyCol[j + 3 * i]);
+      tft.setCursor(BUTTONS_LEFT + j * BUTTONS_SPACE + TEXT_OFFSET, BUTTONS_TOP + i * BUTTONS_SPACE - 18);
+      tft.setTextColor(textCol[j + 3 * i]);
+      tft.print(key_labels[j + 3 * i]);
+    }
+  }
+  tft.setFontScale((enum RA8875tsize)1);
+  tft.setCursor(WATERFALL_LEFT_X + 5, SPECTRUM_TOP_Y + 50);
+  tft.setTextColor(RA8875_WHITE);
+  tft.print(parameterName.c_str());
+  tft.setCursor(WATERFALL_LEFT_X + 20, SPECTRUM_TOP_Y + 100);
+  tft.print(key_labels[1]);
+  tft.print("   Up to next");
+  tft.setCursor(WATERFALL_LEFT_X + 20, SPECTRUM_TOP_Y + 130);
+  tft.print(key_labels[4]);
+  tft.print("   Down to next");
+  tft.setCursor(WATERFALL_LEFT_X + 20, SPECTRUM_TOP_Y + 160);
+  tft.print("<   Apply entry");
+  tft.setCursor(WATERFALL_LEFT_X + 20, SPECTRUM_TOP_Y + 190);
+  tft.print("X   Exit no change");
+
+  tft.writeTo(L2);
+
+  // Display the current value.
+  tft.setFontScale((enum RA8875tsize)1);
+  tft.setCursor(SECONDARY_MENU_X - 25, SPECTRUM_TOP_Y + 50);
+  tft.setTextColor(RA8875_RED, RA8875_BLACK);
+  tft.print(selectionList[buttonReturnValue].c_str());  // Secondary Menu
+
+  while (notDone) {
+    menu = readButton();                       // Read the ladder value
+    if (menu != MenuSelect::BOGUS_PIN_READ) {  // Valid choice?
+      switch (menu) {
+        case MenuSelect::MENU_OPTION_SELECT:  // They made a choice
+          // Find index of user-selected value.
+          stringIterator = std::find(selectionList.begin(), selectionList.end(), selectionList[buttonReturnValue]);
+          parameter = std::distance(selectionList.begin(), stringIterator);  // Set to user selected choice.
+          tft.setTextColor(RA8875_WHITE);
+          display.EraseMenus();
+          notDone = false;  // Exit while.
+                            //          return buttonReturnValue;
+          break;
+
+        case MenuSelect::MAIN_MENU_UP:
+          buttonReturnValue++;
+          if (buttonReturnValue >= static_cast<int32_t>(selectionList.size()))
+            buttonReturnValue = 0;
+          break;
+
+        case MenuSelect::MAIN_MENU_DN:
+          buttonReturnValue--;
+          if (buttonReturnValue < 0)
+            buttonReturnValue = selectionList.size() - 1;
+          break;
+
+        case MenuSelect::BAND_UP:  // Exit without change.
+          notDone = false;         // Exit while.
+          break;
+
+        default:
+          buttonReturnValue = -1;  // An error selection
+          break;
+      }
+      if (buttonReturnValue != -1) {
+        tft.setTextColor(RA8875_RED, RA8875_BLACK);
+        tft.setCursor(SECONDARY_MENU_X - 25, SPECTRUM_TOP_Y + 50);
+        tft.print(selectionList[buttonReturnValue].c_str());
+      }
+    }
+  }  // End while.
+
+  // Clean up and restore normal radio operation.
+  tft.clearMemory();
+  tft.writeTo(L1);
+  tft.clearMemory();
+  display.RedrawAll();
 }

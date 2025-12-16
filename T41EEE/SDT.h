@@ -328,7 +328,7 @@ struct config_t {
   uint32_t morseDecodeSensitivity = 3000;      // Greg KF5N February 19, 2025
   uint32_t keyType = STRAIGHT_KEY_OR_PADDLES;  // Straight key = 0, keyer = 1.  JJP 7-3-23
   int currentWPM = DEFAULT_KEYER_WPM;          // 4 bytes default = 15 JJP 7-3-23
-  int CWOffset = 2;                            // Default is 750 Hz.
+  uint32_t CWOffset = 2;                       // Default is 750 Hz.
   uint32_t sidetoneSpeaker = 40;               // 4 bytes
   uint32_t sidetoneHeadphone = 40;
   uint32_t cwTransmitDelay = 1000;
@@ -980,7 +980,7 @@ void SpectralNoiseReductionInit();
 void Splash();
 void SSBOptions();
 void isTransmitterKeyed();
-int SubmenuSelect(const std::string options[], int numberOfChoices, int defaultStart);
+int SubmenuSelect(std::vector<std::string>options, int defaultStart);
 int SubmenuSelectString(std::string options[], int numberOfChoices, int defaultStart);
 void T4_rtc_set(unsigned long t);
 float TGetTemp();

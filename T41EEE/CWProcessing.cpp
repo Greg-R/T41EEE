@@ -115,9 +115,10 @@ void JackClusteredArrayMax(int32_t *array, int32_t elements, int32_t *maxCount, 
   Return value:
     void
 *****/
+  std::vector<std::string>CWFilter = { "0.8kHz", "1.0kHz", "1.3kHz", "1.8kHz", "2.0kHz", " Off " };
 FLASHMEM void SelectCWFilter() {
-  const std::string CWFilter[] = { "0.8kHz", "1.0kHz", "1.3kHz", "1.8kHz", "2.0kHz", " Off " };
-  ConfigData.CWFilterIndex = SubmenuSelect(CWFilter, 6, ConfigData.CWFilterIndex);  // CWFilter is an array of strings.
+
+  ConfigData.CWFilterIndex = SubmenuSelect(CWFilter, ConfigData.CWFilterIndex);  // CWFilter is an array of strings.
 
   if (ConfigData.CWFilterIndex != 5) switchFilterSideband = true;  // Sets current delimiter to FLow (high-pass filter adjust).
   display.UpdateAudioGraphics();                                   // This draws decoder delimiters and CW bandwidth box (red).
@@ -134,13 +135,13 @@ FLASHMEM void SelectCWFilter() {
   Return value:
     void
 *****/
+  std::vector<std::string>CWOffsets = { "562.5 Hz", "656.5 Hz", "750 Hz", "843.75 Hz", " Cancel " };
 FLASHMEM void SelectCWOffset() {
   int tempCWOffset;
-  const std::string CWOffsets[] = { "562.5 Hz", "656.5 Hz", "750 Hz", "843.75 Hz", " Cancel " };
   const int numCycles[4] = { 6, 7, 8, 9 };
 
   tempCWOffset = ConfigData.CWOffset;
-  ConfigData.CWOffset = SubmenuSelect(CWOffsets, 5, ConfigData.CWOffset);  // CWFilter is an array of strings.
+  ConfigData.CWOffset = SubmenuSelect(CWOffsets, ConfigData.CWOffset);  // CWFilter is an array of strings.
   if(ConfigData.CWOffset == -1) {
     tft.setCursor(0, 1);
     tft.println("Push Select");
@@ -270,16 +271,16 @@ void SetTransmitDitLength(int wpm) {
   Return value:
     void
 *****/
+std::vector<std::string>keyChoice = { "Straight Key", "Keyer" };
 void SetKeyType() {
   uint32_t currentKey{ 0 };
-  const std::string keyChoice[] = { "Straight Key", "Keyer" };
 
   keyPressedOn = false;  // Guard against already fired key interrupt.
 
   // What to do will depend on the current setting!
   currentKey = ConfigData.keyType;
   // Now the user selects the key type.
-  ConfigData.keyType = SubmenuSelect(keyChoice, 2, ConfigData.keyType);
+  ConfigData.keyType = SubmenuSelect(keyChoice, ConfigData.keyType);
   if (currentKey == ConfigData.keyType) return;
 
   // We're switching to a keyer paddle.

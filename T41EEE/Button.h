@@ -31,12 +31,14 @@ public:
   void ButtonMuteAudio();
   void ExecuteModeChange();
   void ButtonFrequencyEntry();
+  void InputParameterButton(const std::string parameterName, std::vector<std::string>selectionList, uint32_t &parameter);
 
 private:
 
   std::vector<uint32_t>& fineTuneArray;
   std::vector<uint32_t>& centerTuneArray;
   std::vector<uint32_t>::iterator result;
+  std::vector<std::string>::iterator stringIterator;
   const int32_t TOP_MENU_COUNT{ 10 };
   IntervalTimer buttonInterrupts;
   int buttonRead = 0;
