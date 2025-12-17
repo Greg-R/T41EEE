@@ -219,7 +219,7 @@ void CalibrateOptions() {
   }
 }
 #else  // Not using QSE2 (No carrier calibration)
-const std::vector<std::string> IQOptions{ "Freq Cal", "CW PA Cal", "CW Rec Cal", "CW Xmit Cal", "SSB PA Cal", "SSB Rec Cal", "SSB Transmit Cal", "CW Radio Cal", "CW Refine Cal", "SSB Radio Cal", "SSB Refine Cal", "dBm Level Cal", "Btn Cal", "Btn Repeat", "Cancel" };
+std::vector<std::string> IQOptions = { "Freq Cal", "CW PA Cal", "CW Rec Cal", "CW Xmit Cal", "SSB PA Cal", "SSB Rec Cal", "SSB Transmit Cal", "CW Radio Cal", "CW Refine Cal", "SSB Radio Cal", "SSB Refine Cal", "dBm Level Cal", "Btn Cal", "Btn Repeat", "Cancel" };
 void CalibrateOptions() {
   int freqCorrectionFactorOld = 0;
   int32_t increment = 100;
@@ -1149,14 +1149,13 @@ void CalDataOptions() {  //           0               1                2        
   Purpose: To select an option from a submenu using buttons.
 
   Parameter list:
-    std::string options[]     submenus
-    int numberOfChoices       choices available
+    vector<std::string> &options     A list of submenus.
     int defaultState          the starting option
 
   Return value
-    int           an index into the band array
+    int           The index of the chosen option.
 *****/
-int SubmenuSelect(std::vector<std::string> options, int defaultStart) {
+int SubmenuSelect(const std::vector<std::string> &options, int defaultStart) {
   int refreshFlag = 0;
   MenuSelect menu;
   int buttonReturnValue;

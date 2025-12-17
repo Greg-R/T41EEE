@@ -967,7 +967,7 @@ void SpectralNoiseReductionInit();
 void Splash();
 void SSBOptions();
 void isTransmitterKeyed();
-int SubmenuSelect(std::vector<std::string>options, int defaultStart);
+int SubmenuSelect(const std::vector<std::string> &options, int defaultStart);
 int SubmenuSelectString(std::string options[], int numberOfChoices, int defaultStart);
 void T4_rtc_set(unsigned long t);
 float TGetTemp();
