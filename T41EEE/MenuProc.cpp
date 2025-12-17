@@ -382,7 +382,7 @@ void CalibrateOptions() {
 *****/
 void CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
 {
-  std::string cwChoices[]{ "Decode Sens", "CW Filter", "CW Offset", "WPM", "Sidetone Speaker", "Sidetone Headpho",
+  std::string cwChoices[]{ "Decode Sens", "CW Filter", "CW Offset", "Keyer WPM", "Sidetone Speaker", "Sidetone Headpho",
                            "Key Type", "Paddle Flip", "Transmit Delay", "Cancel" };
   std::vector<std::string>CWOffsets = { "562.5", "656.5", "750.0", "843.8" };
   int CWChoice = 0;
@@ -420,7 +420,8 @@ void CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
       break;
 
     case 3:  // Keyer WPM.
-      ConfigData.currentWPM = static_cast<uint32_t>(GetEncoderValueLoopFloat(5, 60, ConfigData.currentWPM, 1, 0, "Keyer WPM: ", true, true));
+//      ConfigData.currentWPM = static_cast<uint32_t>(GetEncoderValueLoopFloat(5, 60, ConfigData.currentWPM, 1, 0, "Keyer WPM: ", true, true));
+      button.InputParameterEncoder(5, 60, 1, "Keyer WPM", ConfigData.currentWPM);
       SetTransmitDitLength(ConfigData.currentWPM);  //Afp 09-22-22     // JJP 8/19/23
       display.UpdateKeyType();                      // Update display to show revised WPM.
       break;

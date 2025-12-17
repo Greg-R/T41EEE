@@ -32,6 +32,7 @@ public:
   void ExecuteModeChange();
   void ButtonFrequencyEntry();
   void InputParameterButton(const std::string parameterName, std::vector<std::string>selectionList, uint32_t &parameter);
+  void InputParameterEncoder(int32_t minValue, int32_t maxValue, uint32_t increment, const std::string parameterName, int32_t &parameter);
 
 private:
 

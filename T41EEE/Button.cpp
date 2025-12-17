@@ -1239,3 +1239,193 @@ void Button::InputParameterButton(const std::string parameterName, std::vector<s
   tft.clearMemory();
   display.RedrawAll();
 }
+
+
+/*****
+  Purpose: Input Parameter using Encoder
+
+  Parameter list:
+    const std::string parameterName          Name of the parameter being adjusted.
+    std::vector<std::string> selectionList   An array of the possible options.
+    uint32_t &parameter                      Reference to the currently set parameter.
+
+  Return value;
+    void
+    Base Code courtesy of Harry  GM3RVL
+*****/
+void Button::InputParameterEncoder(int32_t minValue, int32_t maxValue, uint32_t increment, const std::string parameterName, int32_t &parameter) {
+  int centerLine = (MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2;
+  bool notDone{ true };
+  int32_t currentValue = parameter;  // Copy parameter to currentValue;
+
+  String stringF;
+  MenuSelect menu = MenuSelect::DEFAULT;
+
+  display.EraseMenus();
+  int keyCol[] = { RA8875_GREEN, RA8875_RED, RA8875_RED,
+                   RA8875_RED, RA8875_RED, RA8875_RED,
+                   RA8875_RED, RA8875_RED, RA8875_RED,
+                   RA8875_RED, RA8875_RED, RA8875_RED,
+                   RA8875_RED, RA8875_RED, RA8875_RED,
+                   RA8875_RED, RA8875_RED, RA8875_RED };
+  int textCol[] = { RA8875_BLACK, RA8875_BLACK, RA8875_WHITE,
+                    RA8875_WHITE, RA8875_BLACK, RA8875_BLACK,
+                    RA8875_WHITE, RA8875_WHITE, RA8875_WHITE,
+                    RA8875_WHITE, RA8875_WHITE, RA8875_WHITE,
+                    RA8875_WHITE, RA8875_WHITE, RA8875_WHITE,
+                    RA8875_BLACK, RA8875_BLACK, RA8875_WHITE };
+  const char key_labels[] = { 0x3C, 0x00, 0x58,  // 0x18 is up arrow symbol.
+                              0x00, 0x00, 0x00,
+                              0x00, 0x00, 0x00,
+                              0x00, 0x00, 0x00,
+                              0x00, 0x00, 0x00,
+                              0x00, 0x00, 0x00 };
+
+  constexpr uint32_t KEYPAD_LEFT{ 350 };
+  constexpr uint32_t KEYPAD_TOP{ SPECTRUM_TOP_Y + 35 };
+  constexpr uint32_t KEYPAD_WIDTH{ 150 };
+  constexpr uint32_t KEYPAD_HEIGHT{ 300 };
+  constexpr uint32_t BUTTONS_LEFT{ KEYPAD_LEFT + 30 };
+  constexpr uint32_t BUTTONS_TOP{ KEYPAD_TOP + 30 };
+  constexpr uint32_t BUTTONS_SPACE{ 45 };
+  constexpr uint32_t BUTTONS_RADIUS{ 15 };
+  constexpr int32_t TEXT_OFFSET{ -8 };
+
+  tft.writeTo(L1);
+  tft.fillRect(WATERFALL_LEFT_X, SPECTRUM_TOP_Y + 1, MAX_WATERFALL_WIDTH, WATERFALL_BOTTOM - SPECTRUM_TOP_Y, RA8875_BLACK);  // Make space for FEInfo
+  tft.fillRect(MAX_WATERFALL_WIDTH, WATERFALL_TOP_Y - 10, 15, 30, RA8875_BLACK);
+  tft.writeTo(L2);
+  tft.fillRect(WATERFALL_LEFT_X, SPECTRUM_TOP_Y + 1, MAX_WATERFALL_WIDTH, WATERFALL_BOTTOM - SPECTRUM_TOP_Y, RA8875_BLACK);
+  tft.setCursor(centerLine - 140, WATERFALL_TOP_Y);
+  tft.drawRect(SPECTRUM_LEFT_X - 1, SPECTRUM_TOP_Y, MAX_WATERFALL_WIDTH + 2, 360, RA8875_YELLOW);  // Spectrum box
+  // Draw keypad box
+  tft.fillRect(KEYPAD_LEFT, KEYPAD_TOP, KEYPAD_WIDTH, KEYPAD_HEIGHT, DARKGREY);
+  // Put some circles
+  tft.setFontScale((enum RA8875tsize)1);
+  for (unsigned i = 0; i < 6; i++) {
+    for (unsigned j = 0; j < 3; j++) {
+      tft.fillCircle(BUTTONS_LEFT + j * BUTTONS_SPACE, BUTTONS_TOP + i * BUTTONS_SPACE, BUTTONS_RADIUS, keyCol[j + 3 * i]);
+      tft.setCursor(BUTTONS_LEFT + j * BUTTONS_SPACE + TEXT_OFFSET, BUTTONS_TOP + i * BUTTONS_SPACE - 18);
+      tft.setTextColor(textCol[j + 3 * i]);
+      tft.print(key_labels[j + 3 * i]);
+    }
+  }
+  tft.setFontScale((enum RA8875tsize)1);
+  tft.setCursor(WATERFALL_LEFT_X + 30, SPECTRUM_TOP_Y + 50);
+  tft.setTextColor(RA8875_WHITE);
+  tft.print(parameterName.c_str());
+  tft.setCursor(WATERFALL_LEFT_X + 100, SPECTRUM_TOP_Y + 100);
+  //  tft.print(key_labels[1]);
+  tft.print("Rotate Encoder");
+  tft.setCursor(WATERFALL_LEFT_X + 20, SPECTRUM_TOP_Y + 130);
+  tft.drawCircle(200, 280, 18, RA8875_CYAN);
+  tft.drawCircle(200, 280, 17, RA8875_CYAN);
+  tft.drawCircle(200, 280, 16, RA8875_CYAN);
+  tft.drawArc(200, 280, 40, 3, -90, 90, RA8875_RED);
+
+  tft.drawLine(150, 270, 160, 280, RA8875_RED);
+  tft.drawLine(151, 270, 161, 280, RA8875_RED);
+
+  tft.drawLine(163, 280, 173, 270, RA8875_RED);
+  tft.drawLine(162, 280, 172, 270, RA8875_RED);
+
+  tft.drawLine(227, 270, 237, 280, RA8875_RED);
+  tft.drawLine(228, 270, 238, 280, RA8875_RED);
+
+  tft.drawLine(240, 280, 250, 270, RA8875_RED);
+  tft.drawLine(239, 280, 249, 270, RA8875_RED);
+
+  //  tft.print(key_labels[4]);
+  //  tft.print("   Down to next");
+  tft.setCursor(WATERFALL_LEFT_X + 20, SPECTRUM_TOP_Y + 200);
+  tft.print("<   Apply entry");
+  tft.setCursor(WATERFALL_LEFT_X + 20, SPECTRUM_TOP_Y + 230);
+  tft.print("X   Exit no change");
+
+  tft.writeTo(L2);
+
+  // Display the current value.
+  tft.setFontScale((enum RA8875tsize)1);
+  tft.setCursor(SECONDARY_MENU_X - 25, SPECTRUM_TOP_Y + 50);
+  tft.setTextColor(RA8875_RED, RA8875_BLACK);
+  tft.print(parameter);  // Secondary Menu
+
+  while (notDone) {
+    if (filterEncoderMove != 0) {
+      currentValue += filterEncoderMove * increment;  // Bump up or down...
+      if (currentValue < minValue)
+        currentValue = minValue;
+      else if (currentValue > maxValue)
+        currentValue = maxValue;
+      tft.setCursor(SECONDARY_MENU_X - 25, SPECTRUM_TOP_Y + 50);
+      tft.print("  ");  // Erase old
+      tft.setCursor(SECONDARY_MENU_X - 25, SPECTRUM_TOP_Y + 50);
+      //      tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
+      //      tft.print(parameterName.c_str());
+      tft.setTextColor(RA8875_RED, RA8875_BLACK);
+      //      tft.print(currentValue, precision);
+      tft.print(currentValue);
+      filterEncoderMove = 0;
+    }
+    menu = readButton();
+    if (menu == MenuSelect::MENU_OPTION_SELECT) {
+      //      tft.setCursor(0, 1);
+      //      tft.print("                     ");  // Erase
+      parameter = currentValue;  // Copy modified value.
+      notDone = false;           // Exit
+    }
+    if (menu == MenuSelect::BAND_UP) {
+      notDone = false;  // Exit without change.
+    }
+  }
+
+  /*
+  while (notDone) {
+    menu = readButton();                       // Read the ladder value
+    if (menu != MenuSelect::BOGUS_PIN_READ) {  // Valid choice?
+      switch (menu) {
+        case MenuSelect::MENU_OPTION_SELECT:  // They made a choice
+          // Find index of user-selected value.
+          stringIterator = std::find(selectionList.begin(), selectionList.end(), selectionList[buttonReturnValue]);
+          parameter = std::distance(selectionList.begin(), stringIterator);  // Set to user selected choice.
+          tft.setTextColor(RA8875_WHITE);
+          display.EraseMenus();
+          notDone = false;  // Exit while.
+                            //          return buttonReturnValue;
+          break;
+
+        case MenuSelect::MAIN_MENU_UP:
+          buttonReturnValue++;
+          if (buttonReturnValue >= static_cast<int32_t>(selectionList.size()))
+            buttonReturnValue = 0;
+          break;
+
+        case MenuSelect::MAIN_MENU_DN:
+          buttonReturnValue--;
+          if (buttonReturnValue < 0)
+            buttonReturnValue = selectionList.size() - 1;
+          break;
+
+        case MenuSelect::BAND_UP:  // Exit without change.
+          notDone = false;         // Exit while.
+          break;
+
+        default:
+          buttonReturnValue = -1;  // An error selection
+          break;
+      }
+      if (buttonReturnValue != -1) {
+        tft.setTextColor(RA8875_RED, RA8875_BLACK);
+        tft.setCursor(SECONDARY_MENU_X - 25, SPECTRUM_TOP_Y + 50);
+        tft.print(selectionList[buttonReturnValue].c_str());
+      }
+    }
+  }  // End while.
+*/
+
+  // Clean up and restore normal radio operation.
+  tft.clearMemory();
+  tft.writeTo(L1);
+  tft.clearMemory();
+  display.RedrawAll();
+}

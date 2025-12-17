@@ -327,7 +327,7 @@ struct config_t {
   int decoderFlag = false;                     // JJP 7-3-23
   uint32_t morseDecodeSensitivity = 3000;      // Greg KF5N February 19, 2025
   uint32_t keyType = STRAIGHT_KEY_OR_PADDLES;  // Straight key = 0, keyer = 1.  JJP 7-3-23
-  int currentWPM = DEFAULT_KEYER_WPM;          // 4 bytes default = 15 JJP 7-3-23
+  int32_t currentWPM = DEFAULT_KEYER_WPM;          // 4 bytes default = 15 JJP 7-3-23
   uint32_t CWOffset = 2;                       // Default is 750 Hz.
   uint32_t sidetoneSpeaker = 40;               // 4 bytes
   uint32_t sidetoneHeadphone = 40;
@@ -959,7 +959,7 @@ void RFOptions();
 int SDPresentCheck();
 void SaveAnalogSwitchValues();
 void SelectCWFilter();  // AFP 10-18-22
-void SelectCWOffset();  // KF5N December 13, 2023
+void SelectCWOffset();  // NOTE:  This may be deletable!!!
 void SetBandRelay();
 void SetDecIntFilters();
 void SetDitLength(int wpm);

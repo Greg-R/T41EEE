@@ -134,7 +134,7 @@ FLASHMEM void SelectCWFilter() {
 
   Return value:
     void
-*****/
+*****
   std::vector<std::string>CWOffsets = { "562.5 Hz", "656.5 Hz", "750 Hz", "843.75 Hz", " Cancel " };
 FLASHMEM void SelectCWOffset() {
   int tempCWOffset;
@@ -159,6 +159,7 @@ FLASHMEM void SelectCWOffset() {
   }
   display.UpdateAudioGraphics();
 }
+*/
 
 
 //=================  AFP10-18-22 ================
