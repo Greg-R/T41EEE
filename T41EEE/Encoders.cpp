@@ -76,7 +76,7 @@ void EncoderCenterTune() {
 
   // This is an alternate function of the coarse frequency tune.  This resets the Morse decoder.
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and ConfigData.decoderFlag) {
-    ResetHistograms();
+    cwprocess.ResetHistograms();
   }
 
   switch (result) {

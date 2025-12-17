@@ -418,7 +418,7 @@ bool ReceiveDSP::ProcessIQData() {
 */
 
     if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE) {
-      DoCWReceiveProcessing();  //AFP 09-19-22
+      cwprocess.DoCWReceiveProcessing();  //AFP 09-19-22
 
       // ----------------------  CW Narrow band filters  AFP 10-18-22 -------------------------
       if (ConfigData.CWFilterIndex != 5) {

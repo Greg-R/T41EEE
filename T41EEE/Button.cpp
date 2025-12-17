@@ -1315,28 +1315,22 @@ void Button::InputParameterEncoder(int32_t minValue, int32_t maxValue, uint32_t 
   tft.setTextColor(RA8875_WHITE);
   tft.print(parameterName.c_str());
   tft.setCursor(WATERFALL_LEFT_X + 100, SPECTRUM_TOP_Y + 100);
-  //  tft.print(key_labels[1]);
   tft.print("Rotate Encoder");
   tft.setCursor(WATERFALL_LEFT_X + 20, SPECTRUM_TOP_Y + 130);
   tft.drawCircle(200, 280, 18, RA8875_CYAN);
   tft.drawCircle(200, 280, 17, RA8875_CYAN);
   tft.drawCircle(200, 280, 16, RA8875_CYAN);
+  // Knob turning graphics.
   tft.drawArc(200, 280, 40, 3, -90, 90, RA8875_RED);
-
   tft.drawLine(150, 270, 160, 280, RA8875_RED);
   tft.drawLine(151, 270, 161, 280, RA8875_RED);
-
   tft.drawLine(163, 280, 173, 270, RA8875_RED);
   tft.drawLine(162, 280, 172, 270, RA8875_RED);
-
   tft.drawLine(227, 270, 237, 280, RA8875_RED);
   tft.drawLine(228, 270, 238, 280, RA8875_RED);
-
   tft.drawLine(240, 280, 250, 270, RA8875_RED);
   tft.drawLine(239, 280, 249, 270, RA8875_RED);
 
-  //  tft.print(key_labels[4]);
-  //  tft.print("   Down to next");
   tft.setCursor(WATERFALL_LEFT_X + 20, SPECTRUM_TOP_Y + 200);
   tft.print("<   Apply entry");
   tft.setCursor(WATERFALL_LEFT_X + 20, SPECTRUM_TOP_Y + 230);
@@ -1360,8 +1354,6 @@ void Button::InputParameterEncoder(int32_t minValue, int32_t maxValue, uint32_t 
       tft.setCursor(SECONDARY_MENU_X - 25, SPECTRUM_TOP_Y + 50);
       tft.print("  ");  // Erase old
       tft.setCursor(SECONDARY_MENU_X - 25, SPECTRUM_TOP_Y + 50);
-      //      tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
-      //      tft.print(parameterName.c_str());
       tft.setTextColor(RA8875_RED, RA8875_BLACK);
       //      tft.print(currentValue, precision);
       tft.print(currentValue);
@@ -1369,8 +1361,6 @@ void Button::InputParameterEncoder(int32_t minValue, int32_t maxValue, uint32_t 
     }
     menu = readButton();
     if (menu == MenuSelect::MENU_OPTION_SELECT) {
-      //      tft.setCursor(0, 1);
-      //      tft.print("                     ");  // Erase
       parameter = currentValue;  // Copy modified value.
       notDone = false;           // Exit
     }
@@ -1378,50 +1368,6 @@ void Button::InputParameterEncoder(int32_t minValue, int32_t maxValue, uint32_t 
       notDone = false;  // Exit without change.
     }
   }
-
-  /*
-  while (notDone) {
-    menu = readButton();                       // Read the ladder value
-    if (menu != MenuSelect::BOGUS_PIN_READ) {  // Valid choice?
-      switch (menu) {
-        case MenuSelect::MENU_OPTION_SELECT:  // They made a choice
-          // Find index of user-selected value.
-          stringIterator = std::find(selectionList.begin(), selectionList.end(), selectionList[buttonReturnValue]);
-          parameter = std::distance(selectionList.begin(), stringIterator);  // Set to user selected choice.
-          tft.setTextColor(RA8875_WHITE);
-          display.EraseMenus();
-          notDone = false;  // Exit while.
-                            //          return buttonReturnValue;
-          break;
-
-        case MenuSelect::MAIN_MENU_UP:
-          buttonReturnValue++;
-          if (buttonReturnValue >= static_cast<int32_t>(selectionList.size()))
-            buttonReturnValue = 0;
-          break;
-
-        case MenuSelect::MAIN_MENU_DN:
-          buttonReturnValue--;
-          if (buttonReturnValue < 0)
-            buttonReturnValue = selectionList.size() - 1;
-          break;
-
-        case MenuSelect::BAND_UP:  // Exit without change.
-          notDone = false;         // Exit while.
-          break;
-
-        default:
-          buttonReturnValue = -1;  // An error selection
-          break;
-      }
-      if (buttonReturnValue != -1) {
-        tft.setTextColor(RA8875_RED, RA8875_BLACK);
-        tft.setCursor(SECONDARY_MENU_X - 25, SPECTRUM_TOP_Y + 50);
-        tft.print(selectionList[buttonReturnValue].c_str());
-      }
-    }
-  }  // End while.
-*/
 
   // Clean up and restore normal radio operation.
   tft.clearMemory();

@@ -67,6 +67,7 @@ std::vector<uint32_t> center_tune_array = CENTER_TUNE_ARRAY;
 std::vector<uint32_t> fine_tune_array = FINE_TUNE_ARRAY;
 Button button(fine_tune_array, center_tune_array);
 ModeControl modecontrol;  // Mode control struct.  This is a part of the "modal" radio configuration process.
+CWProcessing cwprocess;   // CW mode related functions.
 
 const char *topMenus[] = { "CW Options", "RF Set", "VFO Select",
                            "Config EEPROM", "Cal EEPROM", "AGC",

@@ -598,15 +598,15 @@ FLASHMEM void initPowerCoefficients() {
 FLASHMEM void initUserDefinedStuff() {
   NR_Index = ConfigData.nrOptionSelect;
   TxRxFreq = ConfigData.centerFreq = ConfigData.lastFrequencies[ConfigData.currentBand][ConfigData.activeVFO];
-  SetTransmitDitLength(ConfigData.currentWPM);
+  cwprocess.SetTransmitDitLength(ConfigData.currentWPM);
   // Initialize buffers used by the CW transmitter and CW decoder.
   sineTone(ConfigData.CWOffset + 6);                   // This function takes "number of cycles" which is the offset + 6.  Used by CW decoder.
   cwexciter.writeSineBuffer(ConfigData.CWOffset + 6);  // Used to create CW sinusoidal tone.
   si5351.set_correction(CalData.freqCorrectionFactor, SI5351_PLL_INPUT_XO);
   initCWShaping();
   initPowerCoefficients();
-  SetKeyPowerUp();
-  ResetHistograms();                         // KF5N February 20, 2024
+  cwprocess.SetKeyPowerUp();
+  cwprocess.ResetHistograms();                         // KF5N February 20, 2024
   zoomIndex = ConfigData.spectrum_zoom - 1;  // ButtonZoom() increments zoomIndex, so this cancels it so the read from EEPROM is accurately restored.  KF5N August 3, 2023
   button.ButtonZoom();                       // Restore zoom settings.  KF5N August 3, 2023
 }

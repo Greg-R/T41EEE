@@ -459,6 +459,7 @@ extern struct calibration_t CalData;
 #include "Eeprom.h"
 #include "ReceiveDSP.h"
 #include "ModeControl.h"
+#include "CWProcessing.h"
 
 //------------------------- Global CW Filter declarations ----------
 #define IIR_CW_NUMSTAGES 4
@@ -588,9 +589,10 @@ extern RxCalibrate rxcalibrater;  // CW mode calibration object.
 extern TxCalibrate txcalibrater;  // SSB mode calibration object.
 extern CW_Exciter cwexciter;      // CW exciter object
 extern Button button;             // Front-panel button object.
+extern CWProcessing cwprocess;    // CW mode functions.
 
+// Hardware modules.
 extern Si5351 si5351;  // RF PLL object.
-
 extern RA8875 tft;  // RA8875 display controller plus graphics object.
 
 //====================== Global structure declarations ===============================
@@ -900,12 +902,8 @@ void CWOptions();
 
 void CW_ExciterIQData(int shaping);  // AFP 08-18-22
 void DisplayClock();
-void DoCWDecoding(int audioValue);
-void DoCWReceiveProcessing();  //AFP 09-19-22
 void DoExciterEQ();
 void DoReceiveEQ();
-void DoSignalHistogram(long val);
-void DoGapHistogram(long val);
 // int DoSplitVFO();  // Temporarily removed
 void DoPaddleFlip();
 void DrawActiveLetter(int row, int horizontalSpacer, int whichLetterIndex, int keyWidth, int keyHeight);
@@ -923,7 +921,6 @@ void FilterSetSSB();
 int FindCountry(char *prefix);
 void FreqShift1();
 void FreqShift2();
-float goertzel_mag(int numSamples, int TARGET_FREQUENCY, int SAMPLING_RATE, float *data);
 float GetEncoderValueLive(float minValue, float maxValue, float startValue, float increment, std::string prompt, bool left, bool colorRed);
 float GetEncoderValueLoopFloat(float minValue, float maxValue, float startValue, float increment, int precision, std::string prompt, bool left, bool colorRed);
 float HaversineDistance(float dxLat, float dxLon);
@@ -944,8 +941,6 @@ void KeyTipOn();
 void LMSNoiseReduction(int16_t blockSize, float32_t *nrbuffer);
 float32_t log10f_fast(float32_t X);
 int ModeOptions();
-//DB2OO, 29-AUG-23: added
-void MorseCharacterDisplay(char currentLetter);
 float MSinc(int m, float fc);
 void printFile(const char *filename);
 void playTransmitData();  // KF5N February 23, 2024
@@ -953,23 +948,15 @@ void ProcessEqualizerChoices(int EQType, char *title);
 MenuSelect readButton(MenuSelect lastUsedTask);
 MenuSelect readButton();
 void ResetFlipFlops();
-void ResetHistograms();
 void ResetTuning();  // AFP 10-11-22
 void RFOptions();
 int SDPresentCheck();
 void SaveAnalogSwitchValues();
-void SelectCWFilter();  // AFP 10-18-22
-void SelectCWOffset();  // NOTE:  This may be deletable!!!
 void SetBandRelay();
 void SetDecIntFilters();
-void SetDitLength(int wpm);
 void SetFreq();
 int SetI2SFreq(int freq);
 void SetIIRCoeffs(float32_t f0, float32_t Q, float32_t sample_rate, uint8_t filter_type);
-void SetKeyType();
-void SetKeyPowerUp();
-void SetSideToneVolume(bool speaker);  // This function uses encoder to set sidetone volume.  KF5N August 29, 2023
-void SetTransmitDitLength(int wpm);    // JJP 8/19/23
 void ShowDecoderMessage();
 void sineTone(int numCycles);
 void initCWShaping();

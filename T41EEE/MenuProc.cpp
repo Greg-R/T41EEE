@@ -63,6 +63,7 @@ void ShowMenu(const char *menu[], int where) {
    void
 *****/
 #ifdef QSE2
+std::vector<std::string> IQOptions{ "Freq Cal", "CW PA Cal", "CW Rec Cal", "CW Carrier Cal", "CW Xmit Cal", "SSB PA Cal", "SSB Rec Cal", "SSB Carrier Cal", "SSB Transmit Cal", "CW Radio Cal", "CW Refine Cal", "SSB Radio Cal", "SSB Refine Cal", "dBm Level Cal", "Btn Cal", "Btn Repeat", "Cancel" };
 void CalibrateOptions() {
   int freqCorrectionFactorOld = 0;
   int32_t increment = 100;
@@ -71,7 +72,6 @@ void CalibrateOptions() {
   // Select the type of calibration, and then skip this during the loop() function.
   // Note that some calibrate options run inside the loop() function!
   if (calibrateFlag == 0) {  //    0             1           2               3                4              5             6              7                  8                  9               10                11               12                13               14               15              16          17           18
-    std::vector<std::string>IQOptions{ "Freq Cal", "CW PA Cal", "CW Rec Cal", "CW Carrier Cal", "CW Xmit Cal", "SSB PA Cal", "SSB Rec Cal", "SSB Carrier Cal", "SSB Transmit Cal", "CW Radio Cal", "CW Refine Cal", "SSB Radio Cal", "SSB Refine Cal", "dBm Level Cal", "Btn Cal", "Btn Repeat", "Cancel" };
     IQChoice = SubmenuSelect(IQOptions, 0);
   }
   calibrateFlag = 1;
@@ -219,6 +219,7 @@ void CalibrateOptions() {
   }
 }
 #else  // Not using QSE2 (No carrier calibration)
+const std::vector<std::string> IQOptions{ "Freq Cal", "CW PA Cal", "CW Rec Cal", "CW Xmit Cal", "SSB PA Cal", "SSB Rec Cal", "SSB Transmit Cal", "CW Radio Cal", "CW Refine Cal", "SSB Radio Cal", "SSB Refine Cal", "dBm Level Cal", "Btn Cal", "Btn Repeat", "Cancel" };
 void CalibrateOptions() {
   int freqCorrectionFactorOld = 0;
   int32_t increment = 100;
@@ -226,8 +227,8 @@ void CalibrateOptions() {
 
   // Select the type of calibration, and then skip this during the loop() function.
   if (calibrateFlag == 0) {
-    const std::string IQOptions[]{ "Freq Cal", "CW PA Cal", "CW Rec Cal", "CW Xmit Cal", "SSB PA Cal", "SSB Rec Cal", "SSB Transmit Cal", "CW Radio Cal", "CW Refine Cal", "SSB Radio Cal", "SSB Refine Cal", "dBm Level Cal", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
-    IQChoice = SubmenuSelect(IQOptions, 15, 0);                                                                                                                                                                                                                      //AFP 10-21-22
+
+    IQChoice = SubmenuSelect(IQOptions, 0);  //AFP 10-21-22
   }
   calibrateFlag = true;
   switch (IQChoice) {
@@ -384,7 +385,7 @@ void CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
 {
   std::string cwChoices[]{ "Decode Sens", "CW Filter", "CW Offset", "Keyer WPM", "Sidetone Speaker", "Sidetone Headpho",
                            "Key Type", "Paddle Flip", "Transmit Delay", "Cancel" };
-  std::vector<std::string>CWOffsets = { "562.5", "656.5", "750.0", "843.8" };
+  //  std::vector<std::string>CWOffsets = { "562.5", "656.5", "750.0", "843.8" };
   int CWChoice = 0;
   uint32_t morseDecodeSensitivityOld = 0;
   MenuSelect menu;
@@ -409,33 +410,31 @@ void CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
       }
       break;
 
-    case 1:              // CW Filter BW:      // AFP 10-18-22
-      SelectCWFilter();  // in CWProcessing    // AFP 10-18-22
+    case 1:              // CW Filter BW.
+      cwprocess.SelectCWFilter();
+
       break;
 
     case 2:              // Select a preferred CW offset frequency.
-//      SelectCWOffset();  //  Located in CWProcessing.cpp
+      cwprocess.SelectCWOffset();
 
-      button.InputParameterButton("CW Offset Hz", CWOffsets, ConfigData.CWOffset);
       break;
 
     case 3:  // Keyer WPM.
-//      ConfigData.currentWPM = static_cast<uint32_t>(GetEncoderValueLoopFloat(5, 60, ConfigData.currentWPM, 1, 0, "Keyer WPM: ", true, true));
-      button.InputParameterEncoder(5, 60, 1, "Keyer WPM", ConfigData.currentWPM);
-      SetTransmitDitLength(ConfigData.currentWPM);  //Afp 09-22-22     // JJP 8/19/23
-      display.UpdateKeyType();                      // Update display to show revised WPM.
+    cwprocess.SetKeyerWPM();
+
       break;
 
     case 4:  // Sidetone volume for speaker.
-      SetSideToneVolume(true);
+      cwprocess.SetSideToneVolume(true);
       break;
 
     case 5:  // Sidetone volume for headphone.
-      SetSideToneVolume(false);
+      cwprocess.SetSideToneVolume(false);
       break;
 
     case 6:          // Type of key:
-      SetKeyType();  // Straight key or keyer? Stored in ConfigData.keyType.
+      cwprocess.SetKeyType();  // Straight key or keyer? Stored in ConfigData.keyType.
       display.UpdateKeyType();
       break;
 
@@ -465,7 +464,7 @@ void CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
     none
 *****/
 void AGCOptions() {
-  std::vector<std::string>AGCChoices = { "AGC On", "AGC Off", "AGC Threshold", "Cancel" };  // G0ORX (Added Long) September 5, 2023
+  std::vector<std::string> AGCChoices = { "AGC On", "AGC Off", "AGC Threshold", "Cancel" };  // G0ORX (Added Long) September 5, 2023
   int agcSet = 0;
 
   agcSet = SubmenuSelect(AGCChoices, ConfigData.AGCMode);  // G0ORX
@@ -698,7 +697,7 @@ void ProcessEqualizerChoices(int EQType, char *title) {
     int           an index into the band array
 *****/
 void EqualizerRecOptions() {
-  std::vector<std::string>RecEQChoices = { "RX EQ On", "RX EQ Off", "RX EQSet", "Cancel" };  // Add code practice oscillator
+  std::vector<std::string> RecEQChoices = { "RX EQ On", "RX EQ Off", "RX EQSet", "Cancel" };  // Add code practice oscillator
   int EQChoice = 0;
 
   EQChoice = SubmenuSelect(RecEQChoices, 0);
@@ -732,7 +731,7 @@ void EqualizerRecOptions() {
     none
 *****/
 void EqualizerXmtOptions() {
-  std::vector<std::string>XmtEQChoices = { "TX EQ On", "TX EQ Off", "TX EQSet", "Cancel" };  // Add code practice oscillator
+  std::vector<std::string> XmtEQChoices = { "TX EQ On", "TX EQ Off", "TX EQSet", "Cancel" };  // Add code practice oscillator
   int EQChoice = 0;
 
   EQChoice = SubmenuSelect(XmtEQChoices, 0);
@@ -770,7 +769,7 @@ void SSBOptions() {
   float imdAmplitude = 1.0;
   float imdAmplitudedB = 5;
   MenuSelect menu = MenuSelect::BOGUS_PIN_READ;
-  std::vector<std::string>ssbChoices = { "CESSB", "SSB", "FT8 Active", "FT8 Disable", "Comp On", "Comp Off", "Mic Gain", "Comp Ratio", "Comp Threshold", "IMD Test ", "Cancel" };
+  std::vector<std::string> ssbChoices = { "CESSB", "SSB", "FT8 Active", "FT8 Disable", "Comp On", "Comp Off", "Mic Gain", "Comp Ratio", "Comp Threshold", "IMD Test ", "Cancel" };
 
   ssbChoice = SubmenuSelect(ssbChoices, ssbChoice);
   switch (ssbChoice) {
@@ -794,7 +793,7 @@ void SSBOptions() {
       display.BandInformation();
       break;
 
-      case 3:  // FT8 disable
+    case 3:  // FT8 disable
       ft8EnableFlag = false;
       display.BandInformation();
       break;
@@ -877,7 +876,7 @@ void SSBOptions() {
     void
 *****/
 void RFOptions() {
-  std::vector<std::string>rfOptions = { "TX Power Set", "RF Gain Set", "Cancel" };
+  std::vector<std::string> rfOptions = { "TX Power Set", "RF Gain Set", "Cancel" };
   int rfSet = 0;
 
   rfSet = SubmenuSelect(rfOptions, rfSet);
@@ -964,8 +963,8 @@ void DoPaddleFlip() {
     none
 *****/
 void VFOSelect() {
-//  const std::string VFOOptions[] = { "VFO A", "VFO B", "VFO Split", "Cancel" };
-    std::vector<std::string>VFOOptions = { "VFO A", "VFO B", "Cancel" };
+  //  const std::string VFOOptions[] = { "VFO A", "VFO B", "VFO Split", "Cancel" };
+  std::vector<std::string> VFOOptions = { "VFO A", "VFO B", "Cancel" };
   int toggle;
   int choice, lastChoice;
 
@@ -991,11 +990,11 @@ void VFOSelect() {
       ConfigData.currentBand = ConfigData.currentBandB;
 
       break;
-//
-//    case VFO_SPLIT:  // Split
-//      DoSplitVFO();
+      //
+      //    case VFO_SPLIT:  // Split
+      //      DoSplitVFO();
 
-//      break;
+      //      break;
 
     default:  // Cancel
       break;
@@ -1015,7 +1014,7 @@ void VFOSelect() {
     void
 *****/
 void ConfigDataOptions() {  //           0               1                2                  3                  4                  5                  6                7                  8              9           10
-  std::vector<std::string>ConfigDataOpts = { "Save Current", "Load Defaults", "Copy Config->SD", "Copy SD->Config", "EEPROM->Serial", "Default->Serial", "Stack->Serial", "SD->Serial", "Cancel" };
+  std::vector<std::string> ConfigDataOpts = { "Save Current", "Load Defaults", "Copy Config->SD", "Copy SD->Config", "EEPROM->Serial", "Default->Serial", "Stack->Serial", "SD->Serial", "Cancel" };
   int defaultOpt = 0;
   config_t tempConfig;     // A temporary config_t struct to copy ConfigData data into.
   config_t defaultConfig;  // The configuration defaults.
@@ -1087,7 +1086,7 @@ void ConfigDataOptions() {  //           0               1                2     
     void
 *****/
 void CalDataOptions() {  //           0               1                2               3               4                     5                  6               7          8
-  std::vector<std::string>CalDataOpts = { "Save Current", "Load Defaults", "Copy Cal->SD", "Copy SD->Cal", "EEPROM->Serial", "Defaults->Serial", "Stack->Serial", "SD->Serial", "Cancel" };
+  std::vector<std::string> CalDataOpts = { "Save Current", "Load Defaults", "Copy Cal->SD", "Copy SD->Cal", "EEPROM->Serial", "Defaults->Serial", "Stack->Serial", "SD->Serial", "Cancel" };
   int defaultOpt = 0;
   calibration_t tempCal;     // A temporary calibration_t struct to copy CalData data into.
   calibration_t defaultCal;  // The configuration defaults.
@@ -1157,7 +1156,7 @@ void CalDataOptions() {  //           0               1                2        
   Return value
     int           an index into the band array
 *****/
-int SubmenuSelect(std::vector<std::string>options, int defaultStart) {
+int SubmenuSelect(std::vector<std::string> options, int defaultStart) {
   int refreshFlag = 0;
   MenuSelect menu;
   int buttonReturnValue;
