@@ -321,7 +321,7 @@ struct config_t {
   int nrOptionSelect = 0;                              // 1 byte
   int currentScale = 1;
   long spectrum_zoom = SPECTRUM_ZOOM_2;
-  int CWFilterIndex = 5;  // Off
+  uint32_t CWFilterIndex = 5;  // Off
   int paddleDit = KEYER_DIT_INPUT_TIP;
   int paddleDah = KEYER_DAH_INPUT_RING;
   int decoderFlag = false;                     // JJP 7-3-23
@@ -331,7 +331,7 @@ struct config_t {
   uint32_t CWOffset = 2;                       // Default is 750 Hz.
   uint32_t sidetoneSpeaker = 40;               // 4 bytes
   uint32_t sidetoneHeadphone = 40;
-  uint32_t cwTransmitDelay = 1000;
+  int32_t cwTransmitDelay = 1000;
   int activeVFO = 0;                // 2 bytes
   int currentBand = STARTUP_BAND;   // 4 bytes   JJP 7-3-23
   int currentBandA = STARTUP_BAND;  // 4 bytes   JJP 7-3-23

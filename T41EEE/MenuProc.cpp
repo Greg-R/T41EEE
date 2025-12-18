@@ -410,18 +410,18 @@ void CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
       }
       break;
 
-    case 1:              // CW Filter BW.
+    case 1:  // CW Filter BW.
       cwprocess.SelectCWFilter();
 
       break;
 
-    case 2:              // Select a preferred CW offset frequency.
+    case 2:  // Select a preferred CW offset frequency.
       cwprocess.SelectCWOffset();
 
       break;
 
     case 3:  // Keyer WPM.
-    cwprocess.SetKeyerWPM();
+      cwprocess.SetKeyerWPM();
 
       break;
 
@@ -433,18 +433,17 @@ void CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
       cwprocess.SetSideToneVolume(false);
       break;
 
-    case 6:          // Type of key:
+    case 6:                    // Type of key:
       cwprocess.SetKeyType();  // Straight key or keyer? Stored in ConfigData.keyType.
-      display.UpdateKeyType();
       break;
 
     case 7:  // Flip paddles
       DoPaddleFlip();
       break;
 
-    case 8:  // new function JJP 9/1/22
-      //      SetTransmitDelay();  // Transmit relay hold delay
-      ConfigData.cwTransmitDelay = static_cast<uint32_t>(GetEncoderValueLoopFloat(250, 3000, ConfigData.cwTransmitDelay, 250, 0, "Transmit Delay: ", true, true));
+    case 8:  // Set transmit delay.
+      button.InputParameterEncoder(250, 3000, 250, "Transmit Delay", ConfigData.cwTransmitDelay);
+
       break;
 
     default:  // Cancel
@@ -927,7 +926,6 @@ void DoPaddleFlip() {
   tft.print(paddleState[choice]);  // Show the default (right paddle = dah
 
   while (true) {
-    delay(150L);
     pushButtonSwitchIndex = readButton();  // Winner, winner...chicken dinner!
     if (pushButtonSwitchIndex == MenuSelect::MAIN_MENU_UP || pushButtonSwitchIndex == MenuSelect::MAIN_MENU_DN) {
       choice = !choice;  // Reverse the last choice

@@ -1228,7 +1228,7 @@ void loop() {
 
       cwKeyDown = false;  // false initiates CW_SHAPING_RISE.
       cwTimer = millis();
-      while (millis() - cwTimer <= ConfigData.cwTransmitDelay) {  // Start CW transmit timer.
+      while (millis() - cwTimer <= static_cast<uint32_t>(ConfigData.cwTransmitDelay)) {  // Start CW transmit timer.
 
         if (digitalRead(KEYER_DIT_INPUT_TIP) == LOW or straightKeyStart) {  // AFP 09-25-22  Turn on CW signal
           straightKeyStart = false;
@@ -1258,7 +1258,7 @@ void loop() {
       enableTransmitter(true);
 
       cwTimer = millis();
-      while (millis() - cwTimer <= ConfigData.cwTransmitDelay) {
+      while (millis() - cwTimer <= static_cast<uint32_t>(ConfigData.cwTransmitDelay)) {
         // Keyer Dit
         if (digitalRead(ConfigData.paddleDit) == LOW or keyerFirstDit) {
 

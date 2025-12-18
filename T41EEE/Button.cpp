@@ -1114,7 +1114,7 @@ void Button::ExecuteModeChange() {
 void Button::InputParameterButton(const std::string parameterName, std::vector<std::string> selectionList, uint32_t &parameter) {
   int centerLine = (MAX_WATERFALL_WIDTH + SPECTRUM_LEFT_X) / 2;
   bool notDone{ true };
-  int32_t buttonReturnValue{ 0 };
+  int32_t buttonReturnValue = parameter;  // Used as an index of selectionList, so start with current value.
 
   String stringF;
   MenuSelect menu = MenuSelect::DEFAULT;
@@ -1149,6 +1149,18 @@ void Button::InputParameterButton(const std::string parameterName, std::vector<s
   constexpr uint32_t BUTTONS_RADIUS{ 15 };
   constexpr int32_t TEXT_OFFSET{ -8 };
 
+  // Some preliminary work here.  We need to know the length of the longest member of selectionList.
+  // This is so the longest member can be erased so that characters are not left behind.
+  // Iterate through the list and find the maximum length and set that to a variable.
+  auto maxIterator = std::max_element(selectionList.begin(), selectionList.end(),
+                                     [](const std::string &s1, const std::string &s2) {
+                                       return s1.size() < s2.size();
+                                     });
+  uint32_t index = std::distance(selectionList.begin(), maxIterator);
+  // Create an "eraser string".
+  std::string eraserString{""};
+  for(uint32_t i = 0; i < selectionList[index].length(); i = i + 1) eraserString += " ";
+
   tft.writeTo(L1);
   tft.fillRect(WATERFALL_LEFT_X, SPECTRUM_TOP_Y + 1, MAX_WATERFALL_WIDTH, WATERFALL_BOTTOM - SPECTRUM_TOP_Y, RA8875_BLACK);  // Make space for FEInfo
   tft.fillRect(MAX_WATERFALL_WIDTH, WATERFALL_TOP_Y - 10, 15, 30, RA8875_BLACK);
@@ -1169,9 +1181,7 @@ void Button::InputParameterButton(const std::string parameterName, std::vector<s
     }
   }
   tft.setFontScale((enum RA8875tsize)1);
-  tft.setCursor(WATERFALL_LEFT_X + 5, SPECTRUM_TOP_Y + 50);
-  tft.setTextColor(RA8875_WHITE);
-  tft.print(parameterName.c_str());
+
   tft.setCursor(WATERFALL_LEFT_X + 20, SPECTRUM_TOP_Y + 100);
   tft.print(key_labels[1]);
   tft.print("   Up to next");
@@ -1187,12 +1197,15 @@ void Button::InputParameterButton(const std::string parameterName, std::vector<s
 
   // Display the current value.
   tft.setFontScale((enum RA8875tsize)1);
-  tft.setCursor(SECONDARY_MENU_X - 25, SPECTRUM_TOP_Y + 50);
+  tft.setCursor(WATERFALL_LEFT_X + 5, SPECTRUM_TOP_Y + 50);
+  tft.setTextColor(RA8875_WHITE);
+  tft.print(parameterName.c_str());
+  tft.setCursor(WATERFALL_LEFT_X + 5 + tft.getFontWidth() * (parameterName.length() + 1), SPECTRUM_TOP_Y + 50);
   tft.setTextColor(RA8875_RED, RA8875_BLACK);
-  tft.print(selectionList[buttonReturnValue].c_str());  // Secondary Menu
+  tft.print(selectionList[parameter].c_str());  // Show current value.
 
   while (notDone) {
-    menu = readButton();                       // Read the ladder value
+    menu = readButton();                       // Read the button push.
     if (menu != MenuSelect::BOGUS_PIN_READ) {  // Valid choice?
       switch (menu) {
         case MenuSelect::MENU_OPTION_SELECT:  // They made a choice
@@ -1202,7 +1215,6 @@ void Button::InputParameterButton(const std::string parameterName, std::vector<s
           tft.setTextColor(RA8875_WHITE);
           display.EraseMenus();
           notDone = false;  // Exit while.
-                            //          return buttonReturnValue;
           break;
 
         case MenuSelect::MAIN_MENU_UP:
@@ -1226,8 +1238,14 @@ void Button::InputParameterButton(const std::string parameterName, std::vector<s
           break;
       }
       if (buttonReturnValue != -1) {
+        //        tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
+        //        tft.setCursor(WATERFALL_LEFT_X + 5, SPECTRUM_TOP_Y + 50);
+        //        tft.print(parameterName.c_str());
         tft.setTextColor(RA8875_RED, RA8875_BLACK);
-        tft.setCursor(SECONDARY_MENU_X - 25, SPECTRUM_TOP_Y + 50);
+        // Erase the old value before printing the new value.
+        tft.setCursor(WATERFALL_LEFT_X + 5 + tft.getFontWidth() * (parameterName.length() + 1), SPECTRUM_TOP_Y + 50);
+        tft.print(eraserString.c_str());        
+        tft.setCursor(WATERFALL_LEFT_X + 5 + tft.getFontWidth() * (parameterName.length() + 1), SPECTRUM_TOP_Y + 50);
         tft.print(selectionList[buttonReturnValue].c_str());
       }
     }
@@ -1310,8 +1328,9 @@ void Button::InputParameterEncoder(int32_t minValue, int32_t maxValue, uint32_t 
       tft.print(key_labels[j + 3 * i]);
     }
   }
+
   tft.setFontScale((enum RA8875tsize)1);
-  tft.setCursor(WATERFALL_LEFT_X + 30, SPECTRUM_TOP_Y + 50);
+  tft.setCursor(WATERFALL_LEFT_X + 10, SPECTRUM_TOP_Y + 50);
   tft.setTextColor(RA8875_WHITE);
   tft.print(parameterName.c_str());
   tft.setCursor(WATERFALL_LEFT_X + 100, SPECTRUM_TOP_Y + 100);
@@ -1342,6 +1361,7 @@ void Button::InputParameterEncoder(int32_t minValue, int32_t maxValue, uint32_t 
   tft.setFontScale((enum RA8875tsize)1);
   tft.setCursor(SECONDARY_MENU_X - 25, SPECTRUM_TOP_Y + 50);
   tft.setTextColor(RA8875_RED, RA8875_BLACK);
+  tft.setCursor(WATERFALL_LEFT_X + 10 + tft.getFontWidth() * (parameterName.length() + 1), SPECTRUM_TOP_Y + 50);
   tft.print(parameter);  // Secondary Menu
 
   while (notDone) {
@@ -1351,9 +1371,11 @@ void Button::InputParameterEncoder(int32_t minValue, int32_t maxValue, uint32_t 
         currentValue = minValue;
       else if (currentValue > maxValue)
         currentValue = maxValue;
-      tft.setCursor(SECONDARY_MENU_X - 25, SPECTRUM_TOP_Y + 50);
-      tft.print("  ");  // Erase old
-      tft.setCursor(SECONDARY_MENU_X - 25, SPECTRUM_TOP_Y + 50);
+//      tft.setCursor(SECONDARY_MENU_X - 25, SPECTRUM_TOP_Y + 50);
+        tft.setCursor(WATERFALL_LEFT_X + 10 + tft.getFontWidth() * (parameterName.length() + 1), SPECTRUM_TOP_Y + 50);
+      tft.print("      ");  // Erase old
+//      tft.setCursor(SECONDARY_MENU_X - 25, SPECTRUM_TOP_Y + 50);
+        tft.setCursor(WATERFALL_LEFT_X + 10 + tft.getFontWidth() * (parameterName.length() + 1), SPECTRUM_TOP_Y + 50);
       tft.setTextColor(RA8875_RED, RA8875_BLACK);
       //      tft.print(currentValue, precision);
       tft.print(currentValue);

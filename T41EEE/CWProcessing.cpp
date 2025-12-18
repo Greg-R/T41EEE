@@ -66,7 +66,8 @@ void CWProcessing::JackClusteredArrayMax(int32_t *array, int32_t elements, int32
 *****/
 FLASHMEM void CWProcessing::SelectCWFilter() {
 
-  ConfigData.CWFilterIndex = SubmenuSelect(CWFilter, ConfigData.CWFilterIndex);  // CWFilter is an array of strings.
+  //  ConfigData.CWFilterIndex = SubmenuSelect(CWFilter, ConfigData.CWFilterIndex);  // CWFilter is an array of strings.
+  button.InputParameterButton("CW Filter", CWFilter, ConfigData.CWFilterIndex);
 
   if (ConfigData.CWFilterIndex != 5) switchFilterSideband = true;  // Sets current delimiter to FLow (high-pass filter adjust).
   display.UpdateAudioGraphics();                                   // This draws decoder delimiters and CW bandwidth box (red).
@@ -88,7 +89,7 @@ FLASHMEM void CWProcessing::SelectCWOffset() {
 
   button.InputParameterButton("CW Offset Hz", CWOffsets, ConfigData.CWOffset);
 
-  // Now generate the values for the buffer which is used to create the CW tone.  
+  // Now generate the values for the buffer which is used to create the CW tone.
   // The values are discrete because there must be whole cycles.
   sineTone(numCycles[ConfigData.CWOffset]);                   // This is for the CW decoder only.
   cwexciter.writeSineBuffer(numCycles[ConfigData.CWOffset]);  // For the CW exciter only.
@@ -231,7 +232,9 @@ void CWProcessing::SetKeyType() {
   // What to do will depend on the current setting!
   currentKey = ConfigData.keyType;
   // Now the user selects the key type.
-  ConfigData.keyType = SubmenuSelect(keyChoice, ConfigData.keyType);
+
+  //  ConfigData.keyType = SubmenuSelect(keyChoice, ConfigData.keyType);
+  button.InputParameterButton("Key Type", keyChoice, ConfigData.keyType);
   if (currentKey == ConfigData.keyType) return;
 
   // We're switching to a keyer paddle.
@@ -258,6 +261,7 @@ void CWProcessing::SetKeyType() {
   }
   delay(1000);           // This is required to allow GPIOs to settle out.
   keyPressedOn = false;  // Guard against already fired key interrupt.
+  display.UpdateKeyType();
 }
 
 

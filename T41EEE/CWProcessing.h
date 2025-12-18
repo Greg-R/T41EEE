@@ -48,7 +48,7 @@ public:
   bool drewBlackLastLoop{ false };  // indicator square.
   const std::vector<std::string> CWOffsets = { "562.5", "656.5", "750.0", "843.8" };
   const std::vector<std::string> keyChoice = { "Straight Key", "Keyer" };
-  const std::vector<std::string> CWFilter = { "0.8kHz", "1.0kHz", "1.3kHz", "1.8kHz", "2.0kHz", " Off " };
+  const std::vector<std::string> CWFilter = { "0.8kHz", "1.0kHz", "1.3kHz", "1.8kHz", "2.0kHz", " Off" };
   int col = 0;  // Start at lower left
   // charProcessFlag means a character is being decoded.  blankFlag indicates a blank has already been printed.
   bool charProcessFlag, blankFlag;
