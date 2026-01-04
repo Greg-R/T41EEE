@@ -1114,8 +1114,7 @@ void TxCalibrate::RadioCal(int mode, bool refineCal) {
       bands.bands[ConfigData.currentBand].sideband = Sideband::LOWER;  // Calibrate lower sideband for 80M and 40M.
       rxcalibrater.DoReceiveCalibrate(mode, true, refineCal, false);
       txcalibrater.DoXmitCalibrate(mode, true, refineCal, false);
-    } else
-      bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER;
+    }
 
     bands.bands[ConfigData.currentBand].sideband = Sideband::UPPER;
     rxcalibrater.DoReceiveCalibrate(mode, true, refineCal, false);  // Include 80M and 40M due to FT8.
