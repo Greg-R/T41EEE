@@ -44,7 +44,7 @@ private:
   IntervalTimer buttonInterrupts;
   int buttonRead = 0;
   int minPinRead = 1024;
-  int secondaryMenuChoiceMade;
+//  int secondaryMenuChoiceMade;
   bool save_last_frequency = false;  // Make this the default behavior.  Greg KF5N October 16, 2024.
   int directFreqFlag = 0;
   int32_t subMenuMaxOptions = 0;  // Holds the number of submenu options.
