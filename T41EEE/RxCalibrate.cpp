@@ -345,10 +345,10 @@ void RxCalibrate::DoReceiveCalibrate(int calMode, bool radio, bool refine, bool 
   float qOptimal = 0.0;
   std::vector<float32_t> sweepVector(201);
   std::vector<float32_t> sweepVectorValue(201);
-  std::vector<float> sub_vectorAmp = std::vector<float>(21);
-  std::vector<float> sub_vectorPhase = std::vector<float>(21);
-  std::vector<float> sub_vectorAmpResult = std::vector<float>(21);
-  std::vector<float> sub_vectorPhaseResult = std::vector<float>(21);
+  std::vector<float> sub_vectorAmp(21);
+  std::vector<float> sub_vectorPhase(21);
+  std::vector<float> sub_vectorAmpResult(21);
+  std::vector<float> sub_vectorPhaseResult(21);
   int startTimer = 0;  // Used to time display of results.
   bool averageFlag = false;
   std::vector<float>::iterator result;

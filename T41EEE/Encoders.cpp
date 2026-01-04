@@ -233,9 +233,10 @@ float GetEncoderValueLoopFloat(float minValue, float maxValue, float startValue,
   if (colorRed) tft.setTextColor(RA8875_RED, RA8875_BLACK);  // Make value red if active.
   if (abs(startValue) > 0) {
     tft.print(startValue, precision);
-  } else {
-    if (0 >= increment and increment < 0.1) tft.print(startValue, precision);
-    else tft.print(startValue, precision);
+  } else {  // This needs further work in some display situations. Leave commented for now.
+    //  if (0 >= increment and increment < 0.1) tft.print(startValue, precision);
+    //  else tft.print(startValue, precision);
+    tft.print(startValue, precision);
   }
 
   while (true) {
@@ -246,7 +247,7 @@ float GetEncoderValueLoopFloat(float minValue, float maxValue, float startValue,
       else if (currentValue > maxValue)
         currentValue = maxValue;
       if (left) tft.setCursor(0, 1);
-      else tft.setCursor(290, 1);         //// 260
+      else tft.setCursor(290, 1);          //// 260
       tft.print("                     ");  // Erase old
       if (left) tft.setCursor(0, 1);
       else tft.setCursor(290, 1);  //// 260

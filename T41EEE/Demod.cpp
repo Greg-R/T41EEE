@@ -41,9 +41,9 @@ void AMDecodeSAM() {
   const float32_t omega_max = TWO_PI * ConfigData.pll_fmax * 1 / 24000;
   const float32_t tauR = 0.02;  // original 0.02;
   const float32_t tauI = 1.4;   // original 1.4;
-  float32_t mtauR = exp(-1 / 24000 * tauR);
+  float32_t mtauR = exp(-1.0 / 24000.0 * tauR);
   float32_t onem_mtauR = 1.0 - mtauR;
-  float32_t mtauI = exp(-1 / 24000 * tauI);
+  float32_t mtauI = exp(-1.0 / 24000.0 * tauI);
   float32_t onem_mtauI = 1.0 - mtauI;
   uint8_t fade_leveler = 1;
   float32_t Sin, Cos;

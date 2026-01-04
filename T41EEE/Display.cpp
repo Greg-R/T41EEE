@@ -1453,7 +1453,7 @@ void Display::DrawBandWidthIndicatorBar()  // AFP 10-30-22
   int32_t Zoom1Offset = 0.0;
   int32_t cwOffsetPixels = 0;
   int32_t cwOffsets[4]{ 563, 657, 750, 844 };  // Rounded to nearest Hz.
-  float hz_per_pixel = 0.0;
+  float hz_per_pixel{1.0};
   int32_t hpf_offset{ 0 };
 
   int32_t cwFilterBW[5]{ 800, 1000, 1300, 1800, 2000 };  // CW filter bandwidths.
@@ -1483,6 +1483,10 @@ void Display::DrawBandWidthIndicatorBar()  // AFP 10-30-22
       hz_per_pixel = 23.4375;
       Zoom1Offset = 0;
       break;
+
+      default:
+      hz_per_pixel = 1.0;
+      Zoom1Offset = 0;
   }
 
   // Calculate the offset due to the high-pass filter.
