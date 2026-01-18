@@ -816,7 +816,7 @@ void KeyTipOn() {
 
 
 /*****
-  Purpose: CW Key interrupt service routine (ring) //AFP 09-01-22
+  Purpose: CW Key interrupt service routine (ring)
 
   Parameter list: void
 
@@ -1052,7 +1052,10 @@ FLASHMEM void setup() {
 
   // Don't start up if key/paddle or PTT is closed.  Warn the user to resolve and restart.
   isTransmitterKeyed();
-  keyPressedOn = false;  // Ignore key interrupts which may happen due to start-up transients.
+  // Ignore key interrupts which may happen due to start-up transients.
+  keyPressedOn = false;
+  keyerFirstDit = false;
+  keyerFirstDah = false;
 }
 //============================================================== END setup() =================================================================
 
@@ -1260,7 +1263,7 @@ void loop() {
       while (millis() - cwTimer <= ConfigData.cwTransmitDelay) {
         // Keyer Dit
         if (digitalRead(ConfigData.paddleDit) == LOW or keyerFirstDit) {
-
+Serial.printf("keyerDit\n");
           cwexciter.CW_ExciterIQData(CW_SHAPING_RISE);
           for (cwBlockIndex = 0; cwBlockIndex < transmitDitUnshapedBlocks; cwBlockIndex++) {
             cwexciter.CW_ExciterIQData(CW_SHAPING_NONE);
@@ -1276,7 +1279,7 @@ void loop() {
           keyerFirstDit = false;
           //Keyer DAH
         } else if (digitalRead(ConfigData.paddleDah) == LOW or keyerFirstDah) {
-
+Serial.printf("keyerDah\n");
           cwexciter.CW_ExciterIQData(CW_SHAPING_RISE);
           for (cwBlockIndex = 0; cwBlockIndex < transmitDahUnshapedBlocks; cwBlockIndex++) {
             cwexciter.CW_ExciterIQData(CW_SHAPING_NONE);
