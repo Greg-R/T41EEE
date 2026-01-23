@@ -447,7 +447,8 @@ void CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
     default:  // Cancel
       break;
   }
-  eeprom.ConfigDataWrite();
+  // Don't write to EEPROM if Morse decode adjust is in progress.
+  if(not morseDecodeAdjustFlag) eeprom.ConfigDataWrite();
 }
 
 
