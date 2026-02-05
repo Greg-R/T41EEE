@@ -414,13 +414,14 @@ void Button::ButtonMenuDecrease() {
     void
 *****/
 void Button::ButtonBandIncrease() {
-  int tempIndex;
-  tempIndex = ConfigData.currentBandA;
-  if (ConfigData.currentBand == NUMBER_OF_BANDS) {  // Incremented too far?
-    ConfigData.currentBand = 0;                     // Yep. Roll to list front.
-  }
+//  int tempIndex;
+//  tempIndex = ConfigData.currentBandA;
+//  if (ConfigData.currentBand == NUMBER_OF_BANDS) {  // Incremented too far?
+//    ConfigData.currentBand = 0;                     // Yep. Roll to list front.
+//  }
   switch (ConfigData.activeVFO) {
     case VFO_A:
+    /*
       tempIndex = ConfigData.currentBandA;
       if (save_last_frequency == 1) {
         ConfigData.lastFrequencies[tempIndex][VFO_A] = TxRxFreq;
@@ -436,15 +437,19 @@ void Button::ButtonBandIncrease() {
           TxRxFreqOld = TxRxFreq;
         }
       }
+      */
+      // Increment the current band.
       ConfigData.currentBandA++;
       if (ConfigData.currentBandA == NUMBER_OF_BANDS) {  // Incremented too far?
         ConfigData.currentBandA = 0;                     // Yep. Roll to list front.
       }
       ConfigData.currentBand = ConfigData.currentBandA;
-      ConfigData.centerFreq = TxRxFreq = ConfigData.currentFreqA = ConfigData.lastFrequencies[ConfigData.currentBandA][VFO_A] + NCOFreq;
+      // Set to the last frequency used in the band.
+      ConfigData.centerFreq = TxRxFreq = ConfigData.currentFreqA = ConfigData.lastFrequencies[ConfigData.currentBandA][VFO_A]; //// + NCOFreq;
       break;
 
     case VFO_B:
+    /*
       tempIndex = ConfigData.currentBandB;
       if (save_last_frequency == 1) {
         ConfigData.lastFrequencies[tempIndex][VFO_B] = TxRxFreq;
@@ -460,19 +465,22 @@ void Button::ButtonBandIncrease() {
           TxRxFreqOld = TxRxFreq;
         }
       }
+      */
+      // Increment the current band.
       ConfigData.currentBandB++;
       if (ConfigData.currentBandB == NUMBER_OF_BANDS) {  // Incremented too far?
         ConfigData.currentBandB = 0;                     // Yep. Roll to list front.
       }
       ConfigData.currentBand = ConfigData.currentBandB;
-      ConfigData.centerFreq = TxRxFreq = ConfigData.currentFreqB = ConfigData.lastFrequencies[ConfigData.currentBandB][VFO_B] + NCOFreq;
+      // Set to the last frequency used in the band.
+      ConfigData.centerFreq = TxRxFreq = ConfigData.currentFreqB = ConfigData.lastFrequencies[ConfigData.currentBandB][VFO_B]; // + NCOFreq;
       break;
 
 //    case VFO_SPLIT:
 //      DoSplitVFO();
 //      break;
   }
-  directFreqFlag = 0;
+//  directFreqFlag = 0;
   ExecuteModeChange();
 }
 
@@ -487,7 +495,7 @@ void Button::ButtonBandIncrease() {
     void
 *****/
 void Button::ButtonBandDecrease() {
-  int tempIndex = ConfigData.currentBand;
+//  int tempIndex = ConfigData.currentBand;
 
   ConfigData.currentBand--;  // decrement band index
 
@@ -497,6 +505,7 @@ void Button::ButtonBandDecrease() {
 
   switch (ConfigData.activeVFO) {
     case VFO_A:
+    /*
       if (save_last_frequency == 1) {
         ConfigData.lastFrequencies[tempIndex][VFO_A] = TxRxFreq;
       } else {
@@ -512,6 +521,7 @@ void Button::ButtonBandDecrease() {
           TxRxFreqOld = TxRxFreq;
         }
       }
+      */
       ConfigData.currentBandA--;
       if (ConfigData.currentBandA == NUMBER_OF_BANDS) {  // decremented too far?
         ConfigData.currentBandA = 0;                     // Yep. Roll to list front.
@@ -520,10 +530,11 @@ void Button::ButtonBandDecrease() {
         ConfigData.currentBandA = NUMBER_OF_BANDS - 1;  // Yep. Roll to list front.
       }
       ConfigData.currentBand = ConfigData.currentBandA;
-      ConfigData.centerFreq = TxRxFreq = ConfigData.currentFreqA = ConfigData.lastFrequencies[ConfigData.currentBandA][VFO_A] + NCOFreq;
+      ConfigData.centerFreq = TxRxFreq = ConfigData.currentFreqA = ConfigData.lastFrequencies[ConfigData.currentBandA][VFO_A]; // + NCOFreq;
       break;
 
     case VFO_B:
+    /*
       if (save_last_frequency == 1) {
         ConfigData.lastFrequencies[tempIndex][VFO_B] = TxRxFreq;
       } else {
@@ -539,6 +550,7 @@ void Button::ButtonBandDecrease() {
           TxRxFreqOld = TxRxFreq;
         }
       }
+      */
       ConfigData.currentBandB--;
       if (ConfigData.currentBandB == NUMBER_OF_BANDS) {  // Incremented too far?
         ConfigData.currentBandB = 0;                     // Yep. Roll to list front.
@@ -547,14 +559,14 @@ void Button::ButtonBandDecrease() {
         ConfigData.currentBandB = NUMBER_OF_BANDS - 1;  // Yep. Roll to list front.
       }
       ConfigData.currentBand = ConfigData.currentBandB;
-      ConfigData.centerFreq = TxRxFreq = ConfigData.currentFreqB = ConfigData.lastFrequencies[ConfigData.currentBandB][VFO_B] + NCOFreq;
+      ConfigData.centerFreq = TxRxFreq = ConfigData.currentFreqB = ConfigData.lastFrequencies[ConfigData.currentBandB][VFO_B]; // + NCOFreq;
       break;
 
 //    case VFO_SPLIT:
 //      DoSplitVFO();
 //      break;
   }
-  directFreqFlag = 0;
+//  directFreqFlag = 0;
   ExecuteModeChange();
 }
 
@@ -570,14 +582,15 @@ void Button::ButtonBandDecrease() {
     void
 *****/
 void Button::BandSet(int band) {
-  int tempIndex;
-  tempIndex = ConfigData.currentBandA;
-  if (ConfigData.currentBand == NUMBER_OF_BANDS) {  // Incremented too far?
-    ConfigData.currentBand = 0;                     // Yep. Roll to list front.
-  }
+//  int tempIndex;
+//  tempIndex = ConfigData.currentBandA;
+//  if (ConfigData.currentBand == NUMBER_OF_BANDS) {  // Incremented too far?
+//    ConfigData.currentBand = 0;                     // Yep. Roll to list front.
+//  }
   NCOFreq = 0;
   switch (ConfigData.activeVFO) {
     case VFO_A:
+    /*
       tempIndex = ConfigData.currentBandA;
       if (save_last_frequency == 1) {
         ConfigData.lastFrequencies[tempIndex][VFO_A] = TxRxFreq;
@@ -593,15 +606,17 @@ void Button::BandSet(int band) {
           TxRxFreqOld = TxRxFreq;
         }
       }
+      */
       ConfigData.currentBandA = band;
       if (ConfigData.currentBandA == NUMBER_OF_BANDS) {  // Incremented too far?
         ConfigData.currentBandA = 0;                     // Yep. Roll to list front.
       }
       ConfigData.currentBand = ConfigData.currentBandA;
-      ConfigData.centerFreq = TxRxFreq = ConfigData.currentFreqA = ConfigData.lastFrequencies[ConfigData.currentBandA][VFO_A] + NCOFreq;
+      ConfigData.centerFreq = TxRxFreq = ConfigData.currentFreqA = ConfigData.lastFrequencies[ConfigData.currentBandA][VFO_A]; // + NCOFreq;
       break;
 
     case VFO_B:
+    /*
       tempIndex = ConfigData.currentBandB;
       if (save_last_frequency == 1) {
         ConfigData.lastFrequencies[tempIndex][VFO_B] = TxRxFreq;
@@ -617,19 +632,20 @@ void Button::BandSet(int band) {
           TxRxFreqOld = TxRxFreq;
         }
       }
+      */
       ConfigData.currentBandB = band;
       if (ConfigData.currentBandB == NUMBER_OF_BANDS) {  // Incremented too far?
         ConfigData.currentBandB = 0;                     // Yep. Roll to list front.
       }
       ConfigData.currentBand = ConfigData.currentBandB;
-      ConfigData.centerFreq = TxRxFreq = ConfigData.currentFreqB = ConfigData.lastFrequencies[ConfigData.currentBandB][VFO_B] + NCOFreq;
+      ConfigData.centerFreq = TxRxFreq = ConfigData.currentFreqB = ConfigData.lastFrequencies[ConfigData.currentBandB][VFO_B]; // + NCOFreq;
       break;
 
 //    case VFO_SPLIT:
 //      DoSplitVFO();
 //      break;
   }
-  directFreqFlag = 0;
+//  directFreqFlag = 0;
 }
 
 
@@ -1052,7 +1068,7 @@ void Button::ButtonFrequencyEntry() {
     TxRxFreq = enteredF;
   }
   NCOFreq = 0;
-  directFreqFlag = 1;
+//  directFreqFlag = 1;
   ConfigData.centerFreq = TxRxFreq;
   centerTuneFlag = 1;  // Put back in so tuning bar is refreshed.  KF5N July 31, 2023
 //  SetFreq();           // Used here instead of centerTuneFlag.  KF5N July 22, 2023
