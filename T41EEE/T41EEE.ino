@@ -990,7 +990,7 @@ FLASHMEM void setup() {
 
   // Configure and check SD card.
   ConfigData.sdCardPresent = eeprom.InitializeSDCard();  // Initialize mandatory SD card.
-  ConfigData.sdCardPresent = SDPresentCheck();           // JJP 7/18/23
+//  ConfigData.sdCardPresent = SDPresentCheck();           // Redundant.  Removed Feb 2026.
 
   // GPIOs should be configured at this point.  Make sure transmitter is disabled.
   enableTransmitter(false);

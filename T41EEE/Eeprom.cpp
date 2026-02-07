@@ -475,7 +475,7 @@ int Eeprom::InitializeSDCard() {
   tft.setCursor(100, 240);
   if (!SD.begin(chipSelect)) {
     tft.print("SD card cannot be initialized.");
-    delay(2000L);  // Given them time to read it.
+    delay(2000);  // Given them time to read it.
     return 0;
   }
 

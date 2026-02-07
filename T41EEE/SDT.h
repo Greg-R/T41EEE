@@ -956,7 +956,7 @@ void ResetFlipFlops();
 void ResetHistograms();
 void ResetTuning();  // AFP 10-11-22
 void RFOptions();
-int SDPresentCheck();
+//int SDPresentCheck();
 void SaveAnalogSwitchValues();
 void SelectCWFilter();  // AFP 10-18-22
 void SelectCWOffset();  // KF5N December 13, 2023

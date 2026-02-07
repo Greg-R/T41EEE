@@ -547,7 +547,7 @@ void SaveAnalogSwitchValues() {
 
   Return value;
     int               0 = SD not initialized, 1 = has data
-*****/
+*****
 int SDPresentCheck() {
   if (!SD.begin(chipSelect)) {
     Serial.print("No SD card or cannot be initialized.");
@@ -556,6 +556,7 @@ int SDPresentCheck() {
     tft.setCursor(20, 300);
     tft.print("No SD card or not initialized.");
     tft.setForegroundColor(RA8875_WHITE);
+    delay(5000);
     return 0;
   }
   // open the file.
@@ -567,7 +568,7 @@ int SDPresentCheck() {
     return 0;
   }
 }
-
+*/
 
 /*****
   Purpose: Initialize power coefficients based on transmit power level and calibration factor.
