@@ -1086,7 +1086,7 @@ void loop() {
   bool cwKeyDown;
   unsigned long cwBlockIndex;
 
-  display.DrawBandWidthIndicatorBar();
+//  display.DrawBandWidthIndicatorBar();
 
   //  Radio state detection before entering the primary radio loop.
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::SSB_MODE and digitalRead(PTT) == HIGH) radioState = RadioState::SSB_RECEIVE_STATE;

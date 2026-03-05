@@ -93,6 +93,17 @@ void Display::ShowSpectrum(bool drawSpectrum) {
   bool plotInProgress = false;
   bool blocksAvailable = false;
 
+  tft.writeTo(L2);
+
+// Erase the old spectrums on layer 2.
+tft.fillRect(SPECTRUM_LEFT_X + 2, SPECTRUM_TOP_Y, MAX_WATERFALL_WIDTH + 2, SPECTRUM_HEIGHT, RA8875_BLACK);  // RF spectrum
+tft.fillRect(540, 130, 241, 116, RA8875_BLACK);  // Audio spectrum
+
+// This means only layer 1 is visible.
+tft.layerEffect(LAYER1);
+
+  display.DrawBandWidthIndicatorBar();
+
   for (x1 = 1; x1 < 511; x1++) {  // Bins on the ends are junk, don't plot.
 
     // Quit and start transmitter if key is pressed.
@@ -193,8 +204,9 @@ void Display::ShowSpectrum(bool drawSpectrum) {
     // Erase the old RF spectrum, and draw the new RF spectrum.
     // Note the FFT bins are offset by x = 3 in the display.
     // Don't overwrite or erase the center line.
+//      tft.writeTo(L2);
     if (drawSpectrum and x1 != (centerLine - 3)) {
-      tft.drawLine(x1 + 3, y1_old, x1 + 3, y2_old, RA8875_BLACK);   // Erase old...
+//      tft.drawLine(x1 + 3, y1_old, x1 + 3, y2_old, RA8875_BLACK);   // Erase old...
       tft.drawLine(x1 + 3, y1_new, x1 + 3, y2_new, RA8875_YELLOW);  // Draw new
     }
 
@@ -212,7 +224,7 @@ void Display::ShowSpectrum(bool drawSpectrum) {
                                                                                                 //                                                                                                  ////        return;
                                                                                                 //      } else {                                                                                    //AFP 09-01-22
       if (audioYPixelold[x1] > CLIP_AUDIO_PEAK) audioYPixelold[x1] = CLIP_AUDIO_PEAK;           // audioSpectrumHeight = 118
-      tft.drawFastVLine(532 + x1, 245 - audioYPixelold[x1], audioYPixelold[x1], RA8875_BLACK);  // Erase
+////      tft.drawFastVLine(532 + x1, 245 - audioYPixelold[x1], audioYPixelold[x1], RA8875_BLACK);  // Erase
       if (audioYPixel[x1] != 0) {
         if (audioYPixel[x1] > CLIP_AUDIO_PEAK)  // audioSpectrumHeight = 118
           audioYPixel[x1] = CLIP_AUDIO_PEAK;
@@ -228,8 +240,16 @@ void Display::ShowSpectrum(bool drawSpectrum) {
     if (test1 < 0) test1 = 0;
     if (test1 > 116) test1 = 116;
     waterfall[x1] = gradient[test1];  // Try to put pixel values in middle of gradient array.  KF5N
-    tft.writeTo(L1);
+////    tft.writeTo(L1);
   }  // End for(...) Draw MAX_WATERFALL_WIDTH spectral points
+
+//  display.DrawBandWidthIndicatorBar();
+
+  // Move spectrums from layer 2 to layer 1.
+  tft.BTE_move(3, 101, MAX_WATERFALL_WIDTH-2, 247-101+1, 3, 101, 2, 1);  // RF spectrum
+  tft.BTE_move(BAND_INDICATOR_X - 8, 130, 253, 116, BAND_INDICATOR_X - 8, 130, 2, 1);  // Audio spectrum
+
+tft.writeTo(L1);
 
   // Use the Block Transfer Engine (BTE) to move waterfall down a line
   tft.BTE_move(WATERFALL_LEFT_X, FIRST_WATERFALL_LINE, MAX_WATERFALL_WIDTH, MAX_WATERFALL_ROWS - 2, WATERFALL_LEFT_X, FIRST_WATERFALL_LINE + 1, 1, 2);
@@ -1492,7 +1512,7 @@ void Display::DrawBandWidthIndicatorBar()  // AFP 10-30-22
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER) newCursorPosition = static_cast<int>(NCOFreq / hz_per_pixel) + Zoom1Offset + hpf_offset;  // More accurate tuning bar position.  KF5N May 17, 2024
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER or bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_AM or bands.bands[ConfigData.currentBand].sideband == Sideband::BOTH_SAM) newCursorPosition = static_cast<int>(NCOFreq / hz_per_pixel) + Zoom1Offset;
 
-  tft.writeTo(L2);  // Write graphics to Layer 2.
+//  tft.writeTo(L2);  // Write graphics to Layer 2.
 
   if (bands.bands[ConfigData.currentBand].sideband == Sideband::LOWER or bands.bands[ConfigData.currentBand].sideband == Sideband::UPPER)
     filterWidth = static_cast<int32_t>((bands.bands[ConfigData.currentBand].FHiCut - bands.bands[ConfigData.currentBand].FLoCut) / hz_per_pixel);  // AFP 10-30-22
@@ -1565,7 +1585,7 @@ void Display::DrawBandWidthIndicatorBar()  // AFP 10-30-22
   oldFilterWidth = filterWidth;
   oldCursorPosition = newCursorPosition;
   old_hpf_offset = hpf_offset;
-  tft.writeTo(L1);  //AFP 03-27-22 Layers
+//  tft.writeTo(L1);  //AFP 03-27-22 Layers
 }
 
 
