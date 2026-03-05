@@ -1266,7 +1266,7 @@ void Display::UpdateAudioGraphics() {
     }
   }
 
-  DrawBandWidthIndicatorBar();  // This method has to be run BEFORE UpdateAudioGraphics().  It can cause erasure.
+//  DrawBandWidthIndicatorBar();  // This method has to be run BEFORE UpdateAudioGraphics().  It can cause erasure.
   ShowBandwidth();
   tft.writeTo(L1);
 }
