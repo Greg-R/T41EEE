@@ -466,7 +466,9 @@ void MorseCharacterDisplay(char currentLetter) {
   tft.setFontScale((enum RA8875tsize)1);
   tft.setTextColor(RA8875_WHITE);
   tft.setCursor(CW_TEXT_START_X, CW_TEXT_START_Y);
-  tft.print(decodeBuffer);
+  tft.writeTo(L1);
+//  tft.print(decodeBuffer);
+//  tft.writeTo(L2);
 }
 
 

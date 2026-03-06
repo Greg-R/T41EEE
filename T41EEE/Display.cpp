@@ -96,8 +96,8 @@ void Display::ShowSpectrum(bool drawSpectrum) {
   tft.writeTo(L2);
 
 // Erase the old spectrums on layer 2.
-tft.fillRect(SPECTRUM_LEFT_X + 2, SPECTRUM_TOP_Y, MAX_WATERFALL_WIDTH + 2, SPECTRUM_HEIGHT, RA8875_BLACK);  // RF spectrum
-tft.fillRect(540, 130, 241, 116, RA8875_BLACK);  // Audio spectrum
+tft.fillRect(3, 120, 512, 129, RA8875_BLACK);  // RF spectrum
+tft.fillRect(530, 130, 250, 116, RA8875_BLACK);  // Audio spectrum
 
 // This means only layer 1 is visible.
 tft.layerEffect(LAYER1);
@@ -245,9 +245,13 @@ display.DrawBandWidthIndicatorBar();
   }  // End for(...) Draw MAX_WATERFALL_WIDTH spectral points
 
 //  display.DrawBandWidthIndicatorBar();
+    tft.drawFastVLine(centerLine, SPECTRUM_TOP_Y, h + 20, RA8875_GREEN);    // Draws centerline on spectrum display.
 
+//tft.writeTo(L1);
+//tft.fillRect(3, 120, 512, 129, RA8875_BLACK);  // RF spectrum
+//tft.writeTo(L2);
   // Move spectrums from layer 2 to layer 1.
-  tft.BTE_move(3, 101, MAX_WATERFALL_WIDTH-2, 247-101+1, 3, 101, 2, 1);  // RF spectrum
+  tft.BTE_move(3, 120, 512, 129, 3, 120, 2, 1);  // RF spectrum
   tft.BTE_move(BAND_INDICATOR_X - 8, 130, 253, 116, BAND_INDICATOR_X - 8, 130, 2, 1);  // Audio spectrum
 
 tft.writeTo(L1);
@@ -265,6 +269,7 @@ tft.writeTo(L1);
   // Then write new row data into the missing top row to get a scroll effect using display hardware, not the CPU.
   tft.writeRect(WATERFALL_LEFT_X, FIRST_WATERFALL_LINE, MAX_WATERFALL_WIDTH, 1, waterfall);
 
+
   // Manage audio spectral display graphics.  Keep the spectrum within the viewable area.
   if (AudioH_max_box > 30) {  // HB. Adjust rfGainAllBands 15 and 13 to alter to move target base up and down. UPPERPIXTARGET = 15
     audioFFToffset = audioFFToffset - 1;
@@ -272,7 +277,6 @@ tft.writeTo(L1);
   if (AudioH_max_box < 28) {  // LOWERPIXTARGET = 13
     audioFFToffset = audioFFToffset + 1;
   }
-
 }  // End ShowSpectrum()
 
 
@@ -309,6 +313,9 @@ void Display::ShowRFGain() {
 *****/
 void Display::ShowBandwidth() {
   tft.writeTo(L1);  // Write to layer 1.
+
+Serial.printf("ShowBandwidth\n");
+
   tft.setFontScale((enum RA8875tsize)0);
   tft.setTextColor(RA8875_LIGHT_GREY, RA8875_BLACK);
 
@@ -427,10 +434,10 @@ void Display::ShowSpectrumdBScale() {
 void Display::DrawSpectrumDisplayContainer() {
   tft.writeTo(L1);  // Draw on L1 so it won't interfere with the blue tuning bar.  Don't let the spectrum overwrite the X position in ShowSpectrum().
   if (calOnFlag)
-    tft.drawRect(SPECTRUM_LEFT_X - 1, SPECTRUM_TOP_Y, MAX_WATERFALL_WIDTH + 2, 362, RA8875_YELLOW);  // Spectrum box for calibration.
+    tft.drawRect(2, SPECTRUM_TOP_Y, MAX_WATERFALL_WIDTH + 2, 362, RA8875_YELLOW);  // Spectrum box for calibration.
   else {
-    tft.drawRect(SPECTRUM_LEFT_X - 1, SPECTRUM_TOP_Y, MAX_WATERFALL_WIDTH + 2, 362, RA8875_BLACK);               // Erase spectrum box for calibration.
-    tft.drawRect(SPECTRUM_LEFT_X - 1, SPECTRUM_TOP_Y, MAX_WATERFALL_WIDTH + 2, SPECTRUM_HEIGHT, RA8875_YELLOW);  // Spectrum box.  SPECTRUM_HEIGHT = 150
+    tft.drawRect(2, 100, 514, 362, RA8875_BLACK);               // Erase spectrum box for calibration.
+    tft.drawRect(2, 100, 514, 150, RA8875_YELLOW);  // Spectrum box.  SPECTRUM_HEIGHT = 150
     tft.drawFastVLine(centerLine, SPECTRUM_TOP_Y, h + 20, RA8875_GREEN);                                         // Draws centerline on spectrum display.
   }
 }
@@ -793,9 +800,7 @@ void Display::SwitchVFO() {
 *****/
 void Display::ShowFrequency() {
   char freqBuffer[15] = "              ";  // Initialize to blanks.
-
-Serial.printf("TxRxFreq = %d\n", TxRxFreq);
-
+tft.writeTo(L1);
   if (ConfigData.activeVFO == VFO_A) {     // Needed for edge checking
     ConfigData.currentBand = ConfigData.currentBandA;
   } else {
@@ -813,9 +818,7 @@ Serial.printf("TxRxFreq = %d\n", TxRxFreq);
     }
     tft.fillRect(0, FREQUENCY_Y - 8, tft.getFontWidth() * 10, 34, RA8875_BLACK);  // Erase VFOA frequency.
     tft.setCursor(0, FREQUENCY_Y - 18);                                           // To adjust for Greg's font change jjp 7/14/23
-    Serial.printf("freqBuffer = %s\n", freqBuffer);
     tft.print(freqBuffer);                                                        // Show VFO_A
-    delay(1000);
   } else {                                                                        // Update VFO_B.
     FormatFrequency(TxRxFreq, freqBuffer);
     tft.setFontScale(3, 2);
@@ -829,6 +832,7 @@ Serial.printf("TxRxFreq = %d\n", TxRxFreq);
     tft.print(freqBuffer);
   }
   tft.setFontDefault();
+  tft.writeTo(L2);
 }
 
 

@@ -341,7 +341,7 @@ void EncoderFineTune() {
   fineTuneEncoderMove = 0L;
   TxRxFreq = ConfigData.centerFreq + NCOFreq;  // KF5N
 
-  audioGraphicsFlag = true;
+//  audioGraphicsFlag = true;
 }
 #else
 /*****
