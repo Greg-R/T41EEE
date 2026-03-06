@@ -1345,6 +1345,7 @@ Serial.printf("keyerDah\n");
 
   if (audioGraphicsFlag) {
   //  display.UpdateAudioGraphics();
+  display.ShowBandwidth();
 
     audioGraphicsFlag = false;
   }

@@ -102,7 +102,8 @@ tft.fillRect(540, 130, 241, 116, RA8875_BLACK);  // Audio spectrum
 // This means only layer 1 is visible.
 tft.layerEffect(LAYER1);
 
-  display.DrawBandWidthIndicatorBar();
+display.UpdateAudioGraphics();
+display.DrawBandWidthIndicatorBar();
 
   for (x1 = 1; x1 < 511; x1++) {  // Bins on the ends are junk, don't plot.
 
@@ -223,7 +224,7 @@ tft.layerEffect(LAYER1);
                                                                                                 //      if (keyPressedOn == true) {                                                                 //AFP 09-01-22
                                                                                                 //                                                                                                  ////        return;
                                                                                                 //      } else {                                                                                    //AFP 09-01-22
-      if (audioYPixelold[x1] > CLIP_AUDIO_PEAK) audioYPixelold[x1] = CLIP_AUDIO_PEAK;           // audioSpectrumHeight = 118
+////      if (audioYPixelold[x1] > CLIP_AUDIO_PEAK) audioYPixelold[x1] = CLIP_AUDIO_PEAK;           // audioSpectrumHeight = 118
 ////      tft.drawFastVLine(532 + x1, 245 - audioYPixelold[x1], audioYPixelold[x1], RA8875_BLACK);  // Erase
       if (audioYPixel[x1] != 0) {
         if (audioYPixel[x1] > CLIP_AUDIO_PEAK)  // audioSpectrumHeight = 118
@@ -307,7 +308,7 @@ void Display::ShowRFGain() {
     void
 *****/
 void Display::ShowBandwidth() {
-  tft.writeTo(L2);  // Write to layer 2.
+  tft.writeTo(L1);  // Write to layer 1.
   tft.setFontScale((enum RA8875tsize)0);
   tft.setTextColor(RA8875_LIGHT_GREY, RA8875_BLACK);
 
@@ -331,7 +332,7 @@ void Display::ShowBandwidth() {
     tft.print("kHz");
   }
   tft.setTextColor(RA8875_WHITE, RA8875_BLACK);  // set text color to white for other print routines not to get confused ;-)
-  tft.writeTo(L1);
+//  tft.writeTo(L1);
 }
 
 
@@ -792,6 +793,9 @@ void Display::SwitchVFO() {
 *****/
 void Display::ShowFrequency() {
   char freqBuffer[15] = "              ";  // Initialize to blanks.
+
+Serial.printf("TxRxFreq = %d\n", TxRxFreq);
+
   if (ConfigData.activeVFO == VFO_A) {     // Needed for edge checking
     ConfigData.currentBand = ConfigData.currentBandA;
   } else {
@@ -809,7 +813,9 @@ void Display::ShowFrequency() {
     }
     tft.fillRect(0, FREQUENCY_Y - 8, tft.getFontWidth() * 10, 34, RA8875_BLACK);  // Erase VFOA frequency.
     tft.setCursor(0, FREQUENCY_Y - 18);                                           // To adjust for Greg's font change jjp 7/14/23
+    Serial.printf("freqBuffer = %s\n", freqBuffer);
     tft.print(freqBuffer);                                                        // Show VFO_A
+    delay(1000);
   } else {                                                                        // Update VFO_B.
     FormatFrequency(TxRxFreq, freqBuffer);
     tft.setFontScale(3, 2);
@@ -1205,8 +1211,8 @@ void Display::UpdateAudioGraphics() {
   float CWFilterPosition = 0.0;
 
   // Update text and graphics.  Use a method of clearing everything, and then add only what is needed.
-  tft.writeTo(L2);    // This has to be written to L2 or it will be erased by the audio spectrum eraser.
-  tft.clearMemory();  // Deletes audio filter delimiter bars.
+//  tft.writeTo(L2);    // This has to be written to L2 or it will be erased by the audio spectrum eraser.
+//  tft.clearMemory();  // Deletes audio filter delimiter bars.
 
   //  Calculate position and draw filter delimiters in audio spectrum box.
   int filterLoPositionMarker{ 0 };
@@ -1287,8 +1293,8 @@ void Display::UpdateAudioGraphics() {
   }
 
 //  DrawBandWidthIndicatorBar();  // This method has to be run BEFORE UpdateAudioGraphics().  It can cause erasure.
-  ShowBandwidth();
-  tft.writeTo(L1);
+//  ShowBandwidth();
+//  tft.writeTo(L1);
 }
 
 

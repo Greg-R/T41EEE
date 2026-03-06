@@ -315,7 +315,7 @@ void EncoderFineTune() {
   }
 
   NCOFreq = NCOFreq + ConfigData.fineTuneStep * fineTuneEncoderMove;  // Increment NCOFreq per encoder movement.
-  centerTuneFlag = 1;                                                 // This is used in ReceiveDSP.cpp.  Greg KF5N May 16, 2024
+  centerTuneFlag = true;                                              // This is used in ReceiveDSP.cpp.  Greg KF5N May 16, 2024
   // ============  AFP 10-28-22
   if (ConfigData.activeVFO == VFO_A) {
     ConfigData.currentFreqA = ConfigData.centerFreq + NCOFreq;  //AFP 10-05-22

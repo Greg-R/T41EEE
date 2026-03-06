@@ -47,7 +47,7 @@ bool ReceiveDSP::ProcessIQData() {
 
     // Set frequency here only to minimize interruption to signal stream during tuning.
     // This code was unnecessary in the revised tuning scheme.  KF5N July 22, 2023
-    if (centerTuneFlag == 1) {  //  This flag is set by EncoderFineTune() and also by Direct Freq Entry.
+    if (centerTuneFlag) {  //  This flag is set by EncoderFineTune() and also by Direct Freq Entry.
 //      display.DrawBandWidthIndicatorBar();
       display.ShowFrequency();
     }                    //AFP 10-04-22
