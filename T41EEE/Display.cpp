@@ -104,6 +104,7 @@ tft.layerEffect(LAYER1);
 
 display.UpdateAudioGraphics();
 display.DrawBandWidthIndicatorBar();
+//display.ShowFrequency();
 
   for (x1 = 1; x1 < 511; x1++) {  // Bins on the ends are junk, don't plot.
 
