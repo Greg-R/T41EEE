@@ -167,7 +167,7 @@ display.DrawBandWidthIndicatorBar();
     EncoderCenterTune();  //Moved the tuning encoder to reduce lag times and interference during tuning.
 
     if (not plotInProgress) {
-      delayMicroseconds(100);  // WOW we have to delay to allow the data to catch up!
+//      delayMicroseconds(100);  // WOW we have to delay to allow the data to catch up!
       continue;                // We are not plotting, so go to the next iteration.  Skip the following plotting stuff.
     }
 
@@ -250,7 +250,8 @@ display.DrawBandWidthIndicatorBar();
 //tft.writeTo(L1);
 //tft.fillRect(3, 120, 512, 129, RA8875_BLACK);  // RF spectrum
 //tft.writeTo(L2);
-  // Move spectrums from layer 2 to layer 1.
+  // Move spectrums from layer 2 to layer 1.  This overwrites the previously displayed spectrum.
+//if(x1 == 511)
   tft.BTE_move(3, 120, 512, 129, 3, 120, 2, 1);  // RF spectrum
   tft.BTE_move(BAND_INDICATOR_X - 8, 130, 253, 116, BAND_INDICATOR_X - 8, 130, 2, 1);  // Audio spectrum
 

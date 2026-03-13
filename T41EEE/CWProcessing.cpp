@@ -452,23 +452,15 @@ void MorseCharacterClear(void) {
     void
 *****/
 void MorseCharacterDisplay(char currentLetter) {
-  if (col < MAX_DECODE_CHARS) {  // Start scrolling??
-    decodeBuffer[col] = currentLetter;
-    col++;
-    decodeBuffer[col] = '\0';  // Make is a string
-  } else {
-    //DB2OO, 25-AUG-23: use memmove instead of memcpy(), to avoid the warning
-    memmove(decodeBuffer, &decodeBuffer[1], MAX_DECODE_CHARS - 1);  // Slide array down 1 character.
-    decodeBuffer[col - 1] = currentLetter;                          // Add to end
-    decodeBuffer[col] = '\0';                                       // Make is a string
-  }
-  tft.fillRect(CW_TEXT_START_X, CW_TEXT_START_Y, CW_MESSAGE_WIDTH, CW_MESSAGE_HEIGHT * 2, RA8875_BLACK);
+
   tft.setFontScale((enum RA8875tsize)1);
-  tft.setTextColor(RA8875_WHITE);
-  tft.setCursor(CW_TEXT_START_X, CW_TEXT_START_Y);
+  tft.setTextColor(RA8875_RED, RA8875_BLACK);
+  tft.setCursor(502, CW_TEXT_START_Y);
   tft.writeTo(L1);
-//  tft.print(decodeBuffer);
-//  tft.writeTo(L2);
+
+  tft.BTE_move(18, 457, 505, 22, 0, 457, 1, 1);
+  tft.print(currentLetter);
+  tft.writeTo(L2);
 }
 
 
@@ -649,19 +641,21 @@ void DoCWDecoding(int audioValue) {
 
         break;      // End state5
       case state4:  //  Blank printing state.
+      
         MorseCharacterDisplay(' ');
 
         tft.setFontScale((enum RA8875tsize)0);  // Show estimated WPM
         tft.setTextColor(RA8875_GREEN);
         tft.fillRect(DECODER_X + 75, DECODER_Y - 5, tft.getFontWidth() * 3, tft.getFontHeight(), RA8875_BLACK);  // Erase old WPM.
         tft.setCursor(DECODER_X + 75, DECODER_Y - 5);
-        tft.writeTo(L1);
+//        tft.writeTo(L1);
         tft.print(1200L / (dahLength / 3));
-        tft.writeTo(L1);
-        tft.setTextColor(RA8875_WHITE);
-        tft.setFontScale((enum RA8875tsize)3);
+//        tft.writeTo(L1);
+//        tft.setTextColor(RA8875_WHITE);
+//        tft.setFontScale((enum RA8875tsize)3);
         blankFlag = true;
         decodeStates = state0;  // Start process for next incoming character.
+        
         break;
       default:
         break;
