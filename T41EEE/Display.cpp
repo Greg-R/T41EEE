@@ -105,6 +105,12 @@ tft.layerEffect(LAYER1);
 display.UpdateAudioGraphics();
 display.DrawBandWidthIndicatorBar();
 //display.ShowFrequency();
+    if (centerTuneFlag) {  //  This flag is set by EncoderFineTune() and also by Direct Freq Entry.
+    //  display.DrawBandWidthIndicatorBar();
+      display.ShowFrequency();
+    centerTuneFlag = 0;  //AFP 10-04-22
+    }
+
 
   for (x1 = 1; x1 < 511; x1++) {  // Bins on the ends are junk, don't plot.
 

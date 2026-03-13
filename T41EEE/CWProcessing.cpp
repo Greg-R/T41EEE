@@ -41,6 +41,8 @@ uint32_t gapLength;
 float32_t freq[4] = { 562.5, 656.5, 750.0, 843.75 };
 bool drewGreenLastLoop{ false };  // Variables used to control drawing of CW decode
 bool drewBlackLastLoop{ false };  // indicator square.
+uint32_t wpm{0};
+uint32_t wpm_old{0};
 
 // This enum is used by an experimental Morse decoder.
 enum states { state0,
@@ -643,19 +645,21 @@ void DoCWDecoding(int audioValue) {
       case state4:  //  Blank printing state.
       
         MorseCharacterDisplay(' ');
-
+        wpm = 1200L / (dahLength / 3);
+        if(wpm != wpm_old) {
+        tft.writeTo(L1);
         tft.setFontScale((enum RA8875tsize)0);  // Show estimated WPM
         tft.setTextColor(RA8875_GREEN);
         tft.fillRect(DECODER_X + 75, DECODER_Y - 5, tft.getFontWidth() * 3, tft.getFontHeight(), RA8875_BLACK);  // Erase old WPM.
         tft.setCursor(DECODER_X + 75, DECODER_Y - 5);
-//        tft.writeTo(L1);
-        tft.print(1200L / (dahLength / 3));
-//        tft.writeTo(L1);
+        tft.print(wpm);
+        tft.writeTo(L2);
+        }
 //        tft.setTextColor(RA8875_WHITE);
 //        tft.setFontScale((enum RA8875tsize)3);
         blankFlag = true;
         decodeStates = state0;  // Start process for next incoming character.
-        
+        wpm_old = wpm;
         break;
       default:
         break;
