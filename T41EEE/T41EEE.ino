@@ -1263,7 +1263,6 @@ void loop() {
       while (millis() - cwTimer <= ConfigData.cwTransmitDelay) {
         // Keyer Dit
         if (digitalRead(ConfigData.paddleDit) == LOW or keyerFirstDit) {
-Serial.printf("keyerDit\n");
           cwexciter.CW_ExciterIQData(CW_SHAPING_RISE);
           for (cwBlockIndex = 0; cwBlockIndex < transmitDitUnshapedBlocks; cwBlockIndex++) {
             cwexciter.CW_ExciterIQData(CW_SHAPING_NONE);
@@ -1279,7 +1278,6 @@ Serial.printf("keyerDit\n");
           keyerFirstDit = false;
           //Keyer DAH
         } else if (digitalRead(ConfigData.paddleDah) == LOW or keyerFirstDah) {
-Serial.printf("keyerDah\n");
           cwexciter.CW_ExciterIQData(CW_SHAPING_RISE);
           for (cwBlockIndex = 0; cwBlockIndex < transmitDahUnshapedBlocks; cwBlockIndex++) {
             cwexciter.CW_ExciterIQData(CW_SHAPING_NONE);
