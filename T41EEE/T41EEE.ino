@@ -67,7 +67,7 @@ std::vector<uint32_t> center_tune_array = CENTER_TUNE_ARRAY;
 std::vector<uint32_t> fine_tune_array = FINE_TUNE_ARRAY;
 Button button(fine_tune_array, center_tune_array);
 ModeControl modecontrol;  // Mode control struct.  This is a part of the "modal" radio configuration process.
-SimpleCwKeyer keyer;
+SimpleCwKeyer keyer(KEYER_DIT_INPUT_TIP, KEYER_DAH_INPUT_RING);  // dit GPI, dah GPI
 
 const char *topMenus[] = { "CW Options", "RF Set", "VFO Select",
                            "Config EEPROM", "Cal EEPROM", "AGC",
@@ -809,9 +809,11 @@ void KeyTipOn() {
   //  if (digitalRead(KEYER_DIT_INPUT_TIP) == LOW and bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE)
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE)
     keyPressedOn = true;
-    straightKeyStart = true;
+  straightKeyStart = true;
   if (ConfigData.paddleFlip == 0) keyerFirstDit = true;
   else keyerFirstDah = true;
+
+  Serial.printf("KeyTipOn\n");
 }
 
 
@@ -832,6 +834,8 @@ void KeyRingOn()  //AFP 09-25-22
     if (ConfigData.paddleFlip == 0) keyerFirstDah = true;
     else keyerFirstDit = true;
   }
+
+    Serial.printf("KeyRingOn\n");
 }
 
 
@@ -1044,7 +1048,7 @@ FLASHMEM void setup() {
   ConfigData.rfGainCurrent = 0;     // Start with lower gain so you don't get blasted.
   lastState = RadioState::NOSTATE;  // Forces an update.
   powerUp = true;                   // This delays receiver start-up to allow transients to settle.
-  keyer.initialize();  // Initialize iambic keyer.
+////  keyer.initialize();               // Initialize iambic keyer.
 
   FilterSetSSB();  // This is important!  If this is not run up front various other filters go into never-never land.
 
@@ -1054,6 +1058,8 @@ FLASHMEM void setup() {
   // Don't start up if key/paddle or PTT is closed.  Warn the user to resolve and restart.
   isTransmitterKeyed();
   keyPressedOn = false;  // Ignore key interrupts which may happen due to start-up transients.
+
+  keyer.setup();
 }
 //============================================================== END setup() =================================================================
 
@@ -1233,8 +1239,8 @@ void loop() {
       while (millis() - cwTimer <= ConfigData.cwTransmitDelay) {  // Start CW transmit timer.
 
         if (digitalRead(KEYER_DIT_INPUT_TIP) == LOW or straightKeyStart) {  // AFP 09-25-22  Turn on CW signal
-        straightKeyStart = false;
-          cwTimer = millis();                                                       //Reset timer
+          straightKeyStart = false;
+          cwTimer = millis();  //Reset timer
 
           if (cwKeyDown == false) {
             cwexciter.CW_ExciterIQData(CW_SHAPING_RISE);
@@ -1299,55 +1305,24 @@ void loop() {
       }  // End while.  End keyer relay timer.
       enableTransmitter(false);
 
-      break;
+      break;  // End non-iambic keyer.
 
-          case RadioState::CW_TRANSMIT_IAMBIC_STATE:
+    case RadioState::CW_TRANSMIT_IAMBIC_STATE:
+
       enableTransmitter(true);
-
       cwTimer = millis();
+
       while (millis() - cwTimer <= ConfigData.cwTransmitDelay) {
 
-keyer.runKeyer();  // Run the iambic keyer.
+// Call iambic keyer state machine.
 
-        // Keyer Dit
-        if (digitalRead(ConfigData.paddleDit) == LOW or keyerFirstDit) {
+keyer.iambicKeyerStateMachine();
 
-          cwexciter.CW_ExciterIQData(CW_SHAPING_RISE);
-          for (cwBlockIndex = 0; cwBlockIndex < transmitDitUnshapedBlocks; cwBlockIndex++) {
-            cwexciter.CW_ExciterIQData(CW_SHAPING_NONE);
-          }
-          cwexciter.CW_ExciterIQData(CW_SHAPING_FALL);
 
-          // Pause for one dit length of silence
-          ditTimerOff = millis();
-          while (millis() - ditTimerOff <= transmitDitLength) {
-            cwexciter.CW_ExciterIQData(CW_SHAPING_ZERO);
-          }
-          cwTimer = millis();  //  Reset delay timer only after a dit or dah is transmitted.
-          keyerFirstDit = false;
-          //Keyer DAH
-        } else if (digitalRead(ConfigData.paddleDah) == LOW or keyerFirstDah) {
-
-          cwexciter.CW_ExciterIQData(CW_SHAPING_RISE);
-          for (cwBlockIndex = 0; cwBlockIndex < transmitDahUnshapedBlocks; cwBlockIndex++) {
-            cwexciter.CW_ExciterIQData(CW_SHAPING_NONE);
-          }
-          cwexciter.CW_ExciterIQData(CW_SHAPING_FALL);
-
-          // Pause for one dit length of silence
-          ditTimerOff = millis();
-          while (millis() - ditTimerOff <= transmitDitLength) {
-            cwexciter.CW_ExciterIQData(CW_SHAPING_ZERO);
-          }
-          cwTimer = millis();  //  Reset delay timer only after a dit or dah is transmitted.
-        } else {
-          cwexciter.CW_ExciterIQData(CW_SHAPING_ZERO);
-        }
-        keyerFirstDah = false;
       }  // End while.  End keyer relay timer.
       enableTransmitter(false);
 
-      break;
+      break;  // End iambic keyer.
 
     case RadioState::NOSTATE:
       break;

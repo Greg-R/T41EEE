@@ -1320,7 +1320,7 @@ void Display::UpdateEqualizerField(bool rxEqState, bool txEqState) {
 
 
 /*****
-  Purpose: Updates the displayed Keyer and WPM settings.
+  Purpose: Updates the displayed keyer type and WPM settings.
 
   Parameter list:
     void
@@ -1337,20 +1337,30 @@ void Display::UpdateKeyType() {
   tft.setTextColor(RA8875_GREEN);
   tft.fillRect(WPM_X + 59, WPM_Y - 4, tft.getFontWidth() * 15, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(FIELD_OFFSET_X, WPM_Y - 5);
-  if (ConfigData.keyType == 1) {  // 1 is keyer.
+
+  switch(ConfigData.keyType) {
+  case 0:
+    tft.print("Straight Key       ");
+  break;
+
     // KD0RC start
+    case 1:  // 1 is keyer. 2 is iambic keyer.
+    case 2:
     tft.print("Paddles ");
     if (ConfigData.paddleFlip == 0) {
-      tft.print("R");
+      tft.print("R ");
     } else {
-      tft.print("L");
-    }
-    tft.print(" ");
+      tft.print("L ");
+    } 
     // KD0RC end
     tft.print(ConfigData.currentWPM);
-  } else {
-    tft.print("Straight Key");
-  }
+    if(ConfigData.keyType == 1) tft.print("       ");
+    if(ConfigData.keyType == 2) tft.print(" Iambic");
+  break;
+
+  default:
+  break;
+  } // end switch
 }
 
 

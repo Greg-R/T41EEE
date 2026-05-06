@@ -254,7 +254,7 @@ void SetTransmitDitLength(int wpm) {
 
 
 /*****
-  Purpose: Select straight key or keyer.  All this does is control
+  Purpose: Select straight key, keyer, or iambic keyer.  All this does is control
            the pullups on the GPIs connected to the key or keyer paddle.
            This should be part of the menus used by the operator.
 
@@ -274,23 +274,26 @@ void SetKeyType() {
   currentKey = ConfigData.keyType;
   // Now the user selects the key type.
   ConfigData.keyType = SubmenuSelect(keyChoice, 3, ConfigData.keyType);
-  if (currentKey == ConfigData.keyType) return;
+  if (currentKey == ConfigData.keyType) return;  // No change.
 
 // This needs to be re-factored into a switch statement.
-  // We're switching to a keyer paddle.
-  if (currentKey == 0) {
+  // We're switching to a keyer paddle.  This is for both non-iambic and iambic keyers.
+  switch(ConfigData.keyType) {
+//  Configure for straight key.
+    case 0:
+    // Detach the ring interrupt.  It is not needed and can cause undesired interrupts.
+    detachInterrupt(digitalPinToInterrupt(KEYER_DAH_INPUT_RING));
+    pinMode(KEYER_DAH_INPUT_RING, INPUT);  // Remove the pullup.
+
+break;
+// Configure for regular keyer and iambic keyer (same configuration).
+  case 1:
+  case 2:
     // Set the pullup on the ring.
     pinMode(KEYER_DAH_INPUT_RING, INPUT_PULLUP);  // The other keyer paddle.
     // Attach the ring interrupt, because it was not needed for the straight key.
     // The tip interrupt is always attached.
     attachInterrupt(digitalPinToInterrupt(KEYER_DAH_INPUT_RING), KeyRingOn, CHANGE);
-  }
-  // We're switching to a straight key.
-  if (currentKey == 1) {
-    // Detach the ring interrupt.  It is not needed and can cause undesired interrupts.
-    detachInterrupt(digitalPinToInterrupt(KEYER_DAH_INPUT_RING));
-    pinMode(KEYER_DAH_INPUT_RING, INPUT);  // Remove the pullup.
-  }
   // Flip dit and dah as configured by operator.
   if (ConfigData.paddleFlip) {  // Means right-paddle dit
     ConfigData.paddleDit = KEYER_DAH_INPUT_RING;
@@ -299,6 +302,14 @@ void SetKeyType() {
     ConfigData.paddleDit = KEYER_DIT_INPUT_TIP;
     ConfigData.paddleDah = KEYER_DAH_INPUT_RING;
   }
+
+  break;
+
+default:
+break;
+
+  }  // end switch
+
   delay(1000);           // This is required to allow GPIOs to settle out.
   keyPressedOn = false;  // Guard against already fired key interrupt.
 }
