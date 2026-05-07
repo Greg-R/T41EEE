@@ -752,3 +752,85 @@ float CWProcessing::goertzel_mag(int numSamples, int TARGET_FREQUENCY, int SAMPL
   magnitude = sqrtf(real * real + imag * imag);
   return magnitude;
 }
+
+
+// Iambic keyer methods follow.
+
+//    Calculate new Dit duration in ms based on wpm value
+
+void CWProcessing::loadWPM(int wpm) {
+  g_ditTime = 1200 / wpm;
+}
+
+void CWProcessing::init_iambic() {
+
+  // Setup output pins
+//  pinMode(LED_PIN, OUTPUT);
+//  pinMode(PIEZO_SPKR_PIN, OUTPUT);
+//  pinMode(TX_SWITCH_PIN, OUTPUT);
+
+  // Setup input pins
+//  pinMode(LEFT_PADDLE_PIN, INPUT_PULLUP);   // sets Left Paddle digital pin as input
+//  pinMode(RIGHT_PADDLE_PIN, INPUT_PULLUP);  // sets Right Paddle digital pin as input
+//  pinMode(CMD_SWITCH_PIN, INPUT_PULLUP);    // sets pin as command mode switch input
+
+//  digitalWrite(LED_PIN, LOW);        // turn the LED off
+//  digitalWrite(TX_SWITCH_PIN, LOW);  // Transmitter off
+
+  g_keyerState = IDLE;
+
+  EEPROM.get(EEADDRESS, g_ks_eeprom);  // Read the stored config data from EEPROM
+  if (!validate_ee_checksum()) {       // does EEPROM checksum equal the calculated checksum
+
+    // Checksum didn't match stored data so assume that this is the first time this code has run
+
+    g_keyerControl = IAMBIC_B;   // Make Iambic B the default mode
+
+//    #if defined (KEYER_MODE_IS_IAMBIC_A)
+//      g_keyerControl = IAMBIC_A; // Override with Iambic A via conditional compilation
+//    #endif
+
+    loadWPM(DEFAULT_SPEED_WPM);  // Set initial keyer speed to default
+
+    // Setup for Righthanded paddle by default
+    // These are initialized when the object is instantiated.
+  //  g_dit_paddle = KEYER_DIT_INPUT_TIP;   // Dits on right hand thumb
+  //  g_dah_paddle = KEYER_DAH_INPUT_RING;  // Dahs on right hand index finger
+
+    g_sidetone_muted = true;  // Default to no sidetone
+
+    // Store these defaults and write settings to EEPROM
+    g_ks_eeprom.ms_per_dit = g_ditTime;
+    g_ks_eeprom.dit_paddle_pin = g_dit_paddle;
+    g_ks_eeprom.dah_paddle_pin = g_dah_paddle;
+    g_ks_eeprom.iambic_keying_mode = g_keyerControl;
+    g_ks_eeprom.sidetone_is_muted = true;
+    g_ks_eeprom.num_writes = 1;
+    g_ks_eeprom.data_checksum = calculate_ee_checksum();
+    EEPROM.put(EEADDRESS, g_ks_eeprom);
+  } else {  // Checksum matched so restore previous settings that were saved in EEPROM
+    g_ditTime = g_ks_eeprom.ms_per_dit;
+    g_dit_paddle = g_ks_eeprom.dit_paddle_pin;
+    g_dah_paddle = g_ks_eeprom.dah_paddle_pin;
+    g_keyerControl = g_ks_eeprom.iambic_keying_mode;
+    g_sidetone_muted = (g_ks_eeprom.sidetone_is_muted != 0);
+  }
+
+//  audio_send_morse_msg(&pwr_on_msg[0], g_ditTime);  // Send the OK message via the Piezo Speaker
+
+  // Serial.begin(9600); // for Debug
+}
+
+
+// Calculate the 32-bit checksum value for the state data stored in EEPROM
+// The only field not used in the checksum calculation is the stored checksum which should be obvious
+uint32_t CWProcessing::calculate_ee_checksum() {
+  uint32_t calc_checksum = 0;
+  calc_checksum = g_ks_eeprom.ms_per_dit + g_ks_eeprom.dit_paddle_pin + g_ks_eeprom.dah_paddle_pin + g_ks_eeprom.iambic_keying_mode + g_ks_eeprom.sidetone_is_muted + g_ks_eeprom.num_writes;
+  return (calc_checksum);
+}
+
+// Verify that the stored EEPROM checksum matches the calculated value
+bool CWProcessing::validate_ee_checksum() {
+  return (g_ks_eeprom.data_checksum == (calculate_ee_checksum()));
+}

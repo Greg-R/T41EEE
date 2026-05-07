@@ -61,14 +61,14 @@ ReceiveDSP process;        // Receiver process object.
 RxCalibrate rxcalibrater;  // Instantiate the calibration objects.
 TxCalibrate txcalibrater;  // Transmit calibration object.
 CW_Exciter cwexciter;      // CW exciter object.
-CWProcessing cwkeyer;
+CWProcessing cwKeyer;
 JSON json;                 // JSON object.  Used for reading/writing to SD card.
 Eeprom eeprom;             // Eeprom object.
 std::vector<uint32_t> center_tune_array = CENTER_TUNE_ARRAY;
 std::vector<uint32_t> fine_tune_array = FINE_TUNE_ARRAY;
 Button button(fine_tune_array, center_tune_array);
 ModeControl modecontrol;  // Mode control struct.  This is a part of the "modal" radio configuration process.
-SimpleCwKeyer keyer(KEYER_DIT_INPUT_TIP, KEYER_DAH_INPUT_RING);  // dit GPI, dah GPI
+//SimpleCwKeyer keyer(KEYER_DIT_INPUT_TIP, KEYER_DAH_INPUT_RING);  // dit GPI, dah GPI
 
 const char *topMenus[] = { "CW Options", "RF Set", "VFO Select",
                            "Config EEPROM", "Cal EEPROM", "AGC",
@@ -827,7 +827,7 @@ void KeyTipOn() {
 *****/
 void KeyRingOn()  //AFP 09-25-22
 {
-  if (ConfigData.keyType == 1) {
+  if (ConfigData.keyType == 1 or ConfigData.keyType == 2) {
     // Make sure this is ignored in other modes!  Probably should detach in non-CW modes.
     //    if (digitalRead(KEYER_DAH_INPUT_RING) == LOW and bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE)
     if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE)
@@ -1049,7 +1049,6 @@ FLASHMEM void setup() {
   ConfigData.rfGainCurrent = 0;     // Start with lower gain so you don't get blasted.
   lastState = RadioState::NOSTATE;  // Forces an update.
   powerUp = true;                   // This delays receiver start-up to allow transients to settle.
-////  keyer.initialize();               // Initialize iambic keyer.
 
   FilterSetSSB();  // This is important!  If this is not run up front various other filters go into never-never land.
 
@@ -1060,7 +1059,7 @@ FLASHMEM void setup() {
   isTransmitterKeyed();
   keyPressedOn = false;  // Ignore key interrupts which may happen due to start-up transients.
 
-  keyer.setup();
+cwKeyer.init_iambic();
 }
 //============================================================== END setup() =================================================================
 
@@ -1098,7 +1097,7 @@ void loop() {
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE and SerialUSB1.rts() == LOW) radioState = RadioState::FT8_RECEIVE_STATE;
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::FT8_MODE and SerialUSB1.rts() == HIGH and ft8EnableFlag) radioState = RadioState::FT8_TRANSMIT_STATE;
 
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and ConfigData.keyType == 1 and (digitalRead(ConfigData.paddleDit) == HIGH) and (digitalRead(ConfigData.paddleDah) == HIGH)) radioState = RadioState::CW_RECEIVE_STATE;
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and (ConfigData.keyType == 1 or ConfigData.keyType == 2) and (digitalRead(ConfigData.paddleDit) == HIGH) and (digitalRead(ConfigData.paddleDah) == HIGH)) radioState = RadioState::CW_RECEIVE_STATE;
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and ConfigData.keyType == 0 and digitalRead(KEYER_DIT_INPUT_TIP) == HIGH) radioState = RadioState::CW_RECEIVE_STATE;
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and keyPressedOn == true and ConfigData.keyType == 0) radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and keyPressedOn == true and ConfigData.keyType == 1) radioState = RadioState::CW_TRANSMIT_KEYER_STATE;
@@ -1130,7 +1129,9 @@ void loop() {
     if (radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE and lastState == RadioState::CW_RECEIVE_STATE) SetAudioOperatingState(radioState);
 
     if (radioState == RadioState::CW_RECEIVE_STATE and lastState == RadioState::CW_TRANSMIT_KEYER_STATE) SetAudioOperatingState(radioState);
+    if (radioState == RadioState::CW_RECEIVE_STATE and lastState == RadioState::CW_TRANSMIT_IAMBIC_STATE) SetAudioOperatingState(radioState);
     if (radioState == RadioState::CW_TRANSMIT_KEYER_STATE and lastState == RadioState::CW_RECEIVE_STATE) SetAudioOperatingState(radioState);
+    if (radioState == RadioState::CW_TRANSMIT_IAMBIC_STATE and lastState == RadioState::CW_RECEIVE_STATE) SetAudioOperatingState(radioState);
 
     if (radioState == RadioState::SAM_RECEIVE_STATE and lastState != RadioState::SAM_RECEIVE_STATE) SetAudioOperatingState(radioState);
     if (radioState == RadioState::AM_RECEIVE_STATE and lastState != RadioState::AM_RECEIVE_STATE) SetAudioOperatingState(radioState);
@@ -1273,14 +1274,14 @@ void loop() {
 
           cwexciter.CW_ExciterIQData(CW_SHAPING_RISE);
 
-          for (cwBlockIndex = 0; cwBlockIndex < cwkeyer.transmitDitUnshapedBlocks; cwBlockIndex++) {
+          for (cwBlockIndex = 0; cwBlockIndex < cwKeyer.transmitDitUnshapedBlocks; cwBlockIndex++) {
             cwexciter.CW_ExciterIQData(CW_SHAPING_NONE);
           }
           cwexciter.CW_ExciterIQData(CW_SHAPING_FALL);
 
           // Pause for one dit length of silence
           ditTimerOff = millis();
-          while (millis() - ditTimerOff <= cwkeyer.transmitDitLength) {
+          while (millis() - ditTimerOff <= cwKeyer.transmitDitLength) {
             cwexciter.CW_ExciterIQData(CW_SHAPING_ZERO);
           }
           cwTimer = millis();  //  Reset delay timer only after a dit or dah is transmitted.
@@ -1289,14 +1290,14 @@ void loop() {
         } else if (digitalRead(ConfigData.paddleDah) == LOW or keyerFirstDah) {
 
           cwexciter.CW_ExciterIQData(CW_SHAPING_RISE);
-          for (cwBlockIndex = 0; cwBlockIndex < cwkeyer.transmitDahUnshapedBlocks; cwBlockIndex++) {
+          for (cwBlockIndex = 0; cwBlockIndex < cwKeyer.transmitDahUnshapedBlocks; cwBlockIndex++) {
             cwexciter.CW_ExciterIQData(CW_SHAPING_NONE);
           }
           cwexciter.CW_ExciterIQData(CW_SHAPING_FALL);
 
           // Pause for one dit length of silence
           ditTimerOff = millis();
-          while (millis() - ditTimerOff <= cwkeyer.transmitDitLength) {
+          while (millis() - ditTimerOff <= cwKeyer.transmitDitLength) {
             cwexciter.CW_ExciterIQData(CW_SHAPING_ZERO);
           }
           cwTimer = millis();  //  Reset delay timer only after a dit or dah is transmitted.
@@ -1317,13 +1318,14 @@ void loop() {
       while (millis() - cwTimer <= ConfigData.cwTransmitDelay) {
 
 // Call iambic keyer state machine.
-
-keyer.iambicKeyerStateMachine();
+Serial.printf("Iambic running\n");
+delay(1000);
+//keyer.iambicKeyerStateMachine();
 
 
       }  // End while.  End keyer relay timer.
       enableTransmitter(false);
-
+Serial.printf("keyPressedOn = %d\n", keyPressedOn);
       break;  // End iambic keyer.
 
     case RadioState::NOSTATE:

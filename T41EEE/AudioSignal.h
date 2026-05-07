@@ -450,6 +450,7 @@ void SetAudioOperatingState(RadioState operatingState) {
 
     case RadioState::CW_TRANSMIT_STRAIGHT_STATE:
     case RadioState::CW_TRANSMIT_KEYER_STATE:
+    case RadioState::CW_TRANSMIT_IAMBIC_STATE:
 
       SampleRate = SAMPLE_RATE_48K;
       InitializeDataArrays();  // I2S sample rate set in this function.

@@ -42,7 +42,7 @@ const int RIGNAME_X_OFFSET = 570;  // Pixel count to rig name field.
 #define CURRENT_FREQ_A 7200000  // VFO_A
 #define CURRENT_FREQ_B 7030000  // VFO_B
 #define DEFAULT_POWER_LEVEL 10  // Startup power level.
-#define SPLASH_DELAY 4000L      // How long to show Splash screen. Use 1000 for testing, 4000 normally.
+#define SPLASH_DELAY 1      // How long to show Splash screen. Use 1000 for testing, 4000 normally.
 #define STARTUP_BAND 1          // This is the 40M band. see around line 575 in SDT.h
 
 constexpr uint32_t CENTER_SCREEN_X = 400;

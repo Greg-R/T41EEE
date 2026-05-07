@@ -1619,7 +1619,7 @@ void Display::ShowTransmitReceiveStatus() {
   tft.setCursor(X_R_STATUS_X + 4, X_R_STATUS_Y - 5);
   tft.setTextColor(RA8875_BLACK);
   if (radioState == RadioState::SSB_TRANSMIT_STATE or radioState == RadioState::FT8_TRANSMIT_STATE or radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE
-      or radioState == RadioState::CW_TRANSMIT_KEYER_STATE or radioState == RadioState::CW_CALIBRATE_STATE
+      or radioState == RadioState::CW_TRANSMIT_KEYER_STATE or radioState == RadioState::CW_TRANSMIT_IAMBIC_STATE or radioState == RadioState::CW_CALIBRATE_STATE
       or radioState == RadioState::SSB_CALIBRATE_STATE or radioState == RadioState::RECEIVE_CALIBRATE_STATE or radioState == RadioState::SSB_IM3TEST_STATE) {
     tft.fillRect(X_R_STATUS_X, X_R_STATUS_Y, 55, 25, RA8875_RED);
     if (digitalRead(RXTX)) tft.print("XMT");  // Make sure the hardware is actually in transmit mode!

@@ -22,7 +22,7 @@
 #include <string>
 #include <algorithm>
 #include <memory>
-#include <SimpleCwKeyer.h>
+//#include <SimpleCwKeyer.h>
 
 // User section which is customizable.
 #include "MyConfigurationFile.h"
@@ -590,7 +590,7 @@ extern JSON json;                 // JSON object.
 extern RxCalibrate rxcalibrater;  // CW mode calibration object.
 extern TxCalibrate txcalibrater;  // SSB mode calibration object.
 extern CW_Exciter cwexciter;      // CW exciter object
-extern CWProcessing cwkeyer;      // CW keyer object
+extern CWProcessing cwKeyer;      // CW keyer object
 extern Button button;             // Front-panel button object.
 
 extern Si5351 si5351;  // RF PLL object.
