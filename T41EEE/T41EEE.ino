@@ -61,6 +61,7 @@ ReceiveDSP process;        // Receiver process object.
 RxCalibrate rxcalibrater;  // Instantiate the calibration objects.
 TxCalibrate txcalibrater;  // Transmit calibration object.
 CW_Exciter cwexciter;      // CW exciter object.
+CWProcessing cwkeyer;
 JSON json;                 // JSON object.  Used for reading/writing to SD card.
 Eeprom eeprom;             // Eeprom object.
 std::vector<uint32_t> center_tune_array = CENTER_TUNE_ARRAY;
@@ -216,9 +217,9 @@ int selectedMapIndex;
 
 bool centerTuneFlag = false;
 uint32_t cwTimer = 0;
-uint32_t transmitDitLength = 0;  // JJP 8/19/23
-uint32_t transmitDitUnshapedBlocks = 0;
-uint32_t transmitDahUnshapedBlocks = 0;
+//uint32_t transmitDitLength = 0;  // JJP 8/19/23
+//uint32_t transmitDitUnshapedBlocks = 0;
+//uint32_t transmitDahUnshapedBlocks = 0;
 
 // ============ end new stuff =======
 // Global variables used by audio filter encoder.
@@ -1271,14 +1272,15 @@ void loop() {
         if (digitalRead(ConfigData.paddleDit) == LOW or keyerFirstDit) {
 
           cwexciter.CW_ExciterIQData(CW_SHAPING_RISE);
-          for (cwBlockIndex = 0; cwBlockIndex < transmitDitUnshapedBlocks; cwBlockIndex++) {
+
+          for (cwBlockIndex = 0; cwBlockIndex < cwkeyer.transmitDitUnshapedBlocks; cwBlockIndex++) {
             cwexciter.CW_ExciterIQData(CW_SHAPING_NONE);
           }
           cwexciter.CW_ExciterIQData(CW_SHAPING_FALL);
 
           // Pause for one dit length of silence
           ditTimerOff = millis();
-          while (millis() - ditTimerOff <= transmitDitLength) {
+          while (millis() - ditTimerOff <= cwkeyer.transmitDitLength) {
             cwexciter.CW_ExciterIQData(CW_SHAPING_ZERO);
           }
           cwTimer = millis();  //  Reset delay timer only after a dit or dah is transmitted.
@@ -1287,14 +1289,14 @@ void loop() {
         } else if (digitalRead(ConfigData.paddleDah) == LOW or keyerFirstDah) {
 
           cwexciter.CW_ExciterIQData(CW_SHAPING_RISE);
-          for (cwBlockIndex = 0; cwBlockIndex < transmitDahUnshapedBlocks; cwBlockIndex++) {
+          for (cwBlockIndex = 0; cwBlockIndex < cwkeyer.transmitDahUnshapedBlocks; cwBlockIndex++) {
             cwexciter.CW_ExciterIQData(CW_SHAPING_NONE);
           }
           cwexciter.CW_ExciterIQData(CW_SHAPING_FALL);
 
           // Pause for one dit length of silence
           ditTimerOff = millis();
-          while (millis() - ditTimerOff <= transmitDitLength) {
+          while (millis() - ditTimerOff <= cwkeyer.transmitDitLength) {
             cwexciter.CW_ExciterIQData(CW_SHAPING_ZERO);
           }
           cwTimer = millis();  //  Reset delay timer only after a dit or dah is transmitted.

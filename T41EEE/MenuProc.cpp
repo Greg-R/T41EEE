@@ -409,29 +409,29 @@ void CWOptions()  // new option for Sidetone and Delay JJP 9/1/22
       break;
 
     case 1:              // CW Filter BW:      // AFP 10-18-22
-      SelectCWFilter();  // in CWProcessing    // AFP 10-18-22
+      cwkeyer.SelectCWFilter();  // in CWProcessing    // AFP 10-18-22
       break;
 
     case 2:              // Select a preferred CW offset frequency.
-      SelectCWOffset();  //  Located in CWProcessing.cpp
+      cwkeyer.SelectCWOffset();  //  Located in CWProcessing.cpp
       break;
 
     case 3:  // Keyer WPM.
       ConfigData.currentWPM = static_cast<uint32_t>(GetEncoderValueLoopFloat(5, 60, ConfigData.currentWPM, 1, 0, "Keyer WPM: ", true, true));
-      SetTransmitDitLength(ConfigData.currentWPM);  //Afp 09-22-22     // JJP 8/19/23
+      cwkeyer.SetTransmitDitLength(ConfigData.currentWPM);  //Afp 09-22-22     // JJP 8/19/23
       display.UpdateKeyType();                      // Update display to show revised WPM.
       break;
 
     case 4:  // Sidetone volume for speaker.
-      SetSideToneVolume(true);
+      cwkeyer.SetSideToneVolume(true);
       break;
 
     case 5:  // Sidetone volume for headphone.
-      SetSideToneVolume(false);
+      cwkeyer.SetSideToneVolume(false);
       break;
 
     case 6:          // Type of key:
-      SetKeyType();  // Straight key, keyer, or iambic keyer? Stored in ConfigData.keyType.
+      cwkeyer.SetKeyType();  // Straight key, keyer, or iambic keyer? Stored in ConfigData.keyType.
       display.UpdateKeyType();
       break;
 
