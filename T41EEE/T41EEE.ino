@@ -1139,6 +1139,7 @@ void loop() {
     // Customization dependent on required mode.
     if (radioState == RadioState::CW_RECEIVE_STATE) modecontrol.CWReceiveMode();
     if (radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE) modecontrol.CWTransmitMode();
+    if (radioState == RadioState::CW_TRANSMIT_IAMBIC_STATE) modecontrol.CWTransmitMode();
     if (radioState == RadioState::CW_TRANSMIT_KEYER_STATE) modecontrol.CWTransmitMode();
 
     if (radioState == RadioState::SSB_RECEIVE_STATE) modecontrol.SSBReceiveMode();
@@ -1318,14 +1319,16 @@ void loop() {
       while (millis() - cwTimer <= ConfigData.cwTransmitDelay) {
 
 // Call iambic keyer state machine.
-Serial.printf("Iambic running\n");
-delay(1000);
-//keyer.iambicKeyerStateMachine();
+//Serial.printf("Iambic running\n");
+//delay(1000);
+cwKeyer.iambicStateMachine(cwTimer);
 
 
       }  // End while.  End keyer relay timer.
       enableTransmitter(false);
-Serial.printf("keyPressedOn = %d\n", keyPressedOn);
+
+// Serial.printf("keyPressedOn = %d\n", keyPressedOn);
+
       break;  // End iambic keyer.
 
     case RadioState::NOSTATE:

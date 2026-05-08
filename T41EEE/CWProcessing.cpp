@@ -188,7 +188,8 @@ void CWProcessing::DoCWReceiveProcessing() {  // All New AFP 09-19-22
     void
 *****/
 void CWProcessing::SetTransmitDitLength(int wpm) {
-  transmitDitLength = 1200 / wpm;  // JJP 8/19/23
+  transmitDitLength = 1200.0 / static_cast<float32_t>(wpm);  // JJP 8/19/23
+
 
   // Total audio blocks that will be output = 1 (rise) + transmit(Dit|Dah)UnshapedBlocks + 1 (fall)
   // Blocks are assumed to be 10ms long, and the number of unshaped blocks is rounded to acheive
@@ -197,8 +198,10 @@ void CWProcessing::SetTransmitDitLength(int wpm) {
     transmitDitUnshapedBlocks = 0;
     transmitDahUnshapedBlocks = 0;
   } else {
-    transmitDitUnshapedBlocks = (unsigned long)rint(((double)transmitDitLength - 20.0) / 10.0);
-    transmitDahUnshapedBlocks = (unsigned long)rint((((double)transmitDitLength * 3.0) - 20.0) / 10.0);
+    transmitDitUnshapedBlocks = static_cast<uint32_t>(rint(transmitDitLength / cwBlockLength)) - 2;  // Length of dit minus 2 for ramp up and down.
+    transmitDahUnshapedBlocks = (transmitDitUnshapedBlocks + 2) * 3 - 2;  // Length of dit times 3 - 2 for ramp up and down.
+    Serial.printf("transmitDitUnshapedBlocks = %d\n", transmitDitUnshapedBlocks );
+    Serial.printf("transmitDahUnshapedBlocks = %d\n", transmitDahUnshapedBlocks );
   }
 }
 
@@ -779,8 +782,8 @@ void CWProcessing::init_iambic() {
 
   g_keyerState = IDLE;
 
-  EEPROM.get(EEADDRESS, g_ks_eeprom);  // Read the stored config data from EEPROM
-  if (!validate_ee_checksum()) {       // does EEPROM checksum equal the calculated checksum
+//  EEPROM.get(EEADDRESS, g_ks_eeprom);  // Read the stored config data from EEPROM
+//  if (!validate_ee_checksum()) {       // does EEPROM checksum equal the calculated checksum
 
     // Checksum didn't match stored data so assume that this is the first time this code has run
 
@@ -793,13 +796,13 @@ void CWProcessing::init_iambic() {
     loadWPM(DEFAULT_SPEED_WPM);  // Set initial keyer speed to default
 
     // Setup for Righthanded paddle by default
-    // These are initialized when the object is instantiated.
-  //  g_dit_paddle = KEYER_DIT_INPUT_TIP;   // Dits on right hand thumb
-  //  g_dah_paddle = KEYER_DAH_INPUT_RING;  // Dahs on right hand index finger
+  
+    g_dit_paddle = KEYER_DIT_INPUT_TIP;   // Dits on right hand thumb
+    g_dah_paddle = KEYER_DAH_INPUT_RING;  // Dahs on right hand index finger
 
     g_sidetone_muted = true;  // Default to no sidetone
 
-    // Store these defaults and write settings to EEPROM
+    /* Store these defaults and write settings to EEPROM
     g_ks_eeprom.ms_per_dit = g_ditTime;
     g_ks_eeprom.dit_paddle_pin = g_dit_paddle;
     g_ks_eeprom.dah_paddle_pin = g_dah_paddle;
@@ -815,6 +818,7 @@ void CWProcessing::init_iambic() {
     g_keyerControl = g_ks_eeprom.iambic_keying_mode;
     g_sidetone_muted = (g_ks_eeprom.sidetone_is_muted != 0);
   }
+  */
 
 //  audio_send_morse_msg(&pwr_on_msg[0], g_ditTime);  // Send the OK message via the Piezo Speaker
 
@@ -834,3 +838,178 @@ uint32_t CWProcessing::calculate_ee_checksum() {
 bool CWProcessing::validate_ee_checksum() {
   return (g_ks_eeprom.data_checksum == (calculate_ee_checksum()));
 }
+
+
+//    Latch dit and/or dah press
+void CWProcessing::updatePaddleLatch() {
+  if (digitalRead(g_dit_paddle) == LOW) {
+    g_keyerControl |= DIT_L;  // |= is bitwise OR.  This is the same as g_keyerControl = g_keyerControl | DIT_L;
+  }
+  if (digitalRead(g_dah_paddle) == LOW) {
+    g_keyerControl |= DAH_L;
+  }
+}
+
+
+void CWProcessing::iambicStateMachine(uint32_t& cwTimer) {
+
+//  int debounce;
+
+  /* Handle Command Mode timer and sprcial case of Command TUNE
+  if (g_keyer_command_state != CMD_IDLE) {      // Keyer is in Command Mode (i.e. command button was depressed)
+    if (millis() > g_cmd_mode_input_timeout) {  // Check for command mode timer expiry (no input).
+
+      // Special Case if we are in TUNE MODE - we need to unkey the transmitter if the timer expired
+      if (g_keyer_command_state == CMD_TUNE) {
+        digitalWrite(LED_PIN, LOW);        // turn the LED off
+        digitalWrite(TX_SWITCH_PIN, LOW);  // Turn the transmitter off
+        g_keyer_command_state = CMD_IDLE;
+
+        if (!g_sidetone_muted) {
+          noTone(PIEZO_SPKR_PIN);
+        }
+      }
+      exit_command_mode();
+    }
+  }
+    */
+
+  // This state machine translates paddle input into DITS and DAHs and keys the transmitter.
+  switch (g_keyerState) {
+    case IDLE:
+      // Wait for direct or latched paddle press
+      if ((digitalRead(g_dit_paddle) == LOW) || (digitalRead(g_dah_paddle) == LOW) || (g_keyerControl & 0x03)) {
+        updatePaddleLatch();
+        g_current_morse_character = B11111110;  // Starting point for accumulating a character input via paddles
+        g_keyerState = CHK_DIT;
+      }
+      break;
+
+    case CHK_DIT:
+      // See if the dit paddle was pressed
+      if (g_keyerControl & DIT_L) {
+        g_keyerControl |= DIT_PROC;
+        ktimer = g_ditTime;  ////
+        Serial.printf("g_ditTime = %d\n", g_ditTime);
+        g_current_morse_character = (g_current_morse_character << 1);  // Shift a DIT (0) into the bit #0 position.
+        g_keyerState = KEYED_PREP;
+      } else {
+        g_keyerState = CHK_DAH;
+      }
+      break;
+
+    case CHK_DAH:
+      // See if dah paddle was pressed
+      if (g_keyerControl & DAH_L) {
+        ktimer = g_ditTime * 3;
+        g_current_morse_character = ((g_current_morse_character << 1) | 1);  // Shift left one position and make bit #0 a DAH (1)
+        g_keyerState = KEYED_PREP;
+      } else {
+        ktimer = millis() + (g_ditTime * 2);  // Character space, is g_ditTime x 2 because already have a trailing intercharacter space
+        g_keyerState = PRE_IDLE;
+      }
+      break;
+
+    case KEYED_PREP:
+      // Assert key down, start timing, state shared for dit or dah
+//      tx_key_down();
+
+//cwexciter.CW_ExciterIQData(CW_SHAPING_RISE);
+
+      ktimer += millis();                  // set ktimer to interval end time
+      g_keyerControl &= ~(DIT_L + DAH_L);  // clear both paddle latch bits
+      g_keyerState = KEYED;                // next state
+      break;
+
+    case KEYED:
+
+Serial.printf("KEYED\n");
+// Transmit CW tone and run sidetone.  Run sufficient blocks to exhaust timer (below).
+//for(int i = 0; i < 2; i = i + 1)
+cwexciter.CW_ExciterIQData(CW_SHAPING_NONE);
+
+      // Wait for timer to expire.  When it expires, move to INTER_ELEMENT state.
+//      if (millis() > ktimer) {  // are we at end of key down ?
+        if(true) {     //// Temporary
+//        SimpleCwKeyer::tx_key_up();
+//cwexciter.CW_ExciterIQData(CW_SHAPING_FALL);
+//cwexciter.CW_ExciterIQData(CW_SHAPING_ZERO);
+
+        ktimer = millis() + g_ditTime;  // inter-element time
+        g_keyerState = INTER_ELEMENT;   // next state
+        // Reset the cwTimer, which resets the user-selected transmit delay.  This is passed in as a reference.
+        cwTimer = millis();
+      } else if (g_keyerControl & IAMBIC_B) {
+        updatePaddleLatch();  // early paddle latch check in Iambic B mode
+      }
+      break;
+
+    case INTER_ELEMENT:
+      // Insert time between dits/dahs
+      updatePaddleLatch();                       // latch paddle state
+      if (millis() > ktimer) {                    // are we at end of inter-space ?
+        if (g_keyerControl & DIT_PROC) {          // was it a dit or dah ?
+          g_keyerControl &= ~(DIT_L + DIT_PROC);  // clear two bits
+          g_keyerState = CHK_DAH;                 // dit done, check for dah
+        } else {
+          g_keyerControl &= ~(DAH_L);           // clear dah latch
+          ktimer = millis() + (g_ditTime * 2);  // Character space, is g_ditTime x 2 because already have a trailing intercharacter space
+          g_keyerState = PRE_IDLE;              // go idle
+        }
+      }
+      break;
+
+    case PRE_IDLE:  // Wait for an intercharacter space
+
+      // Check for direct or latched paddle press
+      if ((digitalRead(g_dit_paddle) == LOW) || (digitalRead(g_dah_paddle) == LOW) || (g_keyerControl & 0x03)) {
+        updatePaddleLatch();
+        g_keyerState = CHK_DIT;
+      } else {                    // Check for intercharacter space
+        if (millis() > ktimer) {  // We have a character
+          // Serial.println(g_current_morse_character);
+          g_keyerState = IDLE;  // go idle
+          if (g_keyer_command_state != CMD_IDLE) {
+//            SimpleCwKeyer::process_keyer_command(g_current_morse_character, g_ditTime);
+          }
+        }
+      }
+
+      break;
+  }
+
+
+  /* Handle a command mode button press
+  if (digitalRead(CMD_SWITCH_PIN) == LOW) {
+    // Give the switch time to settle
+    debounce = 100;
+    do {
+      // wait here until switch is released, we debounce to be sure
+      if (digitalRead(CMD_SWITCH_PIN) == LOW) {
+        debounce = 100;
+      }
+      delay(2);
+    } while (debounce--);
+
+    // Special case for TUNE mode
+    if (g_keyer_command_state == CMD_TUNE) {  // We are already locked in TX due to TUNE Mode so exit TUNE on a Command Button press
+      digitalWrite(LED_PIN, LOW);             // turn the LED off
+      digitalWrite(TX_SWITCH_PIN, LOW);       // Turn the transmitter off
+      g_keyer_command_state = CMD_IDLE;
+
+      if (!g_sidetone_muted) {
+        noTone(PIEZO_SPKR_PIN);
+      }
+      exit_command_mode();
+
+    } else {  // Not TUNE MODE
+
+      if (g_keyer_command_state == CMD_IDLE) {  // Not already in command mode so enter it, otherwise ignore a 2nd button press
+        g_keyer_command_state = CMD_ENTER;
+        audio_send_morse_msg(&cmd_mode_entry_msg[0], g_ditTime);
+        g_cmd_mode_input_timeout = millis() + COMMAND_INPUT_TIMEOUT_MS;
+      }
+    }
+  }
+    */
+} // End of iambic keyer state machine. 

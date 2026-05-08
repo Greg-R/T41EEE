@@ -16,7 +16,7 @@ void CW_Exciter::writeSineBuffer(int numCycles) {
   float32_t theta{ 0.0 };
   float32_t freqSideTone{ 0.0 };
   const float32_t amplitude{ 0.12 };  // Sets the peak amplitude of the sinusoid.
-  freqSideTone = static_cast<float>(numCycles) * 48000.0 / 512.0;
+  freqSideTone = static_cast<float>(numCycles) * 48000.0 / 512.0;  // 512 = 4 * 128.  So that is 4 blocks of 128.
   for (int kf = 0, increment = 0; kf < 512; increment += 1, kf++) {  // Calc: numCycles = 8, 750 hz sine wave.
     theta = static_cast<float32_t>(increment) * 2.0 * PI * freqSideTone / 48000.0;
     sineBuffer[kf] = amplitude * sin(theta);  // Create the CW tone waveform.
@@ -50,9 +50,6 @@ void CW_Exciter::CW_ExciterIQData(int shaping)  //AFP 08-20-22
   cwToneData.setBehaviour(AudioPlayQueue_F32::ORIGINAL);
   cwToneData.setMaxBuffers(4);
   cwToneData.play(float_buffer_cw, 512);  // Push CW waveform into SSB transmitter input.
-
-  // Make Q15 data for CW sidetone.
-//  arm_float_to_q15(float_buffer_cw, q15_buffer_Sidetone, 512);
 
   float32_t float_buffer_i[512] = { 0.0 };
   float32_t float_buffer_q[512] = { 0.0 };
@@ -93,6 +90,5 @@ void CW_Exciter::CW_ExciterIQData(int shaping)  //AFP 08-20-22
   Q_out_L_Ex.play(float_buffer_i, 512);  // play it!  This is the I channel from the Audio Adapter line out to QSE I input.
   Q_out_R_Ex.play(float_buffer_q, 512);  // play it!  This is the Q channel from the Audio Adapter line out to QSE Q input.
 
-//  Q_out_L.play(q15_buffer_Sidetone, 512);
   sidetoneOutQueue.play(float_buffer_cw, 512);
 }

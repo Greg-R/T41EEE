@@ -11,6 +11,12 @@
 #define IAMBIC_B 0x10  // 0x00 for Iambic A, 0x10 for Iambic B (Binary 0001 0000)
 #define EEADDRESS 3072  // Starting address for EEPROM
 
+#define DIT_L 0x01     // Dit latch (Binary 0000 0001)
+#define DAH_L 0x02     // Dah latch (Binary 0000 0010)
+#define DIT_PROC 0x04  // Dit is being processed (Binary 0000 0100)
+#define IAMBIC_B 0x10  // 0x00 for Iambic A, 0x10 for Iambic B (Binary 0001 0000)
+#define IAMBIC_A 0
+
 
 class CWProcessing {
 
@@ -66,9 +72,10 @@ enum states { state0,
               state6 };
 states decodeStates = state0;
 
-uint32_t transmitDitLength;
+float32_t transmitDitLength;
 uint32_t transmitDitUnshapedBlocks;
 uint32_t transmitDahUnshapedBlocks;
+static constexpr float32_t cwBlockLength = (512.0 / 48000.0) * 1000.0;  // milliseconds of one chunk of CW waveform.
 
 bool charProcessFlag, blankFlag;
 int currentTime, interElementGap, noSignalTimeStamp;
@@ -162,5 +169,7 @@ void loadWPM(int wpm);
 void init_iambic();
 uint32_t calculate_ee_checksum();
 bool validate_ee_checksum();
+void iambicStateMachine(uint32_t& cwTimer);
+void updatePaddleLatch();
 
 };
