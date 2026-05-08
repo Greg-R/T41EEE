@@ -1354,7 +1354,7 @@ void Display::UpdateKeyType() {
     } 
     // KD0RC end
     tft.print(ConfigData.currentWPM);
-    if(ConfigData.keyType == 1) tft.print("       ");
+    if(ConfigData.keyType == 1) tft.print("XXXXXXX");
     if(ConfigData.keyType == 2) tft.print(" Iambic");
   break;
 

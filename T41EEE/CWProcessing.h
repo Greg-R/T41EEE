@@ -76,6 +76,8 @@ float32_t transmitDitLength;
 uint32_t transmitDitUnshapedBlocks;
 uint32_t transmitDahUnshapedBlocks;
 static constexpr float32_t cwBlockLength = (512.0 / 48000.0) * 1000.0;  // milliseconds of one chunk of CW waveform.
+bool sendDit = false;
+bool sendDah = false;
 
 bool charProcessFlag, blankFlag;
 int currentTime, interElementGap, noSignalTimeStamp;

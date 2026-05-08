@@ -28,13 +28,14 @@ void CW_Exciter::writeSineBuffer(int numCycles) {
   Purpose: Create I and Q signals for CW transmission.
 
   Parameter list:
-    int shaping   one of CW_SHAPING_RISE, CW_SHAPING_FALL, or CW_SHAPING_NONE
+    int shaping   one of CW_SHAPING_RISE 1, CW_SHAPING_FALL 2, CW_SHAPING_ZERO 3 or CW_SHAPING_NONE 0
 
   Return value;
     void
 *****/
 void CW_Exciter::CW_ExciterIQData(int shaping)  //AFP 08-20-22
 {
+  Serial.printf("CW_Exciter\n");
   float32_t powerScale = 0;
 
   if (shaping == CW_SHAPING_RISE) {

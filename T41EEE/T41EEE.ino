@@ -836,7 +836,7 @@ void KeyRingOn()  //AFP 09-25-22
     else keyerFirstDit = true;
   }
 
-    Serial.printf("KeyRingOn\n");
+//    Serial.printf("KeyRingOn\n");
 }
 
 
@@ -1282,7 +1282,7 @@ void loop() {
 
           // Pause for one dit length of silence
           ditTimerOff = millis();
-          while (millis() - ditTimerOff <= cwKeyer.transmitDitLength) {
+          while (millis() - ditTimerOff <= static_cast<uint32_t>(cwKeyer.transmitDitLength)) {
             cwexciter.CW_ExciterIQData(CW_SHAPING_ZERO);
           }
           cwTimer = millis();  //  Reset delay timer only after a dit or dah is transmitted.
@@ -1298,7 +1298,7 @@ void loop() {
 
           // Pause for one dit length of silence
           ditTimerOff = millis();
-          while (millis() - ditTimerOff <= cwKeyer.transmitDitLength) {
+          while (millis() - ditTimerOff <= static_cast<uint32_t>(cwKeyer.transmitDitLength)) {
             cwexciter.CW_ExciterIQData(CW_SHAPING_ZERO);
           }
           cwTimer = millis();  //  Reset delay timer only after a dit or dah is transmitted.

@@ -306,7 +306,7 @@ extern Bands bands;
 // Configuration data structure.
 struct config_t {
 
-  char versionSettings[10] = "T41EEE.92";  // This is required to be the first!
+  char versionSettings[10] = "T41EEE.93";  // This is required to be the first!
 
   bool AGCMode = true;
   float32_t AGCThreshold = -40.0;
