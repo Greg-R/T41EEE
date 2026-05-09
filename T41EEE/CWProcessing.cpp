@@ -429,7 +429,7 @@ void CWProcessing::MorseCharacterClear(void) {
 
   Return value
     void
-*****/
+*****
 void CWProcessing::MorseCharacterDisplay(char currentLetter) {
   if (col < MAX_DECODE_CHARS) {  // Start scrolling??
     decodeBuffer[col] = currentLetter;
@@ -446,6 +446,27 @@ void CWProcessing::MorseCharacterDisplay(char currentLetter) {
   tft.setTextColor(RA8875_WHITE);
   tft.setCursor(CW_TEXT_START_X, CW_TEXT_START_Y);
   tft.print(decodeBuffer);
+}
+*/
+
+/*****
+  Purpose: This function displays the decoded Morse code below waterfall. Arranged as:
+
+  Parameter list:
+    char currentLetter
+
+  Return value
+    void
+*****/
+void CWProcessing::MorseCharacterDisplay(char currentLetter) {
+
+  tft.setFontScale((enum RA8875tsize)1);
+  tft.setTextColor(RA8875_RED, RA8875_BLACK);
+  tft.setCursor(502, CW_TEXT_START_Y);
+  tft.writeTo(L1);
+
+  tft.BTE_move(18, 457, 505, 22, 0, 457, 1, 1);
+  tft.print(currentLetter);
 }
 
 
