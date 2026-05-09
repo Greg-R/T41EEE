@@ -96,7 +96,7 @@ void Display::ShowSpectrum(bool drawSpectrum) {
   for (x1 = 1; x1 < 511; x1++) {  // Bins on the ends are junk, don't plot.
 
     // Quit and start transmitter if key is pressed.
-    if (keyPressedOn) {
+    if (cwKeyer.keyPressedOn) {
       return;
     }
     //Draws the main Spectrum, Waterfall and Audio displays
@@ -1320,7 +1320,7 @@ void Display::UpdateEqualizerField(bool rxEqState, bool txEqState) {
 
 
 /*****
-  Purpose: Updates the displayed Keyer and WPM settings.
+  Purpose: Updates the displayed keyer type and WPM settings.
 
   Parameter list:
     void
@@ -1337,20 +1337,31 @@ void Display::UpdateKeyType() {
   tft.setTextColor(RA8875_GREEN);
   tft.fillRect(WPM_X + 59, WPM_Y - 4, tft.getFontWidth() * 15, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(FIELD_OFFSET_X, WPM_Y - 5);
-  if (ConfigData.keyType == 1) {  // 1 is keyer.
+
+  tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
+  switch (ConfigData.keyType) {
+    case 0:
+      tft.print("Straight Key       ");
+      break;
+
     // KD0RC start
-    tft.print("Paddles ");
-    if (ConfigData.paddleFlip == 0) {
-      tft.print("R");
-    } else {
-      tft.print("L");
-    }
-    tft.print(" ");
-    // KD0RC end
-    tft.print(ConfigData.currentWPM);
-  } else {
-    tft.print("Straight Key");
-  }
+    case 1:  // 1 is keyer. 2 is iambic keyer.
+    case 2:
+      tft.print("Paddles ");
+      if (ConfigData.paddleFlip == 0) {
+        tft.print("R ");
+      } else {
+        tft.print("L ");
+      }
+      // KD0RC end
+      tft.print(ConfigData.currentWPM);
+      if (ConfigData.keyType == 1) tft.print("       ");
+      if (ConfigData.keyType == 2) tft.print(" Iambic");
+      break;
+
+    default:
+      break;
+  }  // end switch
 }
 
 
@@ -1609,7 +1620,7 @@ void Display::ShowTransmitReceiveStatus() {
   tft.setCursor(X_R_STATUS_X + 4, X_R_STATUS_Y - 5);
   tft.setTextColor(RA8875_BLACK);
   if (radioState == RadioState::SSB_TRANSMIT_STATE or radioState == RadioState::FT8_TRANSMIT_STATE or radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE
-      or radioState == RadioState::CW_TRANSMIT_KEYER_STATE or radioState == RadioState::CW_CALIBRATE_STATE
+      or radioState == RadioState::CW_TRANSMIT_KEYER_STATE or radioState == RadioState::CW_TRANSMIT_IAMBIC_STATE or radioState == RadioState::CW_CALIBRATE_STATE
       or radioState == RadioState::SSB_CALIBRATE_STATE or radioState == RadioState::RECEIVE_CALIBRATE_STATE or radioState == RadioState::SSB_IM3TEST_STATE) {
     tft.fillRect(X_R_STATUS_X, X_R_STATUS_Y, 55, 25, RA8875_RED);
     if (digitalRead(RXTX)) tft.print("XMT");  // Make sure the hardware is actually in transmit mode!

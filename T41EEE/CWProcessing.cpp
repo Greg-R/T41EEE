@@ -2,56 +2,6 @@
 
 #include "SDT.h"
 
-constexpr int32_t HISTOGRAM_ELEMENTS = 750;
-constexpr int32_t MAX_DECODE_CHARS = 32;       // Max chars that can appear on decoder line.  Increased to 32.  KF5N October 29, 2023
-constexpr uint32_t DECODER_BUFFER_SIZE = 128;  // Max chars in binary search string with , . ?
-
-byte currentDashJump = DECODER_BUFFER_SIZE;
-byte currentDecoderIndex = 0;
-
-float32_t aveCorrResultR;  // Used in running averages; must not be inside function.
-float32_t aveCorrResultL;
-float32_t *float_Corr_BufferR = new float32_t[511];
-float32_t *float_Corr_BufferL = new float32_t[511];
-float CWLevelTimer;
-float CWLevelTimerOld;
-float goertzelMagnitude;
-char decodeBuffer[33] = { 0 };  // The buffer for holding the decoded characters.  Increased to 33.  KF5N October 29, 2023
-int endGapFlag = 0;
-int topGapIndex;
-int topGapIndexOld;
-int32_t *gapHistogram = new int32_t[HISTOGRAM_ELEMENTS];
-int32_t *signalHistogram = new int32_t[HISTOGRAM_ELEMENTS];
-long valRef1;
-long valRef2;
-long gapRef1;
-int valFlag = 0;
-long signalStartOld = 0;
-long aveDitLength = 80;
-long aveDahLength = 200;
-float thresholdGeometricMean = 140.0;  // This changes as decoder runs
-float thresholdArithmeticMean;
-int dahLength;
-int gapAtom;  // Space between atoms
-int gapChar;  // Space between characters
-long signalElapsedTime;
-long signalStart;
-long signalEnd;  // Start-end of dit or dah
-uint32_t gapLength;
-float32_t freq[4] = { 562.5, 656.5, 750.0, 843.75 };
-bool drewGreenLastLoop{ false };  // Variables used to control drawing of CW decode
-bool drewBlackLastLoop{ false };  // indicator square.
-
-// This enum is used by an experimental Morse decoder.
-enum states { state0,
-              state1,
-              state2,
-              state3,
-              state4,
-              state5,
-              state6 };
-states decodeStates = state0;
-
 
 /*****
   Purpose: This function replaces the arm_max_float32() function that finds the maximum element in an array.
@@ -71,7 +21,7 @@ states decodeStates = state0;
   Return value;
     void
 *****/
-void JackClusteredArrayMax(int32_t *array, int32_t elements, int32_t *maxCount, int32_t *maxIndex, int32_t *firstNonZero, int32_t spread) {
+void CWProcessing::JackClusteredArrayMax(int32_t *array, int32_t elements, int32_t *maxCount, int32_t *maxIndex, int32_t *firstNonZero, int32_t spread) {
   int32_t i, j, clusteredIndex;
   int32_t clusteredMax, temp;
 
@@ -115,7 +65,7 @@ void JackClusteredArrayMax(int32_t *array, int32_t elements, int32_t *maxCount, 
   Return value:
     void
 *****/
-FLASHMEM void SelectCWFilter() {
+FLASHMEM void CWProcessing::SelectCWFilter() {
   const std::string CWFilter[] = { "0.8kHz", "1.0kHz", "1.3kHz", "1.8kHz", "2.0kHz", " Off " };
   ConfigData.CWFilterIndex = SubmenuSelect(CWFilter, 6, ConfigData.CWFilterIndex);  // CWFilter is an array of strings.
 
@@ -134,7 +84,7 @@ FLASHMEM void SelectCWFilter() {
   Return value:
     void
 *****/
-FLASHMEM void SelectCWOffset() {
+FLASHMEM void CWProcessing::SelectCWOffset() {
   int tempCWOffset;
   const std::string CWOffsets[] = { "562.5 Hz", "656.5 Hz", "750 Hz", "843.75 Hz", " Cancel " };
   const int numCycles[4] = { 6, 7, 8, 9 };
@@ -171,7 +121,7 @@ FLASHMEM void SelectCWOffset() {
     void
 
 *****/
-void DoCWReceiveProcessing() {  // All New AFP 09-19-22
+void CWProcessing::DoCWReceiveProcessing() {  // All New AFP 09-19-22
   float goertzelMagnitude1;
   float goertzelMagnitude2;
   float32_t aveCorrResult;
@@ -243,8 +193,8 @@ void DoCWReceiveProcessing() {  // All New AFP 09-19-22
   Return value:
     void
 *****/
-void SetTransmitDitLength(int wpm) {
-  transmitDitLength = 1200 / wpm;  // JJP 8/19/23
+void CWProcessing::SetTransmitDitLength(int wpm) {
+  transmitDitLength = 1200.0 / static_cast<float32_t>(wpm);  // JJP 8/19/23
 
   // Total audio blocks that will be output = 1 (rise) + transmit(Dit|Dah)UnshapedBlocks + 1 (fall)
   // Blocks are assumed to be 10ms long, and the number of unshaped blocks is rounded to acheive
@@ -253,14 +203,14 @@ void SetTransmitDitLength(int wpm) {
     transmitDitUnshapedBlocks = 0;
     transmitDahUnshapedBlocks = 0;
   } else {
-    transmitDitUnshapedBlocks = (unsigned long)rint(((double)transmitDitLength - 20.0) / 10.0);
-    transmitDahUnshapedBlocks = (unsigned long)rint((((double)transmitDitLength * 3.0) - 20.0) / 10.0);
+    transmitDitUnshapedBlocks = static_cast<uint32_t>(rint(transmitDitLength / cwBlockLength)) - 2;  // Length of dit minus 2 for ramp up and down.
+    transmitDahUnshapedBlocks = (transmitDitUnshapedBlocks + 2) * 3 - 2;                             // Length of dit times 3 - 2 for ramp up and down.
   }
 }
 
 
 /*****
-  Purpose: Select straight key or keyer.  All this does is control
+  Purpose: Select straight key, keyer, or iambic keyer.  All this does is control
            the pullups on the GPIs connected to the key or keyer paddle.
            This should be part of the menus used by the operator.
 
@@ -270,42 +220,55 @@ void SetTransmitDitLength(int wpm) {
   Return value:
     void
 *****/
-void SetKeyType() {
+void CWProcessing::SetKeyType() {
   uint32_t currentKey{ 0 };
-  const std::string keyChoice[] = { "Straight Key", "Keyer" };
+  const std::string keyChoice[] = { "Straight Key", "Keyer", "Iambic" };
 
   keyPressedOn = false;  // Guard against already fired key interrupt.
 
   // What to do will depend on the current setting!
   currentKey = ConfigData.keyType;
   // Now the user selects the key type.
-  ConfigData.keyType = SubmenuSelect(keyChoice, 2, ConfigData.keyType);
-  if (currentKey == ConfigData.keyType) return;
+  ConfigData.keyType = SubmenuSelect(keyChoice, 3, ConfigData.keyType);
+  if (currentKey == ConfigData.keyType) return;  // No change.
 
-  // We're switching to a keyer paddle.
-  if (currentKey == 0) {
-    // Set the pullup on the ring.
-    pinMode(KEYER_DAH_INPUT_RING, INPUT_PULLUP);  // The other keyer paddle.
-    // Attach the ring interrupt, because it was not needed for the straight key.
-    // The tip interrupt is always attached.
-    attachInterrupt(digitalPinToInterrupt(KEYER_DAH_INPUT_RING), KeyRingOn, CHANGE);
-  }
-  // We're switching to a straight key.
-  if (currentKey == 1) {
-    // Detach the ring interrupt.  It is not needed and can cause undesired interrupts.
-    detachInterrupt(digitalPinToInterrupt(KEYER_DAH_INPUT_RING));
-    pinMode(KEYER_DAH_INPUT_RING, INPUT);  // Remove the pullup.
-  }
-  // Flip dit and dah as configured by operator.
-  if (ConfigData.paddleFlip) {  // Means right-paddle dit
-    ConfigData.paddleDit = KEYER_DAH_INPUT_RING;
-    ConfigData.paddleDah = KEYER_DIT_INPUT_TIP;
-  } else {
-    ConfigData.paddleDit = KEYER_DIT_INPUT_TIP;
-    ConfigData.paddleDah = KEYER_DAH_INPUT_RING;
-  }
+  // Configure key to user selection.
+  switch (ConfigData.keyType) {
+      //  Configure for straight key.
+    case 0:
+      // Detach the ring interrupt.  It is not needed and can cause undesired interrupts.
+      detachInterrupt(digitalPinToInterrupt(KEYER_DAH_INPUT_RING));
+      pinMode(KEYER_DAH_INPUT_RING, INPUT);  // Remove the pullup.
+
+      break;
+      // Configure for regular keyer and iambic keyer (same configuration).
+    case 1:
+    case 2:
+      // Set the pullup on the ring.
+      pinMode(KEYER_DAH_INPUT_RING, INPUT_PULLUP);  // The other keyer paddle.
+      // Attach the ring interrupt, because it was not needed for the straight key.
+      // The tip interrupt is always attached.
+      attachInterrupt(digitalPinToInterrupt(KEYER_DAH_INPUT_RING), KeyRingOn, CHANGE);
+      // Flip dit and dah as configured by operator.
+      if (ConfigData.paddleFlip) {  // Means right-paddle dit
+        ConfigData.paddleDit = KEYER_DAH_INPUT_RING;
+        ConfigData.paddleDah = KEYER_DIT_INPUT_TIP;
+      } else {
+        ConfigData.paddleDit = KEYER_DIT_INPUT_TIP;
+        ConfigData.paddleDah = KEYER_DAH_INPUT_RING;
+      }
+
+      break;
+
+    default:
+      break;
+
+  }  // end switch
+
   delay(1000);           // This is required to allow GPIOs to settle out.
   keyPressedOn = false;  // Guard against already fired key interrupt.
+  keyerFirstDit = false;
+  keyerFirstDah = false;
 }
 
 
@@ -319,7 +282,7 @@ void SetKeyType() {
   Return value:
     void
 *****/
-FLASHMEM void SetKeyPowerUp() {
+FLASHMEM void CWProcessing::SetKeyPowerUp() {
 
   pinMode(KEYER_DIT_INPUT_TIP, INPUT_PULLUP);  // Straight key and keyer paddle.
   pinMode(KEYER_DAH_INPUT_RING, INPUT);        // The other keyer paddle.  Don't pullup if not used.
@@ -333,7 +296,7 @@ FLASHMEM void SetKeyPowerUp() {
   }
 
   // Keyer paddle.
-  if (ConfigData.keyType == 1) {
+  if (ConfigData.keyType == 1 or ConfigData.keyType == 2) {
     pinMode(KEYER_DAH_INPUT_RING, INPUT_PULLUP);  // Activate pullup on dah.
     attachInterrupt(digitalPinToInterrupt(KEYER_DIT_INPUT_TIP), KeyTipOn, CHANGE);
     attachInterrupt(digitalPinToInterrupt(KEYER_DAH_INPUT_RING), KeyRingOn, CHANGE);
@@ -346,6 +309,22 @@ FLASHMEM void SetKeyPowerUp() {
       ConfigData.paddleDah = KEYER_DAH_INPUT_RING;
     }
   }
+
+  /* Keyer paddle.
+  if (ConfigData.keyType == 2) {
+    pinMode(KEYER_DAH_INPUT_RING, INPUT_PULLUP);  // Activate pullup on dah.
+    detachInterrupt(digitalPinToInterrupt(KEYER_DIT_INPUT_TIP));
+    detachInterrupt(digitalPinToInterrupt(KEYER_DAH_INPUT_RING));
+    // Flip dit and dah if so configured.
+    if (ConfigData.paddleFlip) {  // Means right-paddle dit
+      ConfigData.paddleDit = KEYER_DAH_INPUT_RING;
+      ConfigData.paddleDah = KEYER_DIT_INPUT_TIP;
+    } else {
+      ConfigData.paddleDit = KEYER_DIT_INPUT_TIP;
+      ConfigData.paddleDah = KEYER_DAH_INPUT_RING;
+    }
+  }
+  */
 }
 
 
@@ -360,7 +339,7 @@ FLASHMEM void SetKeyPowerUp() {
   Return value;
     void
 *****/
-void SetSideToneVolume(bool speaker) {
+void CWProcessing::SetSideToneVolume(bool speaker) {
   int sidetoneDisplay;
   bool keyDown;
   MenuSelect menu;
@@ -436,7 +415,7 @@ static int col = 0;  // Start at lower left
   Return value
     void
 *****/
-void MorseCharacterClear(void) {
+void CWProcessing::MorseCharacterClear(void) {
   col = 0;
   decodeBuffer[col] = '\0';  // Make it a string
 }
@@ -451,7 +430,7 @@ void MorseCharacterClear(void) {
   Return value
     void
 *****/
-void MorseCharacterDisplay(char currentLetter) {
+void CWProcessing::MorseCharacterDisplay(char currentLetter) {
   if (col < MAX_DECODE_CHARS) {  // Start scrolling??
     decodeBuffer[col] = currentLetter;
     col++;
@@ -480,7 +459,7 @@ void MorseCharacterDisplay(char currentLetter) {
   Return value
     void
 *****/
-void ResetHistograms() {
+void CWProcessing::ResetHistograms() {
   gapAtom = transmitDitLength;
   gapChar = dahLength = transmitDitLength * 3;
   thresholdGeometricMean = (transmitDitLength + dahLength) / 2;  // Use simple mean for starters so we don't have 0
@@ -507,7 +486,7 @@ void ResetHistograms() {
   Return value;
     void
 *****/
-void DoGapHistogram(uint32_t gapLen) {
+void CWProcessing::DoGapHistogram(uint32_t gapLen) {
   int32_t tempAtom, tempChar;
   int32_t atomIndex, charIndex, firstDit, temp;
   uint32_t offset;
@@ -573,10 +552,8 @@ void DoGapHistogram(uint32_t gapLen) {
     void
 *****/
 // charProcessFlag means a character is being decoded.  blankFlag indicates a blank has already been printed.
-bool charProcessFlag, blankFlag;
-int currentTime, interElementGap, noSignalTimeStamp;
-char *bigMorseCodeTree = (char *)"-EISH5--4--V---3--UF--------?-2--ARL---------.--.WP------J---1--TNDB6--.--X/-----KC------Y------MGZ7----,Q------O-8------9--0----";
-void DoCWDecoding(int audioValue) {
+
+void CWProcessing::DoCWDecoding(int audioValue) {
 
   for (int i = 0; i < 2; i = i + 1) {
     switch (decodeStates) {
@@ -681,7 +658,7 @@ void DoCWDecoding(int audioValue) {
   void
 
 *****/
-void DoSignalHistogram(long val) {
+void CWProcessing::DoSignalHistogram(long val) {
   float compareFactor = 2.0;
   int32_t firstNonEmpty;
   int32_t tempDit, tempDah;
@@ -753,7 +730,7 @@ void DoSignalHistogram(long val) {
     float magnitude     //magnitude of the transform at the target frequency
 
 *****/
-float goertzel_mag(int numSamples, int TARGET_FREQUENCY, int SAMPLING_RATE, float *data) {
+float CWProcessing::goertzel_mag(int numSamples, int TARGET_FREQUENCY, int SAMPLING_RATE, float *data) {
   int k, i;
   float floatnumSamples;
   float omega, sine, cosine, coeff, q0, q1, q2, magnitude, real, imag;
@@ -781,3 +758,119 @@ float goertzel_mag(int numSamples, int TARGET_FREQUENCY, int SAMPLING_RATE, floa
   magnitude = sqrtf(real * real + imag * imag);
   return magnitude;
 }
+
+
+// Iambic keyer methods follow.
+
+void CWProcessing::init_iambic() {
+
+  g_keyerState = KSTYPE::IDLE;
+  g_keyerControl = IAMBIC_B;  // Make Iambic B the default mode
+  //    #if defined (KEYER_MODE_IS_IAMBIC_A)
+  //      g_keyerControl = IAMBIC_A; // Override with Iambic A via conditional compilation
+  //    #endif
+}
+
+
+//    Latch dit and/or dah press
+void CWProcessing::updatePaddleLatch() {
+  if (digitalRead(ConfigData.paddleDit) == LOW) {
+    g_keyerControl |= DIT_L;  // |= is bitwise OR.  This is the same as g_keyerControl = g_keyerControl | DIT_L;
+  }
+  if (digitalRead(ConfigData.paddleDah) == LOW) {
+    g_keyerControl |= DAH_L;
+  }
+}
+
+
+void CWProcessing::iambicStateMachine(uint32_t &cwTimer) {
+
+  // This state machine translates paddle input into DITS and DAHs and keys the transmitter.
+  switch (g_keyerState) {
+    case KSTYPE::IDLE:  // Wait for direct or latched paddle press
+      if ((digitalRead(ConfigData.paddleDit) == LOW) || (digitalRead(ConfigData.paddleDah) == LOW) || (g_keyerControl & 0x03)) {
+        updatePaddleLatch();
+        g_keyerState = KSTYPE::CHK_DIT;
+      }
+      break;
+
+    case KSTYPE::CHK_DIT:  // See if the dit paddle was pressed
+      if (g_keyerControl & DIT_L) {
+        g_keyerControl |= DIT_PROC;
+        sendDit = true;
+        g_keyerState = KSTYPE::KEYED_PREP;
+      } else {
+        g_keyerState = KSTYPE::CHK_DAH;
+      }
+      break;
+
+    case KSTYPE::CHK_DAH:
+      // See if dah paddle was pressed
+      if (g_keyerControl & DAH_L) {
+        sendDah = true;
+        g_keyerState = KSTYPE::KEYED_PREP;
+      } else {
+        g_keyerState = KSTYPE::PRE_IDLE;
+      }
+      break;
+
+    case KSTYPE::KEYED_PREP:  // Prep for transmit, state shared for dit or dah.
+
+      g_keyerControl &= ~(DIT_L + DAH_L);  // clear both paddle latch bits
+
+      g_keyerState = KSTYPE::KEYED;  // next state
+      break;
+
+    case KSTYPE::KEYED:
+
+      cwexciter.CW_ExciterIQData(CW_SHAPING_RISE);
+      if (sendDit) {
+        for (uint32_t i = 0; i < transmitDitUnshapedBlocks; i = i + 1)
+          cwexciter.CW_ExciterIQData(CW_SHAPING_NONE);
+      }
+      if (sendDah) {
+        for (uint32_t i = 0; i < transmitDahUnshapedBlocks; i = i + 1)
+          cwexciter.CW_ExciterIQData(CW_SHAPING_NONE);
+      }
+      cwexciter.CW_ExciterIQData(CW_SHAPING_FALL);
+
+      sendDit = false;
+      sendDah = false;
+ 
+      g_keyerState = KSTYPE::INTER_ELEMENT;   // next state
+      // Reset the cwTimer (used in .ino), which resets the user-selected transmit delay.  This is passed in as a reference.
+      cwTimer = millis();
+
+      if (g_keyerControl & IAMBIC_B)
+        updatePaddleLatch();  // early paddle latch check in Iambic B mode
+
+      break;
+
+    case KSTYPE::INTER_ELEMENT:   // Insert time between dits/dahs
+
+      for (uint32_t i = 0; i < (transmitDitUnshapedBlocks + 2); i = i + 1)
+        cwexciter.CW_ExciterIQData(CW_SHAPING_ZERO);
+
+      updatePaddleLatch();                      // latch paddle state
+                                                //      if (millis() > ktimer) {                    // are we at end of inter-space ?
+      if (g_keyerControl & DIT_PROC) {          // was it a dit or dah ?
+        g_keyerControl &= ~(DIT_L + DIT_PROC);  // clear two bits
+        g_keyerState = KSTYPE::CHK_DAH;                 // dit done, check for dah
+      } else {
+        g_keyerControl &= ~(DAH_L);           // clear dah latch
+        g_keyerState = KSTYPE::PRE_IDLE;              // go idle
+      }
+      //      }
+      break;
+
+    case KSTYPE::PRE_IDLE:  // Wait for an intercharacter space
+
+      // Check for direct or latched paddle press
+      if ((digitalRead(ConfigData.paddleDit) == LOW) || (digitalRead(ConfigData.paddleDah) == LOW) || (g_keyerControl & 0x03)) {
+        updatePaddleLatch();
+        g_keyerState = KSTYPE::CHK_DIT;
+      }
+
+      break;
+  }
+}  // End of iambic keyer state machine.

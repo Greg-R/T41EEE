@@ -22,6 +22,7 @@
 #include <string>
 #include <algorithm>
 #include <memory>
+//#include <SimpleCwKeyer.h>
 
 // User section which is customizable.
 #include "MyConfigurationFile.h"
@@ -227,6 +228,7 @@ enum class RadioState { SSB_RECEIVE_STATE,
                         CW_RECEIVE_STATE,
                         CW_TRANSMIT_STRAIGHT_STATE,
                         CW_TRANSMIT_KEYER_STATE,
+                        CW_TRANSMIT_IAMBIC_STATE,
                         AM_RECEIVE_STATE,
                         SAM_RECEIVE_STATE,
                         SSB_CALIBRATE_STATE,
@@ -304,7 +306,7 @@ extern Bands bands;
 // Configuration data structure.
 struct config_t {
 
-  char versionSettings[10] = "T41EEE.92";  // This is required to be the first!
+  char versionSettings[10] = "T41EEE.93";  // This is required to be the first!
 
   bool AGCMode = true;
   float32_t AGCThreshold = -40.0;
@@ -449,7 +451,7 @@ struct calibration_t {
 
 extern struct calibration_t CalData;
 
-// Custom classes in the sketch.
+// Custom classes in the sketch.  There are global objects for each.
 #include "Button.h"
 #include "Display.h"
 #include "RxCalibrate.h"
@@ -459,6 +461,7 @@ extern struct calibration_t CalData;
 #include "Eeprom.h"
 #include "ReceiveDSP.h"
 #include "ModeControl.h"
+#include "CWProcessing.h"
 
 //------------------------- Global CW Filter declarations ----------
 #define IIR_CW_NUMSTAGES 4
@@ -587,6 +590,7 @@ extern JSON json;                 // JSON object.
 extern RxCalibrate rxcalibrater;  // CW mode calibration object.
 extern TxCalibrate txcalibrater;  // SSB mode calibration object.
 extern CW_Exciter cwexciter;      // CW exciter object
+extern CWProcessing cwKeyer;      // CW keyer object
 extern Button button;             // Front-panel button object.
 
 extern Si5351 si5351;  // RF PLL object.
@@ -724,9 +728,9 @@ extern uint32_t s_hotTemp;    /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] a
 extern uint32_t s_hotCount;   /*!< The value of TEMPMON_TEMPSENSE0[TEMP_VALUE] at the hot temperature.*/
 extern uint32_t s_roomC_hotC; /*!< The value of s_roomCount minus s_hotCount.*/
 extern uint32_t currentFreq;
-extern uint32_t transmitDitLength;  // JJP 8/19/23
-extern uint32_t transmitDitUnshapedBlocks;
-extern uint32_t transmitDahUnshapedBlocks;
+//extern uint32_t transmitDitLength;  // JJP 8/19/23
+//extern uint32_t transmitDitUnshapedBlocks;
+//extern uint32_t transmitDahUnshapedBlocks;
 extern uint32_t TxRxFreq;         // = centerFreq+NCOFreq  NCOFreq from FreqShift2()
 extern uint32_t cwTransmitDelay;  // ms to keep relay on after last atom read
 extern long lastFrequencies[][2];
