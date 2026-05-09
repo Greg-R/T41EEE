@@ -10,7 +10,7 @@ const int RIGNAME_X_OFFSET = 570;  // Pixel count to rig name field.
 //#define DEBUG_SWITCH_CAL                                                  // Uncomment to run switch cal by pushing and holding a button at power-up.
 // Debug switch cal must be disabled for normal radio operation!
 //#define DEBUG_CESSB                                                       // Uncomment to get CESSB operating parameters printed to the serial monitor.
-#define LOOP_TIMER
+//#define LOOP_TIMER
 #define FAST_TUNE                       // Uncomment to activate variable speed fast tune by Harry GM3RVL.
 #define DEFAULT_KEYER_WPM 15            // Startup value for keyer wpm
 #define FREQ_SEP_CHARACTER '.'          // Some may prefer period, space, or combo
@@ -56,14 +56,14 @@ constexpr uint32_t RAY_LENGTH = 190;
 //#define                           FOURSQRP
 
 // Set multiplication factors for your QSD and QSE boards.  Default values here and below are for V10/V11 boards.
-#define MASTER_CLK_MULT_RX 2
-#define MASTER_CLK_MULT_TX 2
+#define MASTER_CLK_MULT_RX 4
+#define MASTER_CLK_MULT_TX 4
 
 // Uncomment this line for QSE2.
-#define QSE2
+//#define QSE2
 
 // Uncomment this line if using an external PLL module.
-#define PLLMODULE
+//#define PLLMODULE
 
 // Customizable definitions for center and fine tune defaults and increments.  Larry K3PTO June 24, 2024
 constexpr uint32_t CENTER_TUNE_DEFAULT = 1000;  // Set to the desired default in the CENTER_TUNE_ARRAY.
@@ -72,17 +72,17 @@ constexpr uint32_t FINE_TUNE_DEFAULT = 50;  // Set to the desired default in the
 #define FINE_TUNE_ARRAY { 10, 20, 50, 100, 200, 500 }  // The number of elements is not fixed.
 
 // Uncomment for the original T41 audio mute control.
-//#define UNMUTEAUDIO LOW
-//#define MUTEAUDIO   HIGH
+#define UNMUTEAUDIO LOW
+#define MUTEAUDIO   HIGH
 // Use this for external amp with mute LOW, unmute HIGH.
-#define UNMUTEAUDIO HIGH
-#define MUTEAUDIO LOW
+//#define UNMUTEAUDIO HIGH
+//#define MUTEAUDIO LOW
 
 // The audio amplifier gain may need to be adjusted for the best volume range.
 constexpr float32_t SPEAKERSCALE = 2.0;   // Increase or decrease this value depending on your amplifier gain.
 constexpr float32_t HEADPHONESCALE = 8.0;  // Same as for the speaker.  Adjust to your preference for volume range.
 
-constexpr float32_t RFGAINSCALE = 1000.0;  // This adjusts for RF gain differences in the QSD.  QSD should use a value of 3000.  QSD2 should use a value of 1000.0.
+constexpr float32_t RFGAINSCALE = 3000.0;  // This adjusts for RF gain differences in the QSD.  QSD should use a value of 3000.  QSD2 should use a value of 1000.0.
 
 constexpr float32_t FREQUENCYCAL = 100000;  // The nominal frequency calibration.  This can be set here permanently after determining the unique value for your radio.
 
