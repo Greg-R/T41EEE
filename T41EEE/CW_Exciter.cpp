@@ -35,7 +35,6 @@ void CW_Exciter::writeSineBuffer(int numCycles) {
 *****/
 void CW_Exciter::CW_ExciterIQData(int shaping)  //AFP 08-20-22
 {
-  Serial.printf("CW_Exciter\n");
   float32_t powerScale = 0;
 
   if (shaping == CW_SHAPING_RISE) {
