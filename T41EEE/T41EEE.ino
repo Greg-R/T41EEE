@@ -11,6 +11,7 @@
 // The ArduinoJSON library.  This library is used for reading and writing to the SD card.
 // The Etherkit Si5351 library.  Important for simplifying a not-so-easy to control device!
 // Brian Low's Rotary encoder library; paramount for the physical user interface of the radio.
+// The Simple CW Keyer by VE3WMB (iambic keyer state machine).
 // Contributors to the code specific to T41EEE:
 // Larry Acklin KB3CUF
 // Harry Brash GM3RVL
@@ -22,7 +23,7 @@
 // Jeorg Uthoff DB200
 // If I have neglected to mention a contributor, please send me a note!
 // I can be found here: https://groups.io/g/SoftwareControlledHamRadio
-// Gregory Raven KF5N November 20 2025
+// Gregory Raven KF5N May 10 2026
 
 // setup() and loop() are at the bottom of this file.
 
@@ -194,9 +195,9 @@ int filterWidth{ 0 };
 int h = 135;  // SPECTRUM_HEIGHT + 3;
 bool ANR_notch = false;
 uint8_t auto_codec_gain = 1;
-bool keyPressedOn = false;
-bool keyerFirstDit = false;
-bool keyerFirstDah = false;
+//bool keyPressedOn = false;
+//bool keyerFirstDit = false;
+//bool keyerFirstDah = false;
 bool straightKeyStart = false;
 uint8_t NR_first_time = 1;
 uint8_t NR_Kim;
@@ -809,10 +810,10 @@ void KeyTipOn() {
   // Make sure this is ignored in other modes!  Probably should detach in non-CW modes.
   //  if (digitalRead(KEYER_DIT_INPUT_TIP) == LOW and bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE)
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE)
-    keyPressedOn = true;
+    cwKeyer.keyPressedOn = true;
   straightKeyStart = true;
-  if (ConfigData.paddleFlip == 0) keyerFirstDit = true;
-  else keyerFirstDah = true;
+  if (ConfigData.paddleFlip == 0) cwKeyer.keyerFirstDit = true;
+  else cwKeyer.keyerFirstDah = true;
 
   Serial.printf("KeyTipOn\n");
 }
@@ -831,9 +832,9 @@ void KeyRingOn()  //AFP 09-25-22
     // Make sure this is ignored in other modes!  Probably should detach in non-CW modes.
     //    if (digitalRead(KEYER_DAH_INPUT_RING) == LOW and bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE)
     if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE)
-      keyPressedOn = true;
-    if (ConfigData.paddleFlip == 0) keyerFirstDah = true;
-    else keyerFirstDit = true;
+      cwKeyer.keyPressedOn = true;
+    if (ConfigData.paddleFlip == 0) cwKeyer.keyerFirstDah = true;
+    else cwKeyer.keyerFirstDit = true;
   }
 
 //    Serial.printf("KeyRingOn\n");
@@ -855,7 +856,7 @@ void enableTransmitter(bool transmitOn) {
     digitalWrite(RXTX, LOW);  //xmit on
     display.ShowTransmitReceiveStatus();
   }
-  keyPressedOn = false;  // Reset isr().
+  cwKeyer.keyPressedOn = false;  // Reset isr().
 }
 
 
@@ -1057,11 +1058,7 @@ FLASHMEM void setup() {
 
   // Don't start up if key/paddle or PTT is closed.  Warn the user to resolve and restart.
   isTransmitterKeyed();
-  keyPressedOn = false;  // Ignore key interrupts which may happen due to start-up transients.
-
-cwKeyer.init_iambic();
-}
-//============================================================== END setup() =================================================================
+} // END setup().
 
 // Timer and loop counting code.
 elapsedMicros usec = 0;  // Automatically increases as time passes; no ++ necessary.
@@ -1099,9 +1096,9 @@ void loop() {
 
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and (ConfigData.keyType == 1 or ConfigData.keyType == 2) and (digitalRead(ConfigData.paddleDit) == HIGH) and (digitalRead(ConfigData.paddleDah) == HIGH)) radioState = RadioState::CW_RECEIVE_STATE;
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and ConfigData.keyType == 0 and digitalRead(KEYER_DIT_INPUT_TIP) == HIGH) radioState = RadioState::CW_RECEIVE_STATE;
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and keyPressedOn == true and ConfigData.keyType == 0) radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and keyPressedOn == true and ConfigData.keyType == 1) radioState = RadioState::CW_TRANSMIT_KEYER_STATE;
-  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and keyPressedOn == true and ConfigData.keyType == 2) radioState = RadioState::CW_TRANSMIT_IAMBIC_STATE;
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and cwKeyer.keyPressedOn == true and ConfigData.keyType == 0) radioState = RadioState::CW_TRANSMIT_STRAIGHT_STATE;
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and cwKeyer.keyPressedOn == true and ConfigData.keyType == 1) radioState = RadioState::CW_TRANSMIT_KEYER_STATE;
+  if (bands.bands[ConfigData.currentBand].mode == RadioMode::CW_MODE and cwKeyer.keyPressedOn == true and ConfigData.keyType == 2) radioState = RadioState::CW_TRANSMIT_IAMBIC_STATE;
 
   // AM modes.  No transmit.
   if (bands.bands[ConfigData.currentBand].mode == RadioMode::AM_MODE) radioState = RadioState::AM_RECEIVE_STATE;
@@ -1253,7 +1250,7 @@ void loop() {
           }
         } else {
           if (digitalRead(KEYER_DIT_INPUT_TIP) == HIGH) {  //Turn off CW signal
-            keyPressedOn = false;
+            cwKeyer.keyPressedOn = false;
             straightKeyStart = false;
             if (cwKeyDown) {  // Initiate falling CW signal.
               cwexciter.CW_ExciterIQData(CW_SHAPING_FALL);
@@ -1271,7 +1268,7 @@ void loop() {
       cwTimer = millis();
       while (millis() - cwTimer <= ConfigData.cwTransmitDelay) {
         // Keyer Dit
-        if (digitalRead(ConfigData.paddleDit) == LOW or keyerFirstDit) {
+        if (digitalRead(ConfigData.paddleDit) == LOW or cwKeyer.keyerFirstDit) {
 
           cwexciter.CW_ExciterIQData(CW_SHAPING_RISE);
 
@@ -1286,9 +1283,9 @@ void loop() {
             cwexciter.CW_ExciterIQData(CW_SHAPING_ZERO);
           }
           cwTimer = millis();  //  Reset delay timer only after a dit or dah is transmitted.
-          keyerFirstDit = false;
+          cwKeyer.keyerFirstDit = false;
           //Keyer DAH
-        } else if (digitalRead(ConfigData.paddleDah) == LOW or keyerFirstDah) {
+        } else if (digitalRead(ConfigData.paddleDah) == LOW or cwKeyer.keyerFirstDah) {
 
           cwexciter.CW_ExciterIQData(CW_SHAPING_RISE);
           for (cwBlockIndex = 0; cwBlockIndex < cwKeyer.transmitDahUnshapedBlocks; cwBlockIndex++) {
@@ -1305,7 +1302,7 @@ void loop() {
         } else {
           cwexciter.CW_ExciterIQData(CW_SHAPING_ZERO);
         }
-        keyerFirstDah = false;
+        cwKeyer.keyerFirstDah = false;
       }  // End while.  End keyer relay timer.
       enableTransmitter(false);
 

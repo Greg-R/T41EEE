@@ -96,7 +96,7 @@ void Display::ShowSpectrum(bool drawSpectrum) {
   for (x1 = 1; x1 < 511; x1++) {  // Bins on the ends are junk, don't plot.
 
     // Quit and start transmitter if key is pressed.
-    if (keyPressedOn) {
+    if (cwKeyer.keyPressedOn) {
       return;
     }
     //Draws the main Spectrum, Waterfall and Audio displays
@@ -1338,29 +1338,30 @@ void Display::UpdateKeyType() {
   tft.fillRect(WPM_X + 59, WPM_Y - 4, tft.getFontWidth() * 15, tft.getFontHeight(), RA8875_BLACK);
   tft.setCursor(FIELD_OFFSET_X, WPM_Y - 5);
 
-  switch(ConfigData.keyType) {
-  case 0:
-    tft.print("Straight Key       ");
-  break;
+  tft.setTextColor(RA8875_WHITE, RA8875_BLACK);
+  switch (ConfigData.keyType) {
+    case 0:
+      tft.print("Straight Key       ");
+      break;
 
     // KD0RC start
     case 1:  // 1 is keyer. 2 is iambic keyer.
     case 2:
-    tft.print("Paddles ");
-    if (ConfigData.paddleFlip == 0) {
-      tft.print("R ");
-    } else {
-      tft.print("L ");
-    } 
-    // KD0RC end
-    tft.print(ConfigData.currentWPM);
-    if(ConfigData.keyType == 1) tft.print("XXXXXXX");
-    if(ConfigData.keyType == 2) tft.print(" Iambic");
-  break;
+      tft.print("Paddles ");
+      if (ConfigData.paddleFlip == 0) {
+        tft.print("R ");
+      } else {
+        tft.print("L ");
+      }
+      // KD0RC end
+      tft.print(ConfigData.currentWPM);
+      if (ConfigData.keyType == 1) tft.print("       ");
+      if (ConfigData.keyType == 2) tft.print(" Iambic");
+      break;
 
-  default:
-  break;
-  } // end switch
+    default:
+      break;
+  }  // end switch
 }
 
 

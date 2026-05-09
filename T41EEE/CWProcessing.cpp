@@ -198,7 +198,7 @@ void CWProcessing::SetTransmitDitLength(int wpm) {
     transmitDahUnshapedBlocks = 0;
   } else {
     transmitDitUnshapedBlocks = static_cast<uint32_t>(rint(transmitDitLength / cwBlockLength)) - 2;  // Length of dit minus 2 for ramp up and down.
-    transmitDahUnshapedBlocks = (transmitDitUnshapedBlocks + 2) * 3 - 2;  // Length of dit times 3 - 2 for ramp up and down.
+    transmitDahUnshapedBlocks = (transmitDitUnshapedBlocks + 2) * 3 - 2;                             // Length of dit times 3 - 2 for ramp up and down.
   }
 }
 
@@ -226,42 +226,43 @@ void CWProcessing::SetKeyType() {
   ConfigData.keyType = SubmenuSelect(keyChoice, 3, ConfigData.keyType);
   if (currentKey == ConfigData.keyType) return;  // No change.
 
-// This needs to be re-factored into a switch statement.
-  // We're switching to a keyer paddle.  This is for both non-iambic and iambic keyers.
-  switch(ConfigData.keyType) {
-//  Configure for straight key.
+  // Configure key to user selection.
+  switch (ConfigData.keyType) {
+      //  Configure for straight key.
     case 0:
-    // Detach the ring interrupt.  It is not needed and can cause undesired interrupts.
-    detachInterrupt(digitalPinToInterrupt(KEYER_DAH_INPUT_RING));
-    pinMode(KEYER_DAH_INPUT_RING, INPUT);  // Remove the pullup.
+      // Detach the ring interrupt.  It is not needed and can cause undesired interrupts.
+      detachInterrupt(digitalPinToInterrupt(KEYER_DAH_INPUT_RING));
+      pinMode(KEYER_DAH_INPUT_RING, INPUT);  // Remove the pullup.
 
-break;
-// Configure for regular keyer and iambic keyer (same configuration).
-  case 1:
-  case 2:
-    // Set the pullup on the ring.
-    pinMode(KEYER_DAH_INPUT_RING, INPUT_PULLUP);  // The other keyer paddle.
-    // Attach the ring interrupt, because it was not needed for the straight key.
-    // The tip interrupt is always attached.
-    attachInterrupt(digitalPinToInterrupt(KEYER_DAH_INPUT_RING), KeyRingOn, CHANGE);
-  // Flip dit and dah as configured by operator.
-  if (ConfigData.paddleFlip) {  // Means right-paddle dit
-    ConfigData.paddleDit = KEYER_DAH_INPUT_RING;
-    ConfigData.paddleDah = KEYER_DIT_INPUT_TIP;
-  } else {
-    ConfigData.paddleDit = KEYER_DIT_INPUT_TIP;
-    ConfigData.paddleDah = KEYER_DAH_INPUT_RING;
-  }
+      break;
+      // Configure for regular keyer and iambic keyer (same configuration).
+    case 1:
+    case 2:
+      // Set the pullup on the ring.
+      pinMode(KEYER_DAH_INPUT_RING, INPUT_PULLUP);  // The other keyer paddle.
+      // Attach the ring interrupt, because it was not needed for the straight key.
+      // The tip interrupt is always attached.
+      attachInterrupt(digitalPinToInterrupt(KEYER_DAH_INPUT_RING), KeyRingOn, CHANGE);
+      // Flip dit and dah as configured by operator.
+      if (ConfigData.paddleFlip) {  // Means right-paddle dit
+        ConfigData.paddleDit = KEYER_DAH_INPUT_RING;
+        ConfigData.paddleDah = KEYER_DIT_INPUT_TIP;
+      } else {
+        ConfigData.paddleDit = KEYER_DIT_INPUT_TIP;
+        ConfigData.paddleDah = KEYER_DAH_INPUT_RING;
+      }
 
-  break;
+      break;
 
-default:
-break;
+    default:
+      break;
 
   }  // end switch
 
   delay(1000);           // This is required to allow GPIOs to settle out.
   keyPressedOn = false;  // Guard against already fired key interrupt.
+  keyerFirstDit = false;
+  keyerFirstDah = false;
 }
 
 
@@ -318,7 +319,6 @@ FLASHMEM void CWProcessing::SetKeyPowerUp() {
     }
   }
   */
-
 }
 
 
@@ -756,212 +756,115 @@ float CWProcessing::goertzel_mag(int numSamples, int TARGET_FREQUENCY, int SAMPL
 
 // Iambic keyer methods follow.
 
-//    Calculate new Dit duration in ms based on wpm value
-
-void CWProcessing::loadWPM(int wpm) {
-  g_ditTime = 1200 / wpm;
-}
-
 void CWProcessing::init_iambic() {
 
-  // Setup output pins
-//  pinMode(LED_PIN, OUTPUT);
-//  pinMode(PIEZO_SPKR_PIN, OUTPUT);
-//  pinMode(TX_SWITCH_PIN, OUTPUT);
-
-  // Setup input pins
-//  pinMode(LEFT_PADDLE_PIN, INPUT_PULLUP);   // sets Left Paddle digital pin as input
-//  pinMode(RIGHT_PADDLE_PIN, INPUT_PULLUP);  // sets Right Paddle digital pin as input
-//  pinMode(CMD_SWITCH_PIN, INPUT_PULLUP);    // sets pin as command mode switch input
-
-//  digitalWrite(LED_PIN, LOW);        // turn the LED off
-//  digitalWrite(TX_SWITCH_PIN, LOW);  // Transmitter off
-
-  g_keyerState = IDLE;
-
-//  EEPROM.get(EEADDRESS, g_ks_eeprom);  // Read the stored config data from EEPROM
-//  if (!validate_ee_checksum()) {       // does EEPROM checksum equal the calculated checksum
-
-    // Checksum didn't match stored data so assume that this is the first time this code has run
-
-    g_keyerControl = IAMBIC_B;   // Make Iambic B the default mode
-
-//    #if defined (KEYER_MODE_IS_IAMBIC_A)
-//      g_keyerControl = IAMBIC_A; // Override with Iambic A via conditional compilation
-//    #endif
-
-    loadWPM(DEFAULT_SPEED_WPM);  // Set initial keyer speed to default
-
-    // Setup for Righthanded paddle by default
-  
-    g_dit_paddle = KEYER_DIT_INPUT_TIP;   // Dits on right hand thumb
-    g_dah_paddle = KEYER_DAH_INPUT_RING;  // Dahs on right hand index finger
-
-    g_sidetone_muted = true;  // Default to no sidetone
-
-    /* Store these defaults and write settings to EEPROM
-    g_ks_eeprom.ms_per_dit = g_ditTime;
-    g_ks_eeprom.dit_paddle_pin = g_dit_paddle;
-    g_ks_eeprom.dah_paddle_pin = g_dah_paddle;
-    g_ks_eeprom.iambic_keying_mode = g_keyerControl;
-    g_ks_eeprom.sidetone_is_muted = true;
-    g_ks_eeprom.num_writes = 1;
-    g_ks_eeprom.data_checksum = calculate_ee_checksum();
-    EEPROM.put(EEADDRESS, g_ks_eeprom);
-  } else {  // Checksum matched so restore previous settings that were saved in EEPROM
-    g_ditTime = g_ks_eeprom.ms_per_dit;
-    g_dit_paddle = g_ks_eeprom.dit_paddle_pin;
-    g_dah_paddle = g_ks_eeprom.dah_paddle_pin;
-    g_keyerControl = g_ks_eeprom.iambic_keying_mode;
-    g_sidetone_muted = (g_ks_eeprom.sidetone_is_muted != 0);
-  }
-  */
-
-//  audio_send_morse_msg(&pwr_on_msg[0], g_ditTime);  // Send the OK message via the Piezo Speaker
-
-  // Serial.begin(9600); // for Debug
-}
-
-
-// Calculate the 32-bit checksum value for the state data stored in EEPROM
-// The only field not used in the checksum calculation is the stored checksum which should be obvious
-uint32_t CWProcessing::calculate_ee_checksum() {
-  uint32_t calc_checksum = 0;
-  calc_checksum = g_ks_eeprom.ms_per_dit + g_ks_eeprom.dit_paddle_pin + g_ks_eeprom.dah_paddle_pin + g_ks_eeprom.iambic_keying_mode + g_ks_eeprom.sidetone_is_muted + g_ks_eeprom.num_writes;
-  return (calc_checksum);
-}
-
-// Verify that the stored EEPROM checksum matches the calculated value
-bool CWProcessing::validate_ee_checksum() {
-  return (g_ks_eeprom.data_checksum == (calculate_ee_checksum()));
+  g_keyerState = KSTYPE::IDLE;
+  g_keyerControl = IAMBIC_B;  // Make Iambic B the default mode
+  //    #if defined (KEYER_MODE_IS_IAMBIC_A)
+  //      g_keyerControl = IAMBIC_A; // Override with Iambic A via conditional compilation
+  //    #endif
 }
 
 
 //    Latch dit and/or dah press
 void CWProcessing::updatePaddleLatch() {
-  if (digitalRead(g_dit_paddle) == LOW) {
+  if (digitalRead(ConfigData.paddleDit) == LOW) {
     g_keyerControl |= DIT_L;  // |= is bitwise OR.  This is the same as g_keyerControl = g_keyerControl | DIT_L;
   }
-  if (digitalRead(g_dah_paddle) == LOW) {
+  if (digitalRead(ConfigData.paddleDah) == LOW) {
     g_keyerControl |= DAH_L;
   }
 }
 
 
-void CWProcessing::iambicStateMachine(uint32_t& cwTimer) {
+void CWProcessing::iambicStateMachine(uint32_t &cwTimer) {
 
   // This state machine translates paddle input into DITS and DAHs and keys the transmitter.
   switch (g_keyerState) {
-    case IDLE:
-      // Wait for direct or latched paddle press
-      if ((digitalRead(g_dit_paddle) == LOW) || (digitalRead(g_dah_paddle) == LOW) || (g_keyerControl & 0x03)) {
+    case KSTYPE::IDLE:  // Wait for direct or latched paddle press
+      if ((digitalRead(ConfigData.paddleDit) == LOW) || (digitalRead(ConfigData.paddleDah) == LOW) || (g_keyerControl & 0x03)) {
         updatePaddleLatch();
-        g_current_morse_character = B11111110;  // Starting point for accumulating a character input via paddles
-        g_keyerState = CHK_DIT;
+        g_keyerState = KSTYPE::CHK_DIT;
       }
       break;
 
-    case CHK_DIT:
-      // See if the dit paddle was pressed
+    case KSTYPE::CHK_DIT:  // See if the dit paddle was pressed
       if (g_keyerControl & DIT_L) {
         g_keyerControl |= DIT_PROC;
-        ktimer = g_ditTime;
         sendDit = true;
-        g_keyerState = KEYED_PREP;
+        g_keyerState = KSTYPE::KEYED_PREP;
       } else {
-        g_keyerState = CHK_DAH;
+        g_keyerState = KSTYPE::CHK_DAH;
       }
       break;
 
-    case CHK_DAH:
+    case KSTYPE::CHK_DAH:
       // See if dah paddle was pressed
       if (g_keyerControl & DAH_L) {
-        ktimer = g_ditTime * 3;  // Set timer for dah.
         sendDah = true;
-//        g_current_morse_character = ((g_current_morse_character << 1) | 1);  // Shift left one position and make bit #0 a DAH (1)
-        g_keyerState = KEYED_PREP;
+        g_keyerState = KSTYPE::KEYED_PREP;
       } else {
-        ktimer = millis() + (g_ditTime * 2);  // Character space, is g_ditTime x 2 because already have a trailing intercharacter space
-        g_keyerState = PRE_IDLE;
+        g_keyerState = KSTYPE::PRE_IDLE;
       }
       break;
 
-    case KEYED_PREP:
-      // Assert key down, start timing, state shared for dit or dah
-//      tx_key_down();
+    case KSTYPE::KEYED_PREP:  // Prep for transmit, state shared for dit or dah.
 
-
-      ktimer += millis();                  // set ktimer to interval end time
       g_keyerControl &= ~(DIT_L + DAH_L);  // clear both paddle latch bits
 
-      g_keyerState = KEYED;                // next state
+      g_keyerState = KSTYPE::KEYED;  // next state
       break;
 
-    case KEYED:
+    case KSTYPE::KEYED:
 
-cwexciter.CW_ExciterIQData(CW_SHAPING_RISE);
-if(sendDit) {
-for(uint32_t i = 0; i < 6; i = i + 1)
-cwexciter.CW_ExciterIQData(CW_SHAPING_NONE);
-}
-if(sendDah) {
-for(uint32_t i = 0; i < 22; i = i + 1)
-cwexciter.CW_ExciterIQData(CW_SHAPING_NONE);
-}
-cwexciter.CW_ExciterIQData(CW_SHAPING_FALL);
+      cwexciter.CW_ExciterIQData(CW_SHAPING_RISE);
+      if (sendDit) {
+        for (uint32_t i = 0; i < transmitDitUnshapedBlocks; i = i + 1)
+          cwexciter.CW_ExciterIQData(CW_SHAPING_NONE);
+      }
+      if (sendDah) {
+        for (uint32_t i = 0; i < transmitDahUnshapedBlocks; i = i + 1)
+          cwexciter.CW_ExciterIQData(CW_SHAPING_NONE);
+      }
+      cwexciter.CW_ExciterIQData(CW_SHAPING_FALL);
 
       sendDit = false;
       sendDah = false;
-      // Wait for timer to expire.  When it expires, move to INTER_ELEMENT state.
-//      if (millis() > ktimer) {  // are we at end of key down ?
-        if(true) {     //// Temporary
-//        SimpleCwKeyer::tx_key_up();
+ 
+      g_keyerState = KSTYPE::INTER_ELEMENT;   // next state
+      // Reset the cwTimer (used in .ino), which resets the user-selected transmit delay.  This is passed in as a reference.
+      cwTimer = millis();
 
-        ktimer = millis() + g_ditTime;  // inter-element time
-        g_keyerState = INTER_ELEMENT;   // next state
-        // Reset the cwTimer, which resets the user-selected transmit delay.  This is passed in as a reference.
-        cwTimer = millis();
-      } else if (g_keyerControl & IAMBIC_B) {
+      if (g_keyerControl & IAMBIC_B)
         updatePaddleLatch();  // early paddle latch check in Iambic B mode
+
+      break;
+
+    case KSTYPE::INTER_ELEMENT:   // Insert time between dits/dahs
+
+      for (uint32_t i = 0; i < (transmitDitUnshapedBlocks + 2); i = i + 1)
+        cwexciter.CW_ExciterIQData(CW_SHAPING_ZERO);
+
+      updatePaddleLatch();                      // latch paddle state
+                                                //      if (millis() > ktimer) {                    // are we at end of inter-space ?
+      if (g_keyerControl & DIT_PROC) {          // was it a dit or dah ?
+        g_keyerControl &= ~(DIT_L + DIT_PROC);  // clear two bits
+        g_keyerState = KSTYPE::CHK_DAH;                 // dit done, check for dah
+      } else {
+        g_keyerControl &= ~(DAH_L);           // clear dah latch
+        g_keyerState = KSTYPE::PRE_IDLE;              // go idle
       }
+      //      }
       break;
 
-    case INTER_ELEMENT:
-      // Insert time between dits/dahs
-
-for(uint32_t i = 0; i < 8; i = i + 1)
-cwexciter.CW_ExciterIQData(CW_SHAPING_ZERO);
-
-      updatePaddleLatch();                       // latch paddle state
-//      if (millis() > ktimer) {                    // are we at end of inter-space ?
-        if (g_keyerControl & DIT_PROC) {          // was it a dit or dah ?
-          g_keyerControl &= ~(DIT_L + DIT_PROC);  // clear two bits
-          g_keyerState = CHK_DAH;                 // dit done, check for dah
-        } else {
-          g_keyerControl &= ~(DAH_L);           // clear dah latch
-          ktimer = millis() + (g_ditTime * 2);  // Character space, is g_ditTime x 2 because already have a trailing intercharacter space
-          g_keyerState = PRE_IDLE;              // go idle
-        }
-//      }
-      break;
-
-    case PRE_IDLE:  // Wait for an intercharacter space
+    case KSTYPE::PRE_IDLE:  // Wait for an intercharacter space
 
       // Check for direct or latched paddle press
-      if ((digitalRead(g_dit_paddle) == LOW) || (digitalRead(g_dah_paddle) == LOW) || (g_keyerControl & 0x03)) {
+      if ((digitalRead(ConfigData.paddleDit) == LOW) || (digitalRead(ConfigData.paddleDah) == LOW) || (g_keyerControl & 0x03)) {
         updatePaddleLatch();
-        g_keyerState = CHK_DIT;
-      } else {                    // Check for intercharacter space
-        if (millis() > ktimer) {  // We have a character
-          // Serial.println(g_current_morse_character);
-          g_keyerState = IDLE;  // go idle
-          if (g_keyer_command_state != CMD_IDLE) {
-//            SimpleCwKeyer::process_keyer_command(g_current_morse_character, g_ditTime);
-          }
-        }
+        g_keyerState = KSTYPE::CHK_DIT;
       }
 
       break;
   }
-
-} // End of iambic keyer state machine. 
+}  // End of iambic keyer state machine.
