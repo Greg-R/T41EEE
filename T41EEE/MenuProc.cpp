@@ -70,14 +70,15 @@ void CalibrateOptions() {
 
   // Select the type of calibration, and then skip this during the loop() function.
   // Note that some calibrate options run inside the loop() function!
-  if (calibrateFlag == 0) {  //    0             1           2               3                4              5             6              7                  8                  9               10                11               12                13               14               15              16          17           18
+  if (calibrateFlag == false) {  //    0             1           2               3                4              5             6              7                  8                  9               10                11               12                13               14               15              16          17           18
     const std::string IQOptions[]{ "Freq Cal", "CW PA Cal", "CW Rec Cal", "CW Carrier Cal", "CW Xmit Cal", "SSB PA Cal", "SSB Rec Cal", "SSB Carrier Cal", "SSB Transmit Cal", "CW Radio Cal", "CW Refine Cal", "SSB Radio Cal", "SSB Refine Cal", "dBm Level Cal", "Btn Cal", "Btn Repeat", "Cancel" };
     IQChoice = SubmenuSelect(IQOptions, 17, 0);
   }
-  calibrateFlag = 1;
+//  calibrateFlag = true;
   switch (IQChoice) {
 
     case 0:  // Calibrate Frequency  - uses WWV
+    calibrateFlag = true;
       CalData.freqCorrectionFactor = GetEncoderValueLive(-200000, 200000, CalData.freqCorrectionFactor, increment, "Freq Cal: ", true, true);
       if (CalData.freqCorrectionFactor != freqCorrectionFactorOld) {
         si5351.set_correction(CalData.freqCorrectionFactor, SI5351_PLL_INPUT_XO);
@@ -97,6 +98,7 @@ void CalibrateOptions() {
       break;
 
     case 1:  // CW PA Cal
+    calibrateFlag = true;
       CalData.CWPowerCalibrationFactor[ConfigData.currentBand] = GetEncoderValueLive(0.0, 1.0, CalData.CWPowerCalibrationFactor[ConfigData.currentBand], 0.01, "CW PA Cal: ", true, true);
       ConfigData.powerOutCW[ConfigData.currentBand] = sqrt(ConfigData.transmitPowerLevel / 20.0) * CalData.CWPowerCalibrationFactor[ConfigData.currentBand];
       menu = readButton();
@@ -125,6 +127,7 @@ void CalibrateOptions() {
       break;
 
     case 5:  // SSB PA Cal
+    calibrateFlag = true;
       CalData.SSBPowerCalibrationFactor[ConfigData.currentBand] = GetEncoderValueLive(0.0, 1.0, CalData.SSBPowerCalibrationFactor[ConfigData.currentBand], 0.01, "SSB PA Cal: ", true, true);
       ConfigData.powerOutSSB[ConfigData.currentBand] = sqrt(ConfigData.transmitPowerLevel / 20.0) * CalData.SSBPowerCalibrationFactor[ConfigData.currentBand];
       menu = readButton();
@@ -141,7 +144,7 @@ void CalibrateOptions() {
       break;
 
     case 6:                                                    // SSB receive cal
-      rxcalibrater.DoReceiveCalibrate(1, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
+      rxcalibrater.DoReceiveCalibrate(1, false, false, true);
 
       break;
 
@@ -150,30 +153,31 @@ void CalibrateOptions() {
       break;
 
     case 8:                                                 // SSB Transmit cal
-      txcalibrater.DoXmitCalibrate(1, false, false, true);  // This function was significantly revised.  KF5N August 16, 2023
+      txcalibrater.DoXmitCalibrate(1, false, false, true);
       break;
 
-    case 9:  // CW fully automatic radio calibration.  (mode, initial cal = false, refinecal = true)
+    case 9:  // CW fully automatic radio calibration.
       txcalibrater.RadioCal(0, false);
-      calibrateFlag = false;
+//      calibrateFlag = false;
       break;
 
     case 10:  // CW full automatic calibration refinement.
       txcalibrater.RadioCal(0, true);
-      calibrateFlag = false;
+//      calibrateFlag = false;
       break;
 
     case 11:  // SSB fully automatic radio calibration.
       txcalibrater.RadioCal(1, false);
-      calibrateFlag = false;
+//      calibrateFlag = false;
       break;
 
     case 12:  // SSB fully automatic calibration refinement.
       txcalibrater.RadioCal(1, true);
-      calibrateFlag = false;
+//      calibrateFlag = false;
       break;
 
     case 13:  // dBm level cal.
+    calibrateFlag = true;
       CalData.dBm_calibration = GetEncoderValueLive(0, 100, CalData.dBm_calibration, 1, (char *)"dBm Cal: ", true, true);
       if (CalData.dBm_calibration != freqCorrectionFactorOld) {
         freqCorrectionFactorOld = CalData.dBm_calibration;
@@ -191,12 +195,13 @@ void CalibrateOptions() {
 
     case 14:  // Calibrate buttons
       SaveAnalogSwitchValues();
-      calibrateFlag = false;
+//      calibrateFlag = false;
       display.RedrawAll();
       eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 15:  // Set button repeat rate
+    calibrateFlag = true;
       CalData.buttonRepeatDelay = 1000 * GetEncoderValueLive(0, 5000, CalData.buttonRepeatDelay / 1000, 1, "Btn Repeat:  ", true, true);
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {
@@ -211,7 +216,7 @@ void CalibrateOptions() {
 
     case 16:  // Cancelled choice
 
-      calibrateFlag = 0;
+//      calibrateFlag = false;
       break;
 
     default:
@@ -225,14 +230,15 @@ void CalibrateOptions() {
   MenuSelect menu = MenuSelect::BOGUS_PIN_READ;
 
   // Select the type of calibration, and then skip this during the loop() function.
-  if (calibrateFlag == 0) {
+  if (calibrateFlag == false) {
     const std::string IQOptions[]{ "Freq Cal", "CW PA Cal", "CW Rec Cal", "CW Xmit Cal", "SSB PA Cal", "SSB Rec Cal", "SSB Transmit Cal", "CW Radio Cal", "CW Refine Cal", "SSB Radio Cal", "SSB Refine Cal", "dBm Level Cal", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
     IQChoice = SubmenuSelect(IQOptions, 15, 0);                                                                                                                                                                                                                      //AFP 10-21-22
   }
-  calibrateFlag = true;
+////  calibrateFlag = true;
   switch (IQChoice) {
 
     case 0:  // Calibrate Frequency  - uses WWV
+      calibrateFlag = true;
       CalData.freqCorrectionFactor = GetEncoderValueLive(-200000, 200000, CalData.freqCorrectionFactor, increment, "Freq Cal: ", true, true);
       if (CalData.freqCorrectionFactor != freqCorrectionFactorOld) {
         si5351.set_correction(CalData.freqCorrectionFactor, SI5351_PLL_INPUT_XO);
@@ -251,6 +257,7 @@ void CalibrateOptions() {
       break;
 
     case 1:  // CW PA Cal
+    calibrateFlag = true;
       CalData.CWPowerCalibrationFactor[ConfigData.currentBand] = GetEncoderValueLive(0.0, 1.0, CalData.CWPowerCalibrationFactor[ConfigData.currentBand], 0.01, "CW PA Cal: ", true, true);
       ConfigData.powerOutCW[ConfigData.currentBand] = sqrt(ConfigData.transmitPowerLevel / 20.0) * CalData.CWPowerCalibrationFactor[ConfigData.currentBand];
       menu = readButton();
@@ -260,7 +267,7 @@ void CalibrateOptions() {
           tft.print("                 ");  // Erase.
           eeprom.ConfigDataWrite();
           eeprom.CalDataWrite();
-          calibrateFlag = 0;
+          calibrateFlag = false;
           display.EraseMenus();
         }
       }
@@ -278,6 +285,7 @@ void CalibrateOptions() {
       break;
 
     case 4:  // SSB PA Cal
+    calibrateFlag = true;
       CalData.SSBPowerCalibrationFactor[ConfigData.currentBand] = GetEncoderValueLive(0.0, 1.0, CalData.SSBPowerCalibrationFactor[ConfigData.currentBand], 0.01, "SSB PA Cal: ", true, true);
       ConfigData.powerOutSSB[ConfigData.currentBand] = sqrt(ConfigData.transmitPowerLevel / 20.0) * CalData.SSBPowerCalibrationFactor[ConfigData.currentBand];
       menu = readButton();
@@ -288,7 +296,7 @@ void CalibrateOptions() {
           eeprom.ConfigDataWrite();
           eeprom.CalDataWrite();
           display.EraseMenus();
-          calibrateFlag = 0;
+          calibrateFlag = false;
         }
       }
 
@@ -306,25 +314,26 @@ void CalibrateOptions() {
 
     case 7:  //  CW fully automatic radio calibration.
       txcalibrater.RadioCal(0, false);
-      calibrateFlag = 0;
+//      calibrateFlag = false;
       break;
 
     case 8:  // CW fully automatic calibration refinement.
       txcalibrater.RadioCal(0, true);
-      calibrateFlag = 0;
+//      calibrateFlag = false;
       break;
 
     case 9:  // SSB fully automatic radio calibration.
       txcalibrater.RadioCal(1, false);
-      calibrateFlag = 0;
+//      calibrateFlag = false;
       break;
 
     case 10:  // SSB fully automatic calibration refinement.
       txcalibrater.RadioCal(1, true);
-      calibrateFlag = 0;
+//      calibrateFlag = false;
       break;
 
     case 11:  // dBm level cal.  Was choose CW calibration tone frequency.
+    calibrateFlag = true;
       CalData.dBm_calibration = GetEncoderValueLive(0, 100, CalData.dBm_calibration, 1, "dBm Cal: ", true, true);
       if (CalData.dBm_calibration != freqCorrectionFactorOld) {
         freqCorrectionFactorOld = CalData.dBm_calibration;
@@ -335,19 +344,20 @@ void CalibrateOptions() {
           tft.setCursor(0, 1);
           tft.print("                ");  // Erase.
           eeprom.CalDataWrite();
-          calibrateFlag = 0;
+          calibrateFlag = false;
         }
       }
       break;
 
     case 12:  // Calibrate buttons
       SaveAnalogSwitchValues();
-      calibrateFlag = 0;
+//      calibrateFlag = false;
       display.RedrawAll();
       eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
 
     case 13:  // Set button repeat rate
+    calibrateFlag = true;
       CalData.buttonRepeatDelay = 1000 * GetEncoderValueLive(0, 5000, CalData.buttonRepeatDelay / 1000, 1, "Btn Repeat:  ", true, true);
       menu = readButton();
       if (menu != MenuSelect::BOGUS_PIN_READ) {
@@ -355,13 +365,13 @@ void CalibrateOptions() {
           tft.setCursor(0, 1);
           tft.print("                ");  // Erase.
           eeprom.CalDataWrite();
-          calibrateFlag = 0;
+          calibrateFlag = false;
         }
       }
       break;
 
     case 14:  // Cancelled choice
-      calibrateFlag = 0;
+//      calibrateFlag = false;
       break;
 
     default:

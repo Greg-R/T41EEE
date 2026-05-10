@@ -1149,7 +1149,7 @@ void loop() {
   }
 
   // Don't turn off audio in the case of CW for sidetone.
-  if (powerUp and not(radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE or radioState == RadioState::CW_TRANSMIT_KEYER_STATE)) {
+  if (powerUp and not(radioState == RadioState::CW_TRANSMIT_STRAIGHT_STATE or radioState == RadioState::CW_TRANSMIT_KEYER_STATE or radioState == RadioState::CW_TRANSMIT_IAMBIC_STATE)) {
     afterPowerUp = afterPowerUp + 1;
     speakerScale.setGain(0);
     headphoneScale.setGain(0);
