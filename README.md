@@ -20,7 +20,7 @@ This software is licensed according to:
 GNU GENERAL PUBLIC LICENSE  
 Version 3, 29 June 2007  
 Please refer to the included LICENSE file.  
-Greg Raven, November 14 2025
+Greg Raven, May 10 2025
 
 T41EEE will be hosted at this public Github repository:
 
@@ -83,7 +83,7 @@ Memory Usage on Teensy 4.1:
 ```
 ## Highlight of Changes included in T41EEE.93 May 10, 2026
 
-This release is to add and iambic keyer and improve CW decoding display.
+This release adds an iambic keyer and improved CW decoding display.
 
 1.  An iambic keyer is added.  This is found in the CW Options, in the sub-menu
     "Key Type".
