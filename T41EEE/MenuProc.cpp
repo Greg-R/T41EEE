@@ -300,7 +300,7 @@ void CalibrateOptions() {
       break;
 
     case 6:
-      txcalibrater.DoXmitCalibrate(false, false, true, true);  // SSB Transmit cal
+      txcalibrater.DoXmitCalibrate(1, false, true, true);  // SSB Transmit cal
 
       break;
 
