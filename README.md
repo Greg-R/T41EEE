@@ -1,4 +1,4 @@
-### Version T41EEE.92 T41 Software Defined Transceiver Arduino Sketch
+### Version T41EEE.93 T41 Software Defined Transceiver Arduino Sketch
 
 This is the "T41 Extreme Experimenter's Edition" software for the 
 T41 Software Defined Transceiver.  The T41EEE was "forked" from the V049.2 version
@@ -36,13 +36,13 @@ unless otherwise noted.
 
 ## How to Compile T41EEE
 
-T41EEE.92 was developed and compiled using Arduino IDE version 2.3.6 with the following
+T41EEE.93 was developed and compiled using Arduino IDE version 2.3.8 with the following
 configuration:
 
 1.  Optimize is set to "Smallest Code" (Tools menu).
 2.  CPU speed is set to 528 MHz (Tools menu).
 3.  Select USB Type: "Dual Serial" in the Tools menu.
-4.  Install TeensyDuino using the IDE Board Manager.  The TeensyDuino version is 1.59.0.  
+4.  Install TeensyDuino using the IDE Board Manager.  The TeensyDuino version is 1.60.0.  
 5.  You will need to install the ArduinoJson library by Benoit Blanchon.  Install via
     the IDE Library Manager.
 6.  You will need to install the Etherkit Si5351 library.  Install via the IDE
@@ -68,7 +68,7 @@ new version.  The instructions for performing a FLASH erase of the Teensy are he
 
 The bullet "Memory Wipe & LED Blink Restore" has the instructions.
 
-Please note a special exception for upgrading from T41EEE.91 to T41EEE.92.
+Please note a special exception for upgrading from T41EEE.92 to T41EEE.93.
 This upgrade does not require a FLASH erase.  An overwrite with the new version will work.
 The version number shown in the "splash" display at boot and in the upper right hand
 corner of the display during normal operation will show the correct version.
@@ -81,6 +81,16 @@ Memory Usage on Teensy 4.1:
    RAM1: variables:146496, code:186936, padding:9672   free for local variables:181184
    RAM2: variables:332896  free for malloc/new:191392
 ```
+## Highlight of Changes included in T41EEE.93 May 10, 2026
+
+This release is to add and iambic keyer and improve CW decoding display.
+
+1.  An iambic keyer is added.  This is found in the CW Options, in the sub-menu
+    "Key Type".
+2.  Display of decoded CW is now managed in the RA8875 display using BTE, which is
+    the "Block Transfer Engine".
+
+
 ## Highlight of Changes included in T41EEE.92 December 11, 2025
 
 This release is to address bug fixes and usability issues in T41EEE.91.
