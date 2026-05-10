@@ -74,7 +74,7 @@ void CalibrateOptions() {
     const std::string IQOptions[]{ "Freq Cal", "CW PA Cal", "CW Rec Cal", "CW Carrier Cal", "CW Xmit Cal", "SSB PA Cal", "SSB Rec Cal", "SSB Carrier Cal", "SSB Transmit Cal", "CW Radio Cal", "CW Refine Cal", "SSB Radio Cal", "SSB Refine Cal", "dBm Level Cal", "Btn Cal", "Btn Repeat", "Cancel" };
     IQChoice = SubmenuSelect(IQOptions, 17, 0);
   }
-//  calibrateFlag = true;
+
   switch (IQChoice) {
 
     case 0:  // Calibrate Frequency  - uses WWV
@@ -158,22 +158,22 @@ void CalibrateOptions() {
 
     case 9:  // CW fully automatic radio calibration.
       txcalibrater.RadioCal(0, false);
-//      calibrateFlag = false;
+
       break;
 
     case 10:  // CW full automatic calibration refinement.
       txcalibrater.RadioCal(0, true);
-//      calibrateFlag = false;
+
       break;
 
     case 11:  // SSB fully automatic radio calibration.
       txcalibrater.RadioCal(1, false);
-//      calibrateFlag = false;
+
       break;
 
     case 12:  // SSB fully automatic calibration refinement.
       txcalibrater.RadioCal(1, true);
-//      calibrateFlag = false;
+
       break;
 
     case 13:  // dBm level cal.
@@ -195,7 +195,6 @@ void CalibrateOptions() {
 
     case 14:  // Calibrate buttons
       SaveAnalogSwitchValues();
-//      calibrateFlag = false;
       display.RedrawAll();
       eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
@@ -216,7 +215,6 @@ void CalibrateOptions() {
 
     case 16:  // Cancelled choice
 
-//      calibrateFlag = false;
       break;
 
     default:
@@ -234,7 +232,7 @@ void CalibrateOptions() {
     const std::string IQOptions[]{ "Freq Cal", "CW PA Cal", "CW Rec Cal", "CW Xmit Cal", "SSB PA Cal", "SSB Rec Cal", "SSB Transmit Cal", "CW Radio Cal", "CW Refine Cal", "SSB Radio Cal", "SSB Refine Cal", "dBm Level Cal", "Btn Cal", "Btn Repeat", "Cancel" };  //AFP 10-21-22
     IQChoice = SubmenuSelect(IQOptions, 15, 0);                                                                                                                                                                                                                      //AFP 10-21-22
   }
-////  calibrateFlag = true;
+
   switch (IQChoice) {
 
     case 0:  // Calibrate Frequency  - uses WWV
@@ -314,22 +312,22 @@ void CalibrateOptions() {
 
     case 7:  //  CW fully automatic radio calibration.
       txcalibrater.RadioCal(0, false);
-//      calibrateFlag = false;
+
       break;
 
     case 8:  // CW fully automatic calibration refinement.
       txcalibrater.RadioCal(0, true);
-//      calibrateFlag = false;
+
       break;
 
     case 9:  // SSB fully automatic radio calibration.
       txcalibrater.RadioCal(1, false);
-//      calibrateFlag = false;
+
       break;
 
     case 10:  // SSB fully automatic calibration refinement.
       txcalibrater.RadioCal(1, true);
-//      calibrateFlag = false;
+
       break;
 
     case 11:  // dBm level cal.  Was choose CW calibration tone frequency.
@@ -351,7 +349,6 @@ void CalibrateOptions() {
 
     case 12:  // Calibrate buttons
       SaveAnalogSwitchValues();
-//      calibrateFlag = false;
       display.RedrawAll();
       eeprom.CalDataWrite();  // Save calibration numbers and configuration.  KF5N August 12, 2023
       break;
@@ -371,7 +368,6 @@ void CalibrateOptions() {
       break;
 
     case 14:  // Cancelled choice
-//      calibrateFlag = false;
       break;
 
     default:

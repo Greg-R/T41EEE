@@ -35,14 +35,14 @@ const int RIGNAME_X_OFFSET = 570;  // Pixel count to rig name field.
 //#define TCXO_25MHZ                1
 
 #define PADDLE_FLIP 0                // 0 = right paddle = DAH, 1 = DIT
-#define STRAIGHT_KEY_OR_PADDLES 0    // 0 = straight, 1 = paddles
+#define STRAIGHT_KEY_OR_PADDLES 0    // 0 = straight, 1 = keyer, 2 = iambic keyer
 #define SDCARD_MESSAGE_LENGTH 3000L  // The number of milliseconds to leave error message on screen
 
 //====================== System specific ===============
 #define CURRENT_FREQ_A 7200000  // VFO_A
 #define CURRENT_FREQ_B 7030000  // VFO_B
 #define DEFAULT_POWER_LEVEL 10  // Startup power level.
-#define SPLASH_DELAY 1      // How long to show Splash screen. Use 1000 for testing, 4000 normally.
+#define SPLASH_DELAY 4000      // How long to show Splash screen. Use 1000 for testing, 4000 normally.
 #define STARTUP_BAND 1          // This is the 40M band. see around line 575 in SDT.h
 
 constexpr uint32_t CENTER_SCREEN_X = 400;

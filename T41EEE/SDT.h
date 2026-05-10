@@ -328,7 +328,7 @@ struct config_t {
   int paddleDah = KEYER_DAH_INPUT_RING;
   int decoderFlag = false;                     // JJP 7-3-23
   uint32_t morseDecodeSensitivity = 3000;      // Greg KF5N February 19, 2025
-  uint32_t keyType = STRAIGHT_KEY_OR_PADDLES;  // Straight key = 0, keyer = 1.  JJP 7-3-23
+  uint32_t keyType = STRAIGHT_KEY_OR_PADDLES;  // Straight key = 0, keyer = 1, iambic keyer = 2
   int currentWPM = DEFAULT_KEYER_WPM;          // 4 bytes default = 15 JJP 7-3-23
   int CWOffset = 2;                            // Default is 750 Hz.
   uint32_t sidetoneSpeaker = 40;               // 4 bytes

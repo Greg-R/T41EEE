@@ -242,7 +242,6 @@ void RxCalibrate::CalibrateEpilogue(bool radioCal, bool saveToEeprom) {
   ADC_RX_Q.clear();
   ConfigData.centerFreq = TxRxFreq;
   NCOFreq = 0;
-//  calibrateFlag = false;                                       // KF5N
   ConfigData.CWOffset = cwFreqOffsetTemp;                  // Return user selected CW offset frequency.
   sineTone(ConfigData.CWOffset + 6);                       // This function takes "number of cycles" which is the offset + 6.
   ConfigData.currentScale = userScale;                     //  Restore vertical scale to user preference.  KF5N
