@@ -888,7 +888,7 @@ FLASHMEM void setup() {
   pinMode(MUTE, OUTPUT);
   digitalWrite(MUTE, MUTEAUDIO);  // Keep audio junk out of the speakers/headphones until configuration is complete.
   pinMode(PTT, INPUT_PULLUP);
-  pinMode(BUSY_ANALOG_PIN, INPUT);  // Pin 39.  Switch matrix output connects to this pin.
+  pinMode(BUSY_ANALOG_PIN, INPUT_PULLUP);  // Pin 39.  Switch matrix output connects to this pin.
                                     // Straight key and paddle GPIOs are handled in special set-up function.
 
   // SPI bus to display.
