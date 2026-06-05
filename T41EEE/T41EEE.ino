@@ -982,7 +982,7 @@ FLASHMEM void setup() {
     tft.setTextColor(RA8875_GREEN);
     tft.setCursor(10, 10);
     tft.print("Release button to start calibration.");
-    delay(2000);
+    delay(5000);  // User must release button before this delay expires!
     button.EnableButtonInterrupts();
     SaveAnalogSwitchValues();  // Call to reset switch matrix values
     eeprom.CalDataWrite();
