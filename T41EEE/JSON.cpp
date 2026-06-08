@@ -65,6 +65,7 @@ FLASHMEM void JSON::loadConfiguration(const char *filename, config_t &ConfigData
   // Copy values from the JsonDocument to the ConfigData
   strlcpy(ConfigData.versionSettings, doc["versionSettings"] | "t41pp.0", 10);
   ConfigData.AGCMode = doc["AGCMode"];
+  ConfigData.AGCThreshold = doc["AGCThreshold"];
   ConfigData.speakerVolume = doc["speakerVolume"];
   ConfigData.headphoneVolume = doc["headphoneVolume"];
   ConfigData.audioOut = doc["audioOut"];
@@ -157,6 +158,7 @@ FLASHMEM void JSON::saveConfiguration(const char *filename, const config_t &Conf
   // Set the values in the document
   doc["versionSettings"] = ConfigData.versionSettings;  // Fix for version not updating in JSON file.  KF5N March 18, 2024.
   doc["AGCMode"] = ConfigData.AGCMode;
+  doc["AGCThreshold"] = ConfigData.AGCThreshold;
   doc["speakerVolume"] = ConfigData.speakerVolume;
   doc["headphoneVolume"] = ConfigData.headphoneVolume;
   doc["audioOut"] = ConfigData.audioOut;

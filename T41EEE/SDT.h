@@ -954,7 +954,7 @@ float MSinc(int m, float fc);
 void printFile(const char *filename);
 void playTransmitData();  // KF5N February 23, 2024
 void ProcessEqualizerChoices(int EQType, char *title);
-MenuSelect readButton(MenuSelect lastUsedTask);
+//MenuSelect readButton(MenuSelect lastUsedTask);
 MenuSelect readButton();
 void ResetFlipFlops();
 void ResetHistograms();

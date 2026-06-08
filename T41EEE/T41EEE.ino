@@ -775,7 +775,7 @@ FLASHMEM void Splash() {
   tft.fillWindow(RA8875_BLACK);
 }
 
-
+/*
 MenuSelect readButton(MenuSelect lastUsedTask) {
   int val = 0;
   MenuSelect menu, task = MenuSelect::DEFAULT;
@@ -787,6 +787,7 @@ MenuSelect readButton(MenuSelect lastUsedTask) {
   }
   return task;
 }
+*/
 
 
 MenuSelect readButton() {
