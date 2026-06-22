@@ -693,6 +693,7 @@ void Button::ButtonZoom() {
 *****/
 void Button::ButtonFilter() {
   switchFilterSideband = not switchFilterSideband;
+  filterEncoderMove = 0;  // So the filter delimiter does not change by simply pushing the Filter button.
   FilterSetSSB();  // Call this so the delimiter is set to the correct color.
 }
 
